@@ -5,8 +5,8 @@ download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/libtiff-bu
 current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
-#wget $download_url
-cp $current_dir/libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz .
+wget $download_url
+#cp $current_dir/libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz .
 tar xfz libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz
 mv libtiff-bug-2006-03-03-a72cf60-0a36d7f src
 rm libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz

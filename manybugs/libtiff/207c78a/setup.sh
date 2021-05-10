@@ -1,15 +1,15 @@
 project_name=libtiff
 bug_id=207c78a
 dir_name=$1/manybugs/$project_name/$bug_id
-download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar
+download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
-#wget $download_url
-cp $current_dir/libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar .
-tar xf libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar
+wget $download_url
+#cp $current_dir/libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar .
+tar xf libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar.gz
 mv libtiff-bug-2006-02-23-b2ce5d8-207c78a src
-rm libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar
+rm libtiff-bug-2006-02-23-b2ce5d8-207c78a.tar.gz
 mv src/* .
 rm -rf src
 rm -rf  coverage* \

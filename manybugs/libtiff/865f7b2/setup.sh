@@ -5,11 +5,11 @@ download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/libtiff-bu
 current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
-#wget $download_url
-cp $current_dir/libtiff-bug-2007-11-02-371336d-865f7b2.tar .
-tar xf libtiff-bug-2007-11-02-371336d-865f7b2.tar
+wget $download_url
+#cp $current_dir/libtiff-bug-2007-11-02-371336d-865f7b2.tar .
+tar xf libtiff-bug-2007-11-02-371336d-865f7b2.tar.gz
 mv libtiff-bug-2007-11-02-371336d-865f7b2 src
-rm libtiff-bug-2007-11-02-371336d-865f7b2.tar
+rm libtiff-bug-2007-11-02-371336d-865f7b2.tar.gz
 mv src/* .
 rm -rf src
 rm -rf  coverage* \
