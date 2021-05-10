@@ -37,9 +37,9 @@ chown -R root $dir_name
 
 ## Compile libtiff.
 make clean
-CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0' --enable-static --disable-shared
+./configure CFLAGS='-g -O0' --enable-static --disable-shared
 sed -i '978 s/./\t&/' test/Makefile
-CC=wllvm CXX=wllvm++ make CFLAGS="-march=x86-64" -j32
+make CFLAGS="-march=x86-64" -j32
 
 cd $dir_name
 
