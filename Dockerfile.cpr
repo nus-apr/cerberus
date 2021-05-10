@@ -1,0 +1,40 @@
+FROM rshariffdeen/cpr:16.04
+MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
+ARG DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
+
+# install experiment dependencies
+RUN apt-get update && apt-get install -y  \
+    autopoint \
+    automake \
+    bison \
+    flex \
+    gettext \
+    gperf \
+    libass-dev \
+    libfreetype6 \
+    libfreetype6-dev \
+    libjpeg-dev \
+    libtool \
+    libxml2-dev \
+    liblzma-dev \
+    nasm \
+    pkg-config \
+    texinfo \
+    yasm \
+    xutils-dev \
+    libpciaccess-dev \
+    libpython-dev \
+    libpython3-dev \
+    libx11-dev \
+    libxcb-xfixes0-dev \
+    libxcb1-dev \
+    libxcb-shm0-dev \
+    libsdl1.2-dev  \
+    libvdpau-dev \
+    libnuma-dev
+
+RUN git clone https://47493629a358a5b8c9d5387bb4271194c71b2921:x-oauth-basic@github.com/rshariffdeen/cpr-experiments.git /experiments
+WORKDIR /experiments
+

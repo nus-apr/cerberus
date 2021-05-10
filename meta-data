@@ -1,0 +1,146 @@
+[
+ {
+   "id": 1,
+   "subject": "libtiff",
+   "bug_id": "207c78a",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 2,
+   "subject": "libtiff",
+   "bug_id": "0a36d7f",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 3,
+   "subject": "libtiff",
+   "bug_id": "ee65c74",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 4,
+   "subject": "libtiff",
+   "bug_id": "865f7b2",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 5,
+   "subject": "libtiff",
+   "bug_id": "565eaa2",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 6,
+   "subject": "libtiff",
+   "bug_id": "7d6e298",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 7,
+   "subject": "libtiff",
+   "bug_id": "6b6496b",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 8,
+   "subject": "libtiff",
+   "bug_id": "e0b51f3",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 9,
+   "subject": "libtiff",
+   "bug_id": "f2d989d",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 12,
+   "subject": "libtiff",
+   "bug_id": "2e42d63",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 13,
+   "subject": "libtiff",
+   "bug_id": "cf05a83",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 14,
+   "subject": "libtiff",
+   "bug_id": "22da1d6",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 15,
+   "subject": "libtiff",
+   "bug_id": "e6d0c32",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 16,
+   "subject": "libtiff",
+   "bug_id": "0d3d51d",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 17,
+   "subject": "libtiff",
+   "bug_id": "5dac30f",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 18,
+   "subject": "libtiff",
+   "bug_id": "1136bdf",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 19,
+   "subject": "libtiff",
+   "bug_id": "0d27dc0",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 20,
+   "subject": "libtiff",
+   "bug_id": "bdba15c",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 21,
+   "subject": "libtiff",
+   "bug_id": "5f42dba",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 23,
+   "subject": "libtiff",
+   "bug_id": "0cc95fb",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 24,
+   "subject": "libtiff",
+   "bug_id": "ccc10c7",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 25,
+   "subject": "libtiff",
+   "bug_id": "3edb9cd",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 26,
+   "subject": "libtiff",
+   "bug_id": "023b6df",
+   "benchmark": "manybugs"
+ },
+ {
+   "id": 28,
+   "subject": "libtiff",
+   "bug_id": "eec7ec0",
+   "benchmark": "manybugs"
+ }
+]

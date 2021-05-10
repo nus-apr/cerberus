@@ -1,0 +1,7 @@
+correct patch:
+tif->tif_fields = tif->tif_fields;
+tif->tif_fields = x;
+
+
+
+
