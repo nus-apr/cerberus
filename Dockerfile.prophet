@@ -55,3 +55,6 @@ RUN cd /radamsa; git checkout 30770f6e; make; make install
 
 RUN git config --global user.email "rshariffdeen@gmail.com"
 RUN git config --global user.name "Ridwan"
+
+RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
+WORKDIR /experiments
