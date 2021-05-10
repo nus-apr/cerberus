@@ -35,6 +35,6 @@ RUN apt-get update && apt-get install -y  \
     libvdpau-dev \
     libnuma-dev
 
-RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/cpr-experiments.git /experiments
+RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
 
