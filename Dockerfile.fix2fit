@@ -1,4 +1,4 @@
-FROM ubuntu:16.04
+FROM FROM ubuntu:20.04
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
