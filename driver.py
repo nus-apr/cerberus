@@ -81,11 +81,14 @@ def setup_experiment(script_path, script_name):
     execute_command(script_command)
 
 
-def cpr(deploy_path, bug_id):
+def cpr(setup_dir_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] running CPR")
-    conf_path = deploy_path + "/cpr/repair.conf"
+    conf_path = setup_dir_path + "/cpr/repair.conf"
+    script_path = setup_dir_path + "/cpr/setup.sh"
     log_path = str(conf_path).replace(".conf", ".log")
+    setup_command = "cd " + setup_dir_path + "; bash " + script_path
+    execute_command(setup_command)
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
     exp_dir = DIR_RESULT + "/" + str(bug_id)
@@ -115,10 +118,10 @@ def fix2fit(deploy_path, bug_id):
     print("\t[INFO] running Fix2Fit")
 
 
-def repair(deploy_path, bug_id):
+def repair(deploy_path, setup_dir_path, bug_id):
     global CONF_TOOL_NAME
     if CONF_TOOL_NAME == "cpr":
-        cpr(deploy_path, bug_id)
+        cpr(setup_dir_path, bug_id)
     elif CONF_TOOL_NAME == "angelix":
         angelix(deploy_path, bug_id)
     elif CONF_TOOL_NAME == "prophet":
@@ -224,16 +227,16 @@ def run(arg_list):
         directory_name = benchmark + "/" + subject_name + "/" + bug_name
         script_name = "setup.sh"
 
-        script_path = DIR_MAIN + "/" + directory_name
+        setup_dir_path = DIR_MAIN + "/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
         print("\t[META-DATA] benchmark: " + benchmark)
         print("\t[META-DATA] project: " + subject_name)
         print("\t[META-DATA] bug ID: " + bug_name)
         print("\t[INFO] setup directory: " + deploy_path)
 
-        setup_experiment(script_path, script_name)
+        setup_experiment(setup_dir_path, script_name)
         if not CONF_SETUP_ONLY:
-            repair(deploy_path, bug_name)
+            repair(deploy_path, setup_dir_path, bug_name)
         index = index + 1
 
 
