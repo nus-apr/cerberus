@@ -43,7 +43,7 @@ all dependencies and prophet installed such that, the driver can instantiate a d
 The driver is a frontend to run all experiments with different tools
 
 ```bash
-python3.7 driver.py --bug-id=ID --tool-name=[cpr/angelix/prophet/genprog/fix2fit]
+python3.7 driver.py --bug-id=ID --tool-name=[cpr/angelix/prophet/genprog/fix2fit] --benchmark=[manybugs]
 ```
 
 ## TODO
