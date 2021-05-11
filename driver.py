@@ -85,7 +85,7 @@ def cpr(setup_dir_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] running CPR")
     conf_path = setup_dir_path + "/cpr/repair.conf"
-    script_path = "cpr/setup.sh"
+    script_path = "setup.sh"
     log_path = str(conf_path).replace(".conf", ".log")
     setup_dir_path = setup_dir_path + "/cpr"
     setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH
