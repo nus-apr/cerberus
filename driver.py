@@ -20,6 +20,7 @@ ARG_START_ID = "--start-id="
 ARG_END_ID = "--end-id="
 ARG_SKIP_LIST = "--skip-list="
 ARG_BUG_ID_LIST = "--bug-id-list="
+ARG_BENCHMARK = "--benchmark="
 
 
 CONF_DATA_PATH = "/data"
@@ -33,10 +34,10 @@ CONF_END_ID = None
 CONF_SETUP_ONLY = False
 CONF_BUG_ID_LIST = None
 CONF_SKIP_LIST = None
+CONF_BENCHMARK = None
 
-FILE_META_DATA = "meta-data"
+FILE_META_DATA = None
 FILE_ERROR_LOG = "error-log"
-
 
 DIR_MAIN = os.getcwd()
 DIR_LOGS = DIR_MAIN + "/logs"
@@ -147,7 +148,8 @@ def print_help():
 
 def read_arg(argument_list):
     global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID
-    global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST
+    global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK
+    global FILE_META_DATA
     print("[DRIVER] Reading configuration values")
     if len(argument_list) > 0:
         for arg in argument_list:
@@ -169,6 +171,8 @@ def read_arg(argument_list):
                 CONF_START_ID = int(str(arg).replace(ARG_START_ID, ""))
             elif ARG_END_ID in arg:
                 CONF_END_ID = int(str(arg).replace(ARG_END_ID, ""))
+            elif ARG_BENCHMARK in arg:
+                CONF_BENCHMARK = str(arg).replace(ARG_BENCHMARK, "")
             elif ARG_SKIP_LIST in arg:
                 CONF_SKIP_LIST = str(arg).replace(ARG_SKIP_LIST, "").split(",")
             elif ARG_BUG_ID_LIST in arg:
@@ -179,10 +183,14 @@ def read_arg(argument_list):
     if CONF_TOOL_NAME is None:
         print("[invalid] --tool-name is missing")
         print_help()
-
     if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None:
         print("[invalid] experiment id is not specified")
         print_help()
+    if CONF_BENCHMARK is None:
+        print("[invalid] --benchmark is missing")
+        print_help()
+    else:
+        FILE_META_DATA = CONF_BENCHMARK + "/meta-data.json"
 
 
 def run(arg_list):
