@@ -1,4 +1,4 @@
-FROM ubuntu:18.04
+FROM ubuntu:16.04
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
@@ -20,8 +20,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
     wget
 
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key| apt-key add -
-RUN echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
-RUN echo "deb-src http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
+RUN echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial main" >> /etc/apt/sources.list
+RUN echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial main" >> /etc/apt/sources.list
 # Installing dependencies for Prophet TOOL
 RUN apt-get update && apt-get install -y \
     g++ \
