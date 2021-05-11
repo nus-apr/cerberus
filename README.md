@@ -55,5 +55,5 @@ python3.7 driver.py --bug-id=ID --tool-name=[cpr/angelix/prophet/genprog/fix2fit
 * implement the interface in driver.py for GenProg (see reference for CPR)
 
 ### Ridwan
-* update Dockerfile.genprog to create a self-contained container for Angelix/Prophet and experiments
+* update Dockerfiles to create a self-contained container for Angelix/Prophet and experiments
 * implement the interface in driver.py for Angelix/Prophet (see reference for CPR)
