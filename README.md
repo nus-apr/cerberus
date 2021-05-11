@@ -7,11 +7,13 @@ is designed to allow future extensions/modifications to this repository.
 
 ```
 root directory
-│   README.md
-│   Dockerfile.toolName  
-│   meta-data
-│
+│   README.md│    
+└───infra
+│   └───Dockerfile.toolName_1
+│   └───Dockerfile.toolName_2
+│ 
 └───benchmark-1
+│   │   meta-data.json
 │   └───subject-1
 │   │   │   setup.sh
 │   │   └───tool-1
@@ -23,6 +25,7 @@ root directory
 │       └───tool-2
 │       └───tool-3 
 └───benchmark-2
+    │   meta-data.json
     │   file021.txt
     │   file022.txt
 ```
