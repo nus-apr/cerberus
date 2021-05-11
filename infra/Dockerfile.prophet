@@ -16,7 +16,9 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
     libcap-dev \
     libncurses5-dev \
     software-properties-common \
-    xz-utils
+    xz-utils\
+    wget
+
 RUN wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key|sudo apt-key add -
 RUN echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
 RUN echo "deb-src http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
@@ -33,8 +35,7 @@ RUN apt-get update && apt-get install -y \
     nano \
     python \
     subversion \
-    vim \
-    wget
+    vim
 
 RUN mkdir -p /llvm/llvm-361; svn co  https://llvm.org/svn/llvm-project/llvm/tags/RELEASE_361/final /llvm/llvm-361/source;
 RUN svn co https://llvm.org/svn/llvm-project/cfe/tags/RELEASE_361/final /llvm/llvm-361/source/tools/clang
