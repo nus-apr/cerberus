@@ -37,13 +37,29 @@ RUN apt-get update && apt-get install -y \
     subversion \
     vim
 
-RUN mkdir -p /llvm/llvm-361; svn co  https://llvm.org/svn/llvm-project/llvm/tags/RELEASE_361/final /llvm/llvm-361/source;
-RUN svn co https://llvm.org/svn/llvm-project/cfe/tags/RELEASE_361/final /llvm/llvm-361/source/tools/clang
-RUN svn co https://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_361/final/ /llvm/llvm-361/source/projects/compiler-rt
-RUN mkdir /llvm/llvm-361/build; cd /llvm/llvm-361/build; cmake ../source -DCMAKE_BUILD_TYPE=Release -DCMAKE_ENABLE_ASSERTIONS=OFF -DLLVM_ENABLE_WERROR=OFF -DCMAKE_CXX_FLAGS="-std=c++11"
+RUN mkdir -p /llvm/llvm-361 && cd /llvm/llvm-361 && \
+    wget https://releases.llvm.org/3.6.1/llvm-3.6.1.src.tar.xz && \
+    tar -xf llvm-3.6.1.src.tar.xz && \
+    rm llvm-3.6.1.src.tar.xz && \
+    mv llvm-3.6.1.src source
+
+RUN cd /llvm/llvm-361 &&  \
+    wget https://releases.llvm.org/3.6.1/cfe-3.6.1.src.tar.xz && \
+    tar -xf cfe-3.6.1.src.tar.xz && \
+    rm cfe-3.6.1.src.tar.xz && \
+    mv cfe-3.6.1.src source/tools/clang
+
+RUN cd /llvm/llvm-361 &&  \
+    wget https://releases.llvm.org/3.6.1/compiler-rt-3.6.1.src.tar.xz && \
+    tar -xf compiler-rt-3.6.1.src.tar.xz && \
+    rm compiler-rt-3.6.1.src.tar.xz && \
+    mv compiler-rt-3.6.1.src source/projects/compiler-rt
+
+RUN mkdir /llvm/llvm-361/build && \
+    cd /llvm/llvm-361/build && \
+    cmake ../source -DCMAKE_BUILD_TYPE=Release -DCMAKE_ENABLE_ASSERTIONS=OFF -DLLVM_ENABLE_WERROR=OFF -DCMAKE_CXX_FLAGS="-std=c++11"
+
 RUN cd /llvm/llvm-361/build; make -j32; make install
-
-
 ADD tools/prophet-0.1-src.tar.gz /prophet.tar.gz
 RUN gunzip prophet.tar.gz && tar -xf prophet.tar && rm prophet.tar
 RUN cd /prophet-gpl;autoreconf -i;
