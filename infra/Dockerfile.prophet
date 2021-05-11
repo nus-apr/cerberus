@@ -1,15 +1,27 @@
-FROM ubuntu:20.04
-RUN apt-get update && apt-get install -y apt-transport-https ca-certificates
-RUN echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial main" >> /etc/apt/sources.list
-RUN echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial main" >> /etc/apt/sources.list
-# Installing dependencies for Prophet TOOL
-RUN apt-get update && apt-get install -y \
+FROM ubuntu:18.04
+MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
+
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
+    apt-transport-https \
     autoconf \
     automake \
+    bc \
     bison \
+    build-essential \
     cmake \
     curl \
     flex \
+    libboost-all-dev \
+    libcap-dev \
+    libncurses5-dev \
+    software-properties-common \
+    xz-utils
+
+RUN echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
+RUN echo "deb-src http://apt.llvm.org/bionic/ llvm-toolchain-bionic main" >> /etc/apt/sources.list
+# Installing dependencies for Prophet TOOL
+RUN apt-get update && apt-get install -y \
     g++ \
     git \
     libexplain-dev \
@@ -21,10 +33,11 @@ RUN apt-get update && apt-get install -y \
     nano \
     python \
     subversion \
+    vim \
     wget
 
-RUN mkdir -p /llvm/llvm-361; svn co  http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_361/final /llvm/llvm-361/source;
-RUN svn co http://llvm.org/svn/llvm-project/cfe/tags/RELEASE_361/final /llvm/llvm-361/source/tools/clang
+RUN mkdir -p /llvm/llvm-361; svn co  https://llvm.org/svn/llvm-project/llvm/tags/RELEASE_361/final /llvm/llvm-361/source;
+RUN svn co https://llvm.org/svn/llvm-project/cfe/tags/RELEASE_361/final /llvm/llvm-361/source/tools/clang
 RUN svn co https://llvm.org/svn/llvm-project/compiler-rt/tags/RELEASE_361/final/ /llvm/llvm-361/source/projects/compiler-rt
 RUN mkdir /llvm/llvm-361/build; cd /llvm/llvm-361/build; cmake ../source -DCMAKE_BUILD_TYPE=Release -DCMAKE_ENABLE_ASSERTIONS=OFF -DLLVM_ENABLE_WERROR=OFF -DCMAKE_CXX_FLAGS="-std=c++11"
 RUN cd /llvm/llvm-361/build; make -j32; make install
