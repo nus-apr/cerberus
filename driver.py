@@ -130,6 +130,21 @@ def repair(deploy_path, bug_id):
         exit("Unknown Tool Name")
 
 
+def print_help():
+    print("Usage: python driver.py [OPTIONS] --tool-name={cpr/genprog/angelix/prophet/fix2fit} ")
+    print("Options are:")
+    print("\t" + ARG_DATA_PATH + "\t| " + "directory for experiments")
+    print("\t" + ARG_TOOL_NAME + "\t| " + "name of the tool")
+    print("\t" + ARG_TOOL_PATH + "\t| " + "path of the tool")
+    print("\t" + ARG_TOOL_PARAMS + "\t| " + "parameters for the tool")
+    print("\t" + ARG_DEBUG_MODE + "\t| " + "enable debug mode")
+    print("\t" + ARG_BUG_ID + "\t| " + "run only the specified experiment")
+    print("\t" + ARG_BUG_ID_LIST + "\t| " + "runs a list of experiments")
+    print("\t" + ARG_START_ID + "\t| " + "specify a range of experiments starting from ID")
+    print("\t" + ARG_END_ID + "\t| " + "specify a range of experiments that ends at ID")
+    exit()
+
+
 def read_arg(argument_list):
     global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID
     global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST
@@ -160,14 +175,14 @@ def read_arg(argument_list):
                 CONF_BUG_ID_LIST = str(arg).replace(ARG_BUG_ID_LIST, "").split(",")
             else:
                 print("Unknown option: " + str(arg))
-                print("Usage: python driver.py [OPTIONS] ")
-                print("Options are:")
-                print("\t" + ARG_DATA_PATH + "\t| " + "directory for experiments")
-                print("\t" + ARG_TOOL_NAME + "\t| " + "name of the tool")
-                print("\t" + ARG_TOOL_PATH + "\t| " + "path of the tool")
-                print("\t" + ARG_TOOL_PARAMS + "\t| " + "parameters for the tool")
-                print("\t" + ARG_DEBUG_MODE + "\t| " + "enable debug mode")
-                exit()
+                print_help()
+    if CONF_TOOL_NAME is None:
+        print("[invalid] --tool-name is missing")
+        print_help()
+
+    if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None:
+        print("[invalid] experiment id is not specified")
+        print_help()
 
 
 def run(arg_list):
