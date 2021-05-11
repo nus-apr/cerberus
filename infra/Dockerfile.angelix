@@ -1,20 +1,36 @@
-FROM ubuntu:20.04
-MAINTAINER Sergey Mechtaev <mechtaev@gmail.com>
+FROM ubuntu:18.04
+MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 
-# Dependencies
-RUN apt-get -y install apt-transport-https
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get upgrade -y && DEBIAN_FRONTEND=noninteractive apt-get autoremove -y
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install  \
+    apt-transport-https \
+    bc \
+    bison \
+    build-essential \
+    cmake \
+    curl \
+    flex \
+    libboost-all-dev \
+    libcap-dev \
+    libncurses5-dev \
+    software-properties-common \
+    xz-utils
+
 RUN echo "deb https://dl.bintray.com/sbt/debian /" | tee -a /etc/apt/sources.list.d/sbt.list
 RUN apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv 642AC823
 RUN apt-get -y update
-RUN apt-get -y install git wget xz-utils build-essential \
-                       curl dejagnu subversion bison flex bc libcap-dev \
-                       cmake libncurses5-dev libboost-all-dev \
-                       sbt --no-install-recommends
+RUN DEBIAN_FRONTEND=noninteractive apt-get -y install --no-install-recommends \
+    dejagnu \
+    git \
+    subversion \
+    sbt \
+    wget
+
 # Installing Angelix
 RUN apt-get install software-properties-common -y --no-install-recommends
 RUN git clone --recursive https://github.com/mechtaev/angelix.git --depth 1
 RUN apt-get purge icedtea-* openjdk-* -y
-RUN add-apt-repository -y ppa:openjdk-r/ppa && apt-get update && sudo apt-get install -y openjdk-8-jdk
+RUN add-apt-repository -y ppa:openjdk-r/ppa && apt-get update && apt-get install -y openjdk-8-jdk
 #check if java command is pointing to " link currently points to /opt/jdk/jdk1.8.0_05/bin/java"
 RUN update-alternatives --display java
 #check if java command is pointing to " link currently points to /opt/jdk/jdk1.8.0_05/bin/javac"
