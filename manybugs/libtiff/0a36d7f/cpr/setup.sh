@@ -38,10 +38,10 @@ sed -i '131i \\tklee_assert(tif > 0);' src/test/long_tag.c
 
 # Compile instrumentation and test driver.
 cd src
-make CXX=wllvm++ CC=wllvm CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include -g -O0" -j32
+make CXX=wllvm++ CC=wllvm CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
 cd ./test
 make clean
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log
 extract-bc long_tag
 
 # Copy remaining files to run CPR.

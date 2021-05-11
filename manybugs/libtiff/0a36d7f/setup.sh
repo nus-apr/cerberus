@@ -6,7 +6,6 @@ current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
 wget $download_url
-#cp $current_dir/libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz .
 tar xfz libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz
 mv libtiff-bug-2006-03-03-a72cf60-0a36d7f src
 rm libtiff-bug-2006-03-03-a72cf60-0a36d7f.tar.gz
@@ -30,15 +29,16 @@ mv *.lines bug-info
 mv fix-failures bug-info
 mv libtiff src
 cd $dir_name/src
-cp $current_dir/tif_dirread.c ./libtiff/tif_dirread.c
+cp $dir_name/diffs/libtiff/tif_dirread.c-a72cf60 $dir_name/src/libtiff/tif_dirread.c
 make distclean
 chown -R root $dir_name
 
 # Compile libtiff.
 make clean
-./configure CFLAGS='-g -O0' --enable-static --disable-shared
+CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0' --enable-static --disable-shared
 sed -i '978 s/./\t&/' test/Makefile
-make CFLAGS="-march=x86-64" -j32
+CC=wllvm CXX=wllvm++ make CFLAGS="-march=x86-64" -j32
+
 cd $dir_name
 
 # fix the test harness and the configuration script
@@ -46,4 +46,3 @@ sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/libtiff-bug-2006-03-03-a72c
 sed -i "s#/data/manybugs/libtiff/0a36d7f/src/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd libtiff#cd src#g" test.sh
-cd src
