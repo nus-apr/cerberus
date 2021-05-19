@@ -1,11 +1,12 @@
-FROM FROM ubuntu:20.04
-MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
+# FROM FROM ubuntu:20.04
+FROM gcr.io/oss-fuzz-base/base-builder
+MAINTAINER Gao Xiang <gaoxiang@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 
 # install experiment dependencies
-RUN apt-get update && apt-get install -y  \
+RUN apt-get install -y  \
     autopoint \
     automake \
     bison \
@@ -35,9 +36,37 @@ RUN apt-get update && apt-get install -y  \
     libvdpau-dev \
     libnuma-dev
 
+RUN apt-get install -y build-essential cmake zlib1g-dev libtinfo-dev python unzip
+RUN apt-get install -y libboost-filesystem-dev libboost-program-options-dev libboost-log-dev wget
 
-RUN git config --global user.email "rshariffdeen@gmail.com"
-RUN git config --global user.name "Ridwan"
+WORKDIR $SRC
+
+RUN mkdir f1x-oss-fuzz
+RUN mkdir f1x-oss-fuzz/repair/
+
+#ADD docs       f1x-oss-fuzz/docs
+ADD Fix2Fit/infra/repair.zip       f1x-oss-fuzz/
+ADD Fix2Fit/aflgo                  $SRC/aflgo
+ADD Fix2Fit/scripts/build_aflgo.sh /src/build_aflgo.sh
+ADD Fix2Fit/scripts/driver         /driver
+ADD Fix2Fit/projects/scripts       $SRC/scripts
+ADD Fix2Fit/scripts/build.sh       $SRC/build.sh
+
+RUN unzip f1x-oss-fuzz/repair.zip -d f1x-oss-fuzz/repair/
+RUN rm -rf f1x-oss-fuzz/repair.zip
+RUN cp f1x-oss-fuzz/repair/lib/* /usr/lib/
+
+ENV C_INCLUDE_PATH="$C_INCLUDE_PATH:/src/f1x-oss-fuzz/repair/include"
+ENV CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/src/f1x-oss-fuzz/repair/include"
+ENV PATH="/src/f1x-oss-fuzz/repair/bin/:${PATH}"
+
+RUN chmod u+x $SRC/build_aflgo.sh
+RUN $SRC/build_aflgo.sh
+ENV PATH="$SRC/llvm-4.0.0/install/bin/:${PATH}"
+ENV AFLGO="$SRC/aflgo"
+
+RUN git config --global user.email "gaoxiang9430@gmail.com"
+RUN git config --global user.name "Gao Xiang"
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
