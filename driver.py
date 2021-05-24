@@ -77,7 +77,7 @@ def load_experiment_details(meta_file):
 def setup_experiment(script_path, script_name):
     global FILE_ERROR_LOG, CONF_DATA_PATH
     print("\t[INFO] running script for setup")
-    script_command = "{ cd " + script_path + "; bash " + script_name + " " + CONF_DATA_PATH + ";} 2> " + FILE_ERROR_LOG
+    script_command = "{ cd " + script_path + "; bash " + script_name + " " + CONF_DATA_PATH + ";}  > /dev/null 2>&1"
     execute_command(script_command)
 
 
@@ -89,7 +89,7 @@ def cpr(setup_dir_path, deploy_path, bug_id):
     log_path = str(conf_path).replace(".conf", ".log")
     if not os.path.isfile(conf_path):
         setup_dir_path = setup_dir_path + "/cpr"
-        setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH
+        setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH + " > /dev/null 2>&1"
         execute_command(setup_command)
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
