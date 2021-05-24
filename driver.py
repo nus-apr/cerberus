@@ -84,7 +84,7 @@ def setup_experiment(script_path, script_name):
 def cpr(setup_dir_path, deploy_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] running CPR")
-    conf_path = deploy_path + "/cpr/repair.conf"
+    conf_path = deploy_path + "/repair.conf"
     script_path = "setup.sh"
     log_path = str(conf_path).replace(".conf", ".log")
     if not os.path.isfile(conf_path):
