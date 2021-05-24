@@ -136,10 +136,11 @@ def repair(deploy_path, setup_dir_path, bug_id):
 
 
 def print_help():
-    print("Usage: python driver.py [OPTIONS] --tool-name={cpr/genprog/angelix/prophet/fix2fit} ")
+    print("Usage: python driver.py [OPTIONS] --benchmark={manybugs} --tool-name={cpr/genprog/angelix/prophet/fix2fit} ")
     print("Options are:")
     print("\t" + ARG_DATA_PATH + "\t| " + "directory for experiments")
     print("\t" + ARG_TOOL_NAME + "\t| " + "name of the tool")
+    print("\t" + ARG_BENCHMARK + "\t| " + "name of the benchmark")
     print("\t" + ARG_TOOL_PATH + "\t| " + "path of the tool")
     print("\t" + ARG_TOOL_PARAMS + "\t| " + "parameters for the tool")
     print("\t" + ARG_DEBUG_MODE + "\t| " + "enable debug mode")
@@ -184,9 +185,10 @@ def read_arg(argument_list):
             else:
                 print("Unknown option: " + str(arg))
                 print_help()
-    if CONF_TOOL_NAME is None:
-        print("[invalid] --tool-name is missing")
-        print_help()
+    if not CONF_SETUP_ONLY:
+        if CONF_TOOL_NAME is None:
+            print("[invalid] --tool-name is missing")
+            print_help()
     if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None:
         print("[invalid] experiment id is not specified")
         print_help()
