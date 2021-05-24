@@ -81,10 +81,10 @@ def setup_experiment(script_path, script_name):
     execute_command(script_command)
 
 
-def cpr(setup_dir_path, bug_id):
+def cpr(setup_dir_path, deploy_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] running CPR")
-    conf_path = setup_dir_path + "/cpr/repair.conf"
+    conf_path = deploy_path + "/cpr/repair.conf"
     script_path = "setup.sh"
     log_path = str(conf_path).replace(".conf", ".log")
     if not os.path.isfile(conf_path):
@@ -94,6 +94,9 @@ def cpr(setup_dir_path, bug_id):
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
     exp_dir = DIR_RESULT + "/" + str(bug_id)
+    if os.path.isdir(exp_dir):
+        rm_command = "rm -rf " + exp_dir
+        execute_command(rm_command)
     mk_command = "mkdir " + exp_dir
     execute_command(mk_command)
     copy_output = "{ cp -rf " + CONF_TOOL_PATH + "/output/" + bug_id + " " + exp_dir + ";} 2> " + FILE_ERROR_LOG
@@ -123,7 +126,7 @@ def fix2fit(deploy_path, bug_id):
 def repair(deploy_path, setup_dir_path, bug_id):
     global CONF_TOOL_NAME
     if CONF_TOOL_NAME == "cpr":
-        cpr(setup_dir_path, bug_id)
+        cpr(setup_dir_path, deploy_path, bug_id)
     elif CONF_TOOL_NAME == "angelix":
         angelix(deploy_path, bug_id)
     elif CONF_TOOL_NAME == "prophet":
