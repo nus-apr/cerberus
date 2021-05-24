@@ -25,7 +25,7 @@ ARG_BENCHMARK = "--benchmark="
 
 CONF_DATA_PATH = "/data"
 CONF_TOOL_PATH = "/CPR"
-CONF_TOOL_PARAMS = "--mode=2"
+CONF_TOOL_PARAMS = ""
 CONF_TOOL_NAME = None
 CONF_DEBUG = False
 CONF_BUG_ID = None
@@ -87,9 +87,10 @@ def cpr(setup_dir_path, bug_id):
     conf_path = setup_dir_path + "/cpr/repair.conf"
     script_path = "setup.sh"
     log_path = str(conf_path).replace(".conf", ".log")
-    setup_dir_path = setup_dir_path + "/cpr"
-    setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH
-    execute_command(setup_command)
+    if not os.path.isfile(conf_path):
+        setup_dir_path = setup_dir_path + "/cpr"
+        setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH
+        execute_command(setup_command)
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
     exp_dir = DIR_RESULT + "/" + str(bug_id)
@@ -190,13 +191,12 @@ def read_arg(argument_list):
             print("[invalid] --tool-name is missing")
             print_help()
     if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None:
-        print("[invalid] experiment id is not specified")
-        print_help()
+        print("[info] experiment id is not specified, running all experiments")
     if CONF_BENCHMARK is None:
         print("[invalid] --benchmark is missing")
         print_help()
     else:
-        FILE_META_DATA = CONF_BENCHMARK + "/meta-data.json"
+        FILE_META_DATA = "benchmark/" + CONF_BENCHMARK + "/meta-data.json"
 
 
 def run(arg_list):
@@ -230,14 +230,17 @@ def run(arg_list):
         directory_name = benchmark + "/" + subject_name + "/" + bug_name
         script_name = "setup.sh"
 
-        setup_dir_path = DIR_MAIN + "/" + directory_name
+        setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
         print("\t[META-DATA] benchmark: " + benchmark)
         print("\t[META-DATA] project: " + subject_name)
         print("\t[META-DATA] bug ID: " + bug_name)
         print("\t[INFO] setup directory: " + deploy_path)
 
-        setup_experiment(setup_dir_path, script_name)
+        if os.path.isdir(deploy_path):
+            print("\t[INFO] deployment path exists, skipping setup")
+        else:
+            setup_experiment(setup_dir_path, script_name)
         if not CONF_SETUP_ONLY:
             repair(deploy_path, setup_dir_path, bug_name)
         index = index + 1
