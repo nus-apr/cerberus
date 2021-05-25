@@ -229,7 +229,7 @@ def run(arg_list):
         print(experiment_name)
         bug_name = str(experiment_item[KEY_BUG_ID])
         subject_name = str(experiment_item[KEY_SUBJECT])
-        directory_name = benchmark + "/" + subject_name + "/" + bug_name
+        directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
         script_name = "setup.sh"
 
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
