@@ -28,7 +28,7 @@ rm -rf  coverage* \
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
 mv fix-failures bug-info
-mv libtiff src
+mv $project_name src
 cd $dir_name/src
 cp $current_dir/tif_dirwrite.c ./libtiff/tif_dirwrite.c
 make distclean
