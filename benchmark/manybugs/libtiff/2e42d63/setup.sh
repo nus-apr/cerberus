@@ -1,7 +1,7 @@
 project_name=libtiff
-bug_id=f2d989d
-scenario_id=libtiff-bug-2007-07-13-09e8220-f2d989d
-diff_file=libtiff/tif_read.c-09e8220
+bug_id=2e42d63
+scenario_id=libtiff-bug-2009-02-05-764dbba-2e42d63
+diff_file=tools/tiffcrop.c-764dbba
 dir_name=$1/manybugs/$project_name/$bug_id
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD

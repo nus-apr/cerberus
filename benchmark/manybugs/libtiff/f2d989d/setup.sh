@@ -1,14 +1,16 @@
 project_name=libtiff
-bug_id=e0b51f3
+bug_id=f2d989d
+scenario_id=libtiff-bug-2007-07-13-09e8220-f2d989d
+diff_file=libtiff/tif_read.c-09e8220
 dir_name=$1/manybugs/$project_name/$bug_id
-download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/libtiff-bug-2009-06-30-b44af47-e0b51f3.tar.gz
+download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
 wget $download_url
-tar xf libtiff-bug-2009-06-30-b44af47-e0b51f3.tar.gz
-mv libtiff-bug-2009-06-30-b44af47-e0b51f3 src
-rm libtiff-bug-2009-06-30-b44af47-e0b51f3.tar.gz
+tar xf ${scenario_id}.tar.gz
+mv ${scenario_id} src
+rm ${scenario_id}.tar.gz
 mv src/* .
 rm -rf src
 rm -rf  coverage* \
@@ -29,7 +31,7 @@ mv *.lines bug-info
 mv fix-failures bug-info
 mv libtiff src
 cd $dir_name/src
-cp $dir_name/diffs/tools/tiffcp.c-b44af47 $dir_name/src/tools/tiffcp.c
+cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 make distclean
 chown -R root $dir_name
 

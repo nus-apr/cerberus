@@ -1,6 +1,6 @@
 project_name=libtiff
-bug_id=2e42d63
-scenario_id=libtiff-bug-2009-02-05-764dbba-2e42d63
+bug_id=cf05a83
+scenario_id=libtiff-bug-2007-11-23-82e378c-cf05a83
 diff_file=tools/tiffcrop.c-764dbba
 dir_name=$1/manybugs/$project_name/$bug_id
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
