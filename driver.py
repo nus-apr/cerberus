@@ -203,7 +203,7 @@ def read_arg(argument_list):
 
 
 def run(arg_list):
-    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONF_BUG_ID_LIST
+    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONF_BUG_ID_LIST, CONF_BENCHMARK
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
@@ -229,13 +229,12 @@ def run(arg_list):
         print(experiment_name)
         bug_name = str(experiment_item[KEY_BUG_ID])
         subject_name = str(experiment_item[KEY_SUBJECT])
-        benchmark = str(experiment_item[KEY_BENCHMARK])
         directory_name = benchmark + "/" + subject_name + "/" + bug_name
         script_name = "setup.sh"
 
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
-        print("\t[META-DATA] benchmark: " + benchmark)
+        print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
         print("\t[META-DATA] project: " + subject_name)
         print("\t[META-DATA] bug ID: " + bug_name)
         print("\t[INFO] setup directory: " + deploy_path)
