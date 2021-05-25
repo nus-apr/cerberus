@@ -1,7 +1,7 @@
 project_name=php
-bug_id=5bb0a44e06
-scenario_id=php-bug-2011-01-29-147382033a-5bb0a44e06
-diff_file=ext/date/php_date.c-147382033a
+bug_id=1e91069eb4
+scenario_id=php-bug-2011-01-30-5bb0a44e06-1e91069eb4
+diff_file=ext/date/php_date.c-5bb0a44e06
 dir_name=$1/manybugs/$project_name/$bug_id
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
