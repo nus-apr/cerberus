@@ -11,7 +11,7 @@ KEY_SUBJECT = "subject"
 
 ARG_DATA_PATH = "--data-dir="
 ARG_TOOL_PATH = "--tool-path="
-ARG_TOOL_NAME = "--tool-name="
+ARG_TOOL_NAME = "--tool="
 ARG_TOOL_PARAMS = "--tool-param="
 ARG_DEBUG_MODE = "--debug"
 ARG_ONLY_SETUP = "--only-setup"
@@ -140,7 +140,7 @@ def repair(deploy_path, setup_dir_path, bug_id):
 
 
 def print_help():
-    print("Usage: python driver.py [OPTIONS] --benchmark={manybugs} --tool-name={cpr/genprog/angelix/prophet/fix2fit} ")
+    print("Usage: python driver.py [OPTIONS] --benchmark={manybugs} --tool={cpr/genprog/angelix/prophet/fix2fit} ")
     print("Options are:")
     print("\t" + ARG_DATA_PATH + "\t| " + "directory for experiments")
     print("\t" + ARG_TOOL_NAME + "\t| " + "name of the tool")
