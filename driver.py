@@ -108,7 +108,7 @@ def cpr(setup_dir_path, deploy_path, bug_id):
     execute_command(copy_log)
 
 
-def angelix(setup_dir_path, deploy_path, bug_id):
+def angelix(setup_dir_path, deploy_path):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for angelix")
     script_path = "instrument.sh"
