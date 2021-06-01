@@ -42,3 +42,15 @@ sed -i '978 s/./\t&/' test/Makefile
 make CFLAGS="-march=x86-64" -j32
 cd $dir_name
 
+## fix the test harness and the configuration script
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/libtiff/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/libtiff/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/usr/bin/perl#perl#g" test.sh
+sed -i "s#cd libtiff#cd src#g" test.sh
+
+# Run few test cases
+bash test.sh p1 /data
+bash test.sh p3 /data
+bash test.sh p5 /data
+bash test.sh p7 /data
+bash test.sh p9 /data
