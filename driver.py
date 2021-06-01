@@ -111,16 +111,16 @@ def cpr(setup_dir_path, deploy_path, bug_id):
 def angelix(setup_dir_path, deploy_path):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for angelix")
-    script_path = "instrument.sh"
+    script_path = "angelix/instrument.sh"
     instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
     execute_command(instrument_command)
     print("\t[INFO] running Angelix")
     source_file = deploy_path + "/src/"
     with open(deploy_path + "/manifest.txt", "r") as man_file:
-        source_file += man_file.readlines()[0]
-
+        source_file += man_file.readlines()[0].strip().replace("\n", "")
+    src_path = deploy_path + "/src"
     angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
-    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite --configure \"/tmp/config-libtiff\"  --build \"/tmp/build-libtiff\"".format(deploy_path, source_file)
+    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite --configure \"/tmp/config-libtiff\"  --build \"/tmp/build-libtiff\"".format(src_path, source_file)
     execute_command(angelix_command)
 
 
