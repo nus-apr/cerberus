@@ -6,8 +6,8 @@ RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 
 # install experiment dependencies
 RUN apt-get update && apt-get install -y  \
-    autopoint \
     automake \
+    autopoint \
     bison \
     flex \
     gettext \
@@ -16,24 +16,26 @@ RUN apt-get update && apt-get install -y  \
     libfreetype6 \
     libfreetype6-dev \
     libjpeg-dev \
-    libtool \
-    libxml2-dev \
     liblzma-dev \
-    nasm \
-    pkg-config \
-    texinfo \
-    yasm \
-    xutils-dev \
+    libnuma-dev \
     libpciaccess-dev \
     libpython-dev \
     libpython3-dev \
+    libsdl1.2-dev  \
+    libtool \
+    libvdpau-dev \
     libx11-dev \
     libxcb-xfixes0-dev \
     libxcb1-dev \
     libxcb-shm0-dev \
-    libsdl1.2-dev  \
-    libvdpau-dev \
-    libnuma-dev
+    libxml2-dev \
+    nasm \
+    nano \
+    pkg-config \
+    psmisc \
+    texinfo \
+    xutils-dev \
+    yasm
 
 
 RUN git config --global user.email "rshariffdeen@gmail.com"

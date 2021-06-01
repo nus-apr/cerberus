@@ -1,0 +1,7 @@
+		//prophet generated patch
+		memset(&dateobj->time->relative,0,sizeof(*(&dateobj->time->relative)));dateobj->time->relative.y= intobj->diff->y*bias;
+		dateobj->time->relative.m = intobj->diff->m * bias;
+		dateobj->time->relative.d = intobj->diff->d * bias;
+		dateobj->time->relative.h = intobj->diff->h * bias;
+		dateobj->time->relative.i = intobj->diff->i * bias;
+		dateobj->time->relative.s = intobj->diff->s * bias;

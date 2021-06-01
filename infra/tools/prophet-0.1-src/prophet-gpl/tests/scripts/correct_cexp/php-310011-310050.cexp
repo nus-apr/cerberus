@@ -1,0 +1,4 @@
+				//prophet generated patch
+				_zval_copy_ctor_func((tmp));
+				zval_set_refcount_p(tmp, 0);
+				Z_UNSET_ISREF_P(tmp);

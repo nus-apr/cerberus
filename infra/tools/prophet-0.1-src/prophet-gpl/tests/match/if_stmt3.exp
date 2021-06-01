@@ -1,0 +1,24 @@
+Candidate:
+Priority 20000
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+if ((b == 21) && !(__abst_hole(b, a))) {
+    return 1;
+}
+
+
+Found for:
+ b
+Candidate:
+Priority 20000
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+if ((b == 21) || (__abst_hole(b, a))) {
+    return 1;
+}
+
+
+Found for:
+ b

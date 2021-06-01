@@ -1,0 +1,26 @@
+Candidate:
+Priority 10000
+At location ./a.c:7
+--Src File: ./a.c
+Fragment 0:
+if ((__abst_hole(type)))
+    break;
+scanf("%d", &type);
+
+
+Found for:
+ type
+Total vec size: 13
+AddControlRepair
+GLOBAL AddControlRepair X StmtCallAF
+GLOBAL+ AddControlRepair X StmtCallAF
+VAR AbstVAF X AddrOfAF
+VAR AbstVAF X StmtCallAF
+VAR StmtIfAF X AddrOfAF
+VAR StmtIfAF X StmtCallAF
+VAR+ AbstVAF X AddrOfAF
+VAR+ AbstVAF X StmtCallAF
+VAR+ StmtIfAF X AddrOfAF
+VAR+ StmtIfAF X StmtCallAF
+VALUE AbstVAF X LocalVarVF
+VALUE StmtIfAF X LocalVarVF

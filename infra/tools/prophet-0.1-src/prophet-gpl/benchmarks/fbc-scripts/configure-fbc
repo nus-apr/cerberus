@@ -1,0 +1,6 @@
+#!/bin/bash
+
+mkdir fbc-root
+cd fbc-src/src/compiler/obj/linux && PATH=`pwd`/../../../../../fbc-bin/bin:$PATH ../../configure --prefix=`pwd`/../../../../../fbc-root && cd ../../../../..
+cd fbc-src/src/rtlib/obj/linux && PATH=`pwd`/../../../../../fbc-bin/bin:$PATH ../../configure --prefix=`pwd`/../../../../../fbc-root && cd ../../../../..
+cd fbc-src/src/gfxlib2/obj/linux && PATH=`pwd`/../../../../../fbc-bin/bin:$PATH ../../configure --prefix=`pwd`/../../../../../fbc-root && cd ../../../../.. 

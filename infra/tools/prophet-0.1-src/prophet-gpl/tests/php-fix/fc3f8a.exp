@@ -1,0 +1,3 @@
+At location ext/xmlreader/php_xmlreader.c:1323!
+xmlreader_object_handlers.clone_obj = 0;
+xmlreader_object_handlers.get_property_ptr_ptr = xmlreader_get_property_ptr_ptr;

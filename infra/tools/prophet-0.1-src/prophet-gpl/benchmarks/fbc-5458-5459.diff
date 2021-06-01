@@ -1,0 +1,75 @@
+Index: src/rtlib/libfb_str_midassign.c
+===================================================================
+--- src/rtlib/libfb_str_midassign.c	(revision 5458)
++++ src/rtlib/libfb_str_midassign.c	(revision 5459)
+@@ -67,11 +67,11 @@
+ 	src_len = FB_STRSIZE( src );
+ 	dst_len = FB_STRSIZE( dst );
+ 
+-    if( (start > 0) && (start <= dst_len) )
++	if( (start > 0) && (start <= dst_len) && (len != 0) )
+     {
+ 		--start;
+ 
+-        if( (len < 1) || (len > src_len) )
++		if( (len < 0) || (len > src_len) )
+ 			len = src_len;
+ 
+         if( start + len > dst_len )
+Index: tests/string/mid_set.bas
+===================================================================
+--- tests/string/mid_set.bas	(revision 5458)
++++ tests/string/mid_set.bas	(revision 5459)
+@@ -5,12 +5,39 @@
+ 
+ namespace fbc_tests.string_.mid_set
+ 
++sub test_midset(byref s as const string, byref t as const string, byval n as integer, byval l as integer)
++
++	dim as string s1, s2
++	s1 = s: mid(s1, n, l) = t
++
++	s2 = s
++	for i as integer = 1 to l
++		if i > len(t) orelse n > len(s2) then exit for
++
++		mid(s2, n, 1) = mid(t, i, 1)
++
++		n += 1
++	next
++
++	CU_ASSERT_EQUAL(s1, s2)
++
++end sub
++
+ sub midSetTest cdecl ()
+ 
+ 	dim h as string = "123"
+ 	dim test as string * 3
+-	dim i as integer
++	dim i as integer, l as integer
++	dim s as string = "abcdefg", t as string = "12345"
+ 
++	for i = 1 to 42
++		for l = 0 to 42
++
++			test_midset(s, t, i, l)
++
++		next
++	next
++
+ 	for i = 1 to 260
+ 	  mid(test,1) = h
+ 	  CU_ASSERT_NOT_EQUAL( 0, len(str(i)) )
+Index: changelog.txt
+===================================================================
+--- changelog.txt	(revision 5458)
++++ changelog.txt	(revision 5459)
+@@ -4,6 +4,7 @@
+ - "No newline at end of file" warning suppressed unless compiling with -w pedantic
+ - FIX(n)/INT(n) no longer affect the type/value of integer-type expressions
+ - __FB_UNIX__ and __FB_PCOS__ are no longer defined when false, allowing #IFDEF to work
++- MID(s,n,0)=t statement was equivalent to MID(s,n)=t; now it more intuitively sets 0 chars (i.e. does nothing) like in QB
+ 
+ [added]
+ - Variadic macros: #define a(x, y...) f(x, y)

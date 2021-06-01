@@ -1,0 +1,11 @@
+Candidate:
+Priority 5000
+At location ./a.c:31
+--Src File: ./a.c
+Fragment 0:
+memset(&c->x->y, 0, sizeof (*(&c->x->y)));
+c->x->y.f2 = 10;
+
+
+Found for:
+ NULL

@@ -1,0 +1,4 @@
+At location mpz/gcdext.c:75
+--Src File: mpz/gcdext.c
+Fragment 0:
+ssize = ((a)->_mp_size) >= 0 ? (asize != 0) : -1;

@@ -1,0 +1,55 @@
+{
+  "sha": "9b43f68d2846d6fc073cf2ed8bc890dc65c755ea",
+  "url": "https://api.github.com/repos/atom/api/git/trees/9b43f68d2846d6fc073cf2ed8bc890dc65c755ea",
+  "tree": [
+    {
+      "path": "LICENSE",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "d459ffc53dee0b10a69918b1a8c68da964380857",
+      "size": 1070,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/d459ffc53dee0b10a69918b1a8c68da964380857"
+    },
+    {
+      "path": "README.md",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "10f564bd16a26ba016f570ac68a7302da1778bb5",
+      "size": 193,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/10f564bd16a26ba016f570ac68a7302da1778bb5"
+    },
+    {
+      "path": "current-api.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "f46bd6a3d26cd827b2d76cd141e3a8736624ee02",
+      "size": 58897,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/f46bd6a3d26cd827b2d76cd141e3a8736624ee02"
+    },
+    {
+      "path": "essential-api.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "4c4fb1d7acbf23996d1cef1bbf4f51c3428225c1",
+      "size": 7222,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/4c4fb1d7acbf23996d1cef1bbf4f51c3428225c1"
+    },
+    {
+      "path": "extended-api.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "b6a4a015c1948f70f4c893d6e8cd94f26955556e",
+      "size": 5712,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/b6a4a015c1948f70f4c893d6e8cd94f26955556e"
+    },
+    {
+      "path": "private-api.txt",
+      "mode": "100644",
+      "type": "blob",
+      "sha": "1665bf0f362f21d487959508dbb655613bfdea89",
+      "size": 12118,
+      "url": "https://api.github.com/repos/atom/api/git/blobs/1665bf0f362f21d487959508dbb655613bfdea89"
+    }
+  ],
+  "truncated": false
+}

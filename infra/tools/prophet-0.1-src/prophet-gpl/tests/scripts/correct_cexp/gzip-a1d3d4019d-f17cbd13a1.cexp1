@@ -1,0 +1,7 @@
+    //prophet generated patch
+    ifd = (0);
+    if (!force && !list && isatty(fileno((FILE *)(decompress ? stdin : stdout)))) {
+        fprintf(stderr, "%s: compressed data not %s a terminal. Use -f to force %scompression.\n", program_name, decompress ? "read from" : "written to", decompress ? "de" : "");
+        fprintf(stderr, "For help, type: %s -h\n", program_name);
+        do_exit(1);
+    }

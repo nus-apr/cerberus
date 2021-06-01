@@ -1,0 +1,4 @@
+At location ext/dom/document.c:2322
+--Src File: ext/dom/document.c
+Fragment 0:
+xmlNodeDump(buf, docp, node, 0, format);

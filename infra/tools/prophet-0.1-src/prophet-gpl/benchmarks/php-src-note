@@ -1,0 +1,8 @@
+environment Ubuntu 14.04
+
+==dependecy==
+1. re2c
+2. bison 2.X
+3. libxml2-dev
+
+you need re2c and bison to use the script

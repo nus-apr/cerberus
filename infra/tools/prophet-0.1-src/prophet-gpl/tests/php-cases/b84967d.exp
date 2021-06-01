@@ -1,0 +1,5 @@
+At location Zend/zend_execute.c:1262
+--Src File: Zend/zend_execute.c
+Fragment 0:
+if (!(__abst_hole(type)))
+    zend_error((1 << 3L), "Uninitialized string offset: %ld", (*dim).value.lval);

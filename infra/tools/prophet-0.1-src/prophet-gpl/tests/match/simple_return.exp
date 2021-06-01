@@ -1,0 +1,12 @@
+Candidate:
+Priority 12500
+At location ./a.c:5
+--Src File: ./a.c
+Fragment 0:
+if ((__abst_hole()))
+    return 0;
+return 1;
+
+
+Found for:
+ NULL

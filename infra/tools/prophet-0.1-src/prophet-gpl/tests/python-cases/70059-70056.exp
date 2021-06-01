@@ -1,0 +1,6 @@
+At location Modules/_io/bufferedio.c:1898
+--Src File: Modules/_io/bufferedio.c
+Fragment 0:
+if ((!(self->writable && self->write_end != -1)) || (__abst_hole(self->write_pos))) {
+    self->write_pos = self->pos;
+}

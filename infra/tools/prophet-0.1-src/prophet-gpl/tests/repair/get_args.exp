@@ -1,0 +1,14 @@
+#include "a.h"
+#include <stdio.h>
+
+int foo() {
+    //prophet generated patch
+    if ((1))
+        return 0;
+    return 1;
+}
+
+int main() {
+    printf("%d\n", foo());
+    return 0;
+}

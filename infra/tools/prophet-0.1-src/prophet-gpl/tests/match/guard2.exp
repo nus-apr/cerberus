@@ -1,0 +1,11 @@
+Candidate:
+Priority 5000
+At location ./a.c:5
+--Src File: ./a.c
+Fragment 0:
+if (!(__abst_hole(a, b)))
+    a = a + b;
+
+
+Found for:
+ b

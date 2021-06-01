@@ -1,0 +1,35 @@
+Distance 11
+Replace:
+IfStmt 0x2e98d58
+|-<<<NULL>>>
+|-BinaryOperator 0x2e98cf0 'int' '&&'
+| |-ParenExpr 0x2e98c28 'int'
+| | `-BinaryOperator 0x2e98c00 'int' '=='
+| |   |-ImplicitCastExpr 0x2e98be8 'int' <LValueToRValue>
+| |   | `-DeclRefExpr 0x2e98ba0 'int' lvalue Var 0x2e98b10 'a' 'int'
+| |   `-IntegerLiteral 0x2e98bc8 'int' 0
+| `-ParenExpr 0x2e98cd0 'int'
+|   `-BinaryOperator 0x2e98ca8 'int' '=='
+|     |-ImplicitCastExpr 0x2e98c90 'int' <LValueToRValue>
+|     | `-DeclRefExpr 0x2e98c48 'int' lvalue Var 0x2e98b10 'a' 'int'
+|     `-IntegerLiteral 0x2e98c70 'int' 1
+|-ReturnStmt 0x2e98d38
+| `-IntegerLiteral 0x2e98d18 'int' 0
+`-<<<NULL>>>
+With
+IfStmt 0x2f08198
+|-<<<NULL>>>
+|-BinaryOperator 0x2f08130 'int' '||'
+| |-ParenExpr 0x2f08068 'int'
+| | `-BinaryOperator 0x2f08040 'int' '=='
+| |   |-ImplicitCastExpr 0x2f08028 'int' <LValueToRValue>
+| |   | `-DeclRefExpr 0x2f07fe0 'int' lvalue Var 0x2f07f50 'a' 'int'
+| |   `-IntegerLiteral 0x2f08008 'int' 0
+| `-ParenExpr 0x2f08110 'int'
+|   `-BinaryOperator 0x2f080e8 'int' '=='
+|     |-ImplicitCastExpr 0x2f080d0 'int' <LValueToRValue>
+|     | `-DeclRefExpr 0x2f08088 'int' lvalue Var 0x2f07f50 'a' 'int'
+|     `-IntegerLiteral 0x2f080b0 'int' 1
+|-ReturnStmt 0x2f08178
+| `-IntegerLiteral 0x2f08158 'int' 0
+`-<<<NULL>>>

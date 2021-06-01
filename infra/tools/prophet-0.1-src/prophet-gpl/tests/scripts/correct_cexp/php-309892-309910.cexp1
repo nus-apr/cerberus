@@ -1,0 +1,6 @@
+		//prophet generated patch
+		if (!(1))
+		    len = s1_len - offset;
+	}
+
+	cmp_len = (uint) (len ? len : MAX(s2_len, (s1_len - offset)));

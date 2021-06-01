@@ -1,0 +1,4 @@
+At location tools/tiffcrop.c:4970
+--Src File: tools/tiffcrop.c
+Fragment 0:
+TIFFGetField(in, 296, &res_unit);

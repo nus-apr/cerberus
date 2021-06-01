@@ -1,0 +1,46 @@
+Candidate:
+Priority 20000
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+if ((b == 21) && !(__abst_hole(b, a))) {
+    return 1;
+}
+
+
+Found for:
+ b
+Total vec size: 10
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+VAR EqOpAF X EqOpAF
+VAR AbstVAF X EqOpAF
+VAR RStmtCondAF X EqOpAF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X NonZeroConstVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X LocalVarVF
+Candidate:
+Priority 20000
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+if ((b == 21) || (__abst_hole(b, a))) {
+    return 1;
+}
+
+
+Found for:
+ b
+Total vec size: 10
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+VAR EqOpAF X EqOpAF
+VAR AbstVAF X EqOpAF
+VAR RStmtCondAF X EqOpAF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X NonZeroConstVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X LocalVarVF

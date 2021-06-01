@@ -1,0 +1,460 @@
+Index: tests/string/val.bas
+===================================================================
+--- tests/string/val.bas	(revision 5251)
++++ tests/string/val.bas	(revision 5252)
+@@ -48,6 +48,10 @@
+ 		TestValInt( "&o179",   15, 15 )
+ 		TestValLng( "&o179",   15, 15 )
+ 
++		TestVal(    " &179",   15     )
++		TestValInt( " &179",   15, 15 )
++		TestValLng( " &179",   15, 15 )
++
+ 		TestVal(    "&b10114", 11     )
+ 		TestValInt( "&b10114", 11, 11 )
+ 		TestValLng( "&b10114", 11, 11 )
+@@ -56,7 +60,8 @@
+ 
+ 	sub test2 cdecl ()
+ 
+-		TestVal(    "9007199254740991",  9007199254740991                   ) '' 2^53-1
++		'' 2^53-1
++		TestVal(    "9007199254740991",  9007199254740991                   )
+ 		TestValLng( "9007199254740991",  9007199254740991, 9007199254740991 )
+ 
+ 		TestVal(            "9.007d15", 9007000000000000 )
+@@ -65,52 +70,102 @@
+ 		TestVal(            "9.007E15", 9007000000000000 )
+ 
+ 
+-		TestVal(    "4294967295",   4294967295             ) '' 2^32-1
++		'' 2^32-1
++		TestVal(    "4294967295",   4294967295             )
+ 		TestValInt( "4294967295",           -1, 4294967295 )
+ 		TestValLng( "4294967295",   4294967295, 4294967295 )
+ 
++		'' 1-2^32
+ 		TestVal(    "-4294967295", -4294967295#                        )
+ 		TestValInt( "-4294967295",             1,                    1 )
+ 		TestValLng( "-4294967295", -4294967295ll, 18446744069414584321 )
+ 
+-		TestVal(    "2147483647",   2147483647             ) '' 2^31-1
++		'' 2^31-1
++		TestVal(    "2147483647",   2147483647             )
+ 		TestValInt( "2147483647",   2147483647, 2147483647 )
+ 		TestValLng( "2147483647",   2147483647, 2147483647 )
+ 
+-		TestVal(    "-2147483648", -2147483648                      ) '' -2^31
++		'' -2^31
++		TestVal(    "-2147483648", -2147483648                      )
+ 		TestValInt( "-2147483648", -2147483648,           2147483648 )
+ 		TestValLng( "-2147483648", -2147483648, 18446744071562067968 )
+ 
+ 
+-		TestVal(    "18446744073709551616", 1.8446744073709551616e+19 ) '' 2^64
++		'' 2^64
++		TestVal(    "18446744073709551616", 1.8446744073709551616e+19 )
+ 
+-		TestVal(    "18446744073709551615",    1.8446744073709551615e+19 ) '' 2^64-1
++		'' 2^64-1
++		TestVal(    "18446744073709551615",    1.8446744073709551615e+19 )
+ 		TestValLng( "18446744073709551615", -1, 18446744073709551615     )
+ 
+-		TestVal(    "-18446744073709551616",  -1.8446744073709551616e+19 ) '' -2^64
++		'' -2^64
++		TestVal(    "-18446744073709551616",  -1.8446744073709551616e+19 )
+ 
+-		TestValLng( "-18446744073709551615", 1, 1 ) '' 1-2^64
++		'' 1-2^64
++		TestValLng( "-18446744073709551615", 1, 1 )
+ 
+-		TestVal(     "9223372036854775807", 9.223372036854775807e+18                  ) '' 2^63-1
++		'' 2^63-1
++		TestVal(     "9223372036854775807", 9.223372036854775807e+18                  )
+ 		TestValLng(  "9223372036854775807",  9223372036854775807, 9223372036854775807 )
+ 
+-		TestVal(    "-9223372036854775808", -9.223372036854775808e+18                 ) '' -2^63
++		'' -2^63
++		TestVal(    "-9223372036854775808", -9.223372036854775808e+18                 )
+ 		TestValLng( "-9223372036854775808", -9223372036854775808, 9223372036854775808 )
+ 
++	end sub
+ 
++	sub test3 cdecl ()
++
++		'' 2^31
++		TestVal(    "&H80000000",  2147483648            )
++		TestValInt( "&H80000000", -2147483648, 2147483648 )
++		TestValLng( "&H80000000",  2147483648, 2147483648 )
++
++		TestVal(    "&O20000000000",  2147483648           )
++		TestValInt( "&O20000000000", -2147483648, 2147483648 )
++		TestValLng( "&O20000000000",  2147483648, 2147483648 )
++
++		TestVal(     "&20000000000",  2147483648             )
++		TestValInt(  "&20000000000", -2147483648, 2147483648 )
++		TestValLng(  "&20000000000",  2147483648, 2147483648 )
++
++		TestVal(    "&B10000000000000000000000000000000",  2147483648             )
++		TestValInt( "&B10000000000000000000000000000000", -2147483648, 2147483648 )
++		TestValLng( "&B10000000000000000000000000000000",  2147483648, 2147483648 )
++
++
++		'' 2^32-1
+ 		TestVal(    "&HFFFFFFFF", 4294967295             )
+-		TestValInt( "&HFFFFFFFF", 4294967295,         -1 )
++		TestValInt( "&HFFFFFFFF",         -1, 4294967295 )
+ 		TestValLng( "&HFFFFFFFF", 4294967295, 4294967295 )
+ 
+ 		TestVal(    "&O37777777777", 4294967295             )
+-		TestValInt( "&O37777777777", 4294967295,         -1 )
++		TestValInt( "&O37777777777",         -1, 4294967295 )
+ 		TestValLng( "&O37777777777", 4294967295, 4294967295 )
+ 
++		TestVal(     "&37777777777", 4294967295             )
++		TestValInt(  "&37777777777",         -1, 4294967295 )
++		TestValLng(  "&37777777777", 4294967295, 4294967295 )
++
+ 		TestVal(    "&B11111111111111111111111111111111", 4294967295             )
+-		TestValInt( "&B11111111111111111111111111111111", 4294967295,         -1 )
++		TestValInt( "&B11111111111111111111111111111111",         -1, 4294967295 )
+ 		TestValLng( "&B11111111111111111111111111111111", 4294967295, 4294967295 )
+ 
+ 
++		''2^63
++		TestVal(    "&H8000000000000000", -9.223372036854775807e+18                 )
++		TestValLng( "&H8000000000000000", -9223372036854775808, 9223372036854775808 )
++
++		TestVal(    "&O1000000000000000000000", -9.223372036854775807e+18                 )
++		TestValLng( "&O1000000000000000000000", -9223372036854775808, 9223372036854775808 )
++
++		TestVal(    " &1000000000000000000000", -9.223372036854775807e+18                 )
++		TestValLng( " &1000000000000000000000", -9223372036854775808, 9223372036854775808 )
++
++		TestVal(    "&B1000000000000000000000000000000000000000000000000000000000000000", -9.223372036854775807e+18                 )
++		TestValLng( "&B1000000000000000000000000000000000000000000000000000000000000000", -9223372036854775808, 9223372036854775808 )
++
++		''2^64-1
+ 		TestVal(    "&HFFFFFFFFFFFFFFFF", -1                       )
+ 		TestValLng( "&HFFFFFFFFFFFFFFFF", -1, 18446744073709551615 )
+ 
+@@ -117,6 +172,9 @@
+ 		TestVal(    "&O1777777777777777777777", -1                       )
+ 		TestValLng( "&O1777777777777777777777", -1, 18446744073709551615 )
+ 
++		TestVal(    " &1777777777777777777777", -1                       )
++		TestValLng( " &1777777777777777777777", -1, 18446744073709551615 )
++
+ 		TestVal(    "&B1111111111111111111111111111111111111111111111111111111111111111", -1                       )
+ 		TestValLng( "&B1111111111111111111111111111111111111111111111111111111111111111", -1, 18446744073709551615 )
+ 
+@@ -126,6 +184,7 @@
+ 		fbcu.add_suite("fbc_tests.string.val")
+ 		fbcu.add_test("test1", @test1)
+ 		fbcu.add_test("test2", @test2)
++		fbcu.add_test("test3", @test3)
+ 
+ 	end sub
+ 
+Index: changelog.txt
+===================================================================
+--- changelog.txt	(revision 5251)
++++ changelog.txt	(revision 5252)
+@@ -41,6 +41,7 @@
+ - PRINT USING now supports "&" for intelligent number formatting (counting_pine)
+ - PRINT USING: normal expressions allowed before USING (counting_pine)
+ - PRINT USING: support for SPC/TAB (counting_pine)
++- VAL/VALINT/... now support "&..." for octal numbers, e.g. "&123" (counting_pine)
+ 
+ [fixed]
+ - WIDTH was crashing when optional parameter was not specified (DrV)
+Index: src/rtlib/libfb_strw_convfrom_int.c
+===================================================================
+--- src/rtlib/libfb_strw_convfrom_int.c	(revision 5251)
++++ src/rtlib/libfb_strw_convfrom_int.c	(revision 5252)
+@@ -69,6 +69,11 @@
+ 			case L'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				r--;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+Index: src/rtlib/libfb_strw_convfrom_lng.c
+===================================================================
+--- src/rtlib/libfb_strw_convfrom_lng.c	(revision 5251)
++++ src/rtlib/libfb_strw_convfrom_lng.c	(revision 5252)
+@@ -69,6 +69,11 @@
+ 			case L'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				r--;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+@@ -103,4 +108,3 @@
+ 
+ 	return val;
+ }
+-
+Index: src/rtlib/libfb_strw_convfrom_uint.c
+===================================================================
+--- src/rtlib/libfb_strw_convfrom_uint.c	(revision 5251)
++++ src/rtlib/libfb_strw_convfrom_uint.c	(revision 5252)
+@@ -69,6 +69,11 @@
+ 			case L'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				r--;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+Index: src/rtlib/libfb_strw_convfrom_ulng.c
+===================================================================
+--- src/rtlib/libfb_strw_convfrom_ulng.c	(revision 5251)
++++ src/rtlib/libfb_strw_convfrom_ulng.c	(revision 5252)
+@@ -69,6 +69,11 @@
+ 			case L'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				r--;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+@@ -101,5 +106,3 @@
+ 
+ 	return val;
+ }
+-
+-
+Index: src/rtlib/libfb_strw_convfrom.c
+===================================================================
+--- src/rtlib/libfb_strw_convfrom.c	(revision 5251)
++++ src/rtlib/libfb_strw_convfrom.c	(revision 5252)
+@@ -72,6 +72,11 @@
+ 			case L'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				r--;
++				break;
+ 		}
+ 
+ 		if( radix != 0 )
+Index: src/rtlib/libfb_str_convfrom_uint.c
+===================================================================
+--- src/rtlib/libfb_str_convfrom_uint.c	(revision 5251)
++++ src/rtlib/libfb_str_convfrom_uint.c	(revision 5252)
+@@ -44,6 +44,7 @@
+ {
+     char 	*p;
+     int 	radix;
++	int 	skip;
+ 
+ 	/* skip white spc */
+ 	p = fb_hStrSkipChar( src, len, 32 );
+@@ -55,6 +56,7 @@
+ 	radix = 10;
+ 	if( (len >= 2) && (p[0] == '&') )
+ 	{
++		skip = 2;
+ 		switch( p[1] )
+ 		{
+ 			case 'h':
+@@ -69,10 +71,15 @@
+ 			case 'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				skip = 1;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+-			p += 2;
++			p += skip;
+ 	}
+ 
+ 	return strtoul( p, NULL, radix );
+Index: src/rtlib/libfb_str_convfrom_ulng.c
+===================================================================
+--- src/rtlib/libfb_str_convfrom_ulng.c	(revision 5251)
++++ src/rtlib/libfb_str_convfrom_ulng.c	(revision 5252)
+@@ -44,6 +44,7 @@
+ {
+     char 	*p;
+     int 	radix;
++	int skip;
+ 
+ 	/* skip white spc */
+ 	p = fb_hStrSkipChar( src, len, 32 );
+@@ -55,6 +56,7 @@
+ 	radix = 10;
+ 	if( (len >= 2) && (p[0] == '&') )
+ 	{
++		skip = 2;
+ 		switch( p[1] )
+ 		{
+ 			case 'h':
+@@ -69,13 +71,18 @@
+ 			case 'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				skip = 1;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+ 		{
+-			p += 2;
++			p += skip;
+ #ifdef TARGET_WIN32
+-			return fb_hStrRadix2Longint( p, len-2, radix );
++			return fb_hStrRadix2Longint( p, len - skip, radix );
+ #endif
+ 		}
+ 	}
+@@ -101,5 +108,3 @@
+ 
+ 	return val;
+ }
+-
+-
+Index: src/rtlib/libfb_str_convfrom_int.c
+===================================================================
+--- src/rtlib/libfb_str_convfrom_int.c	(revision 5251)
++++ src/rtlib/libfb_str_convfrom_int.c	(revision 5252)
+@@ -44,6 +44,7 @@
+ {
+     char 	*p;
+     int 	radix;
++	int 	skip;
+ 
+ 	/* skip white spc */
+ 	p = fb_hStrSkipChar( src, len, 32 );
+@@ -55,6 +56,7 @@
+ 	else if( (len >= 2) && (p[0] == '&') )
+ 	{
+ 		radix = 0;
++		skip = 2;
+ 		switch( p[1] )
+ 		{
+ 			case 'h':
+@@ -69,10 +71,15 @@
+ 			case 'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				skip = 1;
++				break;
+ 		}
+ 
+ 		if( radix != 0 )
+-			return fb_hStrRadix2Int( &p[2], len-2, radix );
++			return fb_hStrRadix2Int( &p[skip], len - skip, radix );
+ 	}
+ 
+ 	/* atoi() saturates values outside [-2^31, 2^31)
+Index: src/rtlib/libfb_str_convfrom.c
+===================================================================
+--- src/rtlib/libfb_str_convfrom.c	(revision 5251)
++++ src/rtlib/libfb_str_convfrom.c	(revision 5252)
+@@ -45,6 +45,7 @@
+ 	char *p, *q, c;
+ 	int radix;
+ 	int i;
++	int skip;
+ 	double ret;
+ 
+ 	/* skip white spc */
+@@ -56,6 +57,7 @@
+ 
+ 	else if( (len >= 2) && (p[0] == '&') )
+ 	{
++		skip = 2;
+ 		radix = 0;
+ 		switch( p[1] )
+ 		{
+@@ -71,10 +73,15 @@
+ 			case 'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				skip = 1;
++				break;
+ 		}
+ 
+ 		if( radix != 0 )
+-			return (double)fb_hStrRadix2Longint( &p[2], len-2, radix );
++			return (double)fb_hStrRadix2Longint( &p[skip], len - skip, radix );
+ 	}
+ 
+ 	/* Workaround: strtod() does not allow 'd' as an exponent specifier on 
+Index: src/rtlib/libfb_str_convfrom_lng.c
+===================================================================
+--- src/rtlib/libfb_str_convfrom_lng.c	(revision 5251)
++++ src/rtlib/libfb_str_convfrom_lng.c	(revision 5252)
+@@ -44,6 +44,7 @@
+ {
+     char 	*p;
+     int 	radix;
++	int skip;
+ 
+ 	/* skip white spc */
+ 	p = fb_hStrSkipChar( src, len, 32 );
+@@ -55,6 +56,7 @@
+ 	radix = 10;
+ 	if( (len >= 2) && (p[0] == '&') )
+ 	{
++		skip = 2;
+ 		switch( p[1] )
+ 		{
+ 			case 'h':
+@@ -69,13 +71,18 @@
+ 			case 'B':
+ 				radix = 2;
+ 				break;
++
++			default: /* assume octal */
++				radix = 8;
++				skip = 1;
++				break;
+ 		}
+ 
+ 		if( radix != 10 )
+ 		{
+-			p += 2;
++			p += skip;
+ #ifdef TARGET_WIN32
+-			return fb_hStrRadix2Longint( p, len-2, radix );
++			return fb_hStrRadix2Longint( p, len - skip, radix );
+ #endif
+ 		}
+ 	}

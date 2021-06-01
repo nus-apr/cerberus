@@ -1,0 +1,4 @@
+At location ext/phar/phar.c:1269
+--Src File: ext/phar/phar.c
+Fragment 0:
+spprintf(error, 0, (__abst_hole()), fname);

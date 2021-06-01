@@ -1,0 +1,70 @@
+Project
+          : Lighttpd
+
+Pre-requisite
+
+           install libpcre3-dev libpcre++-dev libbz2-dev libglib2.0-dev libxml2-dev sqlite3 libsqlite3-dev libssl-dev
+
+App
+          version:
+
+           automake - using automake1.11 instead
+
+Latest
+          version: 2966
+
+Test
+          particular version( i.e. 2785 )
+svn
+          --force up -r2785
+
+        sh
+          autogen.sh
+./configure
+          --with-ldap --with-bzip2 --with-openssl --with-gdbm
+          --with-memcache --with-webdav-props --with-webdav-locks
+svn
+          up --force -r2966 tests/ 
+make
+        
+
+        sudo
+          make install
+
+        cd
+          tests
+
+        sh
+          prepare.sh
+
+        perl
+          run-tests.pl
+sh
+          cleanup.sh
+
+        cd
+          ..
+
+        sudo
+          make uninstall
+
+        make
+          distclean
+
+Test
+          a particular test(i.e. request.t)
+Change
+          ‘perl run-tests.pl’ by
+
+export
+          RUNTESTS=request
+perl
+          run-tests.pl
+unset
+          RUNTESTS
+
+Avoid
+          a particular test
+remove
+          the corresponding .t file under directory ‘tests’
+

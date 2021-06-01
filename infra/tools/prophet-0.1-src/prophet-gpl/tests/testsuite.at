@@ -1,0 +1,210 @@
+AT_INIT
+AT_COLOR_TESTS
+
+m4_define([FOREACH_TESTS],[
+	AT_BANNER([$1])
+	m4_foreach([t],m4_split(m4_normalize([$2])), [
+		AT_SETUP([t])
+		AT_KEYWORDS([$1])
+		$3([t])
+		AT_CLEANUP
+	])
+])
+
+m4_define([DIFFER_TEST],[
+    AT_KEYWORDS([$1])
+    cp $srcdir/differ/$1.a.c a.c
+    cp $srcdir/differ/$1.b.c b.c
+    AT_CHECK([$builddir/../src/pdiffer . a.c . b.c -print-diff-only 2>$1.out], [ignore], [ignore])
+    AT_CHECK([$srcdir/differ/smart_diff.py $1.out $srcdir/differ/$1.exp])
+    AT_XFAIL_IF([test -f $srcdir/differ/$1.xexp])
+])
+
+m4_define([MATCH_TEST],[
+    AT_KEYWORDS([$1])
+    cp $srcdir/match/$1.a.c a.c
+    cp $srcdir/match/$1.b.c b.c
+    AT_CHECK([$builddir/../src/pdiffer . a.c . b.c >$1.out], [ignore], [ignore])
+    AT_CHECK([diff $1.out $srcdir/match/$1.exp])
+    AT_XFAIL_IF([test -f $srcdir/match/$1.xexp])
+])
+
+m4_define([MATCH_FEATURE_TEST],[
+    AT_KEYWORDS([$1])
+    cp $srcdir/match/$1.a.c a.c
+    cp $srcdir/match/$1.b.c b.c
+    AT_CHECK([$builddir/../src/pdiffer . a.c . b.c -print-candidate-vector >$1.out], [ignore], [ignore])
+    AT_CHECK([diff $1.out $srcdir/match/$1.fexp])
+    AT_XFAIL_IF([test -f $srcdir/match/$1.xexp])
+])
+
+m4_define([REPAIR_TEST],[
+    AT_KEYWORDS([$1])
+    cp -rf $srcdir/repair/$1/src ./
+    cp -rf $srcdir/repair/$1/tests ./
+    cp -f $srcdir/repair/$1/revision.log ./
+    cp -f $builddir/repair.conf ./
+    $builddir/../src/prophet repair.conf
+    AT_CHECK([$srcdir/../tools/multidiff.py $srcdir/repair/$1.exp __fixed*.c*])
+    AT_XFAIL_IF([test -f $srcdir/repair/$1.xexp])
+])
+
+m4_define([PHPCASE_TEST],[
+    AT_KEYWORDS([$1])
+    AT_SKIP_IF([! test -d $builddir/php-case-$1])
+    $builddir/../src/prophet -r $builddir/php-case-$1/php-$1-workdir -print-fix-only fix.res -skip-verify -consider-all -first-n-loc 200
+    AT_CHECK([$srcdir/../tools/fix-compare.py fix.res $srcdir/php-cases/$1.exp])
+])
+
+m4_define([LIBTIFFCASE_TEST], [
+    AT_KEYWORDS([$1])
+    AT_SKIP_IF([! test -d $builddir/libtiff-case-$1])
+    $builddir/../src/prophet -r $builddir/libtiff-case-$1/libtiff-$1-workdir -print-fix-only fix.res -skip-verify -consider-all -first-n-loc 200
+    AT_CHECK([$srcdir/../tools/fix-compare.py fix.res $srcdir/libtiff-cases/$1.exp])
+])
+
+m4_define([LIGHTTPDCASE_TEST], [
+    AT_KEYWORDS([$1])
+    AT_SKIP_IF([! test -d $builddir/lighttpd-case-$1])
+    $builddir/../src/prophet -r $builddir/lighttpd-case-$1/lighttpd-$1-workdir -print-fix-only fix.res -skip-verify -consider-all -first-n-loc 200
+    AT_CHECK([$srcdir/../tools/fix-compare.py fix.res $srcdir/lighttpd-cases/$1.exp])
+    AT_XFAIL_IF([test -f $srcdir/lighttpd-cases/$1.xexp])
+])
+
+m4_define([PHPFIX_TEST],[
+    AT_KEYWORDS([$1])
+    cp -rf $builddir/php-src-$1 ./php-src
+    cp -rf $builddir/php-repair.conf ./
+    cp -rf $builddir/php-args-$1 ./php-args
+    cp -rf $srcdir/php-fix/cheat-$1 php-src/__cheat.log
+    $builddir/../src/prophet php-repair.conf -print-fix-only fix_res.log
+    AT_CHECK([$srcdir/../tools/fix-compare.py fix_res.log $srcdir/php-fix/$1.exp])
+    AT_XFAIL_IF([test -f $srcdir/php-fix/$1.xexp])
+])
+
+m4_define([LOCALIZER_TEST], [
+    AT_KEYWORDS([$1])
+    cp -rf $srcdir/profile_localizer/$1/src ./
+    cp -rf $srcdir/profile_localizer/$1/tests ./
+    cp -f $srcdir/profile_localizer/$1/revision.log ./
+    cp -f $builddir/localizer-basic.conf ./
+    $builddir/../src/prophet localizer-basic.conf -r workdir -init-only
+    AT_CHECK([grep "`cat $srcdir/profile_localizer/$1.exp`" workdir/profile_localization.res > /dev/null])
+])
+
+m4_define([LOCALIZER_ABSDIR_TEST], [
+    AT_KEYWORDS([$1])
+    cp -rf $builddir/localizer-absdir.conf ./
+    rm -rf $abs_builddir/__tmpworkdir
+    $builddir/../src/prophet localizer-absdir.conf -r $abs_builddir/__tmpworkdir -init-only
+    AT_CHECK([grep "`cat $srcdir/profile_localizer/$1.exp`" $abs_builddir/__tmpworkdir/profile_localization.res > /dev/null])
+    rm -rf $abs_builddir/__tmpworkdir
+])
+
+FOREACH_TESTS([differ],[
+    basic_insert
+    basic_replace
+    int_const
+    str_const
+    field
+    same
+    operator
+    decl
+], [DIFFER_TEST])
+
+FOREACH_TESTS([match],[
+    delete
+    add_call
+    simple_return
+    guard_return
+    change_cond
+    replace_call
+    return_const
+    memset
+    memset2
+    if_break
+    goto
+    remove_if
+    guard_stmt
+    special_guard
+    if_stmt2
+    if_stmt3
+    if_stmt4
+    if_stmt5
+    if_stmt6
+    if_stmt7
+    if_stmt8
+    if_stmt9
+    if_stmt10
+    nullstmt
+    guard2
+    stringconst
+], [MATCH_TEST])
+
+FOREACH_TESTS([match-feature],[
+    delete
+    add_call
+    simple_return
+    guard_return
+    change_cond
+    replace_call
+    return_const
+    memset
+    memset2
+    if_break
+    goto
+    remove_if
+    guard_stmt
+    special_guard
+    if_stmt2
+    if_stmt3
+    if_stmt4
+    if_stmt5
+    if_stmt6
+    if_stmt7
+    if_stmt8
+    if_stmt9
+    if_stmt10
+    nullstmt
+    guard2
+    stringconst
+], [MATCH_FEATURE_TEST])
+
+FOREACH_TESTS([localizer-basic], [
+    basic
+], [LOCALIZER_TEST])
+
+FOREACH_TESTS([localizer-absdir], [
+    absdir
+], [LOCALIZER_ABSDIR_TEST])
+
+FOREACH_TESTS([repair],[
+    basic
+    get_args
+    ifstmt
+    ifstmt2
+    macro
+    return_const
+    add_call_replace
+    header
+],[REPAIR_TEST])
+
+FOREACH_TESTS([php-case],[
+    1056c57f
+    8ba00176
+    efcb9a71
+    5a8c917
+    2adf58
+    991ba131
+    1e91069
+    f455f8^1-f455f8
+], [PHPCASE_TEST])
+
+FOREACH_TESTS([libtiff-case], [
+    tests-eec7ec0
+    tests2-e8a47d4^1-e8a47d4
+], [LIBTIFFCASE_TEST])
+
+FOREACH_TESTS([lighttpd-case], [
+    1914
+], [LIGHTTPDCASE_TEST])

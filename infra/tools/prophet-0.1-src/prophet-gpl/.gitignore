@@ -1,0 +1,8 @@
+aclocal.m4
+autom4te.cache/
+build-aux/
+Makefile.in
+config.h.in
+configure
+tests/package.m4
+tests/testsuite

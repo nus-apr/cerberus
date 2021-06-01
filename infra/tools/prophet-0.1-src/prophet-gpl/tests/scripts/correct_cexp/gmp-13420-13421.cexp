@@ -1,0 +1,5 @@
+  //prophet generated patch
+  b2p = (rp);
+
+  /* Store b^2 in b2.  */
+  mpn_sqr (tp, this_pp, n);

@@ -1,0 +1,25 @@
+Index: src/rtlib/libfb_qb_str_convto_lng.c
+===================================================================
+--- src/rtlib/libfb_qb_str_convto_lng.c	(revision 5556)
++++ src/rtlib/libfb_qb_str_convto_lng.c	(revision 5557)
+@@ -82,7 +82,7 @@
+ 		dst->data[0] = ' ';
+ 		_ui64toa( num, dst->data + 1, 10 );
+ #else
+-		sprintf( dst->data, "%llu", num );
++		sprintf( dst->data, " %llu", num );
+ #endif
+ 		fb_hStrSetLength( dst, strlen( dst->data ) );
+ 	}
+Index: changelog.txt
+===================================================================
+--- changelog.txt	(revision 5556)
++++ changelog.txt	(revision 5557)
+@@ -49,6 +49,7 @@
+ - #2973014: Compiler was crashing on function calls with certain number and kind of arguments
+ - va_first() now always returns an ANY PTR
+ - #3251750: Local UDT FOR..NEXT iterators could be constructed twice (for i as UDT = ...)
++- STR$() in -lang qb didn't prepend ULONGINT's with a space when evaluated at runtime on non-Windows systems
+ 
+ 
+ Version 0.21.1:

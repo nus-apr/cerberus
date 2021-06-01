@@ -1,0 +1,5 @@
+At location src/mod_cgi.c:749
+--Src File: src/mod_cgi.c
+Fragment 0:
+if (!(__abst_hole(con->request.content_length)))
+    cgi_env_add(&env, "CONTENT_LENGTH", "CONTENT_LENGTH" ? sizeof ("CONTENT_LENGTH") - 1 : 0, buf, strlen(buf));

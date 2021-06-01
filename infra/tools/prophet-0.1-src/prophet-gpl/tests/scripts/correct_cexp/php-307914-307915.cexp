@@ -1,0 +1,5 @@
+				//prophet generated patch
+				spprintf(error, 0, ("Cannot create phar '%s', file extension (or combination) not recognised or the directory does not exist"), fname);
+			}
+		}
+		return FAILURE;

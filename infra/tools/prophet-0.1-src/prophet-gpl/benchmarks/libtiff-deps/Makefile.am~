@@ -1,0 +1,17 @@
+.PHONY: all-local clean-local
+
+all-local: automake-1.12-build
+
+jpeg-9a-build:
+	wget http://www.ijg.org/files/jpegsrc.v9a.tar.gz
+	tar xvzf jpegsrc.v9a.tar.gz
+	cd jpeg-9a &&\
+	./configure --prefix=$(abs_builddir)/jpeg-9a-build &&\
+	make -j 4 &&\
+	make install
+
+clean-local:
+	rm *.gz
+	rm -rf *-build
+	rm -rf jpeg-9a
+

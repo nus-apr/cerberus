@@ -1,0 +1,31 @@
+Candidate:
+Priority 5000
+At location ./a.c:9
+--Src File: ./a.c
+Fragment 0:
+if (!(__abst_hole(a, b)) && (foo(a, b)))
+    return 1;
+
+
+Found for:
+ b
+Total vec size: 19
+GuardRepair
+GLOBAL GuardRepair X StmtIfAF
+GLOBAL GuardRepair X StmtControlAF
+GLOBAL+ GuardRepair X StmtControlAF
+VAR CalleeAF X CalleeAF
+VAR CalleeAF X StmtCallAF
+VAR CallArgumentAF X CallArgumentAF
+VAR CallArgumentAF X StmtCallAF
+VAR AbstVAF X CallArgumentAF
+VAR AbstVAF X StmtCallAF
+VAR RStmtCondAF X CallArgumentAF
+VAR RStmtCondAF X StmtCallAF
+VAR RStmtCallAF X CalleeAF
+VAR RStmtCallAF X CallArgumentAF
+VAR RStmtCallAF X StmtCallAF
+VALUE CallArgumentAF X LocalVarVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X LocalVarVF
+VALUE RStmtCallAF X LocalVarVF

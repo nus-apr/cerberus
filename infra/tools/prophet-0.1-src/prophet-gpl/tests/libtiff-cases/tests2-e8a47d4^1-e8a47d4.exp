@@ -1,0 +1,7 @@
+At location tools/tiffinfo.c:62
+--Src File: tools/tiffinfo.c
+Fragment 0:
+if ((__abst_hole()))
+    return;
+if (old_error_handler)
+    (*old_error_handler)(module, fmt, ap);

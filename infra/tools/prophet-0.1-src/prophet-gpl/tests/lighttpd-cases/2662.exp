@@ -1,0 +1,6 @@
+At location src/mod_accesslog.c:170
+--Src File: src/mod_accesslog.c
+Fragment 0:
+if ((__abst_hole(str->used)))
+    return;
+buffer_prepare_append(dest, str->used - 1);

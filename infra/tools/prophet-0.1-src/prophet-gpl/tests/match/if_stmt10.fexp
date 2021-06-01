@@ -1,0 +1,132 @@
+Candidate:
+Priority 20000
+At location ./a.c:14
+--Src File: ./a.c
+Fragment 0:
+if ((s.x > 0 && s.p != 0 && s.p->y == 1) && !(__abst_hole(s.x, s.p, s.p->y, s.p->z)))
+    return -1;
+
+
+Found for:
+ s.x
+Total vec size: 32
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR GreaterOpAF X GreaterOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X DerefAF
+VAR EqOpAF X MemberAccessAF
+VAR DerefAF X EqOpAF
+VAR DerefAF X DerefAF
+VAR DerefAF X MemberAccessAF
+VAR MemberAccessAF X EqOpAF
+VAR MemberAccessAF X DerefAF
+VAR MemberAccessAF X MemberAccessAF
+VAR AbstVAF X GreaterOpAF
+VAR RStmtCondAF X GreaterOpAF
+VALUE GreaterOpAF X MemberVF
+VALUE GreaterOpAF X ZeroConstVF
+VALUE EqOpAF X MemberVF
+VALUE EqOpAF X PointerVF
+VALUE EqOpAF X StructPointerVF
+VALUE EqOpAF X ZeroConstVF
+VALUE EqOpAF X NonZeroConstVF
+VALUE DerefAF X MemberVF
+VALUE DerefAF X PointerVF
+VALUE DerefAF X StructPointerVF
+VALUE MemberAccessAF X LocalVarVF
+VALUE MemberAccessAF X MemberVF
+VALUE MemberAccessAF X PointerVF
+VALUE MemberAccessAF X StructPointerVF
+VALUE AbstVAF X MemberVF
+VALUE RStmtCondAF X MemberVF
+Candidate:
+Priority 20000
+At location ./a.c:14
+--Src File: ./a.c
+Fragment 0:
+if ((s.x > 0 && s.p != 0 && s.p->y == 1) || (__abst_hole(s.x, s.p, s.p->y, s.p->z)))
+    return -1;
+
+
+Found for:
+ s.x
+Total vec size: 32
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR GreaterOpAF X GreaterOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X DerefAF
+VAR EqOpAF X MemberAccessAF
+VAR DerefAF X EqOpAF
+VAR DerefAF X DerefAF
+VAR DerefAF X MemberAccessAF
+VAR MemberAccessAF X EqOpAF
+VAR MemberAccessAF X DerefAF
+VAR MemberAccessAF X MemberAccessAF
+VAR AbstVAF X GreaterOpAF
+VAR RStmtCondAF X GreaterOpAF
+VALUE GreaterOpAF X MemberVF
+VALUE GreaterOpAF X ZeroConstVF
+VALUE EqOpAF X MemberVF
+VALUE EqOpAF X PointerVF
+VALUE EqOpAF X StructPointerVF
+VALUE EqOpAF X ZeroConstVF
+VALUE EqOpAF X NonZeroConstVF
+VALUE DerefAF X MemberVF
+VALUE DerefAF X PointerVF
+VALUE DerefAF X StructPointerVF
+VALUE MemberAccessAF X LocalVarVF
+VALUE MemberAccessAF X MemberVF
+VALUE MemberAccessAF X PointerVF
+VALUE MemberAccessAF X StructPointerVF
+VALUE AbstVAF X MemberVF
+VALUE RStmtCondAF X MemberVF
+Candidate:
+Priority 20000
+At location ./a.c:14
+--Src File: ./a.c
+Fragment 0:
+if (((s.x > 0 && s.p != 0) || (__abst_hole(s.x, s.p, s.p->y, s.p->z))) && s.p->y == 1)
+    return -1;
+
+
+Found for:
+ s.x
+Total vec size: 32
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR GreaterOpAF X GreaterOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X DerefAF
+VAR EqOpAF X MemberAccessAF
+VAR DerefAF X EqOpAF
+VAR DerefAF X DerefAF
+VAR DerefAF X MemberAccessAF
+VAR MemberAccessAF X EqOpAF
+VAR MemberAccessAF X DerefAF
+VAR MemberAccessAF X MemberAccessAF
+VAR AbstVAF X GreaterOpAF
+VAR RStmtCondAF X GreaterOpAF
+VALUE GreaterOpAF X MemberVF
+VALUE GreaterOpAF X ZeroConstVF
+VALUE EqOpAF X MemberVF
+VALUE EqOpAF X PointerVF
+VALUE EqOpAF X StructPointerVF
+VALUE EqOpAF X ZeroConstVF
+VALUE EqOpAF X NonZeroConstVF
+VALUE DerefAF X MemberVF
+VALUE DerefAF X PointerVF
+VALUE DerefAF X StructPointerVF
+VALUE MemberAccessAF X LocalVarVF
+VALUE MemberAccessAF X MemberVF
+VALUE MemberAccessAF X PointerVF
+VALUE MemberAccessAF X StructPointerVF
+VALUE AbstVAF X MemberVF
+VALUE RStmtCondAF X MemberVF

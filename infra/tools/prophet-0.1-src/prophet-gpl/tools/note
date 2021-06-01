@@ -1,0 +1,20 @@
+xxx-build.py
+
+usage:
+xxx-build.py <src-directory>
+build src-directory
+
+-c just compile, no need to configure, don't make clean
+
+xxx-build.py -d src_file <src-directory> [out_file]
+print build directory and compile argument list
+for src_file
+if out_file available, print to out_file
+
+see: tester_common.py
+
+xxx-tester.py
+
+usage:
+xxx-tester.py <src_dir> <test_dir> <work_dir> [cases]
+print a set of case numbers that passed

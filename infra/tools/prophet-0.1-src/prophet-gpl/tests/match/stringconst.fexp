@@ -1,0 +1,25 @@
+Candidate:
+Priority 7500
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+myprintf((__abst_hole()));
+
+
+Found for:
+ NULL
+Total vec size: 14
+ReplaceStmtRepair
+GLOBAL ReplaceStmtRepair X StmtCallAF
+GLOBAL ReplaceStmtRepair X StmtControlAF
+GLOBAL+ ReplaceStmtRepair X StmtControlAF
+VAR CalleeAF X CalleeAF
+VAR CalleeAF X StmtCallAF
+VAR RStmtCallAF X CalleeAF
+VAR RStmtCallAF X StmtCallAF
+VALUE CallArgumentAF X ModifiedVF
+VALUE CallArgumentAF X StringLiteralVF
+VALUE AbstVAF X ModifiedVF
+VALUE AbstVAF X StringLiteralVF
+VALUE RStmtCallAF X ModifiedVF
+VALUE RStmtCallAF X StringLiteralVF

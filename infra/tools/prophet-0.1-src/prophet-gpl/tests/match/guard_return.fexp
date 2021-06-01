@@ -1,0 +1,29 @@
+Candidate:
+Priority 12500
+At location ./a.c:5
+--Src File: ./a.c
+Fragment 0:
+if ((__abst_hole(a, b)))
+    return 0;
+return a / b;
+
+
+Found for:
+ b
+Total vec size: 16
+AddControlRepair
+GLOBAL AddControlRepair X StmtControlAF
+GLOBAL+ AddControlRepair X StmtControlAF
+VAR AbstVAF X DivOpAF
+VAR AbstVAF X StmtControlAF
+VAR StmtIfAF X DivOpAF
+VAR StmtIfAF X StmtControlAF
+VAR+ AbstVAF X DivOpAF
+VAR+ AbstVAF X StmtControlAF
+VAR+ StmtIfAF X DivOpAF
+VAR+ StmtIfAF X StmtControlAF
+VALUE AbstVAF X FuncArgumentVF
+VALUE AbstVAF X LocalVarVF
+VALUE StmtIfAF X FuncArgumentVF
+VALUE StmtIfAF X LocalVarVF
+VALUE StmtControlAF X ZeroConstVF

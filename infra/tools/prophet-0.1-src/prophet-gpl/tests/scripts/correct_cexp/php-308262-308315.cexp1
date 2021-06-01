@@ -1,0 +1,5 @@
+					//prophet generated patch
+					if (!(type == 3))
+					    zend_error((1 << 3L), "Uninitialized string offset: %ld", (*dim).value.lval);
+					Z_STRVAL_P(ptr) = STR_EMPTY_ALLOC();
+					Z_STRLEN_P(ptr) = 0;

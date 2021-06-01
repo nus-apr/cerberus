@@ -1,0 +1,3 @@
+At location Zend/zend.c:1198!
+(compiler_globals.in_compilation) = 0;
+SAVE_STACK(context_stack);

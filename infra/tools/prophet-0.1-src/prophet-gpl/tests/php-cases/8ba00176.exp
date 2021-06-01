@@ -1,0 +1,21 @@
+At location Zend/zend_compile.c:3666
+--Src File: Zend/zend_compile.c
+Fragment 0:
+if ((!aliases[i]->trait_method->ce || (fn->common.scope == aliases[i]->trait_method->ce && (zend_binary_strcasecmp(aliases[i]->trait_method->method_name, aliases[i]->trait_method->mname_len, fn->common.function_name, fnname_len) == 0))) && !(__abst_hole())) {
+    if (aliases[i]->alias) {
+        fn_copy = *fn;
+        zend_traits_duplicate_function(&fn_copy, _estrndup((aliases[i]->alias), (aliases[i]->alias_len)));
+        if (aliases[i]->modifiers) {
+            fn_copy.common.fn_flags = aliases[i]->modifiers;
+            if (!(aliases[i]->modifiers & (256 | 512 | 1024))) {
+                fn_copy.common.fn_flags |= 256;
+            }
+        }
+        lcname_len = aliases[i]->alias_len;
+        lcname = zend_str_tolower_dup(aliases[i]->alias, lcname_len);
+        if (_zend_hash_add_or_update(target, lcname, lcname_len + 1, &fn_copy, sizeof(zend_function), ((void *)0), (1 << 1)) == -1) {
+            zend_error((1 << 6L), "Failed to add aliased trait method (%s) to the trait table. There is probably already a trait method with the same name", fn_copy.common.function_name);
+        }
+        _efree((lcname));
+    }
+}

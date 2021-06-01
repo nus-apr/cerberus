@@ -1,0 +1,12 @@
+At location fbc-src/src/rtlib/libfb_str_midassign.c:71
+--Src File: fbc-src/src/rtlib/libfb_str_midassign.c
+Fragment 0:
+if (!(__abst_hole(len)))
+    if ((start > 0) && (start <= dst_len)) {
+        --start;
+        if ((len < 1) || (len > src_len))
+            len = src_len;
+        if (start + len > dst_len)
+            len = (dst_len - start);
+        memcpy(dst->data + start, src->data, len);
+    }

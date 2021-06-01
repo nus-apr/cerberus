@@ -1,0 +1,9 @@
+*.py[co]
+*.swp
+*.DS_STORE
+*.rope*
+MANIFEST
+docs/_build
+dist/
+build/
+*egg-info

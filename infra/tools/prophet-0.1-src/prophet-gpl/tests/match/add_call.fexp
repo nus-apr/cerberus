@@ -1,0 +1,23 @@
+Candidate:
+Priority 7500
+At location ./a.c:16
+--Src File: ./a.c
+Fragment 0:
+foo((u));
+return 0;
+
+
+Found for:
+ NULL
+Total vec size: 11
+AddStmtRepair
+GLOBAL AddStmtRepair X StmtControlAF
+GLOBAL+ AddStmtRepair X StmtControlAF
+VALUE CallArgumentAF X FuncArgumentVF
+VALUE CallArgumentAF X LocalVarVF
+VALUE CallArgumentAF X PointerVF
+VALUE CallArgumentAF X StructPointerVF
+VALUE StmtCallAF X FuncArgumentVF
+VALUE StmtCallAF X LocalVarVF
+VALUE StmtCallAF X PointerVF
+VALUE StmtCallAF X StructPointerVF

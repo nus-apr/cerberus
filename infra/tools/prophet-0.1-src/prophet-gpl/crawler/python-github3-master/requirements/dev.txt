@@ -1,0 +1,6 @@
+-r base.txt
+
+nose
+mock
+unittest2
+sphinx

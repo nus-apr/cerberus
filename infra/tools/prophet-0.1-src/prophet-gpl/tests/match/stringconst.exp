@@ -1,0 +1,10 @@
+Candidate:
+Priority 7500
+At location ./a.c:6
+--Src File: ./a.c
+Fragment 0:
+myprintf((__abst_hole()));
+
+
+Found for:
+ NULL

@@ -1,0 +1,11 @@
+Candidate:
+Priority 7500
+At location ./a.c:16
+--Src File: ./a.c
+Fragment 0:
+foo((u));
+return 0;
+
+
+Found for:
+ NULL

@@ -1,0 +1,130 @@
+Candidate:
+Priority 20000
+At location ./a.c:5
+--Src File: ./a.c
+Fragment 0:
+if ((a == 0) && !(__abst_hole(a, b)))
+    return 0;
+
+
+Found for:
+ a
+Total vec size: 26
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR EqOpAF X DivOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X StmtControlAF
+VAR AbstVAF X DivOpAF
+VAR AbstVAF X EqOpAF
+VAR AbstVAF X StmtControlAF
+VAR RStmtCondAF X DivOpAF
+VAR RStmtCondAF X EqOpAF
+VAR RStmtCondAF X StmtControlAF
+VAR+ EqOpAF X DivOpAF
+VAR+ EqOpAF X StmtControlAF
+VAR+ AbstVAF X DivOpAF
+VAR+ AbstVAF X StmtControlAF
+VAR+ RStmtCondAF X DivOpAF
+VAR+ RStmtCondAF X StmtControlAF
+VALUE EqOpAF X FuncArgumentVF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X ZeroConstVF
+VALUE AbstVAF X FuncArgumentVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X FuncArgumentVF
+VALUE RStmtCondAF X LocalVarVF
+Found for:
+ b
+Total vec size: 24
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR EqOpAF X DivOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X StmtControlAF
+VAR AbstVAF X DivOpAF
+VAR AbstVAF X StmtControlAF
+VAR RStmtCondAF X DivOpAF
+VAR RStmtCondAF X StmtControlAF
+VAR+ EqOpAF X DivOpAF
+VAR+ EqOpAF X StmtControlAF
+VAR+ AbstVAF X DivOpAF
+VAR+ AbstVAF X StmtControlAF
+VAR+ RStmtCondAF X DivOpAF
+VAR+ RStmtCondAF X StmtControlAF
+VALUE EqOpAF X FuncArgumentVF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X ZeroConstVF
+VALUE AbstVAF X FuncArgumentVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X FuncArgumentVF
+VALUE RStmtCondAF X LocalVarVF
+Candidate:
+Priority 20000
+At location ./a.c:5
+--Src File: ./a.c
+Fragment 0:
+if ((a == 0) || (__abst_hole(a, b)))
+    return 0;
+
+
+Found for:
+ a
+Total vec size: 26
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR EqOpAF X DivOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X StmtControlAF
+VAR AbstVAF X DivOpAF
+VAR AbstVAF X EqOpAF
+VAR AbstVAF X StmtControlAF
+VAR RStmtCondAF X DivOpAF
+VAR RStmtCondAF X EqOpAF
+VAR RStmtCondAF X StmtControlAF
+VAR+ EqOpAF X DivOpAF
+VAR+ EqOpAF X StmtControlAF
+VAR+ AbstVAF X DivOpAF
+VAR+ AbstVAF X StmtControlAF
+VAR+ RStmtCondAF X DivOpAF
+VAR+ RStmtCondAF X StmtControlAF
+VALUE EqOpAF X FuncArgumentVF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X ZeroConstVF
+VALUE AbstVAF X FuncArgumentVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X FuncArgumentVF
+VALUE RStmtCondAF X LocalVarVF
+Found for:
+ b
+Total vec size: 24
+CondRepair
+GLOBAL CondRepair X StmtIfAF
+GLOBAL CondRepair X StmtControlAF
+GLOBAL+ CondRepair X StmtControlAF
+VAR EqOpAF X DivOpAF
+VAR EqOpAF X EqOpAF
+VAR EqOpAF X StmtControlAF
+VAR AbstVAF X DivOpAF
+VAR AbstVAF X StmtControlAF
+VAR RStmtCondAF X DivOpAF
+VAR RStmtCondAF X StmtControlAF
+VAR+ EqOpAF X DivOpAF
+VAR+ EqOpAF X StmtControlAF
+VAR+ AbstVAF X DivOpAF
+VAR+ AbstVAF X StmtControlAF
+VAR+ RStmtCondAF X DivOpAF
+VAR+ RStmtCondAF X StmtControlAF
+VALUE EqOpAF X FuncArgumentVF
+VALUE EqOpAF X LocalVarVF
+VALUE EqOpAF X ZeroConstVF
+VALUE AbstVAF X FuncArgumentVF
+VALUE AbstVAF X LocalVarVF
+VALUE RStmtCondAF X FuncArgumentVF
+VALUE RStmtCondAF X LocalVarVF

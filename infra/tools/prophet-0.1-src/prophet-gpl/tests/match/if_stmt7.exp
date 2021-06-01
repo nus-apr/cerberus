@@ -1,0 +1,33 @@
+Candidate:
+Priority 20000
+At location ./a.c:10
+--Src File: ./a.c
+Fragment 0:
+if ((s.x > 0 && s.y == 0) && !(__abst_hole(s.x, s.y, s.z)))
+    return -1;
+
+
+Found for:
+ s.z
+Candidate:
+Priority 20000
+At location ./a.c:10
+--Src File: ./a.c
+Fragment 0:
+if ((s.x > 0 && s.y == 0) || (__abst_hole(s.x, s.y, s.z)))
+    return -1;
+
+
+Found for:
+ s.z
+Candidate:
+Priority 20000
+At location ./a.c:10
+--Src File: ./a.c
+Fragment 0:
+if (((s.x > 0) || (__abst_hole(s.x, s.y, s.z))) && s.y == 0)
+    return -1;
+
+
+Found for:
+ s.z

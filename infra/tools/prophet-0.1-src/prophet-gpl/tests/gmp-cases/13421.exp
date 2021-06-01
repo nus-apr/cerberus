@@ -1,0 +1,4 @@
+At location mpn/generic/powm.c:213
+--Src File: mpn/generic/powm.c
+Fragment 0:
+b2p = (rp);
