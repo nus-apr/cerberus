@@ -7,7 +7,8 @@ is designed to allow future extensions/modifications to this repository.
 
 ```
 root directory
-│   README.md│    
+│   README.md
+│    
 └───infra
 │   └───Dockerfile.toolName_1
 │   └───Dockerfile.toolName_2
@@ -49,14 +50,10 @@ python3.7 driver.py --bug-id=ID --tool-name=[cpr/angelix/prophet/genprog/fix2fit
 ## TODO
 
 ### Gao Xiang
-* update Dockerfile.fix2fit to create a self-contained container for Fix2Fit and experiments
-* implement the interface in driver.py for Fix2Fit (see reference for CPR)
+* update Dockerfile.fix2fit to create a self-contained container for Fix2Fit/Prophet and experiments
+* implement the interface in driver.py for Fix2Fit/Prophet (see reference for CPR)
 
-
-### Jyoti
-* update Dockerfile.genprog to create a self-contained container for Fix2Fit and experiments
-* implement the interface in driver.py for GenProg (see reference for CPR)
 
 ### Ridwan
-* update Dockerfiles to create a self-contained container for Angelix/Prophet and experiments
-* implement the interface in driver.py for Angelix/Prophet (see reference for CPR)
+* update Dockerfiles to create a self-contained container for Angelix/CPR/GenProg and experiments
+* implement the interface in driver.py for Angelix/GenProg/CPR (see reference for CPR)
