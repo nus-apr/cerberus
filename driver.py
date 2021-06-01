@@ -141,7 +141,7 @@ def repair(deploy_path, setup_dir_path, bug_id):
     if CONF_TOOL_NAME == "cpr":
         cpr(setup_dir_path, deploy_path, bug_id)
     elif CONF_TOOL_NAME == "angelix":
-        angelix(deploy_path, bug_id)
+        angelix(setup_dir_path, deploy_path)
     elif CONF_TOOL_NAME == "prophet":
         prophet(deploy_path, bug_id)
     elif CONF_TOOL_NAME == "fix2fit":
