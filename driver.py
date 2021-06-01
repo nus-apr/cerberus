@@ -83,14 +83,15 @@ def setup_experiment(script_path, script_name):
 
 def cpr(setup_dir_path, deploy_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
-    print("\t[INFO] running CPR")
+    print("\t[INFO] instrumentation for CPR")
     conf_path = deploy_path + "/repair.conf"
-    script_path = "setup.sh"
+    script_path = "instrument.sh"
     log_path = str(conf_path).replace(".conf", ".log")
     if not os.path.isfile(conf_path):
         setup_dir_path = setup_dir_path + "/cpr"
-        setup_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH + " > /dev/null 2>&1"
-        execute_command(setup_command)
+        instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH + " > /dev/null 2>&1"
+        execute_command(instrument_command)
+    print("\t[INFO] running CPR")
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
     exp_dir = DIR_RESULT + "/" + str(bug_id)
@@ -107,8 +108,20 @@ def cpr(setup_dir_path, deploy_path, bug_id):
     execute_command(copy_log)
 
 
-def angelix(deploy_path, bug_id):
+def angelix(setup_dir_path, deploy_path, bug_id):
+    global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
+    print("\t[INFO] instrumentation for angelix")
+    script_path = "instrument.sh"
+    instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
+    execute_command(instrument_command)
     print("\t[INFO] running Angelix")
+    source_file = deploy_path + "/src/"
+    with open(deploy_path + "/manifest.txt", "r") as man_file:
+        source_file += man_file.readlines()[0]
+
+    angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
+    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite --configure \"/tmp/config-libtiff\"  --build \"/tmp/build-libtiff\"".format(deploy_path, source_file)
+    execute_command(angelix_command)
 
 
 def prophet(deploy_path, bug_id):
