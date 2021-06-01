@@ -44,7 +44,7 @@ cd $dir_name
 
 # fix the test harness and the configuration script
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/libtiff-bug-2005-12-21-3b848a7-3edb9cd#/data/manybugs/libtiff/3edb9cd#g" test.sh
-sed -i "s#/data/manybugs/libtiff/3edb9cd/src/limit#timeout 5#g" test.sh
+sed -i "s#/data/manybugs/libtiff/3edb9cd/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd libtiff#cd src#g" test.sh
 
