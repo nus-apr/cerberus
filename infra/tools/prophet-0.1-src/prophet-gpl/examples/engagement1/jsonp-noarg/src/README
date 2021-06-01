@@ -1,6 +1,0 @@
-This program has the following known bugs:
-
-1) Crashes if no argument supplied
-2) Works on the test input "atom_issues" but prints extra stuff for the other two tests.
-
-

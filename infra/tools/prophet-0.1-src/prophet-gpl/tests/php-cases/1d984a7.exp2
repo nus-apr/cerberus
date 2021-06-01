@@ -1,6 +1,0 @@
-At location ext/tokenizer/tokenizer.c:154
---Src File: ext/tokenizer/tokenizer.c
-Fragment 0:
-if ((__abst_hole(token_type)))
-    return;
-token_line = (compiler_globals.zend_lineno);

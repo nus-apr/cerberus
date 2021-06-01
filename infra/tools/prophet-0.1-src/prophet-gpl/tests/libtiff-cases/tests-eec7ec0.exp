@@ -1,7 +1,0 @@
-At location tools/tiff2pdf.c:770
---Src File: tools/tiff2pdf.c
-Fragment 0:
-if ((__abst_hole()))
-    goto success;
-fail:
-ret = 1;

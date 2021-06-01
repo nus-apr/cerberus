@@ -1,4 +1,0 @@
-At location ext/standard/string.c:5257
---Src File: ext/standard/string.c
-Fragment 0:
-len = (len);

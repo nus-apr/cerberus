@@ -1,5 +1,0 @@
-At location ext/date/php_date.c:3089
---Src File: ext/date/php_date.c
-Fragment 0:
-memset(&dateobj->time->relative, 0, sizeof (*(&dateobj->time->relative)));
-dateobj->time->relative.d = timelib_daynr_from_weeknr(y, w, d);

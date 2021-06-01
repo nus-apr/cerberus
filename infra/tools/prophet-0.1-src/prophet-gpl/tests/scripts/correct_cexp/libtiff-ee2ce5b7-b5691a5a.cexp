@@ -1,6 +1,0 @@
-//prophet generated patch
-if ((1))
-    goto success;
-fail:
-ret = 1;
-success:

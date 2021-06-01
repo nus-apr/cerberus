@@ -1,6 +1,0 @@
-Distance 2
-Replace:
-VarDecl 0x3427b60 <./a.c:3:5, col:11> col:11 p 'int **'
-With
-VarDecl 0x3496c60 <./b.c:3:5, col:10> col:10 p 'int *'
-Not stmt type!

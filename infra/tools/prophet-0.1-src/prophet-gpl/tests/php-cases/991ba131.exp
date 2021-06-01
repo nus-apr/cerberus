@@ -1,5 +1,0 @@
-At location ext/date/php_date.c:2906
---Src File: ext/date/php_date.c
-Fragment 0:
-memset(&dateobj->time->relative, 0, sizeof (*(&dateobj->time->relative)));
-dateobj->time->relative.y = 0 - (intobj->diff->y * bias);

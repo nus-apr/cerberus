@@ -1,6 +1,0 @@
-Distance 2
-Replace:
-VarDecl 0x2ebcb00 <./a.c:3:5, col:9> col:9 a 'int'
-With
-VarDecl 0x2f2bc30 <./b.c:3:5, col:9> col:9 b 'int'
-Not stmt type!

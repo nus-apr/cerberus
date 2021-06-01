@@ -1,6 +1,0 @@
-At location ext/standard/string.c:5256
---Src File: ext/standard/string.c
-Fragment 0:
-if ((len > s1_len - offset) && !(__abst_hole())) {
-    len = s1_len - offset;
-}

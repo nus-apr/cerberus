@@ -1,7 +1,0 @@
-Distance 3
-Insert:
-DeclStmt 0x3192c48
-`-VarDecl 0x3192bf0  a 'int'
-At:
-ReturnStmt 0x3123b10
-`-IntegerLiteral 0x3123af0 'int' 0

@@ -1,9 +1,0 @@
-Distance 1
-Replace:
-BinaryOperator 0x1f53bb8 'int' '='
-|-DeclRefExpr 0x1f53b70 'int' lvalue Var 0x1f53b00 'x' 'int'
-`-IntegerLiteral 0x1f53b98 'int' 1
-With
-BinaryOperator 0x1fc2dd8 'int' '='
-|-DeclRefExpr 0x1fc2d90 'int' lvalue Var 0x1fc2d20 'x' 'int'
-`-IntegerLiteral 0x1fc2db8 'int' 0

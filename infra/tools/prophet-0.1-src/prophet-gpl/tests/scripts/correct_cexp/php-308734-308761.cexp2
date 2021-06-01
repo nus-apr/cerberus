@@ -1,4 +1,0 @@
-		//prophet generated patch
-		if ((token_type == 355))
-		    break;
-		token_line = (compiler_globals.zend_lineno);

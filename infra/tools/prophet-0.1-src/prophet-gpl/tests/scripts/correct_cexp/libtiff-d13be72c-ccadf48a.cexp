@@ -1,8 +1,0 @@
-	} else //prophet generated patch
-{
-    if ((td->td_nstrips > 1 && td->td_compression == 1 && td->td_stripbytecount[0] != td->td_stripbytecount[1]) && !((td->td_nstrips == 2))) {
-        TIFFWarning(module, "%s: Wrong \"%s\" field, ignoring and calculating from imagelength", tif->tif_name, TIFFFieldWithTag(tif, 279)->field_name);
-        if (EstimateStripByteCounts(tif, dir, dircount) < 0)
-            goto bad;
-    }
-}

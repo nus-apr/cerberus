@@ -1,8 +1,0 @@
-At location ext/standard/url.c:321
---Src File: ext/standard/url.c
-Fragment 0:
-if (p - s) {
-    ret->path = _estrndup((s), ((p - s)));
-    php_replace_controlchars_ex(ret->path, (p - s));
-}
-goto label_parse;

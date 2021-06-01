@@ -1,3 +1,0 @@
-		//prophet generated patch
-		xmlNodeDump(buf, docp, node, 0, format);
-		mem = (xmlChar*) xmlBufferContent(buf);

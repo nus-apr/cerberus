@@ -1,5 +1,0 @@
-At location mpn/generic/powm.c:216
---Src File: mpn/generic/powm.c
-Fragment 0:
-b2p = (rp);
-__gmpn_sqr(tp, this_pp, n);
