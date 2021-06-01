@@ -68,3 +68,6 @@ RUN bash -c 'source activate && source /etc/profile.d/maven.sh && make -j8 semfi
 
 RUN rm -rf build/llvm-3.7.0.src
 RUN rm -rf /opt/maven
+
+RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
+WORKDIR /experiments
