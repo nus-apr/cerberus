@@ -230,15 +230,15 @@ instrument () {
 
 
 root_directory=$1
-buggy_directory="$directory/src"
-golden_directory="$directory/src-gold"
+buggy_directory="$root_directory/src"
+golden_directory="$root_directory/src-gold"
 
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
 fi
 
-if [ ! -d "$directory/angelix" ]; then
-  mkdir $directory/angelix
+if [ ! -d "$root_directory/angelix" ]; then
+  mkdir $root_directory/angelix
 fi
 
 clean-source $buggy_directory
@@ -258,7 +258,7 @@ instrument $golden_directory
 
 run_tests_script=$(readlink -f "root_directory/libtiff-run-tests.pl")
 
-cat <<EOF > $directory/angelix/oracle
+cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
 
 if [ "\$1" == "2" ]; then
@@ -274,9 +274,9 @@ else
   perl "$run_tests_script" "\$1" | grep --quiet PASS
 fi
 EOF
-chmod u+x $directory/angelix/oracle
+chmod u+x $root_directory/angelix/oracle
 
-cat <<EOF > $directory/angelix/config
+cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
 ./configure --disable-nls                                 \
             --disable-shared                              \
@@ -287,9 +287,9 @@ cat <<EOF > $directory/angelix/config
             --disable-jbig;                               \
 echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 EOF
-chmod +x $directory/angelix/config
+chmod +x $root_directory/angelix/config
 
-cat <<EOF > $directory/angelix/build
+cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
 make -e
 cd test
@@ -300,4 +300,4 @@ make -e short_tag
 rm -f strip_rw
 make -e strip_rw
 EOF
-chmod u+x $directory/angelix/build
+chmod u+x $root_directory/angelix/build
