@@ -256,7 +256,7 @@ fi
 instrument $buggy_directory
 instrument $golden_directory
 
-run_tests_script=$(readlink -f "root_directory/libtiff-run-tests.pl")
+run_tests_script=$(readlink -f "$root_directory/libtiff-run-tests.pl")
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
