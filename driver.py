@@ -129,7 +129,7 @@ def angelix(setup_dir_path, deploy_path):
                        " --configure {3} " \
                        " --golden {4} " \
                        " --lines {5} " \
-                       " --build {6}".format(src_path, source_file, oracle_path, config_script_path,
+                       " --build {6} > /dev/null 2>&1 ".format(src_path, source_file, oracle_path, config_script_path,
                                              gold_path, line_number, build_script_path)
     execute_command(angelix_command)
 
