@@ -1,0 +1,41 @@
+FROM rshariffdeen/f1x
+MAINTAINER Ridwan Shariffdeen <rshariffdeen@gmail.com>
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
+
+# install experiment dependencies
+RUN apt-get update && apt-get install -y  \
+    automake \
+    autopoint \
+    bison \
+    flex \
+    gettext \
+    gperf \
+    libass-dev \
+    libfreetype6 \
+    libfreetype6-dev \
+    libjpeg-dev \
+    liblzma-dev \
+    libnuma-dev \
+    libpciaccess-dev \
+    libpython-dev \
+    libpython3-dev \
+    libsdl1.2-dev  \
+    libtool \
+    libvdpau-dev \
+    libx11-dev \
+    libxcb-xfixes0-dev \
+    libxcb1-dev \
+    libxcb-shm0-dev \
+    libxml2-dev \
+    nasm \
+    nano \
+    pkg-config \
+    psmisc \
+    texinfo \
+    xutils-dev \
+    yasm
+
+
+RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
+WORKDIR /experiments
