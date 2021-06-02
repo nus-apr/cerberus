@@ -120,13 +120,18 @@ def angelix(setup_dir_path, deploy_path):
         source_file += man_file.readlines()[0].strip().replace("\n", "")
     src_path = deploy_path + "/src"
     gold_path = deploy_path + "/src-gold"
+    angelix_dir_path = deploy_path + '/angelix'
+    oracle_path = angelix_dir_path + "/oracle"
+    config_script_path = angelix_dir_path + '/config'
+    build_script_path = angelix_dir_path + '/build'
     line_number = "589"
     angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
-    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite " \
-                       " --configure \"/tmp/config-libtiff\" " \
-                       " --golden {2} " \
-                       " --lines {3} " \
-                       " --build \"/tmp/build-libtiff\"".format(src_path, source_file, gold_path, line_number)
+    angelix_command += "angelix {0} {1} {2} $libtiff_test_suite " \
+                       " --configure {3} " \
+                       " --golden {4} " \
+                       " --lines {5} " \
+                       " --build {6}".format(src_path, source_file, oracle_path, config_script_path,
+                                             gold_path, line_number, build_script_path)
     execute_command(angelix_command)
 
 
