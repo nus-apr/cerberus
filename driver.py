@@ -108,7 +108,7 @@ def cpr(setup_dir_path, deploy_path, bug_id):
     execute_command(copy_log)
 
 
-def angelix(setup_dir_path, deploy_path):
+def angelix(setup_dir_path, deploy_path, bug_id):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
@@ -126,6 +126,7 @@ def angelix(setup_dir_path, deploy_path):
     line_number = "589"
     timeout = 3600
     syn_timeout = 0.75 * timeout
+    log_file = bug_id + ".log"
     angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
     angelix_command += "angelix {0} {1} {2} $libtiff_test_suite " \
                        " --configure {3} " \
@@ -133,9 +134,11 @@ def angelix(setup_dir_path, deploy_path):
                        " --lines {5} " \
                        " --build {6} " \
                        " --synthesis-timeout {7} " \
-                       " --timeout {8} > /dev/null 2>&1 ".format(src_path, source_file, oracle_path,
-                                                                 config_script_path, gold_path, line_number,
-                                                                 build_script_path, str(syn_timeout), str(timeout))
+                       + CONF_TOOL_PARAMS + \
+                       " --timeout {8} > {9} 2>&1 ".format(src_path, source_file, oracle_path,
+                                                           config_script_path, gold_path, line_number,
+                                                           build_script_path, str(syn_timeout), str(timeout),
+                                                           log_file)
     execute_command(angelix_command)
 
 
@@ -156,7 +159,7 @@ def repair(deploy_path, setup_dir_path, bug_id):
     if CONF_TOOL_NAME == "cpr":
         cpr(setup_dir_path, deploy_path, bug_id)
     elif CONF_TOOL_NAME == "angelix":
-        angelix(setup_dir_path, deploy_path)
+        angelix(setup_dir_path, deploy_path, bug_id)
     elif CONF_TOOL_NAME == "prophet":
         prophet(deploy_path, bug_id)
     elif CONF_TOOL_NAME == "fix2fit":
