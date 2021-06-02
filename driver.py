@@ -134,11 +134,11 @@ def angelix(setup_dir_path, deploy_path, bug_id):
                        " --lines {5} " \
                        " --build {6} " \
                        " --synthesis-timeout {7} " \
-                       + CONF_TOOL_PARAMS + \
-                       " --timeout {8} > {9} 2>&1 ".format(src_path, source_file, oracle_path,
-                                                           config_script_path, gold_path, line_number,
-                                                           build_script_path, str(syn_timeout), str(timeout),
-                                                           log_file)
+                       " {8} " \
+                       " --timeout {9} > {10} 2>&1 ".format(src_path, source_file, oracle_path,
+                                                            config_script_path, gold_path, line_number,
+                                                            build_script_path, str(syn_timeout), CONF_TOOL_PARAMS ,
+                                                            str(timeout), log_file)
     execute_command(angelix_command)
 
 
