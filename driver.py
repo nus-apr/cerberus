@@ -125,7 +125,7 @@ def angelix(setup_dir_path, deploy_path, bug_id):
     build_script_path = angelix_dir_path + '/build'
     line_number = "589"
     timeout = 3600
-    syn_timeout = 0.75 * timeout
+    syn_timeout = int(0.25 * timeout)
     log_file = bug_id + ".log"
     angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
     angelix_command += "angelix {0} {1} {2} $libtiff_test_suite " \
@@ -137,7 +137,7 @@ def angelix(setup_dir_path, deploy_path, bug_id):
                        " {8} " \
                        " --timeout {9} > {10} 2>&1 ".format(src_path, source_file, oracle_path,
                                                             config_script_path, gold_path, line_number,
-                                                            build_script_path, str(syn_timeout), CONF_TOOL_PARAMS ,
+                                                            build_script_path, str(syn_timeout), CONF_TOOL_PARAMS,
                                                             str(timeout), log_file)
     execute_command(angelix_command)
 
