@@ -119,8 +119,14 @@ def angelix(setup_dir_path, deploy_path):
     with open(deploy_path + "/manifest.txt", "r") as man_file:
         source_file += man_file.readlines()[0].strip().replace("\n", "")
     src_path = deploy_path + "/src"
+    gold_path = deploy_path + "/src-gold"
+    line_number = "589"
     angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
-    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite --configure \"/tmp/config-libtiff\"  --build \"/tmp/build-libtiff\"".format(src_path, source_file)
+    angelix_command += "angelix {0} {1} /tmp/libtiff-oracle $libtiff_test_suite " \
+                       " --configure \"/tmp/config-libtiff\" " \
+                       " --golden {2} " \
+                       " --lines {3} " \
+                       " --build \"/tmp/build-libtiff\"".format(src_path, source_file, gold_path, line_number)
     execute_command(angelix_command)
 
 

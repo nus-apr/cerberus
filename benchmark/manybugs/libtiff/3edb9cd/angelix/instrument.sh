@@ -1,6 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 version=d13be72c-ccadf48a
+repaired_version=$(echo $version | cut -d "-" -f 2)
 
 clean-source () {
     local directory="$1"
@@ -228,18 +229,30 @@ instrument () {
 }
 
 
-directory=$1
+root_directory=$1
+buggy_directory="$directory/src"
+golden_directory="$directory/src-gold"
+
 if [ ! -d "$directory/angelix" ]; then
   mkdir $directory/angelix
 fi
-clean-source "$directory/src"
-if [ ! -f "$directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script "$directory/src"
-    touch "$directory/INSTRUMENTED_ANGELIX"
-fi
-instrument "$directory/src"
 
-run_tests_script=$(readlink -f "$directory/libtiff-run-tests.pl")
+clean-source $buggy_directory
+clean-source $golden_directory
+if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
+    instrument_test_script $buggy_directory
+    touch "$buggy_directory/INSTRUMENTED_ANGELIX"
+fi
+
+if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
+    instrument_test_script $golden_directory
+    touch "$golden_directory/INSTRUMENTED_ANGELIX"
+fi
+
+instrument $buggy_directory
+instrument $golden_directory
+
+run_tests_script=$(readlink -f "root_directory/libtiff-run-tests.pl")
 
 cat <<EOF > $directory/angelix/oracle
 #!/bin/bash
