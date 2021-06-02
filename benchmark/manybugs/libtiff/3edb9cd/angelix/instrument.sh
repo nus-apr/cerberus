@@ -233,6 +233,10 @@ root_directory=$1
 buggy_directory="$directory/src"
 golden_directory="$directory/src-gold"
 
+if [ ! -d golden_directory ]; then
+  cp -rf $buggy_directory $golden_directory
+fi
+
 if [ ! -d "$directory/angelix" ]; then
   mkdir $directory/angelix
 fi
