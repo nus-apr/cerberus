@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-version=d13be72c-ccadf48a
-repaired_version=$(echo $version | cut -d "-" -f 2)
+version=d13be72c-ccadf48a #this is the angelix version
+gold_file=libtiff/tif_dirread.c-3edb9cd
 
 clean-source () {
     local directory="$1"
@@ -235,6 +235,7 @@ golden_directory="$root_directory/src-gold"
 
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
+  cp "$root_directory/diffs/$gold_file" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
 fi
 
 if [ ! -d "$root_directory/angelix" ]; then

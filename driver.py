@@ -115,9 +115,8 @@ def angelix(setup_dir_path, deploy_path):
     instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
     execute_command(instrument_command)
     print("\t[INFO] running Angelix")
-    source_file = deploy_path + "/src/"
     with open(deploy_path + "/manifest.txt", "r") as man_file:
-        source_file += man_file.readlines()[0].strip().replace("\n", "")
+        source_file = man_file.readlines()[0].strip().replace("\n", "")
     src_path = deploy_path + "/src"
     gold_path = deploy_path + "/src-gold"
     angelix_dir_path = deploy_path + '/angelix'
