@@ -39,3 +39,4 @@ RUN apt-get update && apt-get install -y  \
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
+RUN source /angelix/activate
