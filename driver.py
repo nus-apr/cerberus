@@ -55,6 +55,7 @@ DIR_LOGS = DIR_MAIN + "/logs"
 DIR_RESULT = DIR_MAIN + "/result"
 
 EXPERIMENT_ITEMS = list()
+CONFIG_INFO = dict()
 
 
 def create_directories():
@@ -160,19 +161,19 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         for test_id in passing_test_list:
             test_id_list += test_id + " "
 
-    angelix_command = "angelix {0} {1} {2} {3} " \
-                       " --configure {4} " \
-                       " --golden {5} " \  
-                       " --build {6} " \
-                       " --synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
-                                                          test_id_list, config_script_path, gold_path,
-                                                          build_script_path, str(syn_timeout))
+    angelix_command = "angelix {0} {1} {2} {3}  " \
+                      "--configure {4}  " \
+                      "--golden {5}  " \
+                      "--build {6} " \
+                      "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
+                                                        test_id_list, config_script_path, gold_path,
+                                                        build_script_path, str(syn_timeout))
 
     if fix_location:
         angelix_command += " --lines {0} ".format(line_number)
 
     angelix_command += " {0} " \
-                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout), log_file)
+                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), log_file)
     execute_command(angelix_command)
 
 
@@ -189,18 +190,17 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
-    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION
-    config_setup = load_configuration_details(FILE_CONFIGURATION, CONF_CONFIG_ID)
+    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION, CONFIG_INFO
     bug_id = str(experiment_info[KEY_BUG_ID])
     fix_source_file = str(experiment_info[KEY_FIX_FILE])
     fix_line_number = str(experiment_info[KEY_FIX_LINE])
     passing_test_list = experiment_info[KEY_PASSING_TEST].split(", ")
     failing_test_list = experiment_info[KEY_FAILING_TEST].split(", ")
-    timeout = config_setup[KEY_CONFIG_TIMEOUT]
-    test_ratio = float(config_setup[KEY_CONFIG_TEST_RATIO])
+    timeout = CONFIG_INFO[KEY_CONFIG_TIMEOUT]
+    test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     fix_location = None
-    if config_setup[KEY_CONFIG_FIX_LOC] == "dev":
+    if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
 
     if CONF_TOOL_NAME == "cpr":
@@ -284,11 +284,12 @@ def read_arg(argument_list):
 
 
 def run(arg_list):
-    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS
+    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
     global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
+    CONFIG_INFO = load_configuration_details(FILE_CONFIGURATION, CONF_CONFIG_ID)
     create_directories()
     index = 1
     for experiment_item in EXPERIMENT_ITEMS:
