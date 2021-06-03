@@ -7,6 +7,13 @@ KEY_BUG_ID = "bug_id"
 KEY_BENCHMARK = "benchmark"
 KEY_ID = "id"
 KEY_SUBJECT = "subject"
+KEY_FIX_FILE = "source_file"
+KEY_FIX_LINE = "line_number"
+KEY_PASSING_TEST = "passing_test"
+KEY_FAILING_TEST = "failing_test"
+KEY_CONFIG_TIMEOUT = "timeout"
+KEY_CONFIG_FIX_LOC = "fault_location"
+KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
 
 
 ARG_DATA_PATH = "--data-dir="
@@ -21,6 +28,7 @@ ARG_END_ID = "--end-id="
 ARG_SKIP_LIST = "--skip-list="
 ARG_BUG_ID_LIST = "--bug-id-list="
 ARG_BENCHMARK = "--benchmark="
+ARG_CONFIG_ID = "--conf="
 
 
 CONF_DATA_PATH = "/data"
@@ -35,8 +43,11 @@ CONF_SETUP_ONLY = False
 CONF_BUG_ID_LIST = None
 CONF_SKIP_LIST = None
 CONF_BENCHMARK = None
+CONF_CONFIG_ID = 1
+
 
 FILE_META_DATA = None
+FILE_CONFIGURATION = "configuration.json"
 FILE_ERROR_LOG = "error-log"
 
 DIR_MAIN = os.getcwd()
@@ -67,11 +78,22 @@ def load_experiment_details(meta_file):
     print("[DRIVER] Loading experiment data\n")
     json_data = None
     if os.path.isfile(meta_file):
-        with open(FILE_META_DATA, 'r') as in_file:
+        with open(meta_file, 'r') as in_file:
             json_data = json.load(in_file)
     else:
         exit("Meta file does not exist")
     return json_data
+
+
+def load_configuration_details(config_file_path, config_id):
+    print("[DRIVER] Loading configuration setup\n")
+    json_data = None
+    if os.path.isfile(config_file_path):
+        with open(config_file_path, 'r') as conf_file:
+            json_data = json.load(conf_file)
+    else:
+        exit("Configuration file does not exist")
+    return json_data[config_id]
 
 
 def setup_experiment(script_path, script_name):
@@ -81,7 +103,7 @@ def setup_experiment(script_path, script_name):
     execute_command(script_command)
 
 
-def cpr(setup_dir_path, deploy_path, bug_id):
+def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for CPR")
     conf_path = deploy_path + "/repair.conf"
@@ -108,64 +130,89 @@ def cpr(setup_dir_path, deploy_path, bug_id):
     execute_command(copy_log)
 
 
-def angelix(setup_dir_path, deploy_path, bug_id):
+def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
     instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
     execute_command(instrument_command)
     print("\t[INFO] running Angelix")
-    with open(deploy_path + "/manifest.txt", "r") as man_file:
-        source_file = man_file.readlines()[0].strip().replace("\n", "")
+    line_number = ""
+    if fix_location:
+        source_file, line_number = fix_location.split(":")
+    else:
+        with open(deploy_path + "/manifest.txt", "r") as man_file:
+            source_file = man_file.readlines()[0].strip().replace("\n", "")
+
     src_path = deploy_path + "/src"
     gold_path = deploy_path + "/src-gold"
     angelix_dir_path = deploy_path + '/angelix'
     oracle_path = angelix_dir_path + "/oracle"
     config_script_path = angelix_dir_path + '/config'
     build_script_path = angelix_dir_path + '/build'
-    line_number = "589"
-    timeout = 3600
-    syn_timeout = int(0.25 * timeout)
+    timeout_s = int(timeout) * 3600
+    syn_timeout = int(0.25 * timeout_s)
     log_file = bug_id + ".log"
-    angelix_command = "libtiff_test_suite=$(seq {MIN} {MAX});".format(MIN=1, MAX=78)
-    angelix_command += "angelix {0} {1} {2} $libtiff_test_suite " \
-                       " --configure {3} " \
-                       " --golden {4} " \
-                       " --lines {5} " \
+    test_id_list = ""
+    for test_id in failing_test_list:
+        test_id_list += test_id + " "
+    if passing_test_list:
+        for test_id in passing_test_list:
+            test_id_list += test_id + " "
+
+    angelix_command = "angelix {0} {1} {2} {3} " \
+                       " --configure {4} " \
+                       " --golden {5} " \  
                        " --build {6} " \
-                       " --synthesis-timeout {7} " \
-                       " {8} " \
-                       " --timeout {9} > {10} 2>&1 ".format(src_path, source_file, oracle_path,
-                                                            config_script_path, gold_path, line_number,
-                                                            build_script_path, str(syn_timeout), CONF_TOOL_PARAMS,
-                                                            str(timeout), log_file)
+                       " --synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
+                                                          test_id_list, config_script_path, gold_path,
+                                                          build_script_path, str(syn_timeout))
+
+    if fix_location:
+        angelix_command += " --lines {0} ".format(line_number)
+
+    angelix_command += " {0} " \
+                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout), log_file)
     execute_command(angelix_command)
 
 
-def prophet(deploy_path, bug_id):
+def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     print("\t[INFO] running Prophet")
 
 
-def genprog(deploy_path, bug_id):
+def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     print("\t[INFO] running GenProg")
 
 
-def fix2fit(deploy_path, bug_id):
+def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     print("\t[INFO] running Fix2Fit")
 
 
-def repair(deploy_path, setup_dir_path, bug_id):
-    global CONF_TOOL_NAME
+def repair(deploy_path, setup_dir_path, experiment_info):
+    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION
+    config_setup = load_configuration_details(FILE_CONFIGURATION, CONF_CONFIG_ID)
+    bug_id = str(experiment_info[KEY_BUG_ID])
+    fix_source_file = str(experiment_info[KEY_FIX_FILE])
+    fix_line_number = str(experiment_info[KEY_FIX_LINE])
+    passing_test_list = experiment_info[KEY_PASSING_TEST].split(", ")
+    failing_test_list = experiment_info[KEY_FAILING_TEST].split(", ")
+    timeout = config_setup[KEY_CONFIG_TIMEOUT]
+    test_ratio = float(config_setup[KEY_CONFIG_TEST_RATIO])
+    passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    fix_location = None
+    if config_setup[KEY_CONFIG_FIX_LOC] == "dev":
+        fix_location = fix_source_file + ":" + fix_line_number
+
     if CONF_TOOL_NAME == "cpr":
-        cpr(setup_dir_path, deploy_path, bug_id)
+        cpr(setup_dir_path, deploy_path, bug_id, timeout, test_ratio)
     elif CONF_TOOL_NAME == "angelix":
-        angelix(setup_dir_path, deploy_path, bug_id)
+        angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "prophet":
-        prophet(deploy_path, bug_id)
+        prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "fix2fit":
-        fix2fit(deploy_path, bug_id)
+        fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "genprog":
-        genprog(deploy_path, bug_id)
+        genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     else:
         exit("Unknown Tool Name")
 
@@ -183,11 +230,12 @@ def print_help():
     print("\t" + ARG_BUG_ID_LIST + "\t| " + "runs a list of experiments")
     print("\t" + ARG_START_ID + "\t| " + "specify a range of experiments starting from ID")
     print("\t" + ARG_END_ID + "\t| " + "specify a range of experiments that ends at ID")
+    print("\t" + ARG_CONFIG_ID + "\t| " + "specify a different configuration using config ID")
     exit()
 
 
 def read_arg(argument_list):
-    global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID
+    global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID, CONF_CONFIG_ID
     global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK
     global FILE_META_DATA
     print("[DRIVER] Reading configuration values")
@@ -205,6 +253,8 @@ def read_arg(argument_list):
                 CONF_DEBUG = True
             elif ARG_ONLY_SETUP in arg:
                 CONF_SETUP_ONLY = True
+            elif ARG_CONFIG_ID in arg:
+                CONF_CONFIG_ID = int(str(arg).replace(ARG_CONFIG_ID, ""))
             elif ARG_BUG_ID in arg:
                 CONF_BUG_ID = int(str(arg).replace(ARG_BUG_ID, ""))
             elif ARG_START_ID in arg:
@@ -234,7 +284,8 @@ def read_arg(argument_list):
 
 
 def run(arg_list):
-    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONF_BUG_ID_LIST, CONF_BENCHMARK
+    global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS
+    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
@@ -275,7 +326,7 @@ def run(arg_list):
         else:
             setup_experiment(setup_dir_path, script_name)
         if not CONF_SETUP_ONLY:
-            repair(deploy_path, setup_dir_path, bug_name)
+            repair(deploy_path, setup_dir_path, experiment_item)
         index = index + 1
 
 

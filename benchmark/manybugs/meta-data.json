@@ -5,7 +5,7 @@
    "bug_id": "3edb9cd",
    "source_file": "libtiff/tif_dirread.c",
    "line_number": 589,
-   "failing_test": "",
+   "failing_test": "22, 23",
    "passing_test": ""
  },
  {
@@ -14,7 +14,7 @@
    "bug_id": "207c78a",
    "source_file": "libtiff/tif_dirwrite.c",
    "line_number": 338,
-   "failing_test": "",
+   "failing_test": "3",
    "passing_test": ""
  },
  {
@@ -23,7 +23,7 @@
    "bug_id": "0a36d7f",
    "source_file": "libtiff/tif_dirread.c",
    "line_number": 976,
-   "failing_test": "",
+   "failing_test": "2, 3, 4, 22, 23",
    "passing_test": ""
  },
  {
@@ -32,7 +32,7 @@
    "bug_id": "865f7b2",
    "source_file": "libtiff/tif_dirwrite.c",
    "line_number": 346,
-   "failing_test": "",
+   "failing_test": "22",
    "passing_test": ""
  },
  {
@@ -41,7 +41,7 @@
    "bug_id": "0d27dc0",
    "source_file": "libtiff/tif_dirinfo.c",
    "line_number": 101,
-   "failing_test": "",
+   "failing_test": "3",
    "passing_test": ""
  },
  {
@@ -50,7 +50,7 @@
    "bug_id": "2e42d63",
    "source_file": "tools/tiffcrop.c",
    "line_number": 4969,
-   "failing_test": "",
+   "failing_test": "39, 40, 41, 43, 44, 45, 46, 47, 48",
    "passing_test": ""
  },
  {
@@ -59,7 +59,7 @@
    "bug_id": "eec7ec0",
    "source_file": "tools/tiff2pdf.c",
    "line_number": 768,
-   "failing_test": "",
+   "failing_test": "28",
    "passing_test": ""
  },
  {
@@ -68,7 +68,7 @@
    "bug_id": "1949",
    "source_file": "src/response.c",
    "line_number": 51,
-   "failing_test": "",
+   "failing_test": "19",
    "passing_test": ""
  },
  {
@@ -77,394 +77,394 @@
    "bug_id": "2662",
    "source_file": "src/mod_accesslog.c",
    "line_number": 168,
-   "failing_test": "",
+   "failing_test": "10, 11",
    "passing_test": ""
  },
  {
    "id": 10,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "5bb0a44e06",
    "source_file": "ext/date/php_date.c",
    "line_number": 3459,
-   "failing_test": "",
+   "failing_test": "354",
    "passing_test": ""
  },
  {
    "id": 11,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "1e91069eb4",
    "source_file": "ext/date/php_date.c",
    "line_number": 3087,
-   "failing_test": "",
+   "failing_test": "4215",
    "passing_test": ""
  },
  {
    "id": 12,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "0927309852",
    "source_file": "ext/phar/phar.c",
    "line_number": 1268,
-   "failing_test": "",
+   "failing_test": "7384, 7780",
    "passing_test": ""
  },
  {
    "id": 13,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "1f49902999",
    "source_file": "main/streams/userspace.c",
    "line_number": 857,
-   "failing_test": "",
+   "failing_test": "6110",
    "passing_test": ""
  },
  {
    "id": 14,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "b84967d3e2",
    "source_file": "Zend/zend_execute.c",
    "line_number": 1261,
-   "failing_test": "",
+   "failing_test": "11215",
    "passing_test": ""
  },
  {
    "id": 15,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "1d984a7ffd",
    "source_file": "ext/tokenizer/tokenizer.c",
    "line_number": 153,
-   "failing_test": "",
+   "failing_test": "9120, 9121",
    "passing_test": ""
  },
  {
    "id": 16,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "6e74d95f34",
    "source_file": "ext/standard/url.c",
    "line_number": 318,
-   "failing_test": "",
+   "failing_test": "6506",
    "passing_test": ""
  },
  {
    "id": 17,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "8deb11c0c3",
    "source_file": "ext/spl/spl_directory.c",
    "line_number": 236,
-   "failing_test": "",
+   "failing_test": "9611",
    "passing_test": ""
  },
  {
    "id": 18,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "2adf58cfcf",
    "source_file": "ext/date/php_date.c",
    "line_number": 3765,
-   "failing_test": "",
+   "failing_test": "671",
    "passing_test": ""
  },
  {
    "id": 19,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "3acdca4703",
    "source_file": "ext/phar/phar_object.c",
    "line_number": 632,
-   "failing_test": "",
+   "failing_test": "7527",
    "passing_test": ""
  },
  {
    "id": 20,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "5a8c917c37",
    "source_file": "ext/standard/string.c",
    "line_number": 5255,
-   "failing_test": "",
+   "failing_test": "5223, 5731",
    "passing_test": ""
  },
  {
    "id": 21,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "2e25ec9eb7",
    "source_file": "Zend/zend_object_handlers.c",
    "line_number": 449,
-   "failing_test": "",
+   "failing_test": "10569",
    "passing_test": ""
  },
  {
    "id": 22,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "77ed819430",
    "source_file": "ext/spl/spl_array.c",
    "line_number": 516,
-   "failing_test": "",
+   "failing_test": "1618",
    "passing_test": ""
  },
  {
    "id": 23,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "efcb9a71cd",
    "source_file": "Zend/zend_variables.c",
    "line_number": 218,
-   "failing_test": "",
+   "failing_test": "1515",
    "passing_test": ""
  },
  {
    "id": 24,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "09b990f499",
    "source_file": "ext/libxml/libxml.c",
    "line_number": 315,
-   "failing_test": "",
+   "failing_test": "7357",
    "passing_test": ""
  },
  {
    "id": 25,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "821d7169d9",
    "source_file": "Zend/zend_closures.c",
    "line_number": 409,
-   "failing_test": "",
+   "failing_test": "10386",
    "passing_test": ""
  },
  {
    "id": 26,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "daecb2c0f4",
    "source_file": "Zend/zend_constants.c",
    "line_number": 144,
-   "failing_test": "",
+   "failing_test": "11035",
    "passing_test": ""
  },
  {
    "id": 27,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "964f44a280",
    "source_file": "ext/pcre/php_pcre.c",
    "line_number": 118,
-   "failing_test": "",
+   "failing_test": "8083",
    "passing_test": ""
  },
  {
    "id": 28,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "1056c57fa9",
    "source_file": "ext/standard/url_scanner_ex.c",
    "line_number": 1015,
-   "failing_test": "",
+   "failing_test": "2152",
    "passing_test": ""
  },
  {
    "id": 29,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "05c5c8958e",
    "source_file": "Zend/zend_compile.c",
    "line_number": 2490,
-   "failing_test": "",
+   "failing_test": "10501",
    "passing_test": ""
  },
  {
    "id": 30,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "d4ae4e79db",
    "source_file": "ext/json/json.c",
    "line_number": 300,
-   "failing_test": "",
+   "failing_test": "8681",
    "passing_test": ""
  },
  {
    "id": 31,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "b5f15ef561",
    "source_file": "Zend/zend_compile.c",
    "line_number": 5025,
-   "failing_test": "",
+   "failing_test": "11153",
    "passing_test": ""
  },
  {
    "id": 32,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "2e5d5e5ac6",
    "source_file": "Zend/zend_API.c",
    "line_number": 1110,
-   "failing_test": "",
+   "failing_test": "11064",
    "passing_test": ""
  },
  {
    "id": 33,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "9b86852d6e",
    "source_file": "ext/spl/spl_directory.c",
    "line_number": 2879,
-   "failing_test": "",
+   "failing_test": "1981",
    "passing_test": ""
  },
  {
    "id": 34,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "8d520d6296",
    "source_file": "Zend/zend_compile.c",
    "line_number": 3826,
-   "failing_test": "",
+   "failing_test": "7185, 10612, 10807, 11063, 11071, 11074, 11075, 11076, 11078, 11079, 11084, 11085, 11086, 11091, 11096, 11097, 11098, 11101, 11103, 11104, 11106, 11109, 11111, 11116, 11117, 11121, 11125, 11129, 11130, 11136, 11139, 11143, 11144, 11148, 11150, 11163, 11164, 11165",
    "passing_test": ""
  },
  {
    "id": 35,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "c1e510aea8",
    "source_file": "ext/spl/spl_directory.c",
    "line_number": 1233,
-   "failing_test": "",
+   "failing_test": "7846",
    "passing_test": ""
  },
  {
    "id": 36,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "fb37f3b20d",
    "source_file": "ext/standard/file.c",
    "line_number": 822,
-   "failing_test": "",
+   "failing_test": "3544",
    "passing_test": ""
  },
  {
    "id": 37,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "13ba2da5f6",
    "source_file": "ext/standard/basic_functions.c",
    "line_number": 2962,
-   "failing_test": "",
+   "failing_test": "6028, 6061, 6072, 6078",
    "passing_test": ""
  },
  {
    "id": 38,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "3c7a573a2c",
    "source_file": "Zend/zend_compile.c",
    "line_number": 5313,
-   "failing_test": "",
+   "failing_test": "11496",
    "passing_test": ""
  },
  {
    "id": 39,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "bc810a443d",
    "source_file": "Zend/zend_compile.c",
    "line_number": 3176,
-   "failing_test": "",
+   "failing_test": "10160, 10993, 11381, 11609, 11682, 11713",
    "passing_test": ""
  },
  {
    "id": 40,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "d3b20b4058",
    "source_file": "ext/phar/phar.c",
    "line_number": 1573,
-   "failing_test": "",
+   "failing_test": "7642",
    "passing_test": ""
  },
  {
    "id": 41,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "f330c8ab4e",
    "source_file": "ext/phar/phar.c",
    "line_number": 1573,
-   "failing_test": "",
+   "failing_test": "7642",
    "passing_test": ""
  },
  {
    "id": 42,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "b548293b99",
    "source_file": "ext/reflection/php_reflection.c",
    "line_number": 748,
-   "failing_test": "",
+   "failing_test": "5039",
    "passing_test": ""
  },
  {
    "id": 43,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "db0888dfc1",
    "source_file": "Zend/zend_compile.c",
    "line_number": 4275,
-   "failing_test": "",
+   "failing_test": "11147",
    "passing_test": ""
  },
  {
    "id": 44,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "dfa08dc325",
    "source_file": "ext/filter/logical_filters.c",
    "line_number": 525,
-   "failing_test": "",
+   "failing_test": "7301",
    "passing_test": ""
  },
  {
    "id": 45,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "52c36e60c4",
    "source_file": "main/streams/streams.c",
    "line_number": 992,
-   "failing_test": "",
+   "failing_test": "6232, 6237, 6246",
    "passing_test": ""
  },
  {
    "id": 46,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "acaf9c5227",
    "source_file": "ext/session/mod_user.c",
    "line_number": 82,
-   "failing_test": "",
+   "failing_test": "2314",
    "passing_test": ""
  },
  {
    "id": 47,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "6672171672",
    "source_file": "main/php_variables.c",
    "line_number": 136,
-   "failing_test": "",
+   "failing_test": "9890",
    "passing_test": ""
  },
  {
    "id": 48,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "34fe62619d",
    "source_file": "Zend/zend_compile.c",
    "line_number": 4998,
-   "failing_test": "",
+   "failing_test": "963",
    "passing_test": ""
  },
  {
    "id": 49,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "cdc512afb3",
    "source_file": "main/streams/streams.c",
    "line_number": 213,
-   "failing_test": "",
+   "failing_test": "7641, 7654, 7689, 7819",
    "passing_test": ""
  },
  {
    "id": 50,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "d4f05fbffc",
    "source_file": "Zend/zend_exceptions.c",
    "line_number": 208,
-   "failing_test": "",
+   "failing_test": "11024",
    "passing_test": ""
  },
  {
    "id": 51,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "efc94f3115",
    "source_file": "ext/standard/html.c",
    "line_number": 1008,
-   "failing_test": "",
+   "failing_test": "5765",
    "passing_test": ""
  },
  {
    "id": 52,
    "subject": "php",
-   "bug_id": "#REF!",
+   "bug_id": "7337a901b7",
    "source_file": "ext/standard/basic_functions.c",
    "line_number": 4469,
-   "failing_test": "",
+   "failing_test": "6576, 6806, 6814",
    "passing_test": ""
  },
  {
@@ -473,7 +473,7 @@
    "bug_id": "08ad8ac3a4f4",
    "source_file": "mpz/gcdext.c",
    "line_number": 56,
-   "failing_test": "",
+   "failing_test": "19",
    "passing_test": ""
  },
  {
@@ -482,7 +482,7 @@
    "bug_id": "f17cbd13a1",
    "source_file": "gzip.c",
    "line_number": 652,
-   "failing_test": "",
+   "failing_test": "7",
    "passing_test": ""
  },
  {
@@ -491,7 +491,7 @@
    "bug_id": "118a107f2d",
    "source_file": "gzip.c",
    "line_number": 1269,
-   "failing_test": "",
+   "failing_test": "8",
    "passing_test": ""
  },
  {
@@ -500,7 +500,7 @@
    "bug_id": "884ef6d16c",
    "source_file": "gzip.c",
    "line_number": 546,
-   "failing_test": "",
+   "failing_test": "6",
    "passing_test": ""
  },
  {
@@ -509,7 +509,7 @@
    "bug_id": "69224",
    "source_file": "Modules/selectmodule.c",
    "line_number": 236,
-   "failing_test": "",
+   "failing_test": "244",
    "passing_test": ""
  },
  {
@@ -518,7 +518,7 @@
    "bug_id": "69372",
    "source_file": "Python/peephole.c",
    "line_number": 185,
-   "failing_test": "",
+   "failing_test": "194",
    "passing_test": ""
  },
  {
@@ -527,7 +527,7 @@
    "bug_id": "69935",
    "source_file": "Modules/signalmodule.c",
    "line_number": 187,
-   "failing_test": "",
+   "failing_test": "249",
    "passing_test": ""
  },
  {
@@ -536,7 +536,7 @@
    "bug_id": "70059",
    "source_file": "Modules/_io/bufferedio.c",
    "line_number": 1897,
-   "failing_test": "",
+   "failing_test": "148",
    "passing_test": ""
  },
  {
@@ -545,7 +545,7 @@
    "bug_id": "5557",
    "source_file": "src/rtlib/libfb_qb_str_convto_lng.c",
    "line_number": 85,
-   "failing_test": "",
+   "failing_test": "474",
    "passing_test": ""
  }
 ]

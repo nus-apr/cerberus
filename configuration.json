@@ -1,0 +1,56 @@
+[
+ {
+   "id": "C1",
+   "timeout": "1",
+   "fault_location": "auto",
+   "passing_test_ratio": 1
+ },
+  {
+   "id": "C2",
+   "timeout": "1",
+   "fault_location": "dev",
+   "passing_test_ratio": 1
+ },
+   {
+   "id": "C3",
+   "timeout": "1",
+   "fault_location": "dev",
+   "passing_test_ratio": 0
+ },
+   {
+   "id": "C4",
+   "timeout": "1",
+   "fault_location": "dev",
+   "passing_test_ratio": 0.33
+ },
+   {
+   "id": "C5",
+   "timeout": "1",
+   "fault_location": "dev",
+   "passing_test_ratio": 0.66
+ },
+   {
+   "id": "C6",
+   "timeout": "4",
+   "fault_location": "dev",
+   "passing_test_ratio": 1
+ },
+   {
+   "id": "C1",
+   "timeout": "8",
+   "fault_location": "dev",
+   "passing_test_ratio": 1
+ },
+   {
+   "id": "C1",
+   "timeout": "16",
+   "fault_location": "dev",
+   "passing_test_ratio": 1
+ },
+   {
+   "id": "C1",
+   "timeout": "24",
+   "fault_location": "dev",
+   "passing_test_ratio": 1
+ }
+]
