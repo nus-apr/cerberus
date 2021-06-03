@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM rshariffdeen/genprog
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -37,10 +37,5 @@ RUN apt-get update && apt-get install -y  \
     xutils-dev \
     yasm
 
-
-RUN git config --global user.email "rshariffdeen@gmail.com"
-RUN git config --global user.name "Ridwan"
-
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
-
