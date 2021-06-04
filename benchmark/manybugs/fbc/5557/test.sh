@@ -1,7 +1,7 @@
-project_name=valgrind
-bug_id=11624
-scenario_id=valgrind-bug-11623-11624
-diff_file=helgrind/hg_main.c-11623
+project_name=fbc
+bug_id=5557
+scenario_id=fbc-bug-5556-5557
+diff_file=src/rtlib/libfb_qb_str_convto_lng.c-5556
 dir_name=$1/manybugs/$project_name/$bug_id
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
@@ -35,8 +35,6 @@ cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 make distclean
 chown -R root $dir_name
 
-# COMPILE Valgrind
-CC=wllvm CXX=wllvm++  ./configure
-CC=clang CXX=clang++ make  -j32
+# COMPILE FBC
 
 
