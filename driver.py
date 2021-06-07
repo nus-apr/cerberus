@@ -171,8 +171,9 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
     FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + bug_id + "-instrument.log"
-    instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
-    execute_command(instrument_command)
+    if not os.path.isfile(deploy_path + "/src/INSTRUMENTED_ANGELIX"):
+        instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        execute_command(instrument_command)
     print("\t[INFO] running Angelix")
     line_number = ""
     if fix_location:
