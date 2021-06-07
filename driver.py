@@ -52,7 +52,7 @@ FILE_ERROR_LOG = "error-log"
 
 DIR_MAIN = os.getcwd()
 DIR_LOGS = DIR_MAIN + "/logs"
-DIR_RESULT = DIR_MAIN + "/result"
+DIR_EXPERIMENT_RESULT = DIR_MAIN + "/result/test"
 
 EXPERIMENT_ITEMS = list()
 CONFIG_INFO = dict()
@@ -104,6 +104,22 @@ def setup_experiment(script_path, script_name):
     execute_command(script_command)
 
 
+def clean_results(exp_dir):
+    if os.path.isdir(exp_dir):
+        rm_command = "rm -rf " + exp_dir
+        execute_command(rm_command)
+    mk_command = "mkdir " + exp_dir
+    execute_command(mk_command)
+
+
+def archive_results(exp_dir):
+    result_dir = "/".join(str(exp_dir).split("/")[:-1])
+    exp_dir_id = str(exp_dir).split("/")[-1]
+    archive_command = "cd " + result_dir + "; tar cvzf " + exp_dir_id + ".tar.gz " + exp_dir_id
+    execute_command(archive_command)
+
+
+# TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
 def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for CPR")
@@ -117,7 +133,7 @@ def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_lis
     print("\t[INFO] running CPR")
     tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
     execute_command(tool_command)
-    exp_dir = DIR_RESULT + "/" + str(bug_id)
+    exp_dir = DIR_EXPERIMENT_RESULT + "/" + str(bug_id)
     if os.path.isdir(exp_dir):
         rm_command = "rm -rf " + exp_dir
         execute_command(rm_command)
@@ -160,7 +176,8 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     if passing_test_list:
         for test_id in passing_test_list:
             test_id_list += test_id + " "
-
+    initialize_command = "source /angelix/activate"
+    execute_command(initialize_command)
     angelix_command = "angelix {0} {1} {2} {3}  " \
                       "--configure {4}  " \
                       "--golden {5}  " \
@@ -176,21 +193,29 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
                        " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), log_file)
     execute_command(angelix_command)
 
+    # copy artifacts to result directory
+    copy_command = "cp " + log_file + " " + DIR_EXPERIMENT_RESULT
+    copy_command += "cp *.patch " + DIR_EXPERIMENT_RESULT
+    execute_command(copy_command)
+
 
 def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+    # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     print("\t[INFO] running Prophet")
 
 
 def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+    # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     print("\t[INFO] running GenProg")
 
 
 def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+    # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     print("\t[INFO] running Fix2Fit")
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
-    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION, CONFIG_INFO
+    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION, CONFIG_INFO, DIR_EXPERIMENT
     bug_id = str(experiment_info[KEY_BUG_ID])
     fix_source_file = str(experiment_info[KEY_FIX_FILE])
     fix_line_number = str(experiment_info[KEY_FIX_LINE])
@@ -200,6 +225,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     fix_location = None
+
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
 
@@ -285,7 +311,7 @@ def read_arg(argument_list):
 
 def run(arg_list):
     global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
-    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK
+    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
@@ -313,6 +339,8 @@ def run(arg_list):
         bug_name = str(experiment_item[KEY_BUG_ID])
         subject_name = str(experiment_item[KEY_SUBJECT])
         directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
+        DIR_EXPERIMENT_RESULT = DIR_MAIN + "/results/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
+                                                                   CONF_TOOL_NAME, subject_name, bug_name])
         script_name = "setup.sh"
 
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
@@ -321,13 +349,14 @@ def run(arg_list):
         print("\t[META-DATA] project: " + subject_name)
         print("\t[META-DATA] bug ID: " + bug_name)
         print("\t[INFO] setup directory: " + deploy_path)
-
+        clean_results(DIR_EXPERIMENT_RESULT)
         if os.path.isdir(deploy_path):
             print("\t[INFO] deployment path exists, skipping setup")
         else:
             setup_experiment(setup_dir_path, script_name)
         if not CONF_SETUP_ONLY:
             repair(deploy_path, setup_dir_path, experiment_item)
+        archive_results(DIR_EXPERIMENT_RESULT)
         index = index + 1
 
 
