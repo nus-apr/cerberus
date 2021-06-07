@@ -50,6 +50,7 @@ FILE_CONFIGURATION = "configuration.json"
 FILE_ERROR_LOG = "error-log"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
+FILE_INSTRUMENT_LOG = ""
 
 
 DIR_MAIN = os.getcwd()
@@ -121,6 +122,7 @@ def archive_results(exp_dir):
     # copy logs
     copy_command = "cp " + FILE_OUTPUT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
     copy_command += "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    copy_command += "cp " + FILE_INSTRUMENT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
     execute_command(copy_command)
     result_dir = "/".join(str(exp_dir).split("/")[:-1])
     exp_dir_id = str(exp_dir).split("/")[-1]
@@ -158,10 +160,11 @@ def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_lis
 
 def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
-    global FILE_SETUP_LOG, FILE_OUTPUT_LOG
+    global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
-    instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
+    FILE_INSTRUMENT_LOG = bug_id + "-instrument.log"
+    instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
     execute_command(instrument_command)
     print("\t[INFO] running Angelix")
     line_number = ""
@@ -179,7 +182,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     build_script_path = angelix_dir_path + '/build'
     timeout_s = int(timeout) * 3600
     syn_timeout = int(0.25 * timeout_s)
-    FILE_OUTPUT_LOG = bug_id + "-angelix.log"
+    FILE_OUTPUT_LOG = bug_id + "-output.log"
     test_id_list = ""
     for test_id in failing_test_list:
         test_id_list += test_id + " "
