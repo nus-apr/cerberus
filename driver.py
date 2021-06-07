@@ -52,7 +52,9 @@ FILE_ERROR_LOG = "error-log"
 
 DIR_MAIN = os.getcwd()
 DIR_LOGS = DIR_MAIN + "/logs"
-DIR_EXPERIMENT_RESULT = DIR_MAIN + "/result/test"
+DIR_RESULT = DIR_MAIN + "/results"
+DIR_EXPERIMENT_RESULT = DIR_RESULT + "/test"
+
 
 EXPERIMENT_ITEMS = list()
 CONFIG_INFO = dict()
@@ -339,7 +341,7 @@ def run(arg_list):
         bug_name = str(experiment_item[KEY_BUG_ID])
         subject_name = str(experiment_item[KEY_SUBJECT])
         directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
-        DIR_EXPERIMENT_RESULT = DIR_MAIN + "/results/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
+        DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
                                                                    CONF_TOOL_NAME, subject_name, bug_name])
         script_name = "setup.sh"
 
