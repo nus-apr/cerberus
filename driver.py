@@ -102,12 +102,17 @@ def load_configuration_details(config_file_path, config_id):
     return json_data[config_id]
 
 
-def setup_experiment(script_path, script_name, bug_id):
+def setup_experiment(script_path, bug_id):
     global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG
     print("\t[INFO] running script for setup")
-    FILE_SETUP_LOG = str(bug_id) + "-setup.log"
-    script_command = "cd " + script_path + "; bash " + script_name + " " + CONF_DATA_PATH + " > " + FILE_SETUP_LOG + " 2>&1"
-    execute_command(script_command)
+    FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_id) + "-setup.log"
+    setup_command = "cd " + script_path + "; { "
+    setup_command += "bash setup.sh; "
+    setup_command += "bash config.sh; "
+    setup_command += "bash build.sh; "
+    setup_command += "bash test.sh; "
+    setup_command += " } >" + FILE_SETUP_LOG + " 2>&1"
+    execute_command(setup_command)
 
 
 def clean_results(exp_dir):
@@ -163,7 +168,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
-    FILE_INSTRUMENT_LOG = bug_id + "-instrument.log"
+    FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + bug_id + "-instrument.log"
     instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
     execute_command(instrument_command)
     print("\t[INFO] running Angelix")
@@ -182,7 +187,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     build_script_path = angelix_dir_path + '/build'
     timeout_s = int(timeout) * 3600
     syn_timeout = int(0.25 * timeout_s)
-    FILE_OUTPUT_LOG = bug_id + "-output.log"
+    FILE_OUTPUT_LOG = DIR_LOGS + "/" + bug_id + "-output.log"
     test_id_list = ""
     for test_id in failing_test_list:
         test_id_list += test_id + " "
@@ -353,8 +358,6 @@ def run(arg_list):
         directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
         DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
                                                                    CONF_TOOL_NAME, subject_name, bug_name])
-        script_name = "setup.sh"
-
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
         print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
@@ -365,7 +368,7 @@ def run(arg_list):
         if os.path.isdir(deploy_path):
             print("\t[INFO] deployment path exists, skipping setup")
         else:
-            setup_experiment(setup_dir_path, script_name, bug_name)
+            setup_experiment(setup_dir_path, bug_name)
         if not CONF_SETUP_ONLY:
             repair(deploy_path, setup_dir_path, experiment_item)
         archive_results(DIR_EXPERIMENT_RESULT)
