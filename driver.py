@@ -117,7 +117,7 @@ def setup_experiment(script_path, bug_id):
 
 def clean_results(exp_dir):
     if os.path.isdir(exp_dir):
-        rm_command = "rm -rf " + exp_dir
+        rm_command = "rm -rf " + exp_dir + "*"
         execute_command(rm_command)
     mk_command = "mkdir " + exp_dir
     execute_command(mk_command)
@@ -125,9 +125,11 @@ def clean_results(exp_dir):
 
 def archive_results(exp_dir):
     # copy logs
-    copy_command = "cp " + FILE_OUTPUT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
-    copy_command += "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
-    copy_command += "cp " + FILE_INSTRUMENT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    copy_command = "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    if os.path.isfile(FILE_OUTPUT_LOG):
+        copy_command += "cp " + FILE_OUTPUT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    if os.path.isfile(FILE_INSTRUMENT_LOG):
+        copy_command += "cp " + FILE_INSTRUMENT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
     execute_command(copy_command)
     result_dir = "/".join(str(exp_dir).split("/")[:-1])
     exp_dir_id = str(exp_dir).split("/")[-1]
