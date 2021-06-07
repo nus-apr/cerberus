@@ -45,10 +45,12 @@ CONF_SKIP_LIST = None
 CONF_BENCHMARK = None
 CONF_CONFIG_ID = "C1"
 
-
 FILE_META_DATA = None
 FILE_CONFIGURATION = "configuration.json"
 FILE_ERROR_LOG = "error-log"
+FILE_OUTPUT_LOG = ""
+FILE_SETUP_LOG = ""
+
 
 DIR_MAIN = os.getcwd()
 DIR_LOGS = DIR_MAIN + "/logs"
@@ -99,10 +101,11 @@ def load_configuration_details(config_file_path, config_id):
     return json_data[config_id]
 
 
-def setup_experiment(script_path, script_name):
-    global FILE_ERROR_LOG, CONF_DATA_PATH
+def setup_experiment(script_path, script_name, bug_id):
+    global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG
     print("\t[INFO] running script for setup")
-    script_command = "{ cd " + script_path + "; bash " + script_name + " " + CONF_DATA_PATH + ";}  > /dev/null 2>&1"
+    FILE_SETUP_LOG = str(bug_id) + "-setup.log"
+    script_command = "cd " + script_path + "; bash " + script_name + " " + CONF_DATA_PATH + " > " + FILE_SETUP_LOG + " 2>&1"
     execute_command(script_command)
 
 
@@ -115,13 +118,17 @@ def clean_results(exp_dir):
 
 
 def archive_results(exp_dir):
+    # copy logs
+    copy_command = "cp " + FILE_OUTPUT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    copy_command += "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
     result_dir = "/".join(str(exp_dir).split("/")[:-1])
     exp_dir_id = str(exp_dir).split("/")[-1]
     archive_command = "cd " + result_dir + "; tar cvzf " + exp_dir_id + ".tar.gz " + exp_dir_id
     execute_command(archive_command)
 
 
-# TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+# TODO: Make sure to copy the artifacts (patches) to DIR_EXPERIMENT_RESULT
 def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for CPR")
@@ -151,6 +158,7 @@ def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_lis
 
 def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
+    global FILE_SETUP_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
     instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > /dev/null 2>&1"
@@ -171,7 +179,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     build_script_path = angelix_dir_path + '/build'
     timeout_s = int(timeout) * 3600
     syn_timeout = int(0.25 * timeout_s)
-    log_file = bug_id + ".log"
+    FILE_OUTPUT_LOG = bug_id + "-angelix.log"
     test_id_list = ""
     for test_id in failing_test_list:
         test_id_list += test_id + " "
@@ -192,12 +200,11 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         angelix_command += " --lines {0} ".format(line_number)
 
     angelix_command += " {0} " \
-                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), log_file)
+                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
     execute_command(angelix_command)
 
-    # copy artifacts to result directory
-    copy_command = "cp " + log_file + " " + DIR_EXPERIMENT_RESULT
-    copy_command += "cp *.patch " + DIR_EXPERIMENT_RESULT
+    # move patches to result directory
+    copy_command = "mv *.patch " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
 
 
@@ -355,7 +362,7 @@ def run(arg_list):
         if os.path.isdir(deploy_path):
             print("\t[INFO] deployment path exists, skipping setup")
         else:
-            setup_experiment(setup_dir_path, script_name)
+            setup_experiment(setup_dir_path, script_name, bug_name)
         if not CONF_SETUP_ONLY:
             repair(deploy_path, setup_dir_path, experiment_item)
         archive_results(DIR_EXPERIMENT_RESULT)
