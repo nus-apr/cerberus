@@ -188,7 +188,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     config_script_path = angelix_dir_path + '/config'
     build_script_path = angelix_dir_path + '/build'
     timeout_s = int(timeout) * 3600
-    syn_timeout = int(0.25 * timeout_s)
+    syn_timeout = int(0.25 * timeout_s * 1000)
     FILE_OUTPUT_LOG = DIR_LOGS + "/" + bug_id + "-output.log"
     test_id_list = ""
     for test_id in failing_test_list:
@@ -207,14 +207,14 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
                                                         build_script_path, str(syn_timeout))
 
     if fix_location:
-        angelix_command += " --lines {0} ".format(line_number)
+        angelix_command += " --lines {0}  --generate-all ".format(line_number)
 
     angelix_command += " {0} " \
                        " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
     execute_command(angelix_command)
 
     # move patches to result directory
-    copy_command = "mv *.patch " + DIR_EXPERIMENT_RESULT
+    copy_command = "mv src-2021-* " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
 
 
