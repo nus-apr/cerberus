@@ -189,8 +189,8 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     if passing_test_list:
         for test_id in passing_test_list:
             test_id_list += test_id + " "
-    initialize_command = "source /angelix/activate"
-    execute_command(initialize_command)
+    # initialize_command = "source /angelix/activate"
+    # execute_command(initialize_command)
     angelix_command = "angelix {0} {1} {2} {3}  " \
                       "--configure {4}  " \
                       "--golden {5}  " \
