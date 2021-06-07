@@ -1,0 +1,12 @@
+declare -a ids=(10a4985-5362170 d13be72c-ccadf48a 29a9d93-b8aa549 a2f7abf-ce76d31 8f6338a-4c5a9ec 3af26048-72391804 0860361d-1ba75257 cb57a69f-740a6187 b675f33d-5d9d496d 031c6a9b-14f51686 4a24508-cc79c2b 6f9f4d7-73757f3 0661f81-ac6a583 5e6542ee-e779b6cd 806c4c9-366216b 34285ec-b0492c2 ed4969a-8a184dc 5b02179-3dfb33b 01209c9-aaf9eb3 d39db2b-4cd598c 0fb6cf7-b4158fa 90d136e4-4c66680f ee2ce5b7-b5691a5a 829d8c4-036d7bb)
+
+for i in "${ids[@]}"
+do
+   ./fetch libtiff $i
+done
+
+for i in "${ids[@]}"
+do
+   ./query positive-tests libtiff $i
+done
+

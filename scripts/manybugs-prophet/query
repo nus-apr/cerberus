@@ -1,0 +1,99 @@
+#!/usr/bin/env python3
+#
+# Usage: query versions SUBJECT
+#        query positive-tests SUBJECT VERSION
+#        query negative-tests SUBJECT VERSION
+#        query positive-reproducible SUBJECT VERSION
+#        query negative-reproducible SUBJECT VERSION
+#        query prophet-package SUBJECT VERSION
+#        query buggy-file SUBJECT VERSION
+
+import os
+import json
+import sys
+import csv
+from os.path import join
+
+root = os.path.dirname(os.path.realpath(__file__))
+
+command = sys.argv[1]
+
+
+if command == 'versions':
+    subject = sys.argv[2]
+    benchmark_file = os.path.join(root, 'benchmark.json')
+    with open(benchmark_file) as file:
+        benchmark = json.load(file)
+
+    for version in benchmark[subject]:
+        print(version)
+
+
+if command == 'prophet-package':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    nameref_file = join(root, 'prophet', 'tests', 'scripts', 'nameref.csv')
+    defect_list = []
+    with open(nameref_file) as file:
+        reader = csv.reader(file);
+        for row in reader:
+            defect_list.append(row);
+    for row in defect_list:
+        if (subject == row[0]) and (version == row[1]):
+            print(row[2].strip())
+
+if command == 'buggy-file':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    conf_file = join(subject + '-' + version, 'prophet.conf')
+    lines = [line.strip() for line in open(root+"/"+conf_file)]
+    for line in lines:
+        if line.startswith('bugged_file'):
+            idx = line.find('=')
+            print(line[idx+1:])
+
+if command == 'negative-tests':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    revlog_file = join(subject + '-' + version, 'prophet.revlog')
+    lines = [line.strip() for line in open(revlog_file)]
+    print_and_exit = False
+    for line in lines:
+        if print_and_exit:
+            print(line)
+            break
+        if line.startswith('Diff Cases'):
+            print_and_exit = True
+
+if command == 'positive-tests':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    revlog_file = join(subject + '-' + version, 'prophet.revlog')
+    lines = [line.strip() for line in open(revlog_file)]
+    print_and_exit = False
+    for line in lines:
+        if print_and_exit:
+            print(line)
+            break
+        if line.startswith('Positive Cases'):
+            print_and_exit = True
+
+if command == 'negative-reproducible':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    reproducible_file = os.path.join(root, 'reproducible.json')
+    with open(reproducible_file) as file:
+        reproducible = json.load(file)
+
+    for test in reproducible[subject][version]['negative']:
+        print(test, end=" ")
+
+if command == 'positive-reproducible':
+    subject = sys.argv[2]
+    version = sys.argv[3]
+    reproducible_file = os.path.join(root, 'reproducible.json')
+    with open(reproducible_file) as file:
+        reproducible = json.load(file)
+
+    for test in reproducible[subject][version]['positive']:
+        print(test, end=" ")

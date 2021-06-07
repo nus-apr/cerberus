@@ -1,0 +1,116 @@
+#!/bin/bash
+set -euo pipefail
+
+# Usage: ./fetch SUBJECT VERSION
+#
+# Download Kali versions of GenProg ICSE'12 subjects
+
+DOWNLOAD="wget --retry-connrefused --waitretry=1 --read-timeout=20 --timeout=15 --tries=5 --continue"
+
+require () {
+    hash "$1" 2>/dev/null || { echo "command $1 is not found"; exit 1; }
+}
+
+require wget
+
+
+usage="Usage: ./fetch SUBJECT VERSION"
+
+if [[ $# > 0 ]]; then
+    subject="$1"
+    shift
+else
+    echo "$usage"
+    exit 1
+fi
+
+if [[ $# > 0 ]]; then
+    version="$1"
+    shift
+else
+    echo "$usage"
+    exit 1
+fi
+
+ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+
+SCENARIO_URL="http://rhino.csail.mit.edu/spr-rep/scenarios/"
+
+directory="${subject}-${version}"
+full_path="$PWD/$directory"
+archive=`$ROOT/query prophet-package $subject $version`
+
+if ! [[ -d "$directory" ]]; then
+    mkdir -p cache
+    if ! [[ -e "cache/$archive" ]]; then
+        $DOWNLOAD "$SCENARIO_URL/$archive" --directory-prefix=cache
+    fi
+    mkdir -p "$directory"
+    tar xf "cache/$archive" --directory "$directory" --strip-components=1
+    mv $directory/*-workdir $directory/workdir
+    mv $directory/*.conf $directory/prophet.conf
+    mv $directory/*.revlog $directory/prophet.revlog
+
+    sed -i "s|revision_file.*$|revision_file=$full_path/prophet.revlog|g" $directory/prophet.conf
+    sed -i "s|src_dir.*$|src_dir=$full_path/${subject}-src|g" $directory/prophet.conf
+    if [[ "$subject" == "python" && "$version" == "69223-69224" ]]; then
+        sed -i "s|Modules/selectmodule.c|Objects/setobject.c|g" $directory/prophet.conf
+    fi
+    if [[ "$subject" == "lighttpd" ]]; then
+        test_dir="$ROOT/prophet/benchmarks/lighttpd-tests"
+    elif [[ "$subject" == "php" ]]; then
+        test_dir="$ROOT/prophet/benchmarks/php-test"
+    elif [[ "$subject" == "libtiff" ]]; then
+        test_dir="$full_path/libtiff-test"
+    else
+        test_dir="$ROOT/prophet/benchmarks/${subject}-tests"
+    fi
+    sed -i "s|test_dir.*$|test_dir=$test_dir|g" $directory/prophet.conf
+    sed -i "s|/home/ubuntu/Workspace/prophet/build/benchmarks|$ROOT/prophet/benchmarks|g" $directory/prophet.conf
+    sed -i "s|/home/ubuntu/Workspace/prophet/build/../tools|$ROOT/prophet/tools|g" $directory/prophet.conf
+
+    if [[ "$subject" == "gzip" && "$version" == "3eb6091d69-884ef6d16c" ]]; then
+        sed -i 's/incorrect/invalid/' $directory/workdir/src/gzip.c
+    fi
+    if [[ "$subject" == "php" ]]; then
+        (
+            cd $directory/workdir/src/
+            make distclean || true
+        )
+    fi
+    if [[ "$subject" == "libtiff" ]]; then
+        sed -i 's|$(SHELL) ./config.status $(subdir)/$@ $(am__depfiles_maybe)|$(SHELL) -c echo|' $directory/libtiff-test/Makefile
+    fi
+    if [[ "$subject" == "wireshark" ]]; then
+        sed -i '/peter.kovar/d' $directory/workdir/src/doc/AUTHORS-SHORT-FORMAT # non-unicode character
+    fi
+    if [[ "$subject" == "gmp" ]]; then
+        (
+            cd $directory/workdir/src/mytests
+            make distclean || true
+        )
+        (
+            cd $directory/workdir/src/
+            make distclean || true
+        )
+        sed -i 's/tests/mytests/' $directory/workdir/src/Makefile.am
+        sed -i 's|tests/Makefile|mytests/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|tests/devel/Makefile|mytests/devel/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/devel/Makefile.am
+        #sed -i 's|tests/mpbsd/Makefile|mytests/mpbsd/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|tests/mpn/Makefile|mytests/mpn/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/mpn/Makefile.am
+        sed -i 's|tests/mpf/Makefile|mytests/mpf/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/mpf/Makefile.am
+        sed -i 's|tests/mpq/Makefile|mytests/mpq/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/mpq/Makefile.am
+        sed -i 's|tests/mpz/Makefile|mytests/mpz/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/mpz/Makefile.am
+        sed -i 's|tests/rand/Makefile|mytests/rand/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/rand/Makefile.am
+        sed -i 's|tests/misc/Makefile|mytests/misc/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/misc/Makefile.am
+        sed -i 's|tests/cxx/Makefile|mytests/cxx/Makefile|' $directory/workdir/src/configure.in
+        sed -i 's|$(top_builddir)/tests|$(top_builddir)/mytests|' $directory/workdir/src/mytests/cxx/Makefile.am
+    fi
+fi
