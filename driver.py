@@ -299,7 +299,7 @@ def read_arg(argument_list):
             elif ARG_ONLY_SETUP in arg:
                 CONF_SETUP_ONLY = True
             elif ARG_CONFIG_ID in arg:
-                CONF_CONFIG_ID = int(str(arg).replace(ARG_CONFIG_ID, ""))
+                CONF_CONFIG_ID = str(arg).replace(ARG_CONFIG_ID, "")
             elif ARG_BUG_ID in arg:
                 CONF_BUG_ID = int(str(arg).replace(ARG_BUG_ID, ""))
             elif ARG_START_ID in arg:
