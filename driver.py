@@ -2,6 +2,8 @@ import sys
 import json
 import subprocess
 import os
+import shutil
+
 
 KEY_BUG_ID = "bug_id"
 KEY_BENCHMARK = "benchmark"
@@ -223,8 +225,32 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] initializing for prophet")
+    if not os.path.isdir(deploy_path + "/prophet"):
+        os.mkdir(deploy_path + "/prophet")
+        shutil.copy(setup_dir_path + "/prophet.conf", deploy_path + "/prophet/prophet.conf")
+    test_config_str = "-\n"
+    test_config_str += "-\n"
+    test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
+    for test_id in failing_test_list:
+        if test_id == passing_test_list[-1]:
+            test_config_str += test_id + "\n"
+        else:
+            test_config_str += test_id + " "
+    test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
+    for test_id in passing_test_list:
+        if test_id == passing_test_list[-1]:
+            test_config_str += test_id + "\n"
+        else:
+            test_config_str += test_id + " "
+    test_config_str += "Regression Cases: Tot 0\n"
+    test_config_file = deploy_path + "/prophet/prophet.revlog"
+    with open(test_config_file, "r+") as conf_file:
+        conf_file.seek(0)
+        conf_file.write(test_config_str)
+        conf_file.truncate()
+
     if not os.path.isdir(deploy_path + "/workdir"):
-        instrument_command = "cd " + setup_dir_path + ";"
+        instrument_command = "cd " + deploy_path + ";"
         instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     print("\t[INFO] running Prophet")
@@ -243,26 +269,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         if os.path.isfile(localization_file):
             os.remove(localization_file)
 
-    test_config_str = "-\n"
-    test_config_str += "-\n"
-    test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
-    for test_id in failing_test_list:
-        if test_id == passing_test_list[-1]:
-            test_config_str += test_id + "\n"
-        else:
-            test_config_str += test_id + " "
-    test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
-    for test_id in passing_test_list:
-        if test_id == passing_test_list[-1]:
-            test_config_str += test_id + "\n"
-        else:
-            test_config_str += test_id + " "
-    test_config_str += "Regression Cases: Tot 0\n"
-    test_config_file = deploy_path + "/workdir/prophet.revlog"
-    with open(test_config_file, "r+") as conf_file:
-        conf_file.seek(0)
-        conf_file.write(test_config_str)
-        conf_file.truncate()
+
     print("\t[INFO] running Prophet")
     repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "
     repair_command += " -full-synthesis -full-explore "
