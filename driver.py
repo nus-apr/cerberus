@@ -227,7 +227,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     print("\t[INFO] initializing for prophet")
     if not os.path.isdir(deploy_path + "/prophet"):
         os.mkdir(deploy_path + "/prophet")
-        shutil.copy(setup_dir_path + "/prophet.conf", deploy_path + "/prophet/prophet.conf")
+        shutil.copy(setup_dir_path + "/prophet/prophet.conf", deploy_path + "/prophet/prophet.conf")
     test_config_str = "-\n"
     test_config_str += "-\n"
     test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
