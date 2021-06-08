@@ -220,7 +220,61 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
 def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
+    global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
+    print("\t[INFO] initializing for prophet")
+    if not os.path.isdir(deploy_path + "/workdir"):
+        instrument_command = "cd " + deploy_path + ";"
+        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        execute_command(instrument_command)
     print("\t[INFO] running Prophet")
+    line_number = ""
+    localization_file = deploy_path + "/workdir/profile_localization.res"
+    if fix_location:
+        source_file, line_number = fix_location.split(":")
+        fault_loc = "{file_path} {line} {column} {file_path} {line} {column}" \
+                    " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(file_path=source_file, line=line_number, column=3)
+
+        with open(localization_file, "r+") as res_file:
+            res_file.seek(0)
+            res_file.write(fault_loc)
+            res_file.truncate()
+    else:
+        if os.path.isfile(localization_file):
+            os.remove(localization_file)
+
+    test_config_str = "-\n"
+    test_config_str += "-\n"
+    test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
+    for test_id in failing_test_list:
+        if test_id == passing_test_list[-1]:
+            test_config_str += test_id + "\n"
+        else:
+            test_config_str += test_id + " "
+    test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
+    for test_id in passing_test_list:
+        if test_id == passing_test_list[-1]:
+            test_config_str += test_id + "\n"
+        else:
+            test_config_str += test_id + " "
+    test_config_str += "Regression Cases: Tot 0\n"
+    test_config_file = deploy_path + "/workdir/prophet.revlog"
+    with open(test_config_file, "r+") as conf_file:
+        conf_file.seek(0)
+        conf_file.write(test_config_str)
+        conf_file.truncate()
+    print("\t[INFO] running Prophet")
+    repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "
+    repair_command += " -full-synthesis -full-explore "
+    repair_command += " -r {0}".format(deploy_path + "/workdir")
+    repair_command += " -cond-ext -replace-ext  "
+    repair_command += " -timeout {0} ".format(int(timeout))
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
+
+    # move patches to result directory
+    copy_command = "mv src-2021-* " + DIR_EXPERIMENT_RESULT
+    execute_command(copy_command)
 
 
 def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
@@ -330,7 +384,8 @@ def read_arg(argument_list):
 
 def run(arg_list):
     global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
-    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT, FILE_SETUP_LOG
+    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
+    global FILE_SETUP_LOG, FILE_OUTPUT_LOG, FILE_INSTRUMENT_LOG
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
@@ -361,6 +416,8 @@ def run(arg_list):
         DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
                                                                    CONF_TOOL_NAME, subject_name, bug_name])
         FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
+        FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
+        FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(bug_name) + "-instrument.log"
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
         print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
