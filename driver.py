@@ -255,14 +255,14 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         instrument_command = "cd " + deploy_path + ";"
         instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
-    print("\t[INFO] running Prophet")
     line_number = ""
     localization_file = deploy_path + "/workdir/profile_localization.res"
     if fix_location:
         source_file, line_number = fix_location.split(":")
         fault_loc = "{file_path} {line} {column} {file_path} {line} {column}" \
                     " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(file_path=source_file, line=line_number, column=3)
-
+        if not os.path.isfile(localization_file):
+            open(localization_file, "w")
         with open(localization_file, "r+") as res_file:
             res_file.seek(0)
             res_file.write(fault_loc)
@@ -270,7 +270,6 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     else:
         if os.path.isfile(localization_file):
             os.remove(localization_file)
-
 
     print("\t[INFO] running Prophet")
     repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "
@@ -399,6 +398,7 @@ def run(arg_list):
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
     CONFIG_INFO = load_configuration_details(FILE_CONFIGURATION, CONF_CONFIG_ID)
+    print("[CONFIGURATION] " + str(CONF_CONFIG_ID))
     create_directories()
     index = 1
     for experiment_item in EXPERIMENT_ITEMS:
