@@ -105,7 +105,6 @@ def load_configuration_details(config_file_path, config_id):
 def setup_experiment(script_path, bug_id):
     global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG
     print("\t[INFO] running script for setup")
-    FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_id) + "-setup.log"
     setup_command = "cd " + script_path + "; { "
     setup_command += "bash setup.sh; "
     setup_command += "bash config.sh; "
@@ -331,7 +330,7 @@ def read_arg(argument_list):
 
 def run(arg_list):
     global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
-    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
+    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT, FILE_SETUP_LOG
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
@@ -361,6 +360,7 @@ def run(arg_list):
         directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
         DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
                                                                    CONF_TOOL_NAME, subject_name, bug_name])
+        FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
         setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
         deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
         print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
