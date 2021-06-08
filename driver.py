@@ -232,7 +232,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     test_config_str += "-\n"
     test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
     for test_id in failing_test_list:
-        if test_id == passing_test_list[-1]:
+        if test_id == failing_test_list[-1]:
             test_config_str += test_id + "\n"
         else:
             test_config_str += test_id + " "
@@ -244,6 +244,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             test_config_str += test_id + " "
     test_config_str += "Regression Cases: Tot 0\n"
     test_config_file = deploy_path + "/prophet/prophet.revlog"
+    if not os.path.isfile(test_config_file):
+        open(test_config_file, "w")
     with open(test_config_file, "r+") as conf_file:
         conf_file.seek(0)
         conf_file.write(test_config_str)
