@@ -1,0 +1,5 @@
+(declare-const rvalue_z (_ BitVec 32))
+(declare-const lvalue_z (_ BitVec 32))
+(declare-const rreturn (_ BitVec 32))
+(declare-const lreturn (_ BitVec 32))
+(assert (and (= rreturn rvalue_z) (= lreturn lvalue_z)))
