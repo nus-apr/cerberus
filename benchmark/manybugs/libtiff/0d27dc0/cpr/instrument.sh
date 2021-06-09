@@ -25,23 +25,21 @@ cd $dir_name
 
 ## Instrument test driver
 sed -i '33i #include <klee/klee.h>' src/test/short_tag.c
-sed -i '70,79 s/^/\/\//' src/test/short_tag.c
-sed -i '80i #define NPAIREDTAGS   4' src/test/short_tag.c
-sed -i '83i main(int argc, char** argv)' src/test/short_tag.c
-sed -i '84d' src/test/short_tag.c
-sed -i '88i \\tfilename = argv[1];\n'  src/test/short_tag.c
-
-
+sed -i '44i const char      *filename = "short_test.tiff";' src/test/short_tag.c
+sed -i '45d' src/test/short_tag.c
+sed -i '82i main(int argc, char **argv)'  src/test/short_tag.c
+sed -i '83d' src/test/short_tag.c
+sed -i '87i \\tfilename = argv[1];\n'  src/test/short_tag.c
 
 ## Instrument libtiff component.
-sed -i '42i // KLEE' src/test/short_tag.c
-sed -i '43i #include <klee/klee.h>' src/test/short_tag.c
-sed -i '44i #ifndef TRIDENT_OUTPUT' src/test/short_tag.c
-sed -i '45i #define TRIDENT_OUTPUT(id, typestr, value) value' src/test/short_tag.c
-sed -i '46i #endif' src/test/short_tag.c
+sed -i '43i // KLEE' src/test/short_tag.c
+sed -i '44i #include <klee/klee.h>' src/test/short_tag.c
+sed -i '45i #ifndef TRIDENT_OUTPUT' src/test/short_tag.c
+sed -i '46i #define TRIDENT_OUTPUT(id, typestr, value) value' src/test/short_tag.c
+sed -i '47i #endif' src/test/short_tag.c
 
-sed -i '183i \\t\t\tint check = CheckShortField(tif, short_single_tags[i].tag, short_single_tags[i].value);' src/test/short_tag.c
-sed -i '183i \\t\t\tTRIDENT_OUTPUT("obs", "i32", check);' src/test/short_tag.c
+sed -i '187i \\t\t\tTRIDENT_OUTPUT("obs", "i32", check);' src/test/short_tag.c
+sed -i '187i \\t\t\tint check = CheckShortField(tif, short_single_tags[i].tag, short_single_tags[i].value);' src/test/short_tag.c
 
 sed -i '101i { TIFFTAG_NUMBEROFINKS, 1, 1, TIFF_SHORT, 0, __trident_choice("L976", "bool", (int[]){TIFF_SETGET_UNDEFINED, TIFF_SETGET_UINT16, TIFF_SETGET_C16_ASCII}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)), TIFF_SETGET_UNDEFINED, FIELD_CUSTOM, 1, 0, "NumberOfInks", NULL },' src/libtiff/tif_dirinfo.c
 sed -i '102d' src/libtiff/tif_dirinfo.c
