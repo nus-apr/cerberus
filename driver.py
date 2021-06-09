@@ -212,9 +212,9 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
                                                         build_script_path, str(syn_timeout))
 
     if fix_location:
-        angelix_command += " --lines {0}  --generate-all ".format(line_number)
+        angelix_command += " --lines {0}  ".format(line_number)
 
-    angelix_command += " {0} " \
+    angelix_command += "  --generate-all {0} " \
                        " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
     execute_command(angelix_command)
 
