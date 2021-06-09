@@ -441,7 +441,6 @@ def run(arg_list):
             print("\t[META-DATA] project: " + subject_name)
             print("\t[META-DATA] bug ID: " + bug_name)
             print("\t[INFO] setup directory: " + deploy_path)
-            clean_results(DIR_EXPERIMENT_RESULT)
             if os.path.isdir(deploy_path):
                 print("\t[INFO] deployment path exists, skipping setup")
             else:
@@ -449,6 +448,7 @@ def run(arg_list):
             if not CONF_SETUP_ONLY:
                 DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                      CONF_TOOL_NAME, subject_name, bug_name])
+                clean_results(DIR_EXPERIMENT_RESULT)
                 repair(deploy_path, setup_dir_path, experiment_item)
                 archive_results(DIR_EXPERIMENT_RESULT, deploy_path)
             index = index + 1
