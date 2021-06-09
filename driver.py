@@ -433,8 +433,6 @@ def run(arg_list):
             bug_name = str(experiment_item[KEY_BUG_ID])
             subject_name = str(experiment_item[KEY_SUBJECT])
             directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
-            DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
-                                                                 CONF_TOOL_NAME, subject_name, bug_name])
             FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
             FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
             FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(bug_name) + "-instrument.log"
@@ -450,8 +448,10 @@ def run(arg_list):
             else:
                 setup_experiment(setup_dir_path, bug_name)
             if not CONF_SETUP_ONLY:
+                DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
+                                                                     CONF_TOOL_NAME, subject_name, bug_name])
                 repair(deploy_path, setup_dir_path, experiment_item)
-            archive_results(DIR_EXPERIMENT_RESULT)
+                archive_results(DIR_EXPERIMENT_RESULT)
             index = index + 1
 
 
