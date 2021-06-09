@@ -286,7 +286,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     # move patches to result directory
     regex_for_fix = "*-fix-" + str(bug_id) + "*"
-    copy_command = "mv  " + regex_for_fix + " " + DIR_EXPERIMENT_RESULT
+    copy_command = "mv  " + regex_for_fix + " " + DIR_EXPERIMENT_RESULT + ";"
+    copy_command += "cp " + deploy_path + "/diffs " + DIR_EXPERIMENT_RESULT + "/dev-patch"
     execute_command(copy_command)
 
 
