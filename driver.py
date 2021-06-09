@@ -387,7 +387,9 @@ def read_arg(argument_list):
         if CONF_TOOL_NAME is None:
             print("[invalid] --tool-name is missing")
             print_help()
-    if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None:
+    if CONF_SUBJECT_NAME:
+        print("[info] running experiments for subject " + str(CONF_SUBJECT_NAME))
+    if CONF_START_ID is None and CONF_BUG_ID is None and CONF_BUG_ID_LIST is None and CONF_SUBJECT_NAME is None:
         print("[info] experiment id is not specified, running all experiments")
     if CONF_BENCHMARK is None:
         print("[invalid] --benchmark is missing")
@@ -426,7 +428,7 @@ def run(arg_list):
 
             if CONF_SUBJECT_NAME and CONF_SUBJECT_NAME != subject_name:
                 continue
-            experiment_name = "Configuration-" + str(config_id) + " : Experiment-" + str(index) + "\n-----------------------------"
+            experiment_name = "\n\nConfiguration-" + str(config_id) + " : Experiment-" + str(index) + "\n-----------------------------"
             print(experiment_name)
             bug_name = str(experiment_item[KEY_BUG_ID])
             subject_name = str(experiment_item[KEY_SUBJECT])
