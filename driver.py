@@ -270,6 +270,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     else:
         if os.path.isfile(localization_file):
             os.remove(localization_file)
+        shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
     repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "

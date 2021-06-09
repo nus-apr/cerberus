@@ -1,14 +1,12 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
-dir_name=/data/$benchmark_name/$project_name/$bug_id
-
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=libtiff-bug-2005-12-21-3b848a7-3edb9cd
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 diff_file=libtiff/tif_dirread.c-3b848a7
-
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
-current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
 wget $download_url
@@ -38,3 +36,9 @@ cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
+
+# Prophet requires/works on git source
+cd $dir_name
+repo_url=https://github.com/vadz/libtiff.git
+git clone $repo_url src-git
+cd src-git; git checkout $bug_id
