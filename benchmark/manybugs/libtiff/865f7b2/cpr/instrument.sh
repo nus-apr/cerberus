@@ -44,7 +44,7 @@ cd tools
 extract-bc tiffcp
 
 ## Copy remaining files to run CPR.
-cd $current_dir
+cd $script_dir
 cp repair.conf $dir_name
 cp spec.smt2 $dir_name
 cp test-input $dir_name
