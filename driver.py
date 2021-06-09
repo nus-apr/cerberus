@@ -347,7 +347,7 @@ def print_help():
 def read_arg(argument_list):
     global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID, CONF_CONFIG_ID_LIST
     global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK
-    global FILE_META_DATA
+    global FILE_META_DATA, CONF_SUBJECT_NAME
     print("[DRIVER] Reading configuration values")
     if len(argument_list) > 0:
         for arg in argument_list:
@@ -355,6 +355,8 @@ def read_arg(argument_list):
                 CONF_DATA_PATH = str(arg).replace(ARG_DATA_PATH, "")
             elif ARG_TOOL_NAME in arg:
                 CONF_TOOL_NAME = str(arg).replace(ARG_TOOL_NAME, "").lower()
+            elif ARG_SUBJECT_NAME in arg:
+                CONF_SUBJECT_NAME = str(arg).replace(ARG_SUBJECT_NAME, "").lower()
             elif ARG_TOOL_PATH in arg:
                 CONF_TOOL_PATH = str(arg).replace(ARG_TOOL_PATH, "")
             elif ARG_TOOL_PARAMS in arg:
