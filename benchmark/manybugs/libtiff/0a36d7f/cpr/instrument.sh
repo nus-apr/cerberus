@@ -1,9 +1,14 @@
-project_name=libtiff
-bug_id=0a36d7f
-dir_name=$1/manybugs/$project_name/$bug_id
-current_dir=$PWD
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 cd $dir_name/src
+
+if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
+    touch "$dir_name/src/INSTRUMENTED_CPR"
+fi
 
 ## Prepare for KLEE
 # Fix fabs calls (not supported by KLEE).
@@ -45,14 +50,12 @@ make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/
 extract-bc long_tag
 
 # Copy remaining files to run CPR.
-cd $current_dir
-cp repair.conf $dir_name
-cp spec.smt2 $dir_name
-cp test-input $dir_name
-cp seed-file $dir_name
-cp -rf components $dir_name
-cp -rf test-input-files $dir_name
-cp -rf test-expected-output $dir_name
-cp -rf seed-dir $dir_name
+cp $script_dir/repair.conf $dir_name
+cp $script_dir/spec.smt2 $dir_name
+cp $script_dir/test-input $dir_name
+cp $script_dir/seed-file $dir_name
+cp -rf $script_dir/components $dir_name
+cp -rf $script_dir/test-input-files $dir_name
+cp -rf $script_dir/test-expected-output $dir_name
+cp -rf $script_dir/seed-dir $dir_name
 
-cd $dir_name
