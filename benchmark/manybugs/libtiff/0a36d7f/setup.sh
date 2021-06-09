@@ -1,12 +1,11 @@
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
-dir_name=/data/$benchmark_name/$project_name/$bug_id
-
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=libtiff-bug-2006-03-03-a72cf60-0a36d7f
 diff_file=libtiff/tif_dirread.c-a72cf60
-
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
