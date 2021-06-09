@@ -432,7 +432,7 @@ def run(arg_list):
             bug_name = str(experiment_item[KEY_BUG_ID])
             subject_name = str(experiment_item[KEY_SUBJECT])
             directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
-            DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
+            DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                  CONF_TOOL_NAME, subject_name, bug_name])
             FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
             FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
