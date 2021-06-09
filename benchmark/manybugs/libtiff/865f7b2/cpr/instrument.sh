@@ -1,8 +1,16 @@
-project_name=libtiff
-bug_id=865f7b2
-dir_name=$1/manybugs/$project_name/$bug_id
-current_dir=$PWD
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
+
 cd $dir_name/src
+make clean
+
+if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
+    touch "$dir_name/src/INSTRUMENTED_CPR"
+fi
+
 
 ## Prepare for KLEE
 # Fix fabs calls (not supported by KLEE).
