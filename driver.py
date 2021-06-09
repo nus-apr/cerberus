@@ -21,6 +21,7 @@ KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
 ARG_DATA_PATH = "--data-dir="
 ARG_TOOL_PATH = "--tool-path="
 ARG_TOOL_NAME = "--tool="
+ARG_SUBJECT_NAME = "--subject="
 ARG_TOOL_PARAMS = "--tool-param="
 ARG_DEBUG_MODE = "--debug"
 ARG_ONLY_SETUP = "--only-setup"
@@ -30,7 +31,7 @@ ARG_END_ID = "--end-id="
 ARG_SKIP_LIST = "--skip-list="
 ARG_BUG_ID_LIST = "--bug-id-list="
 ARG_BENCHMARK = "--benchmark="
-ARG_CONFIG_ID = "--conf="
+ARG_CONFIG_ID_LIST = "--conf="
 
 
 CONF_DATA_PATH = "/data"
@@ -45,7 +46,8 @@ CONF_SETUP_ONLY = False
 CONF_BUG_ID_LIST = None
 CONF_SKIP_LIST = None
 CONF_BENCHMARK = None
-CONF_CONFIG_ID = "C1"
+CONF_CONFIG_ID_LIST = ["C1"]
+CONF_SUBJECT_NAME = None
 
 FILE_META_DATA = None
 FILE_CONFIGURATION = "configuration.json"
@@ -338,12 +340,12 @@ def print_help():
     print("\t" + ARG_BUG_ID_LIST + "\t| " + "runs a list of experiments")
     print("\t" + ARG_START_ID + "\t| " + "specify a range of experiments starting from ID")
     print("\t" + ARG_END_ID + "\t| " + "specify a range of experiments that ends at ID")
-    print("\t" + ARG_CONFIG_ID + "\t| " + "specify a different configuration using config ID")
+    print("\t" + ARG_CONFIG_ID_LIST + "\t| " + "specify a different configuration using config ID")
     exit()
 
 
 def read_arg(argument_list):
-    global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID, CONF_CONFIG_ID
+    global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID, CONF_CONFIG_ID_LIST
     global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK
     global FILE_META_DATA
     print("[DRIVER] Reading configuration values")
@@ -361,8 +363,8 @@ def read_arg(argument_list):
                 CONF_DEBUG = True
             elif ARG_ONLY_SETUP in arg:
                 CONF_SETUP_ONLY = True
-            elif ARG_CONFIG_ID in arg:
-                CONF_CONFIG_ID = str(arg).replace(ARG_CONFIG_ID, "")
+            elif ARG_CONFIG_ID_LIST in arg:
+                CONF_CONFIG_ID_LIST = str(arg).replace(ARG_CONFIG_ID_LIST, "").split(",")
             elif ARG_BUG_ID in arg:
                 CONF_BUG_ID = int(str(arg).replace(ARG_BUG_ID, ""))
             elif ARG_START_ID in arg:
@@ -393,56 +395,61 @@ def read_arg(argument_list):
 
 def run(arg_list):
     global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
-    global CONF_CONFIG_ID, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
+    global CONF_CONFIG_ID_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
     global FILE_SETUP_LOG, FILE_OUTPUT_LOG, FILE_INSTRUMENT_LOG
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
-    EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
-    CONFIG_INFO = load_configuration_details(FILE_CONFIGURATION, CONF_CONFIG_ID)
-    print("[CONFIGURATION] " + str(CONF_CONFIG_ID))
     create_directories()
-    index = 1
-    for experiment_item in EXPERIMENT_ITEMS:
-        if CONF_BUG_ID and index != CONF_BUG_ID:
-            index = index + 1
-            continue
-        if CONF_BUG_ID_LIST and str(index) not in CONF_BUG_ID_LIST:
-            index = index + 1
-            continue
-        if CONF_SKIP_LIST and str(index) in CONF_SKIP_LIST:
-            index = index + 1
-            continue
-        if CONF_START_ID and index < CONF_START_ID:
-            index = index + 1
-            continue
-        if CONF_END_ID and index > CONF_END_ID:
-            break
+    EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
+    for config_id in CONF_CONFIG_ID_LIST:
+        CONFIG_INFO = load_configuration_details(FILE_CONFIGURATION, config_id)
+        print("[CONFIGURATION] " + str(config_id))
+        index = 1
+        for experiment_item in EXPERIMENT_ITEMS:
+            subject_name = experiment_item[KEY_SUBJECT]
+            if CONF_BUG_ID and index != CONF_BUG_ID:
+                index = index + 1
+                continue
+            if CONF_BUG_ID_LIST and str(index) not in CONF_BUG_ID_LIST:
+                index = index + 1
+                continue
+            if CONF_SKIP_LIST and str(index) in CONF_SKIP_LIST:
+                index = index + 1
+                continue
+            if CONF_START_ID and index < CONF_START_ID:
+                index = index + 1
+                continue
+            if CONF_END_ID and index > CONF_END_ID:
+                break
 
-        experiment_name = "Experiment-" + str(index) + "\n-----------------------------"
-        print(experiment_name)
-        bug_name = str(experiment_item[KEY_BUG_ID])
-        subject_name = str(experiment_item[KEY_SUBJECT])
-        directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
-        DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
-                                                                   CONF_TOOL_NAME, subject_name, bug_name])
-        FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
-        FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
-        FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(bug_name) + "-instrument.log"
-        setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
-        deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
-        print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
-        print("\t[META-DATA] project: " + subject_name)
-        print("\t[META-DATA] bug ID: " + bug_name)
-        print("\t[INFO] setup directory: " + deploy_path)
-        clean_results(DIR_EXPERIMENT_RESULT)
-        if os.path.isdir(deploy_path):
-            print("\t[INFO] deployment path exists, skipping setup")
-        else:
-            setup_experiment(setup_dir_path, bug_name)
-        if not CONF_SETUP_ONLY:
-            repair(deploy_path, setup_dir_path, experiment_item)
-        archive_results(DIR_EXPERIMENT_RESULT)
-        index = index + 1
+            if CONF_SUBJECT_NAME and CONF_SUBJECT_NAME != subject_name:
+                continue
+
+            experiment_name = "Experiment-" + str(index) + "\n-----------------------------"
+            print(experiment_name)
+            bug_name = str(experiment_item[KEY_BUG_ID])
+            subject_name = str(experiment_item[KEY_SUBJECT])
+            directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
+            DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([CONF_CONFIG_ID, CONF_BENCHMARK,
+                                                                 CONF_TOOL_NAME, subject_name, bug_name])
+            FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
+            FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
+            FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(bug_name) + "-instrument.log"
+            setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
+            deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
+            print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
+            print("\t[META-DATA] project: " + subject_name)
+            print("\t[META-DATA] bug ID: " + bug_name)
+            print("\t[INFO] setup directory: " + deploy_path)
+            clean_results(DIR_EXPERIMENT_RESULT)
+            if os.path.isdir(deploy_path):
+                print("\t[INFO] deployment path exists, skipping setup")
+            else:
+                setup_experiment(setup_dir_path, bug_name)
+            if not CONF_SETUP_ONLY:
+                repair(deploy_path, setup_dir_path, experiment_item)
+            archive_results(DIR_EXPERIMENT_RESULT)
+            index = index + 1
 
 
 if __name__ == "__main__":
