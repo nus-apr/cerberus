@@ -139,7 +139,7 @@ def archive_results(exp_dir, deploy_path):
     if os.path.isfile(FILE_INSTRUMENT_LOG):
         copy_command += "cp " + FILE_INSTRUMENT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
 
-    copy_command += "cp -rf" + deploy_path + "/diffs " + DIR_EXPERIMENT_RESULT
+    copy_command += "cp -rf " + deploy_path + "/diffs " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
     result_dir = "/".join(str(exp_dir).split("/")[:-1])
     exp_dir_id = str(exp_dir).split("/")[-1]
