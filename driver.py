@@ -153,6 +153,8 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     conf_path = deploy_path + "/repair.conf"
     if not os.path.isfile(deploy_path + "/src/INSTRUMENTED_CPR"):
         setup_dir_path = setup_dir_path + "/cpr"
+        if not os.path.isdir(setup_dir_path):
+            return
         instrument_command = "cd " + setup_dir_path + "; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     print("\t[INFO] running CPR")
