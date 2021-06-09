@@ -35,7 +35,7 @@ ARG_CONFIG_ID_LIST = "--conf="
 
 
 CONF_DATA_PATH = "/data"
-CONF_TOOL_PATH = "/CPR"
+CONF_TOOL_PATH = ""
 CONF_TOOL_PARAMS = ""
 CONF_TOOL_NAME = None
 CONF_DEBUG = False
@@ -143,31 +143,23 @@ def archive_results(exp_dir, deploy_path):
     execute_command(archive_command)
 
 
-# TODO: Make sure to copy the artifacts (patches) to DIR_EXPERIMENT_RESULT
-def cpr(setup_dir_path, deploy_path, bug_id, passing_test_list, failing_test_list, fix_location):
+def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for CPR")
     conf_path = deploy_path + "/repair.conf"
-    script_path = "instrument.sh"
-    log_path = str(conf_path).replace(".conf", ".log")
     if not os.path.isfile(conf_path):
         setup_dir_path = setup_dir_path + "/cpr"
-        instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + CONF_DATA_PATH + " > /dev/null 2>&1"
+        instrument_command = "cd " + setup_dir_path + "; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     print("\t[INFO] running CPR")
-    tool_command = "{ " + CONF_TOOL_NAME + " --conf=" + conf_path + " " + CONF_TOOL_PARAMS + ";} 2> " + FILE_ERROR_LOG
-    execute_command(tool_command)
-    exp_dir = DIR_EXPERIMENT_RESULT + "/" + str(bug_id)
-    if os.path.isdir(exp_dir):
-        rm_command = "rm -rf " + exp_dir
-        execute_command(rm_command)
-    mk_command = "mkdir " + exp_dir
-    execute_command(mk_command)
-    copy_output = "{ cp -rf " + CONF_TOOL_PATH + "/output/" + bug_id + " " + exp_dir + ";} 2> " + FILE_ERROR_LOG
+    timeout_m = str(timeout * 60)
+    cpr_command = "cpr --conf=" + conf_path + " "
+    cpr_command += "{0} --time-duration={1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
+    execute_command(cpr_command)
+
+    copy_output = "cp -rf /CPR/output/" + bug_id + " " + DIR_EXPERIMENT_RESULT
     execute_command(copy_output)
-    copy_log = "{ cp " + CONF_TOOL_PATH + "/logs/log-latest " + exp_dir + ";} 2> " + FILE_ERROR_LOG
-    execute_command(copy_log)
-    copy_log = "cp " + FILE_ERROR_LOG + " " + exp_dir
+    copy_log = "cp -rf /CPR/logs/" + bug_id + " " + DIR_EXPERIMENT_RESULT
     execute_command(copy_log)
 
 
@@ -176,7 +168,6 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
-    FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + bug_id + "-instrument.log"
     if not os.path.isfile(deploy_path + "/src/INSTRUMENTED_ANGELIX"):
         instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
@@ -196,7 +187,6 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     build_script_path = angelix_dir_path + '/build'
     timeout_s = int(timeout) * 3600
     syn_timeout = int(0.25 * timeout_s * 1000)
-    FILE_OUTPUT_LOG = DIR_LOGS + "/" + bug_id + "-output.log"
     test_id_list = ""
     for test_id in failing_test_list:
         test_id_list += test_id + " "
@@ -318,7 +308,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
         fix_location = fix_source_file + ":" + fix_line_number
 
     if CONF_TOOL_NAME == "cpr":
-        cpr(setup_dir_path, deploy_path, bug_id, timeout, test_ratio)
+        cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "angelix":
         angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "prophet":
