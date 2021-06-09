@@ -5,6 +5,7 @@ fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 cd $dir_name/src
+make clean
 
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
     touch "$dir_name/src/INSTRUMENTED_CPR"

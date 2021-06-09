@@ -108,12 +108,16 @@ def load_configuration_details(config_file_path, config_id):
 
 
 def setup_experiment(script_path, bug_id):
-    global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG
+    global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG, CONF_TOOL_NAME
     print("\t[INFO] running script for setup")
+    set_cc = " CC=gcc CXX=g++ "
+    if str(CONF_TOOL_NAME).lower() == "cpr":
+        set_cc = " CC=wllvm CXX=wllvm++ "
+
     setup_command = "cd " + script_path + "; { "
     setup_command += "bash setup.sh; "
-    setup_command += "bash config.sh; "
-    setup_command += "bash build.sh; "
+    setup_command += set_cc + " bash config.sh; "
+    setup_command += set_cc + " bash build.sh; "
     setup_command += "bash test.sh; "
     setup_command += " } >" + FILE_SETUP_LOG + " 2>&1"
     execute_command(setup_command)
