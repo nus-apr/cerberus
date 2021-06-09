@@ -68,6 +68,7 @@ CONFIG_INFO = dict()
 
 
 def create_directories():
+    print("[DRIVER] Creating essential directory structure")
     if not os.path.isdir(DIR_LOGS):
         create_command = "mkdir " + DIR_LOGS
         execute_command(create_command)
@@ -85,7 +86,7 @@ def execute_command(command):
 
 
 def load_experiment_details(meta_file):
-    print("[DRIVER] Loading experiment data\n")
+    print("[DRIVER] Loading experiment data")
     json_data = None
     if os.path.isfile(meta_file):
         with open(meta_file, 'r') as in_file:
@@ -96,7 +97,7 @@ def load_experiment_details(meta_file):
 
 
 def load_configuration_details(config_file_path, config_id):
-    print("[DRIVER] Loading configuration setup\n")
+    print("[DRIVER] Loading configuration setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, 'r') as conf_file:
@@ -405,7 +406,6 @@ def run(arg_list):
     EXPERIMENT_ITEMS = load_experiment_details(FILE_META_DATA)
     for config_id in CONF_CONFIG_ID_LIST:
         CONFIG_INFO = load_configuration_details(FILE_CONFIGURATION, config_id)
-        print("[CONFIGURATION] " + str(config_id))
         index = 1
         for experiment_item in EXPERIMENT_ITEMS:
             subject_name = experiment_item[KEY_SUBJECT]
@@ -426,8 +426,7 @@ def run(arg_list):
 
             if CONF_SUBJECT_NAME and CONF_SUBJECT_NAME != subject_name:
                 continue
-
-            experiment_name = "Experiment-" + str(index) + "\n-----------------------------"
+            experiment_name = "Configuration-" + str(config_id) + " : Experiment-" + str(index) + "\n-----------------------------"
             print(experiment_name)
             bug_name = str(experiment_item[KEY_BUG_ID])
             subject_name = str(experiment_item[KEY_SUBJECT])
