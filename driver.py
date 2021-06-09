@@ -285,7 +285,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     execute_command(repair_command)
 
     # move patches to result directory
-    copy_command = "mv src-2021-* " + DIR_EXPERIMENT_RESULT
+    regex_for_fix = "*-fix-" + str(bug_id) + "*"
+    copy_command = "mv  " + regex_for_fix + " " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
 
 
