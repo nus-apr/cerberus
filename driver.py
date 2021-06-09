@@ -127,13 +127,15 @@ def clean_results(exp_dir):
     execute_command(mk_command)
 
 
-def archive_results(exp_dir):
+def archive_results(exp_dir, deploy_path):
     # copy logs
     copy_command = "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
     if os.path.isfile(FILE_OUTPUT_LOG):
         copy_command += "cp " + FILE_OUTPUT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
     if os.path.isfile(FILE_INSTRUMENT_LOG):
         copy_command += "cp " + FILE_INSTRUMENT_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
+
+    copy_command += "cp " + deploy_path + "/diffs " + DIR_EXPERIMENT_RESULT + "/dev-patch"
     execute_command(copy_command)
     result_dir = "/".join(str(exp_dir).split("/")[:-1])
     exp_dir_id = str(exp_dir).split("/")[-1]
@@ -287,7 +289,6 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # move patches to result directory
     regex_for_fix = "*-fix-" + str(bug_id) + "*"
     copy_command = "mv  " + regex_for_fix + " " + DIR_EXPERIMENT_RESULT + ";"
-    copy_command += "cp " + deploy_path + "/diffs " + DIR_EXPERIMENT_RESULT + "/dev-patch"
     execute_command(copy_command)
 
 
@@ -453,7 +454,7 @@ def run(arg_list):
                 DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                      CONF_TOOL_NAME, subject_name, bug_name])
                 repair(deploy_path, setup_dir_path, experiment_item)
-                archive_results(DIR_EXPERIMENT_RESULT)
+                archive_results(DIR_EXPERIMENT_RESULT, deploy_path)
             index = index + 1
 
 
