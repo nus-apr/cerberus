@@ -34,7 +34,8 @@ RUN apt-get install -y  \
     libxcb-shm0-dev \
     libsdl1.2-dev  \
     libvdpau-dev \
-    libnuma-dev
+    libnuma-dev \
+    vim
 
 RUN apt-get install -y build-essential cmake zlib1g-dev libtinfo-dev python unzip
 RUN apt-get install -y libboost-filesystem-dev libboost-program-options-dev libboost-log-dev wget
@@ -67,6 +68,19 @@ ENV AFLGO="$SRC/aflgo"
 
 RUN git config --global user.email "gaoxiang9430@gmail.com"
 RUN git config --global user.name "Gao Xiang"
+
+ENV IS_DOCKER_SINGLE_CORE_MODE=
+
+# configuration for F1X
+ENV F1X_PROJECT_CC="/src/aflgo/afl-clang-fast"
+ENV F1X_PROJECT_CXX="/src/aflgo/afl-clang-fast++"
+ENV CC="f1x-cc"
+ENV CXX="f1x-cxx"
+ENV LDFLAGS="-lpthread"
+ENV PATH="$PATH:/src/scripts"
+
+WORKDIR /src/f1x-oss-fuzz/repair/CInterface
+RUN make
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments

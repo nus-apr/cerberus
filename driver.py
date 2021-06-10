@@ -304,6 +304,14 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
 def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
+    # export SUBJECT_DIR=setup_dir_path
+    # export BUGGY_FILE=deploy_path/src/fix_location
+    # export TESTCASE=passing_test_list+failing_test_list
+    # export DRIVER=./test.sh
+    # @Ridwan: do the test.sh at setup_dir_path take any argument?
+    # export BINARY=???
+    # invoke /src/script/run.sh at the setup_dir_path
     print("\t[INFO] running Fix2Fit")
 
 
