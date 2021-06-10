@@ -33,7 +33,8 @@ RUN apt-get update && apt-get install -y  \
     libxcb-shm0-dev \
     libsdl1.2-dev  \
     libvdpau-dev \
-    libnuma-dev
+    libnuma-dev \
+    shc
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
