@@ -4,18 +4,19 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
-cd $dir_name/src
-make clean
+cd $dir_name/src/test
 
 # Copy Seed Files
-cd test
+mkdir $dir_name/seed-dir
 find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
 find . -type f -iname '*.bmp' -exec cp  {} $dir_name/seed-dir/ \;
 find . -type f -iname '*.gif' -exec cp  {} $dir_name/seed-dir/ \;
 find . -type f -iname '*.pgm' -exec cp  {} $dir_name/seed-dir/ \;
 find . -type f -iname '*.ppm' -exec cp  {} $dir_name/seed-dir/ \;
 find . -type f -iname '*.pbm' -exec cp  {} $dir_name/seed-dir/ \;
+
 cd $dir_name/src
+make clean
 
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
     touch "$dir_name/src/INSTRUMENTED_CPR"
