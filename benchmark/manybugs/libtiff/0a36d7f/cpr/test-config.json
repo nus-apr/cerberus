@@ -1,1 +1,80 @@
-[ [2,"test/long_tag","$long_test.tiff", "test-expected-output/long_test.smt2"],[3,"test/short_tag","$short_test.tiff", "test-expected-output/short_test.smt2"],[4,"test/strip_rw","$strip_test.tiff", "test-expected-output/strip_test.smt2"],[22,"test/tiffcp-split","$minisblack-1c-8b.tiff out.tiff", "test-expected-output/minisblack-1c-8b.smt2"],[22,"test/tiffcp-split","$rgb-3c-8b out.tiff", "test-expected-output/rgb-3c-8b.smt2"],[22,"test/tiffcp-split","$palette-1c-8b.tiff out.tiff", "test-expected-output/palette-1c-8b.tiff.smt2"],[22,"test/tiffcp-split","$palette-1c-1b.tiff out.tiff", "test-expected-output/palette-1c-1b.tiff.smt2"],[22,"test/tiffcp-split","$palette-1c-4b.tiff out.tiff", "test-expected-output/palette-1c-4b.tiff.smt2"]]
+[
+  [
+    2,
+    "test/long_tag",
+    "$long_test.tiff",
+    "test-expected-output/long_test.smt2"
+  ],
+  [
+    3,
+    "test/short_tag",
+    "$short_test.tiff",
+    "test-expected-output/short_test.smt2"
+  ],
+  [
+    4,
+    "test/strip_rw",
+    "$strip_test.tiff",
+    "test-expected-output/strip_test.smt2"
+  ],
+  [
+    22,
+    "test/tiffcp-split",
+    "$minisblack-1c-8b.tiff out.tiff",
+    "test-expected-output/minisblack-1c-8b.smt2"
+  ],
+  [
+    22,
+    "test/tiffcp-split",
+    "$rgb-3c-8b out.tiff",
+    "test-expected-output/rgb-3c-8b.smt2"
+  ],
+  [
+    22,
+    "test/tiffcp-split",
+    "$palette-1c-8b.tiff out.tiff",
+    "test-expected-output/palette-1c-8b.tiff.smt2"
+  ],
+  [
+    22,
+    "test/tiffcp-split",
+    "$palette-1c-1b.tiff out.tiff",
+    "test-expected-output/palette-1c-1b.tiff.smt2"
+  ],
+  [
+    22,
+    "test/tiffcp-split",
+    "$palette-1c-4b.tiff out.tiff",
+    "test-expected-output/palette-1c-4b.tiff.smt2"
+  ],
+    [
+    23,
+    "test/tiffcp-split-join",
+    "$minisblack-1c-8b.tiff out.tiff",
+    "test-expected-output/minisblack-1c-8b.smt2"
+  ],
+  [
+    23,
+    "test/tiffcp-split-join",
+    "$rgb-3c-8b out.tiff",
+    "test-expected-output/rgb-3c-8b.smt2"
+  ],
+  [
+    23,
+    "test/tiffcp-split-join",
+    "$palette-1c-8b.tiff out.tiff",
+    "test-expected-output/palette-1c-8b.tiff.smt2"
+  ],
+  [
+    23,
+    "test/tiffcp-split-join",
+    "$palette-1c-1b.tiff out.tiff",
+    "test-expected-output/palette-1c-1b.tiff.smt2"
+  ],
+  [
+    23,
+    "test/tiffcp-split-join",
+    "$palette-1c-4b.tiff out.tiff",
+    "test-expected-output/palette-1c-4b.tiff.smt2"
+  ]
+]
