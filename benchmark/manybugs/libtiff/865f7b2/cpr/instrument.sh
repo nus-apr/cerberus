@@ -52,3 +52,12 @@ cp -rf components $dir_name
 cp -rf test-input-files $dir_name
 cp -rf test-expected-output $dir_name
 cp -rf seed-dir $dir_name
+
+# Convert shell to binary as a driver
+cd $dir_name/src/test
+sed -i "s/IMG_UNCOMPRESSED/1/g" tiffcp-split.sh
+sed -i "s/IMG_UNCOMPRESSED/1/g" tiffcp-split-join.sh
+CC=$TRIDENT_CC CXX=$TRIDENT_CXX shc -f tiffcp-split.sh
+CC=$TRIDENT_CC CXX=$TRIDENT_CXX shc -f tiffcp-split-join.sh
+mv tiffcp-split.sh.x tiffcp-split
+mv tiffcp-split-join.sh.x tiffcp-split-join
