@@ -449,9 +449,9 @@ def run(arg_list):
             bug_name = str(experiment_item[KEY_BUG_ID])
             subject_name = str(experiment_item[KEY_SUBJECT])
             directory_name = CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
-            FILE_SETUP_LOG = DIR_LOGS + "/" + str(bug_name) + "-setup.log"
-            FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(bug_name) + "-output.log"
-            FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(bug_name) + "-instrument.log"
+            FILE_SETUP_LOG = DIR_LOGS + "/" + str(config_id) + "-" + str(bug_name) + "-setup.log"
+            FILE_OUTPUT_LOG = DIR_LOGS + "/" + str(config_id) + "-" + str(bug_name) + "-output.log"
+            FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(config_id) + "-" + str(bug_name) + "-instrument.log"
             setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
             deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
             print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
