@@ -7,6 +7,16 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 cd $dir_name/src
 make clean
 
+# Copy Seed Files
+cd test
+find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.bmp' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.gif' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pgm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.ppm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pbm' -exec cp  {} $dir_name/seed-dir/ \;
+cd $dir_name/src
+
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
     touch "$dir_name/src/INSTRUMENTED_CPR"
 fi
@@ -47,7 +57,7 @@ cd src
 make CXX=wllvm++ CC=wllvm CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
 cd ./test
 make clean
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
 extract-bc long_tag
 
 # Copy remaining files to run CPR.
