@@ -308,6 +308,31 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     abs_path_binary = deploy_path + "/" + binary_path
 
+    test_id_list = ""
+    for test_id in failing_test_list:
+        test_id_list += test_id + " "
+    if passing_test_list:
+        for test_id in passing_test_list:
+            test_id_list += test_id + " "
+
+    if fix_location:
+        abs_path_buggy_file = deploy_path + "/" + fix_location
+    else:
+        with open(deploy_path + "/manifest.txt", "r") as man_file:
+            abs_path_buggy_file = deploy_path + "/" + man_file.readlines()[0].strip().replace("\n", "")
+
+    print("\t[INFO] running Fix2Fit")
+
+    repair_command = "export SUBJECT_DIR={0}; ".format(setup_dir_path)
+    repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
+    repair_command += "export TESTCASE={0}; ".format(test_id_list)
+    repair_command += "export DRIVER=./test.sh; "
+    repair_command += "export BINARY={0}; ".format(abs_path_binary)
+    repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
+    repair_command += "cd {0}; timeout {1}h bash /src/script/run.sh ".format(setup_dir_path, str(timeout))
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
+
     # export SUBJECT_DIR=setup_dir_path
     # export BUGGY_FILE=deploy_path/src/fix_location
     # export TESTCASE=passing_test_list+failing_test_list
@@ -315,7 +340,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # @Ridwan: do the test.sh at setup_dir_path take any argument?
     # export BINARY=???
     # invoke /src/script/run.sh at the setup_dir_path
-    print("\t[INFO] running Fix2Fit")
+
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
