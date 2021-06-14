@@ -316,10 +316,10 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             test_id_list += test_id + " "
 
     if fix_location:
-        abs_path_buggy_file = deploy_path + "/" + fix_location
+        abs_path_buggy_file = deploy_path + "/src/" + fix_location
     else:
         with open(deploy_path + "/manifest.txt", "r") as man_file:
-            abs_path_buggy_file = deploy_path + "/" + man_file.readlines()[0].strip().replace("\n", "")
+            abs_path_buggy_file = deploy_path + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
 
     print("\t[INFO] running Fix2Fit")
 
