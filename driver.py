@@ -16,6 +16,7 @@ KEY_FAILING_TEST = "failing_test"
 KEY_CONFIG_TIMEOUT = "timeout"
 KEY_CONFIG_FIX_LOC = "fault_location"
 KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
+KEY_BINARY_PATH = "binary_path"
 
 
 ARG_DATA_PATH = "--data-dir="
@@ -302,9 +303,11 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     print("\t[INFO] running GenProg")
 
 
-def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
+    abs_path_binary = deploy_path + "/" + binary_path
+
     # export SUBJECT_DIR=setup_dir_path
     # export BUGGY_FILE=deploy_path/src/fix_location
     # export TESTCASE=passing_test_list+failing_test_list
@@ -326,7 +329,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     fix_location = None
-
+    binary_path = experiment_info[KEY_BINARY_PATH]
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
 
@@ -337,7 +340,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     elif CONF_TOOL_NAME == "prophet":
         prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "fix2fit":
-        fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
+        fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
         genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     else:
