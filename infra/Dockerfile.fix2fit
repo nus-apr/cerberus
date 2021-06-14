@@ -1,14 +1,13 @@
-# FROM FROM ubuntu:20.04
-FROM gcr.io/oss-fuzz-base/base-builder
+FROM gaoxiang9430/fix2fit
 MAINTAINER Gao Xiang <gaoxiang@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 
 # install experiment dependencies
-RUN apt-get install -y  \
-    autopoint \
+RUN apt-get update && apt-get install -y  \
     automake \
+    autopoint \
     bison \
     flex \
     gettext \
@@ -17,71 +16,28 @@ RUN apt-get install -y  \
     libfreetype6 \
     libfreetype6-dev \
     libjpeg-dev \
-    libtool \
-    libxml2-dev \
     liblzma-dev \
-    nasm \
-    pkg-config \
-    texinfo \
-    yasm \
-    xutils-dev \
+    libnuma-dev \
     libpciaccess-dev \
     libpython-dev \
     libpython3-dev \
+    libsdl1.2-dev  \
+    libtool \
+    libvdpau-dev \
     libx11-dev \
     libxcb-xfixes0-dev \
     libxcb1-dev \
     libxcb-shm0-dev \
-    libsdl1.2-dev  \
-    libvdpau-dev \
-    libnuma-dev \
-    vim
+    libxml2-dev \
+    nasm \
+    nano \
+    pkg-config \
+    psmisc \
+    texinfo \
+    xutils-dev \
+    yasm
 
-RUN apt-get install -y build-essential cmake zlib1g-dev libtinfo-dev python unzip
-RUN apt-get install -y libboost-filesystem-dev libboost-program-options-dev libboost-log-dev wget
-
-WORKDIR $SRC
-
-RUN mkdir f1x-oss-fuzz
-RUN mkdir f1x-oss-fuzz/repair/
-
-#ADD docs       f1x-oss-fuzz/docs
-ADD Fix2Fit/infra/repair.zip       f1x-oss-fuzz/
-ADD Fix2Fit/aflgo                  $SRC/aflgo
-ADD Fix2Fit/scripts/build_aflgo.sh /src/build_aflgo.sh
-ADD Fix2Fit/scripts/driver         /driver
-ADD Fix2Fit/projects/scripts       $SRC/scripts
-ADD Fix2Fit/scripts/build.sh       $SRC/build.sh
-
-RUN unzip f1x-oss-fuzz/repair.zip -d f1x-oss-fuzz/repair/
-RUN rm -rf f1x-oss-fuzz/repair.zip
-RUN cp f1x-oss-fuzz/repair/lib/* /usr/lib/
-
-ENV C_INCLUDE_PATH="$C_INCLUDE_PATH:/src/f1x-oss-fuzz/repair/include"
-ENV CPLUS_INCLUDE_PATH="$CPLUS_INCLUDE_PATH:/src/f1x-oss-fuzz/repair/include"
-ENV PATH="/src/f1x-oss-fuzz/repair/bin/:${PATH}"
-
-RUN chmod u+x $SRC/build_aflgo.sh
-RUN $SRC/build_aflgo.sh
-ENV PATH="$SRC/llvm-4.0.0/install/bin/:${PATH}"
-ENV AFLGO="$SRC/aflgo"
-
-RUN git config --global user.email "gaoxiang9430@gmail.com"
-RUN git config --global user.name "Gao Xiang"
-
-ENV IS_DOCKER_SINGLE_CORE_MODE=
-
-# configuration for F1X
-ENV F1X_PROJECT_CC="/src/aflgo/afl-clang-fast"
-ENV F1X_PROJECT_CXX="/src/aflgo/afl-clang-fast++"
-ENV CC="f1x-cc"
-ENV CXX="f1x-cxx"
-ENV LDFLAGS="-lpthread"
-ENV PATH="$PATH:/src/scripts"
-
-WORKDIR /src/f1x-oss-fuzz/repair/CInterface
-RUN make
-
-RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
+RUN rm -rf /experiments
+RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/cerberus.git /experiments
 WORKDIR /experiments
 
