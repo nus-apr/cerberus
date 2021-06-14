@@ -325,7 +325,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     repair_command = "export SUBJECT_DIR={0}; ".format(setup_dir_path)
     repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
-    repair_command += "export TESTCASE={0}; ".format(test_id_list)
+    repair_command += "export TESTCASE=\"{0}\"; ".format(test_id_list)
     repair_command += "export DRIVER=./test.sh; "
     repair_command += "export BINARY={0}; ".format(abs_path_binary)
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
