@@ -306,7 +306,13 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
+    global CONF_TOOL_NAME
     abs_path_binary = deploy_path + "/" + binary_path
+    seed_dir = setup_dir_path + "/seed-dir"
+    if not os.path.isdir(seed_dir):
+        pre_process_command = "cd " + setup_dir_path + "/" + CONF_TOOL_NAME
+        pre_process_command += "bash pre-process.sh"
+        execute_command(pre_process_command)
 
     test_id_list = ""
     for test_id in failing_test_list:
@@ -340,7 +346,6 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # @Ridwan: do the test.sh at setup_dir_path take any argument?
     # export BINARY=???
     # invoke /src/script/run.sh at the setup_dir_path
-
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
