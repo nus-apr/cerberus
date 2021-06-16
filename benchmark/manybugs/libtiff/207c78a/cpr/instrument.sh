@@ -39,11 +39,9 @@ cd $dir_name
 sed -i '33i #include <klee/klee.h>' src/test/short_tag.c
 sed -i '44d ' src/test/short_tag.c
 sed -i '44i const char      *filename = "short_test.tiff";' src/test/short_tag.c
-sed -i '70,79 s/^/\/\//' src/test/short_tag.c
-sed -i '80i #define NPAIREDTAGS   4' src/test/short_tag.c
-sed -i '83i main(int argc, char** argv)' src/test/short_tag.c
-sed -i '84d' src/test/short_tag.c
-sed -i '88i \\tfilename = argv[1];'  src/test/short_tag.c
+sed -i '82i main(int argc, char** argv)' src/test/short_tag.c
+sed -i '82d' src/test/short_tag.c
+sed -i '87i \\tfilename = argv[1];'  src/test/short_tag.c
 
 
 ## Instrument libtiff component.
