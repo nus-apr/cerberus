@@ -49,9 +49,11 @@ sed -i '603i \\tklee_assert(td->td_nstrips != 2);' src/libtiff/tif_dirread.c
 
 ## Compile instrumentation and test driver.
 cd src
+extract-bc tools/tiffcp
 make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include -g -O0" -j32
-cd tools
-extract-bc tiffcp
+cd ./test
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
+
 
 ## Copy remaining files to run CPR.
 cd $script_dir
