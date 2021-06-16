@@ -74,6 +74,7 @@ cp spec.smt2 $dir_name
 cp -rf components $dir_name
 cp -rf test-input-files $dir_name
 cp -rf test-expected-output $dir_name
+cp $script_dir/seed-dir/* $dir_name/seed-dir
 cp $script_dir/test-config.json $dir_name
 cp $script_dir/seed-config.json $dir_name
 

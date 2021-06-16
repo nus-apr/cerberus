@@ -71,6 +71,7 @@ cp -rf $script_dir/test-input-files $dir_name
 cp -rf $script_dir/test-expected-output $dir_name
 cp $script_dir/test-config.json $dir_name
 cp $script_dir/seed-config.json $dir_name
+cp $script_dir/seed-dir/* $dir_name/seed-dir
 
 # Convert shell to binary as a driver
 cd $dir_name/src/test
