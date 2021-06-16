@@ -47,6 +47,27 @@ sed -i '595d' src/libtiff/tif_dirread.c
 sed -i '602i \\tTRIDENT_OUTPUT("obs", "i32", td->td_nstrips);' src/libtiff/tif_dirread.c
 sed -i '603i \\tklee_assert(td->td_nstrips != 2);' src/libtiff/tif_dirread.c
 
+## Instrument Short_TAG
+sed -i '43d ' src/test/short_tag.c
+sed -i '43i const char      *filename = "short_test.tiff";' src/test/short_tag.c
+sed -i '81i main(int argc, char** argv)' src/test/short_tag.c
+sed -i '82d' src/test/short_tag.c
+sed -i '86i \\tfilename = argv[1];'  src/test/short_tag.c
+sed -i '89,150 s/^/\/\//' src/test/short_tag.c
+
+## Instrument Long_TAG
+sed -i '69i \\tfilename = argv[1];'  src/test/long_tag.c
+sed -i '70,121 s/^/\/\//' src/test/long_tag.c
+
+## Instrument Strip_RW
+sed -i '60i \\tfilename = argv[1];'  src/test/strip_rw.c
+sed -i '76,82 s/^/\/\//' src/test/strip_rw.c
+sed -i '118,124 s/^/\/\//' src/test/strip_rw.c
+sed -i '135,141 s/^/\/\//' src/test/strip_rw.c
+sed -i '90d'  src/test/strip_rw.c
+sed -i '106d'  src/test/strip_rw.c
+sed -i '132d'  src/test/strip_rw.c
+
 ## Compile instrumentation and test driver.
 cd src
 extract-bc tools/tiffcp
