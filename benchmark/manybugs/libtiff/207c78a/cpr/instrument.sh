@@ -35,14 +35,26 @@ make CC=$TRIDENT_CC CXX=$TRIDENT_CXX -j32
 
 cd $dir_name
 
-## Instrument test driver (TIFFTAG_DOTRANGE=336)
-sed -i '33i #include <klee/klee.h>' src/test/short_tag.c
-sed -i '44d ' src/test/short_tag.c
-sed -i '44i const char      *filename = "short_test.tiff";' src/test/short_tag.c
-sed -i '82i main(int argc, char** argv)' src/test/short_tag.c
-sed -i '82d' src/test/short_tag.c
-sed -i '87i \\tfilename = argv[1];'  src/test/short_tag.c
+## Instrument Short_TAG
+sed -i '43d ' src/test/short_tag.c
+sed -i '43i const char      *filename = "short_test.tiff";' src/test/short_tag.c
+sed -i '81i main(int argc, char** argv)' src/test/short_tag.c
+sed -i '81d' src/test/short_tag.c
+sed -i '86i \\tfilename = argv[1];'  src/test/short_tag.c
+sed -i '89,152 s/^/\/\//' src/test/short_tag.c
 
+## Instrument Long_TAG
+sed -i '69i \\tfilename = argv[1];'  src/test/long_tag.c
+sed -i '70,121 s/^/\/\//' src/test/long_tag.c
+
+## Instrument Strip_RW
+sed -i '60i \\tfilename = argv[1];'  src/test/strip_rw.c
+sed -i '76,82 s/^/\/\//' src/test/strip_rw.c
+sed -i '118,124 s/^/\/\//' src/test/strip_rw.c
+sed -i '135,141 s/^/\/\//' src/test/strip_rw.c
+sed -i '90d'  src/test/strip_rw.c
+sed -i '106d'  src/test/strip_rw.c
+sed -i '132d'  src/test/strip_rw.c
 
 ## Instrument libtiff component.
 sed -i '33i // KLEE' src/libtiff/tif_dirwrite.c
