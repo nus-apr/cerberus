@@ -69,7 +69,6 @@ cp $script_dir/seed-file $dir_name
 cp -rf $script_dir/components $dir_name
 cp -rf $script_dir/test-input-files $dir_name
 cp -rf $script_dir/test-expected-output $dir_name
-cp -rf $script_dir/seed-dir $dir_name
 cp $script_dir/test-config.json $dir_name
 cp $script_dir/seed-config.json $dir_name
 
