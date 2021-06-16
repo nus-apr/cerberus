@@ -39,9 +39,9 @@ cd $dir_name
 sed -i '43d ' src/test/short_tag.c
 sed -i '43i const char      *filename = "short_test.tiff";' src/test/short_tag.c
 sed -i '81i main(int argc, char** argv)' src/test/short_tag.c
-sed -i '81d' src/test/short_tag.c
+sed -i '82d' src/test/short_tag.c
 sed -i '86i \\tfilename = argv[1];'  src/test/short_tag.c
-sed -i '89,152 s/^/\/\//' src/test/short_tag.c
+sed -i '89,150 s/^/\/\//' src/test/short_tag.c
 
 ## Instrument Long_TAG
 sed -i '69i \\tfilename = argv[1];'  src/test/long_tag.c
