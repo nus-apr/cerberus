@@ -4,6 +4,17 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
+cd $dir_name/src/test
+
+# Copy Seed Files
+mkdir $dir_name/seed-dir
+find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.bmp' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.gif' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pgm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.ppm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pbm' -exec cp  {} $dir_name/seed-dir/ \;
+
 cd $dir_name/src
 make clean
 
@@ -46,11 +57,10 @@ extract-bc tiffcp
 cd $script_dir
 cp repair.conf $dir_name
 cp spec.smt2 $dir_name
-cp test-input $dir_name
 cp -rf components $dir_name
 cp -rf test-input-files $dir_name
 cp -rf test-expected-output $dir_name
-cp -rf seed-dir $dir_name
+
 
 # Convert shell to binary as a driver
 cd $dir_name/src/test

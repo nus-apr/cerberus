@@ -4,7 +4,19 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
+cd $dir_name/src/test
+
+# Copy Seed Files
+mkdir $dir_name/seed-dir
+find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.bmp' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.gif' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pgm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.ppm' -exec cp  {} $dir_name/seed-dir/ \;
+find . -type f -iname '*.pbm' -exec cp  {} $dir_name/seed-dir/ \;
+
 cd $dir_name/src
+
 make clean
 
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
@@ -65,17 +77,16 @@ sed -i '346d' src/libtiff/tif_dirwrite.c
 cd src
 make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include" -j32
 cd ./test
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include" -j32 short_tag.log
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include" -j32 long_tag.log
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
 extract-bc short_tag
-extract-bc long_tag
 
 ## Copy remaining files to run CPR.
 cd $script_dir
 cp repair.conf $dir_name
 cp spec.smt2 $dir_name
 cp -rf components $dir_name
-cp t1.smt2 $dir_name
+cp -rf test-input-files $dir_name
+cp -rf test-expected-output $dir_name
 
 # Convert shell to binary as a driver
 cd $dir_name/src/test
