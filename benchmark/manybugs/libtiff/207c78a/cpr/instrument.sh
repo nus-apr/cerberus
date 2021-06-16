@@ -37,27 +37,14 @@ cd $dir_name
 
 ## Instrument test driver (TIFFTAG_DOTRANGE=336)
 sed -i '33i #include <klee/klee.h>' src/test/short_tag.c
+sed -i '44d ' src/test/short_tag.c
+sed -i '44i const char      *filename = "short_test.tiff";' src/test/short_tag.c
 sed -i '70,79 s/^/\/\//' src/test/short_tag.c
 sed -i '80i #define NPAIREDTAGS   4' src/test/short_tag.c
 sed -i '83i main(int argc, char** argv)' src/test/short_tag.c
 sed -i '84d' src/test/short_tag.c
+sed -i '88i \\tfilename = argv[1];'  src/test/short_tag.c
 
-sed -i '124i \\n'  src/test/short_tag.c
-sed -i '125i \\tuint32 symDotRangeTag;'  src/test/short_tag.c
-sed -i '127i \\tsymDotRangeTag = atoi(argv[1]);'  src/test/short_tag.c
-sed -i '129i \\n'  src/test/short_tag.c
-
-sed -i '130i \\tconst struct {'  src/test/short_tag.c
-sed -i '131i \\t\tconst ttag_t    tag;'  src/test/short_tag.c
-sed -i '132i \\t\tconst uint16    values[2];'  src/test/short_tag.c
-sed -i '133i \\t} short_paired_tags[] = {'  src/test/short_tag.c
-sed -i '134i \\t\t{ TIFFTAG_PAGENUMBER, {1, 1} },'  src/test/short_tag.c
-sed -i '135i \\t\t{ TIFFTAG_HALFTONEHINTS, {0, 255} },'  src/test/short_tag.c
-sed -i '136i \\t\t{ symDotRangeTag, {8, 16} },'  src/test/short_tag.c
-#sed -i '143i \\t\t{ symDotRangeTag, {symLowBound, symHighBound} },'  src/test/short_tag.c
-sed -i '137i \\t\t//    { TIFFTAG_DOTRANGE, {8, 16} }, //, {8, 16} }, // uint32 ttag_t TIFFTAG_DOTRANGE'  src/test/short_tag.c
-sed -i '138i \\t\t{ TIFFTAG_YCBCRSUBSAMPLING, {2, 1} }'  src/test/short_tag.c
-sed -i '139i \\t};'  src/test/short_tag.c
 
 ## Instrument libtiff component.
 sed -i '33i // KLEE' src/libtiff/tif_dirwrite.c
