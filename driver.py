@@ -330,13 +330,14 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
-    repair_command += " -T 15000  "
+    repair_command += " -T 15000  --enable-validation"
     repair_command += " --driver={0} ".format(test_driver_path)
     repair_command += " -b {0} ".format(build_script_path)
     repair_command += " --disable-dteq  -a -o patches "
-    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
     patch_dir = deploy_path + "/patches"
     # move patches to result directory
     if os.path.isdir(patch_dir):
