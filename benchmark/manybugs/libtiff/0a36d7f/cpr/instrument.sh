@@ -46,9 +46,8 @@ sed -i '43d ' src/test/short_tag.c
 sed -i '43i const char      *filename = "short_test.tiff";' src/test/short_tag.c
 sed -i '81i main(int argc, char** argv)' src/test/short_tag.c
 sed -i '82d' src/test/short_tag.c
-sed -i '86i \\tfilename = argv[1];'  src/test/short_tag.c
 sed -i '89,150 s/^/\/\//' src/test/short_tag.c
-
+sed -i '151i \\tfilename = argv[1];'  src/test/short_tag.c
 
 ## Instrument Strip_RW
 sed -i '60i \\tfilename = argv[1];'  src/test/strip_rw.c
