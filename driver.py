@@ -337,9 +337,11 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
+    patch_dir = deploy_path + "/patches"
     # move patches to result directory
-    copy_command = "mv  " + deploy_path + "/patches " + DIR_EXPERIMENT_RESULT + ";"
-    execute_command(copy_command)
+    if os.path.isdir(patch_dir):
+        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        execute_command(copy_command)
 
 
 def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
