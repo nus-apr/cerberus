@@ -309,7 +309,7 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
-    abs_path_binary = deploy_path + "/" + binary_path
+    abs_path_binary = deploy_path + "/src/" + binary_path
     test_driver_path = setup_dir_path + "/test.sh"
     build_script_path = setup_dir_path + "/build.sh"
     test_id_list = ""
