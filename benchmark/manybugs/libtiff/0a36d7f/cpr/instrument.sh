@@ -59,24 +59,30 @@ sed -i '90d'  src/test/strip_rw.c
 sed -i '106d'  src/test/strip_rw.c
 sed -i '132d'  src/test/strip_rw.c
 
-sed -i '35i // KLEE' src/test/long_tag.c
-sed -i '36i #include <klee/klee.h>' src/test/long_tag.c
-sed -i '37i #ifndef TRIDENT_OUTPUT' src/test/long_tag.c
-sed -i '38i #define TRIDENT_OUTPUT(id, typestr, value) value' src/test/long_tag.c
-sed -i '39i #endif' src/test/long_tag.c
-##
-sed -i '69i \\tfilename = argv[1];'  src/test/long_tag.c
-sed -i '70,125 s/^/\/\//' src/test/long_tag.c
-sed -i '129i \\tklee_print_expr("tif=", tif);' src/test/long_tag.c
-sed -i '130i \\tTRIDENT_OUTPUT("obs", "i32", tif);' src/test/long_tag.c
-sed -i '131i \\tklee_assert(tif > 0);' src/test/long_tag.c
+## Instrument LongTag
+sed -i '65,120 s/^/\/\//' src/test/long_tag.c
+sed -i '122i \\tfilename = argv[1];'  src/test/long_tag.c
+
+
+sed -i '54i // KLEE' src/libtiff/tif_unix.c
+sed -i '55i #include <klee/klee.h>' src/libtiff/tif_unix.c
+sed -i '56i #ifndef TRIDENT_OUTPUT' src/libtiff/tif_unix.c
+sed -i '57i #define TRIDENT_OUTPUT(id, typestr, value) value' src/libtiff/tif_unix.c
+sed -i '58i #endif' src/libtiff/tif_unix.c
+sed -i '166i {' src/libtiff/tif_unix.c
+sed -i '167i \\t tif = ((TIFF *)0);' src/libtiff/tif_unix.c
+sed -i '168i \\t goto obs;' src/libtiff/tif_unix.c
+sed -i '170i }' src/libtiff/tif_unix.c
+sed -i '184i \\t tif = ((TIFF *)0);' src/libtiff/tif_unix.c
+sed -i '185i \\t goto obs;' src/libtiff/tif_unix.c
+sed -i '192i obs: TRIDENT_OUTPUT("obs", "i32", tif);' src/libtiff/tif_unix.c
+sed -i '193i \\tklee_assert(tif > 0);' src/libtiff/tif_unix.c
 
 
 # Compile instrumentation and test driver.
 cd src
 make CXX=$TRIDENT_CXX CC=$TRIDENT_CC  CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
 cd ./test
-make clean
 make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
 extract-bc long_tag
 
