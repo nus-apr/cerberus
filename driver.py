@@ -114,6 +114,8 @@ def setup_experiment(script_path, bug_id):
     set_cc = " CC=gcc CXX=g++ "
     if str(CONF_TOOL_NAME).lower() == "cpr":
         set_cc = " CC=wllvm CXX=wllvm++ "
+    elif str(CONF_TOOL_NAME).lower() == "f1x":
+        set_cc = " CC=f1x-cc CXX=f1x-cxx "
 
     setup_command = "cd " + script_path + "; { "
     setup_command += "bash setup.sh; "
@@ -328,7 +330,7 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
-    repair_command += " -T 15000 --enable-llvm-cov "
+    repair_command += " -T 15000  "
     repair_command += " --driver={0} ".format(test_driver_path)
     repair_command += " -b {0} ".format(build_script_path)
     repair_command += " --disable-dteq  -a -o patches "
