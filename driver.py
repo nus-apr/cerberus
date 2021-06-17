@@ -303,6 +303,43 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     print("\t[INFO] running GenProg")
 
 
+def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
+    # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
+    global CONF_TOOL_NAME
+    abs_path_binary = deploy_path + "/" + binary_path
+    test_driver_path = setup_dir_path + "/test.sh"
+    build_script_path = setup_dir_path + "/build.sh"
+    test_id_list = ""
+    for test_id in failing_test_list:
+        test_id_list += test_id + " "
+    if passing_test_list:
+        for test_id in passing_test_list:
+            test_id_list += test_id + " "
+
+    if fix_location:
+        abs_path_buggy_file = deploy_path + "/src/" + fix_location
+    else:
+        with open(deploy_path + "/manifest.txt", "r") as man_file:
+            abs_path_buggy_file = deploy_path + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
+
+    print("\t[INFO] running F1X")
+
+    repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
+    repair_command += " -f {0} ".format(abs_path_buggy_file)
+    repair_command += " -t {0} ".format(test_id_list)
+    repair_command += " -T 15000 --enable-llvm-cov "
+    repair_command += " --driver={0} ".format(test_driver_path)
+    repair_command += " -b {0} ".format(build_script_path)
+    repair_command += " --disable-dteq  -a -o patches "
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
+
+    # move patches to result directory
+    copy_command = "mv  " + deploy_path + "/patches " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
+
+
 def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
@@ -371,6 +408,8 @@ def repair(deploy_path, setup_dir_path, experiment_info):
         prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "fix2fit":
         fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
+    elif CONF_TOOL_NAME == "f1x":
+        f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
         genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     else:
