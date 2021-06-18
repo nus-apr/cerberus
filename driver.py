@@ -349,7 +349,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
-    abs_path_binary = deploy_path + "/" + binary_path
+    abs_path_binary = deploy_path + "/src/" + binary_path
     seed_dir = setup_dir_path + "/seed-dir"
     if not os.path.isdir(seed_dir):
         pre_process_command = "cd " + setup_dir_path + "/" + CONF_TOOL_NAME + ";"
