@@ -333,15 +333,19 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command += " -T 15000  --enable-validation"
     repair_command += " --driver={0} ".format(test_driver_path)
     repair_command += " -b {0} ".format(build_script_path)
-    repair_command += " --disable-dteq  -a -o patches "
-    execute_command(repair_command)
-
+    dry_command = repair_command + " --disable-dteq"
+    execute_command(dry_command)
+    all_command = repair_command + " --disable-dteq  -a -o patches "
+    execute_command(all_command)
+    repair_command = repair_command + " --disable-dteq  -a -o patches-top --output-top 10"
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
+
+
     patch_dir = deploy_path + "/patches"
     # move patches to result directory
     if os.path.isdir(patch_dir):
-        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        copy_command = "mv  " + patch_dir + "* " + DIR_EXPERIMENT_RESULT + ";"
         execute_command(copy_command)
 
 
