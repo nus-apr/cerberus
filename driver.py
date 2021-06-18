@@ -381,13 +381,18 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
-    # export SUBJECT_DIR=setup_dir_path
-    # export BUGGY_FILE=deploy_path/src/fix_location
-    # export TESTCASE=passing_test_list+failing_test_list
-    # export DRIVER=./test.sh
-    # @Ridwan: do the test.sh at setup_dir_path take any argument?
-    # export BINARY=???
-    # invoke /src/script/run.sh at the setup_dir_path
+    patch_gen_log = setup_dir_path + "/original.txt"
+    copy_command = "mv  " + patch_gen_log + " " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
+    patch_dir = setup_dir_path + "/patches"
+    # move patches to result directory
+    if os.path.isdir(patch_dir):
+        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        execute_command(copy_command)
+
+    copy_command = "cd " + setup_dir_path + ";"
+    copy_command += "mv  f1x-* " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
