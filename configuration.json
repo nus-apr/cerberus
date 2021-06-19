@@ -13,42 +13,48 @@
   },
   "C3": {
     "id": "C3",
-    "timeout": "1",
+    "timeout": "2",
     "fault_location": "dev",
     "passing_test_ratio": 0
   },
   "C4": {
     "id": "C4",
-    "timeout": "1",
+    "timeout": "2",
     "fault_location": "dev",
     "passing_test_ratio": 0.33
   },
   "C5": {
     "id": "C5",
-    "timeout": "1",
+    "timeout": "2",
     "fault_location": "dev",
     "passing_test_ratio": 0.66
   },
   "C6": {
     "id": "C6",
-    "timeout": "4",
+    "timeout": "2",
     "fault_location": "dev",
     "passing_test_ratio": 1
   },
   "C7": {
-    "id": "C1",
-    "timeout": "8",
+    "id": "C7",
+    "timeout": "4",
     "fault_location": "dev",
     "passing_test_ratio": 1
   },
   "C8": {
-    "id": "C1",
-    "timeout": "16",
-    "fault_location": "dev",
+    "id": "C8",
+    "timeout": "4",
+    "fault_location": "auto",
     "passing_test_ratio": 1
   },
   "C9": {
-    "id": "C1",
+    "id": "C9",
+    "timeout": "12",
+    "fault_location": "dev",
+    "passing_test_ratio": 1
+  },
+  "C10": {
+    "id": "C10",
     "timeout": "24",
     "fault_location": "dev",
     "passing_test_ratio": 1
