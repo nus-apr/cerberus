@@ -306,7 +306,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     print("\t[INFO] initializing for genprog")
     repair_conf_path = deploy_path + "/src/repair.conf"
     if not os.path.isfile(deploy_path + "/src/compile.pl"):
-        instrument_command = "cd " + setup_dir_path + "; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        instrument_command = "cd " + setup_dir_path + "/genprog; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
 
     repair_config_str = "--allow-coverage-fail \n" \
@@ -344,7 +344,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         conf_file.truncate()
 
     print("\t[INFO] running GenProg")
-    repair_command = "cd {0}; timeout {1}h  ".format(deploy_path, str(timeout))
+    repair_command = "cd {0}; timeout {1}h  ".format(deploy_path + "/src", str(timeout))
     repair_command += "genprog repair.conf "
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
