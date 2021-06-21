@@ -1,4 +1,4 @@
-FROM rshariffdeen/genprog:v3.0
+FROM squareslab/genprog
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -11,6 +11,7 @@ RUN apt-get update && apt-get install -y  \
     bison \
     flex \
     gettext \
+    git \
     gperf \
     libass-dev \
     libfreetype6 \
@@ -34,10 +35,13 @@ RUN apt-get update && apt-get install -y  \
     pkg-config \
     psmisc \
     python \
+    python3 \
     texinfo \
+    time \
     xutils-dev \
     yasm \
     wget
 
+ENV PATH "/root/.opam/system/bin/:/opt/genprog/bin:${PATH}"
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
