@@ -213,13 +213,14 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             test_id_list += test_id + " "
     # initialize_command = "source /angelix/activate"
     # execute_command(initialize_command)
-    angelix_command = "angelix {0} {1} {2} {3}  " \
+
+    angelix_command = "timeout {8}h  angelix {0} {1} {2} {3}  " \
                       "--configure {4}  " \
                       "--golden {5}  " \
                       "--build {6} " \
                       "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
                                                         test_id_list, config_script_path, gold_path,
-                                                        build_script_path, str(syn_timeout))
+                                                        build_script_path, str(syn_timeout), str(timeout))
 
     if fix_location:
         angelix_command += " --lines {0}  ".format(line_number)
