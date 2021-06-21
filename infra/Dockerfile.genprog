@@ -1,4 +1,4 @@
-FROM rshariffdeen/genprog
+FROM rshariffdeen/genprog:v3.0
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
@@ -33,6 +33,7 @@ RUN apt-get update && apt-get install -y  \
     nano \
     pkg-config \
     psmisc \
+    python \
     texinfo \
     xutils-dev \
     yasm \
