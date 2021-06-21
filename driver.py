@@ -303,7 +303,51 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
 def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    print("\t[INFO] initializing for genprog")
+    repair_conf_path = deploy_path + "/src/repair.conf"
+    if not os.path.isfile(deploy_path + "/src/compile.pl"):
+        instrument_command = "cd " + setup_dir_path + "; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        execute_command(instrument_command)
+
+    repair_config_str = "--allow-coverage-fail \n" \
+                        "--no-rep-cache \n" \
+                        "--no-test-cache \n" \
+                        "--label-repair \n" \
+                        "--sanity no \n" \
+                        "--multi-file \n" \
+                        "--search ww \n" \
+                        "--compiler-command perl compile.pl __EXE_NAME__ > build.log \n" \
+                        "--test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1 \n" \
+                        "--crossover subset \n" \
+                        "--rep cilpatch \n" \
+                        "--suffix-extension .c \n" \
+                        "--describe-machine \n" \
+                        "--program bugged-program.txt \n" \
+                        "--prefix preprocessed \n" \
+                        "--seed 0 \n" \
+                        "--popsize 40 \n" \
+                        "--generations 10 \n" \
+                        "--promut 1 \n" \
+                        "--mutp 0 \n" \
+                        "--fitness-in-parallel 1 \n" \
+                        "--rep-cache default.cache \n" \
+                        "--pos-tests {p_size} \n" \
+                        "--neg-tests {n_size} \n" \
+                        "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh \n" \
+                        "--continue".format(bug_id=bug_id, p_size=len(passing_test_list), n_size=len(failing_test_list))
+
+    if not os.path.isfile(repair_conf_path):
+        open(repair_conf_path, "w")
+    with open(repair_conf_path, "r+") as conf_file:
+        conf_file.seek(0)
+        conf_file.write(repair_config_str)
+        conf_file.truncate()
+
     print("\t[INFO] running GenProg")
+    repair_command = "cd {0}; timeout {1}h  ".format(deploy_path, str(timeout))
+    repair_command += "genprog repair.conf "
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
 
 
 def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
