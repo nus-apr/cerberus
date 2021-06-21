@@ -309,7 +309,7 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
-    abs_path_binary = deploy_path + "/" + binary_path
+    abs_path_binary = deploy_path + "/src/" + binary_path
     test_driver_path = setup_dir_path + "/test.sh"
     build_script_path = setup_dir_path + "/build.sh"
     test_id_list = ""
@@ -330,18 +330,22 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
-    repair_command += " -T 15000  --enable-validation"
+    repair_command += " -T 15000"
     repair_command += " --driver={0} ".format(test_driver_path)
     repair_command += " -b {0} ".format(build_script_path)
-    repair_command += " --disable-dteq  -a -o patches "
-    execute_command(repair_command)
-
+    dry_command = repair_command + " --disable-dteq"
+    execute_command(dry_command)
+    all_command = repair_command + " --disable-dteq  -a -o patches "
+    execute_command(all_command)
+    repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10"
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
+
+
     patch_dir = deploy_path + "/patches"
     # move patches to result directory
     if os.path.isdir(patch_dir):
-        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        copy_command = "mv  " + patch_dir + "* " + DIR_EXPERIMENT_RESULT + ";"
         execute_command(copy_command)
 
 
@@ -349,7 +353,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
-    abs_path_binary = deploy_path + "/" + binary_path
+    abs_path_binary = deploy_path + "/src/" + binary_path
     seed_dir = setup_dir_path + "/seed-dir"
     if not os.path.isdir(seed_dir):
         pre_process_command = "cd " + setup_dir_path + "/" + CONF_TOOL_NAME + ";"
@@ -381,13 +385,18 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
-    # export SUBJECT_DIR=setup_dir_path
-    # export BUGGY_FILE=deploy_path/src/fix_location
-    # export TESTCASE=passing_test_list+failing_test_list
-    # export DRIVER=./test.sh
-    # @Ridwan: do the test.sh at setup_dir_path take any argument?
-    # export BINARY=???
-    # invoke /src/script/run.sh at the setup_dir_path
+    patch_gen_log = setup_dir_path + "/original.txt"
+    copy_command = "mv  " + patch_gen_log + " " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
+    patch_dir = setup_dir_path + "/patches"
+    # move patches to result directory
+    if os.path.isdir(patch_dir):
+        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        execute_command(copy_command)
+
+    copy_command = "cd " + setup_dir_path + ";"
+    copy_command += "mv  f1x-* " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
