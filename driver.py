@@ -336,6 +336,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
                         "--pos-tests {p_size}\n" \
                         "--neg-tests {n_size}\n" \
                         "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh\n" \
+                        "--label-repair\n" \
                         "--continue".format(bug_id=bug_id, p_size=len(passing_test_list), n_size=len(failing_test_list))
 
     if not os.path.isfile(repair_conf_path):
@@ -347,7 +348,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     print("\t[INFO] running GenProg")
     repair_command = "cd {0}; timeout -k 5m {1}h  ".format(deploy_path + "/src", str(timeout))
-    repair_command += "genprog repair.conf "
+    repair_command += "genprog --label-repair  repair.conf "
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
