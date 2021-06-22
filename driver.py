@@ -216,7 +216,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # initialize_command = "source /angelix/activate"
     # execute_command(initialize_command)
 
-    angelix_command = "timeout {8}h  angelix {0} {1} {2} {3}  " \
+    angelix_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
                       "--configure {4}  " \
                       "--golden {5}  " \
                       "--build {6} " \
@@ -289,7 +289,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
-    repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "
+    repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
     repair_command += " -full-synthesis -full-explore "
     repair_command += " -r {0}".format(deploy_path + "/workdir")
     repair_command += " -cond-ext -replace-ext  "
@@ -311,31 +311,31 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         instrument_command = "cd " + setup_dir_path + "/genprog; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
 
-    repair_config_str = "--allow-coverage-fail \n" \
-                        "--no-rep-cache \n" \
-                        "--no-test-cache \n" \
-                        "--label-repair \n" \
-                        "--sanity no \n" \
-                        "--multi-file \n" \
-                        "--search ww \n" \
-                        "--compiler-command perl compile.pl __EXE_NAME__ > build.log \n" \
-                        "--test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1 \n" \
-                        "--crossover subset \n" \
-                        "--rep cilpatch \n" \
-                        "--suffix-extension .c \n" \
-                        "--describe-machine \n" \
-                        "--program bugged-program.txt \n" \
-                        "--prefix preprocessed \n" \
-                        "--seed 0 \n" \
-                        "--popsize 40 \n" \
-                        "--generations 10 \n" \
-                        "--promut 1 \n" \
-                        "--mutp 0 \n" \
-                        "--fitness-in-parallel 1 \n" \
-                        "--rep-cache default.cache \n" \
-                        "--pos-tests {p_size} \n" \
-                        "--neg-tests {n_size} \n" \
-                        "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh \n" \
+    repair_config_str = "--allow-coverage-fail\n" \
+                        "--no-rep-cache\n" \
+                        "--no-test-cache\n" \
+                        "--label-repair\n" \
+                        "--sanity no\n" \
+                        "--multi-file\n" \
+                        "--search ww\n" \
+                        "--compiler-command perl compile.pl __EXE_NAME__ > build.log\n" \
+                        "--test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1\n" \
+                        "--crossover subset\n" \
+                        "--rep cilpatch\n" \
+                        "--suffix-extension .c\n" \
+                        "--describe-machine\n" \
+                        "--program bugged-program.txt\n" \
+                        "--prefix preprocessed\n" \
+                        "--seed 0\n" \
+                        "--popsize 40\n" \
+                        "--generations 10\n" \
+                        "--promut 1\n" \
+                        "--mutp 0\n" \
+                        "--fitness-in-parallel 1\n" \
+                        "--rep-cache default.cache\n" \
+                        "--pos-tests {p_size}\n" \
+                        "--neg-tests {n_size}\n" \
+                        "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh\n" \
                         "--continue".format(bug_id=bug_id, p_size=len(passing_test_list), n_size=len(failing_test_list))
 
     if not os.path.isfile(repair_conf_path):
@@ -346,7 +346,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         conf_file.truncate()
 
     print("\t[INFO] running GenProg")
-    repair_command = "cd {0}; timeout {1}h  ".format(deploy_path + "/src", str(timeout))
+    repair_command = "cd {0}; timeout -k 5m {1}h  ".format(deploy_path + "/src", str(timeout))
     repair_command += "genprog repair.conf "
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
