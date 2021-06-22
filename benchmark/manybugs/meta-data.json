@@ -8,7 +8,7 @@
    "failing_test": "22, 23",
    "passing_test": "2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 69, 70, 71, 72, 73, 74, 76, 77, 78",
    "count_neg": 2,
-   "count_pos": 31,
+   "count_pos": 33,
    "binary_path": "tools/tiffcp"
  },
  {
@@ -20,7 +20,7 @@
    "failing_test": "3",
    "passing_test": "2, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 1,
-   "count_pos": 32,
+   "count_pos": 34,
    "binary_path": "test/short_tag"
  },
  {

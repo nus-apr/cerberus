@@ -17,7 +17,8 @@ KEY_CONFIG_TIMEOUT = "timeout"
 KEY_CONFIG_FIX_LOC = "fault_location"
 KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
 KEY_BINARY_PATH = "binary_path"
-
+KEY_COUNT_NEG = "count_neg"
+KEY_COUNT_POS = "count_pos"
 
 ARG_DATA_PATH = "--data-dir="
 ARG_TOOL_PATH = "--tool-path="
@@ -303,7 +304,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     execute_command(copy_command)
 
 
-def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     print("\t[INFO] initializing for genprog")
     repair_conf_path = deploy_path + "/src/repair.conf"
@@ -336,8 +337,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
                         "--pos-tests {p_size}\n" \
                         "--neg-tests {n_size}\n" \
                         "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh\n" \
-                        "--label-repair\n" \
-                        "--continue".format(bug_id=bug_id, p_size=len(passing_test_list), n_size=len(failing_test_list))
+                        "--continue".format(bug_id=bug_id, p_size=len(count_pass), n_size=len(count_neg))
 
     if not os.path.isfile(repair_conf_path):
         open(repair_conf_path, "w")
@@ -457,6 +457,8 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     timeout = int(CONFIG_INFO[KEY_CONFIG_TIMEOUT])
     test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    count_pass = int(int(experiment_info[KEY_COUNT_POS]) * test_ratio)
+    count_neg = int(experiment_info[KEY_COUNT_NEG])
     fix_location = None
     binary_path = experiment_info[KEY_BINARY_PATH]
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
@@ -473,7 +475,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     elif CONF_TOOL_NAME == "f1x":
         f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
-        genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
+        genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location)
     else:
         exit("Unknown Tool Name")
 
