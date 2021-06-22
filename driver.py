@@ -175,9 +175,11 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     cpr_command += "{0} --time-duration={1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
     execute_command(cpr_command)
 
-    copy_output = "cp -rf /CPR/output/" + bug_id + " " + DIR_EXPERIMENT_RESULT
+    copy_output = "cp -rf /CPR/output/" + bug_id + " " + DIR_EXPERIMENT_RESULT + "/output"
     execute_command(copy_output)
-    copy_log = "cp -rf /CPR/logs/" + bug_id + " " + DIR_EXPERIMENT_RESULT
+    filter_command = "rm -rf " + DIR_EXPERIMENT_RESULT + "/output/klee-out-*"
+    execute_command(filter_command)
+    copy_log = "cp -rf /CPR/logs/" + bug_id + " " + DIR_EXPERIMENT_RESULT + "/logs"
     execute_command(copy_log)
 
 
