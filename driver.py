@@ -374,7 +374,7 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
 
     print("\t[INFO] running F1X")
 
-    repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
+    repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
     repair_command += " -T 15000"
@@ -428,7 +428,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += "export DRIVER=./test.sh; "
     repair_command += "export BINARY={0}; ".format(abs_path_binary)
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
-    repair_command += "cd {0}; timeout {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
+    repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
