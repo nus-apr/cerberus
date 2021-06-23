@@ -17,7 +17,8 @@ KEY_CONFIG_TIMEOUT = "timeout"
 KEY_CONFIG_FIX_LOC = "fault_location"
 KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
 KEY_BINARY_PATH = "binary_path"
-
+KEY_COUNT_NEG = "count_neg"
+KEY_COUNT_POS = "count_pos"
 
 ARG_DATA_PATH = "--data-dir="
 ARG_TOOL_PATH = "--tool-path="
@@ -169,15 +170,17 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     if passing_test_list:
         for test_id in passing_test_list:
             seed_id_list += test_id + ","
-    cpr_command = "cpr --conf=" + conf_path + " "
+    cpr_command = "timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
     cpr_command += " --seed-id-list=" + seed_id_list + " "
     cpr_command += " --test-id-list=" + test_id_list + " "
     cpr_command += "{0} --time-duration={1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
     execute_command(cpr_command)
 
-    copy_output = "cp -rf /CPR/output/" + bug_id + " " + DIR_EXPERIMENT_RESULT
+    copy_output = "cp -rf /CPR/output/" + bug_id + " " + DIR_EXPERIMENT_RESULT + "/output"
     execute_command(copy_output)
-    copy_log = "cp -rf /CPR/logs/" + bug_id + " " + DIR_EXPERIMENT_RESULT
+    filter_command = "rm -rf " + DIR_EXPERIMENT_RESULT + "/output/klee-out-*"
+    execute_command(filter_command)
+    copy_log = "cp -rf /CPR/logs/" + bug_id + " " + DIR_EXPERIMENT_RESULT + "/logs"
     execute_command(copy_log)
 
 
@@ -213,13 +216,14 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             test_id_list += test_id + " "
     # initialize_command = "source /angelix/activate"
     # execute_command(initialize_command)
-    angelix_command = "angelix {0} {1} {2} {3}  " \
+
+    angelix_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
                       "--configure {4}  " \
                       "--golden {5}  " \
                       "--build {6} " \
                       "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
                                                         test_id_list, config_script_path, gold_path,
-                                                        build_script_path, str(syn_timeout))
+                                                        build_script_path, str(syn_timeout), str(timeout))
 
     if fix_location:
         angelix_command += " --lines {0}  ".format(line_number)
@@ -286,7 +290,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
-    repair_command = "prophet -feature-para /prophet-gpl/crawler/para-all.out "
+    repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
     repair_command += " -full-synthesis -full-explore "
     repair_command += " -r {0}".format(deploy_path + "/workdir")
     repair_command += " -cond-ext -replace-ext  "
@@ -300,9 +304,53 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     execute_command(copy_command)
 
 
-def genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
+def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    print("\t[INFO] initializing for genprog")
+    repair_conf_path = deploy_path + "/src/repair.conf"
+    if not os.path.isfile(deploy_path + "/src/compile.pl"):
+        instrument_command = "cd " + setup_dir_path + "/genprog; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        execute_command(instrument_command)
+
+    repair_config_str = "--allow-coverage-fail\n" \
+                        "--no-rep-cache\n" \
+                        "--no-test-cache\n" \
+                        "--label-repair\n" \
+                        "--sanity no\n" \
+                        "--multi-file\n" \
+                        "--search ww\n" \
+                        "--compiler-command perl compile.pl __EXE_NAME__ > build.log\n" \
+                        "--test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1\n" \
+                        "--crossover subset\n" \
+                        "--rep cilpatch\n" \
+                        "--suffix-extension .c\n" \
+                        "--describe-machine\n" \
+                        "--program bugged-program.txt\n" \
+                        "--prefix preprocessed\n" \
+                        "--seed 0\n" \
+                        "--popsize 40\n" \
+                        "--generations 10\n" \
+                        "--promut 1\n" \
+                        "--mutp 0\n" \
+                        "--fitness-in-parallel 1\n" \
+                        "--rep-cache default.cache\n" \
+                        "--pos-tests {p_size}\n" \
+                        "--neg-tests {n_size}\n" \
+                        "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh\n" \
+                        "--continue".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg)
+
+    if not os.path.isfile(repair_conf_path):
+        open(repair_conf_path, "w")
+    with open(repair_conf_path, "r+") as conf_file:
+        conf_file.seek(0)
+        conf_file.write(repair_config_str)
+        conf_file.truncate()
+
     print("\t[INFO] running GenProg")
+    repair_command = "cd {0}; timeout -k 5m {1}h  ".format(deploy_path + "/src", str(timeout))
+    repair_command += "genprog --label-repair  repair.conf "
+    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    execute_command(repair_command)
 
 
 def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
@@ -327,21 +375,25 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
 
     print("\t[INFO] running F1X")
 
-    repair_command = "cd {0}; timeout {1}h f1x ".format(deploy_path, str(timeout))
+    repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
-    repair_command += " -T 15000  --enable-validation"
+    repair_command += " -T 15000"
     repair_command += " --driver={0} ".format(test_driver_path)
     repair_command += " -b {0} ".format(build_script_path)
-    repair_command += " --disable-dteq  -a -o patches "
-    execute_command(repair_command)
-
+    dry_command = repair_command + " --disable-dteq"
+    execute_command(dry_command)
+    all_command = repair_command + " --disable-dteq  -a -o patches "
+    execute_command(all_command)
+    repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10"
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
+
+
     patch_dir = deploy_path + "/patches"
     # move patches to result directory
     if os.path.isdir(patch_dir):
-        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        copy_command = "mv  " + patch_dir + "* " + DIR_EXPERIMENT_RESULT + ";"
         execute_command(copy_command)
 
 
@@ -349,7 +401,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
-    abs_path_binary = deploy_path + "/" + binary_path
+    abs_path_binary = deploy_path + "/src/" + binary_path
     seed_dir = setup_dir_path + "/seed-dir"
     if not os.path.isdir(seed_dir):
         pre_process_command = "cd " + setup_dir_path + "/" + CONF_TOOL_NAME + ";"
@@ -377,17 +429,22 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += "export DRIVER=./test.sh; "
     repair_command += "export BINARY={0}; ".format(abs_path_binary)
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
-    repair_command += "cd {0}; timeout {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
+    repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
-    # export SUBJECT_DIR=setup_dir_path
-    # export BUGGY_FILE=deploy_path/src/fix_location
-    # export TESTCASE=passing_test_list+failing_test_list
-    # export DRIVER=./test.sh
-    # @Ridwan: do the test.sh at setup_dir_path take any argument?
-    # export BINARY=???
-    # invoke /src/script/run.sh at the setup_dir_path
+    patch_gen_log = setup_dir_path + "/original.txt"
+    copy_command = "mv  " + patch_gen_log + " " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
+    patch_dir = setup_dir_path + "/patches"
+    # move patches to result directory
+    if os.path.isdir(patch_dir):
+        copy_command = "mv  " + patch_dir + " " + DIR_EXPERIMENT_RESULT + ";"
+        execute_command(copy_command)
+
+    copy_command = "cd " + setup_dir_path + ";"
+    copy_command += "mv  f1x-* " + DIR_EXPERIMENT_RESULT + ";"
+    execute_command(copy_command)
 
 
 def repair(deploy_path, setup_dir_path, experiment_info):
@@ -400,6 +457,8 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     timeout = int(CONFIG_INFO[KEY_CONFIG_TIMEOUT])
     test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    count_pass = int(int(experiment_info[KEY_COUNT_POS]) * test_ratio)
+    count_neg = int(experiment_info[KEY_COUNT_NEG])
     fix_location = None
     binary_path = experiment_info[KEY_BINARY_PATH]
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
@@ -416,7 +475,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     elif CONF_TOOL_NAME == "f1x":
         f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
-        genprog(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
+        genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location)
     else:
         exit("Unknown Tool Name")
 

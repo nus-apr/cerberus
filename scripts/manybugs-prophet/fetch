@@ -34,7 +34,7 @@ fi
 
 ROOT=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
-SCENARIO_URL="http://rhino.csail.mit.edu/spr-rep/scenarios/"
+SCENARIO_URL="http://www.cs.toronto.edu/~fanl/program_repair/scenarios/"
 
 directory="${subject}-${version}"
 full_path="$PWD/$directory"

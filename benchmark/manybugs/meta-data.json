@@ -32,7 +32,7 @@
    "failing_test": "2, 3, 4, 22, 23",
    "passing_test": "6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 73",
    "count_neg": 5,
-   "count_pos": 31,
+   "count_pos": 21,
    "binary_path": "test/long_tag"
  },
  {
