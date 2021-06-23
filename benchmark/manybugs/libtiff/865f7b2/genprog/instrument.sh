@@ -10,7 +10,7 @@ make CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-ali
 
 cp $script_dir/compile.pl $dir_name/src
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
-cfile=libtiff/tif_dirread.c
+cfile=$(head -n 1 $dir_name/manifest.txt)
 cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
 
 rm -rf preprocessed
