@@ -9,7 +9,8 @@
    "passing_test": "2, 3, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 69, 70, 71, 72, 73, 74, 76, 77, 78",
    "count_neg": 2,
    "count_pos": 33,
-   "binary_path": "tools/tiffcp"
+   "binary_path": "tools/tiffcp",
+   "crash_input": "-c g3:1d:fill $POC out.tiff"
  },
  {
    "id": 2,
@@ -21,7 +22,8 @@
    "passing_test": "2, 4, 6, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 1,
    "count_pos": 34,
-   "binary_path": "test/short_tag"
+   "binary_path": "test/short_tag",
+   "crash_input": "$POC"
  },
  {
    "id": 3,
@@ -33,7 +35,8 @@
    "passing_test": "6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 24, 25, 26, 27, 28, 73",
    "count_neg": 5,
    "count_pos": 21,
-   "binary_path": "test/long_tag"
+   "binary_path": "test/long_tag",
+   "crash_input": "$POC"
  },
  {
    "id": 4,
@@ -45,7 +48,8 @@
    "passing_test": "1, 2, 4, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20, 21, 24, 25, 26, 27, 28, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 1,
    "count_pos": 60,
-   "binary_path": "tools/tiffcp"
+   "binary_path": "tools/tiffcp",
+   "crash_input": "-c g3:1d:fill $POC out.tiff"
  },
  {
    "id": 5,
@@ -57,7 +61,8 @@
    "passing_test": "1, 2, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 20, 21, 22, 24, 25, 26, 27, 28, 39, 40, 41, 43, 44, 45, 46, 47, 48, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 1,
    "count_pos": 61,
-   "binary_path": "test/short_tag"
+   "binary_path": "test/short_tag",
+   "crash_input": "$POC"
  },
  {
    "id": 6,
@@ -69,7 +74,8 @@
    "passing_test": "1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 33, 34, 35, 36, 37, 38, 49, 50, 51, 53, 54, 55, 56, 57, 58, 59, 60, 61, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 9,
    "count_pos": 64,
-   "binary_path": "tools/tiffcrop"
+   "binary_path": "tools/tiffcrop",
+   "crash_input": "-U px -E top -X 60 -Y 60 $POC out.tiff"
  },
  {
    "id": 7,
@@ -81,7 +87,8 @@
    "passing_test": "1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78",
    "count_neg": 1,
    "count_pos": 76,
-   "binary_path": "tools/tiff2pdf"
+   "binary_path": "tools/tiff2pdf",
+   "crash_input": "$POC out.pdf"
  },
  {
    "id": 8,
