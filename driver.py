@@ -19,6 +19,7 @@ KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
 KEY_BINARY_PATH = "binary_path"
 KEY_COUNT_NEG = "count_neg"
 KEY_COUNT_POS = "count_pos"
+KEY_CRASH_CMD = "crash_input"
 
 ARG_DATA_PATH = "--data-dir="
 ARG_TOOL_PATH = "--tool-path="
@@ -401,7 +402,7 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
         execute_command(copy_command)
 
 
-def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
+def fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
     # TODO: set SUBJECT_DIR BUGGY_FILE TESTCASE DRIVER BINARY
     global CONF_TOOL_NAME
@@ -433,7 +434,7 @@ def fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += "export DRIVER=./test.sh; "
     repair_command += "export BINARY={0}; ".format(abs_path_binary)
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
-
+    repair_command += "export BINARY_INPUT={0}".format(binary_arg)
     repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
@@ -464,6 +465,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     count_pass = int(int(experiment_info[KEY_COUNT_POS]) * test_ratio)
     count_neg = int(experiment_info[KEY_COUNT_NEG])
+    binary_arg = experiment_info[KEY_CRASH_CMD]
     fix_location = None
     binary_path = experiment_info[KEY_BINARY_PATH]
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
@@ -476,7 +478,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     elif CONF_TOOL_NAME == "prophet":
         prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location)
     elif CONF_TOOL_NAME == "fix2fit":
-        fix2fit(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
+        fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "f1x":
         f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
