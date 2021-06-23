@@ -15,3 +15,25 @@ find . -type f -iname '*.pgm' -exec cp  {} $target_dir/seed-dir/ \;
 find . -type f -iname '*.ppm' -exec cp  {} $target_dir/seed-dir/ \;
 find . -type f -iname '*.pbm' -exec cp  {} $target_dir/seed-dir/ \;
 
+cd $src_dir_name
+
+make clean
+
+if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
+    touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
+fi
+
+
+## Instrument Short_TAG
+sed -i '43d ' test/short_tag.c
+sed -i '43i const char      *filename = "short_test.tiff";' test/short_tag.c
+sed -i '81i main(int argc, char** argv)' test/short_tag.c
+sed -i '82d' test/short_tag.c
+sed -i '151i \\tfilename = argv[1];'  test/short_tag.c
+
+
+## Instrument Long_TAG
+sed -i '122i \\tfilename = argv[1];'  test/long_tag.c
+
+cd test
+make -j32 long_tag.log short_tag.log
