@@ -397,9 +397,9 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     repair_command += " -b {0} ".format(build_script_path)
     dry_command = repair_command + " --disable-dteq"
     execute_command(dry_command)
-    all_command = repair_command + " --disable-dteq  -a -o patches "
+    all_command = repair_command + " --disable-dteq  -a -o patches -v "
     execute_command(all_command)
-    repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10"
+    repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
