@@ -357,6 +357,9 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
+    copy_command = "cp -rf " + deploy_path + "/src/repair " + DIR_EXPERIMENT_RESULT + "/patches"
+    execute_command(copy_command)
+
 
 def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
