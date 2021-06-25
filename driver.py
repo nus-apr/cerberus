@@ -136,6 +136,12 @@ def clean_results(exp_dir):
     execute_command(mk_command)
 
 
+def clean_setup(exp_dir):
+    if os.path.isdir(exp_dir):
+        rm_command = "rm -rf " + exp_dir
+        execute_command(rm_command)
+
+
 def archive_results(exp_dir, deploy_path):
     # copy logs
     copy_command = "cp " + FILE_SETUP_LOG + " " + DIR_EXPERIMENT_RESULT + ";"
@@ -605,9 +611,9 @@ def run(arg_list):
             print("\t[META-DATA] bug ID: " + bug_name)
             print("\t[INFO] setup directory: " + deploy_path)
             if os.path.isdir(deploy_path):
-                print("\t[INFO] deployment path exists, skipping setup")
-            else:
-                setup_experiment(setup_dir_path, bug_name)
+                print("\t[INFO] deployment path exists, cleaning setup")
+                clean_setup(deploy_path)
+            setup_experiment(setup_dir_path, bug_name)
             if not CONF_SETUP_ONLY:
                 DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                      CONF_TOOL_NAME, subject_name, bug_name])
