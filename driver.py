@@ -437,7 +437,7 @@ def fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list,
     repair_command += "export DRIVER=./test.sh; "
     repair_command += "export BINARY={0}; ".format(abs_path_binary)
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
-    repair_command += "export BINARY_INPUT={0}".format(binary_arg)
+    repair_command += "export BINARY_INPUT=\"{0}\"; ".format(binary_arg)
     repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
     repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
