@@ -53,8 +53,9 @@ sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
-sed -i 's#cd ../../#popd#g' test.sh
-
+sed -i "27,41d" test.sh
+sed -i "s#run_test 2 #run_test 15 #g" test.sh
+sed -i "s#run_test 1 #run_test 2 #g" test.sh
 
 # fix an obnoxious bug in tests/core-request.t
 sed -i 's#image.JPG#image.jpg#g' src/tests/core-request.t

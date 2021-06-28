@@ -6,7 +6,7 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 scenario_id=libtiff-bug-2006-03-03-a72cf60-0a36d7f
 cd $dir_name
 TEST_ID=$1
-POS_N=17
+POS_N=2
 NEG_N=1
 
 
@@ -34,8 +34,8 @@ else
       cd $dir_name
       timeout 5 bash test.sh $TEST_ID
   else
-      cd $dir_name/src
-      timeout 5 perl $dir_name/libtiff-run-tests.pl $TEST_ID
+      cd $dir_name/src/tests
+      timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
   fi
 
 fi
