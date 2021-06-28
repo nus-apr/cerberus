@@ -1,8 +1,11 @@
-project_name=lighttpd
-bug_id=2662
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=lighttpd-bug-2661-2662
 diff_file=src/mod_accesslog.c-2661
-dir_name=$1/manybugs/$project_name/$bug_id
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
@@ -32,35 +35,34 @@ mv fix-failures bug-info
 mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-make distclean
 chown -R root $dir_name
+
+
+# Prophet requires/works on git source
+cd $dir_name
+repo_url=svn://svn.lighttpd.net/lighttpd/trunk
+svn co $repo_url src-svn
+cd src-svn; svn update $bug_id
 
 
 cd $dir_name
 
-# fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/lighttpd-bug-2661-2662#/data/manybugs/lighttpd/2662/#g" test.sh
-sed -i "s#/data/manybugs/lighttpd/2662/src/limit#timeout 5#g" test.sh
+## fix the test harness and the configuration script
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${fix_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
-sed -i 's#cd lighttpd/tests#pushd /data/manybugs/lighttpd/2662/src/tests#g' test.sh
-sed -i 's#cd ../../#popd#g' test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
+sed -i "27,41d" test.sh
+sed -i "s#run_test 2 #run_test 15 #g" test.sh
+sed -i "s#run_test 1 #run_test 2 #g" test.sh
 
 # fix an obnoxious bug in tests/core-request.t
 sed -i 's#image.JPG#image.jpg#g' src/tests/core-request.t
+sed -i '49,71 s/^/#/' src/tests/mod-cgi.t
 
 # fix broken symlinks
 cd src/tests/tmp/lighttpd/servers/www.example.org/pages
 rm symlinked index.xhtml
 ln -s expire symlinked
 ln -s index.html index.xhtml
-
-# fix broken test file
-cp $current_dir/mod-cgi.t /data/manybugs/lighttpd/1914/src/tests/mod-cgi.t
-
-# compile program
-cd $dir_name/src
-make clean
-CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0' --enable-static --with-pcre=yes --with-ldap --with-bzip2 --with-openssl --with-gdbm --with-memcache --with-webdav-props --with-webdav-locks
-#CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0' --enable-static --disable-shared --with-pcre=yes --with-ldap --with-bzip2 --with-openssl --with-gdbm --with-memcache --with-webdav-props --with-webdav-locks
-CC=wllvm CXX=wllvm++ make CFLAGS="-march=x86-64" -j32
