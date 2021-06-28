@@ -21,6 +21,7 @@ RUN apt-get update && apt-get install -y  \
     libpython-dev \
     libpython3-dev \
     libsdl1.2-dev  \
+    libsqlite3-dev \
     libtool \
     libvdpau-dev \
     libx11-dev \
