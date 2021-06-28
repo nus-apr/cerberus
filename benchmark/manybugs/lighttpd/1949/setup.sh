@@ -42,7 +42,7 @@ chown -R root $dir_name
 cd $dir_name
 repo_url=svn://svn.lighttpd.net/lighttpd/trunk
 svn co $repo_url src-svn
-cd src-svn; git checkout $bug_id
+cd src-svn; svn update $bug_id
 
 
 cd $dir_name
