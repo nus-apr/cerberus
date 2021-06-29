@@ -7,3 +7,8 @@ cd $dir_name/src
 
 # Compile gzip
 make -e  CFLAGS="-march=x86-64 -g -O0 -static" -j`nproc`
+
+cd tests
+make mixed.log znew-k.log
+chmod +x mixed
+chmod +x znew-k
