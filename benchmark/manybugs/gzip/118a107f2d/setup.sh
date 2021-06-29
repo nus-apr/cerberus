@@ -47,10 +47,13 @@ sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "29d" test.sh
-sed -i "s#run_test 7 #run_test 9 #g" test.sh
-sed -i "s#run_test 4 #run_test 7 #g" test.sh
-sed -i "s#run_test 3 #run_test 4 #g" test.sh
-sed -i "s#run_test 1 #run_test 3 #g" test.sh
+sed -i "6d" gzip-run-tests.pl
+
+sed -i "s#run_test 7 #run_test 8 #g" test.sh
+sed -i "s#run_test 4 #run_test 6 #g" test.sh
+sed -i "s#run_test 3 #run_test 3 #g" test.sh
+sed -i "s#run_test 1 #run_test 2 #g" test.sh
+sed -i "s#n1) run_test 8#n1) run_test 7#g" test.sh
 
 # Prophet requires/works on git source
 repo_url=http://git.savannah.gnu.org/cgit/gzip.git

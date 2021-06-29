@@ -662,11 +662,12 @@
    "bug_id": "118a107f2d",
    "source_file": "gzip.c",
    "line_number": 1269,
-   "failing_test": "8",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
+   "failing_test": "7",
+   "passing_test": "2, 3, 6, 8",
+   "count_neg": 1,
+   "count_pos": 4,
+   "binary_path": "gzip",
+   "crash_input": "---presume-input-tty -d -S '' $POC"
  },
  {
    "id": 56,
