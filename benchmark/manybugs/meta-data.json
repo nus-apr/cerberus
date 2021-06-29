@@ -655,7 +655,7 @@
    "count_neg": 1,
    "count_pos": 2,
    "binary_path": "gzip",
-   "crash_input": "---presume-input-tty -d -S '' $POC"
+   "crash_input": "-dc $POC"
  },
  {
    "id": 55,
@@ -668,7 +668,7 @@
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "gzip",
-   "crash_input": "---presume-input-tty -d -S '' $POC"
+   "crash_input": "-d $POC"
  },
  {
    "id": 56,
@@ -681,7 +681,7 @@
    "count_neg": 1,
    "count_pos": 8,
    "binary_path": "gzip",
-   "crash_input": "---presume-input-tty -d -S '' $POC"
+   "crash_input": "---presume-input-tty -d -S '' $POC < yes"
  },
  {
    "id": 57,
