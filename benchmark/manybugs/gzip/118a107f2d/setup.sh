@@ -56,7 +56,7 @@ sed -i "s#run_test 1 #run_test 2 #g" test.sh
 sed -i "s#n1) run_test 8#n1) run_test 7#g" test.sh
 
 # Prophet requires/works on git source
-repo_url=http://git.savannah.gnu.org/cgit/gzip.git
+repo_url=git://git.savannah.gnu.org/gzip.git
 git clone $repo_url src-git
 cd src-git; git checkout $bug_id
 
