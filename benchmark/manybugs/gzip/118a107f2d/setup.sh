@@ -1,8 +1,11 @@
-project_name=gzip
-bug_id=118a107f2d
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=gzip-bug-2009-10-09-1a085b1446-118a107f2d
 diff_file=gzip.c-1a085b1446
-dir_name=$1/manybugs/$project_name/$bug_id
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
@@ -32,22 +35,13 @@ mv fix-failures bug-info
 mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-make distclean
 chown -R root $dir_name
 
-# Compile gzip.
-make clean
-CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0'
-CC=wllvm CXX=wllvm++ make CFLAGS="-g -O0 -static" -j32
 
-# Run Test Suite
-cd $dir_name/src/tests
-make helin-segv.log
-make help-version.log
-make hufts.log
-make mixed.log
-make memcpy-abuse.log
-make null-suffix-clobber.log
-make stdin.log
-make trailing-nul.log
-make zdiff.log
+# Prophet requires/works on git source
+cd $dir_name
+repo_url=https://github.com/vadz/libtiff.git
+git clone $repo_url src-git
+cd src-git; git checkout $bug_id
+
+
