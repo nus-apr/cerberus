@@ -650,11 +650,12 @@
    "bug_id": "f17cbd13a1",
    "source_file": "gzip.c",
    "line_number": 652,
-   "failing_test": "7",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
+   "failing_test": "6",
+   "passing_test": "2, 3",
+   "count_neg": 1,
+   "count_pos": 2,
+   "binary_path": "gzip",
+   "crash_input": "---presume-input-tty -d -S '' $POC"
  },
  {
    "id": 55,
@@ -675,11 +676,12 @@
    "bug_id": "884ef6d16c",
    "source_file": "gzip.c",
    "line_number": 546,
-   "failing_test": "6",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
+   "failing_test": "5",
+   "passing_test": "1, 2, 3, 4, 6, 7, 8, 11",
+   "count_neg": 1,
+   "count_pos": 8,
+   "binary_path": "gzip",
+   "crash_input": "---presume-input-tty -d -S '' $POC"
  },
  {
    "id": 57,
