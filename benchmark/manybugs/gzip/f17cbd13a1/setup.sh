@@ -49,8 +49,9 @@ sed -i "s#cd ${project_name}#cd src#g" test.sh
 
 #sed -i "29d" test.sh
 sed -i "6d" gzip-run-tests.pl
-sed -i "s#run_test 3 #run_test 2 #g" test.sh
-sed -i "s#run_test 4 #run_test 3 #g" test.sh
+sed -i "s#run_test 1 #run_test 2 #g" test.sh
+sed -i "s#run_test 2 #run_test 3 #g" test.sh
+sed -i "27d" test.sh
 sed -i "s#run_test 7 #run_test 6 #g" test.sh
 
 
