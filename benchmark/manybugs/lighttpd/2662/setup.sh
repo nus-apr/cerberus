@@ -40,10 +40,7 @@ chown -R root $dir_name
 
 # Prophet requires/works on git source
 cd $dir_name
-repo_url=svn://svn.lighttpd.net/lighttpd/trunk
-svn co $repo_url src-svn
-cd src-svn; svn update $bug_id
-
+svn checkout -r $bug_id svn://svn.lighttpd.net/lighttpd/branches/lighttpd-1.4.x src-svn
 
 cd $dir_name
 
