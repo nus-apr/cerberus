@@ -75,6 +75,24 @@ ln -s index.html index.xhtml
 
 cd $dir_name
 # fix test-case-id
+cp src/tests/core-condition.t src/tests/1.t
 cp src/tests/mod-rewrite.t src/tests/2.t
+cp src/tests/lowercase.t src/tests/3.t
+cp src/tests/mod-redirect.t src/tests/4.t
+cp src/tests/mod-secdownload.t src/tests/5.t
+cp src/tests/mod-ssi.t src/tests/6.t
+cp src/tests/core-var-include.t src/tests/7.t
+cp src/tests/core-keepalive.t src/tests/8.t
+cp src/tests/mod-cgi.t src/tests/9.t
+cp src/tests/core.t src/tests/10.t
+cp src/tests/core-request.t src/tests/11.t
+cp src/tests/mod-access.t src/tests/12.t
+cp src/tests/mod-compress.t src/tests/13.t
+cp src/tests/mod-setenv.t src/tests/14.t
 cp src/tests/fastcgi.t src/tests/15.t
+cp src/tests/cachable.t src/tests/16.t
+cp src/tests/mod-userdir.t src/tests/17.t
+cp src/tests/core-response.t src/tests/18.t
 cp src/tests/request.t src/tests/19.t
+cp src/tests/mod-auth.t src/tests/20.t
+cp src/tests/symlink.t src/tests/21.t
