@@ -6,10 +6,11 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
 # Config libtiff.
-make clean
+grep -v '"tests/mpbsd/Makefile") ' configure |   sed "s#tests/mpbsd/Makefile ##g" |   sponge configure
+make distclean
+autoreconf --force --install
+./configure && make -j32
 
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' configure.in
-./.bootstrap
 ./configure --disable-shared --enable-static \
             --disable-fft \
             --disable-mpbsd \
