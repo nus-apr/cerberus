@@ -37,10 +37,15 @@ cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 
+cd $dir_name
+## fix the test harness and the configuration script
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/usr/bin/perl#perl#g" test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
 
 # Prophet requires/works on git source
-cd $dir_name
-repo_url=https://github.com/vadz/libtiff.git
+repo_url=http://git.savannah.gnu.org/cgit/gzip.git
 git clone $repo_url src-git
 cd src-git; git checkout $bug_id
 
