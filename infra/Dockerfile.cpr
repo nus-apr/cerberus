@@ -36,12 +36,14 @@ RUN apt-get update && apt-get install -y  \
     libvdpau-dev \
     libnuma-dev \
     shc \
-    m4 \
+   m4 \
     libglib2.0-dev \
     libldap-dev \
     libbz2-dev \
     libssl-dev \
-    libgdbm-dev
+    libsqlite3-dev \
+    libxml2-dev \
+    libgdbm-dev \
     subversion
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments

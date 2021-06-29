@@ -47,7 +47,9 @@ RUN apt-get update && apt-get install -y  \
     libldap-dev \
     libbz2-dev \
     libssl-dev \
-    libgdbm-dev
+    libsqlite3-dev \
+    libxml2-dev \
+    libgdbm-dev \
     subversion
 
 ENV PATH "/root/.opam/system/bin/:/opt/genprog/bin:${PATH}"
