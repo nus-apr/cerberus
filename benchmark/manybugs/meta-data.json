@@ -110,10 +110,11 @@
    "source_file": "src/mod_accesslog.c",
    "line_number": 168,
    "failing_test": "10, 11",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
+   "passing_test": "1, 2, 3, 4, 5, 6, 7, 8, 12, 13, 14, 15, 16, 17, 18, 20, 21",
+   "count_neg": 2,
+   "count_pos": 17,
+   "binary_path": "",
+   "crash_input": ""
  },
  {
    "id": 10,

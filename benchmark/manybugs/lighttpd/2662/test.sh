@@ -6,8 +6,8 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 scenario_id=lighttpd-bug-2661-2662
 cd $dir_name
 TEST_ID=$1
-POS_N=2
-NEG_N=1
+POS_N=17
+NEG_N=2
 
 
 if [ -z "$TEST_ID" ]
