@@ -42,7 +42,6 @@ chown -R root $dir_name
 cd $dir_name
 svn checkout -r $bug_id svn://svn.lighttpd.net/lighttpd/branches/lighttpd-1.4.x src-svn
 
-
 cd $dir_name
 
 ## fix the test harness and the configuration script
