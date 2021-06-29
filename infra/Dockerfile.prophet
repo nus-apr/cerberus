@@ -38,7 +38,14 @@ RUN apt-get update && apt-get install -y  \
     texinfo \
     xutils-dev \
     unzip \
-    yasm
+    yasm \
+    m4 \
+    libglib2.0-dev \
+    libldap-dev \
+    libbz2-dev \
+    libssl-dev \
+    libgdbm-dev
+    subversion \
 
 RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32
