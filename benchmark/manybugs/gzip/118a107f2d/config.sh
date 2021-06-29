@@ -7,5 +7,5 @@ cd $dir_name/src
 
 # Config libtiff.
 make clean
-./configure CFLAGS='-g -O0' --enable-static --disable-shared
+./configure CFLAGS="-g -O0 -m32" LDFLAGS="-m32" CXXFLAGS="-g -O0 -m32"
 
