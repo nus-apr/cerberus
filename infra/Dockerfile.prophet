@@ -45,7 +45,7 @@ RUN apt-get update && apt-get install -y  \
     libbz2-dev \
     libssl-dev \
     libgdbm-dev
-    subversion \
+    subversion
 
 RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32

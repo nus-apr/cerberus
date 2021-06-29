@@ -36,7 +36,15 @@ RUN apt-get update && apt-get install -y  \
     psmisc \
     texinfo \
     xutils-dev \
-    yasm
+    yasm \
+    m4 \
+    libglib2.0-dev \
+    libldap-dev \
+    libbz2-dev \
+    libssl-dev \
+    libgdbm-dev
+    subversion
+
 ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=""
 ENV AFL_SKIP_CPUFREQ=1
 RUN rm -rf /experiments

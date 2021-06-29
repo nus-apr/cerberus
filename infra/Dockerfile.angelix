@@ -35,7 +35,14 @@ RUN apt-get update && apt-get install -y  \
     psmisc \
     texinfo \
     xutils-dev \
-    yasm
+    yasm \
+    m4 \
+    libglib2.0-dev \
+    libldap-dev \
+    libbz2-dev \
+    libssl-dev \
+    libgdbm-dev
+    subversion
 
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
