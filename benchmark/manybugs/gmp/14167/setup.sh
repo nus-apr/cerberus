@@ -54,13 +54,9 @@ sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
+sed -i '190d' gmp-run-tests.pl
+sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $name);' gmp-run-tests.pl
 chmod +x gmp-run-tests.pl
-
-sed -i "s#run_test 7 #run_test 8 #g" test.sh
-sed -i "s#run_test 4 #run_test 6 #g" test.sh
-sed -i "s#run_test 3 #run_test 3 #g" test.sh
-sed -i "s#run_test 1 #run_test 2 #g" test.sh
-sed -i "s#n1) run_test 8#n1) run_test 7#g" test.sh
 
 # Prophet requires/works on git source
 repo_url=git://git.savannah.gnu.org/gzip.git
