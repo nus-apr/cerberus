@@ -97,10 +97,11 @@
    "source_file": "src/response.c",
    "line_number": 51,
    "failing_test": "19",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
+   "passing_test": "2, 15",
+   "count_neg": 1,
+   "count_pos": 2,
+   "binary_path": "",
+   "crash_input": ""
  },
  {
    "id": 9,

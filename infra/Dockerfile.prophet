@@ -40,6 +40,9 @@ RUN apt-get update && apt-get install -y  \
     unzip \
     yasm
 
+RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
+RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32
+RUN cd /prophet-gpl/benchmarks/php-deps/ && make -j32
 
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments

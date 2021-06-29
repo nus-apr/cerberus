@@ -67,3 +67,8 @@ rm symlinked index.xhtml
 ln -s expire symlinked
 ln -s index.html index.xhtml
 
+cd $dir_name
+# fix test-case-id
+cp src/tests/mod-rewrite.t src/tests/2.t
+cp src/tests/fastcgi.t src/tests/15.t
+cp src/tests/request.t src/tests/19.t
