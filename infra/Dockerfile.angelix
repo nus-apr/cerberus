@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y  \
     texinfo \
     xutils-dev \
     yasm \
-   m4 \
+    m4 \
     libglib2.0-dev \
     libldap-dev \
     libbz2-dev \
@@ -44,7 +44,9 @@ RUN apt-get update && apt-get install -y  \
     libsqlite3-dev \
     libxml2-dev \
     libgdbm-dev \
-    subversion
+    subversion \
+    libc6-dev-i386 \
+    mercurial
 
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments

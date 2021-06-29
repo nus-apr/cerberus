@@ -44,8 +44,10 @@ RUN apt-get update && apt-get install -y  \
     libldap-dev \
     libbz2-dev \
     libssl-dev \
-    libgdbm-dev
-    subversion
+    libgdbm-dev \
+    subversion \
+    libc6-dev-i386 \
+    mercurial
 
 RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32
