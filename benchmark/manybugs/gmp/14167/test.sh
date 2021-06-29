@@ -3,7 +3,7 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/data/$benchmark_name/$project_name/$bug_id
-scenario_id=gzip-bug-2009-10-09-1a085b1446-118a107f2d
+scenario_id=gmp-bug-14166-14167
 cd $dir_name
 TEST_ID=$1
 POS_N=4

@@ -7,5 +7,12 @@ cd $dir_name/src
 
 # Config libtiff.
 make clean
-./configure CFLAGS="-g -O0 -m32" LDFLAGS="-m32" CXXFLAGS="-g -O0 -m32"
 
+sed -i 's/no-dependencies ansi2knr/no-dependencies/g' configure.in
+./.bootstrap
+./configure --disable-shared --enable-static \
+            --disable-fft \
+            --disable-mpbsd \
+            --disable-cxx \
+            --disable-fast-install \
+            --disable-minithres
