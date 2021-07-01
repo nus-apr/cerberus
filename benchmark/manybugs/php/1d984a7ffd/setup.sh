@@ -33,12 +33,6 @@ mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
-echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
-
-# Prophet requires/works on git source
-cd $dir_name
-git clone https://github.com/php/php-src.git src-git
-cd src-git; git checkout $bug_id
 
 cd $dir_name
 ## fix the test harness and the configuration script
@@ -50,23 +44,5 @@ sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "s#&> /dev/null##" python-run-tests.pl
 
 
-# COMPILE PHP
-cd src/php
-make clean
-./configure \
-  --enable-cli \
-  --disable-dom \
-  --disable-libxml  \
-  --disable-xml \
-  --disable-simplexml \
-  --disable-xmlreader  \
-  --disable-xmlwriter  \
-  --disable-pear  \
-  --disable-phar \
-  --disable-inline-optimization  \
-  --without-pcre-dir  \
-  --disable-fileinfo \
-  --disable-shared
 
-CC=clang CXX=clang++ make  -j32
 
