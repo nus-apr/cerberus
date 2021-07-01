@@ -731,17 +731,6 @@
    "count_neg": null,
    "count_pos": null,
    "binary_path": ""
- },
- {
-   "id": 61,
-   "subject": "fbc",
-   "bug_id": "5557",
-   "source_file": "src/rtlib/libfb_qb_str_convto_lng.c",
-   "line_number": 85,
-   "failing_test": "474",
-   "passing_test": "",
-   "count_neg": null,
-   "count_pos": null,
-   "binary_path": ""
  }
+
 ]
