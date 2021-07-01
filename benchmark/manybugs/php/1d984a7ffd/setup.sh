@@ -42,7 +42,18 @@ make distclean &> /dev/null && \
     rm -rf  configure config.nice autom4te.cache aclocal.m4 php5.spec missing mkinstalldirs
 cd $dir_name
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
-chmod +x prepare.py && ./prepare.py
+cd src && git reset --hard && git clean -fd && git checkout $bug_id
+# apply libxml fix
+cat libxml.patch | patch -p0
+# build configure script
+./buildconf
+
+./configure CFLAGS="-save-temps=obj"
+make -j`nproc`
+cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
+make distclean
+
+
 ./tester.py build && rm tests.all.txt tests.indices.txt
 cd $dir_name/src
 find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
@@ -51,7 +62,7 @@ find . -name tests -type d | rm -rf - && \
     rm -f all-tests.tar.gz
 
 
-cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
+
 
 
 
