@@ -6,7 +6,7 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 scenario_id=python-bug-69223-69224
 cd $dir_name
 TEST_ID=$1
-POS_N=1
+POS_N=284
 NEG_N=1
 
 

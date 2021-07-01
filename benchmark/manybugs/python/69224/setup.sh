@@ -40,12 +40,12 @@ echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 
 # Prophet requires/works on git source
 cd $dir_name
-repo_url=https://github.com/vadz/libtiff.git
-git clone $repo_url src-git
-cd src-git; git checkout $bug_id
+hg clone http://hg.python.org/cpython src-hg
+cd src-hg; hg update $bug_id
 
 cd $dir_name
 ## fix the test harness and the configuration script
+sed -i "s/cd python/cd src/" test.sh
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/libtiff/${bug_id}#g" test.sh
 sed -i "s#/data/manybugs/libtiff/${bug_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
