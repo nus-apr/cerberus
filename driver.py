@@ -281,7 +281,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     if not os.path.isdir(deploy_path + "/workdir"):
         instrument_command = "cd " + deploy_path + ";"
-        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only -skip-verify  > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     line_number = ""
     localization_file = deploy_path + "/workdir/profile_localization.res"
