@@ -41,7 +41,7 @@ cd $dir_name/src
 make distclean &> /dev/null && \
     rm -rf  configure config.nice autom4te.cache aclocal.m4 php5.spec missing mkinstalldirs
 cd $dir_name
-cp /data/$benchmark_name/$project_name/base/* $dir_name
+cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 chmod +x prepare.py && ./prepare.py
 ./tester.py build && rm tests.all.txt tests.indices.txt
 cd $dir_name/src
