@@ -24,9 +24,7 @@ rm -rf  coverage* \
         *.debug.* \
         sanity \
         *~ \
-        tests \
         reconfigure \
-        preprocessed \
         fixed-program.txt
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
