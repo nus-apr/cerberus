@@ -36,7 +36,7 @@ RUN apt-get update && apt-get install -y  \
     libvdpau-dev \
     libnuma-dev \
     shc \
-   m4 \
+    m4 \
     libglib2.0-dev \
     libldap-dev \
     libbz2-dev \
@@ -46,8 +46,21 @@ RUN apt-get update && apt-get install -y  \
     libgdbm-dev \
     subversion \
     libc6-dev-i386 \
-    mercurial
-
+    mercurial \
+    libncurses-dev \
+    libsqlite-dev \
+    libgdbm-dev \
+    libssl-dev \
+    libreadline-gplv2-dev \
+    libbz2-dev \
+    psmisc \
+    libsqlite3-dev \
+    gcc-multilib \
+    g++-multilib \
+    tk-dev \
+    mercurial \
+    tcl-dev \
+    tix-dev
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
 

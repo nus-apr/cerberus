@@ -47,7 +47,21 @@ RUN apt-get update && apt-get install -y  \
     libgdbm-dev \
     subversion \
     libc6-dev-i386 \
-    mercurial
+    mercurial \
+    libncurses-dev \
+    libsqlite-dev \
+    libgdbm-dev \
+    libssl-dev \
+    libreadline-gplv2-dev \
+    libbz2-dev \
+    psmisc \
+    libsqlite3-dev \
+    gcc-multilib \
+    g++-multilib \
+    tk-dev \
+    mercurial \
+    tcl-dev \
+    tix-dev
 
 ENV AFL_I_DONT_CARE_ABOUT_MISSING_CRASHES=""
 ENV AFL_SKIP_CPUFREQ=1
