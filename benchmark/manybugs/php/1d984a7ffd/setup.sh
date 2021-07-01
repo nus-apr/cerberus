@@ -38,11 +38,8 @@ grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
 rm -f php-run-tests.c test.sh.orig
 mv $project_name src
 cd $dir_name/src
-make distclean &> /dev/null && \
-    rm -rf  configure config.nice autom4te.cache aclocal.m4 php5.spec missing mkinstalldirs
-cd $dir_name
+make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
-
 # apply libxml fix
 cat ../libxml.patch | patch -p0
 
@@ -51,9 +48,12 @@ cat ../libxml.patch | patch -p0
 #cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
 #make distclean
 ./configure && make -j`nproc`
+
+
 cd $dir_name
 chmod +x tester.py test.sh
 ./tester.py build && rm tests.all.txt tests.indices.txt
+
 cd $dir_name/src
 find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
 find . -name tests -type d | rm -rf - && \
