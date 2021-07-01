@@ -16,32 +16,42 @@ mv ${scenario_id} src
 rm ${scenario_id}.tar.gz
 mv src/* .
 rm -rf src
+
 rm -rf  coverage* \
         configuration-oracle \
         local-root \
         limit* \
+        php-tests-* \
         *.cache \
         *.debug.* \
-        sanity \
         *~ \
-        reconfigure \
-        fixed-program.txt
-mv bugged-program.txt manifest.txt
-mv *.lines bug-info
-mv fix-failures bug-info
+        php.tar.gz && \
+    mv test.sh test.sh.orig && \
+    mv bug-failures bug-info && \
+    cp bugged-program.txt manifest.txt && \
+    mv *.lines bug-info && \
+    mv fix-failures bug-info
+
+chown -R root $dir_name
+grep -o -P '(?<=")[^"]+.phpt(?=")' php-run-tests.c > tests.all.txt
+grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
+rm -f php-run-tests.c test.sh.orig
 mv $project_name src
 cd $dir_name/src
-cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-chown -R root $dir_name
-
+make distclean &> /dev/null && \
+    rm -rf  configure config.nice autom4te.cache aclocal.m4 php5.spec missing mkinstalldirs
 cd $dir_name
-## fix the test harness and the configuration script
-sed -i "s/cd python/cd src/" test.sh
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
-sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
-sed -i "s#/usr/bin/perl#perl#g" test.sh
-sed -i "s#cd ${project_name}#cd src#g" test.sh
-sed -i "s#&> /dev/null##" python-run-tests.pl
+cp /data/$benchmark_name/$project_name/base/* $dir_name
+chmod +x prepare.py && ./prepare.py
+./tester.py build && rm tests.all.txt tests.indices.txt
+cd $dir_name/src
+find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
+find . -name tests -type d | rm -rf - && \
+    tar -xf all-tests.tar.gz && \
+    rm -f all-tests.tar.gz
+
+
+cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 
 
 
