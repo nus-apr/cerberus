@@ -42,7 +42,7 @@ else
       timeout 5 bash test.sh $TEST_ID
   else
       cd $dir_name/src
-      timeout 5 perl $dir_name/libtiff-run-tests.pl $TEST_ID
+      timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
   fi
 
 fi
