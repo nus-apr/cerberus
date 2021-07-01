@@ -1,2 +1,2 @@
 #!/bin/bash
-/experiment/tester.py run $@
+./tester.py run $@
