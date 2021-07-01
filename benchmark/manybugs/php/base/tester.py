@@ -7,22 +7,22 @@ import subprocess
 from subprocess import Popen, PIPE
 
 DEVNULL = open(os.devnull, 'w')
-
+exp_dir = os.path.abspath(os.getcwd())
 
 # Build a list of all the test cases for the program
 def build():
     # Find the list of tests used by all ManyBugs PHP scenarios
-    with open("/experiment/tests.all.txt", "r") as f:
+    with open( exp_dir + "/tests.all.txt", "r") as f:
         all_tests = [t.strip() for t in f]
 
     # Find the sub-set of tests used by this scenario
-    with open("/experiment/tests.indices.txt", "r") as f:
+    with open(exp_dir + "/tests.indices.txt", "r") as f:
         indices = [int(i.strip()) for i in f]
 
     tests = set(all_tests[i - 1] for i in indices)
 
     # Find a list of the failing tests
-    with open("/experiment/bug-info/scenario-data.txt", "r") as f:
+    with open(exp_dir + "/bug-info/scenario-data.txt", "r") as f:
         lines = [l.strip() for l in f]
 
     cut_from = \
@@ -35,12 +35,12 @@ def build():
     passing = tests - failing
 
     # write failing tests to disk
-    with open("/experiment/failing.tests.txt", "w") as f:
+    with open( exp_dir + "/failing.tests.txt", "w") as f:
         for t in sorted(failing):
             f.write("{}\n".format(t))
 
     # write passing tests to disk
-    with open("/experiment/passing.tests.txt", "w") as f:
+    with open( exp_dir + "/passing.tests.txt", "w") as f:
         for t in sorted(passing):
             f.write("{}\n".format(t))
 
@@ -50,12 +50,13 @@ def preexec():
 
 
 def run(identifier, exe=None):
+    global exp_dir
     offset = int(identifier[1:]) - 1
     if identifier[0] == "p":
-        with open("/experiment/passing.tests.txt") as f:
+        with open( exp_dir + "/passing.tests.txt") as f:
             test = f.readlines()[offset]
     elif identifier[0] == "n":
-        with open("/experiment/failing.tests.txt") as f:
+        with open( exp_dir + "/failing.tests.txt") as f:
             test = f.readlines()[offset]
     test = test.strip()
 
@@ -69,7 +70,7 @@ def run(identifier, exe=None):
     #       plausible but incorrect patch).
     cmd = ["sapi/cli/php", "run-tests.php", "-p", "sapi/cli/php", test]
 
-    with Popen(cmd, stdout=PIPE, stderr=DEVNULL, preexec_fn=preexec, cwd="/experiment/src") as p:
+    with Popen(cmd, stdout=PIPE, stderr=DEVNULL, preexec_fn=preexec, cwd= exp_dir + "/src") as p:
         try:
             stdout = p.communicate(timeout=tlim)[0]
             try:

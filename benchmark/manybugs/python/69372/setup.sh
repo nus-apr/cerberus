@@ -23,11 +23,8 @@ rm -rf  coverage* \
         *.cache \
         *.debug.* \
         sanity \
-        compile.pl \
         *~ \
-        test \
         reconfigure \
-        preprocessed \
         fixed-program.txt
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
@@ -36,12 +33,7 @@ mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
-echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 
-# Prophet requires/works on git source
-cd $dir_name
-hg clone http://hg.python.org/cpython src-hg
-cd src-hg; hg update $bug_id
 
 cd $dir_name
 ## fix the test harness and the configuration script
