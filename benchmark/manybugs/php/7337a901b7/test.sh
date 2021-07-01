@@ -3,7 +3,7 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/data/$benchmark_name/$project_name/$bug_id
-scenario_id=php-bug-2011-02-27-e65d361fde-1d984a7ffd
+scenario_id=php-bug-2012-03-12-438a30f1e7-7337a901b7
 cd $dir_name
 TEST_ID=$1
 POS_N=2
