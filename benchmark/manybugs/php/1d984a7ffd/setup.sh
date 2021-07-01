@@ -40,8 +40,8 @@ echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 
 # Prophet requires/works on git source
 cd $dir_name
-hg clone http://hg.python.org/cpython src-hg
-cd src-hg; hg update $bug_id
+git clone https://github.com/php/php-src.git src-git
+cd src-git; git checkout $bug_id
 
 cd $dir_name
 ## fix the test harness and the configuration script
