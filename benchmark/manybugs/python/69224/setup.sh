@@ -46,9 +46,9 @@ cd src-hg; hg update $bug_id
 cd $dir_name
 ## fix the test harness and the configuration script
 sed -i "s/cd python/cd src/" test.sh
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/libtiff/${bug_id}#g" test.sh
-sed -i "s#/data/manybugs/libtiff/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
-sed -i "s#cd libtiff#cd src#g" test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "s#&> /dev/null##" python-run-tests.pl
 
