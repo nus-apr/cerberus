@@ -6,7 +6,7 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 scenario_id=gmp-bug-14166-14167
 cd $dir_name
 TEST_ID=$1
-POS_N=4
+POS_N=144
 NEG_N=1
 
 
