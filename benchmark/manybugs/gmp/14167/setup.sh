@@ -58,7 +58,6 @@ sed -i '190d' gmp-run-tests.pl
 sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $name);' gmp-run-tests.pl
 chmod +x gmp-run-tests.pl
 
-# Prophet requires/works on git source
-repo_url=git://git.savannah.gnu.org/gzip.git
-git clone $repo_url src-hg
-cd src-hg; hg revert -r $bug_id
+# Prophet requires/works on source
+hg clone https://gmplib.org/repo/gmp/ src-hg
+cd src-hg; hg update $bug_id
