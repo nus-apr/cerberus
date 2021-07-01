@@ -1,8 +1,11 @@
-project_name=python
-bug_id=69372
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=python-bug-69368-69372
 diff_file=Python/peephole.c-69368
-dir_name=$1/manybugs/$project_name/$bug_id
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
@@ -32,11 +35,21 @@ mv fix-failures bug-info
 mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-make distclean
 chown -R root $dir_name
+echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 
-# COMPILE PYTHON
-CC=wllvm CXX=wllvm++  ./configure
-CC=clang CXX=clang++ make  -j32
+# Prophet requires/works on git source
+cd $dir_name
+hg clone http://hg.python.org/cpython src-hg
+cd src-hg; hg update $bug_id
+
+cd $dir_name
+## fix the test harness and the configuration script
+sed -i "s/cd python/cd src/" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/libtiff/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/libtiff/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/usr/bin/perl#perl#g" test.sh
+sed -i "s#cd libtiff#cd src#g" test.sh
+sed -i "s#&> /dev/null##" python-run-tests.pl
 
 
