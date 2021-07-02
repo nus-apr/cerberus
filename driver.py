@@ -198,6 +198,13 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
 def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
+
+    print("\t[INFO] check for angelix")
+    check_command = "angelix --help"
+    ret_code = execute_command(check_command)
+    if int(ret_code) != 0:
+        exit("Angelix not Found")
+
     print("\t[INFO] instrumentation for angelix")
     script_path = "angelix/instrument.sh"
     if not os.path.isfile(deploy_path + "/src/INSTRUMENTED_ANGELIX"):
