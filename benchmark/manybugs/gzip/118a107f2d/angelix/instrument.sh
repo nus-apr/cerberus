@@ -2,7 +2,7 @@
 set -euo pipefail
 version=a1d3d4019d-f17cbd13a1 #this is the angelix version
 gold_file=gzip.c-1a085b1446
-
+test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
 clean-source () {
     local directory="$1"
     pushd "$directory" &> /dev/null
@@ -93,7 +93,7 @@ preinstrument_test() {
     directory="$1"
     for t in "${test_array[@]}"
     do
-        local test_script="$directory/gzip/tests/$t"
+        local test_script="$directory/tests/$t"
         prepare-angelix-runner "$test_script"
     done
 }
@@ -103,7 +103,7 @@ instrument_test() {
     directory="$1"
     for t in "${test_array[@]}"
     do
-        local test_script="$directory/gzip/tests/$t"
+        local test_script="$directory/tests/$t"
         if [[ "$t" == *"version"* ]]
         then
             add-angelix-runner-simple "$test_script" gzip
@@ -119,10 +119,10 @@ instrument_source () {
     if [[ "$version" == *"a1d3d4019ddd22"* ]]
     then
         instrument_test "$directory"
-        #  local test7_script="$directory/gzip/tests/stdin"
+        #  local test7_script="$directory/tests/stdin"
         # add-angelix-runner "$test7_script" gzip
-        local gzip_write="$directory/gzip/bits.c"
-        local gzip_main="$directory/gzip/gzip.c"
+        local gzip_write="$directory/bits.c"
+        local gzip_main="$directory/gzip.c"
 
         #    if ! grep -q ANGELIX "$gzip_write"; then
         add-header "$gzip_write"
@@ -130,10 +130,10 @@ instrument_source () {
         sed -i '653iifd =ifd;' "$gzip_main"
         #   fi
     else
-        #  local test6_script="$directory/gzip/tests/null-suffix-clobber"
+        #  local test6_script="$directory/tests/null-suffix-clobber"
         #  add-angelix-runner "$test6_script" gzip
         instrument_test "$directory"
-        local gzip_error="$directory/gzip/gzip.c"
+        local gzip_error="$directory/gzip.c"
 
         add-header "$gzip_error"
         # sed -i '/incorrect suffix/i ANGELIX_REACHABLE("stderr");' "$gzip_error"
@@ -158,48 +158,42 @@ gzip_configure="rm -f tests/Makefile && echo "\$CC" > /tmp/gzip-cc && ./configur
 gzip_test_suite=$(seq 1 12)
 
 
-repair-gzip () {
-    local directory="$1"
-    local golden_directory="$2"
-    local src="$directory/gzip"
-    local buggy=$(cat "$directory/bugged-program.txt")
-    local run_tests_script=$(readlink -f "$directory/gzip-run-tests.pl")
-    cat <<EOF > /tmp/gzip-oracle
-#!/bin/bash
-FILE=/tmp/testo
-perl "$run_tests_script" "\$1" &> "\$FILE"
-if [[ -s \$FILE ]] ; then
-  pwd >> "\$FILE"
-  exit 1;
-else
-  exit 0;
-fi
-EOF
-
-    chmod u+x /tmp/gzip-oracle
-    local golden="$golden_directory/gzip"
-    angelix "$src" "$buggy" /tmp/gzip-oracle $gzip_test_suite \
-            --golden "$golden" \
-            --configure "$gzip_configure" \
-            --test-timeout 50 \
-            $arguments
-}
+#repair-gzip () {
+#    local directory="$1"
+#    local golden_directory="$2"
+#    local src="$directory/gzip"
+#    local buggy=$(cat "$directory/bugged-program.txt")
+#    local run_tests_script=$(readlink -f "$directory/gzip-run-tests.pl")
+#    cat <<EOF > /tmp/gzip-oracle
+##!/bin/bash
+#FILE=/tmp/testo
+#perl "$run_tests_script" "\$1" &> "\$FILE"
+#if [[ -s \$FILE ]] ; then
+#  pwd >> "\$FILE"
+#  exit 1;
+#else
+#  exit 0;
+#fi
+#EOF
+#
+#    chmod u+x /tmp/gzip-oracle
+#    local golden="$golden_directory/gzip"
+#    angelix "$src" "$buggy" /tmp/gzip-oracle $gzip_test_suite \
+#            --golden "$golden" \
+#            --configure "$gzip_configure" \
+#            --test-timeout 50 \
+#            $arguments
+#}
 
 preinstrument(){
     local directory="$1"
     local is_golden="$2"
     preinstrument_test "$directory"
 
-    sed -i 's/make /.\//' "$directory/gzip-run-tests.pl"
-    sed -i 's/\.log//g' "$directory/gzip-run-tests.pl"
-    sed -i '/rm/d' "$directory/gzip-run-tests.pl"
-    sed -i '/kill/d' "$directory/gzip-run-tests.pl"
-    sed -i '/\^PASS/i print "FAIL:$line";' "$directory/gzip-run-tests.pl"
-
     case $version in
         3eb6091d69a-884ef6d16c6 )
             if [[ "$is_golden" ==  *"notgolden"* ]]; then
-                local test6_script="$directory/gzip/tests/null-suffix-clobber"
+                local test6_script="$directory/tests/null-suffix-clobber"
                 sed -i "s/invalid suffix/incorrect suffix/" "$test6_script"
             fi
             ;;
@@ -209,31 +203,31 @@ preinstrument(){
     # then
     #    if [[ "$is_golden" ==  *"notgolden"* ]]
     #     then
-    #        #local test6_script="$directory/gzip/tests/null-suffix-clobber"
+    #        #local test6_script="$directory/tests/null-suffix-clobber"
     #        #sed -i "s/invalid suffix/incorrect suffix/" "$test6_script"
     #        #else
-    #        #   cd "$directory/gzip/"
+    #        #   cd "$directory/"
     #        #   ./configure &>/dev/null && make clean &>/dev/null
     #        #     cd "$origDIR"
     #     fi
     # fi
-    #sed -i 's/5.5/-/g' $directory/gzip/bootstrap.conf
+    #sed -i 's/5.5/-/g' $directory/bootstrap.conf
     #echo "before boostrap"
-    #cd "$directory/gzip/"
+    #cd "$directory/"
     #bash "./bootstrap"
 
-    sed -i '/gets is/d' "$directory/gzip/lib/stdio.in.h"
-    sed -i 's/: O_BINARY/: 0/' "$directory/gzip/gzip.c"
-    sed -i 's/S_IRWXUGO/00777/' "$directory/gzip/gzip.c"
-    sed -i 3324's/signbit (arg)/arg < 0.0L/' "$directory/gzip/lib/vasnprintf.c"
+    sed -i '/gets is/d' "$directory/lib/stdio.in.h"
+    sed -i 's/: O_BINARY/: 0/' "$directory/gzip.c"
+    sed -i 's/S_IRWXUGO/00777/' "$directory/gzip.c"
+    sed -i 3324's/signbit (arg)/arg < 0.0L/' "$directory/lib/vasnprintf.c"
 
 
-    #cd "$directory/gzip/"
+    #cd "$directory/"
     #./configure &>/dev/null && make clean &>/dev/null
     #cd "$origDIR"
     #echo "after boostrap"
     #echo "after sed"
-    #sed -i "s/root\/mountpoint-genprog\/genprog-many-bugs\//$(echo "$origDIR/" | sed -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" "$directory/gzip/tests/Makefile"
+    #sed -i "s/root\/mountpoint-genprog\/genprog-many-bugs\//$(echo "$origDIR/" | sed -e 's/\\/\\\\/g' -e 's/\//\\\//g' -e 's/&/\\\&/g')/g" "$directory/tests/Makefile"
 
 
     instrument_source "$directory"
@@ -269,10 +263,14 @@ if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
     preinstrument $golden_directory "golden"
 fi
 
+sed -i 's/make /.\//' "$root_directory/gzip-run-tests.pl"
+sed -i 's/\.log//g' "$root_directory/gzip-run-tests.pl"
+sed -i '/rm/d' "$root_directory/gzip-run-tests.pl"
+sed -i '/kill/d' "$root_directory/gzip-run-tests.pl"
+sed -i '/\^PASS/i print "FAIL:$line";' "$root_directory/gzip-run-tests.pl"
 
 
-
-run_tests_script=$(readlink -f "$root_directory/libtiff-run-tests.pl")
+run_tests_script=$(readlink -f "$root_directory/gzip-run-tests.pl")
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
@@ -289,7 +287,7 @@ chmod u+x $root_directory/angelix/oracle
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-./configure CFLAGS="-g -O0 -m32" LDFLAGS="-m32" CXXFLAGS="-g -O0 -m32"
+./configure
 EOF
 chmod +x $root_directory/angelix/config
 
