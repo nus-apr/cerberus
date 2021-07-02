@@ -1,0 +1,30 @@
+[2021-Jun-25 10:22:16.077938] [info]	intermediate data directory: "/tmp/3ed4-6a51-d9f3-cdb3"
+[2021-Jun-25 10:22:16.078149] [info]	output data directory: "/experiments/benchmark/manybugs/libtiff/207c78a/f1x-2021_06_25-10_22_16"
+[2021-Jun-25 10:22:16.078314] [info]	building project and inferring compile commands
+[2021-Jun-25 10:22:16.083149] [info]	using existing compilation database (compile_commands.json)
+[2021-Jun-25 10:22:18.536282] [info]	instrumenting source files for profiling
+[2021-Jun-25 10:22:18.854041] [warning]	profiling instrumentation of "../../../../../data/manybugs/libtiff/207c78a/src/libtiff/tif_dirwrite.c" returned non-zero exit code
+[2021-Jun-25 10:22:19.108701] [info]	building project with f1x runtime
+[2021-Jun-25 10:22:19.651578] [info]	profiling project
+[2021-Jun-25 10:22:19.778291] [info]	number of positive tests: 0
+[2021-Jun-25 10:22:19.778333] [info]	number of negative tests: 1
+[2021-Jun-25 10:22:19.778347] [info]	negative tests: [3]
+[2021-Jun-25 10:22:19.778366] [info]	binary path /data/manybugs/libtiff/207c78a//src/test
+[2021-Jun-25 10:22:19.778381] [info]	binary name short_tag
+[2021-Jun-25 10:22:19.780481] [info]	copy profile executable: 0
+[2021-Jun-25 10:22:19.780580] [info]	number of locations: 0
+[2021-Jun-25 10:22:19.780608] [info]	applying transfomation schemas to source files
+[2021-Jun-25 10:22:20.043282] [warning]	transformation returned non-zero exit code
+[2021-Jun-25 10:22:20.043639] [info]	generating search space
+[2021-Jun-25 10:22:20.043773] [info]	search space size: 0
+[2021-Jun-25 10:22:20.043793] [info]	compiling analysis runtime
+[2021-Jun-25 10:22:20.129335] [info]	building project with f1x runtime
+[2021-Jun-25 10:22:21.550369] [info]	prioritizing search space
+[2021-Jun-25 10:22:21.550698] [info]	candidates evaluated: 0
+[2021-Jun-25 10:22:21.550721] [info]	tests executed: 0
+[2021-Jun-25 10:22:21.550734] [info]	executions with timeout: 0
+[2021-Jun-25 10:22:21.550746] [info]	number of equivalent partition: 0
+[2021-Jun-25 10:22:21.550759] [info]	plausible patches: 0
+[2021-Jun-25 10:22:21.550771] [info]	fix locations: 0
+[2021-Jun-25 10:22:21.550955] [info]	no patch found
+[2021-Jun-25 10:22:21.551049] [info]	locations : 

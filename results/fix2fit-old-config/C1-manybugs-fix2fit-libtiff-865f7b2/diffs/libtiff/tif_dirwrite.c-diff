@@ -1,0 +1,14 @@
+326,327d325
+<                 tmsize_t orig_rawcc = tif->tif_rawcc;
+< 
+341,344c339
+< 		 * by the compression close+cleanup routines.  But
+<                  * be careful not to write stuff if we didn't add data
+<                  * in the previous steps as the "rawcc" data may well be
+<                  * a previously read tile/strip in mixed read/write mode.
+---
+> 		 * by the compression close+cleanup routines.
+346c341
+< 		if (tif->tif_rawcc > 0 && tif->tif_rawcc != orig_rawcc
+---
+> 		if (tif->tif_rawcc > 0

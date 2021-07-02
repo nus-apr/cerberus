@@ -1,0 +1,57 @@
+[2021-Jun-25 10:45:36.099693] [info]	intermediate data directory: "/tmp/459d-4d85-6d9b-1f00"
+[2021-Jun-25 10:45:36.099903] [info]	output data directory: "/experiments/benchmark/manybugs/libtiff/0a36d7f/f1x-2021_06_25-10_45_36"
+[2021-Jun-25 10:45:36.100084] [info]	building project and inferring compile commands
+[2021-Jun-25 10:45:36.104935] [info]	using existing compilation database (compile_commands.json)
+[2021-Jun-25 10:45:38.529351] [info]	instrumenting source files for profiling
+[2021-Jun-25 10:45:38.896917] [warning]	profiling instrumentation of "../../../../../data/manybugs/libtiff/0a36d7f/src/libtiff/tif_dirread.c" returned non-zero exit code
+[2021-Jun-25 10:45:39.151041] [info]	building project with f1x runtime
+[2021-Jun-25 10:45:40.746653] [info]	profiling project
+[2021-Jun-25 10:45:40.780295] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.810138] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.840943] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.870395] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.870432] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.898751] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:40.898784] [warning]	iterating line0 976 6 976 64
+[2021-Jun-25 10:45:41.531567] [info]	number of positive tests: 21
+[2021-Jun-25 10:45:41.531621] [info]	number of negative tests: 5
+[2021-Jun-25 10:45:41.531634] [info]	negative tests: [2, 3, 4, 22, 23]
+[2021-Jun-25 10:45:41.531658] [info]	binary path /data/manybugs/libtiff/0a36d7f//src/test
+[2021-Jun-25 10:45:41.531675] [info]	binary name long_tag
+[2021-Jun-25 10:45:41.534028] [info]	copy profile executable: 0
+[2021-Jun-25 10:45:41.534169] [info]	number of locations: 1
+[2021-Jun-25 10:45:41.534202] [info]	applying transfomation schemas to source files
+[2021-Jun-25 10:45:41.861342] [warning]	transformation returned non-zero exit code
+[2021-Jun-25 10:45:41.862628] [info]	generating search space
+[2021-Jun-25 10:45:41.920686] [info]	original expression is : ((! (dir->tdir_count == 0) || ! (w == 0)) || (((tsize_t)dir->tdir_count / w) != cc))
+[2021-Jun-25 10:45:41.920784] [info]	search space size: 4825
+[2021-Jun-25 10:45:41.920803] [info]	compiling analysis runtime
+[2021-Jun-25 10:45:42.122237] [info]	building project with f1x runtime
+[2021-Jun-25 10:45:43.587346] [info]	prioritizing search space
+[2021-Jun-25 10:45:43.898592] [info]	exploration progress: 0%
+[2021-Jun-25 10:45:43.974592] [info]	exploration progress: 10%
+[2021-Jun-25 10:45:44.796294] [info]	partition size : 272
+[2021-Jun-25 10:45:44.796486] [info]	plausible patch: "((! (dir->tdir_count == 0) || ! (w == 0)) || (((tsize_t)dir->tdir_count / w) != cc))" ---> "(((! (dir->tdir_count == 0) || ! (w == 0)) || (((tsize_t)dir->tdir_count / w) != cc)) && (cp != cp))" in ../../../../../data/manybugs/libtiff/0a36d7f/src/libtiff/tif_dirread.c:976
+[2021-Jun-25 10:45:44.796649] [info]	more patches found in ../../../../../data/manybugs/libtiff/0a36d7f/src/libtiff/tif_dirread.c:976
+[2021-Jun-25 10:45:45.403765] [info]	partition size : 22
+[2021-Jun-25 10:45:45.603769] [info]	partition size : 6
+[2021-Jun-25 10:45:45.734928] [info]	partition size : 4
+[2021-Jun-25 10:45:45.837273] [info]	partition size : 4
+[2021-Jun-25 10:45:45.837802] [info]	exploration progress: 20%
+[2021-Jun-25 10:45:45.907915] [info]	exploration progress: 30%
+[2021-Jun-25 10:45:45.908082] [info]	exploration progress: 40%
+[2021-Jun-25 10:45:45.908196] [info]	exploration progress: 50%
+[2021-Jun-25 10:45:45.908304] [info]	exploration progress: 60%
+[2021-Jun-25 10:45:45.908406] [info]	exploration progress: 70%
+[2021-Jun-25 10:45:45.908505] [info]	exploration progress: 80%
+[2021-Jun-25 10:45:45.909500] [info]	exploration progress: 90%
+[2021-Jun-25 10:45:45.916390] [info]	computing source diffs
+[2021-Jun-25 10:45:46.229179] [info]	candidates evaluated: 4825
+[2021-Jun-25 10:45:46.229245] [info]	tests executed: 54
+[2021-Jun-25 10:45:46.229270] [info]	executions with timeout: 0
+[2021-Jun-25 10:45:46.229294] [info]	execution speed: 32 exe/sec
+[2021-Jun-25 10:45:46.229327] [info]	number of equivalent partition: 5
+[2021-Jun-25 10:45:46.229359] [info]	plausible patches: 308
+[2021-Jun-25 10:45:46.229383] [info]	fix locations: 1
+[2021-Jun-25 10:45:46.236589] [info]	patches successfully generated : "/experiments/benchmark/manybugs/libtiff/0a36d7f/f1x-2021_06_25-10_45_36"
+[2021-Jun-25 10:45:46.236718] [info]	locations : 0 976 6 976 64#

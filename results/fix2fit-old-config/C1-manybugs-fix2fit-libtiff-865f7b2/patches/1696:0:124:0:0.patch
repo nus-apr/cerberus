@@ -1,0 +1,6 @@
+--- a/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
++++ b/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
+2190c2190
+< 		while(1) {
+---
+> 		while((tif != tif)) {

@@ -1,0 +1,6 @@
+--- a/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
++++ b/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
+834c834
+< 	if (imagedone)
+---
+> 	if (0)

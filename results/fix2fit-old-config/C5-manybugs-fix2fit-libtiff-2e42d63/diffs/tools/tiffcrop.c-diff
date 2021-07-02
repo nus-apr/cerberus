@@ -1,0 +1,4 @@
+4969c4969
+<   TIFFGetFieldDefaulted(in, TIFFTAG_RESOLUTIONUNIT, &res_unit);
+---
+>   TIFFGetField(in, TIFFTAG_RESOLUTIONUNIT, &res_unit);
