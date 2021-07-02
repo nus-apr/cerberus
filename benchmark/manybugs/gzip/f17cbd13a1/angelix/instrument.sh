@@ -293,6 +293,6 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-make -e  CFLAGS="-march=x86-64 -g -O0 -static" -j`nproc`
+make -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
