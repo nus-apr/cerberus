@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y  \
     libpython-dev \
     libpython3-dev \
     libsdl1.2-dev  \
+    libsqlite3-dev \
     libtool \
     libvdpau-dev \
     libx11-dev \
@@ -36,7 +37,32 @@ RUN apt-get update && apt-get install -y  \
     python3 \
     texinfo \
     xutils-dev \
-    yasm
+    yasm \
+    m4 \
+    libglib2.0-dev \
+    libldap-dev \
+    libbz2-dev \
+    libssl-dev \
+    libsqlite3-dev \
+    libxml2-dev \
+    libgdbm-dev \
+    subversion \
+    libc6-dev-i386 \
+    mercurial \
+    libncurses-dev \
+    libsqlite-dev \
+    libgdbm-dev \
+    libssl-dev \
+    libreadline-gplv2-dev \
+    libbz2-dev \
+    psmisc \
+    libsqlite3-dev \
+    gcc-multilib \
+    g++-multilib \
+    tk-dev \
+    mercurial \
+    tcl-dev \
+    tix-dev
 
 
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments

@@ -1,8 +1,11 @@
-project_name=gmp
-bug_id=14167
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
 scenario_id=gmp-bug-14166-14167
 diff_file=mpz/gcdext.c-14166
-dir_name=$1/manybugs/$project_name/$bug_id
+bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
 download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario_id}.tar.gz
 current_dir=$PWD
 mkdir -p $dir_name
@@ -20,11 +23,8 @@ rm -rf  coverage* \
         *.cache \
         *.debug.* \
         sanity \
-        compile.pl \
         *~ \
-        test \
         reconfigure \
-        preprocessed \
         fixed-program.txt
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
@@ -32,22 +32,30 @@ mv fix-failures bug-info
 mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-make distclean
+sed -i "s#_GL_WARN_ON_USE (gets,#//#g" lib/stdio.in.h
+sed -i "s#root/mountpoint-genprog/genprog-many-bugs/${scenario_id}/gzip#/data/manybugs/${project_name}/${fix_id}/src#g" tests/Makefile
+sed -i "s#\$abs_srcdir#/data/manybugs/${project_name}/${fix_id}/src/tests#g" tests/hufts
 chown -R root $dir_name
 
+cd $dir_name/src
 
-# Compile gzip.
-make clean
 mkdir tests/mpbsd/
 touch tests/mpbsd/Makefile.in
 cp $current_dir/ltmain.sh ltmain.sh
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' configure.in
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile.am
-./.bootstrap
-CC=wllvm CXX=wllvm++ ./configure --disable-shared --enable-static --disable-fft --disable-mpbsd --disable-cxx --disable-fast-install --disable-minithres
 
-CC=wllvm CXX=wllvm++ ./configure --disable-shared --disable-cxx --disable-fast-install --enable-static;
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;
-make -e fib_table.h;make -e mp_bases.h;
-CC=clang CXX=clang++ make -j32
+cd $dir_name
+## fix the test harness and the configuration script
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${fix_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/usr/bin/perl#perl#g" test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
+sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
+sed -i '190d' gmp-run-tests.pl
+sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $name);' gmp-run-tests.pl
+chmod +x gmp-run-tests.pl
 
+# Prophet requires/works on source
+hg clone https://gmplib.org/repo/gmp/ src-hg
+cd src-hg; hg update $bug_id
