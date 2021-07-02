@@ -52,7 +52,7 @@ cat ../libxml.patch | patch -p0
 
 cd $dir_name
 chmod +x tester.py test.sh
-./tester.py build && rm tests.all.txt tests.indices.txt
+./tester.py build
 
 cd $dir_name/src
 find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
