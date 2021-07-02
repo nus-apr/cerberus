@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-version=1a085b1446-118a107f2d #this is the angelix version
-gold_file=gzip.c-1a085b1446
+version=a1d3d4019d-f17cbd13a1 #this is the angelix version
+gold_file=gzip.c-a1d3d4019d
 test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
 clean-source () {
     local directory="$1"
