@@ -1,0 +1,6 @@
+--- a/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
++++ b/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
+4969c4969
+<   TIFFGetFieldDefaulted(in, TIFFTAG_RESOLUTIONUNIT, &res_unit);
+---
+>   if (0) TIFFGetFieldDefaulted(in, 296, &res_unit);

@@ -1,0 +1,55 @@
+[2021-Jun-25 10:36:04.252435] [info]	intermediate data directory: "/tmp/c63d-9cb3-2044-bdd3"
+[2021-Jun-25 10:36:04.252642] [info]	output data directory: "/experiments/benchmark/manybugs/libtiff/2e42d63/f1x-2021_06_25-10_36_04"
+[2021-Jun-25 10:36:04.252942] [info]	building project and inferring compile commands
+[2021-Jun-25 10:36:04.257845] [info]	using existing compilation database (compile_commands.json)
+[2021-Jun-25 10:36:06.505208] [info]	instrumenting source files for profiling
+[2021-Jun-25 10:36:08.328478] [warning]	profiling instrumentation of "../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c" returned non-zero exit code
+[2021-Jun-25 10:36:08.583435] [info]	building project with f1x runtime
+[2021-Jun-25 10:36:09.568501] [info]	profiling project
+[2021-Jun-25 10:36:09.604269] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.636606] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.667102] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.696950] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.725675] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.754561] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.783557] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.813501] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:09.842048] [warning]	iterating line0 4969 3 4969 62
+[2021-Jun-25 10:36:11.232997] [info]	number of positive tests: 41
+[2021-Jun-25 10:36:11.233050] [info]	number of negative tests: 9
+[2021-Jun-25 10:36:11.233063] [info]	negative tests: [39, 40, 41, 43, 44, ...]
+[2021-Jun-25 10:36:11.233088] [info]	binary path /data/manybugs/libtiff/2e42d63//src/tools
+[2021-Jun-25 10:36:11.233158] [info]	binary name tiffcrop
+[2021-Jun-25 10:36:11.235508] [info]	copy profile executable: 0
+[2021-Jun-25 10:36:11.235632] [info]	number of locations: 1
+[2021-Jun-25 10:36:11.235665] [info]	applying transfomation schemas to source files
+[2021-Jun-25 10:36:12.513839] [warning]	transformation returned non-zero exit code
+[2021-Jun-25 10:36:12.514943] [info]	generating search space
+[2021-Jun-25 10:36:12.516526] [info]	original expression is : 1
+[2021-Jun-25 10:36:12.516591] [info]	search space size: 257
+[2021-Jun-25 10:36:12.516609] [info]	compiling analysis runtime
+[2021-Jun-25 10:36:12.614195] [info]	building project with f1x runtime
+[2021-Jun-25 10:36:13.541053] [info]	prioritizing search space
+[2021-Jun-25 10:36:13.544819] [info]	exploration progress: 0%
+[2021-Jun-25 10:36:14.280638] [info]	partition size : 129
+[2021-Jun-25 10:36:14.280825] [info]	plausible patch: "1" ---> "0" in ../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c:4969
+[2021-Jun-25 10:36:14.280965] [info]	more patches found in ../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c:4969
+[2021-Jun-25 10:36:14.310238] [info]	exploration progress: 10%
+[2021-Jun-25 10:36:14.311373] [info]	exploration progress: 20%
+[2021-Jun-25 10:36:14.311857] [info]	exploration progress: 30%
+[2021-Jun-25 10:36:14.311971] [info]	exploration progress: 40%
+[2021-Jun-25 10:36:14.312570] [info]	exploration progress: 50%
+[2021-Jun-25 10:36:14.313443] [info]	exploration progress: 60%
+[2021-Jun-25 10:36:14.314417] [info]	exploration progress: 70%
+[2021-Jun-25 10:36:14.314491] [info]	exploration progress: 80%
+[2021-Jun-25 10:36:14.314684] [info]	exploration progress: 90%
+[2021-Jun-25 10:36:14.315531] [info]	computing source diffs
+[2021-Jun-25 10:36:15.601240] [info]	candidates evaluated: 257
+[2021-Jun-25 10:36:15.601292] [info]	tests executed: 25
+[2021-Jun-25 10:36:15.601305] [info]	executions with timeout: 0
+[2021-Jun-25 10:36:15.601317] [info]	execution speed: 33.7 exe/sec
+[2021-Jun-25 10:36:15.601338] [info]	number of equivalent partition: 1
+[2021-Jun-25 10:36:15.601350] [info]	plausible patches: 129
+[2021-Jun-25 10:36:15.601361] [info]	fix locations: 1
+[2021-Jun-25 10:36:15.601944] [info]	patches successfully generated : "/experiments/benchmark/manybugs/libtiff/2e42d63/f1x-2021_06_25-10_36_04"
+[2021-Jun-25 10:36:15.602071] [info]	locations : 0 4969 3 4969 62#

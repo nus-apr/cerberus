@@ -1,0 +1,6 @@
+--- a/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
++++ b/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
+785c785
+< 			_TIFFmemcpy(n,&o->tdir_offset,4);
+---
+> 			if ((ndir != 15)) _TIFFmemcpy(n, &o->tdir_offset, 4);
