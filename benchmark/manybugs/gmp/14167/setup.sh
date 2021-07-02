@@ -56,6 +56,10 @@ sed -i '190d' gmp-run-tests.pl
 sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $name);' gmp-run-tests.pl
 chmod +x gmp-run-tests.pl
 
+# Fix build script of Prophet
+sed -i '79d' /prophet-gpl/tools/gmp-build.py
+sed -i '79i \\tret = subprocess.call(["make", "CFLAGS=\\"-static\\""], env = my_env);'  /prophet-gpl/tools/gmp-build.py
+
 # Prophet requires/works on source
 #hg clone https://gmplib.org/repo/gmp/ src-hg
 #cd src-hg; hg update $bug_id
