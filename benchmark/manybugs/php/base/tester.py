@@ -58,6 +58,9 @@ def run(identifier, exe=None):
     elif identifier[0] == "n":
         with open( exp_dir + "/failing.tests.txt") as f:
             test = f.readlines()[offset]
+    else:
+        with open(exp_dir + "/tests.all.txt") as f:
+            test = f.readlines()[offset]
     test = test.strip()
 
     # determine a time limit (measured in seconds)
