@@ -10,10 +10,10 @@ POS_N=76
 NEG_N=1
 
 ## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/libtiff/${bug_id}#g" test.sh
-sed -i "s#/data/manybugs/libtiff/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
-sed -i "s#cd libtiff#cd src#g" test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
 
 
 if [ -z "$TEST_ID" ]
@@ -41,7 +41,7 @@ else
       timeout 5 bash test.sh $TEST_ID
   else
       cd $dir_name/src
-      timeout 5 perl $dir_name/libtiff-run-tests.pl $TEST_ID
+      timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
   fi
 
 fi
