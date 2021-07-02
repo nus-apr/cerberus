@@ -281,7 +281,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     if not os.path.isdir(deploy_path + "/workdir"):
         instrument_command = "cd " + deploy_path + ";"
-        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only  > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     line_number = ""
     localization_file = deploy_path + "/workdir/profile_localization.res"
@@ -315,8 +315,9 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     execute_command(copy_command)
 
 
-def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location):
+def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location, subject_name):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
+    global CONF_BENCHMARK
     print("\t[INFO] initializing for genprog")
     repair_conf_path = deploy_path + "/src/repair.conf"
     if not os.path.isfile(deploy_path + "/src/compile.pl"):
@@ -347,8 +348,9 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
                         "--rep-cache default.cache\n" \
                         "--pos-tests {p_size}\n" \
                         "--neg-tests {n_size}\n" \
-                        "--test-script bash /experiments/benchmark/manybugs/libtiff/{bug_id}/test.sh\n" \
-                        "--continue".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg)
+                        "--test-script bash /experiments/benchmark/{benchmark}/{subject}/{bug_id}/test.sh\n" \
+                        "--continue".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg,
+                                            benchmark=CONF_BENCHMARK, subject=subject_name)
 
     if not os.path.isfile(repair_conf_path):
         open(repair_conf_path, "w")
@@ -475,6 +477,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     count_pass = int(int(experiment_info[KEY_COUNT_POS]) * test_ratio)
     count_neg = int(experiment_info[KEY_COUNT_NEG])
     binary_arg = experiment_info[KEY_CRASH_CMD]
+    subject_name = experiment_info[KEY_SUBJECT]
     fix_location = None
     binary_path = experiment_info[KEY_BINARY_PATH]
     if CONFIG_INFO[KEY_CONFIG_FIX_LOC] == "dev":
@@ -491,7 +494,7 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     elif CONF_TOOL_NAME == "f1x":
         f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location, binary_path)
     elif CONF_TOOL_NAME == "genprog":
-        genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location)
+        genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location, subject_name)
     else:
         exit("Unknown Tool Name")
 
