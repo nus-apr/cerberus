@@ -57,5 +57,5 @@ sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $nam
 chmod +x gmp-run-tests.pl
 
 # Prophet requires/works on source
-hg clone https://gmplib.org/repo/gmp/ src-hg
-cd src-hg; hg update $bug_id
+#hg clone https://gmplib.org/repo/gmp/ src-hg
+#cd src-hg; hg update $bug_id
