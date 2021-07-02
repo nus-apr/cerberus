@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 version=a1d3d4019d-f17cbd13a1 #this is the angelix version
-gold_file=gzip.c-a1d3d4019d
+gold_file=gzip.c-1a085b1446
 
 clean-source () {
     local directory="$1"
@@ -243,7 +243,6 @@ preinstrument(){
 }
 
 # check locale
-export LC_ALL=en_US.UTF-8
 perl -v |& grep --silent "warning" && echo "Type perl -v and check locale errors" && exit 1
 
 root_directory=$1
