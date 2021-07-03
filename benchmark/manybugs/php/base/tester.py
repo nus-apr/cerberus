@@ -51,16 +51,17 @@ def preexec():
 
 def run(identifier, exe=None):
     global exp_dir
-    offset = int(identifier[1:]) - 1
     if identifier[0] == "p":
+        offset = int(identifier[1:]) - 1
         with open( exp_dir + "/passing.tests.txt") as f:
             test = f.readlines()[offset]
     elif identifier[0] == "n":
+        offset = int(identifier[1:]) - 1
         with open( exp_dir + "/failing.tests.txt") as f:
             test = f.readlines()[offset]
     else:
         with open(exp_dir + "/tests.all.txt") as f:
-            test = f.readlines()[offset]
+            test = f.readlines()[identifier]
     test = test.strip()
 
     # determine a time limit (measured in seconds)
