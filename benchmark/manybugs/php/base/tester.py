@@ -9,6 +9,8 @@ from subprocess import Popen, PIPE
 DEVNULL = open(os.devnull, 'w')
 exp_dir = os.path.abspath(os.getcwd())
 
+fail_list = ["ext/reflection/tests/traits005.phpt", "Zend/tests/bug55825.phpt", "Zend/tests/bug55137.phpt", "Zend/tests/traits/static_get_called_class.phpt", "Zend/tests/traits/static_002.phpt"]
+
 # Build a list of all the test cases for the program
 def build():
     # Find the list of tests used by all ManyBugs PHP scenarios
@@ -30,6 +32,8 @@ def build():
     cut_to = \
         next((i for (i, l) in enumerate(lines) if l.startswith("minutes between bug rev and fix rev:")))
     failing = set(lines[cut_from + 1:cut_to - 1])
+    if "8d520d6296" in exp_dir:
+        failing = set(fail_list)
 
     # Deduce the set of passing tests
     passing = tests - failing
