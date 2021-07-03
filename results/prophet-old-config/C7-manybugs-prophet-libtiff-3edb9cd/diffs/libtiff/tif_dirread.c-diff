@@ -1,4 +1,0 @@
-589c589
-< 	} else if (td->td_nstrips > 1
----
-> 	} else if (td->td_nstrips > 2

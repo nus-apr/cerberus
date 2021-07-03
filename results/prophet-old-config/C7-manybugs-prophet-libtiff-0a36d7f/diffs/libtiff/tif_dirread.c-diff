@@ -1,4 +1,0 @@
-976c976
-< 	if (!dir->tdir_count || !w || (tsize_t)dir->tdir_count / w != cc)
----
-> 	if (!dir->tdir_count || !w || cc / w != (tsize_t)dir->tdir_count)
