@@ -1,6 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/0a36d7f/src/libtiff/tif_dirread.c
-+++ b/../../../../../data/manybugs/libtiff/0a36d7f/src/libtiff/tif_dirread.c
-976c976
-< 	if (!dir->tdir_count || !w || (tsize_t)dir->tdir_count / w != cc)
----
-> 	if ((((! (dir->tdir_count == 0) || ! (w == 0)) || (((tsize_t)dir->tdir_count / w) != cc)) && (cp != cp)))

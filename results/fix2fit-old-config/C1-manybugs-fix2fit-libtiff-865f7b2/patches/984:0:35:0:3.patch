@@ -1,6 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
-+++ b/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
-1414c1414
-<     if (dir==NULL)
----
->     if (((dir == (void *)0) || (count == 3)))

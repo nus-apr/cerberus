@@ -1,9 +1,0 @@
-338c338,343
-< 			if (!TIFFWriteNormalTag(tif, dir, fip))
----
-> 			/* XXX: Should be fixed and removed. */
-> 			if (fip->field_tag == TIFFTAG_DOTRANGE) {
-> 				if (!TIFFSetupShortPair(tif, fip->field_tag, dir))
-> 					goto bad;
-> 			}
-> 			else if (!TIFFWriteNormalTag(tif, dir, fip))

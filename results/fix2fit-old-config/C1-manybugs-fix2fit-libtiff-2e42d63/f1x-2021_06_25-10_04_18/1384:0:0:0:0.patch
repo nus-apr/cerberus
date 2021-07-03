@@ -1,7 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-+++ b/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-4252,4253c4252
-< 	((crop->crop_mode & CROP_REGIONS) || (crop->crop_mode & CROP_MARGINS) ||
-<  	 (crop->crop_mode & CROP_LENGTH)  || (crop->crop_mode & CROP_WIDTH)))
----
-> 	(((((( crop->crop_mode &  16) == 0) || (( crop->crop_mode &  1) == 0)) || (( crop->crop_mode &  4) == 0)) && (( crop->crop_mode &  2) == 0))))

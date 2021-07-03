@@ -1,6 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
-+++ b/../../../../../data/manybugs/libtiff/865f7b2/src/libtiff/tif_dirwrite.c
-2177c2177
-< 			tif->tif_header.classic.tiff_diroff = (uint32) tif->tif_diroff;
----
-> 			tif->tif_header.classic.tiff_diroff = 0;

@@ -1,6 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-+++ b/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-4244c4244
-<   if (image->res_unit != RESUNIT_INCH && image->res_unit != RESUNIT_CENTIMETER)
----
->   if (((image->res_unit != 2) || (image->res_unit != 3)))

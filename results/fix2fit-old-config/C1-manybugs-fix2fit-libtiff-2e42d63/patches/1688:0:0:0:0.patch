@@ -1,6 +1,0 @@
---- a/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-+++ b/../../../../../data/manybugs/libtiff/2e42d63/src/tools/tiffcrop.c
-4979c4979
-<   image->res_unit = res_unit;
----
->   image->res_unit = readunit;
