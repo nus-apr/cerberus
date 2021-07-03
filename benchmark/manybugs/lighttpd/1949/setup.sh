@@ -23,11 +23,8 @@ rm -rf  coverage* \
         *.cache \
         *.debug.* \
         sanity \
-        compile.pl \
         *~ \
-        test \
         reconfigure \
-        preprocessed \
         fixed-program.txt
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
