@@ -7,6 +7,8 @@ cd $dir_name/src
 
 # Config libtiff.
 make clean
+PATH_ORIG=$PATH
+export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
 ./configure \
   --enable-cli \
   --disable-dom \
@@ -22,5 +24,5 @@ make clean
   --disable-fileinfo \
   --disable-shared
 
-
+export PATH=$PATH_ORIG
 

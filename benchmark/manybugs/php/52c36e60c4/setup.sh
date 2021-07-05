@@ -41,12 +41,19 @@ cd $dir_name/src
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
+git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
+./buildconf
+PATH_ORIG=$PATH
+export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
+./configure CFLAGS="-save-temps=obj"
+make -j`nproc`
+cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(echo $diff_file| cut -d'.' -f 1).c
 
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
 #cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
-#make distclean
+make distclean
 ./configure && make -j`nproc`
 
 
@@ -59,6 +66,8 @@ find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-t
 find . -name tests -type d | rm -rf - && \
     tar -xf all-tests.tar.gz && \
     rm -f all-tests.tar.gz
+
+export PATH=$PATH_ORIG
 
 
 
