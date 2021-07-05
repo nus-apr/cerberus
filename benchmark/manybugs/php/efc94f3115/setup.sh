@@ -41,12 +41,19 @@ cd $dir_name/src
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
+git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
+./buildconf
+./configure CFLAGS="-save-temps=obj"
+make -j`nproc`
+cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(echo $diff_file| cut -d'.' -f 1).c
+
+#PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf ./buildconf
 
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
 #cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
-#make distclean
+make distclean
 ./configure && make -j`nproc`
 
 
