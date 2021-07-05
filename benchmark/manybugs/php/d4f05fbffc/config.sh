@@ -7,6 +7,7 @@ cd $dir_name/src
 
 # Config libtiff.
 make clean
+PHP_AUTOHEADER=/usr/bin/autoheader PHP_AUTOCONF=/usr/bin/autoconf ./buildconf
 ./configure \
   --enable-cli \
   --disable-dom \
