@@ -35,6 +35,9 @@ else
       timeout 5 bash test.sh $TEST_ID
   else
       cd $dir_name/src
+      if [[ $TEST_ID == '195' ]]; then
+         TEST_ID=194
+      fi
       timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
   fi
 

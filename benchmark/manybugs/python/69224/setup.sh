@@ -39,8 +39,11 @@ cd $dir_name
 ## fix the test harness and the configuration script
 sed -i "s/cd python/cd src/" test.sh
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${fix_id}#g" test.sh
-sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 300#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "s#&> /dev/null##" python-run-tests.pl
+
+# disable 'test_create_connection' in 'test_socket'
+RUN sed -i "s#def test_create_connection_timeout(self):#def test_create_connection(self):\n        return#" src/Lib/test/test_socket.py
 
