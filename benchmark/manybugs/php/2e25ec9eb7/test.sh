@@ -6,7 +6,7 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 scenario_id=php-bug-2011-04-06-187eb235fe-2e25ec9eb7
 cd $dir_name
 TEST_ID=$1
-POS_N=2
+POS_N=7608
 NEG_N=1
 
 
