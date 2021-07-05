@@ -476,8 +476,8 @@ def repair(deploy_path, setup_dir_path, experiment_info):
     bug_id = str(experiment_info[KEY_BUG_ID])
     fix_source_file = str(experiment_info[KEY_FIX_FILE])
     fix_line_number = str(experiment_info[KEY_FIX_LINE])
-    passing_test_list = experiment_info[KEY_PASSING_TEST].split(", ")
-    failing_test_list = experiment_info[KEY_FAILING_TEST].split(", ")
+    passing_test_list = experiment_info[KEY_PASSING_TEST].split(",")
+    failing_test_list = experiment_info[KEY_FAILING_TEST].split(",")
     timeout = int(CONFIG_INFO[KEY_CONFIG_TIMEOUT])
     test_ratio = float(CONFIG_INFO[KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
