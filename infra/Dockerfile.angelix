@@ -75,13 +75,13 @@ RUN cd /deps/php && wget http://ftp.gnu.org/gnu/autoconf/autoconf-2.13.tar.gz &&
 RUN cd /deps/php &&  wget http://ftp.gnu.org/gnu/bison/bison-2.5.1.tar.gz && \
         tar xvzf bison-2.5.1.tar.gz && \
         cd bison-2.5.1 && \
-        ./configure --prefix=$(abs_builddir)/bison-2.5.1-build && \
+        ./configure --prefix=/deps/php/bison-2.5.1-build && \
         make -j`nproc`
 
 RUN cd /deps/php &&  wget ftp://ftp.gnu.org/gnu/bison/bison-2.2.tar.gz && \
         tar xvzf bison-2.2.tar.gz && \
         cd bison-2.2 && \
-        ./configure --prefix=$(abs_builddir)/bison-2.2-build && \
+        ./configure --prefix=/deps/php/bison-2.2-build && \
         make -j`nproc`
 
 

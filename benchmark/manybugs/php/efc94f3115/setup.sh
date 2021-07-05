@@ -44,6 +44,8 @@ cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
 ./buildconf
+PATH_ORIG=$PATH
+export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
 ./configure CFLAGS="-save-temps=obj"
 make -j`nproc`
 cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(echo $diff_file| cut -d'.' -f 1).c
@@ -67,5 +69,5 @@ find . -name tests -type d | rm -rf - && \
     tar -xf all-tests.tar.gz && \
     rm -f all-tests.tar.gz
 
-
+export PATH=$PATH_ORIG
 
