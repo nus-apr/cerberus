@@ -4,7 +4,7 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 src_dir_name=/data/$benchmark_name/$project_name/$fix_id/src
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
-cd $src_dir_name/test
+cd $src_dir_name/tests
 
 # Copy Seed Files
 mkdir $target_dir/seed-dir
