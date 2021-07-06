@@ -129,3 +129,6 @@ dmypy.json
 .pyre/
 
 infra/Fix2Fit
+
+
+*.DS_Store
