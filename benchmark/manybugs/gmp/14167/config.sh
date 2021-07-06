@@ -9,8 +9,6 @@ cd $dir_name/src
 grep -v '"tests/mpbsd/Makefile") ' configure |   sed "s#tests/mpbsd/Makefile ##g" |   sponge configure
 make distclean
 autoreconf --force --install
-./configure && make -j32
-
 ./configure --disable-shared --enable-static \
             --disable-fft \
             --disable-mpbsd \
