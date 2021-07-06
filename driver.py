@@ -123,7 +123,7 @@ def setup_experiment(script_path, bug_id):
     setup_command += "bash setup.sh; "
     setup_command += set_cc + " bash config.sh; "
     setup_command += set_cc + " bash build.sh; "
-    setup_command += "bash test.sh; "
+    setup_command += "bash test.sh p1; "
     setup_command += " } >" + FILE_SETUP_LOG + " 2>&1"
     execute_command(setup_command)
 
