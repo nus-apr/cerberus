@@ -100,7 +100,7 @@ fix-header () {
 }
 
 instrument_common() {
-    local src1=".aux/gmp/gmp-run-tests.pl"
+    local src1=".aux/src/gmp-run-tests.pl"
     restore_original $src1
 
     case $version in
@@ -163,19 +163,19 @@ instrument () {
             sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/configure.in"
             sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/Makefile.am"
             currdir=$(pwd)
-            cp $HOME/angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stddef.h "$directory/src/mpz/stddef.h"
-            cp $HOME/angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stdarg.h "$directory/src/mpz/stdarg.h"
+            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stddef.h "$directory/src/mpz/stddef.h"
+            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stdarg.h "$directory/src/mpz/stdarg.h"
 
 
             for ctest in "t-gcd"; do
                 gmptestd="$directory/src/tests/mpz/";
-                cp .aux/gmp/testcase/t-gcd-vet.c "$gmptestd"
+                cp .aux/src/testcase/t-gcd-vet.c "$gmptestd"
                 pushd "$gmptestd" > /dev/null
                 cp t-gcd-vet.c t-gcd.c
                 sed -i '/10, t/d' t-gcd.c
                 popd > /dev/null
 
-                cp .aux/gmp/testcase/std.txt "$gmptestd"
+                cp .aux/src/testcase/std.txt "$gmptestd"
                 pushd "$gmptestd" > /dev/null
                 sed -i 's/t:0/t:/g' std.txt
                 popd > /dev/null
@@ -206,13 +206,21 @@ fi
 
 clean-source $buggy_directory
 clean-source $golden_directory
+instrument_common
+
 if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $buggy_directory
+    test_script=$buggy_directory/gmp-run-tests.pl
+    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $buggy_directory/src/configure.in
+    sed -i 's/$(top_builddir)\/ansi2knr//g' $buggy_directory/src/configure.in
+    add-angelix-runner "$test_script"
     touch "$buggy_directory/INSTRUMENTED_ANGELIX"
 fi
 
 if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $golden_directory
+    test_script=$golden_directory/gmp-run-tests.pl
+    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $golden_directory/src/configure.in
+    sed -i 's/$(top_builddir)\/ansi2knr//g' $golden_directory/src/configure.in
+    add-angelix-runner "$test_script"
     touch "$golden_directory/INSTRUMENTED_ANGELIX"
 fi
 
@@ -223,14 +231,151 @@ run_tests_script=$(readlink -f "$root_directory/gmp-run-tests.pl")
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
-FILE=/tmp/testo
-perl "$run_tests_script" "\$1" &> "\$FILE"
-cat \$FILE
-grep -q "PASS:" \$FILE && echo "PASS" && exit 0
-echo "FAIL"
-exit 1
+set -uo pipefail
+
+test_log_file=$test_log_file
+
+if [ "\$#" -ne 1 ]
+then
+    echo "Usage: \$0 <test-id>" >> \${test_log_file}
+    exit 1
+fi
+
+
+#################################################################
+
+CMD=\$(basename \$0 | sed 's/.\///' | sed 's/.sh//')
+
+function abort() {
+    local msg=\$1
+    abort_msg="[\$CMD] Abort: \$msg"
+    echo "\$abort_msg" >> \${test_log_file} 2>& 1
+    exit 1
+}
+
+#################################################################
+
+test_id="\$1"
+
+run_tests_script="$run_tests_script"
+if ! [ -e \$run_tests_script ]; then
+    abort "No such file: \$run_tests_script"
+fi
+
+# the current dir is {validation, frontend, backend}.
+# export AF_WORK_DIR=\$(readlink -f .)
+# export AF_SRC_ROOT_DIR=\$(pwd)/php
+# export AF_USE_TEST_SCRIPT_ID=""
+
+if ! [ -e ../php-helper.php ]; then
+    cp $php_helper_script ..
+fi
+
+test_abbrev="$test_abbrev"
+if [[ \$test_abbrev == "T" ]]; then
+    echo "[oracle] \${run_tests_script} \${test_id} 'T'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'T'
+    result=\$?
+else
+    echo "[oracle] \${run_tests_script} \${test_id} 'F'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'F'
+    result=\$?
+fi
+
+echo "[oracle] test result: \$result" >> \${test_log_file} 2>& 1
+
+if [[ \$result -eq 0 ]]; then
+    echo "\${test_id}: P" >> \${test_log_file} 2>& 1
+    exit 0
+else
+    echo "\${test_id}: N" >> \${test_log_file} 2>& 1
+    exit 1
+fi
 EOF
 chmod u+x $root_directory/angelix/oracle
+
+
+cat <<EOF > $root_directory/angelix/transform
+#!/bin/bash
+set -uo pipefail
+
+if [ -e configured.mark ]; then
+    echo "[transform] Already configured"
+
+    # Makefile
+    sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+    sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+    exit 0
+fi
+
+# extend main.c
+cp $main_c_appendix ./main/
+cat ./main/main.c ./main/main.c.appendix > ./main/main.c.merge
+cp ./main/main.c ./main/main.c.bak
+cp ./main/main.c.merge ./main/main.c
+$aux/src/get_test_script_file.awk $test_univ >> ./main/main.c
+
+# extend php.h
+cp $php_h_appendix ./main/
+cp ./main/php.h ./main/php.h.bak
+cat ./main/php.h ./main/php.h.appendix > ./main/php.h.merge
+cp ./main/php.h.merge ./main/php.h
+
+files=\$(grep -rl "FD_ZERO(" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/FD_ZERO(/FD_ZERO_SIMUL(/g' \$file
+done
+
+files=\$(grep -rl "(char \*)gnu_get_libc_version()" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/(char \*)gnu_get_libc_version()/\"2.19\"/g' \$file
+done
+
+files=\$(grep -rl "# define XPFPA_HAVE_CW 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/# define XPFPA_HAVE_CW 1//g' \$file
+done
+
+files=\$(grep -rl "#define HAVE_MMAP 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/#define HAVE_MMAP 1//g' \$file
+done
+
+# php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif defined(HAVE_ATOMIC_H)/#elif defined(AF_KEEP_ORG) \&\& defined(HAVE_ATOMIC_H)/g' ./ext/standard/php_crypt_r.c
+
+# zend_alloc.c
+sed -i 's/#if defined(__GNUC__) && defined(i386)/#if defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(i386)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(__GNUC__) && defined(__x86_64__)/#elif defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(__x86_64__)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(_MSC_VER) && defined(_M_IX86)/#elif defined(AF_KEEP_ORG) \&\& defined(_MSC_VER) \&\& defined(_M_IX86)/g' ./Zend/zend_alloc.c
+
+# zend_language_scanner.c
+if [ \$(basename \`pwd\`) == "backend" ]; then
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/load_data\(\&buf, \&offset, \&size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+else
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/if (getenv("ANGELIX_TRACE")) dump_data\(buf, offset, size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+fi
+
+# zend.h
+sed -i 's/# define EXPECTED(condition)   __builtin_expect(condition, 1)/# define EXPECTED(condition)   (__builtin_expect(condition, 1))/g' ./Zend/zend.h
+sed -i 's/# define UNEXPECTED(condition) __builtin_expect(condition, 0)/# define UNEXPECTED(condition) (__builtin_expect(condition, 0))/g' ./Zend/zend.h
+
+# php_cli.c
+sed -i 's/script_file=argv\[php_optind\];/script_file = get_script_file\(argv\[php_optind\]\);/g' ./sapi/cli/php_cli.c
+
+# Makefile
+sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+touch configured.mark
+
+exit 0
+EOF
+
+
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
@@ -261,22 +406,9 @@ cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
 curr=\$(pwd)
 echo "BUILDINGTEST"
-#trying to tweet this
-#make -e
-make -e
-cd tests/mpz
-for test in "t-powm" "reuse" "t-gcd";
-do
-   if [[ \$test =~ .*gcd.* ]]
-then
-   echo "BUILDING VET"
-   rm t-gcd
-   make -e t-gcd
-   chmod 755 t-gcd
-else
-   rm -r \$test; make -e \$test;
-fi
-done
+make -j`nproc`
 cd \$curr
 EOF
 chmod u+x $root_directory/angelix/build
+
+currdir=$(pwd)
