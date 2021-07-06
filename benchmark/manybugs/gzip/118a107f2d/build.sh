@@ -6,4 +6,4 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
 # Compile gzip
-make -e  CFLAGS="-march=x86-64 -g -O0 -static" -j`nproc`
+make -e  CFLAGS="-g -O0 -static" -j`nproc`
