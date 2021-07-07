@@ -428,7 +428,7 @@ def fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list,
     seed_dir = setup_dir_path + "/seed-dir"
     if not os.path.isdir(seed_dir):
         pre_process_command = "cd " + setup_dir_path + "/" + CONF_TOOL_NAME + ";"
-        pre_process_command += "bash pre-process.sh"
+        pre_process_command += "bash instrument.sh"
         execute_command(pre_process_command)
 
     test_id_list = ""
