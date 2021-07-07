@@ -22,4 +22,4 @@ rm -rf repair.cache
 rm -rf repair.debug.*
 
 cp $dir_name/compile.pl $dir_name/src
-sed -i 's#/project = "gzip"#project = "${$dir_name/src}"#g' $dir_name/src/compile.pl
+sed -i "s#project = \"gzip\"#project = "\"${dir_name}/src\""#g" $dir_name/src/compile.pl
