@@ -56,9 +56,16 @@ sed -i '190d' gmp-run-tests.pl
 sed -i '190i my $cmd = sprintf("k=%s && rm -f \\$k && make \\$k && ./\\$k", $name);' gmp-run-tests.pl
 chmod +x gmp-run-tests.pl
 
-# Fix build script of Prophet
-sed -i '79d' /prophet-gpl/tools/gmp-build.py
-sed -i '79i \\tret = subprocess.call(["make", "CFLAGS=\\"-static\\""], env = my_env);'  /prophet-gpl/tools/gmp-build.py
+# fix driver for input generation
+sed -i "111d" src/tests/mpz/t-gcd.c
+sed -i "111i int reps = atoi(argv[1]); " src/tests/mpz/t-gcd.c
+sed -i "111i char* filename = argv[2];" src/tests/mpz/t-gcd.c
+sed -i "139i char line1 [1000];\n char line2 [1000];" src/tests/mpz/t-gcd.c
+sed -i "141i FILE *file = fopen ( filename, "r" );" src/tests/mpz/t-gcd.c
+sed -i "142i if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }" src/tests/mpz/t-gcd.c
+sed -i "143i else {    perror(filename); }" src/tests/mpz/t-gcd.c
+sed -i "145,149d" src/tests/mpz/t-gcd.c
+sed -i "145i mpz_set_str (op1, line1, 16);\n mpz_set_str (op2, line2, 16);" src/tests/mpz/t-gcd.c
 
 # Prophet requires/works on source
 #hg clone https://gmplib.org/repo/gmp/ src-hg
