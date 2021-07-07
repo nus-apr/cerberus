@@ -8,10 +8,10 @@ cd $dir_name/src
 make clean
 make CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
 
-cp $script_dir/compile.pl $dir_name/src
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 cfile=$(head -n 1 $dir_name/manifest.txt)
-cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
+#cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
+cilfile=$(echo $cfile | cut -d$"." -f1 | rev| cut -d$"/" -f1 | rev).cil.c
 
 rm -rf preprocessed
 mkdir -p `dirname preprocessed/$cfile`
@@ -21,3 +21,6 @@ rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
 rm -rf repair.debug.*
+
+cp $dir_name/compile.pl $dir_name/src
+sed -i "s#project = \"python\"#project = "\"${dir_name}/src\""#g" $dir_name/src/compile.pl
