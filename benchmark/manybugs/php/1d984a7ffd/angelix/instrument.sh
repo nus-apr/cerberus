@@ -1,7 +1,14 @@
 #!/bin/bash
 set -euo pipefail
-version=14166-14167 #this is the angelix version
-gold_file=mpz/gcdext.c-14167
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
+
+version=308734-308761 #this is the angelix version
+gold_file=ext/tokenizer/tokenizer.c-1d984a7ffd
+export ANGELIX_ARGS=" --defect if-conditions --synthesis-levels extended-arithmetic --klee-search dfs --klee-max-forks 200 --synthesis-timeout 200000 --group-size 1 --lines 154"
 
 clean-source () {
     local directory="$1"
@@ -78,7 +85,7 @@ instrument_common () {
 
 ####### main.c ################################################################
 
-    local src1="$directory/src/main/main.c"
+    local src1="$directory/main/main.c"
     restore_original $src1
     add-header $src1
 
@@ -141,7 +148,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### php_cli.c ###################################################################
 
-    local src2="$directory/src/sapi/cli/php_cli.c"
+    local src2="$directory/sapi/cli/php_cli.c"
     restore_original $src2
     add-header $src2
 
@@ -149,7 +156,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### zend.c ###################################################################
 
-    local src3="$directory/src/Zend/zend.c"
+    local src3="$directory/Zend/zend.c"
     restore_original $src3
     add-header $src3
 
@@ -186,7 +193,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### output.c ###################################################################
 
-    local src4="$directory/src/main/output.c"
+    local src4="$directory/main/output.c"
     restore_original $src4
     add-header $src4
 
@@ -203,11 +210,11 @@ instrument () {
 
     case $version in
         307931-307934 )
-            local src1="$directory/src/main/output.c"
+            local src1="$directory/main/output.c"
             restore_original $src1
             ;;
         309579-309580 )
-            local src="$directory/src/ext/date/php_date.c"
+            local src="$directory/ext/date/php_date.c"
             restore_original $src
 
             sed -i '1s/^/#define UNKNOWN_OR_BAD_FORMAT 255\n/' $src
@@ -225,7 +232,7 @@ instrument () {
             sed -i "s/php_error_docref(NULL TSRMLS_CC, E_WARNING, \"The ISO interval '%s' did not contain an end date or a recurrence count.\", isostr);/ANGELIX_OUTPUT(int, DID_NOT_CONTAIN_END_DATE, \"error\"); php_error_docref(NULL TSRMLS_CC, E_WARNING, \"The ISO interval '%s' did not contain an end date or a recurrence count.\", isostr);/g" $src
             ;;
         309111-309159 )
-            local src1="$directory/src/ext/standard/url.c"
+            local src1="$directory/ext/standard/url.c"
             restore_original $src1
             add-header "$src1"
 
@@ -246,7 +253,7 @@ instrument () {
 \tif (key > -1) {'
             ;;
         309892-309910 )
-            local src1="$directory/src/ext/standard/string.c"
+            local src1="$directory/ext/standard/string.c"
             restore_original $src1
             add-header $src1
 
@@ -270,7 +277,7 @@ instrument () {
                 'ANGELIX_OUTPUT(int, zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len), \"substr_compare_out\")'
             ;;
         308262-308315 )
-            local src1="$directory/src/Zend/zend_execute.c"
+            local src1="$directory/Zend/zend_execute.c"
             restore_original $src1
             add-header $src1
 
@@ -280,11 +287,11 @@ instrument () {
                 'return;' \
                 'ANGELIX_REACHABLE("return"); return;'
 
-            local src2="$directory/src/main/output.c"
+            local src2="$directory/main/output.c"
             restore_original $src2
             ;;
         308734-308761 )
-            local src1="$directory/src/ext/tokenizer/tokenizer.c"
+            local src1="$directory/ext/tokenizer/tokenizer.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -300,7 +307,7 @@ instrument () {
                 'int token_type;' \
                 'int token_type = 1;'
 
-            local src2=".aux/src/php-run-tests.c"
+            local src2="/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
             restore_original $src2
 
             replace-in-range "$src2" \
@@ -310,7 +317,7 @@ instrument () {
                 'if (num < 0 || num >= length || num == 8208)'
             ;;
         309688-309716 )
-            local src1="$directory/src/ext/phar/phar_object.c"
+            local src1="$directory/ext/phar/phar_object.c"
             restore_original $src1
 
             sed -i 's/if (SUCCESS == zend_hash_find/if (1 \&\& SUCCESS == zend_hash_find/g' $src1
@@ -329,7 +336,7 @@ instrument () {
 \tzend_bool bApplyProtection = fname_map->bApplyProtection;'
             ;;
         310370-310389 )
-            local src1="$directory/src/Zend/zend_closures.c"
+            local src1="$directory/Zend/zend_closures.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -339,7 +346,7 @@ instrument () {
                 'zend_closure \*closure = (zend_closure \*)object;\
 \tzval *c_ptr = closure->this_ptr;'
 
-            local src2=".aux/src/php-run-tests.c"
+            local src2="/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
             restore_original $src2
 
             replace-in-range "$src2" \
@@ -349,13 +356,13 @@ instrument () {
                 'if (num < 0 || num >= length || num == 1259-1)'
             ;;
         311346-311348 )
-            cp $directory/src/Zend/zend_multiply.h $directory/src/Zend/zend_multiply.h.bak
-            cp .aux/src/Zend/zend_multiply.h $directory/src/Zend/zend_multiply.h
+            cp $directory/Zend/zend_multiply.h $directory/Zend/zend_multiply.h.bak
+            cp /experiments/benchmark/manybugs/php/.aux/Zend/zend_multiply.h $directory/Zend/zend_multiply.h
 
-            cp $directory/src/Zend/zend_vm_execute.h $directory/src/Zend/zend_vm_execute.h.bak
-            cp .aux/src/Zend/zend_vm_execute.h $directory/src/Zend/zend_vm_execute.h
+            cp $directory/Zend/zend_vm_execute.h $directory/Zend/zend_vm_execute.h.bak
+            cp /experiments/benchmark/manybugs/php/.aux/Zend/zend_vm_execute.h $directory/Zend/zend_vm_execute.h
 
-            local src1="$directory/src/main/output.c"
+            local src1="$directory/main/output.c"
             restore_original $src1
             add-header $src1
 
@@ -369,7 +376,7 @@ instrument2 () {
 
     case $version in
         310370-310389 )
-            local src1="$directory/src/Zend/zend_closures.c"
+            local src1="$directory/Zend/zend_closures.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -381,11 +388,21 @@ instrument2 () {
     esac
 }
 
+experiments_dir="$PWD"
+test_abbrev="F"
+php_oracle_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-oracle")
+php_transform_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-transform")
+test_log_file=php-oracle.log
+run_tests_script=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-run-tests")
+php_helper_script=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-helper.php")
+aux=$(readlink -f "/experiments/benchmark/manybugs/php/.aux")
+main_c_appendix=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/main/main.c.appendix")
+php_h_appendix=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/main/php.h.appendix")
 
 root_directory=$1
 buggy_directory="$root_directory/src"
 golden_directory="$root_directory/src-gold"
-
+restore_original "/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
   cp "$root_directory/diffs/$gold_file" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
@@ -397,77 +414,190 @@ fi
 
 clean-source $buggy_directory
 clean-source $golden_directory
+
 if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $buggy_directory
+    instrument_common $buggy_directory
+    instrument $buggy_directory
     touch "$buggy_directory/INSTRUMENTED_ANGELIX"
 fi
 
 if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $golden_directory
+    instrument_common $golden_directory
+    instrument $golden_directory
+    instrument2 $golden_directory
     touch "$golden_directory/INSTRUMENTED_ANGELIX"
 fi
 
 instrument $buggy_directory
 instrument $golden_directory
 
-run_tests_script=$(readlink -f "$root_directory/gmp-run-tests.pl")
+
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
-FILE=/tmp/testo
-perl "$run_tests_script" "\$1" &> "\$FILE"
-cat \$FILE
-grep -q "PASS:" \$FILE && echo "PASS" && exit 0
-echo "FAIL"
-exit 1
+set -uo pipefail
+
+test_log_file=$test_log_file
+
+if [ "\$#" -ne 1 ]
+then
+    echo "Usage: \$0 <test-id>" >> \${test_log_file}
+    exit 1
+fi
+
+
+#################################################################
+
+CMD=\$(basename \$0 | sed 's/.\///' | sed 's/.sh//')
+
+function abort() {
+    local msg=\$1
+    abort_msg="[\$CMD] Abort: \$msg"
+    echo "\$abort_msg" >> \${test_log_file} 2>& 1
+    exit 1
+}
+
+#################################################################
+
+test_id="\$1"
+
+run_tests_script="$run_tests_script"
+if ! [ -e \$run_tests_script ]; then
+    abort "No such file: \$run_tests_script"
+fi
+
+# the current dir is {validation, frontend, backend}.
+# export AF_WORK_DIR=\$(readlink -f .)
+# export AF_SRC_ROOT_DIR=\$(PWD)/php
+# export AF_USE_TEST_SCRIPT_ID=""
+
+if ! [ -e ../php-helper.php ]; then
+    cp $php_helper_script ..
+fi
+
+test_abbrev="$test_abbrev"
+if [[ \$test_abbrev == "T" ]]; then
+    echo "[oracle] \${run_tests_script} \${test_id} 'T'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'T'
+    result=\$?
+else
+    echo "[oracle] \${run_tests_script} \${test_id} 'F'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'F'
+    result=\$?
+fi
+
+echo "[oracle] test result: \$result" >> \${test_log_file} 2>& 1
+
+if [[ \$result -eq 0 ]]; then
+    echo "\${test_id}: P" >> \${test_log_file} 2>& 1
+    exit 0
+else
+    echo "\${test_id}: N" >> \${test_log_file} 2>& 1
+    exit 1
+fi
 EOF
 chmod u+x $root_directory/angelix/oracle
 
+
+if [[ $test_abbrev == "T" ]]; then
+    test_univ=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/TEST_UNIV_ABBREV")
+else
+    test_univ=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/TEST_UNIV_FULL")
+fi
+
+cat <<EOF > $root_directory/angelix/transform
+#!/bin/bash
+set -uo pipefail
+
+if [ -e configured.mark ]; then
+    echo "[php-transform] Already configured"
+
+    # Makefile
+    sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+    sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+    exit 0
+fi
+
+# extend main.c
+cp $main_c_appendix ./main/
+cat ./main/main.c ./main/main.c.appendix > ./main/main.c.merge
+cp ./main/main.c ./main/main.c.bak
+cp ./main/main.c.merge ./main/main.c
+$aux/php/get_test_script_file.awk $test_univ >> ./main/main.c
+
+# extend php.h
+cp $php_h_appendix ./main/
+cp ./main/php.h ./main/php.h.bak
+cat ./main/php.h ./main/php.h.appendix > ./main/php.h.merge
+cp ./main/php.h.merge ./main/php.h
+
+files=\$(grep -rl "FD_ZERO(" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/FD_ZERO(/FD_ZERO_SIMUL(/g' \$file
+done
+
+files=\$(grep -rl "(char \*)gnu_get_libc_version()" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/(char \*)gnu_get_libc_version()/\"2.19\"/g' \$file
+done
+
+files=\$(grep -rl "# define XPFPA_HAVE_CW 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/# define XPFPA_HAVE_CW 1//g' \$file
+done
+
+files=\$(grep -rl "#define HAVE_MMAP 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/#define HAVE_MMAP 1//g' \$file
+done
+
+# php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif defined(HAVE_ATOMIC_H)/#elif defined(AF_KEEP_ORG) \&\& defined(HAVE_ATOMIC_H)/g' ./ext/standard/php_crypt_r.c
+
+# zend_alloc.c
+sed -i 's/#if defined(__GNUC__) && defined(i386)/#if defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(i386)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(__GNUC__) && defined(__x86_64__)/#elif defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(__x86_64__)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(_MSC_VER) && defined(_M_IX86)/#elif defined(AF_KEEP_ORG) \&\& defined(_MSC_VER) \&\& defined(_M_IX86)/g' ./Zend/zend_alloc.c
+
+# zend_language_scanner.c
+if [ \$(basename \`pwd\`) == "backend" ]; then
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/load_data\(\&buf, \&offset, \&size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+else
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/if (getenv("ANGELIX_TRACE")) dump_data\(buf, offset, size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+fi
+
+# zend.h
+sed -i 's/# define EXPECTED(condition)   __builtin_expect(condition, 1)/# define EXPECTED(condition)   (__builtin_expect(condition, 1))/g' ./Zend/zend.h
+sed -i 's/# define UNEXPECTED(condition) __builtin_expect(condition, 0)/# define UNEXPECTED(condition) (__builtin_expect(condition, 0))/g' ./Zend/zend.h
+
+# php_cli.c
+sed -i 's/script_file=argv\[php_optind\];/script_file = get_script_file\(argv\[php_optind\]\);/g' ./sapi/cli/php_cli.c
+
+# Makefile
+sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+touch configured.mark
+
+exit 0
+EOF
+chmod u+x $root_directory/angelix/transform
+
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-curr=\$(pwd)
-echo "BUILDINGTEST"
-   if [[ \$curr =~ .*validation.* ]]
-then
-  make clean; \
-   ./configure CFLAGS=-std=c99 \
---enable-shared --disable-cxx --disable-fast-install --disable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-make \
-   ./configure CFLAGS=-std=c99 \
---disable-shared --disable-cxx --disable-fast-install --disable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-else
-   ./configure CFLAGS=-std=c99 \
---disable-shared --disable-cxx --disable-fast-install --enable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-fi
+bash $script_dir/config.sh > /dev/null
+bash $root_directory/angelix/transform
+mkdir -p ../state_dump
 EOF
 chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-curr=\$(pwd)
-echo "BUILDINGTEST"
-#trying to tweet this
-#make -e
-make -e
-cd tests/mpz
-for test in "t-powm" "reuse" "t-gcd";
-do
-   if [[ \$test =~ .*gcd.* ]]
-then
-   echo "BUILDING VET"
-   rm t-gcd
-   make -e t-gcd
-   chmod 755 t-gcd
-else
-   rm -r \$test; make -e \$test;
-fi
-done
-cd \$curr
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
+
+

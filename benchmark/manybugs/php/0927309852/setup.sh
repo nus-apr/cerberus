@@ -35,7 +35,7 @@ rm -rf  coverage* \
 chown -R root $dir_name
 grep -o -P '(?<=")[^"]+.phpt(?=")' php-run-tests.c > tests.all.txt
 grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
-rm -f php-run-tests.c test.sh.orig
+
 mv $project_name src
 cd $dir_name/src
 make distclean &> /dev/null

@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 import fnmatch
 import os
+import shutil
 import sys
 import subprocess
 
@@ -14,8 +15,18 @@ fail_list = ["ext/reflection/tests/traits005.phpt", "Zend/tests/bug55825.phpt", 
 # Build a list of all the test cases for the program
 def build():
     # Find the list of tests used by all ManyBugs PHP scenarios
-    with open( exp_dir + "/tests.all.txt", "r") as f:
+    with open(exp_dir + "/tests.all.txt", "r") as f:
         all_tests = [t.strip() for t in f]
+
+    # Create test directory
+    if not os.path.isdir("tests"):
+        os.mkdir("tests")
+    for t in all_tests:
+        shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)).zfill(5) + ".phpt")
+    with open(exp_dir + "/tests/testfile.log", "w") as f:
+        f.write("{}\n".format(str(len(all_tests))))
+        for t in all_tests:
+            f.write("{0}\n{1}\n".format(all_tests.index(t), t))
 
     # Find the sub-set of tests used by this scenario
     with open(exp_dir + "/tests.indices.txt", "r") as f:
@@ -39,12 +50,12 @@ def build():
     passing = tests - failing
 
     # write failing tests to disk
-    with open( exp_dir + "/failing.tests.txt", "w") as f:
+    with open(exp_dir + "/failing.tests.txt", "w") as f:
         for t in sorted(failing):
             f.write("{}\n".format(t))
 
     # write passing tests to disk
-    with open( exp_dir + "/passing.tests.txt", "w") as f:
+    with open(exp_dir + "/passing.tests.txt", "w") as f:
         for t in sorted(passing):
             f.write("{}\n".format(t))
 
@@ -57,11 +68,11 @@ def run(identifier, exe=None):
     global exp_dir
     if identifier[0] == "p":
         offset = int(identifier[1:]) - 1
-        with open( exp_dir + "/passing.tests.txt") as f:
+        with open(exp_dir + "/passing.tests.txt") as f:
             test = f.readlines()[offset]
     elif identifier[0] == "n":
         offset = int(identifier[1:]) - 1
-        with open( exp_dir + "/failing.tests.txt") as f:
+        with open(exp_dir + "/failing.tests.txt") as f:
             test = f.readlines()[offset]
     else:
         with open(exp_dir + "/tests.all.txt") as f:

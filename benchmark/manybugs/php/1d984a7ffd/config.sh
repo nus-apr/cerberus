@@ -4,7 +4,7 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
-
+export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
 # Config libtiff.
 make clean
 ./configure \

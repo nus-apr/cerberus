@@ -246,6 +246,9 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     if fix_location:
         angelix_command += " --lines {0}  ".format(line_number)
 
+    if os.getenv("ANGELIX_ARGS", False):
+        angelix_command += " " + os.environ["ANGELIX_ARGS"] + " "
+
     angelix_command += "  --generate-all {0} " \
                        " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
     execute_command(angelix_command)
@@ -261,8 +264,9 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] initializing for prophet")
     if not os.path.isdir(deploy_path + "/prophet"):
-        os.mkdir(deploy_path + "/prophet")
-        shutil.copy(setup_dir_path + "/prophet/prophet.conf", deploy_path + "/prophet/prophet.conf")
+        instrument_command = "cd {0}/prophet; bash instrument.sh > ".format(setup_dir_path) + FILE_INSTRUMENT_LOG + " 2>&1"
+        execute_command(instrument_command)
+
     test_config_str = "-\n"
     test_config_str += "-\n"
     test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
@@ -279,6 +283,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             test_config_str += test_id + " "
     test_config_str += "Regression Cases: Tot 0\n"
     test_config_file = deploy_path + "/prophet/prophet.revlog"
+
     if not os.path.isfile(test_config_file):
         open(test_config_file, "w")
     with open(test_config_file, "r+") as conf_file:
@@ -288,7 +293,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
 
     if not os.path.isdir(deploy_path + "/workdir"):
         instrument_command = "cd " + deploy_path + ";"
-        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only  > " + FILE_INSTRUMENT_LOG + " 2>&1"
+        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only  > " + FILE_OUTPUT_LOG + " 2>&1"
         execute_command(instrument_command)
     line_number = ""
     localization_file = deploy_path + "/workdir/profile_localization.res"
@@ -303,9 +308,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             res_file.write(fault_loc)
             res_file.truncate()
     else:
-        if os.path.isfile(localization_file):
-            os.remove(localization_file)
-        shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
+        if not os.path.isfile(localization_file):
+            shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
     repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
@@ -313,7 +317,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += " -r {0}".format(deploy_path + "/workdir")
     repair_command += " -cond-ext -replace-ext  "
     repair_command += " -timeout {0} ".format(int(timeout))
-    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
     # move patches to result directory

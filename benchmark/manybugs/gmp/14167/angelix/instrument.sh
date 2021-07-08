@@ -100,7 +100,7 @@ fix-header () {
 }
 
 instrument_common() {
-    local src1=".aux/src/gmp-run-tests.pl"
+    local src1=".aux/gmp/gmp-run-tests.pl"
     restore_original $src1
 
     case $version in
@@ -169,13 +169,13 @@ instrument () {
 
             for ctest in "t-gcd"; do
                 gmptestd="$directory/src/tests/mpz/";
-                cp .aux/src/testcase/t-gcd-vet.c "$gmptestd"
+                cp .aux/gmp/testcase/t-gcd-vet.c "$gmptestd"
                 pushd "$gmptestd" > /dev/null
                 cp t-gcd-vet.c t-gcd.c
                 sed -i '/10, t/d' t-gcd.c
                 popd > /dev/null
 
-                cp .aux/src/testcase/std.txt "$gmptestd"
+                cp .aux/gmp/testcase/std.txt "$gmptestd"
                 pushd "$gmptestd" > /dev/null
                 sed -i 's/t:0/t:/g' std.txt
                 popd > /dev/null

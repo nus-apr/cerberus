@@ -1,0 +1,199 @@
+#ifdef DEF_STRLEN_SIMUL
+int strlen_simul(char *str) {
+    int len;
+    for (len = 0; *str; str++, len++)
+    return len;
+}
+#endif
+
+#ifdef DEF_AF_DUMP_LOAD
+
+static void set_dump_file_name(char *buf, const char **strs, int strs_size) {
+    int i;
+    char *dir;
+
+    dir = getenv("ANGELIX_WORKDIR");
+    if (dir == NULL) {
+        fprintf(stderr, "ANGELIX_WORKDIR is not set\n");
+        exit(1);
+    }
+    strcat(buf, dir);
+    strcat(buf, "/state_dump/");
+    for (i = 0; i < strs_size; i++) {
+        strcat(buf, strs[i]);
+    }
+    strcat(buf, ".dump");
+}
+
+#define INIT_DUMP_BUFFER_SIZE 500
+
+typedef struct _dump_buffer {
+    void *data;
+    int next;
+    size_t size;
+} dump_buffer;
+
+dump_buffer* new_dump_buffer() {
+    dump_buffer *b = malloc(sizeof(dump_buffer));
+
+    b->data = malloc(INIT_DUMP_BUFFER_SIZE);
+    memset(b->data, 0, INIT_DUMP_BUFFER_SIZE);    
+    b->size = INIT_DUMP_BUFFER_SIZE;
+    b->next = 0;
+
+    return b;
+}
+
+void reserve_dump_buffer_space(dump_buffer *b, size_t bytes) {
+    while ((b->next + bytes) > b->size) {
+        b->data = realloc(b->data, b->size + INIT_DUMP_BUFFER_SIZE);
+        b->size += INIT_DUMP_BUFFER_SIZE;
+    }
+}
+
+void add_to_dump(dump_buffer* buf, const void *source, size_t bytes) {
+    reserve_dump_buffer_space(buf, bytes);
+    memcpy(buf->data + buf->next, source, bytes);
+    buf->next += bytes;
+}
+
+void dump_data(char *scanner_buf, size_t offset, size_t size, char *test_filename) {
+    FILE *fp;
+    char file_name[500];
+    int scanner_buf_len = 0;
+
+    dump_buffer *buf = new_dump_buffer();
+
+    // scanner_buf_len
+    if (scanner_buf) {
+        scanner_buf_len = strlen(scanner_buf);
+        add_to_dump(buf, &scanner_buf_len, sizeof(int));
+    }
+    // scanner_buf
+    if (scanner_buf_len > 0) {
+        add_to_dump(buf, scanner_buf, sizeof(char) * scanner_buf_len);
+    }
+    // offset
+    add_to_dump(buf, &offset, sizeof(size_t));
+    // size
+    add_to_dump(buf, &size, sizeof(size_t));
+
+    /////////////////////////////////////////////////////////////////
+    // dump size
+    memset(file_name, 0, 500);
+    set_dump_file_name(file_name, (const char*[]) {basename(test_filename), "_data_size"}, 2);
+    fp = fopen(file_name, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open %s\n", file_name);
+        exit(1);
+    }
+    fprintf(fp, "%d", buf->size);
+    fclose(fp);
+
+    // dump data
+    memset(file_name, 0, 500);
+    set_dump_file_name(file_name, (const char*[]) {basename(test_filename), "_data"}, 2);
+    fp = fopen(file_name, "w");
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open %s\n", file_name);
+        exit(1);
+    }  
+    fwrite(buf->data, sizeof(void), buf->size, fp);
+    fclose(fp);
+    free(buf);    
+}
+
+void *read_from_data(void* data, const void *dest, int size) {
+    memcpy(dest, data, size);
+    data += size;
+    return data;
+}
+
+void load_data(char **scanner_buf, size_t *offset, size_t *size, char* test_filename) {
+    FILE *fp;
+    char file_name[500];
+    int data_size;
+    void *data;
+    size_t num_of_read;
+    int scanner_buf_len = 0;
+
+    puts("[main.c] load_data");
+
+    memset(file_name, 0, 500);
+    set_dump_file_name(file_name, (const char*[]) {basename(test_filename), "_data_size"}, 2);
+    printf("[main.c] try to open %s\n", file_name);
+    fflush(stdout);
+    fp = fopen(file_name, "r");    
+    if (fp == NULL) {
+        fprintf(stderr, "Failed to open %s\n", file_name);
+        fflush(stderr);
+        return;
+    }
+    fscanf(fp, "%d", &data_size);
+    fclose(fp);
+    data = malloc(sizeof(void) * data_size);
+    memset(data, 0, data_size);
+
+    memset(file_name, 0, 500);
+    set_dump_file_name(file_name, (const char*[]) {basename(test_filename), "_data"}, 2);
+    fp = fopen(file_name, "r");    
+    num_of_read = fread(data, sizeof(void), data_size, fp);
+    fclose(fp);
+
+    //////////////////////////////////////////////
+
+    // scanner_buf_len
+    data = read_from_data(data, &scanner_buf_len, sizeof(int));
+    // scanner_buf
+    if (scanner_buf_len > 0) {
+        *scanner_buf = (char*) emalloc(sizeof(char) * (scanner_buf_len + 1));
+        memset(*scanner_buf, 0, scanner_buf_len + 1);
+        data = read_from_data(data, *scanner_buf, sizeof(char) * scanner_buf_len);
+    }
+    // offset
+    data = read_from_data(data, offset, sizeof(size_t));
+    // size
+    data = read_from_data(data, size, sizeof(size_t));
+}
+#endif
+
+#ifdef DEF_AF_TESTS
+char *get_script_file(char *arg) {
+  char *script_file=NULL;
+  char *use_test_script_id = NULL;
+  int test_script_id = 0;
+
+  use_test_script_id = getenv("AF_USE_TEST_SCRIPT_ID");
+  if (use_test_script_id != NULL && strlen(use_test_script_id) > 0) {
+    char *src_root_dir;
+    char *test_script_file;
+                
+    src_root_dir = getenv("AF_SRC_ROOT_DIR");
+    if (src_root_dir == NULL) {
+      fprintf(stderr, "[main.c] Env var AF_SRC_ROOT_DIR is not set\n");
+      exit(1);
+    }
+    printf("[main.c] src_root_dir: %s\n", src_root_dir);
+
+    test_script_id=atoi(arg);
+    test_script_file = get_test_script_file(test_script_id);
+
+    if (test_script_file == NULL) {
+      fprintf(stderr, "[main.c] test_script_file is not set\n");
+      exit(1);
+    }
+    printf("[main.c] test_script_file: %s\n", test_script_file);
+
+    script_file = (char*) malloc(sizeof(char) * (strlen(src_root_dir)+strlen(test_script_file)+2));
+    memset(script_file, 0, (strlen(src_root_dir)+strlen(test_script_file)+2));
+    strcat(script_file, src_root_dir);
+    strcat(script_file, "/");
+    strcat(script_file, test_script_file);
+                
+    printf("[main.c] script_file: %s\n", script_file);
+  } else {
+    script_file=arg;
+  }  
+  return script_file;
+}
+#endif
