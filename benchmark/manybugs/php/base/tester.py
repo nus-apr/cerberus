@@ -22,7 +22,7 @@ def build():
     if not os.path.isdir("tests"):
         os.mkdir("tests")
     for t in all_tests:
-        shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)) + ".phpt")
+        shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)).zfill(5) + ".phpt")
     with open(exp_dir + "/tests/testfile.log", "w") as f:
         f.write("{}\n".format(str(len(all_tests))))
         for t in all_tests:
