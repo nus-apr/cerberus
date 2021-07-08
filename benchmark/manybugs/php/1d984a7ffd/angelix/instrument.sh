@@ -1,7 +1,8 @@
 #!/bin/bash
 set -euo pipefail
-version=14166-14167 #this is the angelix version
-gold_file=mpz/gcdext.c-14167
+version=308734-308761 #this is the angelix version
+gold_file=ext/tokenizer/tokenizer.c-1d984a7ffd
+export ANGELIX_ARGS=" --defect if-conditions --synthesis-levels extended-arithmetic --klee-search dfs --klee-max-forks 200 --synthesis-timeout 200000 --group-size 1 --lines 154"
 
 clean-source () {
     local directory="$1"
@@ -78,7 +79,7 @@ instrument_common () {
 
 ####### main.c ################################################################
 
-    local src1="$directory/src/main/main.c"
+    local src1="$directory/main/main.c"
     restore_original $src1
     add-header $src1
 
@@ -141,7 +142,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### php_cli.c ###################################################################
 
-    local src2="$directory/src/sapi/cli/php_cli.c"
+    local src2="$directory/sapi/cli/php_cli.c"
     restore_original $src2
     add-header $src2
 
@@ -149,7 +150,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### zend.c ###################################################################
 
-    local src3="$directory/src/Zend/zend.c"
+    local src3="$directory/Zend/zend.c"
     restore_original $src3
     add-header $src3
 
@@ -186,7 +187,7 @@ angelix_output_php_error="va_list args;\n \
 
 #### output.c ###################################################################
 
-    local src4="$directory/src/main/output.c"
+    local src4="$directory/main/output.c"
     restore_original $src4
     add-header $src4
 
@@ -203,11 +204,11 @@ instrument () {
 
     case $version in
         307931-307934 )
-            local src1="$directory/src/main/output.c"
+            local src1="$directory/main/output.c"
             restore_original $src1
             ;;
         309579-309580 )
-            local src="$directory/src/ext/date/php_date.c"
+            local src="$directory/ext/date/php_date.c"
             restore_original $src
 
             sed -i '1s/^/#define UNKNOWN_OR_BAD_FORMAT 255\n/' $src
@@ -225,7 +226,7 @@ instrument () {
             sed -i "s/php_error_docref(NULL TSRMLS_CC, E_WARNING, \"The ISO interval '%s' did not contain an end date or a recurrence count.\", isostr);/ANGELIX_OUTPUT(int, DID_NOT_CONTAIN_END_DATE, \"error\"); php_error_docref(NULL TSRMLS_CC, E_WARNING, \"The ISO interval '%s' did not contain an end date or a recurrence count.\", isostr);/g" $src
             ;;
         309111-309159 )
-            local src1="$directory/src/ext/standard/url.c"
+            local src1="$directory/ext/standard/url.c"
             restore_original $src1
             add-header "$src1"
 
@@ -246,7 +247,7 @@ instrument () {
 \tif (key > -1) {'
             ;;
         309892-309910 )
-            local src1="$directory/src/ext/standard/string.c"
+            local src1="$directory/ext/standard/string.c"
             restore_original $src1
             add-header $src1
 
@@ -270,7 +271,7 @@ instrument () {
                 'ANGELIX_OUTPUT(int, zend_binary_strncasecmp(s1 + offset, (s1_len - offset), s2, s2_len, cmp_len), \"substr_compare_out\")'
             ;;
         308262-308315 )
-            local src1="$directory/src/Zend/zend_execute.c"
+            local src1="$directory/Zend/zend_execute.c"
             restore_original $src1
             add-header $src1
 
@@ -280,11 +281,11 @@ instrument () {
                 'return;' \
                 'ANGELIX_REACHABLE("return"); return;'
 
-            local src2="$directory/src/main/output.c"
+            local src2="$directory/main/output.c"
             restore_original $src2
             ;;
         308734-308761 )
-            local src1="$directory/src/ext/tokenizer/tokenizer.c"
+            local src1="$directory/ext/tokenizer/tokenizer.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -300,7 +301,7 @@ instrument () {
                 'int token_type;' \
                 'int token_type = 1;'
 
-            local src2=".aux/src/php-run-tests.c"
+            local src2="/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
             restore_original $src2
 
             replace-in-range "$src2" \
@@ -310,7 +311,7 @@ instrument () {
                 'if (num < 0 || num >= length || num == 8208)'
             ;;
         309688-309716 )
-            local src1="$directory/src/ext/phar/phar_object.c"
+            local src1="$directory/ext/phar/phar_object.c"
             restore_original $src1
 
             sed -i 's/if (SUCCESS == zend_hash_find/if (1 \&\& SUCCESS == zend_hash_find/g' $src1
@@ -329,7 +330,7 @@ instrument () {
 \tzend_bool bApplyProtection = fname_map->bApplyProtection;'
             ;;
         310370-310389 )
-            local src1="$directory/src/Zend/zend_closures.c"
+            local src1="$directory/Zend/zend_closures.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -339,7 +340,7 @@ instrument () {
                 'zend_closure \*closure = (zend_closure \*)object;\
 \tzval *c_ptr = closure->this_ptr;'
 
-            local src2=".aux/src/php-run-tests.c"
+            local src2="/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
             restore_original $src2
 
             replace-in-range "$src2" \
@@ -349,13 +350,13 @@ instrument () {
                 'if (num < 0 || num >= length || num == 1259-1)'
             ;;
         311346-311348 )
-            cp $directory/src/Zend/zend_multiply.h $directory/src/Zend/zend_multiply.h.bak
-            cp .aux/src/Zend/zend_multiply.h $directory/src/Zend/zend_multiply.h
+            cp $directory/Zend/zend_multiply.h $directory/Zend/zend_multiply.h.bak
+            cp /experiments/benchmark/manybugs/php/.aux/Zend/zend_multiply.h $directory/Zend/zend_multiply.h
 
-            cp $directory/src/Zend/zend_vm_execute.h $directory/src/Zend/zend_vm_execute.h.bak
-            cp .aux/src/Zend/zend_vm_execute.h $directory/src/Zend/zend_vm_execute.h
+            cp $directory/Zend/zend_vm_execute.h $directory/Zend/zend_vm_execute.h.bak
+            cp /experiments/benchmark/manybugs/php/.aux/Zend/zend_vm_execute.h $directory/Zend/zend_vm_execute.h
 
-            local src1="$directory/src/main/output.c"
+            local src1="$directory/main/output.c"
             restore_original $src1
             add-header $src1
 
@@ -369,7 +370,7 @@ instrument2 () {
 
     case $version in
         310370-310389 )
-            local src1="$directory/src/Zend/zend_closures.c"
+            local src1="$directory/Zend/zend_closures.c"
             restore_original $src1
 
             replace-in-range "$src1" \
@@ -385,7 +386,7 @@ instrument2 () {
 root_directory=$1
 buggy_directory="$root_directory/src"
 golden_directory="$root_directory/src-gold"
-
+restore_original "/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
   cp "$root_directory/diffs/$gold_file" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
@@ -397,13 +398,17 @@ fi
 
 clean-source $buggy_directory
 clean-source $golden_directory
+
 if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $buggy_directory
+    instrument_common $buggy_directory
+    instrument $buggy_directory
     touch "$buggy_directory/INSTRUMENTED_ANGELIX"
 fi
 
 if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
-    instrument_test_script $golden_directory
+    instrument_common $golden_directory
+    instrument $golden_directory
+    instrument2 $golden_directory
     touch "$golden_directory/INSTRUMENTED_ANGELIX"
 fi
 
@@ -450,24 +455,7 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-curr=\$(pwd)
-echo "BUILDINGTEST"
-#trying to tweet this
-#make -e
-make -e
-cd tests/mpz
-for test in "t-powm" "reuse" "t-gcd";
-do
-   if [[ \$test =~ .*gcd.* ]]
-then
-   echo "BUILDING VET"
-   rm t-gcd
-   make -e t-gcd
-   chmod 755 t-gcd
-else
-   rm -r \$test; make -e \$test;
-fi
-done
-cd \$curr
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
+

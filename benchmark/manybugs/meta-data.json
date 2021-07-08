@@ -686,7 +686,7 @@
    "count_neg": 1,
    "count_pos": 144,
    "binary_path": "tests/mpz/t-gcd",
-   "crash_input": "200"
+   "crash_input": "200 $POC"
  },
  {
    "id": 54,

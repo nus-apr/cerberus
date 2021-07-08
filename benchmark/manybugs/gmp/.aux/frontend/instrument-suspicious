@@ -1,0 +1,21 @@
+#!/bin/bash
+
+file="$1"
+line=`sed '1q;d' $ANGELIX_SUSPICIOUS`
+
+case $line in
+    '170 9 170 19')
+        sed -i 's/tn \* 2 - 1/ANGELIX_CHOOSE(int, tn * 2 - 1, 170, 9, 170, 19, ((char*[]){"tn"}), ((int[]){tn}), 1)/' "$file"
+        echo '(assert (- (* tn 2) 1))' >  $ANGELIX_EXTRACTED/170-9-170-19.smt2
+    ;;
+    '212 8 212 16')
+        sed -i 's/b2p = tp + 2\*n;/b2p = ANGELIX_CHOOSE(int, tp + 2*n, 212, 8, 212, 16, ((char*[]){"tp", "n", "rp", "pp", "this_pp"}), ((int[]){tp, n, rp, pp, this_pp}), 5); klee_assume(b2p == tp | b2p == rp);/' "$file"
+        echo '(assert (+ tp (* 2 n)))' >  $ANGELIX_EXTRACTED/212-8-212-16.smt2
+    ;;
+    *)
+    echo 'Unsupported line'
+    exit 1
+    ;;
+esac
+
+
