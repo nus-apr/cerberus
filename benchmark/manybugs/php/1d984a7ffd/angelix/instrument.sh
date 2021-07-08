@@ -590,7 +590,25 @@ chmod u+x $root_directory/angelix/transform
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-bash $script_dir/../config.sh > /dev/null
+export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
+PATH_ORIG=$PATH
+export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
+# Config libtiff.
+make clean
+./configure \
+  --enable-cli \
+  --disable-dom \
+  --disable-libxml  \
+  --disable-xml \
+  --disable-simplexml \
+  --disable-xmlreader  \
+  --disable-xmlwriter  \
+  --disable-pear  \
+  --disable-phar \
+  --disable-inline-optimization  \
+  --without-pcre-dir  \
+  --disable-fileinfo \
+  --disable-shared
 bash $root_directory/angelix/transform
 mkdir -p ../state_dump
 EOF
@@ -598,7 +616,7 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-bash $script_dir/../build.sh > /dev/null
+make -e  CFLAGS="-march=x86-64" -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
 
