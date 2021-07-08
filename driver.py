@@ -264,7 +264,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     global FILE_INSTRUMENT_LOG, FILE_OUTPUT_LOG
     print("\t[INFO] initializing for prophet")
     if not os.path.isdir(deploy_path + "/prophet"):
-        instrument_command = "cd {0}/prophet; . instrument.sh > ".format(setup_dir_path) + FILE_INSTRUMENT_LOG + " 2>&1"
+        instrument_command = "bash {0}/prophet/instrument.sh > ".format(setup_dir_path) + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
 
     test_config_str = "-\n"
