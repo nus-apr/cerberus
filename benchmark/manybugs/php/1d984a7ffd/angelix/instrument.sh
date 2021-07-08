@@ -524,7 +524,7 @@ cp $main_c_appendix ./main/
 cat ./main/main.c ./main/main.c.appendix > ./main/main.c.merge
 cp ./main/main.c ./main/main.c.bak
 cp ./main/main.c.merge ./main/main.c
-$aux/php/get_test_script_file.awk $test_univ >> ./main/main.c
+$aux/get_test_script_file.awk $test_univ >> ./main/main.c
 
 # extend php.h
 cp $php_h_appendix ./main/
@@ -588,7 +588,7 @@ chmod u+x $root_directory/angelix/transform
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-bash $script_dir/config.sh > /dev/null
+bash $script_dir/../config.sh > /dev/null
 bash $root_directory/angelix/transform
 mkdir -p ../state_dump
 EOF
@@ -596,7 +596,7 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-make -e -j`nproc`
+bash $script_dir/../build.sh > /dev/null
 EOF
 chmod u+x $root_directory/angelix/build
 
