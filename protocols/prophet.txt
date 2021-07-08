@@ -1,0 +1,44 @@
+
+### M1	"number of generated patches"
+Check for last occurence of "The number of explored templates:" and take this
+number.
+
+Search term:
+(The number of explored templates:)
+
+
+### M2	"number of patches non-compilable"
+Search for single build failures. They merge patches at different locations and
+run a merged build, which can fail, but then they check the single builds.
+
+Search term:
+^(Single building .* failed as well!)$
+
+
+### M3  "number of patches in-plausible"
+M3 = M1 - M2 - M4
+
+
+### M4  "number of plausible patches"
+Number of created files representing the plausible patches. Note that all
+created files are plausible patches, also the file without "~" in file name.
+
+
+### M5	"number of correct patches"
+Check the created patch files (only the first 10). Compare the patch (see search
+term) and compare with developer patch.
+
+Search term:
+(//prophet generated patch)
+
+
+### M6	"order of generation of correct patch"
+= represents ranking (only check first 10 patches)
+
+
+### M7	"rank of the correct patch"
+Patch ID of first (semantically equivalent) to the developer patch.
+
+
+### M8	"time until correct patch is identified"
+Time can be found in output.log in seconds.
