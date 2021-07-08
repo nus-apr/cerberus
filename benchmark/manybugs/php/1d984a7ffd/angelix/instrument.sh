@@ -600,4 +600,7 @@ bash $script_dir/../build.sh > /dev/null
 EOF
 chmod u+x $root_directory/angelix/build
 
+pushd $aux > /dev/null
+gcc -o php-run-tests php-run-tests.c
+popd > /dev/null
 
