@@ -23,10 +23,6 @@ def build():
         os.mkdir("tests")
     for t in all_tests:
         shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)).zfill(5) + ".phpt")
-    with open(exp_dir + "/tests/testfile.log", "w") as f:
-        f.write("{}\n".format(str(len(all_tests))))
-        for t in all_tests:
-            f.write("{0}\n{1}\n".format(all_tests.index(t), t))
 
     # Find the sub-set of tests used by this scenario
     with open(exp_dir + "/tests.indices.txt", "r") as f:
@@ -60,6 +56,11 @@ def build():
             f.write("{}\n".format(t))
 
     shutil.copy("src/" + list(passing)[0], "tests/" + str(len(all_tests)).zfill(5) + ".phpt")
+    with open(exp_dir + "/tests/testfile.log", "w") as f:
+        f.write("{}\n".format(str(len(all_tests))))
+        for t in all_tests:
+            f.write("{0}\n{1}\n".format(all_tests.index(t), t))
+        f.write("{0}\n{1}\n".format(len(all_tests), list(passing)[0]))
 
 
 def preexec():
