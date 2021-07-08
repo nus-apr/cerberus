@@ -50,6 +50,12 @@ def build():
         for t in sorted(failing):
             f.write("{}\n".format(t))
 
+    with open(exp_dir + "/tests.all.txt.rev", "w") as f:
+        rev_list = all_tests.copy()
+        rev_list.reverse()
+        for t in rev_list:
+            f.write("{}\n".format(t))
+
     # write passing tests to disk
     with open(exp_dir + "/passing.tests.txt", "w") as f:
         for t in sorted(passing):

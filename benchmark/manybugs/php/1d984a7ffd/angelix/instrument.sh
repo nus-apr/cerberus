@@ -620,7 +620,14 @@ make -e  CFLAGS="-march=x86-64" -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
 
+
+
 pushd $aux > /dev/null
+sed -i "96,8506d" php-run-tests.c
+while IFS= read -r line
+do
+  sed -i "96i $line," php-run-tests.c
+done < $dir_name/tests.all.txt.rev
 gcc -o php-run-tests php-run-tests.c
 popd > /dev/null
 
