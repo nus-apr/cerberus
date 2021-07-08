@@ -388,7 +388,7 @@ instrument2 () {
     esac
 }
 
-experiments_dir="$pwd"
+experiments_dir="$PWD"
 test_abbrev="F"
 php_oracle_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-oracle")
 php_transform_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-transform")
@@ -468,7 +468,7 @@ fi
 
 # the current dir is {validation, frontend, backend}.
 # export AF_WORK_DIR=\$(readlink -f .)
-# export AF_SRC_ROOT_DIR=\$(pwd)/php
+# export AF_SRC_ROOT_DIR=\$(PWD)/php
 # export AF_USE_TEST_SCRIPT_ID=""
 
 if ! [ -e ../php-helper.php ]; then
@@ -500,9 +500,9 @@ chmod u+x $root_directory/angelix/oracle
 
 
 if [[ $test_abbrev == "T" ]]; then
-    test_univ=$(readlink -f "${experiments_dir}/.aux/php/TEST_UNIV_ABBREV")
+    test_univ=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/TEST_UNIV_ABBREV")
 else
-    test_univ=$(readlink -f "${experiments_dir}/.aux/php/TEST_UNIV_FULL")
+    test_univ=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/TEST_UNIV_FULL")
 fi
 
 cat <<EOF > $root_directory/angelix/transform
@@ -584,7 +584,6 @@ touch configured.mark
 
 exit 0
 EOF
-
 chmod u+x $root_directory/angelix/transform
 
 cat <<EOF > $root_directory/angelix/config
