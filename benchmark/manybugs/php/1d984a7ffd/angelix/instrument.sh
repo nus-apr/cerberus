@@ -591,8 +591,7 @@ chmod u+x $root_directory/angelix/transform
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
 export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
-PATH_ORIG=$PATH
-export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
+export PATH=/deps/php/bison-2.2-build/bin:$PATH
 # Config libtiff.
 make clean
 ./configure \
