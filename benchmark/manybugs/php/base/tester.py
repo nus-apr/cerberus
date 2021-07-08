@@ -59,7 +59,7 @@ def build():
         for t in sorted(passing):
             f.write("{}\n".format(t))
 
-    shutil.copy("src/" + passing[0], "tests/" + str(len(all_tests)).zfill(5) + ".phpt")
+    shutil.copy("src/" + list(passing)[0], "tests/" + str(len(all_tests)).zfill(5) + ".phpt")
 
 
 def preexec():
