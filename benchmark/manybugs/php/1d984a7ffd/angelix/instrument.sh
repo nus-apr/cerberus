@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
-version=14166-14167 #this is the angelix version
-gold_file=mpz/gcdext.c-14167
+version=308734-308761 #this is the angelix version
+gold_file=ext/tokenizer/tokenizer.c-1d984a7ffd
 
 clean-source () {
     local directory="$1"
@@ -450,24 +450,6 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-curr=\$(pwd)
-echo "BUILDINGTEST"
-#trying to tweet this
-#make -e
-make -e
-cd tests/mpz
-for test in "t-powm" "reuse" "t-gcd";
-do
-   if [[ \$test =~ .*gcd.* ]]
-then
-   echo "BUILDING VET"
-   rm t-gcd
-   make -e t-gcd
-   chmod 755 t-gcd
-else
-   rm -r \$test; make -e \$test;
-fi
-done
-cd \$curr
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
