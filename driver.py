@@ -113,7 +113,7 @@ def load_configuration_details(config_file_path, config_id):
 def setup_experiment(script_path, bug_id):
     global FILE_ERROR_LOG, CONF_DATA_PATH, FILE_SETUP_LOG, CONF_TOOL_NAME
     print("\t[INFO] running script for setup")
-    set_cc = " CC=gcc CXX=g++ "
+    # set_cc = " CC=gcc CXX=g++ "
     if str(CONF_TOOL_NAME).lower() == "cpr":
         set_cc = " CC=wllvm CXX=wllvm++ "
     elif str(CONF_TOOL_NAME).lower() == "f1x":
