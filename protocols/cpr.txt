@@ -1,0 +1,30 @@
+
+### M1	"number of generated patches"
+Equal to the number of plausible patches M4.
+
+
+### M2	"number of patches non-compilable"
+Always zero because of the controlled synthesis.
+
+
+### M3  "number of patches in-plausible"
+Always zero because of the controlled path synthesis. Only plausible patches
+will be generated.
+
+
+### M4  "number of plausible patches"
+
+
+
+### M5	"number of correct patches"
+
+
+
+### M6	"order of generation of correct patch"
+= represents ranking (only check first 10 patches)
+
+
+### M7	"rank of the correct patch"
+
+
+### M8	"time until correct patch is identified"
