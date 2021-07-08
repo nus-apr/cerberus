@@ -388,6 +388,16 @@ instrument2 () {
     esac
 }
 
+experiments_dir="$pwd"
+test_abbrev="F"
+php_oracle_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-oracle")
+php_transform_file=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-transform")
+test_log_file=php-oracle.log
+run_tests_script=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-run-tests")
+php_helper_script=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/php-helper.php")
+aux=$(readlink -f "/experiments/benchmark/manybugs/php/.aux")
+main_c_appendix=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/main/main.c.appendix")
+php_h_appendix=$(readlink -f "/experiments/benchmark/manybugs/php/.aux/main/php.h.appendix")
 
 root_directory=$1
 buggy_directory="$root_directory/src"
@@ -421,18 +431,79 @@ fi
 instrument $buggy_directory
 instrument $golden_directory
 
-run_tests_script=$(readlink -f "$root_directory/gmp-run-tests.pl")
+
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
-FILE=/tmp/testo
-perl "$run_tests_script" "\$1" &> "\$FILE"
-cat \$FILE
-grep -q "PASS:" \$FILE && echo "PASS" && exit 0
-echo "FAIL"
-exit 1
+set -uo pipefail
+
+test_log_file=$test_log_file
+
+if [ "\$#" -ne 1 ]
+then
+    echo "Usage: \$0 <test-id>" >> \${test_log_file}
+    exit 1
+fi
+
+
+#################################################################
+
+CMD=\$(basename \$0 | sed 's/.\///' | sed 's/.sh//')
+
+function abort() {
+    local msg=\$1
+    abort_msg="[\$CMD] Abort: \$msg"
+    echo "\$abort_msg" >> \${test_log_file} 2>& 1
+    exit 1
+}
+
+#################################################################
+
+test_id="\$1"
+
+run_tests_script="$run_tests_script"
+if ! [ -e \$run_tests_script ]; then
+    abort "No such file: \$run_tests_script"
+fi
+
+# the current dir is {validation, frontend, backend}.
+# export AF_WORK_DIR=\$(readlink -f .)
+# export AF_SRC_ROOT_DIR=\$(pwd)/php
+# export AF_USE_TEST_SCRIPT_ID=""
+
+if ! [ -e ../php-helper.php ]; then
+    cp $php_helper_script ..
+fi
+
+test_abbrev="$test_abbrev"
+if [[ \$test_abbrev == "T" ]]; then
+    echo "[oracle] \${run_tests_script} \${test_id} 'T'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'T'
+    result=\$?
+else
+    echo "[oracle] \${run_tests_script} \${test_id} 'F'" >> \${test_log_file} 2>& 1
+    \${run_tests_script} \${test_id} 'F'
+    result=\$?
+fi
+
+echo "[oracle] test result: \$result" >> \${test_log_file} 2>& 1
+
+if [[ \$result -eq 0 ]]; then
+    echo "\${test_id}: P" >> \${test_log_file} 2>& 1
+    exit 0
+else
+    echo "\${test_id}: N" >> \${test_log_file} 2>& 1
+    exit 1
+fi
 EOF
 chmod u+x $root_directory/angelix/oracle
+
+
+if [[ $test_abbrev == "T" ]]; then
+    test_univ=$(readlink -f "${experiments_dir}/.aux/php/TEST_UNIV_ABBREV")
+else
+    test_univ=$(readlink -f "${experiments_dir}/.aux/php/TEST_UNIV_FULL")
+fi
 
 cat <<EOF > $root_directory/angelix/transform
 #!/bin/bash
@@ -513,6 +584,7 @@ touch configured.mark
 
 exit 0
 EOF
+
 chmod u+x $root_directory/angelix/transform
 
 cat <<EOF > $root_directory/angelix/config
