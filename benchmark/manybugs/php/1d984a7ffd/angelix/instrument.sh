@@ -2,6 +2,7 @@
 set -euo pipefail
 version=308734-308761 #this is the angelix version
 gold_file=ext/tokenizer/tokenizer.c-1d984a7ffd
+export ANGELIX_ARGS=" --defect if-conditions --synthesis-levels extended-arithmetic --klee-search dfs --klee-max-forks 200 --synthesis-timeout 200000 --group-size 1 --lines 154"
 
 clean-source () {
     local directory="$1"
@@ -385,7 +386,7 @@ instrument2 () {
 root_directory=$1
 buggy_directory="$root_directory/src"
 golden_directory="$root_directory/src-gold"
-restore_original "/experiments/benchmark/manybugs/php/.aux/php/php-run-tests.c"
+restore_original "/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
   cp "$root_directory/diffs/$gold_file" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
@@ -457,3 +458,4 @@ cat <<EOF > $root_directory/angelix/build
 make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
+

@@ -246,7 +246,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     if fix_location:
         angelix_command += " --lines {0}  ".format(line_number)
 
-    if os.environ["ANGELIX_ARGS"]:
+    if os.getenv("ANGELIX_ARGS", False):
         angelix_command += " " + os.environ["ANGELIX_ARGS"] + " "
 
     angelix_command += "  --generate-all {0} " \
