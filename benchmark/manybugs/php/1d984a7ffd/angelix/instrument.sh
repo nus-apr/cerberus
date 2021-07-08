@@ -1,5 +1,11 @@
 #!/bin/bash
 set -euo pipefail
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
+
 version=308734-308761 #this is the angelix version
 gold_file=ext/tokenizer/tokenizer.c-1d984a7ffd
 export ANGELIX_ARGS=" --defect if-conditions --synthesis-levels extended-arithmetic --klee-search dfs --klee-max-forks 200 --synthesis-timeout 200000 --group-size 1 --lines 154"
@@ -428,28 +434,92 @@ exit 1
 EOF
 chmod u+x $root_directory/angelix/oracle
 
+cat <<EOF > $root_directory/angelix/transform
+#!/bin/bash
+set -uo pipefail
+
+if [ -e configured.mark ]; then
+    echo "[php-transform] Already configured"
+
+    # Makefile
+    sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+    sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+    exit 0
+fi
+
+# extend main.c
+cp $main_c_appendix ./main/
+cat ./main/main.c ./main/main.c.appendix > ./main/main.c.merge
+cp ./main/main.c ./main/main.c.bak
+cp ./main/main.c.merge ./main/main.c
+$aux/php/get_test_script_file.awk $test_univ >> ./main/main.c
+
+# extend php.h
+cp $php_h_appendix ./main/
+cp ./main/php.h ./main/php.h.bak
+cat ./main/php.h ./main/php.h.appendix > ./main/php.h.merge
+cp ./main/php.h.merge ./main/php.h
+
+files=\$(grep -rl "FD_ZERO(" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/FD_ZERO(/FD_ZERO_SIMUL(/g' \$file
+done
+
+files=\$(grep -rl "(char \*)gnu_get_libc_version()" --include=*.c) || true
+for file in \$files; do
+    sed -i 's/(char \*)gnu_get_libc_version()/\"2.19\"/g' \$file
+done
+
+files=\$(grep -rl "# define XPFPA_HAVE_CW 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/# define XPFPA_HAVE_CW 1//g' \$file
+done
+
+files=\$(grep -rl "#define HAVE_MMAP 1" --include=*.h) || true
+for file in \$files; do
+    sed -i 's/#define HAVE_MMAP 1//g' \$file
+done
+
+# php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 2))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/#elif defined(AF_KEEP_ORG) \&\& (defined(__GNUC__) \&\& (__GNUC__ >= 4 \&\& __GNUC_MINOR__ >= 1))/g' ./ext/standard/php_crypt_r.c
+sed -i 's/#elif defined(HAVE_ATOMIC_H)/#elif defined(AF_KEEP_ORG) \&\& defined(HAVE_ATOMIC_H)/g' ./ext/standard/php_crypt_r.c
+
+# zend_alloc.c
+sed -i 's/#if defined(__GNUC__) && defined(i386)/#if defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(i386)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(__GNUC__) && defined(__x86_64__)/#elif defined(AF_KEEP_ORG) \&\& defined(__GNUC__) \&\& defined(__x86_64__)/g' ./Zend/zend_alloc.c
+sed -i 's/#elif defined(_MSC_VER) && defined(_M_IX86)/#elif defined(AF_KEEP_ORG) \&\& defined(_MSC_VER) \&\& defined(_M_IX86)/g' ./Zend/zend_alloc.c
+
+# zend_language_scanner.c
+if [ \$(basename \`pwd\`) == "backend" ]; then
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/load_data\(\&buf, \&offset, \&size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+else
+    sed -i 's/SCNG(yy_start) = (unsigned char \*)buf - offset;/if (getenv("ANGELIX_TRACE")) dump_data\(buf, offset, size, file_handle->filename\); SCNG\(yy_start\) = \(unsigned char \*\)buf-offset;/g' ./Zend/zend_language_scanner.c
+fi
+
+# zend.h
+sed -i 's/# define EXPECTED(condition)   __builtin_expect(condition, 1)/# define EXPECTED(condition)   (__builtin_expect(condition, 1))/g' ./Zend/zend.h
+sed -i 's/# define UNEXPECTED(condition) __builtin_expect(condition, 0)/# define UNEXPECTED(condition) (__builtin_expect(condition, 0))/g' ./Zend/zend.h
+
+# php_cli.c
+sed -i 's/script_file=argv\[php_optind\];/script_file = get_script_file\(argv\[php_optind\]\);/g' ./sapi/cli/php_cli.c
+
+# Makefile
+sed -i 's/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES) pharcmd/all_targets = \$(OVERALL_TARGET) \$(PHP_MODULES) \$(PHP_ZEND_EX) \$(PHP_BINARIES)/' ./Makefile
+sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
+
+touch configured.mark
+
+exit 0
+EOF
+chmod u+x $root_directory/angelix/transform
+
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-curr=\$(pwd)
-echo "BUILDINGTEST"
-   if [[ \$curr =~ .*validation.* ]]
-then
-  make clean; \
-   ./configure CFLAGS=-std=c99 \
---enable-shared --disable-cxx --disable-fast-install --disable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-make \
-   ./configure CFLAGS=-std=c99 \
---disable-shared --disable-cxx --disable-fast-install --disable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-else
-   ./configure CFLAGS=-std=c99 \
---disable-shared --disable-cxx --disable-fast-install --enable-static; \
-sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;\
-make -e fib_table.h;make -e mp_bases.h;
-fi
+bash $script_dir/config.sh > /dev/null
+bash $root_directory/angelix/transform
+mkdir -p ../state_dump
 EOF
 chmod +x $root_directory/angelix/config
 
@@ -458,4 +528,5 @@ cat <<EOF > $root_directory/angelix/build
 make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
+
 
