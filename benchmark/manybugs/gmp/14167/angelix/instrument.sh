@@ -210,7 +210,7 @@ clean-source $golden_directory
 instrument_common
 
 if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
-    test_script=$buggy_directory/gmp-run-tests.pl
+    test_script=$root_directory/gmp-run-tests.pl
     sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $buggy_directory/configure.in
     sed -i 's/$(top_builddir)\/ansi2knr//g' $buggy_directory/configure.in
     add-angelix-runner "$test_script"
@@ -218,7 +218,7 @@ if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
 fi
 
 if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
-    test_script=$golden_directory/gmp-run-tests.pl
+    test_script=$root_directory/gmp-run-tests.pl
     sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $golden_directory/configure.in
     sed -i 's/$(top_builddir)\/ansi2knr//g' $golden_directory/configure.in
     add-angelix-runner "$test_script"
