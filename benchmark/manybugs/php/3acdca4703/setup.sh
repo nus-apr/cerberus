@@ -31,7 +31,7 @@ rm -rf  coverage* \
     cp bugged-program.txt manifest.txt && \
     mv *.lines bug-info && \
     mv fix-failures bug-info
-
+cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 grep -o -P '(?<=")[^"]+.phpt(?=")' php-run-tests.c > tests.all.txt
 grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
