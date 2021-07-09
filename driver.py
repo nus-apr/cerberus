@@ -335,6 +335,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
         instrument_command = "cd " + setup_dir_path + "/genprog; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
 
+
     repair_config_str = "--allow-coverage-fail\n" \
                         "--no-rep-cache\n" \
                         "--no-test-cache\n" \
@@ -362,6 +363,13 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
                         "--test-script bash /experiments/benchmark/{benchmark}/{subject}/{bug_id}/test.sh\n" \
                         "--continue".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg,
                                             benchmark=CONF_BENCHMARK, subject=subject_name)
+
+    if fix_location:
+        source_file, line_number = fix_location.split(":")
+        with open(deploy_path + "/src/fault-loc", "w") as loc_file:
+            loc_file.write(str(line_number))
+        repair_config_str += "--fault-schema line\n" \
+                             "--fault-file fault-loc\n"
 
     if not os.path.isfile(repair_conf_path):
         open(repair_conf_path, "w")
