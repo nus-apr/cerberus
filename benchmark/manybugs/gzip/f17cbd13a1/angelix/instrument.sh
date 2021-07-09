@@ -287,7 +287,7 @@ chmod u+x $root_directory/angelix/oracle
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-./configure
+rm -f tests/Makefile && echo "\$CC" > /tmp/gzip-cc && ./configure
 EOF
 chmod +x $root_directory/angelix/config
 
