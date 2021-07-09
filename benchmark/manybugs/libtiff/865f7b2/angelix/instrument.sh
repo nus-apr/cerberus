@@ -2,6 +2,8 @@
 set -euo pipefail
 version=0661f81-ac6a583 #this is the angelix version
 gold_file=libtiff/tif_dirwrite.c-865f7b2
+aux_dir=/experiments/benchmark/manybugs/libtiff/.aux
+export ANGELIX_ARGS="--assert $aux_dir/assert.json"
 
 clean-source () {
     local directory="$1"
