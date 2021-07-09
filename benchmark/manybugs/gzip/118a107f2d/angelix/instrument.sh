@@ -146,45 +146,7 @@ instrument_source () {
     fi
 }
 
-
-gzip_configure="rm -f tests/Makefile && echo "\$CC" > /tmp/gzip-cc && ./configure"
-
-# if [[ "$version" == *"a1d3d4019ddd22"* ]]
-# then
-#     gzip_test_suite="7"
-# else
-#     gzip_test_suite="1 4 7 6"
-#     #gzip_test_suite="6"
-# fi
 gzip_test_suite=$(seq 1 12)
-
-
-#repair-gzip () {
-#    local directory="$1"
-#    local golden_directory="$2"
-#    local src="$directory/gzip"
-#    local buggy=$(cat "$directory/bugged-program.txt")
-#    local run_tests_script=$(readlink -f "$directory/gzip-run-tests.pl")
-#    cat <<EOF > /tmp/gzip-oracle
-##!/bin/bash
-#FILE=/tmp/testo
-#perl "$run_tests_script" "\$1" &> "\$FILE"
-#if [[ -s \$FILE ]] ; then
-#  pwd >> "\$FILE"
-#  exit 1;
-#else
-#  exit 0;
-#fi
-#EOF
-#
-#    chmod u+x /tmp/gzip-oracle
-#    local golden="$golden_directory/gzip"
-#    angelix "$src" "$buggy" /tmp/gzip-oracle $gzip_test_suite \
-#            --golden "$golden" \
-#            --configure "$gzip_configure" \
-#            --test-timeout 50 \
-#            $arguments
-#}
 
 preinstrument(){
     local directory="$1"
@@ -288,9 +250,10 @@ chmod u+x $root_directory/angelix/oracle
 
 cat <<EOF > $root_directory/angelix/config
 #!/bin/bash
-./configure
+rm -f tests/Makefile && echo "\$CC" > /tmp/gzip-cc && ./configure
 EOF
 chmod +x $root_directory/angelix/config
+
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
