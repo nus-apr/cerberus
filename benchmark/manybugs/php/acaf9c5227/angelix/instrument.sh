@@ -9,7 +9,7 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 version=none #this is the angelix version
 gold_file=ext/session/mod_user.c-$fix_id
 # buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
-export ANGELIX_ARGS=" --defect if-conditions --synthesis-levels extended-arithmetic --klee-search dfs --klee-max-forks 200 --synthesis-timeout 200000 --group-size 1 --lines 154"
+export ANGELIX_ARGS=" "
 
 clean-source () {
     local directory="$1"
