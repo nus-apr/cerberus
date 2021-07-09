@@ -87,7 +87,7 @@ preinstrument_test() {
    directory="$1"
    for t in "${test_array[@]}"
    do
-        local test_script="$directory/src/tests/$t"
+        local test_script="$directory/tests/$t"
         prepare-angelix-runner "$test_script"
    done
 }
@@ -119,7 +119,7 @@ instrument () {
         local directory="$1"
         if [[ "$version" == *"1342"* ]]
         then
-                local gmp_error="$directory/src/mpn/generic/powm.c"
+                local gmp_error="$directory/mpn/generic/powm.c"
                 #cp "$directory/sanity/mpn/generic/powm.c" "$gmp_error"
                 local line=$(grep -n "(mp_bitcnt_t)0" $gmp_error | cut -d: -f 1)
                 #sed -i 's/if WANT_REDC_2/if 1/g' "$gmp_error"
@@ -135,17 +135,17 @@ instrument () {
 
                 #sed -i 's/\/\* WANT_REDC_2 \*\///g' "$gmp_error"
 
-                sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/configure.in"
-                sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/Makefile.am"
+                sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/configure.in"
+                sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/Makefile.am"
                 for ctest in "t-powm" "reuse";
                 do
-                add-header "$directory/src/tests/mpz/$ctest.c";
-                sed -i '/mpz_powm (/i ANGELIX_REACHABLE("stderr1");' "$directory/src/tests/mpz/$ctest.c"
-                sed -i '/mpz_powm (/a ANGELIX_REACHABLE("stderr2");' "$directory/src/tests/mpz/$ctest.c"
+                add-header "$directory/tests/mpz/$ctest.c";
+                sed -i '/mpz_powm (/i ANGELIX_REACHABLE("stderr1");' "$directory/tests/mpz/$ctest.c"
+                sed -i '/mpz_powm (/a ANGELIX_REACHABLE("stderr2");' "$directory/tests/mpz/$ctest.c"
                 done
 
         else
-            local src1="$directory/src/mpz/gcdext.c"
+            local src1="$directory/mpz/gcdext.c"
             restore_original $src1
             sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tsiz = SIZ (a) >= 0;\
 \tif (siz) {\
@@ -161,15 +161,15 @@ instrument () {
                 '  __mpz_struct stmp, gtmp;\
   int siz;'
 
-            sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/configure.in"
-            sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/src/Makefile.am"
+            sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/configure.in"
+            sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/Makefile.am"
             currdir=$(pwd)
-            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stddef.h "$directory/src/mpz/stddef.h"
-            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stdarg.h "$directory/src/mpz/stdarg.h"
+            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stddef.h "$directory/mpz/stddef.h"
+            cp /angelix/build/llvm-gcc4.2-2.9-x86_64-linux/lib/gcc/x86_64-unknown-linux-gnu/4.2.1/install-tools/include/stdarg.h "$directory/mpz/stdarg.h"
 
 
             for ctest in "t-gcd"; do
-                gmptestd="$directory/src/tests/mpz/";
+                gmptestd="$directory/tests/mpz/";
                 cp $aux/testcase/t-gcd-vet.c "$gmptestd"
                 pushd "$gmptestd" > /dev/null
                 cp t-gcd-vet.c t-gcd.c
@@ -182,7 +182,7 @@ instrument () {
                 popd > /dev/null
 
                 cd "$currdir"
-                local src="$directory/src/tests/mpz/$ctest.c"
+                local src="$directory/tests/mpz/$ctest.c"
                 add-header $src
                 restore_original $src
                 sed -i '/s)/i ANGELIX_OUTPUT(int,mpz_get_ui(s),"s");' $src
@@ -211,16 +211,16 @@ instrument_common
 
 if [ ! -f "$buggy_directory/INSTRUMENTED_ANGELIX" ]; then
     test_script=$buggy_directory/gmp-run-tests.pl
-    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $buggy_directory/src/configure.in
-    sed -i 's/$(top_builddir)\/ansi2knr//g' $buggy_directory/src/configure.in
+    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $buggy_directory/configure.in
+    sed -i 's/$(top_builddir)\/ansi2knr//g' $buggy_directory/configure.in
     add-angelix-runner "$test_script"
     touch "$buggy_directory/INSTRUMENTED_ANGELIX"
 fi
 
 if [ ! -f "$golden_directory/INSTRUMENTED_ANGELIX" ]; then
     test_script=$golden_directory/gmp-run-tests.pl
-    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $golden_directory/src/configure.in
-    sed -i 's/$(top_builddir)\/ansi2knr//g' $golden_directory/src/configure.in
+    sed -i 's/AM_C_PROTOTYPES/dnl AM_C_PROTOTYPES/g' $golden_directory/configure.in
+    sed -i 's/$(top_builddir)\/ansi2knr//g' $golden_directory/configure.in
     add-angelix-runner "$test_script"
     touch "$golden_directory/INSTRUMENTED_ANGELIX"
 fi
