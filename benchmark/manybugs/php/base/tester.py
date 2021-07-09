@@ -22,6 +22,8 @@ def build():
     if not os.path.isdir("tests"):
         os.mkdir("tests")
     for t in all_tests:
+        if not os.path.isfile("src/" + t):
+            continue
         shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)).zfill(5) + ".phpt")
 
     # Find the sub-set of tests used by this scenario

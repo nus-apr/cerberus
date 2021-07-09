@@ -5,7 +5,7 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
-# Config libtiff.
+# Config gmp.
 grep -v '"tests/mpbsd/Makefile") ' configure |   sed "s#tests/mpbsd/Makefile ##g" |   sponge configure
 make distclean
 autoreconf --force --install

@@ -9,4 +9,4 @@ cd $dir_name/src
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;
 # Compile gmp
 make -e fib_table.h;make -e mp_bases.h;
-make -e  CFLAGS="-march=x86-64 -g -O0 -static" -j`nproc`
+make -e  CFLAGS="-g -O0 -static" -j`nproc`
