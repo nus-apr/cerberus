@@ -1,0 +1,45 @@
+
+### M1	"number of enumerated/explored patches"
+number of expressions that are located
+--> how many of them have been generated
+
+Search term:
+(considering suspicious)
+
+Note that whole search space can the identified by searching for:
+(selected expressions)
+
+
+### M2	"number of patches non-compilable"
+Always zero because of the controlled synthesis.
+
+
+### M3  "number of patches in-plausible"
+-> calculated: M3 = M1 - M2 - M3
+
+
+### M4  "number of plausible patches"
+-> search for "fixing expression"
+-> or number of generated files
+
+
+### M5	"number of correct patches"
+-> manually check top-10 plausible patches
+-> there will be only one patch per location
+
+
+### M6	"order of generation of correct patch"
+-> there is only one patch per location so it is about the location
+ranking which is reflected in the output.log in the order of patch generation
+and there is also a "score", for which one can search.
+
+For example: "selected expressions [(472, 8, 473, 26)] with group score 1.0"
+
+
+### M7	"rank of the correct patch"
+see M6
+
+
+### M8	"time until correct patch is identified"
+At the end of the output.log there is a comment with the time if there was a
+succesful patch generation.
