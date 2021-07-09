@@ -45,7 +45,7 @@ cat ../libxml.patch | patch -p0
 
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
-#cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
+cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
 #make distclean
 ./configure && make -j`nproc`
 
