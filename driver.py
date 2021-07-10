@@ -368,7 +368,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
         source_file, line_number = fix_location.split(":")
         with open(deploy_path + "/src/fault-loc", "w") as loc_file:
             loc_file.write(str(line_number))
-        repair_config_str += "--fault-schema line\n" \
+        repair_config_str += "--fault-scheme line\n" \
                              "--fault-file fault-loc\n"
 
     if not os.path.isfile(repair_conf_path):
