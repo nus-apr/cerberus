@@ -35,6 +35,7 @@ ARG_SKIP_LIST = "--skip-list="
 ARG_BUG_ID_LIST = "--bug-id-list="
 ARG_BENCHMARK = "--benchmark="
 ARG_CONFIG_ID_LIST = "--conf="
+ARG_PURGE = "--purge"
 
 
 CONF_DATA_PATH = "/data"
@@ -51,6 +52,7 @@ CONF_SKIP_LIST = None
 CONF_BENCHMARK = None
 CONF_CONFIG_ID_LIST = ["C1"]
 CONF_SUBJECT_NAME = None
+CONF_PURGE = False
 
 FILE_META_DATA = None
 FILE_CONFIGURATION = "configuration.json"
@@ -538,7 +540,7 @@ def print_help():
 def read_arg(argument_list):
     global CONF_DATA_PATH, CONF_TOOL_NAME, CONF_TOOL_PARAMS, CONF_START_ID, CONF_END_ID, CONF_CONFIG_ID_LIST
     global CONF_TOOL_PATH, CONF_DEBUG, CONF_SETUP_ONLY, CONF_BUG_ID, CONF_SKIP_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK
-    global FILE_META_DATA, CONF_SUBJECT_NAME
+    global FILE_META_DATA, CONF_SUBJECT_NAME, CONF_PURGE
     print("[DRIVER] Reading configuration values")
     if len(argument_list) > 0:
         for arg in argument_list:
@@ -554,6 +556,8 @@ def read_arg(argument_list):
                 CONF_TOOL_PARAMS = str(arg).replace(ARG_TOOL_PARAMS, "")
             elif ARG_DEBUG_MODE in arg:
                 CONF_DEBUG = True
+            elif ARG_PURGE in arg:
+                CONF_PURGE = True
             elif ARG_ONLY_SETUP in arg:
                 CONF_SETUP_ONLY = True
             elif ARG_CONFIG_ID_LIST in arg:
@@ -591,7 +595,7 @@ def read_arg(argument_list):
 def run(arg_list):
     global EXPERIMENT_ITEMS, DIR_MAIN, CONF_DATA_PATH, CONF_TOOL_PARAMS, CONFIG_INFO
     global CONF_CONFIG_ID_LIST, CONF_BUG_ID_LIST, CONF_BENCHMARK, DIR_EXPERIMENT_RESULT
-    global FILE_SETUP_LOG, FILE_OUTPUT_LOG, FILE_INSTRUMENT_LOG
+    global FILE_SETUP_LOG, FILE_OUTPUT_LOG, FILE_INSTRUMENT_LOG, CONF_PURGE
     print("[DRIVER] Running experiment driver")
     read_arg(arg_list)
     create_directories()
@@ -642,6 +646,8 @@ def run(arg_list):
                 clean_results(DIR_EXPERIMENT_RESULT)
                 repair(deploy_path, setup_dir_path, experiment_item)
                 archive_results(DIR_EXPERIMENT_RESULT, deploy_path)
+                if CONF_PURGE:
+                    clean_setup(deploy_path)
             index = index + 1
 
 
