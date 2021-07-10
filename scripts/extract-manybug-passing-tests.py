@@ -52,7 +52,9 @@ for subject in subject_list:
                                 pass_list.append(test_list.index(test_case))
                             test_status = None
                             test_case = None
-
-            result_list[subject + "-" + bug_id] = pass_list
+            if pass_list:
+                result_list[subject + "-" + bug_id] = pass_list
+            else:
+                print("Failed", bug_id)
 
 write_as_json(result_list, "test.json")
