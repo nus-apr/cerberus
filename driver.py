@@ -361,7 +361,7 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
                         "--pos-tests {p_size}\n" \
                         "--neg-tests {n_size}\n" \
                         "--test-script bash /experiments/benchmark/{benchmark}/{subject}/{bug_id}/test.sh\n" \
-                        "--continue".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg,
+                        "--continue\n".format(bug_id=bug_id, p_size=count_pass, n_size=count_neg,
                                             benchmark=CONF_BENCHMARK, subject=subject_name)
 
     if fix_location:
