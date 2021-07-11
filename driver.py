@@ -179,7 +179,7 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     if passing_test_list:
         for test_id in passing_test_list:
             seed_id_list += test_id + ","
-    cpr_command = "timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
+    cpr_command = "cpr --conf=".format(timeout) + conf_path + " "
     cpr_command += " --seed-id-list=" + seed_id_list + " "
     cpr_command += " --test-id-list=" + test_id_list + " "
     cpr_command += "{0} --time-duration={1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
