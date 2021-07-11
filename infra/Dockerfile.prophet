@@ -63,7 +63,7 @@ RUN apt-get update && apt-get install -y  \
     tcl-dev \
     tix-dev
 
-RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
+#RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/php-deps/ && make -j32
 
