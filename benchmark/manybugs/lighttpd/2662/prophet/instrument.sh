@@ -9,8 +9,8 @@ mkdir $dir_name/prophet
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/data/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
 src_dir=/data/$benchmark_name/$project_name/$fix_id/src
-test_dir=/data/$benchmark_name/$project_name/$fix_id/test
-bugged_file=Modules/_io/bufferedio.c
+test_dir=/data/$benchmark_name/$project_name/$fix_id/src/tests
+bugged_file=src/mod_accesslog.c
 fixed_out_file=$project_name-fix-$fix_id.c
 build_cmd=/prophet-gpl/tools/$project_name-build.py
 test_cmd=/prophet-gpl/tools/$project_name-test.py
