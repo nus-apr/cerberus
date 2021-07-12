@@ -6,6 +6,9 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 mkdir $dir_name/prophet
 
+export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
+export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
+
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/data/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
 src_dir=/data/$benchmark_name/$project_name/$fix_id/src
@@ -17,7 +20,6 @@ test_cmd=/prophet-gpl/tools/$project_name-test.py
 dep_dir=/prophet-gpl/benchmarks/$project_name-deps
 localizer=profile
 single_case_timeout=120
-wrap_ld=yes
 EOF
 
 cat <<EOF > $dir_name/prophet/prophet.revlog
