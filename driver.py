@@ -310,7 +310,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             res_file.write(fault_loc)
             res_file.truncate()
     else:
-        if not os.path.isfile(localization_file):
+        if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
             shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
