@@ -7,7 +7,7 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/prophet
 
 export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
-export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
+export PATH=/deps/php/bison-2.2-build/bin:$PATH
 
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/data/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
