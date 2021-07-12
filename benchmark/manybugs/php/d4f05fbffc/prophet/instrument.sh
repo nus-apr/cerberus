@@ -19,7 +19,7 @@ build_cmd=/prophet-gpl/tools/$project_name-build.py
 test_cmd=/prophet-gpl/tools/$project_name-test.py
 dep_dir=/prophet-gpl/benchmarks/$project_name-deps
 localizer=profile
-single_case_timeout=600
+single_case_timeout=60
 EOF
 
 cat <<EOF > $dir_name/prophet/prophet.revlog
