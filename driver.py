@@ -317,7 +317,7 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
     repair_command += " -full-synthesis -full-explore "
     repair_command += " -r {0}".format(deploy_path + "/workdir")
-    repair_command += " -cond-ext -replace-ext  "
+    repair_command += " -cond-ext -replace-ext -skip-verify "
     repair_command += " -timeout {0} ".format(int(timeout))
     repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
