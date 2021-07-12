@@ -14,6 +14,7 @@ bugged_file=src/mod_accesslog.c
 fixed_out_file=$project_name-fix-$fix_id.c
 build_cmd=/prophet-gpl/tools/$project_name-build.py
 test_cmd=/prophet-gpl/tools/$project_name-test.py
+dep_dir=/prophet-gpl/benchmarks/$project_name-deps
 localizer=profile
 single_case_timeout=120
 wrap_ld=yes
