@@ -8,7 +8,7 @@ mkdir $dir_name/prophet
 
 cat <<EOF > $dir_name/prophet/build
 export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf  PATH=/deps/php/bison-2.2-build/bin:$PATH
-/prophet-gpl/tools/php-build.py $@
+/prophet-gpl/tools/php-build.py "\$@"
 EOF
 
 chmod +x $dir_name/prophet/build
