@@ -49,12 +49,20 @@ for subject in subject_list:
 
                         if test_status is not None:
                             if "PASS" in test_status:
-                                pass_list.append(test_list.index(test_case))
+                                pass_list.append(test_list.index(test_case) + 1)
                             test_status = None
                             test_case = None
             if pass_list:
-                result_list[subject + "-" + bug_id] = pass_list
+                result_list[subject + "-" + bug_id] = sorted(pass_list)
             else:
                 print("Failed", bug_id)
 
 write_as_json(result_list, "test.json")
+for bug_id in result_list:
+    print(bug_id)
+    passing_id_list = result_list[bug_id]
+    print(len(passing_id_list))
+    id_str = ""
+    for id in passing_id_list:
+        id_str += str(id) + ","
+    print(id_str[:-1])
