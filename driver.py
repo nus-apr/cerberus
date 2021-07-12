@@ -311,7 +311,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
             res_file.truncate()
     else:
         if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
-            shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
+            if os.path.isfile(setup_dir_path + "/prophet/profile_localization.res"):
+                shutil.copy(setup_dir_path + "/prophet/profile_localization.res", localization_file)
 
     print("\t[INFO] running Prophet")
     repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
