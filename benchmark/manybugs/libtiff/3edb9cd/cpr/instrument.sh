@@ -101,7 +101,7 @@ EOF
 # Create patch components
 mkdir $dir_name/cpr/components
 declare -a arr_var=("x" "y" "z")
-#declare -a arr_const=("constant_a")
+declare -a arr_const=("constant_a")
 # Create components for program variables
 for i in "${arr_var[@]}"
 do
@@ -115,10 +115,10 @@ EOF
 done
 
 # Create components for constants
-#for i in "${arr_const[@]}"
-#do
-#cp /CPR/components/$i.smt2 $dir_name/cpr/components
-#done
+for i in "${arr_const[@]}"
+do
+cp /CPR/components/$i.smt2 $dir_name/cpr/components
+done
 
 
 # Copy Seed Files
