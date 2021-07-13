@@ -163,7 +163,7 @@ def archive_results(exp_dir, deploy_path):
 def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     global CONF_TOOL_PARAMS, CONF_TOOL_PATH, CONF_TOOL_NAME, DIR_LOGS
     print("\t[INFO] instrumentation for CPR")
-    conf_path = deploy_path + "/repair.conf"
+    conf_path = deploy_path + "/cpr/repair.conf"
     if not os.path.isfile(deploy_path + "/src/INSTRUMENTED_CPR"):
         setup_dir_path = setup_dir_path + "/cpr"
         if not os.path.isdir(setup_dir_path):
