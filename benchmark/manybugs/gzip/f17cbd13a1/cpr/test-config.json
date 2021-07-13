@@ -1,0 +1,1 @@
+[[6,"gzip","-dc $POC_stdin.gz", "cpr/test-expected-output/stdin.smt2"]]
