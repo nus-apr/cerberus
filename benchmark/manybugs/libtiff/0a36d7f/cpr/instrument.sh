@@ -3,7 +3,7 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
-
+mkdir $dir_name/cpr
 cd $dir_name/src
 make clean
 
