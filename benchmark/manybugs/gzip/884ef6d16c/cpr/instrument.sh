@@ -46,7 +46,6 @@ tag_id:$fix_id
 src_directory:src
 config_command:skip
 build_command:skip
-spec_path:spec.smt2
 custom_comp_list:components/x.smt2,components/y.smt2,components/z.smt2,components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,logical-and.smt2,logical-or.smt2
 depth:3
@@ -55,11 +54,12 @@ loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:556
 gen_limit:80
 stack_size:15000
 dist_metric:angelic
-test_input_dir:test-input-files
-test_output_dir:test-expected-output
-seed_dir:seed-dir
-path_seed_suite:seed-config.json
-path_test_suite:test-config.json
+spec_path:cpr/spec.smt2
+test_input_dir:cpr/test-input-files
+test_output_dir:cpr/test-expected-output
+seed_dir:cpr/seed-dir
+path_seed_suite:cpr/seed-config.json
+path_test_suite:cpr/test-config.json
 EOF
 
 
@@ -91,9 +91,9 @@ mkdir $dir_name/cpr/seed-dir
 cp $script_dir/../seed-dir/* $dir_name/cpr/seed-dir
 
 # Copy remaining files to run CPR.
-cp $script_dir/spec.smt2 $dir_name
-cp -rf $script_dir/test-input-files $dir_name
-cp -rf $script_dir/test-expected-output $dir_name
-cp $script_dir/test-config.json $dir_name
-cp $script_dir/seed-config.json $dir_name
+cp $script_dir/spec.smt2 $dir_name/cpr
+cp -rf $script_dir/test-input-files $dir_name/cpr
+cp -rf $script_dir/test-expected-output $dir_name/cpr
+cp $script_dir/test-config.json $dir_name/cpr
+cp $script_dir/seed-config.json $dir_name/cpr
 
