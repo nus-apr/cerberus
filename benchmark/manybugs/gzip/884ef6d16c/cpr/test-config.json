@@ -1,1 +1,1 @@
-[[  5,  "gzip",  "---presume-input-tty -d -S '' $POC_null-suffix-clobber.gz",  "test-expected-output/null-suffix-clobber.smt2"]]
+[[  5,  "gzip",  "---presume-input-tty -d -S '' $POC_null-suffix-clobber.gz",  "cpr/test-expected-output/null-suffix-clobber.smt2"]]
