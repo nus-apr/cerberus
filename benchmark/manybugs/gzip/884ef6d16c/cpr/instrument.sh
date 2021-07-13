@@ -4,7 +4,7 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/cpr
-cd $dir_name/src/test
+
 
 cd $dir_name/src
 make clean
@@ -88,7 +88,7 @@ done
 
 # Copy Seed Files
 mkdir $dir_name/cpr/seed-dir
-cp $script_dir/../seed-dir/* $dir_name/seed-dir
+cp $script_dir/../seed-dir/* $dir_name/cpr/seed-dir
 
 # Copy remaining files to run CPR.
 cp $script_dir/spec.smt2 $dir_name
