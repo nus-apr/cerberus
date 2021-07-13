@@ -1,6 +1,6 @@
 
 ### M1	"number of generated patches"
-Equal to the number of plausible patches M4.
+Number of (concrete) plausible patches after synthesis.
 
 
 ### M2	"number of patches non-compilable"
@@ -13,7 +13,7 @@ will be generated.
 
 
 ### M4  "number of plausible patches"
-
+Number of (concrete) plausible patches after refinement.
 
 
 ### M5	"number of correct patches"
