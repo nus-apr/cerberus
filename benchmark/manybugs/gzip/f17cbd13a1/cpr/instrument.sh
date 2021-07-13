@@ -47,7 +47,7 @@ config_command:skip
 build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:addition.smt2,minus.smt2,multiplication.smt2,subtraction.smt2,division.smt2
-depth:3
+depth:2
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:659
 loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:661
 gen_limit:80
