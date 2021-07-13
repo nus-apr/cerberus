@@ -13,78 +13,32 @@ if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
     touch "$dir_name/src/INSTRUMENTED_CPR"
 fi
 
-## Prepare for KLEE
-# Fix fabs calls (not supported by KLEE).
-sed -i 's/fabs/fabs_trident/g' libtiff/tif_luv.c
-sed -i 's/fabs/fabs_trident/g' tools/tiff2ps.c
-#sed -i 's/fabs_trident/fabs/g' libtiff/tif_luv.c
-#sed -i 's/fabs_trident/fabs/g' tools/tiff2ps.c
 
-make CC=$TRIDENT_CC CXX=$TRIDENT_CXX -j32
-
-cd $dir_name
-
-#Instrument driver and libtiff
-sed -i '43i // KLEE' src/libtiff/tif_dirread.c
-sed -i '44i #include <klee/klee.h>' src/libtiff/tif_dirread.c
-#
-sed -i '976i \\tif (!dir->tdir_count || !w || __trident_choice("L976", "bool", (int[]){(tsize_t)dir->tdir_count, w, cc}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0))' src/libtiff/tif_dirread.c
-sed -i '977d' src/libtiff/tif_dirread.c
-#
-
-## Instrument Short_TAG
-sed -i '43d ' src/test/short_tag.c
-sed -i '43i const char      *filename = "short_test.tiff";' src/test/short_tag.c
-sed -i '81i main(int argc, char** argv)' src/test/short_tag.c
-sed -i '82d' src/test/short_tag.c
-sed -i '89,150 s/^/\/\//' src/test/short_tag.c
-sed -i '151i \\tfilename = argv[1];'  src/test/short_tag.c
-
-## Instrument Strip_RW
-sed -i '60i \\tfilename = argv[1];'  src/test/strip_rw.c
-sed -i '76,82 s/^/\/\//' src/test/strip_rw.c
-sed -i '118,124 s/^/\/\//' src/test/strip_rw.c
-sed -i '135,141 s/^/\/\//' src/test/strip_rw.c
-sed -i '90d'  src/test/strip_rw.c
-sed -i '106d'  src/test/strip_rw.c
-sed -i '132d'  src/test/strip_rw.c
-
-## Instrument LongTag
-sed -i '65,120 s/^/\/\//' src/test/long_tag.c
-sed -i '122i \\tfilename = argv[1];'  src/test/long_tag.c
+# Compile gzip.
+CC=wllvm CXX=wllvm++ ./configure CFLAGS='-g -O0'
+CC=wllvm CXX=wllvm++ make CFLAGS="-g -O0 -static" -j32
 
 
-sed -i '54i // KLEE' src/libtiff/tif_unix.c
-sed -i '55i #include <klee/klee.h>' src/libtiff/tif_unix.c
-sed -i '56i #ifndef TRIDENT_OUTPUT' src/libtiff/tif_unix.c
-sed -i '57i #define TRIDENT_OUTPUT(id, typestr, value) value' src/libtiff/tif_unix.c
-sed -i '58i #endif' src/libtiff/tif_unix.c
-sed -i '166i {' src/libtiff/tif_unix.c
-sed -i '167i \\t tif = ((TIFF *)0);' src/libtiff/tif_unix.c
-sed -i '168i \\t goto obs;' src/libtiff/tif_unix.c
-sed -i '170i }' src/libtiff/tif_unix.c
-sed -i '184i \\t tif = ((TIFF *)0);' src/libtiff/tif_unix.c
-sed -i '185i \\t goto obs;' src/libtiff/tif_unix.c
-sed -i '192i obs: TRIDENT_OUTPUT("obs", "i32", tif);' src/libtiff/tif_unix.c
-sed -i '193i \\tklee_assert(tif > 0);' src/libtiff/tif_unix.c
+cd $dir_name/src
 
+#Instrument gzip
+sed -i '168i #endif' gzip.c
+sed -i '168i #define TRIDENT_OUTPUT(id, typestr, value) value' gzip.c
+sed -i '168i #ifndef TRIDENT_OUTPUT' gzip.c
+sed -i '168i #include <klee/klee.h>' gzip.c
+sed -i '168i // KLEE' gzip.c
+
+sed -i '551i if (( __trident_choice("L1634", "bool", (int[]){z_len, MAX_SUFFIX, decompress}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) ) { ' gzip.c
+sed -i '552d' gzip.c
+sed -i '556i \\tklee_assert(z_len > 0);' gzip.c
+sed -i '556i \\tTRIDENT_OUTPUT("obs", "i32", z_len);' gzip.c
+sed -i '1642,1648d' gzip.c
+sed -i '1642i int ok = 1;' gzip.c
 
 # Compile instrumentation and test driver.
-cd src
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC  CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
-cd ./test
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
-extract-bc long_tag
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/lib -lkleeRuntest -I/klee/source/include -g -O0" -j32
 
 
-# Convert shell to binary as a driver
-cd $dir_name/src/test
-sed -i "s/IMG_UNCOMPRESSED/1/g" tiffcp-split.sh
-sed -i "s/IMG_UNCOMPRESSED/1/g" tiffcp-split-join.sh
-CC=$TRIDENT_CC CXX=$TRIDENT_CXX shc -f tiffcp-split.sh
-CC=$TRIDENT_CC CXX=$TRIDENT_CXX shc -f tiffcp-split-join.sh
-mv tiffcp-split.sh.x tiffcp-split
-mv tiffcp-split-join.sh.x tiffcp-split-join
 
 cat <<EOF > $dir_name/cpr/repair.conf
 project_path:/data/$benchmark_name/$project_name/$fix_id
