@@ -7,9 +7,6 @@ test_dir_name=/data/$benchmark_name/$project_name/$fix_id/tests
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
 cd $test_dir_name
 
-# Copy Seed Files
-mkdir $target_dir/seed-dir
-find . -type f -iname '*.gz' -exec cp  {} $target_dir/seed-dir/ \;
 
 cd $src_dir_name
 make clean
