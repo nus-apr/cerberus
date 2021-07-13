@@ -30,8 +30,9 @@ sed -i '168i // KLEE' gzip.c
 
 sed -i '1274i if (( __trident_choice("L1634", "bool", (int[]){magic[0], force, in}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) ) { ' gzip.c
 sed -i '1277i }' gzip.c
-sed -i '556i \\tklee_assert(z_len > 0);' gzip.c
-sed -i '556i \\tTRIDENT_OUTPUT("obs", "i32", z_len);' gzip.c
+sed -i '1277i \\tklee_assert(magic[0] > 0);' gzip.c
+sed -i '1277i \\tTRIDENT_OUTPUT("obs", "i32", magic[0]);' gzip.c
+
 
 
 # Compile instrumentation and test driver.
@@ -48,8 +49,8 @@ build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,logical-and.smt2,logical-or.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:551
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:556
+loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:1274
+loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:1277
 gen_limit:80
 stack_size:15000
 dist_metric:angelic
