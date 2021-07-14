@@ -13,9 +13,9 @@ fi
 
 ## Prepare for KLEE
 # Fix fabs calls (not supported by KLEE).
-sed -i 's/fabs/fabs_trident/g' libtiff/tif_luv.c
-sed -i 's/fabs/fabs_trident/g' tools/tiff2ps.c
-#sed -i 's/fabs_trident/fabs/g' libtiff/tif_luv.c
+sed -i 's/fabs/fabs_trident/g' ext/gd/libgd/gd_rotate.c
+sed -i 's/fabs/fabs_trident/g' ext/standard/math.c
+sed -i 's/fabs(/fabs_trident(/g' ext/gd/libgd/gd.c
 #sed -i 's/fabs_trident/fabs/g' tools/tiff2ps.c
 
 make CC=$TRIDENT_CC CXX=$TRIDENT_CXX -j32
@@ -71,7 +71,7 @@ sed -i '193i \\tklee_assert(tif > 0);' src/libtiff/tif_unix.c
 cd src
 make CXX=$TRIDENT_CXX CC=$TRIDENT_CC  CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
 cd ./test
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
+make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS=" -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32 long_tag.log short_tag.log ascii_tag.log strip_rw.log
 extract-bc long_tag
 
 

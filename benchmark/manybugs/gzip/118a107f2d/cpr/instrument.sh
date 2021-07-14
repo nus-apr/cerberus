@@ -48,7 +48,7 @@ config_command:skip
 build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,logical-and.smt2,logical-or.smt2
-depth:3
+depth:2
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:1274
 loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/gzip.c:1277
 gen_limit:80
