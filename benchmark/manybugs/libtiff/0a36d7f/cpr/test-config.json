@@ -1,1 +1,1 @@
-[[  2,  "test/long_tag",  "$POC_long_test.tiff",  "test-expected-output/long_test.smt2"],[  3,  "test/short_tag",  "$POC_short_test.tiff",  "test-expected-output/short_test.smt2"],[  4,  "test/strip_rw",  "$POC_strip_test.tiff",  "test-expected-output/strip_test.smt2"]]
+[[  2,  "test/long_tag",  "$POC_long_test.tiff",  "cpr/test-expected-output/long_test.smt2"],[  3,  "test/short_tag",  "$POC_short_test.tiff",  "cpr/test-expected-output/short_test.smt2"],[  4,  "test/strip_rw",  "$POC_strip_test.tiff",  "cpr/test-expected-output/strip_test.smt2"]]
