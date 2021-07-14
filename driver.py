@@ -260,7 +260,7 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     execute_command(copy_command)
 
     #post-cleaning
-    clean_command = "rm -rf /tmp"
+    clean_command = "rm -rf /tmp /experiments/.angelix/"
     execute_command(clean_command)
 
 
