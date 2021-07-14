@@ -1,0 +1,8 @@
+315,318c315,316
+< 	if (LIBXML(stream_context)) {
+< 		context = zend_fetch_resource(&LIBXML(stream_context) TSRMLS_CC, -1, "Stream-Context", NULL, 1, php_le_stream_context(TSRMLS_C));
+< 	}
+< 
+---
+> 	context = php_stream_context_from_zval(LIBXML(stream_context), 0);
+> 	
