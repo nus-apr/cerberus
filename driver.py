@@ -259,6 +259,10 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     copy_command = "mv src-2021-* " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
 
+    #post-cleaning
+    clean_command = "rm -rf /tmp"
+    execute_command(clean_command)
+
 
 def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing_test_list, fix_location):
     # TODO: Make sure to copy the artifacts (logs/patches) to DIR_EXPERIMENT_RESULT
