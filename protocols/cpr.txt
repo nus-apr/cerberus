@@ -1,6 +1,10 @@
 
 ### M1	"number of generated patches"
 Number of (concrete) plausible patches after synthesis.
+Check "Run time statistics:" at the end of the output.log
+
+Search Term:
+Patch Explored Count
 
 
 ### M2	"number of patches non-compilable"
@@ -8,16 +12,23 @@ Always zero because of the controlled synthesis.
 
 
 ### M3  "number of patches in-plausible"
-Always zero because of the controlled path synthesis. Only plausible patches
-will be generated.
+M3 = M1 - M2 - M4
 
 
 ### M4  "number of plausible patches"
 Number of (concrete) plausible patches after refinement.
+Check "Run time statistics:" at the end of the output.log
+
+Search Term:
+Patch End Count
 
 
 ### M5	"number of correct patches"
-
+Check the generated output/patch-set-ranked-X (X will the iteration where the
+patch set was generated). You can pick the file with the highest iteration.
+You check check the variable mapping in the instrument.sh script. Note that the
+generated output are the abstract patches, so you need take the parameters into
+account. Only check the first 10 patches.
 
 
 ### M6	"order of generation of correct patch"
@@ -25,6 +36,15 @@ Number of (concrete) plausible patches after refinement.
 
 
 ### M7	"rank of the correct patch"
+Check Patch number in patch-set-ranked-X.
 
 
 ### M8	"time until correct patch is identified"
+The time for generation would the time needed for the initial synthesis and
+is the same for all plausible/generated patches. Check "Run time statistics:"
+at the end of the output.log
+
+Search Term:
+Synthesis
+
+Note: time given in seconds in the sheet, the log gives in minutes
