@@ -143,7 +143,7 @@ sed -i '159i \\tTRIDENT_OUTPUT("obs", "i32", token_type - T_HALT_COMPILER);' ext
 sed -i '159i \\tif ( __trident_choice("L154", "bool", (int[]){token_type, T_HALT_COMPILER, zendleng}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) break;' ext/tokenizer/tokenizer.c
 
 # Compile instrumentation and test driver.
-make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include" -j32
+make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
 
 
 cd $dir_name/src/sapi/cli
