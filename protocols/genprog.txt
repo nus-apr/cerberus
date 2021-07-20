@@ -1,0 +1,36 @@
+### M1	"number of enumerated/explored patches"
+"find_best_edit" at the end of the summary, or the last id of the variant that was generated
+the patch space is defined at the beginning of logs with "possible edits"
+
+
+### M2	"number of patches non-compilable"
+count the occurrences of  "fails to compile"
+
+
+### M3  "number of patches in-plausible"
+-> calculated: M3 = M1 - M2 - M4
+
+
+
+### M4  "number of plausible patches"
+GenProg only generates one patch, so plausible patches are either 0 or 1
+
+
+### M5	"number of correct patches"
+-> manually check top-1 plausible patch
+-> there will be only one patch
+
+
+
+### M6	"order of generation of correct patch"
+-> there is only one patch, so order is either nill or 1
+
+
+
+### M7	"rank of the correct patch"
+-> there is only one patch, so order is either nill or 1
+
+
+### M8	"time until correct patch is identified"
+At the end of the output.log there is a stat for the total time elapsed
+
