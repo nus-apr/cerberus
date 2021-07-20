@@ -184,7 +184,7 @@ general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/tokenizer/tokenizer.c:159
 loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/tokenizer/tokenizer.c:160
-gen_limit:80
+gen_limit:30
 stack_size:15000
 dist_metric:angelic
 spec_path:cpr/spec.smt2
