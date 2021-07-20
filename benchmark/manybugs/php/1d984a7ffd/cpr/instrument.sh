@@ -194,6 +194,8 @@ seed_file:cpr/seed-input
 test_input_file:cpr/test-input
 test_output_list:cpr/expected-output/t1.smt2,cpr/expected-output/t2.smt2
 mask_arg:$(seq -s "," -f "%g" 0 52)
+generalize_seed_input:-d output_handler= -d open_basedir= -d safe_mode=0 -d disable_functions= -d output_buffering=Off -d error_reporting=32767 -d display_errors=1 -d display_startup_errors=1 -d log_errors=0 -d html_errors=0 -d track_errors=1 -d report_memleaks=1 -d report_zend_debug=0 -d docref_root= -d docref_ext=.html -d error_prepend_string= -d error_append_string= -d auto_prepend_file= -d auto_append_file= -d magic_quotes_runtime=0 -d ignore_repeated_errors=0 -d precision=14 -d unicode.runtime_encoding=ISO-8859-1 -d unicode.script_encoding=UTF-8 -d unicode.output_encoding=UTF-8 -d unicode.from_error_mode=U_INVALID_SUBSTITUTE -f $POC
+generalize_test_input:-d output_handler= -d open_basedir= -d safe_mode=0 -d disable_functions= -d output_buffering=Off -d error_reporting=32767 -d display_errors=1 -d display_startup_errors=1 -d log_errors=0 -d html_errors=0 -d track_errors=1 -d report_memleaks=1 -d report_zend_debug=0 -d docref_root= -d docref_ext=.html -d error_prepend_string= -d error_append_string= -d auto_prepend_file= -d auto_append_file= -d magic_quotes_runtime=0 -d ignore_repeated_errors=0 -d precision=14 -d unicode.runtime_encoding=ISO-8859-1 -d unicode.script_encoding=UTF-8 -d unicode.output_encoding=UTF-8 -d unicode.from_error_mode=U_INVALID_SUBSTITUTE -f $POC
 EOF
 
 
@@ -224,14 +226,14 @@ done
 echo " " > $dir_name/cpr/seed-input
 while IFS= read -r line
 do
-  sed -i "1i \$POC_$line" $dir_name/cpr/seed-input
+  sed -i "1i \$POC_${line%.phpt}.php" $dir_name/cpr/seed-input
 done < $dir_name/tests.all.txt.rev
 
 # Create test configuration
 echo " " > $dir_name/cpr/test-input
 while IFS= read -r line
 do
-  sed -i "1i \$POC_$line" cpr/test-input
+  sed -i "1i \$POC_${line%.phpt}.php" cpr/test-input
 done < $dir_name/failing.tests.txt
 
 
