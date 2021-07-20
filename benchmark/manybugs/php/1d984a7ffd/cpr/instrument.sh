@@ -181,7 +181,7 @@ src_directory:src
 config_command:skip
 build_command:skip
 binary_path:sapi/cli/php
-custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,components/constant_a.smt2
+custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/tokenizer/tokenizer.c:159
@@ -221,17 +221,17 @@ done
 
 
 # Create seed configuration
-touch $dir_name/cpr/seed-input
+echo " " > $dir_name/cpr/seed-input
 while IFS= read -r line
 do
   sed -i "1i \$POC_$line" $dir_name/cpr/seed-input
 done < $dir_name/tests.all.txt.rev
 
 # Create test configuration
-touch $dir_name/cpr/test-input
+echo " " > $dir_name/cpr/test-input
 while IFS= read -r line
 do
-  sed -i "1i \$POC_$line" $dir_name/cpr/test-input
+  sed -i "1i \$POC_$line" cpr/test-input
 done < $dir_name/failing.tests.txt
 
 
