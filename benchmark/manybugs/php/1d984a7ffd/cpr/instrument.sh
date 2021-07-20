@@ -128,8 +128,24 @@ touch configured.mark
 #sed -i "379d" Zend/zend_float.h
 #sed -i "379i  _FPU_SETCW(_xpfpa_fpu_oldcw)" Zend/zend_float.h
 
+#CC=wllvm CXX=wllvm++ CFLAGS="-g -O0 -DHAVE_FPU_INLINE_ASM_X86=0" CXXFLAGS="-g -O0 -DHAVE_FPU_INLINE_ASM_X86=0"  make  -j32
 
-CC=wllvm CXX=wllvm++ CFLAGS="-g -O0 -DHAVE_FPU_INLINE_ASM_X86=0" CXXFLAGS="-g -O0 -DHAVE_FPU_INLINE_ASM_X86=0"  make  -j32
+
+cd $dir_name/src
+#Instrument for test-case
+sed -i '20i // KLEE' ext/tokenizer/tokenizer.c
+sed -i '21i #include <klee/klee.h>' ext/tokenizer/tokenizer.c
+sed -i '22i #ifndef TRIDENT_OUTPUT' ext/tokenizer/tokenizer.c
+sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/tokenizer/tokenizer.c
+sed -i '24i #endif' ext/tokenizer/tokenizer.c
+sed -i '159i \\tklee_assert(token_type - T_HALT_COMPILER != 0);' ext/tokenizer/tokenizer.c
+sed -i '159i \\tTRIDENT_OUTPUT("obs", "i32", token_type - T_HALT_COMPILER);' ext/tokenizer/tokenizer.c
+sed -i '159i \\tif ( __trident_choice("L154", "bool", (int[]){token_type, T_HALT_COMPILER, zendleng}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) break;' ext/tokenizer/tokenizer.c
+
+# Compile instrumentation and test driver.
+make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include" -j32
+
+
 cd $dir_name/src/sapi/cli
 extract-bc php
 llvm-dis php.bc
@@ -154,24 +170,6 @@ sed -i "$line i %2 = alloca double, align 8" php.ll
 sed -i "$line i define double @fabs_f64(double) #0 {" php.ll
 sed -i 's#\@llvm.fabs.f64#\@fabs_f64#g' php.ll
 llvm-as php.ll
-
-
-cd $dir_name/src
-#Instrument for test-case
-sed -i '20i // KLEE' ext/tokenizer/tokenizer.c
-sed -i '21i #include <klee/klee.h>' ext/tokenizer/tokenizer.c
-sed -i '22i #ifndef TRIDENT_OUTPUT' ext/tokenizer/tokenizer.c
-sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/tokenizer/tokenizer.c
-sed -i '24i #endif' ext/tokenizer/tokenizer.c
-sed -i '159i \\tklee_assert(token_type - T_HALT_COMPILER != 0);' ext/tokenizer/tokenizer.c
-sed -i '159i \\tTRIDENT_OUTPUT("obs", "i32", token_type - T_HALT_COMPILER);' ext/tokenizer/tokenizer.c
-sed -i '159i \\tif ( __trident_choice("L154", "bool", (int[]){token_type, T_HALT_COMPILER, zendleng}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) break' ext/tokenizer/tokenizer.c
-
-
-# Compile instrumentation and test driver.
-make CXX=$TRIDENT_CXX CC=$TRIDENT_CC  CFLAGS="-L/CPR/lib -ltrident_proxy -L/klee/build/lib  -lkleeRuntest -I/klee/source/include -g -O0" -j32
-
-
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
@@ -234,12 +232,11 @@ done < $dir_name/tests.all.txt.rev
 echo " " > $dir_name/cpr/test-input
 while IFS= read -r line
 do
-  sed -i "1i \$POC_${line%.phpt}.php" cpr/test-input
+  sed -i "1i \$POC_${line%.phpt}.php" $dir_name/cpr/test-input
 done < $dir_name/failing.tests.txt
 
 
 # Copy remaining files to run CPR.
 cp $script_dir/spec.smt2 $dir_name/cpr
-cp -rf $script_dir/test-input-files $dir_name/cpr
-cp -rf $script_dir/test-expected-output $dir_name/cpr
-cp $script_dir/test-config.json $dir_name/cpr
+cp -rf $script_dir/expected-output $dir_name/cpr
+
