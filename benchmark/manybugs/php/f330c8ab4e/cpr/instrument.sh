@@ -135,8 +135,8 @@ config_command:skip
 build_command:skip
 binary_path:sapi/cli/php
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
-general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
-depth:3
+general_comp_list:addition.smt2,subtraction.smt2
+depth:2
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar.c:1579
 loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar.c:1582
 gen_limit:30
