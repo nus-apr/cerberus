@@ -637,19 +637,20 @@ def run(arg_list):
             FILE_INSTRUMENT_LOG = DIR_LOGS + "/" + str(config_id) + "-" + str(bug_name) + "-instrument.log"
             setup_dir_path = DIR_MAIN + "/benchmark/" + directory_name
             deploy_path = CONF_DATA_PATH + "/" + directory_name + "/"
+            tool_inst_dir = setup_dir_path + "/" + str(CONF_TOOL_NAME).lower()
             print("\t[META-DATA] benchmark: " + CONF_BENCHMARK)
             print("\t[META-DATA] project: " + subject_name)
             print("\t[META-DATA] bug ID: " + bug_name)
             print("\t[INFO] setup directory: " + deploy_path)
+            if not os.path.isdir(tool_inst_dir):
+                print("\t[INFO] instrumentation not exist for tool, skipping experiment")
+                index = index + 1
+                continue
             if os.path.isdir(deploy_path):
                 print("\t[INFO] deployment path exists, cleaning setup")
                 clean_setup(deploy_path)
             setup_experiment(setup_dir_path, bug_name)
             if not CONF_SETUP_ONLY:
-                tool_inst_dir = setup_dir_path + "/" + str(CONF_TOOL_NAME).lower()
-                if not os.path.isdir(tool_inst_dir):
-                    print("\t[INFO] instrumentation not exist for tool, skipping experiment")
-                    continue
                 DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                      CONF_TOOL_NAME, subject_name, bug_name])
                 clean_results(DIR_EXPERIMENT_RESULT)
