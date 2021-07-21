@@ -144,7 +144,7 @@ dist_metric:angelic
 spec_path:cpr/spec.smt2
 seed_file:cpr/seed-input
 test_input_file:cpr/test-input
-test_output_list:cpr/expected-output/t1.smt2,cpr/expected-output/t2.smt2,cpr/expected-output/t3.smt2
+test_output_list:cpr/expected-output/t1.smt2
 mask_arg:$(seq -s "," -f "%g" 0 52)
 preserve_bc:true
 max_flippings:25
