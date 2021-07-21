@@ -443,7 +443,6 @@ libtiff/tif_dir.c 1147 2 libtiff/tif_dir.c 1147 2		2999947		732		12082
 libtiff/tif_dir.c 1145 2 libtiff/tif_dir.c 1145 2		2999947		733		12082
 libtiff/tif_dir.c 1138 2 libtiff/tif_dir.c 1138 2		2999947		734		12082
 libtiff/tif_dir.c 684 2 libtiff/tif_dir.c 684 2		2999947		735		12082
-libtiff/tif_dir.c 683 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		2999947		736		12082
 libtiff/tif_dir.c 617 2 libtiff/tif_dir.c 617 2		2999947		737		12082
 libtiff/tif_dir.c 615 1 libtiff/tif_dir.c 615 1		2999947		738		12082
 libtiff/tif_dir.c 612 3 libtiff/tif_dir.c 612 3		2999947		739		12082
@@ -521,7 +520,6 @@ libtiff/tif_dirinfo.c 473 2 libtiff/tif_dirinfo.c 473 2		2999947		841		12082
 libtiff/tif_dir.c 646 2 libtiff/tif_dir.c 646 2		2999947		846		12082
 libtiff/tif_dir.c 696 2 libtiff/tif_dir.c 696 2		2999947		847		12082
 libtiff/tif_dir.c 682 2 libtiff/tif_dir.c 682 2		2999947		848		12082
-libtiff/tif_dir.c 681 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		2999947		849		12082
 libtiff/tif_dir.c 679 2 libtiff/tif_dir.c 679 2		2999947		850		12082
 libtiff/tif_dir.c 678 2 libtiff/tif_dir.c 678 2		2999947		851		12082
 libtiff/tif_dir.c 1129 2 libtiff/tif_dir.c 1129 2		2999947		852		12082
@@ -1495,12 +1493,10 @@ libtiff/tif_dirread.c 4533 5 libtiff/tif_dirread.c 4533 5		999956		16442		12082
 libtiff/tif_dirread.c 4532 5 /usr/include/assert.h 89 3		999956		16443		12082
 libtiff/tif_dirread.c 4531 5 libtiff/tif_dirread.c 4531 5		999956		16444		12082
 libtiff/tif_aux.c 272 2 libtiff/tif_aux.c 272 2		999955		14939		12082
-libtiff/tif_aux.c 271 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		999955		14940		12082
 libtiff/tif_aux.c 118 2 libtiff/tif_aux.c 118 2		999955		14942		12082
 libtiff/tif_aux.c 116 2 libtiff/tif_aux.c 116 2		999955		14982		12082
 libtiff/tif_aux.c 114 2 libtiff/tif_aux.c 114 2		999955		14983		12082
 libtiff/tif_aux.c 270 2 libtiff/tif_aux.c 270 2		999955		14984		12082
-libtiff/tif_aux.c 269 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		999955		14985		12082
 libtiff/tif_aux.c 267 2 libtiff/tif_aux.c 267 2		999955		14986		12082
 libtiff/tif_aux.c 266 2 libtiff/tif_aux.c 266 2		999955		14987		12082
 libtiff/tif_dir.c 352 3 libtiff/tif_dir.c 352 3		999954		12480		12082
@@ -1588,7 +1584,6 @@ libtiff/tif_dirread.c 3337 2 libtiff/tif_dirread.c 3337 2		999947		720		12082
 libtiff/tif_dirread.c 3336 2 libtiff/tif_dirread.c 3336 2		999947		721		12082
 libtiff/tif_dirread.c 3335 2 libtiff/tif_dirread.c 3335 2		999947		722		12082
 libtiff/tif_dir.c 997 2 libtiff/tif_dir.c 997 2		999947		11808		12082
-libtiff/tif_dir.c 996 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		999947		11809		12082
 libtiff/tif_dir.c 981 2 libtiff/tif_dir.c 981 2		999947		11810		12082
 libtiff/tif_dir.c 706 2 libtiff/tif_dir.c 706 2		999947		11812		12082
 libtiff/tif_dir.c 704 2 libtiff/tif_dir.c 704 2		999947		11813		12082
@@ -1596,7 +1591,6 @@ libtiff/tif_dir.c 703 2 libtiff/tif_dir.c 703 2		999947		11814		12082
 libtiff/tif_dir.c 1010 2 libtiff/tif_dir.c 1010 2		999947		11815		12082
 libtiff/tif_dir.c 1009 2 libtiff/tif_dir.c 1009 2		999947		11857		12082
 libtiff/tif_dir.c 995 2 libtiff/tif_dir.c 995 2		999947		11858		12082
-libtiff/tif_dir.c 994 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		999947		11859		12082
 libtiff/tif_dir.c 992 2 libtiff/tif_dir.c 992 2		999947		11860		12082
 libtiff/tif_dir.c 991 2 libtiff/tif_dir.c 991 2		999947		11861		12082
 libtiff/tif_open.c 467 5 libtiff/tif_open.c 467 5		999947		15778		12082

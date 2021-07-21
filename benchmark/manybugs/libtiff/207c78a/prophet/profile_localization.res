@@ -375,11 +375,9 @@ libtiff/tif_dirinfo.c 727 16 libtiff/tif_dirinfo.c 727 16		999968		164		19790
 libtiff/tif_dirinfo.c 713 2 libtiff/tif_dirinfo.c 713 2		999968		165		19790
 libtiff/tif_dir.c 945 2 libtiff/tif_dir.c 945 2		999968		168		19790
 libtiff/tif_dir.c 931 2 libtiff/tif_dir.c 931 2		999968		169		19790
-libtiff/tif_dir.c 930 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.6.1/include/stdarg.h 33 29		999968		170		19790
 libtiff/tif_dir.c 928 2 libtiff/tif_dir.c 928 2		999968		171		19790
 libtiff/tif_dir.c 927 2 libtiff/tif_dir.c 927 2		999968		172		19790
 libtiff/tif_dir.c 933 2 libtiff/tif_dir.c 933 2		999968		194		19790
-libtiff/tif_dir.c 932 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.6.1/include/stdarg.h 34 29		999968		195		19790
 libtiff/tif_dir.c 917 5 libtiff/tif_dir.c 917 5		999968		196		19790
 libtiff/tif_dir.c 711 13 libtiff/tif_dir.c 711 13		999968		1083		19790
 libtiff/tif_dirinfo.c 622 2 libtiff/tif_dirinfo.c 622 2		999968		1198		19790
@@ -413,7 +411,6 @@ libtiff/tif_strip.c 95 2 libtiff/tif_strip.c 95 2		999968		2131		19790
 libtiff/tif_strip.c 93 2 libtiff/tif_strip.c 93 2		999968		2132		19790
 libtiff/tif_strip.c 92 2 libtiff/tif_strip.c 92 2		999968		2133		19790
 libtiff/tif_dir.c 635 2 libtiff/tif_dir.c 635 2		999968		2148		19790
-libtiff/tif_dir.c 634 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.6.1/include/stdarg.h 34 29		999968		2149		19790
 libtiff/tif_dir.c 572 2 libtiff/tif_dir.c 572 2		999968		2150		19790
 libtiff/tif_dir.c 570 1 libtiff/tif_dir.c 570 1		999968		2151		19790
 libtiff/tif_dir.c 567 3 libtiff/tif_dir.c 567 3		999968		2152		19790
@@ -434,7 +431,6 @@ libtiff/tif_dir.c 598 2 libtiff/tif_dir.c 598 2		999968		2177		19790
 libtiff/tif_dir.c 597 2 libtiff/tif_dir.c 597 2		999968		2347		19790
 libtiff/tif_dir.c 647 2 libtiff/tif_dir.c 647 2		999968		2348		19790
 libtiff/tif_dir.c 633 2 libtiff/tif_dir.c 633 2		999968		2349		19790
-libtiff/tif_dir.c 632 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.6.1/include/stdarg.h 33 29		999968		2350		19790
 libtiff/tif_dir.c 630 2 libtiff/tif_dir.c 630 2		999968		2351		19790
 libtiff/tif_dir.c 629 2 libtiff/tif_dir.c 629 2		999968		2352		19790
 libtiff/tif_unix.c 252 2 libtiff/tif_unix.c 252 2		999968		2403		19790

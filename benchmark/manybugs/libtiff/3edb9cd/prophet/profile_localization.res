@@ -1,5 +1,4 @@
 libtiff/tif_read.c 164 3 libtiff/tif_read.c 164 3		3000000		687352		16076
-libtiff/tif_error.c 72 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		3000000		687355		16076
 libtiff/tif_error.c 70 2 libtiff/tif_error.c 70 2		3000000		687356		16076
 libtiff/tif_unix.c 290 2 libtiff/tif_unix.c 290 2		3000000		687357		16076
 libtiff/tif_unix.c 289 2 libtiff/tif_unix.c 289 2		3000000		687358		16076
@@ -7,7 +6,6 @@ libtiff/tif_unix.c 288 3 libtiff/tif_unix.c 288 3		3000000		687359		16076
 libtiff/tif_unix.c 287 2 libtiff/tif_unix.c 287 2		3000000		687360		16076
 libtiff/tif_error.c 69 3 libtiff/tif_error.c 69 3		3000000		687361		16076
 libtiff/tif_error.c 68 2 libtiff/tif_error.c 68 2		3000000		687362		16076
-libtiff/tif_error.c 67 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		3000000		687363		16076
 libtiff/tif_error.c 66 2 libtiff/tif_error.c 66 2		3000000		687364		16076
 libtiff/tif_dumpmode.c 78 3 libtiff/tif_dumpmode.c 78 3		3000000		712560		16076
 libtiff/tif_dumpmode.c 75 3 libtiff/tif_dumpmode.c 75 3		3000000		712571		16076
@@ -26,14 +24,12 @@ libtiff/tif_dirread.c 862 2 libtiff/tif_dirread.c 862 2		3000000		717895		16076
 libtiff/tif_dirread.c 861 2 libtiff/tif_dirread.c 861 2		3000000		717896		16076
 libtiff/tif_dirread.c 859 2 libtiff/tif_dirread.c 859 2		3000000		717897		16076
 libtiff/tif_dirread.c 601 3 libtiff/tif_dirread.c 601 3		3000000		717898		16076
-libtiff/tif_warning.c 47 3 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		3000000		717899		16076
 libtiff/tif_unix.c 280 2 libtiff/tif_unix.c 280 2		3000000		717900		16076
 libtiff/tif_unix.c 279 2 libtiff/tif_unix.c 279 2		3000000		717901		16076
 libtiff/tif_unix.c 278 2 libtiff/tif_unix.c 278 2		3000000		717902		16076
 libtiff/tif_unix.c 277 3 libtiff/tif_unix.c 277 3		3000000		717903		16076
 libtiff/tif_unix.c 276 2 libtiff/tif_unix.c 276 2		3000000		717904		16076
 libtiff/tif_warning.c 46 3 libtiff/tif_warning.c 46 3		3000000		717905		16076
-libtiff/tif_warning.c 45 3 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		3000000		717906		16076
 libtiff/tif_warning.c 44 3 libtiff/tif_warning.c 44 3		3000000		717907		16076
 libtiff/tif_warning.c 43 2 libtiff/tif_warning.c 43 2		3000000		717908		16076
 libtiff/tif_dirread.c 597 3 libtiff/tif_dirread.c 597 3		3000000		717973		16076
@@ -142,11 +138,9 @@ libtiff/tif_open.c 385 3 libtiff/tif_open.c 385 3		2999980		723678		16076
 libtiff/tif_open.c 108 3 libtiff/tif_open.c 108 3		2999980		723680		16076
 libtiff/tif_open.c 106 3 libtiff/tif_open.c 106 3		2999980		723681		16076
 libtiff/tif_aux.c 269 2 libtiff/tif_aux.c 269 2		2999979		712660		16076
-libtiff/tif_aux.c 268 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		2999979		712661		16076
 libtiff/tif_aux.c 108 2 libtiff/tif_aux.c 108 2		2999979		712727		16076
 libtiff/tif_aux.c 106 2 libtiff/tif_aux.c 106 2		2999979		712728		16076
 libtiff/tif_aux.c 267 2 libtiff/tif_aux.c 267 2		2999979		712729		16076
-libtiff/tif_aux.c 266 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		2999979		712730		16076
 libtiff/tif_aux.c 264 2 libtiff/tif_aux.c 264 2		2999979		712731		16076
 libtiff/tif_aux.c 263 2 libtiff/tif_aux.c 263 2		2999979		712732		16076
 libtiff/tif_aux.c 110 2 libtiff/tif_aux.c 110 2		2999979		715204		16076
@@ -606,7 +600,6 @@ libtiff/tif_dirinfo.c 236 16 libtiff/tif_dirinfo.c 236 16		2999970		951		16076
 libtiff/tif_dirinfo.c 222 2 libtiff/tif_dirinfo.c 222 2		2999970		952		16076
 libtiff/tif_dirinfo.c 220 3 libtiff/tif_dirinfo.c 220 3		2999970		1512		15892
 libtiff/tif_dir.c 641 2 libtiff/tif_dir.c 641 2		2999970		2266		15892
-libtiff/tif_dir.c 640 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		2999970		2267		15892
 libtiff/tif_dir.c 573 2 libtiff/tif_dir.c 573 2		2999970		2268		15892
 libtiff/tif_dir.c 571 1 libtiff/tif_dir.c 571 1		2999970		2269		15892
 libtiff/tif_dir.c 568 3 libtiff/tif_dir.c 568 3		2999970		2270		15892
@@ -628,11 +621,9 @@ libtiff/tif_dir.c 604 2 libtiff/tif_dir.c 604 2		2999970		2299		15892
 libtiff/tif_dir.c 603 2 libtiff/tif_dir.c 603 2		2999970		2447		15892
 libtiff/tif_dir.c 653 2 libtiff/tif_dir.c 653 2		2999970		2448		15892
 libtiff/tif_dir.c 639 2 libtiff/tif_dir.c 639 2		2999970		2449		15892
-libtiff/tif_dir.c 638 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		2999970		2450		15892
 libtiff/tif_dir.c 636 2 libtiff/tif_dir.c 636 2		2999970		2451		15892
 libtiff/tif_dir.c 635 2 libtiff/tif_dir.c 635 2		2999970		2452		15892
 libtiff/tif_dir.c 946 2 libtiff/tif_dir.c 946 2		2999970		4433		16076
-libtiff/tif_dir.c 945 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		2999970		4434		16076
 libtiff/tif_dir.c 930 5 libtiff/tif_dir.c 930 5		2999970		4435		16076
 libtiff/tif_dir.c 663 5 libtiff/tif_dir.c 663 5		2999970		4438		16076
 libtiff/tif_dir.c 661 5 libtiff/tif_dir.c 661 5		2999970		4439		16076
@@ -640,7 +631,6 @@ libtiff/tif_dir.c 660 5 libtiff/tif_dir.c 660 5		2999970		4440		16076
 libtiff/tif_dir.c 959 2 libtiff/tif_dir.c 959 2		2999970		4441		16076
 libtiff/tif_dir.c 958 2 libtiff/tif_dir.c 958 2		2999970		4585		16076
 libtiff/tif_dir.c 944 2 libtiff/tif_dir.c 944 2		2999970		4586		16076
-libtiff/tif_dir.c 943 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		2999970		4587		16076
 libtiff/tif_dir.c 941 2 libtiff/tif_dir.c 941 2		2999970		4588		16076
 libtiff/tif_dir.c 940 2 libtiff/tif_dir.c 940 2		2999970		4589		16076
 libtiff/tif_dir.c 717 13 libtiff/tif_dir.c 717 13		2999970		4916		16076
@@ -1027,11 +1017,9 @@ tools/tiffcp.c 288 25 tools/tiffcp.c 288 25		2000000		1		15892
 tools/tiffcp.c 287 25 tools/tiffcp.c 287 25		2000000		423		15892
 tools/tiffcp.c 911 2 tools/tiffcp.c 911 2		2000000		424		15892
 tools/tiffcp.c 890 5 tools/tiffcp.c 890 5		2000000		426		15892
-libtiff/tif_error.c 60 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 34 29		2000000		427		15892
 libtiff/tif_error.c 58 2 libtiff/tif_error.c 58 2		2000000		428		15892
 libtiff/tif_error.c 57 3 libtiff/tif_error.c 57 3		2000000		433		15892
 libtiff/tif_error.c 56 2 libtiff/tif_error.c 56 2		2000000		434		15892
-libtiff/tif_error.c 55 2 /home/ubuntu/Workspace/utils/llvm-build/lib/clang/3.5.0/include/stdarg.h 33 29		2000000		435		15892
 libtiff/tif_error.c 54 2 libtiff/tif_error.c 54 2		2000000		436		15892
 libtiff/tif_open.c 466 2 libtiff/tif_open.c 466 2		2000000		437		15892
 tools/tiffcp.c 887 5 tools/tiffcp.c 887 5		2000000		438		15892
