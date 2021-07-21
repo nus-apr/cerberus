@@ -92,7 +92,7 @@ sed -i '21i #include <klee/klee.h>' Zend/zend_compile.c
 sed -i '22i #ifndef TRIDENT_OUTPUT' Zend/zend_compile.c
 sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' Zend/zend_compile.c
 sed -i '24i #endif' Zend/zend_compile.c
-sed -i '2495d'
+sed -i '2495d' Zend/zend_compile.c
 sed -i '2495i \\tklee_assert(original_op - ZEND_SEND_VAL != 0);' Zend/zend_compile.c
 sed -i '2495i \\tTRIDENT_OUTPUT("obs", "i32", original_op - ZEND_SEND_VAL);' Zend/zend_compile.c
 sed -i '2495i \\tif (param->op_type & (IS_VAR|IS_CV) && __trident_choice("L154", "bool", (int[]){original_op, ZEND_SEND_VAL, param->op_type}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' Zend/zend_compile.c
