@@ -60,6 +60,8 @@ make distclean
 
 cd $dir_name
 chmod +x tester.py test.sh
+git checkout $fix_id
+cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 ./tester.py build
 
 cd $dir_name/src
