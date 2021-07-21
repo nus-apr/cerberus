@@ -92,10 +92,10 @@ sed -i '21i #include <klee/klee.h>' ext/standard/html.c
 sed -i '22i #ifndef TRIDENT_OUTPUT' ext/standard/html.c
 sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/standard/html.c
 sed -i '24i #endif' ext/standard/html.c
-sed -i '1013d' ext/standard/html.c
-sed -i '1013i \\tklee_assert(charset - cs_utf_8 != 0);' ext/standard/html.c
-sed -i '1013i \\tTRIDENT_OUTPUT("obs", "i32", charset - cs_utf_8);' ext/standard/html.c
-sed -i '1013i \\tif ( __trident_choice("L154", "bool", (int[]){charset, cs_utf_8, code2}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/standard/html.c
+sed -i '1012d' ext/standard/html.c
+sed -i '1012i \\tklee_assert(charset - cs_utf_8 != 0);' ext/standard/html.c
+sed -i '1012i \\tTRIDENT_OUTPUT("obs", "i32", charset - cs_utf_8);' ext/standard/html.c
+sed -i '1012i \\tif ( __trident_choice("L154", "bool", (int[]){charset, cs_utf_8, code2}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/standard/html.c
 
 # Compile instrumentation and test driver.
 make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
@@ -137,8 +137,8 @@ binary_path:sapi/cli/php
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1013
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1014
+loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1012
+loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1013
 gen_limit:30
 stack_size:15000
 dist_metric:angelic
