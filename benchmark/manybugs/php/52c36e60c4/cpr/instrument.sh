@@ -92,10 +92,10 @@ sed -i '21i #include <klee/klee.h>' main/streams/streams.c
 sed -i '22i #ifndef TRIDENT_OUTPUT' main/streams/streams.c
 sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' main/streams/streams.c
 sed -i '24i #endif' main/streams/streams.c
-sed -i '999d' main/streams/streams.c
-sed -i '999i \\tklee_assert(just_read == 0);' main/streams/streams.c
-sed -i '999i \\tTRIDENT_OUTPUT("obs", "i32", just_read);' main/streams/streams.c
-sed -i '999i \\tif ( __trident_choice("L154", "bool", (int[]){just_read, toread, len}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' main/streams/streams.c
+sed -i '998d' main/streams/streams.c
+sed -i '998i \\tklee_assert(just_read == 0);' main/streams/streams.c
+sed -i '998i \\tTRIDENT_OUTPUT("obs", "i32", just_read);' main/streams/streams.c
+sed -i '998i \\tif ( __trident_choice("L154", "bool", (int[]){just_read, toread, len}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' main/streams/streams.c
 
 # Compile instrumentation and test driver.
 make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
