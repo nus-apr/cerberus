@@ -31,7 +31,7 @@ def build():
             shutil.copy("src/" + t, file_php)
             start_line = 0
             end_line = 0
-            with open(file_php, "r") as test_file:
+            with open(file_php, "r", encoding='utf-8', errors='ignore') as test_file:
                 test_content = test_file.readlines()
                 test_file.seek(0)
                 for num, line in enumerate(test_file, 1):
@@ -40,7 +40,7 @@ def build():
                     if "--EXPECT" in line:
                         end_line = num
                         break
-            with open(file_php, "w+") as test_file:
+            with open(file_php, "w+", encoding='utf-8', errors='ignore') as test_file:
                 test_file.seek(0)
                 test_file.truncate()
                 test_file.writelines(test_content[start_line:end_line-1])
