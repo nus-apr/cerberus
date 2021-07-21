@@ -25,6 +25,26 @@ def build():
         if not os.path.isfile("src/" + t):
             continue
         shutil.copy("src/" + t, "tests/" + str(all_tests.index(t)).zfill(5) + ".phpt")
+        file_php = "src/" + t[:-1]
+        test_content = []
+        if not os.path.isfile(file_php):
+            shutil.copy("src/" + t, file_php)
+            start_line = 0
+            end_line = 0
+            with open(file_php, "r") as test_file:
+                test_content = test_file.readlines()
+                test_file.seek(0)
+                for num, line in enumerate(test_file, 1):
+                    if "--FILE-" in line:
+                        start_line = num
+                    if "--EXPECT" in line:
+                        end_line = num
+                        break
+            with open(file_php, "w+") as test_file:
+                test_file.seek(0)
+                test_file.truncate()
+                test_file.writelines(test_content[start_line:end_line-1])
+
 
     # Find the sub-set of tests used by this scenario
     with open(exp_dir + "/tests.indices.txt", "r") as f:
