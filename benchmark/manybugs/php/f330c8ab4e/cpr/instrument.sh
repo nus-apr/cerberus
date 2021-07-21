@@ -14,6 +14,7 @@ fi
 
 ## Prepare for KLEE
 
+
 if [ -e configured.mark ]; then
     echo "[php-transform] Already configured"
 
@@ -42,6 +43,16 @@ cat ./main/php.h ./main/php.h.appendix > ./main/php.h.merge
 cp ./main/php.h.merge ./main/php.h
 
 #sed -i "21i #define FD_ZERO_SIMUL(set) memset(set, 0, sizeof(*(set)))" main/php.h
+
+files=$(grep -rl "LONGJMP\(.*\)" --include=*.c) || true
+for file in $files;do
+    sed -i "s/LONGJMP\(.*\));/ /g" $file
+done
+
+files=$(grep -rl "longjmp\(.*\)" --include=*.c) || true
+for file in $files;do
+    sed -i "s/longjmp\(.*\));/ /g" $file
+done
 
 files=$(grep -rl "FD_ZERO(" --include=*.c) || true
 for file in $files; do
