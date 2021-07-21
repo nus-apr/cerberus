@@ -86,6 +86,7 @@ touch configured.mark
 
 cd $dir_name/src
 #Instrument for test-case
+sed -i "19d" ext/standard/html.c
 sed -i '20i // KLEE' ext/standard/html.c
 sed -i '21i #include <klee/klee.h>' ext/standard/html.c
 sed -i '22i #ifndef TRIDENT_OUTPUT' ext/standard/html.c
@@ -94,7 +95,7 @@ sed -i '24i #endif' ext/standard/html.c
 sed -i '1013d' ext/standard/html.c
 sed -i '1013i \\tklee_assert(charset - cs_utf_8 != 0);' ext/standard/html.c
 sed -i '1013i \\tTRIDENT_OUTPUT("obs", "i32", charset - cs_utf_8);' ext/standard/html.c
-sed -i '1013i \\tif ( __trident_choice("L154", "bool", (int[]){charset, cs_utf_8, ent_len}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/standard/html.c
+sed -i '1013i \\tif ( __trident_choice("L154", "bool", (int[]){charset, cs_utf_8, code2}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/standard/html.c
 
 # Compile instrumentation and test driver.
 make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
