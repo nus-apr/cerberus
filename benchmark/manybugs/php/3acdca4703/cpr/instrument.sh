@@ -87,15 +87,15 @@ touch configured.mark
 
 cd $dir_name/src
 #Instrument for test-case
-sed -i '20i // KLEE' ext/phar/phar_object.c 
-sed -i '21i #include <klee/klee.h>' ext/phar/phar_object.c 
-sed -i '22i #ifndef TRIDENT_OUTPUT' ext/phar/phar_object.c 
-sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/phar/phar_object.c 
-sed -i '24i #endif' ext/phar/phar_object.c
-sed -i '637d' ext/phar/phar_object.c
-sed -i '637i \\tklee_assert(PHAR_GLOBALS->phar_fname_map.arBuckets != 0);' ext/phar/phar_object.c
-sed -i '637i \\tTRIDENT_OUTPUT("obs", "i32", PHAR_GLOBALS->phar_fname_map.arBuckets);' ext/phar/phar_object.c
-sed -i '637i \\t} else if ( __trident_choice("L154", "bool", (int[]){PHAR_GLOBALS->phar_fname_map.arBuckets, fname, fname_len}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0) && SUCCESS == zend_hash_find(&(PHAR_GLOBALS->phar_fname_map), fname, fname_len, (void **)&pphar)) {' ext/phar/phar_object.c
+sed -i '20i // KLEE' ext/date/php_date.c 
+sed -i '21i #include <klee/klee.h>' ext/date/php_date.c 
+sed -i '22i #ifndef TRIDENT_OUTPUT' ext/date/php_date.c 
+sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/date/php_date.c 
+sed -i '24i #endif' ext/date/php_date.c
+sed -i '3770d' ext/date/php_date.c
+sed -i '3770i \\tklee_assert(isostr != 0);' ext/date/php_date.c
+sed -i '3770i \\tTRIDENT_OUTPUT("obs", "i32", isostr);' ext/date/php_date.c
+sed -i '3770i \\tif ( __trident_choice("L154", "bool", (int[]){isostr, isostr_len, recurrences}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/date/php_date.c
 
 # Compile instrumentation and test driver.
 make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
@@ -137,8 +137,8 @@ binary_path:sapi/cli/php
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3770
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3771
+loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/date/php_date.c:3770
+loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/date/php_date.c:3771
 gen_limit:30
 stack_size:15000
 dist_metric:angelic
