@@ -86,6 +86,7 @@ touch configured.mark
 
 cd $dir_name/src
 #Instrument for test-case
+sed -i '19d' main/streams/streams.c
 sed -i '20i // KLEE' main/streams/streams.c
 sed -i '21i #include <klee/klee.h>' main/streams/streams.c
 sed -i '22i #ifndef TRIDENT_OUTPUT' main/streams/streams.c
