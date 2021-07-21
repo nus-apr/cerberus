@@ -62,10 +62,10 @@ cd $dir_name
 chmod +x tester.py test.sh
 ./tester.py build
 
-cd $dir_name/src
-find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
-find . -name tests -type d | rm -rf - && \
-    tar -xf all-tests.tar.gz && \
-    rm -f all-tests.tar.gz
+# cd $dir_name/src
+# find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
+# find . -name tests -type d | rm -rf - && \
+#  tar -xf all-tests.tar.gz && \
+#    rm -f all-tests.tar.gz
 
 export PATH=$PATH_ORIG
