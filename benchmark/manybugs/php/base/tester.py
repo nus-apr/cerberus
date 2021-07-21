@@ -44,6 +44,7 @@ def build():
                 test_file.seek(0)
                 test_file.truncate()
                 test_file.writelines(test_content[start_line:end_line-1])
+                test_file.write("?>\n")
 
 
     # Find the sub-set of tests used by this scenario
