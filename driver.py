@@ -646,6 +646,10 @@ def run(arg_list):
                 clean_setup(deploy_path)
             setup_experiment(setup_dir_path, bug_name)
             if not CONF_SETUP_ONLY:
+                tool_inst_dir = setup_dir_path + "/" + str(CONF_TOOL_NAME).lower()
+                if not os.path.isdir(tool_inst_dir):
+                    print("\t[INFO] instrumentation not exist for tool, skipping experiment")
+                    continue
                 DIR_EXPERIMENT_RESULT = DIR_RESULT + "/" + "-".join([config_id, CONF_BENCHMARK,
                                                                      CONF_TOOL_NAME, subject_name, bug_name])
                 clean_results(DIR_EXPERIMENT_RESULT)
