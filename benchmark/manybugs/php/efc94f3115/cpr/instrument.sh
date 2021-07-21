@@ -84,18 +84,17 @@ sed -i 's/PHP_BINARIES = cli cgi/PHP_BINARIES = cli/' ./Makefile
 
 touch configured.mark
 
-
 cd $dir_name/src
 #Instrument for test-case
-sed -i '20i // KLEE' Zend/zend_compile.c
-sed -i '21i #include <klee/klee.h>' Zend/zend_compile.c
-sed -i '22i #ifndef TRIDENT_OUTPUT' Zend/zend_compile.c
-sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' Zend/zend_compile.c
-sed -i '24i #endif' Zend/zend_compile.c
-sed -i '3181d' Zend/zend_compile.c
-sed -i '3181i \\tif (__trident_choice("L154", "bool", (int[]){parent->common.scope->ce_flags , ZEND_ACC_INTERFACE, ZEND_ACC_ABSTRACT}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0) && parent->common.fn_flags & ZEND_ACC_ABSTRACT ' Zend/zend_compile.c
-sed -i '3184i \\tklee_assert((parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) == 0);' Zend/zend_compile.c
-sed -i '3184i \\tTRIDENT_OUTPUT("obs", "i32", (parent->common.scope->ce_flags & ZEND_ACC_INTERFACE) );' Zend/zend_compile.c
+sed -i '20i // KLEE' ext/standard/html.c
+sed -i '21i #include <klee/klee.h>' ext/standard/html.c
+sed -i '22i #ifndef TRIDENT_OUTPUT' ext/standard/html.c
+sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' ext/standard/html.c
+sed -i '24i #endif' ext/standard/html.c
+sed -i '1013d' ext/standard/html.c
+sed -i '1013i \\tklee_assert(charset - cs_utf_8 != 0);' ext/standard/html.c
+sed -i '1013i \\tTRIDENT_OUTPUT("obs", "i32", charset - cs_utf_8);' ext/standard/html.c
+sed -i '1013i \\tif ( __trident_choice("L154", "bool", (int[]){charset, cs_utf_8, ent_len}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) {' ext/standard/html.c
 
 # Compile instrumentation and test driver.
 make CXX=wllvm++ CC=wllvm LDFLAGS="-L/CPR/lib -ltrident_runtime -L/klee/build/lib  -lkleeRuntest " EXTRA_CFLAGS="-g -I/klee/source/include -include /CPR/lib/trident_runtime.h" -j32
@@ -135,17 +134,17 @@ config_command:skip
 build_command:skip
 binary_path:sapi/cli/php
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
-general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2,bitwise-and.smt2
+general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/Zend/zend_compile.c:3181
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/Zend/zend_compile.c:3184
+loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1013
+loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/standard/html.c:1014
 gen_limit:30
 stack_size:15000
 dist_metric:angelic
 spec_path:cpr/spec.smt2
 seed_file:cpr/seed-input
 test_input_file:cpr/test-input
-test_output_list:cpr/expected-output/t1.smt2,cpr/expected-output/t2.smt2,cpr/expected-output/t3.smt2,cpr/expected-output/t4.smt2,cpr/expected-output/t5.smt2,cpr/expected-output/t6.smt2
+test_output_list:cpr/expected-output/t1.smt2,cpr/expected-output/t2.smt2,cpr/expected-output/t3.smt2
 mask_arg:$(seq -s "," -f "%g" 0 52)
 preserve_bc:true
 max_flippings:25
