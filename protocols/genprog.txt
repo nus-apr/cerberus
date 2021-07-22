@@ -11,7 +11,6 @@ count the occurrences of  "fails to compile"
 -> calculated: M3 = M1 - M2 - M4
 
 
-
 ### M4  "number of plausible patches"
 GenProg only generates one patch, so plausible patches are either 0 or 1
 
@@ -21,10 +20,8 @@ GenProg only generates one patch, so plausible patches are either 0 or 1
 -> there will be only one patch
 
 
-
 ### M6	"order of generation of correct patch"
 -> there is only one patch, so order is either nill or 1
-
 
 
 ### M7	"rank of the correct patch"
