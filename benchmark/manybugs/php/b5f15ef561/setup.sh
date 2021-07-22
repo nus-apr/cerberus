@@ -62,8 +62,6 @@ make distclean
 cd $dir_name
 chmod +x tester.py test.sh
 
-./tester.py build
-
 cd $dir_name/src-bk
 find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
 mv $dir_name/src-bk/all-tests.tar.gz $dir_name/src/all-tests.tar.gz && rm -rf $dir_name/src-bk
@@ -72,8 +70,7 @@ find . -name tests -type d | rm -rf - && \
     tar -xf all-tests.tar.gz && \
     rm -f all-tests.tar.gz
 
-
-
+./tester.py build
 export PATH=$PATH_ORIG
 
 
