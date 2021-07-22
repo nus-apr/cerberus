@@ -23,3 +23,5 @@ rm -rf repair.debug.*
 
 cp $script_dir/compile.sh $dir_name/src/compile.pl
 chmod +x $dir_name/src/compile.pl
+cd $dir_name/src
+make clean
