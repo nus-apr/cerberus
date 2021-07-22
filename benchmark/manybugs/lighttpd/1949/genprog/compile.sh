@@ -14,7 +14,7 @@
 # Usage: ./compile.sh __EXE_NAME__
 #
 here_dir=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
-src_dir="$here_dir/src"
+src_dir="$here_dir"
 
 if [ $# -ne 1 ]; then
   echo "ERROR: no executable name provided"
