@@ -171,6 +171,8 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
         instrument_command = "cd " + setup_dir_path + "; bash instrument.sh > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     print("\t[INFO] running CPR")
+    timestamp_command = "echo $(date) > " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     timeout_m = str(timeout * 60)
     test_id_list = ""
     for test_id in failing_test_list:
@@ -182,10 +184,11 @@ def cpr(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     cpr_command = "timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
     cpr_command += " --seed-id-list=" + seed_id_list + " "
     cpr_command += " --test-id-list=" + test_id_list + " "
-    cpr_command += "{0} --time-duration={1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
+    cpr_command += "{0} --time-duration={1} >> {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_m), FILE_OUTPUT_LOG)
     execute_command(cpr_command)
 
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     copy_script = "cp " + setup_dir_path + "/instrument.sh " + DIR_EXPERIMENT_RESULT
     execute_command(copy_script)
 
@@ -213,6 +216,8 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         instrument_command = "cd " + setup_dir_path + "; bash " + script_path + " " + deploy_path + " > " + FILE_INSTRUMENT_LOG + " 2>&1"
         execute_command(instrument_command)
     print("\t[INFO] running Angelix")
+    timestamp_command = "echo $(date) > " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     line_number = ""
     if fix_location:
         source_file, line_number = fix_location.split(":")
@@ -252,9 +257,10 @@ def angelix(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         angelix_command += " " + os.environ["ANGELIX_ARGS"] + " "
 
     angelix_command += "  --generate-all {0} " \
-                       " --timeout {1} > {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
+                       " --timeout {1} >> {2} 2>&1 ".format(CONF_TOOL_PARAMS, str(timeout_s), FILE_OUTPUT_LOG)
     execute_command(angelix_command)
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     # move patches to result directory
     copy_command = "mv src-2021-* " + DIR_EXPERIMENT_RESULT
     execute_command(copy_command)
@@ -296,10 +302,11 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
         conf_file.seek(0)
         conf_file.write(test_config_str)
         conf_file.truncate()
-
+    timestamp_command = "echo $(date) > " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     if not os.path.isdir(deploy_path + "/workdir"):
         instrument_command = "cd " + deploy_path + ";"
-        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only  > " + FILE_OUTPUT_LOG + " 2>&1"
+        instrument_command += "prophet prophet/prophet.conf  -r workdir -init-only  >> " + FILE_OUTPUT_LOG + " 2>&1"
         execute_command(instrument_command)
     line_number = ""
     localization_file = deploy_path + "/workdir/profile_localization.res"
@@ -326,6 +333,8 @@ def prophet(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, fai
     repair_command += " -timeout {0} ".format(int(timeout))
     repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
 
     # move patches to result directory
     regex_for_fix = "*-fix-" + str(bug_id) + "*"
@@ -386,11 +395,14 @@ def genprog(setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg,
         conf_file.truncate()
 
     print("\t[INFO] running GenProg")
+    timestamp_command = "echo $(date) > " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     repair_command = "cd {0}; timeout -k 5m {1}h  ".format(deploy_path + "/src", str(timeout))
     repair_command += "genprog --label-repair  repair.conf "
-    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     copy_command = "cp -rf " + deploy_path + "/src/repair " + DIR_EXPERIMENT_RESULT + "/patches"
     execute_command(copy_command)
 
@@ -416,7 +428,8 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
             abs_path_buggy_file = deploy_path + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
 
     print("\t[INFO] running F1X")
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(deploy_path, str(timeout))
     repair_command += " -f {0} ".format(abs_path_buggy_file)
     repair_command += " -t {0} ".format(test_id_list)
@@ -428,9 +441,11 @@ def f1x(setup_dir_path, deploy_path, bug_id, timeout, passing_test_list, failing
     all_command = repair_command + " --disable-dteq  -a -o patches -v "
     execute_command(all_command)
     repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
-    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
 
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
 
     patch_dir = deploy_path + "/patches"
     # move patches to result directory
@@ -464,7 +479,8 @@ def fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list,
             abs_path_buggy_file = deploy_path + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
 
     print("\t[INFO] running Fix2Fit")
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     repair_command = "export SUBJECT_DIR={0}; ".format(setup_dir_path)
     repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
     repair_command += "export TESTCASE=\"{0}\"; ".format(test_id_list)
@@ -473,9 +489,10 @@ def fix2fit(setup_dir_path, deploy_path, binary_arg, timeout, passing_test_list,
     repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
     repair_command += "export BINARY_INPUT=\"{0}\"; ".format(binary_arg)
     repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(setup_dir_path, str(timeout))
-    repair_command += " > {0} 2>&1 ".format(FILE_OUTPUT_LOG)
+    repair_command += " >> {0} 2>&1 ".format(FILE_OUTPUT_LOG)
     execute_command(repair_command)
-
+    timestamp_command = "echo $(date) >> " + FILE_OUTPUT_LOG
+    execute_command(timestamp_command)
     patch_gen_log = setup_dir_path + "/original.txt"
     copy_command = "mv  " + patch_gen_log + " " + DIR_EXPERIMENT_RESULT + ";"
     execute_command(copy_command)
