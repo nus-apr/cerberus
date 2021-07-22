@@ -9,6 +9,7 @@ make clean
 
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 cp -rf $dir_name/preprocessed $dir_name/src/preprocessed
+cfile=$(head -n 1 $dir_name/manifest.txt)
 cp preprocessed/$cfile $cfile
 
 rm -rf coverage
