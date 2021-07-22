@@ -52,16 +52,11 @@ cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(ech
 
 cd $dir_name
 chmod +x tester.py test.sh
-cd $dir_name/src; git checkout $fix_id; cd $dir_name
-cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
+
 ./tester.py build
 
 
-cd $dir_name/src
-find . -name tests.tar.gz -delete && find . -name tests -type d | tar -czf all-tests.tar.gz --files-from -
-find . -name tests -type d | rm -rf - && \
-    tar -xf all-tests.tar.gz && \
-    rm -f all-tests.tar.gz
+
 
 
 
