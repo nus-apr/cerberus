@@ -407,7 +407,7 @@ restore_original "/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
 # cp "$root_directory/diffs/$buggy_file" "$buggy_directory/$(echo $buggy_file| cut -d'-' -f 1)"
 if [ ! -d golden_directory ]; then
   cp -rf $buggy_directory $golden_directory
-  cp "$root_directory/diffs/$gold_file" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
+  cp "$root_directory/diffs/$gold_file*" "$golden_directory/$(echo $gold_file| cut -d'-' -f 1)"
 fi
 
 if [ ! -d "$root_directory/angelix" ]; then
