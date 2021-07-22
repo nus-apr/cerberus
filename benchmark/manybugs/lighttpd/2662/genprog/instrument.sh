@@ -8,7 +8,8 @@ cd $dir_name/src
 make clean
 
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
-cp -r $dir_name/preprocessed $dir_name/src/preprocessed
+cp -rf $dir_name/preprocessed $dir_name/src/preprocessed
+cp preprocessed/$cfile $cfile
 
 rm -rf coverage
 rm -rf coverage.path.*
