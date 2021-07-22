@@ -22,3 +22,4 @@ rm -rf repair.cache
 rm -rf repair.debug.*
 
 cp $script_dir/compile.sh $dir_name/src/compile.pl
+chmod +x $dir_name/src/compile.pl
