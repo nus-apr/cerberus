@@ -6,16 +6,10 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 cd $dir_name/src
 make clean
-make CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
 
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
-cfile=$(head -n 1 $dir_name/manifest.txt)
-cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
+cp -r $dir_name/preprocessed $dir_name/src/preprocessed
 
-rm -rf preprocessed
-mkdir -p `dirname preprocessed/$cfile`
-cp $cilfile preprocessed/$cfile
-cp preprocessed/$cfile $cfile
 rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
