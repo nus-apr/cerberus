@@ -69,7 +69,7 @@ cd $dir_name/src
 find . -name tests -type d | rm -rf - && \
     tar -xf all-tests.tar.gz && \
     rm -f all-tests.tar.gz
-
+cd $dir_name
 ./tester.py build
 export PATH=$PATH_ORIG
 
