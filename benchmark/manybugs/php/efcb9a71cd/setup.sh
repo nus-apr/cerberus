@@ -42,7 +42,7 @@ cd $dir_name/src
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
-cp $dir_name/src $dir_name/src-bk
+cp -rf $dir_name/src $dir_name/src-bk
 git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
 PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf ./buildconf

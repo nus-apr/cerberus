@@ -41,7 +41,7 @@ cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
-cp $dir_name/src $dir_name/src-bk
+cp -rf $dir_name/src $dir_name/src-bk
 git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
 ./buildconf
