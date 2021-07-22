@@ -21,5 +21,7 @@ rm -rf coverage.path.*
 rm -rf repair.cache
 rm -rf repair.debug.*
 
-cp $dir_name/compile.pl $dir_name/src
-sed -i "s#project = \"lighttpd\"#project = "\"${dir_name}/src\""#g" $dir_name/src/compile.pl
+cp $script_dir/compile.sh $dir_name/src/compile.pl
+chmod +x $dir_name/src/compile.pl
+cd $dir_name/src
+make clean
