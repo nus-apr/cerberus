@@ -4,18 +4,9 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
+cp -rf $dir_name/preprocessed $dir_name/src
 cd $dir_name/src
-make clean
-make CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
 
-cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
-cfile=$(head -n 1 $dir_name/manifest.txt)
-cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
-
-rm -rf preprocessed
-mkdir -p `dirname preprocessed/$cfile`
-cp $cilfile preprocessed/$cfile
-cp preprocessed/$cfile $cfile
 rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
