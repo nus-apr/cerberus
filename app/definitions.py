@@ -46,9 +46,8 @@ ARG_PURGE = "--purge"
 
 
 
-
 FILE_META_DATA = None
-FILE_CONFIGURATION = "../configurations/icse21.json"
+FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse21.json"
 FILE_ERROR_LOG = "error-log"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""

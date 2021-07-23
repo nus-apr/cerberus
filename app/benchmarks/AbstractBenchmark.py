@@ -20,8 +20,11 @@ class AbstractBenchmark:
         self.meta_file = self.bench_dir_path + "/meta-data.json"
         self.load()
 
+    def get_list(self):
+        return self.experiment_subjects
+
     def load(self):
-        print("[Benchmark] Loading experiment meta-data")
+        emitter.normal("\t loading experiment meta-data")
         if os.path.isfile(self.meta_file):
             with open(self.meta_file, 'r') as in_file:
                 json_data = json.load(in_file)

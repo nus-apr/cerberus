@@ -70,10 +70,10 @@ def run(repair_tool, benchmark, setup):
             utilities.error_exit("invalid configuration id " + config_id)
         config_info = setup[config_id]
         emitter.sub_sub_title("Configuration: " + config_info[definitions.KEY_ID])
-        emitter.highlight("[configuration] timeout:" + config_info[definitions.KEY_ID])
-        emitter.highlight("[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-        emitter.highlight("[configuration] test-suite ratio:" + config_info[definitions.KEY_CONFIG_TEST_RATIO])
-        experiment_list = benchmark.experiment_list
+        emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_ID]))
+        emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
+        emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
+        experiment_list = benchmark.get_list()
         iteration = 0
         for index in range(1, benchmark.size):
             iteration = iteration + 1
