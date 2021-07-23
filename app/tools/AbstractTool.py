@@ -13,14 +13,14 @@ class AbstractTool:
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
-        if os.path.isfile(dir_expr + "{}/instrument.sh".format(self.name.lower())):
-            if not os.path.isfile(dir_expr + "/src/INSTRUMENTED"):
-                command_str = "cd " + dir_expr + "/{}; bash instrument.sh;".format(self.name.lower())
+        if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
+            if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
+                command_str = "cd " + dir_setup + "/{}; bash instrument.sh;".format(self.name.lower())
                 command_str += " > {0} 2>&1".format(self.log_instrument_path)
                 status = execute_command(command_str)
                 if not status == 0:
                     error_exit("error with instrumentation of ", self.name)
-                with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
+                with open(dir_setup + "/src/INSTRUMENTED", 'w') as fp:
                     pass
         else:
             error_exit("no instrumentation available for ", self.name)
