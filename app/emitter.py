@@ -195,18 +195,16 @@ def end(time_info, is_error=False):
 
 
 def emit_help():
-    write("Usage: cpr [OPTIONS] " + definitions.ARG_CONF_FILE + "$FILE_PATH", RED)
-    write("Options are:", RED)
-    write("\t" + definitions.ARG_TIME_DURATION + "\t| " + "specify the time duration for repair in minutes", RED)
-    write("\t" + definitions.ARG_ITERATION_COUNT + "\t| " + "limit number of iterations for repair", RED)
-    write("\t" + definitions.ARG_CEGIS_TIME_SPLIT + "\t| " + "specify time split ratio for CEGIS mode; explore:refine  in minutes(default=1:1)", RED)
-    write("\t" + definitions.ARG_DEBUG + "\t| " + "enable debugging information", RED)
-    write("\t" + definitions.ARG_OPERATION_MODE + "\t| " + "execution mode [0: sequential, 1: semi-paralle, 2: parallel] (default = 0)", RED)
-    write("\t" + definitions.ARG_DISABLE_DISTANCE_CAL + "\t| " + "disable distance calculation (default=enabled)", RED)
-    write("\t" + definitions.ARG_SELECTION_METHOD + "\t| " + "selection strategy [0: deterministic, 1: random] (default=0)", RED)
-    write("\t" + definitions.ARG_DIST_METRIC + "\t| " + "distance metric [0: control-loc, 1: statement] (default=0)", RED)
-    write("\t" + definitions.ARG_PATCH_TYPE + "\t| " + "patch type [0: concrete, 1: abstract] (default=0)", RED)
-    write("\t" + definitions.ARG_REFINE_METHOD + "\t| " + "refine strategy [0: under-approx, 1: over-approx, 2: under-approx and over-approx, 3: none] (default=0)", RED)
-    write("\t" + definitions.ARG_REDUCE_METHOD + "\t| " + "reduce method [0: cpr, 1: cegis] (default=0)", RED)
-
-
+    write("Usage: python driver.py [OPTIONS] --benchmark={manybugs} --tool={cpr/genprog/angelix/prophet/fix2fit} ")
+    write("Options are:")
+    write("\t" + definitions.ARG_DATA_PATH + "\t| " + "directory for experiments")
+    write("\t" + definitions.ARG_TOOL_NAME + "\t| " + "name of the tool")
+    write("\t" + definitions.ARG_BENCHMARK + "\t| " + "name of the benchmark")
+    write("\t" + definitions.ARG_TOOL_PATH + "\t| " + "path of the tool")
+    write("\t" + definitions.ARG_TOOL_PARAMS + "\t| " + "parameters for the tool")
+    write("\t" + definitions.ARG_DEBUG_MODE + "\t| " + "enable debug mode")
+    write("\t" + definitions.ARG_BUG_ID + "\t| " + "run only the specified experiment")
+    write("\t" + definitions.ARG_BUG_ID_LIST + "\t| " + "runs a list of experiments")
+    write("\t" + definitions.ARG_START_ID + "\t| " + "specify a range of experiments starting from ID")
+    write("\t" + definitions.ARG_END_ID + "\t| " + "specify a range of experiments that ends at ID")
+    write("\t" + definitions.ARG_CONFIG_ID_LIST + "\t| " + "specify a different configuration using config ID")

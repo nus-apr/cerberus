@@ -1,6 +1,7 @@
 import abc
 import os
 import json
+import shutil
 from app import emitter, utilities
 
 
@@ -13,9 +14,11 @@ class AbstractBenchmark:
     log_config_path = None
     log_build_path = None
     log_test_path = None
+    size = 0
 
     def __init__(self):
         self.meta_file = self.bench_dir_path + "/meta-data.json"
+        self.load()
 
     def load(self):
         print("[Benchmark] Loading experiment meta-data")
@@ -24,6 +27,7 @@ class AbstractBenchmark:
                 json_data = json.load(in_file)
                 if json_data:
                     self.experiment_subjects = json_data
+                    self.size = len(json_data)
                 else:
                     utilities.error_exit("could not load meta-data from ", self.meta_file)
         else:
@@ -55,6 +59,21 @@ class AbstractBenchmark:
         """Method documentation"""
         return
 
+    @abc.abstractmethod
+    def save_artefacts(self, results_dir_path, exp_dir_path):
+        """Method documentation"""
+        return
 
+    @abc.abstractmethod
+    def clean(self, results_dir_path, exp_dir_path):
+        """Method documentation"""
+        return
+
+
+    def save_logs(self, results_dir):
+        shutil.copy(self.log_deploy_path, results_dir)
+        shutil.copy(self.log_config_path, results_dir)
+        shutil.copy(self.log_build_path, results_dir)
+        shutil.copy(self.log_test_path, results_dir)
 
 

@@ -1,5 +1,11 @@
 import os
 
+DIR_MAIN = os.path.abspath(os.getcwd() + "/../")
+DIR_LOGS = "/logs"
+DIR_RESULT = "/results"
+DIR_EXPERIMENT = "/experiment"
+
+
 KEY_BUG_ID = "bug_id"
 KEY_BENCHMARK = "benchmark"
 KEY_ID = "id"
@@ -32,10 +38,7 @@ ARG_BENCHMARK = "--benchmark="
 ARG_CONFIG_ID_LIST = "--conf="
 ARG_PURGE = "--purge"
 
-DIR_MAIN = os.getcwd()
-DIR_LOGS = "/logs"
-DIR_RESULT = "/results"
-DIR_EXPERIMENT = "/experiment"
+
 
 
 FILE_META_DATA = None

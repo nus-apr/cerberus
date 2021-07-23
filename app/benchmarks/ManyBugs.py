@@ -1,3 +1,5 @@
+import shutil
+import os
 from app.benchmark import AbstractBenchmark
 from app.utilities import execute_command, error_exit
 from app import definitions, values
@@ -5,8 +7,9 @@ from app import definitions, values
 
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
-        self.name = "ManyBugs"
+        self.name = os.path.basename(__file__)
         self.bench_dir_path = "../../benchmark/" + self.name
+        super(ManyBugs, self).__init__()
 
     def setup(self, bug_index):
         experiment_item = self.experiment_subjects[bug_index-1]
@@ -29,22 +32,22 @@ class ManyBugs(AbstractBenchmark):
             error_exit("\t[Benchmark] deploy failed")
         return
 
-    def deploy(self, exp_dir_path, bug_id):
-        self.log_deploy_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-deploy.log"
+    def deploy(self, exp_dir_path, bug_id, log_dir_path):
+        self.log_deploy_path = log_dir_path + "/" + self.name + "-" + bug_id + "-deploy.log"
         command_str = "cd " + exp_dir_path + "; bash setup.sh;"
         command_str += " > {0} 2>&1".format(self.log_deploy_path)
         status = execute_command(command_str)
         return status
 
-    def config(self, exp_dir_path, bug_id):
-        self.log_config_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-config.log"
+    def config(self, exp_dir_path, bug_id, log_dir_path):
+        self.log_config_path = log_dir_path + "/" + self.name + "-" + bug_id + "-config.log"
         command_str = "cd " + exp_dir_path + "; bash config.sh;"
         command_str += " > {0} 2>&1".format(self.log_config_path)
         status = execute_command(command_str)
         return status
 
-    def build(self, exp_dir_path, bug_id):
-        self.log_build_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-build.log"
+    def build(self, exp_dir_path, bug_id, log_dir_path):
+        self.log_build_path = log_dir_path + "/" + self.name + "-" + bug_id + "-build.log"
         command_str = "cd " + exp_dir_path + "; bash build.sh;"
         command_str += " > {0} 2>&1".format(self.log_build_path)
         status = execute_command(command_str)
@@ -57,9 +60,20 @@ class ManyBugs(AbstractBenchmark):
         status = execute_command(command_str)
         return status
 
-    def test_all(self, exp_dir_path, bug_id):
-        self.log_test_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-test.log"
+    def test_all(self, exp_dir_path, bug_id, log_dir_path):
+        self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh;"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)
         return status
+
+    def save_artefacts(self, results_dir_path, exp_dir_path):
+        self.save_logs(results_dir_path)
+        shutil.copy2(exp_dir_path + "/diffs", results_dir_path)
+        return
+
+    def clean(self, exp_dir_path):
+        if os.path.isdir(exp_dir_path):
+            rm_command = "rm -rf " + exp_dir_path
+            execute_command(rm_command)
+        return

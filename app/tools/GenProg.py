@@ -1,4 +1,6 @@
 import os
+import shutil
+
 from app.tools import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values
@@ -6,29 +8,21 @@ from app import definitions, values
 
 class GenProg(AbstractTool):
     def __init__(self):
-        self.name = "GenProg"
+        self.name = os.path.basename(__file__).lower()
 
-    def instrument(self, exp_dir_path, bug_id):
-        print("\t[INFO] instrumenting for", self.name)
-        self.log_instrument_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-instrument.log"
-        if os.path.isfile(exp_dir_path + "/instrument.sh"):
-            command_str = "cd " + exp_dir_path + "; bash instrument.sh;"
-            command_str += " > {0} 2>&1".format(self.log_deploy_path)
-            status = execute_command(command_str)
-            return status
-        else:
-            error_exit("no instrumentation available for ", self.name)
-
-    def repair(self, setup_dir_path, deploy_path, bug_id, timeout, count_pass, count_neg, fix_location, subject_name):
+    def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
+               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
         print("\t[INFO] running repair with", self.name)
-        self.log_output_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-instrument.log"
+        self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
         timestamp_command = "echo $(date) > " + self.log_output_path
         execute_command(timestamp_command)
-        repair_command = "cd {0}; timeout -k 5m {1}h  ".format(deploy_path + "/src", str(timeout))
+        count_pass = len(passing_test_list)
+        count_neg = len(failing_test_list)
+        repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
         repair_command += "genprog --label-repair  "
         if fix_location:
             source_file, line_number = fix_location.split(":")
-            with open(deploy_path + "/src/fault-loc", "w") as loc_file:
+            with open(dir_expr + "/src/fault-loc", "w") as loc_file:
                 loc_file.write(str(line_number))
             repair_command += " --fault-scheme line " \
                               " --fault-file fault-loc "
@@ -43,16 +37,10 @@ class GenProg(AbstractTool):
         execute_command(timestamp_command)
         return
 
-    def preprocess(self, input):
-        """Method documentation"""
+    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
+        self.save_logs(dir_results)
+        dir_patches = dir_expr + "/src/repair"
+        if os.path.isdir(dir_patches):
+            shutil.copy2(dir_patches, dir_results + "/patches")
         return
 
-   
-    def postprocess(self, input):
-        """Method documentation"""
-        return
-
-   
-    def archive(self, input):
-        """Method documentation"""
-        return

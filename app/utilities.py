@@ -41,6 +41,14 @@ def clean_files():
         execute_command(clean_command)
 
 
+def clean_results(self, exp_dir):
+    if os.path.isdir(exp_dir):
+        rm_command = "rm -rf " + exp_dir + "*"
+        execute_command(rm_command)
+    mk_command = "mkdir " + exp_dir
+    execute_command(mk_command)
+
+
 def backup_file(file_path, backup_name):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     backup_command = "cp " + file_path + " " + definitions.DIRECTORY_BACKUP + "/" + backup_name

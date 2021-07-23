@@ -1,3 +1,9 @@
+import os
+
+DIR_MAIN = os.getcwd()
+DIR_LOGS = "/logs"
+DIR_RESULT = "/results"
+DIR_EXPERIMENT = "/experiment"
 
 CONF_DATA_PATH = "/data"
 CONF_TOOL_PATH = ""
