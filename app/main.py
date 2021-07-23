@@ -110,7 +110,7 @@ def run(repair_tool, benchmark, setup):
             dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
                                                                   repair_tool.name,
                                                                   subject_name, bug_name])
-            benchmark.setup(index)
+            benchmark.setup(index, definitions.DIR_LOGS)
             benchmark.save_artefacts(dir_result, dir_exp)
             if not values.CONF_SETUP_ONLY:
                 utilities.clean_results(dir_result)
