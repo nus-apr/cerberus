@@ -1,6 +1,6 @@
 import os
 
-DIR_MAIN = os.path.abspath(os.getcwd() + "/../")
+DIR_MAIN = os.path.abspath(os.getcwd())
 DIR_LOGS = "/logs"
 DIR_RESULT = "/results"
 DIR_EXPERIMENT = "/experiments"
