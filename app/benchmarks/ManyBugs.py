@@ -35,7 +35,7 @@ class ManyBugs(AbstractBenchmark):
     def deploy(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\tdownloading experiment subject")
         self.log_deploy_path = log_dir_path + "/" + self.name + "-" + bug_id + "-deploy.log"
-        command_str = "cd " + exp_dir_path + "; bash setup.sh;"
+        command_str = "cd " + exp_dir_path + "; bash setup.sh"
         command_str += " > {0} 2>&1".format(self.log_deploy_path)
         status = execute_command(command_str)
         return status == 0
@@ -43,7 +43,7 @@ class ManyBugs(AbstractBenchmark):
     def config(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\tconfiguring experiment subject")
         self.log_config_path = log_dir_path + "/" + self.name + "-" + bug_id + "-config.log"
-        command_str = "cd " + exp_dir_path + "; bash config.sh;"
+        command_str = "cd " + exp_dir_path + "; bash config.sh"
         command_str += " > {0} 2>&1".format(self.log_config_path)
         status = execute_command(command_str)
         return status == 0
@@ -51,7 +51,7 @@ class ManyBugs(AbstractBenchmark):
     def build(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\tbuilding experiment subject")
         self.log_build_path = log_dir_path + "/" + self.name + "-" + bug_id + "-build.log"
-        command_str = "cd " + exp_dir_path + "; bash build.sh;"
+        command_str = "cd " + exp_dir_path + "; bash build.sh"
         command_str += " > {0} 2>&1".format(self.log_build_path)
         status = execute_command(command_str)
         return status == 0
@@ -59,7 +59,7 @@ class ManyBugs(AbstractBenchmark):
     def test(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\ttesting experiment subject")
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test.log"
-        command_str = "cd " + exp_dir_path + "; bash test.sh p1;"
+        command_str = "cd " + exp_dir_path + "; bash test.sh p1"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)
         return status == 0
@@ -67,7 +67,7 @@ class ManyBugs(AbstractBenchmark):
     def test_all(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\ttesting(full) experiment subject")
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test.log"
-        command_str = "cd " + exp_dir_path + "; bash test.sh;"
+        command_str = "cd " + exp_dir_path + "; bash test.sh"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)
         return status == 0
