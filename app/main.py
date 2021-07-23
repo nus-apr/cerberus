@@ -153,10 +153,10 @@ def main():
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
+    start_time = time.time()
     create_directories()
     logger.create()
     try:
-        start_time = time.time()
         emitter.title("Starting " + values.TOOL_NAME + " (Program Repair Framework) ")
         bootstrap(sys.argv[1:])
         repair_tool, benchmark, setup = initialize()
@@ -170,7 +170,6 @@ def main():
         total_duration = format((time.time() - start_time) / 60, '.3f')
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)
-        logger.store()
     except Exception as e:
         is_error = True
         emitter.error("Runtime Error")
