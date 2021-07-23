@@ -33,9 +33,10 @@ ARG_CONFIG_ID_LIST = "--conf="
 ARG_PURGE = "--purge"
 
 DIR_MAIN = os.getcwd()
-DIR_LOGS = DIR_MAIN + "/logs"
-DIR_RESULT = DIR_MAIN + "/results"
-DIR_EXPERIMENT_RESULT = DIR_RESULT + "/test"
+DIR_LOGS = "/logs"
+DIR_RESULT = "/results"
+DIR_EXPERIMENT = "/experiment"
+
 
 FILE_META_DATA = None
 FILE_CONFIGURATION = "../configurations/icse21.json"

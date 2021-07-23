@@ -2,6 +2,9 @@ import abc
 
 
 class AbstractTool:
+    log_instrument_path = None
+    log_output_path = None
+
     @abc.abstractmethod
     def create_docker_image(self, input):
         """Method documentation"""
