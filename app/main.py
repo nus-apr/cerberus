@@ -72,13 +72,6 @@ def run(repair_tool, benchmark, setup):
         experiment_list = benchmark.get_list()
         iteration = 0
         for index in range(1, benchmark.size):
-            iteration = iteration + 1
-            emitter.sub_sub_title("Experiment: " + str(iteration))
-            emitter.highlight("\t[configuration] identifier:" + str(config_info[definitions.KEY_ID]))
-            emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
-            emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-            emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
-            values.ITERATION_NO = iteration
             experiment_item = experiment_list[index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             if values.CONF_BUG_ID and index != values.CONF_BUG_ID:
@@ -100,7 +93,13 @@ def run(repair_tool, benchmark, setup):
             dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name
             dir_exp = values.CONF_DATA_PATH + "/" + directory_name + "/"
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
-
+            iteration = iteration + 1
+            values.ITERATION_NO = iteration
+            emitter.sub_sub_title("Experiment: " + str(iteration))
+            emitter.highlight("\t[configuration] identifier:" + str(config_info[definitions.KEY_ID]))
+            emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
+            emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
+            emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
             emitter.highlight("\t[meta-data] project: " + subject_name)
             emitter.highlight("\t[meta-data] bug ID: " + bug_name)
             emitter.highlight("\t[info] experiment directory: " + dir_exp)
