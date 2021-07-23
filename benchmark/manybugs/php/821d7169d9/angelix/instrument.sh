@@ -7,7 +7,7 @@ fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 version=310370-310389 #this is the angelix version
-gold_file=Zend/zend_closures-$fix_id
+gold_file=Zend/zend_closures.c-$fix_id
 # buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
 export ANGELIX_ARGS=" --defect if-conditions --synthesis-ptr-vars --synthesis-used-vars --synthesis-levels extended-logic --klee-max-forks 100 --group-size 1 "
 
