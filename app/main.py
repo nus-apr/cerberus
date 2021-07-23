@@ -136,7 +136,6 @@ def shutdown(signum, frame):
 
 def bootstrap(arg_list):
     emitter.sub_title("Bootstrapping framework")
-    create_directories()
     configuration.read_arg(arg_list)
     values.CONF_ARG_PASS = True
     configuration.update_configuration()
@@ -155,7 +154,10 @@ def main():
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
+    create_directories()
+    logger.create()
     try:
+        start_time = time.time()
         emitter.title("Starting " + values.TOOL_NAME + " (Program Repair Framework) ")
         bootstrap(sys.argv[1:])
         repair_tool, benchmark, setup = initialize()
