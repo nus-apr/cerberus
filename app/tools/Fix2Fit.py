@@ -47,7 +47,7 @@ class Fix2Fit(AbstractTool):
         self.save_logs(dir_results)
         dir_patches = dir_setup + "/patches"
         if os.path.isdir(dir_patches):
-            shutil.copytree(dir_patches, dir_results + "/patches")
+            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
 
     def save_logs(self, dir_results, dir_setup, bug_id):

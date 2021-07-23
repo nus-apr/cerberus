@@ -74,7 +74,7 @@ class ManyBugs(AbstractBenchmark):
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
         self.save_logs(results_dir_path)
-        shutil.copytree(exp_dir_path + "/diffs", results_dir_path + "/dev-fix")
+        execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
         return
 
     def clean(self, exp_dir_path):

@@ -54,5 +54,5 @@ class F1X(AbstractTool):
         self.save_logs(dir_results)
         dir_patches = dir_expr + "/patches"
         if os.path.isdir(dir_patches):
-            shutil.copytree(dir_patches, dir_results + "/patches")
+            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
