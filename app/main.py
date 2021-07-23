@@ -110,6 +110,9 @@ def run(repair_tool, benchmark, setup):
             dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
                                                                   repair_tool.name,
                                                                   subject_name, bug_name])
+            if os.path.isdir(dir_exp):
+                emitter.warning("\t[warning] experiment dir exists, cleaning setup")
+                benchmark.clean(dir_exp)
             benchmark.setup(index, definitions.DIR_LOGS)
             benchmark.save_artefacts(dir_result, dir_exp)
             if not values.CONF_SETUP_ONLY:
