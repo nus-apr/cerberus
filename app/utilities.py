@@ -41,7 +41,7 @@ def clean_files():
         execute_command(clean_command)
 
 
-def clean_results(self, exp_dir):
+def clean_results(exp_dir):
     if os.path.isdir(exp_dir):
         rm_command = "rm -rf " + exp_dir + "*"
         execute_command(rm_command)
