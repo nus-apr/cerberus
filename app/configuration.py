@@ -7,7 +7,7 @@ from app.benchmarks import ManyBugs
 
 
 def read_arg(argument_list):
-    print("[Configuration] reading configuration values")
+    emitter.normal("reading configuration values")
     if len(argument_list) > 0:
         for arg in argument_list:
             if definitions.ARG_DATA_PATH in arg:
