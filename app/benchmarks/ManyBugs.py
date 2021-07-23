@@ -13,7 +13,7 @@ class ManyBugs(AbstractBenchmark):
 
     def setup(self, bug_index, dir_logs):
         experiment_item = self.experiment_subjects[bug_index-1]
-        bug_id = str([definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         directory_name = self.bench_dir_path + "/" + subject_name + "/" + bug_id
         emitter.normal("\t\tpreparing experiment subject")
