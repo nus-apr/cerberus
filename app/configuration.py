@@ -40,21 +40,24 @@ def read_arg(argument_list):
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
             elif definitions.ARG_BUG_ID_LIST in arg:
                 values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
+            elif arg in ["--help", "-help", "-h"]:
+                emitter.emit_help()
+                exit(0)
             else:
-                print("Unknown option: " + str(arg))
+                emitter.error("Unknown option: " + str(arg))
                 emitter.emit_help()
                 exit(1)
     if not values.CONF_SETUP_ONLY:
         if values.CONF_TOOL_NAME is None:
-            print("[invalid] --tool-name is missing")
+            emitter.error("[invalid] --tool-name is missing")
             emitter.emit_help()
             exit(1)
     if values.CONF_SUBJECT_NAME:
-        print("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
+        emitter.normal("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
     if values.CONF_START_ID is None and values.CONF_BUG_ID is None and values.CONF_BUG_ID_LIST is None and values.CONF_SUBJECT_NAME is None:
-        print("[info] experiment id is not specified, running all experiments")
+        emitter.warning("[warning] experiment id is not specified, running all experiments")
     if values.CONF_BENCHMARK is None:
-        print("[invalid] --benchmark is missing")
+        emitter.error("[invalid] --benchmark is missing")
         emitter.emit_help()
         exit(1)
     else:
