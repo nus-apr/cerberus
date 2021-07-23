@@ -49,7 +49,7 @@ def read_arg(argument_list):
                 exit(1)
     if not values.CONF_SETUP_ONLY:
         if values.CONF_TOOL_NAME is None:
-            emitter.error("[invalid] --tool-name is missing")
+            emitter.error("[invalid] --tool is missing")
             emitter.emit_help()
             exit(1)
     if values.CONF_SUBJECT_NAME:
