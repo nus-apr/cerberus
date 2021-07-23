@@ -69,14 +69,15 @@ def run(repair_tool, benchmark, setup):
         if config_id not in setup:
             utilities.error_exit("invalid configuration id " + config_id)
         config_info = setup[config_id]
-        emitter.sub_sub_title("Configuration: " + config_info[definitions.KEY_ID])
-        emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_ID]))
-        emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-        emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
         experiment_list = benchmark.get_list()
         iteration = 0
         for index in range(1, benchmark.size):
             iteration = iteration + 1
+            emitter.sub_sub_title("Experiment: " + str(iteration))
+            emitter.highlight("\t[configuration] identifier:" + str(config_info[definitions.KEY_ID]))
+            emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
+            emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
+            emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
             values.ITERATION_NO = iteration
             experiment_item = experiment_list[index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
@@ -93,7 +94,6 @@ def run(repair_tool, benchmark, setup):
             if values.CONF_SUBJECT_NAME and values.CONF_SUBJECT_NAME != subject_name:
                 continue
 
-            emitter.normal("Experiment-" + str(index))
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             directory_name = benchmark.name + "/" + subject_name + "/" + bug_name
@@ -101,9 +101,9 @@ def run(repair_tool, benchmark, setup):
             dir_exp = values.CONF_DATA_PATH + "/" + directory_name + "/"
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
 
-            emitter.normal("\t[META-DATA] project: " + subject_name)
-            emitter.normal("\t[META-DATA] bug ID: " + bug_name)
-            emitter.normal("\t[INFO] experiment directory: " + dir_exp)
+            emitter.highlight("\t[meta-data] project: " + subject_name)
+            emitter.highlight("\t[meta-data] bug ID: " + bug_name)
+            emitter.highlight("\t[info] experiment directory: " + dir_exp)
 
             if not os.path.isdir(tool_inst_dir):
                 emitter.warning("\t[warning] instrumentation not exist for tool, skipping experiment")

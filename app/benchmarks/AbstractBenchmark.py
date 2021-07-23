@@ -24,7 +24,7 @@ class AbstractBenchmark:
         return self.experiment_subjects
 
     def load(self):
-        emitter.normal("\t loading experiment meta-data")
+        emitter.normal("loading experiment meta-data")
         if os.path.isfile(self.meta_file):
             with open(self.meta_file, 'r') as in_file:
                 json_data = json.load(in_file)
