@@ -1,6 +1,6 @@
 import shutil
 import os
-from app.benchmark import AbstractBenchmark
+from app.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
 

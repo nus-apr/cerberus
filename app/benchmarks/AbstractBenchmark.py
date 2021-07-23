@@ -35,17 +35,17 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def setup(self, exp_dir_path, bug_id):
+    def setup(self, bug_index):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id):
+    def config(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id):
+    def build(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
@@ -55,7 +55,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id):
+    def test_all(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
@@ -65,7 +65,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def clean(self, results_dir_path, exp_dir_path):
+    def clean(self, exp_dir_path):
         """Method documentation"""
         return
 

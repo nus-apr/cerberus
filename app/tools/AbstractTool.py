@@ -9,9 +9,6 @@ class AbstractTool:
     log_output_path = None
     name = None
 
-    def __init__(self):
-        pass
-
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)

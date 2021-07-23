@@ -1,7 +1,6 @@
 import os
 import shutil
-
-from app.tools import AbstractTool
+from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
 
