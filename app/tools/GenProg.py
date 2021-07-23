@@ -7,7 +7,7 @@ from app import definitions, values, emitter
 
 class GenProg(AbstractTool):
     def __init__(self):
-        self.name = os.path.basename(__file__).lower()
+        self.name = os.path.basename(__file__)[:-3].lower()
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):

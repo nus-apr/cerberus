@@ -7,8 +7,8 @@ from app import definitions, values, emitter
 
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
-        self.name = os.path.basename(__file__)
-        self.bench_dir_path = "../../benchmark/" + self.name
+        self.name = os.path.basename(__file__)[:-3].lower()
+        self.bench_dir_path = os.path.dirname(__file__) + "/../../benchmarks/" + self.name
         super(ManyBugs, self).__init__()
 
     def setup(self, bug_index):
