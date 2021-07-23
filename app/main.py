@@ -16,13 +16,12 @@ end_time = 0
 
 
 def create_directories():
-    emitter.normal("[Cerberus] creating essential directory structure")
     if not os.path.isdir(definitions.DIR_LOGS):
-        create_command = "mkdir " + definitions.DIR_LOGS
-        utilities.execute_command(create_command)
+        os.makedirs(definitions.DIR_LOGS)
     if not os.path.isdir(definitions.DIR_RESULT):
-        create_command = "mkdir " + definitions.DIR_RESULT
-        utilities.execute_command(create_command)
+        os.makedirs(definitions.DIR_RESULT)
+    if not os.path.isdir(definitions.DIRECTORY_LOG_BASE):
+        os.makedirs(definitions.DIRECTORY_LOG_BASE)
 
 
 def archive_results(dir_results):
