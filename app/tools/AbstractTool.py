@@ -20,7 +20,7 @@ class AbstractTool:
                 status = execute_command(command_str)
                 if not status == 0:
                     error_exit("error with instrumentation of ", self.name)
-                with open(dir_setup + "/src/INSTRUMENTED", 'w') as fp:
+                with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
                     pass
         else:
             error_exit("no instrumentation available for ", self.name)
