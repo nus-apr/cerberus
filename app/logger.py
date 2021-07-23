@@ -27,14 +27,6 @@ def create():
         command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
 
 
-def store():
-    copyfile(definitions.FILE_MAIN_LOG, definitions.DIRECTORY_LOG_BASE + "/log-latest")
-    if os.path.isfile(definitions.FILE_COMMAND_LOG):
-        copyfile(definitions.FILE_COMMAND_LOG, definitions.DIRECTORY_LOG_BASE + "/log-command")
-    if os.path.isfile(definitions.FILE_ERROR_LOG):
-        copyfile(definitions.FILE_ERROR_LOG, definitions.DIRECTORY_LOG_BASE + "/log-error")
-
-
 def log(log_message):
     log_message = "[" + str(time.asctime()) + "]" + log_message
     if "COMMAND" in log_message:

@@ -182,4 +182,4 @@ def main():
         total_duration = format((time.time() - start_time) / 60, '.3f')
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)
-        logger.store()
+
