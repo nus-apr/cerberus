@@ -3,91 +3,8 @@ import json
 import subprocess
 import os
 import shutil
+from app import definitions, values
 
-
-KEY_BUG_ID = "bug_id"
-KEY_BENCHMARK = "benchmark"
-KEY_ID = "id"
-KEY_SUBJECT = "subject"
-KEY_FIX_FILE = "source_file"
-KEY_FIX_LINE = "line_number"
-KEY_PASSING_TEST = "passing_test"
-KEY_FAILING_TEST = "failing_test"
-KEY_CONFIG_TIMEOUT = "timeout"
-KEY_CONFIG_FIX_LOC = "fault_location"
-KEY_CONFIG_TEST_RATIO = "passing_test_ratio"
-KEY_BINARY_PATH = "binary_path"
-KEY_COUNT_NEG = "count_neg"
-KEY_COUNT_POS = "count_pos"
-KEY_CRASH_CMD = "crash_input"
-
-ARG_DATA_PATH = "--data-dir="
-ARG_TOOL_PATH = "--tool-path="
-ARG_TOOL_NAME = "--tool="
-ARG_SUBJECT_NAME = "--subject="
-ARG_TOOL_PARAMS = "--tool-param="
-ARG_DEBUG_MODE = "--debug"
-ARG_ONLY_SETUP = "--only-setup"
-ARG_BUG_ID = "--bug-id="
-ARG_START_ID = "--start-id="
-ARG_END_ID = "--end-id="
-ARG_SKIP_LIST = "--skip-list="
-ARG_BUG_ID_LIST = "--bug-id-list="
-ARG_BENCHMARK = "--benchmark="
-ARG_CONFIG_ID_LIST = "--conf="
-ARG_PURGE = "--purge"
-
-
-CONF_DATA_PATH = "/data"
-CONF_TOOL_PATH = ""
-CONF_TOOL_PARAMS = ""
-CONF_TOOL_NAME = None
-CONF_DEBUG = False
-CONF_BUG_ID = None
-CONF_START_ID = None
-CONF_END_ID = None
-CONF_SETUP_ONLY = False
-CONF_BUG_ID_LIST = None
-CONF_SKIP_LIST = None
-CONF_BENCHMARK = None
-CONF_CONFIG_ID_LIST = ["C1"]
-CONF_SUBJECT_NAME = None
-CONF_PURGE = False
-
-FILE_META_DATA = None
-FILE_CONFIGURATION = "../configurations/icse21.json"
-FILE_ERROR_LOG = "error-log"
-FILE_OUTPUT_LOG = ""
-FILE_SETUP_LOG = ""
-FILE_INSTRUMENT_LOG = ""
-
-
-DIR_MAIN = os.getcwd()
-DIR_LOGS = DIR_MAIN + "/logs"
-DIR_RESULT = DIR_MAIN + "/results"
-DIR_EXPERIMENT_RESULT = DIR_RESULT + "/test"
-
-
-EXPERIMENT_ITEMS = list()
-CONFIG_INFO = dict()
-
-
-def create_directories():
-    print("[DRIVER] Creating essential directory structure")
-    if not os.path.isdir(DIR_LOGS):
-        create_command = "mkdir " + DIR_LOGS
-        execute_command(create_command)
-    if not os.path.isdir(DIR_RESULT):
-        create_command = "mkdir " + DIR_RESULT
-        execute_command(create_command)
-
-
-def execute_command(command):
-    if CONF_DEBUG:
-        print("\t[COMMAND]" + command)
-    process = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-    (output, error) = process.communicate()
-    return int(process.returncode)
 
 
 def load_experiment_details(meta_file):
@@ -685,3 +602,39 @@ if __name__ == "__main__":
     except KeyboardInterrupt as e:
         print("[DRIVER] Program Interrupted by User")
         exit()
+
+def main():
+    import sys
+    is_error = False
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.signal(signal.SIGTERM, shutdown)
+    try:
+        run(sys.argv[1:])
+    except SystemExit as e:
+        total_duration = format((time.time() - start_time) / 60, '.3f')
+        time_info[definitions.KEY_DURATION_TOTAL] = str(total_duration)
+        emitter.end(time_info, is_error)
+        logger.end(time_info, is_error)
+        logger.store()
+        parallel.pool.terminate()
+        parallel.pool.join()
+        os.system("ps -aux | grep 'pypy3' | awk '{print $2}' | xargs kill -9")
+    except KeyboardInterrupt as e:
+        total_duration = format((time.time() - start_time) / 60, '.3f')
+        time_info[definitions.KEY_DURATION_TOTAL] = str(total_duration)
+        emitter.end(time_info, is_error)
+        logger.end(time_info, is_error)
+        logger.store()
+    except Exception as e:
+        is_error = True
+        emitter.error("Runtime Error")
+        emitter.error(str(e))
+        logger.error(traceback.format_exc())
+    finally:
+        # Final running time and exit message
+        # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
+        total_duration = format((time.time() - start_time) / 60, '.3f')
+        time_info[definitions.KEY_DURATION_TOTAL] = str(total_duration)
+        emitter.end(time_info, is_error)
+        logger.end(time_info, is_error)
+        logger.store()
