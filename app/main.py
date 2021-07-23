@@ -3,6 +3,7 @@ import json
 import subprocess
 import os
 import shutil
+import traceback
 import signal
 import time
 from app import emitter, logger, definitions, values, utilities, configuration
@@ -161,14 +162,13 @@ def main():
         run(repair_tool, benchmark, setup)
     except SystemExit as e:
         total_duration = format((time.time() - start_time) / 60, '.3f')
-        emitter.end(time_info, is_error)
-        logger.end(time_info, is_error)
+        emitter.end(total_duration, is_error)
+        logger.end(total_duration, is_error)
         logger.store()
     except KeyboardInterrupt as e:
         total_duration = format((time.time() - start_time) / 60, '.3f')
-        time_info[definitions.KEY_DURATION_TOTAL] = str(total_duration)
-        emitter.end(time_info, is_error)
-        logger.end(time_info, is_error)
+        emitter.end(total_duration, is_error)
+        logger.end(total_duration, is_error)
         logger.store()
     except Exception as e:
         is_error = True
@@ -178,6 +178,7 @@ def main():
     finally:
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
-        emitter.end(time_info, is_error)
-        logger.end(time_info, is_error)
+        total_duration = format((time.time() - start_time) / 60, '.3f')
+        emitter.end(total_duration, is_error)
+        logger.end(total_duration, is_error)
         logger.store()
