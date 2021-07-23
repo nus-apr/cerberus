@@ -38,22 +38,23 @@ grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
 
 mv $project_name src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
+cd $dir_name/src
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
 cp -rf $dir_name/src $dir_name/src-bk
 git reset --hard && git clean -fd
 cat ../libxml.patch | patch -p0
-./buildconf
+PATH=/deps/php/bison-2.2-build/bin:$PATH PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf ./buildconf
 PATH_ORIG=$PATH
 export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
 ./configure CFLAGS="-save-temps=obj"
 make -j`nproc`
 cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(echo $diff_file| cut -d'.' -f 1).c
-
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
-cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
+
+
 make distclean
 ./configure && make -j`nproc`
 

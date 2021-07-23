@@ -38,6 +38,7 @@ grep -o -P '\d+(?= &&)' test.sh.orig > tests.indices.txt
 
 mv $project_name src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
+cd $dir_name/src
 make distclean &> /dev/null
 cp /experiments/benchmark/$benchmark_name/$project_name/base/* $dir_name
 # apply libxml fix
@@ -54,7 +55,7 @@ cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(
 
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
-cp $dir_name/src/$(echo $diff_file| cut -d'-' -f 1) $dir_name/preprocessed/$(echo $diff_file| cut -d'-' -f 1)
+
 make distclean
 ./configure && make -j`nproc`
 
