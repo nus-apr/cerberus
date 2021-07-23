@@ -54,5 +54,5 @@ class F1X(AbstractTool):
         self.save_logs(dir_results)
         dir_patches = dir_expr + "/patches"
         if os.path.isdir(dir_patches):
-            shutil.copy2(dir_patches, dir_results + "/patches")
+            shutil.copytree(dir_patches, dir_results + "/patches")
         return

@@ -37,13 +37,13 @@ class CPR(AbstractTool):
     def save_logs(self, dir_results, dir_setup, bug_id):
         super(CPR, self).save_logs(dir_results)
         dir_logs = "/CPR/logs/" + bug_id
-        shutil.copy2(dir_logs, dir_results)
+        shutil.copytree(dir_logs, dir_results + "/logs")
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
         self.save_logs(dir_results)
         dir_patches = "/CPR/output/" + bug_id
         if os.path.isdir(dir_patches):
-            shutil.copy2(dir_patches, dir_results + "/patches")
+            shutil.copytree(dir_patches, dir_results + "/patches")
         shutil.copy(dir_setup + "/cpr/instrument.sh", dir_results)
         return
 
