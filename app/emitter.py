@@ -20,21 +20,20 @@ STAT_COLOR = '\t\x1b[0;32;47m'
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    if not values.silence_emitter:
-        message = "\033[K" + print_color + str(print_message) + '\x1b[0m'
-        if prefix:
-            prefix = "\033[K" + print_color + str(prefix) + '\x1b[0m'
-            len_prefix = ((indent_level+1) * 4) + len(prefix)
-            wrapper = textwrap.TextWrapper(initial_indent=prefix, subsequent_indent=' '*len_prefix, width=int(columns))
-            message = wrapper.fill(message)
-        sys.stdout.write(message)
-        if new_line:
-            r = "\n"
-            sys.stdout.write("\n")
-        else:
-            r = "\033[K\r"
-            sys.stdout.write(r)
-        sys.stdout.flush()
+    message = "\033[K" + print_color + str(print_message) + '\x1b[0m'
+    if prefix:
+        prefix = "\033[K" + print_color + str(prefix) + '\x1b[0m'
+        len_prefix = ((indent_level+1) * 4) + len(prefix)
+        wrapper = textwrap.TextWrapper(initial_indent=prefix, subsequent_indent=' '*len_prefix, width=int(columns))
+        message = wrapper.fill(message)
+    sys.stdout.write(message)
+    if new_line:
+        r = "\n"
+        sys.stdout.write("\n")
+    else:
+        r = "\033[K\r"
+        sys.stdout.write(r)
+    sys.stdout.flush()
 
 
 def title(title):
@@ -53,21 +52,21 @@ def sub_sub_title(sub_title):
 
 
 def command(message):
-    if values.DEBUG:
+    if values.CONF_DEBUG:
         prefix = "\t\t[command] "
         write(message, ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
 def debug(message):
-    if values.DEBUG:
+    if values.CONF_DEBUG:
         prefix = "\t\t[debug] "
         write(message, GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
 
 def data(message, info=None):
-    if values.DEBUG:
+    if values.CONF_DEBUG:
         prefix = "\t\t[data] "
         write(message, GREY, prefix=prefix, indent_level=2)
         if info:
@@ -89,7 +88,7 @@ def highlight(message, jump_line=True):
 
 
 def information(message, jump_line=True):
-    if values.DEBUG:
+    if values.CONF_DEBUG:
         write(message, GREY, jump_line)
     logger.information(message)
 
@@ -154,44 +153,37 @@ def configuration(setting, value):
 def end(time_info, is_error=False):
     if values.CONF_ARG_PASS:
         statistics("\nRun time statistics:\n-----------------------\n")
-        statistics("Startup: " + str(time_info[definitions.KEY_DURATION_BOOTSTRAP].format()) + " minutes")
-        statistics("Build: " + str(time_info[definitions.KEY_DURATION_BUILD]) + " minutes")
-        statistics("Testing: " + str(time_info[definitions.KEY_DURATION_INITIALIZATION]) + " minutes")
-        statistics("Synthesis: " + str(values.TIME_TO_GENERATE) + " minutes")
-        statistics("Explore: " + format(values.TIME_TO_EXPLORE, ".3f") + " minutes")
-        statistics("Refine: " + format(values.TIME_TO_REDUCE, ".3f") + " minutes")
-        statistics("Reduce: " + str(time_info[definitions.KEY_DURATION_REPAIR]) + " minutes")
         statistics("Iteration Count: " + str(values.ITERATION_NO))
         # statistics("Patch Gen Count: " + str(values.COUNT_PATCH_GEN))
-        statistics("Patch Explored Count: " + str(values.COUNT_PATCHES_EXPLORED))
-        statistics("Patch Start Count: " + str(values.COUNT_PATCH_START))
-        statistics("Patch End Seed Count: " + str(values.COUNT_PATCH_END_SEED))
-        statistics("Patch End Count: " + str(values.COUNT_PATCH_END))
-        if values.DEFAULT_PATCH_TYPE == values.OPTIONS_PATCH_TYPE[1]:
-            statistics("Template Explored Count: " + str(values.COUNT_TEMPLATES_EXPLORED))
-            # statistics("Template Gen Count: " + str(values.COUNT_TEMPLATE_GEN))
-            statistics("Template Start Count: " + str(values.COUNT_TEMPLATE_START))
-            statistics("Template End Seed Count: " + str(values.COUNT_TEMPLATE_END_SEED))
-            statistics("Template End Count: " + str(values.COUNT_TEMPLATE_END))
-
-        statistics("Paths Detected: " + str(values.COUNT_PATHS_DETECTED))
-        statistics("Paths Explored: " + str(values.COUNT_PATHS_EXPLORED))
-        statistics("Paths Explored via Generation: " + str(values.COUNT_PATHS_EXPLORED_GEN))
-        statistics("Paths Skipped: " + str(values.COUNT_PATHS_SKIPPED))
-        statistics("Paths Hit Patch Loc: " + str(values.COUNT_HIT_PATCH_LOC))
-        statistics("Paths Hit Observation Loc: " + str(values.COUNT_HIT_BUG_LOG))
-        statistics("Paths Hit Crash Loc: " + str(values.COUNT_HIT_CRASH_LOC))
-        statistics("Paths Crashed: " + str(values.COUNT_HIT_CRASH))
-        statistics("Component Count: " + str(values.COUNT_COMPONENTS))
-        statistics("Component Count Gen: " + str(values.COUNT_COMPONENTS_GEN))
-        statistics("Component Count Cus: " + str(values.COUNT_COMPONENTS_CUS))
-        statistics("Gen Limit: " + str(values.DEFAULT_GEN_SEARCH_LIMIT))
-        if is_error:
-            error("\n" + values.TOOL_NAME + " exited with an error after " + time_info[
-                definitions.KEY_DURATION_TOTAL] + " minutes \n")
-        else:
-            success("\n" + values.TOOL_NAME + " finished successfully after " + time_info[
-                definitions.KEY_DURATION_TOTAL] + " minutes \n")
+        # statistics("Patch Explored Count: " + str(values.COUNT_PATCHES_EXPLORED))
+        # statistics("Patch Start Count: " + str(values.COUNT_PATCH_START))
+        # statistics("Patch End Seed Count: " + str(values.COUNT_PATCH_END_SEED))
+        # statistics("Patch End Count: " + str(values.COUNT_PATCH_END))
+        # if values.DEFAULT_PATCH_TYPE == values.OPTIONS_PATCH_TYPE[1]:
+        #     statistics("Template Explored Count: " + str(values.COUNT_TEMPLATES_EXPLORED))
+        #     # statistics("Template Gen Count: " + str(values.COUNT_TEMPLATE_GEN))
+        #     statistics("Template Start Count: " + str(values.COUNT_TEMPLATE_START))
+        #     statistics("Template End Seed Count: " + str(values.COUNT_TEMPLATE_END_SEED))
+        #     statistics("Template End Count: " + str(values.COUNT_TEMPLATE_END))
+        #
+        # statistics("Paths Detected: " + str(values.COUNT_PATHS_DETECTED))
+        # statistics("Paths Explored: " + str(values.COUNT_PATHS_EXPLORED))
+        # statistics("Paths Explored via Generation: " + str(values.COUNT_PATHS_EXPLORED_GEN))
+        # statistics("Paths Skipped: " + str(values.COUNT_PATHS_SKIPPED))
+        # statistics("Paths Hit Patch Loc: " + str(values.COUNT_HIT_PATCH_LOC))
+        # statistics("Paths Hit Observation Loc: " + str(values.COUNT_HIT_BUG_LOG))
+        # statistics("Paths Hit Crash Loc: " + str(values.COUNT_HIT_CRASH_LOC))
+        # statistics("Paths Crashed: " + str(values.COUNT_HIT_CRASH))
+        # statistics("Component Count: " + str(values.COUNT_COMPONENTS))
+        # statistics("Component Count Gen: " + str(values.COUNT_COMPONENTS_GEN))
+        # statistics("Component Count Cus: " + str(values.COUNT_COMPONENTS_CUS))
+        # statistics("Gen Limit: " + str(values.DEFAULT_GEN_SEARCH_LIMIT))
+        # if is_error:
+        #     error("\n" + values.TOOL_NAME + " exited with an error after " + time_info[
+        #         definitions.KEY_DURATION_TOTAL] + " minutes \n")
+        # else:
+        #     success("\n" + values.TOOL_NAME + " finished successfully after " + time_info[
+        #         definitions.KEY_DURATION_TOTAL] + " minutes \n")
 
 
 def emit_help():

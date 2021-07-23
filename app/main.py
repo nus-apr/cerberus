@@ -74,7 +74,10 @@ def run(repair_tool, benchmark, setup):
         emitter.highlight("[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
         emitter.highlight("[configuration] test-suite ratio:" + config_info[definitions.KEY_CONFIG_TEST_RATIO])
         experiment_list = benchmark.experiment_list
+        iteration = 0
         for index in range(1, benchmark.size):
+            iteration = iteration + 1
+            values.ITERATION_NO = iteration
             experiment_item = experiment_list[index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             if values.CONF_BUG_ID and index != values.CONF_BUG_ID:
@@ -134,6 +137,7 @@ def bootstrap(arg_list):
     emitter.sub_title("Bootstrapping framework")
     create_directories()
     configuration.read_arg(arg_list)
+    values.CONF_ARG_PASS = True
     configuration.update_configuration()
 
 
