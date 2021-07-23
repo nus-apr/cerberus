@@ -1,7 +1,7 @@
 import abc
 import os
 import shutil
-from app.utilities import execute_command, error_exit, values
+from app.utilities import execute_command, error_exit, values, emitter
 
 
 class AbstractTool:
@@ -14,7 +14,7 @@ class AbstractTool:
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
-        print("\t[INFO] instrumenting for", self.name)
+        emitter.normal("\t\t\t instrumenting for " + self.name)
         self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
         if os.path.isfile(dir_expr + "{}/instrument.sh".format(self.name.lower())):
             if not os.path.isfile(dir_expr + "/src/INSTRUMENTED"):
@@ -37,7 +37,7 @@ class AbstractTool:
 
     def pre_process(self):
         """any pre-processing required for the repair"""
-        print("\t[INFO] check for {}".format(self.name))
+        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
         check_command = "{} --help".format(self.name.lower())
         ret_code = execute_command(check_command)
         if int(ret_code) != 0:

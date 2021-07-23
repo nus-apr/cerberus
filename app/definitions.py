@@ -3,8 +3,13 @@ import os
 DIR_MAIN = os.path.abspath(os.getcwd() + "/../")
 DIR_LOGS = "/logs"
 DIR_RESULT = "/results"
-DIR_EXPERIMENT = "/experiment"
+DIR_EXPERIMENT = "/experiments"
 
+FILE_MAIN_LOG = ""
+FILE_ERROR_LOG = DIRECTORY_LOG_BASE + "/log-error"
+FILE_LAST_LOG = DIRECTORY_LOG_BASE + "/log-latest"
+FILE_MAKE_LOG = DIRECTORY_LOG_BASE + "/log-make"
+FILE_COMMAND_LOG = DIRECTORY_LOG_BASE + "/log-command"
 
 KEY_BUG_ID = "bug_id"
 KEY_BENCHMARK = "benchmark"

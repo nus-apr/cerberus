@@ -3,7 +3,7 @@ import shutil
 
 from app.tools import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values
+from app import definitions, values, emitter
 
 
 class GenProg(AbstractTool):
@@ -12,12 +12,12 @@ class GenProg(AbstractTool):
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
-        print("\t[INFO] running repair with", self.name)
+        emitter.normal("\t\t\t running repair with " + self.name)
         self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
-        timestamp_command = "echo $(date) > " + self.log_output_path
-        execute_command(timestamp_command)
         count_pass = len(passing_test_list)
         count_neg = len(failing_test_list)
+        timestamp_command = "echo $(date) > " + self.log_output_path
+        execute_command(timestamp_command)
         repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
         repair_command += "genprog --label-repair  "
         if fix_location:

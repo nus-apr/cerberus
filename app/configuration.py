@@ -61,18 +61,19 @@ def read_arg(argument_list):
         values.FILE_META_DATA = "benchmark/" + values.CONF_BENCHMARK + "/meta-data.json"
 
 
-def load_configuration_details(config_file_path, config_id):
-    print("[DRIVER] Loading configuration setup")
+def load_configuration_details(config_file_path):
+    emitter.normal("loading configuration setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, 'r') as conf_file:
             json_data = json.load(conf_file)
     else:
-        exit("Configuration file does not exist")
-    return json_data[config_id]
+        utilities.error_exit("Configuration file does not exist")
+    return json_data
 
 
 def load_tool(tool_name):
+    emitter.normal("loading repair tool")
     if tool_name == "cpr":
         return CPR.CPR()
     elif tool_name == "angelix":
@@ -90,8 +91,13 @@ def load_tool(tool_name):
 
 
 def load_benchmark(benchmark_name):
+    emitter.normal("loading benchmark")
     if benchmark_name == "manybugs":
         return ManyBugs.ManyBugs()
     else:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
 
+
+def update_configuration():
+    emitter.normal("updating configuration values")
+    sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)

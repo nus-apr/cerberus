@@ -8,7 +8,7 @@ from app import logger, emitter, values, definitions
 import base64
 import hashlib
 import time
-
+import shutil
 
 
 def execute_command(command, show_output=True):
@@ -100,11 +100,12 @@ def get_hash(str_value):
     return hash_value
 
 
-def create_directories():
-    print("[DRIVER] Creating essential directory structure")
-    if not os.path.isdir(DIR_LOGS):
-        create_command = "mkdir " + DIR_LOGS
-        execute_command(create_command)
-    if not os.path.isdir(DIR_RESULT):
-        create_command = "mkdir " + DIR_RESULT
-        execute_command(create_command)
+def check_space():
+    emitter.normal("\t\t\t checking disk space")
+    total, used, free = shutil.disk_usage("/")
+    emitter.information("\t\t\t\t Total: %d GiB" % (total // (2 ** 30)))
+    emitter.information("\t\t\t\t Used: %d GiB" % (used // (2 ** 30)))
+    emitter.information("\t\t\t\t Free: %d GiB" % (free // (2 ** 30)))
+    free_size = (free // (2 ** 30))
+    if int(free_size) < values.DEFAULT_DISK_SPACE:
+        error_exit("insufficient disk space " + str(free_size))

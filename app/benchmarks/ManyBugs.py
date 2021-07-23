@@ -2,7 +2,7 @@ import shutil
 import os
 from app.benchmark import AbstractBenchmark
 from app.utilities import execute_command, error_exit
-from app import definitions, values
+from app import definitions, values, emitter
 
 
 class ManyBugs(AbstractBenchmark):
@@ -16,23 +16,24 @@ class ManyBugs(AbstractBenchmark):
         bug_id = str([definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         directory_name = self.bench_dir_path + "/" + subject_name + "/" + bug_id
-        print("\t[Benchmark] setting up experiment subject")
+        emitter.normal("\t\tpreparing experiment subject")
         if self.deploy(directory_name, bug_id):
             if self.config(directory_name, bug_id):
                 if self.build(directory_name, bug_id):
                     if self.test(directory_name, bug_id):
-                        print("\t[Benchmark] setting up completed successfully")
+                        emitter.success("\t\t\t[status] setting up completed successfully")
                     else:
-                        error_exit("\t[Benchmark] test failed")
+                        error_exit("\t[error] test failed")
                 else:
-                    error_exit("\t[Benchmark] build failed")
+                    error_exit("\t[error] build failed")
             else:
-                error_exit("\t[Benchmark] config failed")
+                error_exit("\t[error] config failed")
         else:
-            error_exit("\t[Benchmark] deploy failed")
+            error_exit("\t[error] deploy failed")
         return
 
     def deploy(self, exp_dir_path, bug_id, log_dir_path):
+        emitter.normal("\t\t\tdownloading experiment subject")
         self.log_deploy_path = log_dir_path + "/" + self.name + "-" + bug_id + "-deploy.log"
         command_str = "cd " + exp_dir_path + "; bash setup.sh;"
         command_str += " > {0} 2>&1".format(self.log_deploy_path)
@@ -40,6 +41,7 @@ class ManyBugs(AbstractBenchmark):
         return status
 
     def config(self, exp_dir_path, bug_id, log_dir_path):
+        emitter.normal("\t\t\tconfiguring experiment subject")
         self.log_config_path = log_dir_path + "/" + self.name + "-" + bug_id + "-config.log"
         command_str = "cd " + exp_dir_path + "; bash config.sh;"
         command_str += " > {0} 2>&1".format(self.log_config_path)
@@ -47,6 +49,7 @@ class ManyBugs(AbstractBenchmark):
         return status
 
     def build(self, exp_dir_path, bug_id, log_dir_path):
+        emitter.normal("\t\t\tbuilding experiment subject")
         self.log_build_path = log_dir_path + "/" + self.name + "-" + bug_id + "-build.log"
         command_str = "cd " + exp_dir_path + "; bash build.sh;"
         command_str += " > {0} 2>&1".format(self.log_build_path)
@@ -54,6 +57,7 @@ class ManyBugs(AbstractBenchmark):
         return status
 
     def test(self, exp_dir_path, bug_id):
+        emitter.normal("\t\t\ttesting experiment subject")
         self.log_test_path = definitions.DIR_LOGS + "/" + self.name + "-" + bug_id + "-test.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh p1;"
         command_str += " > {0} 2>&1".format(self.log_test_path)
@@ -61,6 +65,7 @@ class ManyBugs(AbstractBenchmark):
         return status
 
     def test_all(self, exp_dir_path, bug_id, log_dir_path):
+        emitter.normal("\t\t\ttesting(full) experiment subject")
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh;"
         command_str += " > {0} 2>&1".format(self.log_test_path)

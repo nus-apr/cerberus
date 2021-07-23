@@ -3,32 +3,18 @@ import shutil
 
 from app.tools import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values
+from app import definitions, values, emitter
 
 
 class F1X(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__).lower()
 
-    def instrument(self, dir_expr, dir_logs, bug_id):
-        print("\t[INFO] instrumenting for", self.name)
-        self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
-        if os.path.isfile(dir_expr + "/instrument.sh"):
-            command_str = "cd " + dir_expr + "; bash instrument.sh;"
-            command_str += " > {0} 2>&1".format(self.log_deploy_path)
-            status = execute_command(command_str)
-            return status
-        else:
-            error_exit("no instrumentation available for ", self.name)
-
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
 
         print("\t[INFO] running repair with", self.name)
         self.log_output_path = dir_logs+ "/" + self.name.lower() + "-" + bug_id + "-output.log"
-        timestamp_command = "echo $(date) > " + self.log_output_path
-        execute_command(timestamp_command)
-        abs_path_binary = dir_expr + "/src/" + binary_path
         test_driver_path = dir_setup + "/test.sh"
         build_script_path = dir_setup + "/build.sh"
         test_id_list = ""
@@ -64,8 +50,6 @@ class F1X(AbstractTool):
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
         return
-
-
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
         self.save_logs(dir_results)

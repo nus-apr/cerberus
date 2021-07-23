@@ -15,7 +15,7 @@ end_time = 0
 
 
 def create_directories():
-    print("[Cerberus] creating essential directory structure")
+    emitter.normal("[Cerberus] creating essential directory structure")
     if not os.path.isdir(definitions.DIR_LOGS):
         create_command = "mkdir " + definitions.DIR_LOGS
         utilities.execute_command(create_command)
@@ -24,35 +24,34 @@ def create_directories():
         utilities.execute_command(create_command)
 
 
-def archive_results(benchmark: AbstractBenchmark, tool: AbstractTool, dir_results, dir_experiment):
+def archive_results(dir_results):
     if not os.path.isdir(dir_results):
         os.makedirs(dir_results)
-    benchmark.save_artefacts(dir_results, dir_experiment)
-    tool.save_artefacts(dir_results, dir_experiment)
     experiment_id = dir_results.split("/")[-1]
     archive_command = "cd " + dirname(abspath(dir_results)) + "; tar cvzf " + experiment_id + ".tar.gz " + experiment_id
     utilities.execute_command(archive_command)
 
 
-def repair(dir_expr, dir_setup, experiment_info, tool: AbstractTool):
-    global CONF_TOOL_NAME, CONF_CONFIG_ID, FILE_CONFIGURATION, CONFIG_INFO, DIR_EXPERIMENT
+def repair(dir_expr, dir_setup, experiment_info, tool: AbstractTool, config_info):
+    emitter.normal("\t\trepairing experiment subject")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
     passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
-    timeout = int(CONFIG_INFO[definitions.KEY_CONFIG_TIMEOUT])
-    test_ratio = float(CONFIG_INFO[definitions.KEY_CONFIG_TEST_RATIO])
+    timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
     subject_name = experiment_info[definitions.KEY_SUBJECT]
     fix_location = None
     binary_path = experiment_info[definitions.KEY_BINARY_PATH]
-    if CONFIG_INFO[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+    if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
     additional_tool_param = values.CONF_TOOL_PARAMS
     dir_logs = values.DIR_LOGS
     dir_results = values.DIR_RESULT
+    utilities.check_space()
     tool.pre_process()
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
     tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
@@ -61,16 +60,19 @@ def repair(dir_expr, dir_setup, experiment_info, tool: AbstractTool):
     tool.post_process(dir_expr, dir_results)
 
 
-def run(arg_list):
-    print("[Cerberus] Running cerberus")
-    configuration.read_arg(arg_list)
-    create_directories()
-    repair_tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
-    benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
-    configuration_list = values.CONF_CONFIG_ID_LIST
-
-    for config_id in configuration_list:
-        config_info = configuration.load_configuration_details(definitions.FILE_CONFIGURATION, config_id)
+def run(repair_tool, benchmark, setup):
+    emitter.sub_title("Repairing benchmark")
+    emitter.highlight("[configuration] repair-tool: " + repair_tool.name)
+    emitter.highlight("[configuration] repair-benchmark: " + benchmark.name)
+    run_config_id_list = values.CONF_CONFIG_ID_LIST
+    for config_id in run_config_id_list:
+        if config_id not in setup:
+            utilities.error_exit("invalid configuration id " + config_id)
+        config_info = setup[config_id]
+        emitter.sub_sub_title("Configuration: " + config_info[definitions.KEY_ID])
+        emitter.highlight("[configuration] timeout:" + config_info[definitions.KEY_ID])
+        emitter.highlight("[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
+        emitter.highlight("[configuration] test-suite ratio:" + config_info[definitions.KEY_CONFIG_TEST_RATIO])
         experiment_list = benchmark.experiment_list
         for index in range(1, benchmark.size):
             experiment_item = experiment_list[index - 1]
@@ -85,36 +87,33 @@ def run(arg_list):
                 continue
             if values.CONF_END_ID and index > values.CONF_END_ID:
                 break
-
             if values.CONF_SUBJECT_NAME and values.CONF_SUBJECT_NAME != subject_name:
                 continue
 
-            experiment_name = "\n\nConfiguration-" + str(config_id) + " : Experiment-" + str(index) + "\n-----------------------------"
-            print(experiment_name)
+            emitter.normal("Experiment-" + str(index))
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-            directory_name = values.CONF_BENCHMARK + "/" + subject_name + "/" + bug_name
+            directory_name = benchmark.name + "/" + subject_name + "/" + bug_name
             dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name
             dir_exp = values.CONF_DATA_PATH + "/" + directory_name + "/"
-            tool_inst_dir = dir_setup + "/" + str(CONF_TOOL_NAME).lower()
+            tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
 
-            print("\t[META-DATA] benchmark: " + values.CONF_BENCHMARK)
-            print("\t[META-DATA] project: " + subject_name)
-            print("\t[META-DATA] bug ID: " + bug_name)
-            print("\t[INFO] experiment directory: " + dir_exp)
+            emitter.normal("\t[META-DATA] project: " + subject_name)
+            emitter.normal("\t[META-DATA] bug ID: " + bug_name)
+            emitter.normal("\t[INFO] experiment directory: " + dir_exp)
 
             if not os.path.isdir(tool_inst_dir):
-                print("\t[INFO] instrumentation not exist for tool, skipping experiment")
+                emitter.warning("\t[warning] instrumentation not exist for tool, skipping experiment")
                 continue
-
+            dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
+                                                                  repair_tool.name,
+                                                                  subject_name, bug_name])
             benchmark.setup(index)
+            benchmark.save_artefacts(dir_result, dir_exp)
             if not values.CONF_SETUP_ONLY:
-                dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
-                                                                                 repair_tool.name,
-                                                                                 subject_name, bug_name])
                 utilities.clean_results(dir_result)
-                repair(dir_exp, dir_setup, experiment_item, repair_tool)
-                archive_results(benchmark, repair_tool, dir_result, dir_exp)
+                repair(dir_exp, dir_setup, experiment_item, repair_tool, config_info)
+                archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp)
 
@@ -131,13 +130,31 @@ def shutdown(signum, frame):
     raise SystemExit
 
 
+def bootstrap(arg_list):
+    emitter.sub_title("Bootstrapping framework")
+    create_directories()
+    configuration.read_arg(arg_list)
+    configuration.update_configuration()
+
+
+def initialize():
+    emitter.sub_title("Initializing setup")
+    tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
+    benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
+    setup = configuration.load_configuration_details(definitions.FILE_CONFIGURATION)
+    return tool, benchmark, setup
+
+
 def main():
     import sys
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
     try:
-        run(sys.argv[1:])
+        emitter.title("Starting " + values.TOOL_NAME + " (Program Repair Framework) ")
+        bootstrap(sys.argv[1:])
+        repair_tool, benchmark, setup = initialize()
+        run(repair_tool, benchmark, setup)
     except SystemExit as e:
         total_duration = format((time.time() - start_time) / 60, '.3f')
         emitter.end(time_info, is_error)
@@ -157,8 +174,6 @@ def main():
     finally:
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
-        total_duration = format((time.time() - start_time) / 60, '.3f')
-        time_info[definitions.KEY_DURATION_TOTAL] = str(total_duration)
         emitter.end(time_info, is_error)
         logger.end(time_info, is_error)
         logger.store()

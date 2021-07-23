@@ -5,6 +5,8 @@ DIR_LOGS = "/logs"
 DIR_RESULT = "/results"
 DIR_EXPERIMENT = "/experiment"
 
+TOOL_NAME = "Cerberus"
+
 CONF_DATA_PATH = "/data"
 CONF_TOOL_PATH = ""
 CONF_TOOL_PARAMS = ""
@@ -21,5 +23,5 @@ CONF_CONFIG_ID_LIST = ["C1"]
 CONF_SUBJECT_NAME = None
 CONF_PURGE = False
 
-
-
+DEFAULT_STACK_SIZE = 15000
+DEFAULT_DISK_SPACE = 5  # 5GB
