@@ -8,7 +8,7 @@ from app import definitions, values, emitter
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.bench_dir_path = os.path.dirname(__file__) + "/../../benchmark/" + self.name
+        self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/" + self.name)
         super(ManyBugs, self).__init__()
 
     def setup(self, bug_index, dir_logs, test_all=False):
@@ -21,7 +21,7 @@ class ManyBugs(AbstractBenchmark):
             if self.config(directory_name, bug_id, dir_logs):
                 if self.build(directory_name, bug_id, dir_logs):
                     if test_all:
-                        if self.test_all(directory_name, bug_id, dir_logs):
+                        if self.test_all(directory_name, experiment_item, dir_logs):
                             emitter.success("\t\t\t[status] setting up completed successfully")
                         else:
                             error_exit("\t[error] testing failed")
@@ -70,13 +70,32 @@ class ManyBugs(AbstractBenchmark):
         status = execute_command(command_str)
         return status == 0
 
-    def test_all(self, exp_dir_path, bug_id, log_dir_path):
+    def test_all(self, exp_dir_path, experiment_item, log_dir_path):
         emitter.normal("\t\t\ttesting(full) experiment subject")
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
-        command_str = "cd " + exp_dir_path + "; bash test.sh"
-        command_str += " > {0} 2>&1".format(self.log_test_path)
-        status = execute_command(command_str)
-        return status == 0
+        failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST]
+        passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST]
+        with open(self.log_test_path, "r") as log_file:
+            log_file.write("FAILING TEST CASES")
+            for test_id in failing_test_cases:
+                command_str = "cd " + exp_dir_path + "; bash test.sh {}".format(test_id)
+                status = execute_command(command_str)
+                if status != 0:
+                    log_file.write("FAIL")
+                else:
+                    log_file.write("PASS")
+
+            log_file.write("PASSING TEST CASES")
+            for test_id in passing_test_cases:
+                command_str = "cd " + exp_dir_path + "; bash test.sh {}".format(test_id)
+                status = execute_command(command_str)
+                if status != 0:
+                    log_file.write("FAIL")
+                else:
+                    log_file.write("PASS")
+            log_file.close()
+        return
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
         self.save_logs(results_dir_path)
