@@ -22,6 +22,8 @@ def read_arg(argument_list):
                 values.CONF_TOOL_PARAMS = str(arg).replace(definitions.ARG_TOOL_PARAMS, "")
             elif definitions.ARG_DEBUG_MODE in arg:
                 values.CONF_DEBUG = True
+            elif definitions.ARG_RUN_TESTS_ONLY in arg:
+                values.CONF_RUN_TESTS_ONLY = True
             elif definitions.ARG_PURGE in arg:
                 values.CONF_PURGE = True
             elif definitions.ARG_ONLY_SETUP in arg:
@@ -103,4 +105,10 @@ def load_benchmark(benchmark_name):
 
 def update_configuration():
     emitter.normal("updating configuration values")
+    if values.CONF_RUN_TESTS_ONLY:
+        values.DEFAULT_RUN_TESTS_ONLY = True
+        values.DEFAULT_SETUP_ONLY = True
+    if values.CONF_SETUP_ONLY:
+        values.DEFAULT_SETUP_ONLY = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
+

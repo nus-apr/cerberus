@@ -11,7 +11,7 @@ class ManyBugs(AbstractBenchmark):
         self.bench_dir_path = os.path.dirname(__file__) + "/../../benchmark/" + self.name
         super(ManyBugs, self).__init__()
 
-    def setup(self, bug_index, dir_logs):
+    def setup(self, bug_index, dir_logs, test_all=False):
         experiment_item = self.experiment_subjects[bug_index-1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -20,10 +20,16 @@ class ManyBugs(AbstractBenchmark):
         if self.deploy(directory_name, bug_id, dir_logs):
             if self.config(directory_name, bug_id, dir_logs):
                 if self.build(directory_name, bug_id, dir_logs):
-                    if self.test(directory_name, bug_id, dir_logs):
-                        emitter.success("\t\t\t[status] setting up completed successfully")
+                    if test_all:
+                        if self.test_all(directory_name, bug_id, dir_logs):
+                            emitter.success("\t\t\t[status] setting up completed successfully")
+                        else:
+                            error_exit("\t[error] testing failed")
                     else:
-                        error_exit("\t[error] test failed")
+                        if self.test(directory_name, bug_id, dir_logs):
+                            emitter.success("\t\t\t[status] setting up completed successfully")
+                        else:
+                            error_exit("\t[error] testing failed")
                 else:
                     error_exit("\t[error] build failed")
             else:
@@ -66,7 +72,7 @@ class ManyBugs(AbstractBenchmark):
 
     def test_all(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\ttesting(full) experiment subject")
-        self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)

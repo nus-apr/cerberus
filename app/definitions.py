@@ -43,6 +43,7 @@ ARG_BUG_ID_LIST = "--bug-id-list="
 ARG_BENCHMARK = "--benchmark="
 ARG_CONFIG_ID_LIST = "--conf="
 ARG_PURGE = "--purge"
+ARG_RUN_TESTS_ONLY = "--run-tests-only"
 
 
 

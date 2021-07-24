@@ -38,7 +38,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def setup(self, bug_index, dir_logs):
+    def setup(self, bug_index, dir_logs, test_all=False):
         """Method documentation"""
         return
 
