@@ -1,9 +1,15 @@
 import os
 
-DIR_MAIN = os.path.abspath(os.getcwd() + "/../")
+DIR_MAIN = os.path.abspath(os.getcwd())
 DIR_LOGS = "/logs"
 DIR_RESULT = "/results"
-DIR_EXPERIMENT = "/experiment"
+DIR_EXPERIMENT = "/experiments"
+DIRECTORY_LOG_BASE = DIR_MAIN + "/logs"
+FILE_MAIN_LOG = ""
+FILE_ERROR_LOG = DIRECTORY_LOG_BASE + "/log-error"
+FILE_LAST_LOG = DIRECTORY_LOG_BASE + "/log-latest"
+FILE_MAKE_LOG = DIRECTORY_LOG_BASE + "/log-make"
+FILE_COMMAND_LOG = DIRECTORY_LOG_BASE + "/log-command"
 
 
 KEY_BUG_ID = "bug_id"
@@ -40,9 +46,8 @@ ARG_PURGE = "--purge"
 
 
 
-
 FILE_META_DATA = None
-FILE_CONFIGURATION = "../configurations/icse21.json"
+FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse21.json"
 FILE_ERROR_LOG = "error-log"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""

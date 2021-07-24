@@ -20,8 +20,11 @@ class AbstractBenchmark:
         self.meta_file = self.bench_dir_path + "/meta-data.json"
         self.load()
 
+    def get_list(self):
+        return self.experiment_subjects
+
     def load(self):
-        print("[Benchmark] Loading experiment meta-data")
+        emitter.normal("loading experiment meta-data")
         if os.path.isfile(self.meta_file):
             with open(self.meta_file, 'r') as in_file:
                 json_data = json.load(in_file)
@@ -35,27 +38,27 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def setup(self, exp_dir_path, bug_id):
+    def setup(self, bug_index, dir_logs):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id):
+    def config(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id):
+    def build(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, exp_dir_path, bug_id):
+    def test(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id):
+    def test_all(self, exp_dir_path, bug_id, log_dir_path):
         """Method documentation"""
         return
 
@@ -65,7 +68,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def clean(self, results_dir_path, exp_dir_path):
+    def clean(self, exp_dir_path):
         """Method documentation"""
         return
 
