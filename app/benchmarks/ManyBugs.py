@@ -76,7 +76,7 @@ class ManyBugs(AbstractBenchmark):
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST]
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST]
-        with open(self.log_test_path, "r") as log_file:
+        with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES")
             for test_id in failing_test_cases:
                 command_str = "cd " + exp_dir_path + "; bash test.sh {}".format(test_id)
