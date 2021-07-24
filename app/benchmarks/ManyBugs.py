@@ -12,7 +12,7 @@ class ManyBugs(AbstractBenchmark):
         super(ManyBugs, self).__init__()
 
     def setup(self, bug_index, dir_logs, test_all=False):
-        experiment_item = self.experiment_subjects[bug_index]
+        experiment_item = self.experiment_subjects[bug_index-1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         directory_name = self.bench_dir_path + "/" + subject_name + "/" + bug_id
