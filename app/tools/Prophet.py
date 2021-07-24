@@ -73,7 +73,7 @@ class Prophet(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         regex_for_fix = "*-fix-" + str(bug_id) + "*"
         copy_command = "mv  " + regex_for_fix + " " + dir_results + ";"
         execute_command(copy_command)

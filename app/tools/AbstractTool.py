@@ -52,7 +52,7 @@ class AbstractTool:
         """store all artefacts from the tool"""
         return
 
-    def save_logs(self, dir_results, dir_setup, bug_id):
+    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         if os.path.isfile(self.log_instrument_path):
             shutil.copy(self.log_instrument_path, dir_results)
         if os.path.isfile(self.log_output_path):

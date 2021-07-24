@@ -44,13 +44,13 @@ class Fix2Fit(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = dir_setup + "/patches"
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
 
-    def save_logs(self, dir_results, dir_setup, bug_id):
-        super(Fix2Fit, self).save_logs(dir_results)
+    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
+        super(Fix2Fit, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
         patch_gen_log = dir_setup + "/original.txt"
         shutil.copy(patch_gen_log, dir_results)

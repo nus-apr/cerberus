@@ -37,7 +37,7 @@ class GenProg(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
