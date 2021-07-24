@@ -95,5 +95,8 @@ RUN sed -i '273i\ \ \ \ \ \ \ \ \ \ \ \ all_tests = [t.strip() for t in f]' /pro
 RUN sed -i "275,278d"  /prophet-gpl/tools/php_tester.py
 RUN sed -i "275i\ \ \ \ \ \ \ \ \ \ \ \ arg_list.append( all_tests[(2*(i))])" /prophet-gpl/tools/php_tester.py
 
+# Install cerberus dependencies
+RUN apt install software-properties-common &&  add-apt-repository -y ppa:pypy/ppa && apt update && apt install pypy3 pypy3-dev
+
 RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiments
