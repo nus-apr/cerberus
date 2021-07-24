@@ -95,10 +95,10 @@ def run(repair_tool, benchmark, setup):
             iteration = iteration + 1
             values.ITERATION_NO = iteration
             emitter.sub_sub_title("Experiment: " + str(iteration))
-            emitter.highlight("\t[configuration] identifier:" + str(config_info[definitions.KEY_ID]))
-            emitter.highlight("\t[configuration] timeout:" + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
+            emitter.highlight("\t[configuration] identifier: " + str(config_info[definitions.KEY_ID]))
+            emitter.highlight("\t[configuration] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
             emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-            emitter.highlight("\t[configuration] test-suite ratio:" + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
+            emitter.highlight("\t[configuration] test-suite ratio: " + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
             emitter.highlight("\t[meta-data] project: " + subject_name)
             emitter.highlight("\t[meta-data] bug ID: " + bug_name)
             emitter.highlight("\t[info] experiment directory: " + dir_exp)
