@@ -15,7 +15,7 @@ class AbstractTool:
         self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
         if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
             if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
-                command_str = "cd " + dir_setup + "/{}; bash instrument.sh;".format(self.name.lower())
+                command_str = "cd " + dir_setup + "/{}; bash instrument.sh ".format(self.name.lower())
                 command_str += " > {0} 2>&1".format(self.log_instrument_path)
                 status = execute_command(command_str)
                 if not status == 0:
