@@ -95,7 +95,7 @@ class ManyBugs(AbstractBenchmark):
                 else:
                     log_file.write("{}: PASS\n".format(test_id))
             log_file.close()
-        emitter.success("\t\t\t\t summary of tests written to: " + self.log_test_path)
+        emitter.success("\t\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
