@@ -74,8 +74,8 @@ class ManyBugs(AbstractBenchmark):
         emitter.normal("\t\t\ttesting(full) experiment subject")
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
-        failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST]
-        passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST]
+        failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
+        passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
         with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES")
             for test_id in failing_test_cases:
