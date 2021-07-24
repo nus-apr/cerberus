@@ -76,6 +76,8 @@ class ManyBugs(AbstractBenchmark):
         self.log_test_path = log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
+        unexpected_fail_list = []
+        unexpected_pass_list = []
         with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES\n")
             for test_id in failing_test_cases:
@@ -85,6 +87,7 @@ class ManyBugs(AbstractBenchmark):
                     log_file.write("{}: FAIL\n".format(test_id))
                 else:
                     log_file.write("{}: PASS\n".format(test_id))
+                    unexpected_pass_list.append(test_id)
 
             log_file.write("PASSING TEST CASES\n")
             for test_id in passing_test_cases:
@@ -92,8 +95,20 @@ class ManyBugs(AbstractBenchmark):
                 status = execute_command(command_str)
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
+                    unexpected_fail_list.append(test_id)
                 else:
                     log_file.write("{}: PASS\n".format(test_id))
+
+            if unexpected_fail_list:
+                log_file.write("unexpected failing list: ")
+                for test_id in unexpected_fail_list:
+                    log_file.write(str(test_id))
+                log_file.write("\n")
+            if unexpected_pass_list:
+                log_file.write("unexpected passing list: ")
+                for test_id in unexpected_pass_list:
+                    log_file.write(str(test_id))
+                log_file.write("\n")
             log_file.close()
         emitter.success("\t\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
