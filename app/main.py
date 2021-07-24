@@ -113,10 +113,10 @@ def run(repair_tool, benchmark, setup):
             if os.path.isdir(dir_exp):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp)
+            utilities.clean_results(dir_result)
             benchmark.setup(index, definitions.DIR_LOGS)
             benchmark.save_artefacts(dir_result, dir_exp)
             if not values.CONF_SETUP_ONLY:
-                utilities.clean_results(dir_result)
                 repair(dir_exp, dir_setup, experiment_item, repair_tool, config_info)
                 archive_results(dir_result)
                 if values.CONF_PURGE:
