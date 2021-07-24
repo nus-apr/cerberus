@@ -9,6 +9,23 @@ class Angelix(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
 
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
+        """instrumentation for the experiment as needed by the tool"""
+        emitter.normal("\t\t\t instrumenting for " + self.name)
+        self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
+        if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
+            if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
+                command_str = "cd " + dir_setup + "/{0}; bash instrument.sh {1}".format(self.name.lower(), dir_expr)
+                command_str += " > {0} 2>&1".format(self.log_instrument_path)
+                status = execute_command(command_str)
+                if not status == 0:
+                    error_exit("error with instrumentation of ", self.name)
+                with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
+                    pass
+        else:
+            error_exit("no instrumentation available for ", self.name)
+        return
+
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
         emitter.normal("\t\t\t running repair with " + self.name)
@@ -60,15 +77,15 @@ class Angelix(AbstractTool):
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
 
-    def post_process(self, dir_expr):
+    def post_process(self, dir_expr, dir_results):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(Angelix, self).post_process(dir_expr)
+        super(Angelix, self).post_process(dir_expr, dir_results)
         clean_command = "rm -rf /tmp /experiments/.angelix/"
         execute_command(clean_command)
 

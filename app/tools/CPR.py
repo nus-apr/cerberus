@@ -34,13 +34,13 @@ class CPR(AbstractTool):
         execute_command(timestamp_command)
         return
 
-    def save_logs(self, dir_results, dir_setup, bug_id):
-        super(CPR, self).save_logs(dir_results)
+    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
+        super(CPR, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_logs = "/CPR/logs/" + bug_id
         execute_command("cp -rf" + dir_logs + " " + dir_results + "/logs")
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = "/CPR/output/" + bug_id
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
@@ -49,7 +49,7 @@ class CPR(AbstractTool):
 
     def post_process(self, dir_expr, dir_results):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(CPR, self).post_process(dir_expr)
+        super(CPR, self).post_process(dir_expr, dir_results)
         clean_command = "rm -rf " + dir_results + "/output/klee-out-*"
         execute_command(clean_command)
 

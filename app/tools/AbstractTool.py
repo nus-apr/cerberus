@@ -15,7 +15,7 @@ class AbstractTool:
         self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
         if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
             if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
-                command_str = "cd " + dir_setup + "/{}; bash instrument.sh;".format(self.name.lower())
+                command_str = "cd " + dir_setup + "/{}; bash instrument.sh ".format(self.name.lower())
                 command_str += " > {0} 2>&1".format(self.log_instrument_path)
                 status = execute_command(command_str)
                 if not status == 0:
@@ -33,6 +33,11 @@ class AbstractTool:
         return
 
     def pre_process(self):
+        """any pre-processing required for the repair"""
+        self.check_tool_exists()
+        return
+
+    def check_tool_exists(self):
         """any pre-processing required for the repair"""
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
         check_command = "{} --help".format(self.name.lower())
@@ -52,7 +57,7 @@ class AbstractTool:
         """store all artefacts from the tool"""
         return
 
-    def save_logs(self, dir_results, dir_setup, bug_id):
+    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         if os.path.isfile(self.log_instrument_path):
             shutil.copy(self.log_instrument_path, dir_results)
         if os.path.isfile(self.log_output_path):

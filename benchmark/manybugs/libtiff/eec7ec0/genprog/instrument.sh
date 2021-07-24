@@ -21,3 +21,30 @@ rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
 rm -rf repair.debug.*
+
+cat <<EOF > $dir_name/src/repair.conf
+--allow-coverage-fail
+--no-rep-cache
+--no-test-cache
+--label-repair
+--sanity no
+--multi-file
+--search ww
+--compiler-command perl compile.pl __EXE_NAME__ > build.log
+--test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1
+--crossover subset
+--rep cilpatch
+--suffix-extension .c
+--describe-machine
+--program bugged-program.txt
+--prefix preprocessed
+--seed 0
+--popsize 40
+--generations 10
+--promut 1
+--mutp 0
+--fitness-in-parallel 1
+--rep-cache default.cache
+--continue
+EOF
+

@@ -32,7 +32,7 @@ def archive_results(dir_results):
     utilities.execute_command(archive_command)
 
 
-def repair(dir_expr, dir_setup, experiment_info, tool: AbstractTool, config_info):
+def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool, config_info):
     emitter.normal("\t\trepairing experiment subject")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
@@ -50,7 +50,6 @@ def repair(dir_expr, dir_setup, experiment_info, tool: AbstractTool, config_info
         fix_location = fix_source_file + ":" + fix_line_number
     additional_tool_param = values.CONF_TOOL_PARAMS
     dir_logs = values.DIR_LOGS
-    dir_results = values.DIR_RESULT
     utilities.check_space()
     tool.pre_process()
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
@@ -113,11 +112,11 @@ def run(repair_tool, benchmark, setup):
             if os.path.isdir(dir_exp):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp)
+            utilities.clean_results(dir_result)
             benchmark.setup(index, definitions.DIR_LOGS)
             benchmark.save_artefacts(dir_result, dir_exp)
             if not values.CONF_SETUP_ONLY:
-                utilities.clean_results(dir_result)
-                repair(dir_exp, dir_setup, experiment_item, repair_tool, config_info)
+                repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
                 archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp)
@@ -145,6 +144,7 @@ def bootstrap(arg_list):
 def initialize():
     emitter.sub_title("Initializing setup")
     tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
+    tool.check_tool_exists()
     benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
     setup = configuration.load_configuration_details(definitions.FILE_CONFIGURATION)
     return tool, benchmark, setup

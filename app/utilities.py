@@ -43,7 +43,7 @@ def clean_files():
 
 def clean_results(exp_dir):
     if os.path.isdir(exp_dir):
-        rm_command = "rm -rf " + exp_dir + "*"
+        rm_command = "rm -rf " + exp_dir
         execute_command(rm_command)
     mk_command = "mkdir " + exp_dir
     execute_command(mk_command)

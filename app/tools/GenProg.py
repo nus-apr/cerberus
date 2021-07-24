@@ -15,21 +15,25 @@ class GenProg(AbstractTool):
         self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
         count_pass = len(passing_test_list)
         count_neg = len(failing_test_list)
-        timestamp_command = "echo $(date) > " + self.log_output_path
-        execute_command(timestamp_command)
-        repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
-        repair_command += "genprog --label-repair  "
+        repair_config_str = "--pos-tests {p_size}\n" \
+                            "--neg-tests {n_size}\n" \
+                            "--test-script bash {dir_exp}/test.sh\n".format(bug_id=bug_id, p_size=count_pass,
+                                                                            n_size=count_neg, dir_exp=dir_expr)
         if fix_location:
             source_file, line_number = fix_location.split(":")
             with open(dir_expr + "/src/fault-loc", "w") as loc_file:
                 loc_file.write(str(line_number))
-            repair_command += " --fault-scheme line " \
-                              " --fault-file fault-loc "
-        repair_command += " --pos-tests {p_size} " \
-                          " --neg-tests {n_size} " \
-                          " --test-script \"bash /experiments/benchmark/{benchmark}/{subject}/{bug_id}/test.sh\" " \
-            .format(bug_id=bug_id, p_size=count_pass, n_size=count_neg,
-                    benchmark="ManyBugs", subject=subject_name)
+            repair_config_str += "--fault-scheme line\n" \
+                                 "--fault-file fault-loc\n"
+
+        repair_conf_path = dir_expr + "/src/repair.conf"
+        with open(repair_conf_path, "r+") as conf_file:
+            conf_file.write(repair_config_str)
+
+        timestamp_command = "echo $(date) > " + self.log_output_path
+        execute_command(timestamp_command)
+        repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
+        repair_command += "genprog --label-repair --continue "
         repair_command += " repair.conf >> {0} 2>&1 ".format(self.log_output_path)
         execute_command(repair_command)
         timestamp_command = "echo $(date) >> " + self.log_output_path
@@ -37,7 +41,7 @@ class GenProg(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results)
+        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
