@@ -70,8 +70,8 @@ def run(repair_tool, benchmark, setup):
         config_info = setup[config_id]
         experiment_list = benchmark.get_list()
         iteration = 0
-        for index in range(1, benchmark.size):
-            experiment_item = experiment_list[index - 1]
+        for index in range(0, benchmark.size):
+            experiment_item = experiment_list[index]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             if values.CONF_BUG_ID and index != values.CONF_BUG_ID:
                 continue
