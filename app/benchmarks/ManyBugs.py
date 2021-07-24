@@ -102,12 +102,12 @@ class ManyBugs(AbstractBenchmark):
             if unexpected_fail_list:
                 log_file.write("unexpected failing list: ")
                 for test_id in unexpected_fail_list:
-                    log_file.write(str(test_id))
+                    log_file.write(str(test_id) + " ")
                 log_file.write("\n")
             if unexpected_pass_list:
                 log_file.write("unexpected passing list: ")
                 for test_id in unexpected_pass_list:
-                    log_file.write(str(test_id))
+                    log_file.write(str(test_id) + " ")
                 log_file.write("\n")
             log_file.close()
         emitter.success("\t\t\t\tsummary of tests written to: " + self.log_test_path)
