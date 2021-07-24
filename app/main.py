@@ -144,6 +144,7 @@ def bootstrap(arg_list):
 def initialize():
     emitter.sub_title("Initializing setup")
     tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
+    tool.check_tool_exists()
     benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
     setup = configuration.load_configuration_details(definitions.FILE_CONFIGURATION)
     return tool, benchmark, setup

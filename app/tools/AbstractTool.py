@@ -34,6 +34,11 @@ class AbstractTool:
 
     def pre_process(self):
         """any pre-processing required for the repair"""
+        self.check_tool_exists()
+        return
+
+    def check_tool_exists(self):
+        """any pre-processing required for the repair"""
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
         check_command = "{} --help".format(self.name.lower())
         ret_code = execute_command(check_command)
