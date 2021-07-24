@@ -77,25 +77,26 @@ class ManyBugs(AbstractBenchmark):
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
         with open(self.log_test_path, "w") as log_file:
-            log_file.write("FAILING TEST CASES")
+            log_file.write("FAILING TEST CASES\n")
             for test_id in failing_test_cases:
                 command_str = "cd " + exp_dir_path + "; bash test.sh {}".format(test_id)
                 status = execute_command(command_str)
                 if status != 0:
-                    log_file.write("FAIL")
+                    log_file.write("{}: FAIL\n".format(test_id))
                 else:
-                    log_file.write("PASS")
+                    log_file.write("{}: PASS\n".format(test_id))
 
-            log_file.write("PASSING TEST CASES")
+            log_file.write("PASSING TEST CASES\n")
             for test_id in passing_test_cases:
                 command_str = "cd " + exp_dir_path + "; bash test.sh {}".format(test_id)
                 status = execute_command(command_str)
                 if status != 0:
-                    log_file.write("FAIL")
+                    log_file.write("{}: FAIL\n".format(test_id))
                 else:
-                    log_file.write("PASS")
+                    log_file.write("{}: PASS\n".format(test_id))
             log_file.close()
-        return
+        emitter.success("\t\t\t\t summary of tests written to: " + self.log_test_path)
+        return True
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
         self.save_logs(results_dir_path)
