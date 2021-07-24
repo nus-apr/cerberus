@@ -7,7 +7,7 @@ from app.benchmarks import ManyBugs
 
 
 def read_arg(argument_list):
-    print("[Configuration] reading configuration values")
+    emitter.normal("reading configuration values")
     if len(argument_list) > 0:
         for arg in argument_list:
             if definitions.ARG_DATA_PATH in arg:
@@ -40,39 +40,43 @@ def read_arg(argument_list):
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
             elif definitions.ARG_BUG_ID_LIST in arg:
                 values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
+            elif arg in ["--help", "-help", "-h"]:
+                emitter.emit_help()
+                exit(0)
             else:
-                print("Unknown option: " + str(arg))
+                emitter.error("Unknown option: " + str(arg))
                 emitter.emit_help()
                 exit(1)
     if not values.CONF_SETUP_ONLY:
         if values.CONF_TOOL_NAME is None:
-            print("[invalid] --tool-name is missing")
+            emitter.error("[invalid] --tool is missing")
             emitter.emit_help()
             exit(1)
     if values.CONF_SUBJECT_NAME:
-        print("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
+        emitter.normal("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
     if values.CONF_START_ID is None and values.CONF_BUG_ID is None and values.CONF_BUG_ID_LIST is None and values.CONF_SUBJECT_NAME is None:
-        print("[info] experiment id is not specified, running all experiments")
+        emitter.warning("[warning] experiment id is not specified, running all experiments")
     if values.CONF_BENCHMARK is None:
-        print("[invalid] --benchmark is missing")
+        emitter.error("[invalid] --benchmark is missing")
         emitter.emit_help()
         exit(1)
     else:
         values.FILE_META_DATA = "benchmark/" + values.CONF_BENCHMARK + "/meta-data.json"
 
 
-def load_configuration_details(config_file_path, config_id):
-    print("[DRIVER] Loading configuration setup")
+def load_configuration_details(config_file_path):
+    emitter.normal("loading configuration setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, 'r') as conf_file:
             json_data = json.load(conf_file)
     else:
-        exit("Configuration file does not exist")
-    return json_data[config_id]
+        utilities.error_exit("Configuration file does not exist")
+    return json_data
 
 
 def load_tool(tool_name):
+    emitter.normal("loading repair tool")
     if tool_name == "cpr":
         return CPR.CPR()
     elif tool_name == "angelix":
@@ -90,8 +94,13 @@ def load_tool(tool_name):
 
 
 def load_benchmark(benchmark_name):
+    emitter.normal("loading benchmark")
     if benchmark_name == "manybugs":
         return ManyBugs.ManyBugs()
     else:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
 
+
+def update_configuration():
+    emitter.normal("updating configuration values")
+    sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)

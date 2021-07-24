@@ -1,22 +1,18 @@
 import os
 import shutil
-
-from app.tools import AbstractTool
+from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values
+from app import definitions, values, emitter
 
 
 class Prophet(AbstractTool):
     def __init__(self):
-        self.name = os.path.basename(__file__).lower()
+        self.name = os.path.basename(__file__)[:-3].lower()
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
-        print("\t[INFO] running repair with", self.name)
-        self.log_output_path = dir_logs+ "/" + self.name.lower() + "-" + bug_id + "-output.log"
-        timestamp_command = "echo $(date) > " + self.log_output_path
-        execute_command(timestamp_command)
-
+        emitter.normal("\t\t\t running repair with " + self.name)
+        self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
         test_config_str = "-\n"
         test_config_str += "-\n"
         test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
@@ -65,7 +61,6 @@ class Prophet(AbstractTool):
                 if os.path.isfile(dir_setup + "/prophet/profile_localization.res"):
                     shutil.copy(dir_setup + "/prophet/profile_localization.res", localization_file)
 
-        print("\t[INFO] running Prophet")
         repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
         repair_command += " -full-synthesis -full-explore "
         repair_command += " -r {0}".format(dir_expr + "/workdir")
