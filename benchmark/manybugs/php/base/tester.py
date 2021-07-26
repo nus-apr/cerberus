@@ -108,7 +108,7 @@ def run(identifier, exe=None):
             test = f.readlines()[offset]
     else:
         with open(exp_dir + "/tests.all.txt") as f:
-            test = f.readlines()[int(identifier)]
+            test = f.readlines()[int(identifier) - 1]
     test = test.strip()
 
     # determine a time limit (measured in seconds)
