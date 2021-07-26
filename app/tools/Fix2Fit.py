@@ -38,7 +38,11 @@ class Fix2Fit(AbstractTool):
         repair_command += "export BINARY_INPUT=\"{0}\"; ".format(binary_input_arg)
         repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(dir_setup, str(timeout))
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        execute_command(repair_command)
+        status = execute_command(repair_command)
+        if status != 0:
+            emitter.warning("\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+        else:
+            emitter.success("\t\t[success] {0} ended successfully".format(self.name))
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
         return
