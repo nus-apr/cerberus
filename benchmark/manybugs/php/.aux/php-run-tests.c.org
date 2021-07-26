@@ -8559,7 +8559,7 @@ int main(int argc, char** argv) {
 int run_test(int num, char** tests)
 {    
     char buffer[1024];
-    char* name = tests[num];
+    char* name = tests[num-1];
 
     int killed = system("killall php --wait > /dev/null 2>&1");
     if (killed == 0) {
