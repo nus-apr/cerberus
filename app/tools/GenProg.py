@@ -27,7 +27,7 @@ class GenProg(AbstractTool):
                                  "--fault-file fault-loc\n"
 
         repair_conf_path = dir_expr + "/src/repair.conf"
-        with open(repair_conf_path, "r+") as conf_file:
+        with open(repair_conf_path, "a") as conf_file:
             conf_file.write(repair_config_str)
 
         timestamp_command = "echo $(date) > " + self.log_output_path
