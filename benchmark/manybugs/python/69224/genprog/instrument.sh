@@ -25,6 +25,9 @@ rm -rf repair.debug.*
 cp $dir_name/compile.pl $dir_name/src
 sed -i "s#project = \"python\"#project = "\"${dir_name}/src\""#g" $dir_name/src/compile.pl
 
+# disable 'test_create_connection' in 'test_socket'
+sed -i "s#def test_create_connection_timeout(self):#def test_create_connection(self):\n        return#" src/Lib/test/test_socket.py
+
 cat <<EOF > $dir_name/src/repair.conf
 --allow-coverage-fail
 --no-rep-cache
@@ -49,5 +52,6 @@ cat <<EOF > $dir_name/src/repair.conf
 --fitness-in-parallel 1
 --rep-cache default.cache
 --continue
+--mt-cov
 EOF
 
