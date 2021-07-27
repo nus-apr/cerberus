@@ -5,6 +5,7 @@ fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 
+
 cd $dir_name/src
 make clean
 make --ignore-errors CC="cilly --save-temps  -std=c99  -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
@@ -23,7 +24,6 @@ rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
 rm -rf repair.debug.*
-
 cp $script_dir/compile.sh $dir_name/src/compile.pl
 chmod +x $dir_name/src/compile.pl
 cd $dir_name/src
