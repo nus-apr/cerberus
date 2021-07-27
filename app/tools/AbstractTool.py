@@ -64,11 +64,11 @@ class AbstractTool:
 
     def print_analysis(self, size_space, n_enumerated, n_plausible, n_noncompile):
         n_implausible = n_enumerated - n_plausible - n_noncompile
-        emitter.highlight("\t\t\t\t search space size: {0}".format(size_space))
-        emitter.highlight("\t\t\t\t count enumerations: {0}".format(n_enumerated))
-        emitter.highlight("\t\t\t\t count plausible patches: {0}".format(n_plausible))
-        emitter.highlight("\t\t\t\t count non-compiling patches: {0}".format(n_noncompile))
-        emitter.highlight("\t\t\t\t count implausible patches: {0}".format(n_implausible))
+        emitter.highlight("\t\t\t search space size: {0}".format(size_space))
+        emitter.highlight("\t\t\t count enumerations: {0}".format(n_enumerated))
+        emitter.highlight("\t\t\t count plausible patches: {0}".format(n_plausible))
+        emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
+        emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
 
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         if os.path.isfile(self.log_instrument_path):
