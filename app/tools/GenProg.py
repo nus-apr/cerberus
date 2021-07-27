@@ -63,7 +63,7 @@ class GenProg(AbstractTool):
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
-                if " variant " in line:
+                if "variant " in line:
                     count_enumerations = line.split("/")[0].split(" ")[-1]
                 elif "possible edits" in line:
                     size_search_space = line.split(": ")[2].split(" ")[0]
