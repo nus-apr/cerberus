@@ -29,7 +29,7 @@ cat <<EOF > $dir_name/src/repair.conf
 --sanity no
 --multi-file
 --search ww
---compiler-command perl compile.pl __EXE_NAME__ > build.log
+--compiler-command perl compile.pl __EXE_NAME__ > build.log  2>&1
 --test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1
 --crossover subset
 --rep cilpatch
