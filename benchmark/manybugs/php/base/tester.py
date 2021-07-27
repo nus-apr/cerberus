@@ -8,7 +8,7 @@ import subprocess
 from subprocess import Popen, PIPE
 
 DEVNULL = open(os.devnull, 'w')
-exp_dir = os.path.abspath(os.getcwd())
+exp_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
 fail_list = ["ext/reflection/tests/traits005.phpt", "Zend/tests/bug55825.phpt", "Zend/tests/bug55137.phpt", "Zend/tests/traits/static_get_called_class.phpt", "Zend/tests/traits/static_002.phpt"]
 
