@@ -28,7 +28,7 @@ def create():
     with open(definitions.FILE_COMMAND_LOG, 'w+') as command_log:
         command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
     with open(definitions.FILE_ANALYSIS_LOG, 'w+') as analysis_log:
-        command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
+        analysis_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
 
 
 def log(log_message):
