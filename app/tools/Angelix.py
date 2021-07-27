@@ -12,7 +12,8 @@ class Angelix(AbstractTool):
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
-        self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
+        conf_id = str(values.CONFIG_ID)
+        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
             if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
                 command_str = "cd " + dir_setup + "/{0}; bash instrument.sh {1}".format(self.name.lower(), dir_expr)
@@ -29,7 +30,8 @@ class Angelix(AbstractTool):
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
         emitter.normal("\t\t\t running repair with " + self.name)
-        self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
+        conf_id = str(values.CONFIG_ID)
+        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
         line_number = ""
         if fix_location:
             source_file, line_number = fix_location.split(":")

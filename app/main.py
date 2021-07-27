@@ -55,6 +55,12 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
     tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                 failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
+    size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output()
+    conf_id = str(values.CONFIG_ID)
+    exp_id = conf_id + "-" + bug_id
+    values.ANALYSIS_RESULTS[exp_id] = [size_space, n_enumerated, n_plausible, n_noncompile]
+    tool.print_analysis(size_space, n_enumerated, n_plausible, n_noncompile)
+    logger.analysis(exp_id)
     tool.save_artefacts(dir_results, dir_expr, dir_setup, bug_id)
     tool.post_process(dir_expr, dir_results)
 
@@ -68,6 +74,7 @@ def run(repair_tool, benchmark, setup):
         if config_id not in setup:
             utilities.error_exit("invalid configuration id " + config_id)
         config_info = setup[config_id]
+        values.CONFIG_ID = config_info[definitions.KEY_ID]
         experiment_list = benchmark.get_list()
         iteration = 0
         for index in range(1, benchmark.size + 1):

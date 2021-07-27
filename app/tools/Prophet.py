@@ -12,7 +12,8 @@ class Prophet(AbstractTool):
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
         emitter.normal("\t\t\t running repair with " + self.name)
-        self.log_output_path = dir_logs + "/" + self.name.lower() + "-" + bug_id + "-output.log"
+        conf_id = str(values.CONFIG_ID)
+        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
         test_config_str = "-\n"
         test_config_str += "-\n"
         test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))

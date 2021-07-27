@@ -12,7 +12,8 @@ class AbstractTool:
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
-        self.log_instrument_path = dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
+        conf_id = str(values.CONFIG_ID)
+        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
             if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
                 command_str = "cd " + dir_setup + "/{}; bash instrument.sh ".format(self.name.lower())
@@ -55,6 +56,19 @@ class AbstractTool:
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
         """store all artefacts from the tool"""
         return
+
+    @abc.abstractmethod
+    def analyse_output(self, dir_results, dir_expr, dir_setup, bug_id):
+        """analyse tool output and collect information"""
+        return
+
+    def print_analysis(self, size_space, n_enumerated, n_plausible, n_noncompile):
+        n_implausible = n_enumerated - n_plausible - n_noncompile
+        emitter.highlight("\t\t\t\t search space size: {0]".format(size_space))
+        emitter.highlight("\t\t\t\t count enumerations: {0]".format(n_enumerated))
+        emitter.highlight("\t\t\t\t count plausible patches: {0]".format(n_plausible))
+        emitter.highlight("\t\t\t\t count non-compiling patches: {0]".format(n_noncompile))
+        emitter.highlight("\t\t\t\t count implausible patches: {0]".format(n_implausible))
 
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         if os.path.isfile(self.log_instrument_path):
