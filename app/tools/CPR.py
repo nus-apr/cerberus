@@ -29,7 +29,12 @@ class CPR(AbstractTool):
         cpr_command += " --test-id-list=" + test_id_list + " "
         cpr_command += "{0} --time-duration={1} >> {2} 2>&1 ".format(additional_tool_param, str(timeout_m),
                                                                      self.log_output_path)
-        execute_command(cpr_command)
+        status = execute_command(cpr_command)
+        if status != 0:
+            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
         return

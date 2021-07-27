@@ -44,7 +44,12 @@ class F1X(AbstractTool):
         execute_command(all_command)
         repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        execute_command(repair_command)
+        status = execute_command(repair_command)
+        if status != 0:
+            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
