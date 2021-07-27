@@ -70,7 +70,12 @@ class Angelix(AbstractTool):
 
         angelix_command += "  --generate-all {0} " \
                            " --timeout {1} >> {2} 2>&1 ".format(additional_tool_param, str(timeout_s), self.log_output_path)
-        execute_command(angelix_command)
+        status = execute_command(angelix_command)
+        if status != 0:
+            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
         return
