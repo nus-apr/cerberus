@@ -86,6 +86,6 @@ class Angelix(AbstractTool):
     def post_process(self, dir_expr, dir_results):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
         super(Angelix, self).post_process(dir_expr, dir_results)
-        clean_command = "rm -rf /tmp /experiments/.angelix/"
+        clean_command = "rm -rf /tmp/* /experiments/.angelix/"
         execute_command(clean_command)
 
