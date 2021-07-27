@@ -54,8 +54,10 @@ class GenProg(AbstractTool):
             shutil.copytree(dir_patches, dir_results + "/patches")
         return
 
-    def analyse_output(self, dir_results, dir_expr, dir_setup, bug_id):
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
         emitter.normal("\t\t\t analysing output of " + self.name)
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
         count_non_compilable = 0
         count_plausible = 0
         size_search_space = 0
@@ -71,6 +73,13 @@ class GenProg(AbstractTool):
                     count_non_compilable = count_non_compilable + 1
                 elif "Repair Found" in line:
                     count_plausible = count_plausible + 1
+            log_file.close()
+        count_implausible = count_enumerations - count_plausible - count_non_compilable
+        with open(self.log_analysis_path, 'w') as log_file:
+            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
-
 

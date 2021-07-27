@@ -55,7 +55,8 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
     tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                 failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
-    size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_expr, dir_setup, bug_id)
+    size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_results,
+                                                                              dir_expr, dir_setup, bug_id)
     conf_id = str(values.CONFIG_ID)
     exp_id = conf_id + "-" + bug_id
     values.ANALYSIS_RESULTS[exp_id] = [size_space, n_enumerated, n_plausible, n_noncompile]
