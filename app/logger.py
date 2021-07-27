@@ -112,11 +112,11 @@ def analysis(exp_id):
     n_implausible = n_enumerated - n_plausible - n_noncompile
     with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
         log_file.write(exp_id)
-        log_file.write("\t\t\t\t search space size: {0]".format(size_space))
-        log_file.write("\t\t\t\t count enumerations: {0]".format(n_enumerated))
-        log_file.write("\t\t\t\t count plausible patches: {0]".format(n_plausible))
-        log_file.write("\t\t\t\t count non-compiling patches: {0]".format(n_noncompile))
-        log_file.write("\t\t\t\t count implausible patches: {0]".format(n_implausible))
+        log_file.write("\t\t\t\t search space size: {0}".format(size_space))
+        log_file.write("\t\t\t\t count enumerations: {0}".format(n_enumerated))
+        log_file.write("\t\t\t\t count plausible patches: {0}".format(n_plausible))
+        log_file.write("\t\t\t\t count non-compiling patches: {0}".format(n_noncompile))
+        log_file.write("\t\t\t\t count implausible patches: {0}".format(n_implausible))
 
 
 
