@@ -10,7 +10,9 @@ cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
 
 cp -rf $dir_name/preprocessed $dir_name/src
 cd $dir_name/src
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${fix_id}#g" preprocessed/$cfile
 cp preprocessed/$cfile $cfile
+
 rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
