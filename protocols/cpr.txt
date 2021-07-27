@@ -40,11 +40,14 @@ Check Patch number in patch-set-ranked-X.
 
 
 ### M8	"time until correct patch is identified"
-The time for generation would the time needed for the initial synthesis and
+The time for generation would the time needed for the initial synthesis (incl. all steps that happenened before) and
 is the same for all plausible/generated patches. Check "Run time statistics:"
 at the end of the output.log
 
 Search Term:
 Synthesis
+
+Note: you need to add also the times for Startup, Build, and Testing because
+the numbers reported in the statistics are *not* cumulated.
 
 Note: time given in seconds in the sheet, the log gives in minutes
