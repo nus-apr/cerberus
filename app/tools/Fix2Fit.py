@@ -44,7 +44,7 @@ class Fix2Fit(AbstractTool):
             emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         timestamp_command = "echo $(date) >> " + self.log_output_path
         execute_command(timestamp_command)
         return
