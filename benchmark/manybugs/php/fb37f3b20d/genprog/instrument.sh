@@ -46,5 +46,6 @@ cat <<EOF > $dir_name/src/repair.conf
 --fitness-in-parallel 1
 --rep-cache default.cache
 --continue
+--mt-cov
 EOF
 
