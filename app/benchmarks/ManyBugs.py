@@ -50,7 +50,7 @@ class ManyBugs(AbstractBenchmark):
     def config(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\tconfiguring experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_deploy_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-config.log"
+        self.log_config_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-config.log"
         command_str = "cd " + exp_dir_path + "; bash config.sh"
         command_str += " > {0} 2>&1".format(self.log_config_path)
         status = execute_command(command_str)
@@ -59,7 +59,7 @@ class ManyBugs(AbstractBenchmark):
     def build(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\tbuilding experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_deploy_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-build.log"
+        self.log_build_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-build.log"
         command_str = "cd " + exp_dir_path + "; bash build.sh"
         command_str += " > {0} 2>&1".format(self.log_build_path)
         status = execute_command(command_str)
@@ -68,7 +68,7 @@ class ManyBugs(AbstractBenchmark):
     def test(self, exp_dir_path, bug_id, log_dir_path):
         emitter.normal("\t\t\ttesting experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_deploy_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh p1"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)
@@ -78,7 +78,7 @@ class ManyBugs(AbstractBenchmark):
         emitter.normal("\t\t\ttesting(full) experiment subject")
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         conf_id = str(values.CONFIG_ID)
-        self.log_deploy_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test-all.log"
+        self.log_test_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test-all.log"
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
         unexpected_fail_list = []
