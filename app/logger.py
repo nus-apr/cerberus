@@ -19,11 +19,15 @@ def create():
         os.remove(definitions.FILE_ERROR_LOG)
     if os.path.exists(definitions.FILE_COMMAND_LOG):
         os.remove(definitions.FILE_COMMAND_LOG)
+    if os.path.exists(definitions.FILE_ANALYSIS_LOG):
+        os.remove(definitions.FILE_ANALYSIS_LOG)
     with open(definitions.FILE_LAST_LOG, 'w+') as last_log:
         last_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
     with open(definitions.FILE_ERROR_LOG, 'w+') as error_log:
         error_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
     with open(definitions.FILE_COMMAND_LOG, 'w+') as command_log:
+        command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
+    with open(definitions.FILE_ANALYSIS_LOG, 'w+') as analysis_log:
         command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
 
 
@@ -106,7 +110,7 @@ def warning(message):
 def analysis(exp_id):
     size_space, n_enumerated, n_plausible, n_noncompile = values.ANALYSIS_RESULTS[exp_id]
     n_implausible = n_enumerated - n_plausible - n_noncompile
-    with open(definitions.FILE_COMMAND_LOG, 'a') as log_file:
+    with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
         log_file.write(exp_id)
         log_file.write("\t\t\t\t search space size: {0]".format(size_space))
         log_file.write("\t\t\t\t count enumerations: {0]".format(n_enumerated))
