@@ -39,7 +39,7 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
     passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
-    timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
