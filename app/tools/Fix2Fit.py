@@ -70,7 +70,7 @@ class Fix2Fit(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
-        with open(dir_setup + "/original.txt", "r") as log_file:
+        with open(dir_results + "/original.txt", "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
                 if "candidates evaluated: " in line:
@@ -78,7 +78,7 @@ class Fix2Fit(AbstractTool):
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1]
             log_file.close()
-        dir_patch = dir_setup + "/patches"
+        dir_patch = dir_results + "/patches"
         output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
         count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
