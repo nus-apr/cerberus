@@ -96,3 +96,29 @@ class Angelix(AbstractTool):
         clean_command = "rm -rf /tmp/* /experiments/.angelix/"
         execute_command(clean_command)
 
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
+        emitter.normal("\t\t\t analysing output of " + self.name)
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
+        count_non_compilable = 0
+        count_plausible = 0
+        size_search_space = 0
+        count_enumerations = 0
+        with open(self.log_output_path, "r") as log_file:
+            log_lines = log_file.readlines()
+            for line in log_lines:
+                if "candidate fix synthesized" in line:
+                    count_plausible = count_plausible + 1
+                elif "selected expressions" in line:
+                    size_search_space = size_search_space + 1
+                elif "considering suspicious expressions" in line:
+                    count_enumerations = count_enumerations + 1
+            log_file.close()
+        count_implausible = count_enumerations - count_plausible - count_non_compilable
+        with open(self.log_analysis_path, 'w') as log_file:
+            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable
