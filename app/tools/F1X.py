@@ -80,7 +80,7 @@ class F1X(AbstractTool):
                     size_search_space = line.split("search space size: ")[-1]
                 elif "plausible patches: " in line:
                     count_plausible = line.split("plausible patches: ")[-1]
-                elif "Fail to execute f1x" in line:
+                elif "failed to infer compile commands" in line:
                     size_search_space = -1
             log_file.close()
 
