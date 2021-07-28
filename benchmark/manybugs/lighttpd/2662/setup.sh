@@ -46,7 +46,8 @@ sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybu
 sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
-sed -i "s#cd ${project_name}#cd src#g" test.sh
+sed -i "s#cd ${project_name}#pushd ${dir_name}/src#g" test.sh
+sed -i 's#cd ../../#popd#g' test.sh
 sed -i "42d" test.sh
 
 sed -i "s#run_test 20 #run_test 21 #g" test.sh

@@ -45,7 +45,7 @@ ARG_BENCHMARK = "--benchmark="
 ARG_CONFIG_ID_LIST = "--conf="
 ARG_PURGE = "--purge"
 ARG_RUN_TESTS_ONLY = "--run-tests-only"
-
+ARG_ANALYSE_ONLY = "--analyse-only"
 
 
 FILE_META_DATA = None

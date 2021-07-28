@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
@@ -62,3 +63,39 @@ class F1X(AbstractTool):
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
+
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
+        emitter.normal("\t\t\t analysing output of " + self.name)
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
+        count_non_compilable = 0
+        count_plausible = 0
+        size_search_space = 0
+        count_enumerations = 0
+        regex = re.compile('(.*-output.log$)')
+        for root, dirs, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file):
+                    self.log_output_path = dir_results + "/" + file
+                    break
+        with open(self.log_output_path, "r") as log_file:
+            log_lines = log_file.readlines()
+            for line in log_lines:
+                if "candidates evaluated: " in line:
+                    count_enumerations = int(line.split("candidates evaluated: ")[-1])
+                elif "search space size: " in line:
+                    size_search_space = line.split("search space size: ")[-1]
+                elif "plausible patches: " in line:
+                    count_plausible = line.split("plausible patches: ")[-1]
+                elif "failed to infer compile commands" in line:
+                    size_search_space = -1
+            log_file.close()
+
+        count_implausible = count_enumerations - count_plausible - count_non_compilable
+        with open(self.log_analysis_path, 'w') as log_file:
+            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable

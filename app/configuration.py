@@ -26,6 +26,8 @@ def read_arg(argument_list):
                 values.CONF_RUN_TESTS_ONLY = True
             elif definitions.ARG_PURGE in arg:
                 values.CONF_PURGE = True
+            elif definitions.ARG_ANALYSE_ONLY in arg:
+                values.CONF_ANALYSE_ONLY = True
             elif definitions.ARG_ONLY_SETUP in arg:
                 values.CONF_SETUP_ONLY = True
             elif definitions.ARG_CONFIG_ID_LIST in arg:
@@ -110,5 +112,7 @@ def update_configuration():
         values.DEFAULT_SETUP_ONLY = True
     if values.CONF_SETUP_ONLY:
         values.DEFAULT_SETUP_ONLY = True
+    if values.CONF_ANALYSE_ONLY:
+        values.DEFAULT_ANALYSE_ONLY = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
 
