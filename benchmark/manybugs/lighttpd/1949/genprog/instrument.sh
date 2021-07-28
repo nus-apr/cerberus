@@ -6,11 +6,20 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 cd $dir_name/src
 make clean
-make CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
+./configure CFLAGS='-g -O0 -save-temps=obj' --enable-static \
+            --with-pcre=yes \
+            --with-ldap \
+            --with-bzip2 \
+            --with-openssl \
+            --with-gdbm \
+            --with-memcache \
+            --with-webdav-props \
+            --with-webdav-locks;
+make -j32
 
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 cfile=$(head -n 1 $dir_name/manifest.txt)
-cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
+cilfile=$(echo $(echo $cfile | cut -d$"." -f1).i)
 
 rm -rf preprocessed
 mkdir -p `dirname preprocessed/$cfile`
@@ -25,6 +34,7 @@ cp $script_dir/compile.sh $dir_name/src/compile.pl
 chmod +x $dir_name/src/compile.pl
 cd $dir_name/src
 make clean
+
 cat <<EOF > $dir_name/src/repair.conf
 --allow-coverage-fail
 --no-rep-cache

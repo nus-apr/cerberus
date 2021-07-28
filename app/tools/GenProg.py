@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
@@ -52,6 +53,8 @@ class GenProg(AbstractTool):
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
+        if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
+            shutil.copytree(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
@@ -62,6 +65,12 @@ class GenProg(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        regex = re.compile('(.*-output.log$)')
+        for root, dirs, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file):
+                    self.log_output_path = dir_results + "/" + file
+                    break
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -74,6 +83,12 @@ class GenProg(AbstractTool):
                 elif "Repair Found" in line:
                     count_plausible = count_plausible + 1
             log_file.close()
+        if size_search_space == 0:
+            if os.path.isfile(dir_results + "/coverage.path"):
+                if os.path.getsize(dir_results + "/coverage.path"):
+                    size_search_space = -1
+            else:
+                size_search_space = -1
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))

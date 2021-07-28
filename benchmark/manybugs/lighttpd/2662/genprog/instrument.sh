@@ -6,12 +6,25 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 
 cd $dir_name/src
 make clean
+./configure CFLAGS='-g -O0 -save-temps=obj' --enable-static \
+            --with-pcre=yes \
+            --with-ldap \
+            --with-bzip2 \
+            --with-openssl \
+            --with-gdbm \
+            --with-memcache \
+            --with-webdav-props \
+            --with-webdav-locks;
+make -j32
 
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
-cp -rf $dir_name/preprocessed $dir_name/src/preprocessed
 cfile=$(head -n 1 $dir_name/manifest.txt)
-cp preprocessed/$cfile $cfile
+cilfile=$(echo $(echo $cfile | cut -d$"." -f1).i)
 
+rm -rf preprocessed
+mkdir -p `dirname preprocessed/$cfile`
+cp $cilfile preprocessed/$cfile
+cp preprocessed/$cfile $cfile
 rm -rf coverage
 rm -rf coverage.path.*
 rm -rf repair.cache
