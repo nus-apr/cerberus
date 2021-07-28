@@ -54,7 +54,7 @@ class GenProg(AbstractTool):
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
         if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
-            shutil.copytree(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
+            shutil.copy(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
