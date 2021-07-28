@@ -56,7 +56,7 @@ cp $dir_name/src/$(echo $diff_file| cut -d'.' -f 1).i  $dir_name/preprocessed/$(
 
 
 make distclean
-./configure && make -j`nproc`
+PATH=/deps/php/bison-2.2-build/bin:$PATH ./configure && make -j`nproc`
 
 
 
