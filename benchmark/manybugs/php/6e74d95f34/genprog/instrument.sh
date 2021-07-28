@@ -7,7 +7,7 @@ cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 
 cd $dir_name/src
 make clean
-make --ignore-errors CC="cilly --save-temps  -std=c99  -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
+make --ignore-errors CC="cilly --save-temps -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
 
 cp $script_dir/compile.pl $dir_name/src
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
