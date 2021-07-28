@@ -53,6 +53,8 @@ class GenProg(AbstractTool):
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
+        if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
+            shutil.copytree(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
@@ -81,6 +83,10 @@ class GenProg(AbstractTool):
                 elif "Repair Found" in line:
                     count_plausible = count_plausible + 1
             log_file.close()
+        if size_search_space == 0:
+            if os.path.isfile(dir_results+ "/coverage.path"):
+                if os.path.getsize(dir_results + "/coverage.path"):
+                    size_search_space = -1
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
