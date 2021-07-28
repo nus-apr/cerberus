@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
@@ -62,6 +63,12 @@ class GenProg(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        regex = re.compile('(.*-output.log$)')
+        for root, dirs, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file):
+                    self.log_output_path = dir_results + "/" + file
+                    break
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:

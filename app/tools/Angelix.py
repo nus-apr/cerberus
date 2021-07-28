@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
@@ -100,6 +101,12 @@ class Angelix(AbstractTool):
         emitter.normal("\t\t\t analysing output of " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
+        regex = re.compile('(.*-output.log$)')
+        for root, dirs, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file):
+                    self.log_output_path = dir_results + "/" + file
+                    break
         count_non_compilable = 0
         count_plausible = 0
         size_search_space = 0

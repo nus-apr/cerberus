@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
