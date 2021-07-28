@@ -79,8 +79,9 @@ class Fix2Fit(AbstractTool):
                     size_search_space = line.split("search space size: ")[-1]
             log_file.close()
         dir_patch = dir_results + "/patches"
-        output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
-        count_plausible = len(output_patch_list)
+        if os.path.isdir(dir_patch):
+            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+            count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
