@@ -55,13 +55,25 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
     tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                 failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
+
+
+def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
+    emitter.normal("\t\tanalysing experiment results")
+    bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+    dir_logs = values.DIR_LOGS
     size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_results,
                                                                               dir_expr, dir_setup, bug_id)
+
     conf_id = str(values.CONFIG_ID)
     exp_id = conf_id + "-" + bug_id
     values.ANALYSIS_RESULTS[exp_id] = [size_space, n_enumerated, n_plausible, n_noncompile]
     tool.print_analysis(size_space, n_enumerated, n_plausible, n_noncompile)
     logger.analysis(exp_id)
+
+
+def save_results(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
+    emitter.normal("\t\tsaving results and cleaning up")
+    bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     tool.save_artefacts(dir_results, dir_expr, dir_setup, bug_id)
     tool.post_process(dir_expr, dir_results)
 
@@ -117,6 +129,11 @@ def run(repair_tool, benchmark, setup):
             dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
                                                                   repair_tool.name,
                                                                   subject_name, bug_name])
+            if values.CONF_ANALYSE_ONLY:
+                if os.path.isdir(dir_result):
+                    analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                continue
+
             if os.path.isdir(dir_exp):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp)
@@ -125,6 +142,8 @@ def run(repair_tool, benchmark, setup):
             benchmark.save_artefacts(dir_result, dir_exp)
             if not values.DEFAULT_SETUP_ONLY:
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
+                analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp)
