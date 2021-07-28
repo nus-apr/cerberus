@@ -84,9 +84,11 @@ class GenProg(AbstractTool):
                     count_plausible = count_plausible + 1
             log_file.close()
         if size_search_space == 0:
-            if os.path.isfile(dir_results+ "/coverage.path"):
+            if os.path.isfile(dir_results + "/coverage.path"):
                 if os.path.getsize(dir_results + "/coverage.path"):
                     size_search_space = -1
+            else:
+                size_search_space = -1
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
