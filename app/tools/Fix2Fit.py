@@ -77,6 +77,8 @@ class Fix2Fit(AbstractTool):
                     count_enumerations = int(line.split("candidates evaluated: ")[-1])
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1]
+                elif "Fail to execute f1x" in line:
+                    size_search_space = -1
             log_file.close()
         dir_patch = dir_results + "/patches"
         if os.path.isdir(dir_patch):
