@@ -104,17 +104,19 @@ class Angelix(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
-        with open(self.log_output_path, "r") as log_file:
-            log_lines = log_file.readlines()
-            for line in log_lines:
-                if "candidate fix synthesized" in line:
-                    count_plausible = count_plausible + 1
-                elif "selected expressions" in line:
-                    size_search_space = size_search_space + 1
-                elif "considering suspicious expressions" in line:
-                    count_enumerations = count_enumerations + 1
-            log_file.close()
+        if os.path.isfile(self.log_output_path):
+            with open(self.log_output_path, "r") as log_file:
+                log_lines = log_file.readlines()
+                for line in log_lines:
+                    if "candidate fix synthesized" in line:
+                        count_plausible = count_plausible + 1
+                    elif "selected expressions" in line:
+                        size_search_space = size_search_space + 1
+                    elif "considering suspicious expressions" in line:
+                        count_enumerations = count_enumerations + 1
+                log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
+
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
