@@ -37,9 +37,10 @@ cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
-sed -i '978 s/./\t&/' test/Makefile
-# Prophet requires/works on git source
-cd $dir_name
-repo_url=https://github.com/vadz/libtiff.git
-git clone $repo_url src-git
-cd src-git; git checkout $bug_id
+
+
+## fix the test harness and the configuration script
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
+sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
+sed -i "s#/usr/bin/perl#perl#g" test.sh
+sed -i "s#cd ${project_name}#cd src#g" test.sh
