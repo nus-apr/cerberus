@@ -94,6 +94,8 @@ class Fix2Fit(AbstractTool):
                     for line in log_lines:
                         if "Fail to execute f1x" in line:
                             is_error = True
+                        elif "tests are not specified" in line:
+                            is_error = True
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
