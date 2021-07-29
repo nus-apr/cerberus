@@ -39,6 +39,11 @@ else
          TEST_ID=194
       fi
       timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
+      ret=$?
+      if [[ $ret == 0 ]]; then
+         exit 0;
+      fi
+      exit 1;
   fi
 
 fi
