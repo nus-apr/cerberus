@@ -9,10 +9,6 @@ TEST_ID=$1
 POS_N=61
 NEG_N=1
 
-
-
-
-
 if [ -z "$TEST_ID" ]
 then
    # Run passing test cases
