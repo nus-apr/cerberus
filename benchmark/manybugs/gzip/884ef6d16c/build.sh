@@ -12,5 +12,3 @@ cd tests
 make mixed.log znew-k.log
 chmod +x mixed
 chmod +x znew-k
-chmod +x $dir_name/src-git/tests/mixed
-chmod +x $dir_name/src-git/tests/znew-k
