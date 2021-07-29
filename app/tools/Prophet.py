@@ -121,7 +121,7 @@ class Prophet(AbstractTool):
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
-            emitter.error("\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
         if os.path.isdir(dir_results):
             output_patch_list = [f for f in listdir(dir_results) if isfile(join(dir_results, f)) and ".c" in f]
             count_plausible = len(output_patch_list)

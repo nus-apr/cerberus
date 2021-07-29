@@ -95,7 +95,7 @@ class Fix2Fit(AbstractTool):
                         if "Fail to execute f1x" in line:
                             is_error = True
         if is_error:
-            emitter.error("\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
         if os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
