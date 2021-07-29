@@ -87,15 +87,14 @@ class Fix2Fit(AbstractTool):
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1]
             log_file.close()
-        if size_search_space == 0:
-            if os.path.isfile(self.log_output_path):
-                with open(self.log_output_path, 'r') as log_file:
-                    log_lines = log_file.readlines()
-                    for line in log_lines:
-                        if "Fail to execute f1x" in line:
-                            is_error = True
-                        elif "tests are not specified" in line:
-                            is_error = True
+        if os.path.isfile(self.log_output_path):
+            with open(self.log_output_path, 'r') as log_file:
+                log_lines = log_file.readlines()
+                for line in log_lines:
+                    if "Fail to execute f1x" in line:
+                        is_error = True
+                    elif "tests are not specified" in line:
+                        is_error = True
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
