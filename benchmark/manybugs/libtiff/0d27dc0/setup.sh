@@ -39,7 +39,7 @@ chown -R root $dir_name
 
 make distclean
 git checkout $(cat ../manifest.txt)
-sed -i '978 s/./\t&/' test/Makefile
+
 
 cd $dir_name
 ## fix the test harness and the configuration script
