@@ -84,7 +84,7 @@ prepare-angelix-runner () {
     sed -i 's/^Exit/exit/' "$script"
     sed -i 's/framework_failure_/exit 99/' "$script"
 
-    sed -i 's/^compare/diff/' "$script"
+    sed -i 's/compare/diff/' "$script"
 
     local kline=$(grep -n "gzip" "$script")
     #echo "kline:$kline"
@@ -239,8 +239,8 @@ cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
 FILE=/tmp/testo
 perl "$run_tests_script" "\$1" &> "\$FILE"
-if [[ -s \$FILE ]] ; then
-  pwd >> "\$FILE"
+FILESIZE="\$(cat \$FILE | wc -l)"
+if [[ "\$FILESIZE" -gt 2 ]] ; then
   exit 1;
 else
   exit 0;
