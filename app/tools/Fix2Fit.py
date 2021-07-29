@@ -77,6 +77,8 @@ class Fix2Fit(AbstractTool):
                 if regex.match(file):
                     self.log_output_path = dir_results + "/" + file
                     break
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_error = False
         with open(dir_results + "/original.txt", "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -91,7 +93,9 @@ class Fix2Fit(AbstractTool):
                     log_lines = log_file.readlines()
                     for line in log_lines:
                         if "Fail to execute f1x" in line:
-                            size_search_space = -1
+                            is_error = True
+        if is_error:
+            emitter.error("\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
         if os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
@@ -103,4 +107,5 @@ class Fix2Fit(AbstractTool):
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
