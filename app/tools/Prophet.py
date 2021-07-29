@@ -102,7 +102,7 @@ class Prophet(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
-        emitter.highlight("\t\t Log File: " + self.log_output_path)
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
