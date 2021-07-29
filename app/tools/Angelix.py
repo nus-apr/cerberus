@@ -111,6 +111,8 @@ class Angelix(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_error = False
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -121,13 +123,19 @@ class Angelix(AbstractTool):
                         size_search_space = size_search_space + 1
                     elif "considering suspicious expressions" in line:
                         count_enumerations = count_enumerations + 1
+                    elif "repair test suite: []" in line:
+                        is_error = True
+                    elif "validation test suite: []" in line:
+                        is_error = True
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
-
+        if is_error:
+            emitter.error("\t\t\t\t[error] error detected in logs")
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
