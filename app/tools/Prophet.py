@@ -103,6 +103,7 @@ class Prophet(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_error = False
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -113,8 +114,14 @@ class Prophet(AbstractTool):
                         count_non_compilable = count_non_compilable + 1
                     elif "different repair candidate" in line:
                         size_search_space = int(line.split(" different repair candidate")[0].replace("Total ", "").strip())
+                    elif "Segmentation fault" in line:
+                        is_error = True
+                    elif "Verification failed!" in line:
+                        is_error = True
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
+        if is_error:
+            emitter.error("\t\t[error] error detected in logs")
         if os.path.isdir(dir_results):
             output_patch_list = [f for f in listdir(dir_results) if isfile(join(dir_results, f)) and ".c" in f]
             count_plausible = len(output_patch_list)
@@ -124,4 +131,5 @@ class Prophet(AbstractTool):
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
