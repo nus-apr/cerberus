@@ -116,7 +116,7 @@ class Prophet(AbstractTool):
                         size_search_space = int(line.split(" different repair candidate")[0].replace("Total ", "").strip())
                     elif "Segmentation fault" in line:
                         is_error = True
-                    elif "Verification failed!" in line:
+                    elif "Verification failed!" in line or "Repair error:" in line:
                         is_error = True
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
