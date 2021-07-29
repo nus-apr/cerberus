@@ -9,12 +9,6 @@ TEST_ID=$1
 POS_N=33
 NEG_N=2
 
-## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
-sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
-sed -i "s#/usr/bin/perl#perl#g" test.sh
-sed -i "s#cd ${project_name}#cd src#g" test.sh
-
 
 if [ -z "$TEST_ID" ]
 then
