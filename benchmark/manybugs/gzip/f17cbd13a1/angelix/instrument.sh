@@ -68,7 +68,7 @@ add-angelix-runner () {
 
     local line=$(grep -n -v "^\s*[#;]" "$script" | grep -v "echo" | grep "$call" | grep -e "-d" | cut -d: -f 1)
     #echo "line:$line::script: $script"
-    sed -i "$line"'s/^\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
+    sed -i "$line"'s/\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
     #sed -i "s/-S ''/-S \\\'\\\'/" "$script"
 }
 
@@ -83,7 +83,7 @@ prepare-angelix-runner () {
     sed -i 's/^Exit/exit/' "$script"
     sed -i 's/framework_failure_/exit 99/' "$script"
 
-    sed -i 's/^compare/diff/' "$script"
+    sed -i 's/compare/diff/' "$script"
 
     local kline=$(grep -n "gzip" "$script")
     #echo "kline:$kline"
