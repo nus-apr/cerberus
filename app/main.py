@@ -77,7 +77,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
     if os.path.isfile(archive_path):
         extract_command = "cp " + archive_path + " " + definitions.DIR_RESULT + ";"
         extract_command += "cd " + definitions.DIR_RESULT + ";"
-        extract_command += "tar -xfv " + archive_name
+        extract_command += "tar -xf " + archive_name
         utilities.execute_command(extract_command)
         return True
     else:
