@@ -88,7 +88,7 @@ class Fix2Fit(AbstractTool):
                     size_search_space = line.split("search space size: ")[-1]
             log_file.close()
         if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, 'r') as log_file:
+            with open(self.log_output_path, 'r', encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "Fail to execute f1x" in line:
