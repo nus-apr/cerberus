@@ -71,6 +71,20 @@ def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: Abst
     logger.analysis(exp_id)
 
 
+def retrieve_results(dir_expr, tool: AbstractTool):
+    emitter.normal("\t\tretrieving results for analysis")
+    archive_path = values.DIR_MAIN + "/results/" + tool.name.lower() + "/" + dir_expr + ".tar.gz"
+    if os.path.isfile(archive_path):
+        extract_command = "cp " + archive_path + " " + definitions.DIR_RESULT + ";"
+        extract_command += "cd " + definitions.DIR_RESULT + ";"
+        extract_command += "tar -xfv " +  dir_expr + ".tar.gz"
+        utilities.execute_command(extract_command)
+        return True
+    else:
+        emitter.error("[error] result archive not found")
+        return False
+
+
 def save_results(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
     emitter.normal("\t\tsaving results and cleaning up")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
@@ -130,8 +144,9 @@ def run(repair_tool, benchmark, setup):
                                                                   repair_tool.name,
                                                                   subject_name, bug_name])
             if values.CONF_ANALYSE_ONLY:
-                if os.path.isdir(dir_result):
-                    analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                if not os.path.isdir(dir_result):
+                    if retrieve_results(dir_result, repair_tool):
+                        analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 continue
 
             if os.path.isdir(dir_exp):
