@@ -148,8 +148,9 @@ def run(repair_tool, benchmark, setup):
                     archive_name = "-".join([config_id, benchmark.name,
                                                                   repair_tool.name,
                                                                   subject_name, bug_name]) + ".tar.gz"
-                    if retrieve_results(archive_name, repair_tool):
-                        analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    if not retrieve_results(archive_name, repair_tool):
+                        continue
+                analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 continue
 
             if os.path.isdir(dir_exp):
