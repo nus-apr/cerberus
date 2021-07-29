@@ -74,9 +74,9 @@ class AbstractBenchmark:
 
 
     def save_logs(self, results_dir):
-        shutil.copy(self.log_deploy_path, results_dir)
-        shutil.copy(self.log_config_path, results_dir)
-        shutil.copy(self.log_build_path, results_dir)
-        shutil.copy(self.log_test_path, results_dir)
+        shutil.move(self.log_deploy_path, results_dir)
+        shutil.move(self.log_config_path, results_dir)
+        shutil.move(self.log_build_path, results_dir)
+        shutil.move(self.log_test_path, results_dir)
 
 

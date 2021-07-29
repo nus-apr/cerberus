@@ -72,9 +72,9 @@ class AbstractTool:
 
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         if os.path.isfile(self.log_instrument_path):
-            shutil.copy(self.log_instrument_path, dir_results)
+            shutil.move(self.log_instrument_path, dir_results)
         if os.path.isfile(self.log_output_path):
-            shutil.copy(self.log_output_path, dir_results)
+            shutil.move(self.log_output_path, dir_results)
         return
 
     def clean_up(self, exp_dir):
