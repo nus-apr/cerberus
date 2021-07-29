@@ -38,7 +38,7 @@ cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 echo -ne 'all:\nclean:\ndistclean:\n' >> contrib/Makefile
 
-
+cd $dir_name
 ## fix the test harness and the configuration script
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${bug_id}#g" test.sh
 sed -i "s#/data/manybugs/${project_name}/${bug_id}/limit#timeout 5#g" test.sh
