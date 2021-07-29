@@ -37,6 +37,9 @@ cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
 
+git reset --hard HEAD
+git checkout $(cat ../manifest.txt)
+
 cd $dir_name
 ## fix the test harness and the configuration script
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/data/manybugs/${project_name}/${fix_id}#g" test.sh
