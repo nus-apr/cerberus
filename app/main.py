@@ -83,13 +83,13 @@ def run(repair_tool, benchmark, setup):
     emitter.highlight("[configuration] repair-tool: " + repair_tool.name)
     emitter.highlight("[configuration] repair-benchmark: " + benchmark.name)
     run_config_id_list = values.CONF_CONFIG_ID_LIST
+    iteration = 0
     for config_id in run_config_id_list:
         if config_id not in setup:
             utilities.error_exit("invalid configuration id " + config_id)
         config_info = setup[config_id]
         values.CONFIG_ID = config_info[definitions.KEY_ID]
         experiment_list = benchmark.get_list()
-        iteration = 0
         for index in range(1, benchmark.size + 1):
             experiment_item = experiment_list[index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
@@ -114,7 +114,7 @@ def run(repair_tool, benchmark, setup):
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
             iteration = iteration + 1
             values.ITERATION_NO = iteration
-            emitter.sub_sub_title("Experiment: " + str(iteration))
+            emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(index))
             emitter.highlight("\t[configuration] identifier: " + str(config_info[definitions.KEY_ID]))
             emitter.highlight("\t[configuration] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
             emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
