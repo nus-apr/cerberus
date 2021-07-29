@@ -81,7 +81,7 @@ def retrieve_results(dir_expr, tool: AbstractTool):
         utilities.execute_command(extract_command)
         return True
     else:
-        emitter.error("[error] result archive not found")
+        emitter.error("\t\t[error] result archive not found at " + archive_path)
         return False
 
 
@@ -145,7 +145,7 @@ def run(repair_tool, benchmark, setup):
                                                                   subject_name, bug_name])
             if values.CONF_ANALYSE_ONLY:
                 if not os.path.isdir(dir_result):
-                    if retrieve_results(dir_result, repair_tool):
+                    if retrieve_results(dir_exp, repair_tool):
                         analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 continue
 
