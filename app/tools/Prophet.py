@@ -107,12 +107,12 @@ class Prophet(AbstractTool):
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "number of explored templates:" in line:
-                        count_enumerations = line.split("number of explored templates: ")[-1]
+                        count_enumerations = int(line.split("number of explored templates: ")[-1])
                     elif "Single building" in line and "failed as well!" in line:
                         count_non_compilable = count_non_compilable + 1
                     elif "different repair schemas!!!!" in line:
-                        size_search_space = line.replace(" different repair schemas!!!!", "").\
-                            replace("Total ", "").strip()
+                        size_search_space = int(line.replace(" different repair schemas!!!!", "").\
+                            replace("Total ", "").strip())
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if os.path.isdir(dir_results):
