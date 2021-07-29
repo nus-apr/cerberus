@@ -35,8 +35,10 @@ mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 chown -R root $dir_name
-git reset --hard HEAD
+
+make distclean
 git checkout $(cat ../manifest.txt)
+sed -i '978 s/./\t&/' test/Makefile
 
 cd $dir_name
 ## fix the test harness and the configuration script
