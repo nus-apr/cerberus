@@ -53,6 +53,9 @@ class GenProg(AbstractTool):
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")
+        dir_preprocessed = dir_expr + "/src/preprocessed"
+        if os.path.isdir(dir_preprocessed):
+            shutil.copytree(dir_preprocessed, dir_results + "/preprocessed")
         if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
             shutil.copy(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
         return
