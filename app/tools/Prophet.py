@@ -105,7 +105,7 @@ class Prophet(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r") as log_file:
+            with open(self.log_output_path, "r", encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "number of explored templates:" in line:
