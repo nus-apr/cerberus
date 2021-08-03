@@ -105,25 +105,25 @@ class ManyBugs(AbstractBenchmark):
                     log_file.write("{}: PASS\n".format(test_id))
 
             if unexpected_fail_list:
-                emitter.warning("\t\t\t\tunexpected failing test cases")
+                emitter.warning("\t\t\t\t[warning] unexpected failing test cases")
                 log_file.write("unexpected failing list: ")
                 for test_id in unexpected_fail_list:
                     log_file.write(str(test_id) + " ")
                     emitter.warning("\t\t\t\t\t" + str(test_id))
                 log_file.write("\n")
             else:
-                emitter.success("\t\t\t\tno unexpected failing test cases")
+                emitter.success("\t\t\t\t[success] no unexpected failing test cases")
             if unexpected_pass_list:
                 log_file.write("unexpected passing list: ")
-                emitter.warning("\t\t\t\tunexpected passing test cases")
+                emitter.warning("\t\t\t\t[warning] unexpected passing test cases")
                 for test_id in unexpected_pass_list:
                     log_file.write(str(test_id) + " ")
                     emitter.warning("\t\t\t\t\t" + str(test_id))
                 log_file.write("\n")
             else:
-                emitter.success("\t\t\t\tno unexpected passing test cases")
+                emitter.success("\t\t\t\t[success] no unexpected passing test cases")
             log_file.close()
-        emitter.success("\t\t\t\tsummary of tests written to: " + self.log_test_path)
+        emitter.highlight("\t\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
