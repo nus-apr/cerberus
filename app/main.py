@@ -107,20 +107,24 @@ def run(repair_tool, benchmark, setup):
         for index in range(1, benchmark.size + 1):
             experiment_item = experiment_list[index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
-            if values.CONF_BUG_ID and index != values.CONF_BUG_ID:
+            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+
+            if values.CONF_BUG_ID and bug_name != values.CONF_BUG_ID:
                 continue
-            if values.CONF_BUG_ID_LIST and str(index) not in values.CONF_BUG_ID_LIST:
+            if values.CONF_BUG_INDEX and index != values.CONF_BUG_INDEX:
+                continue
+            if values.CONF_BUG_INDEX_LIST and str(index) not in values.CONF_BUG_INDEX_LIST:
                 continue
             if values.CONF_SKIP_LIST and str(index) in values.CONF_SKIP_LIST:
                 continue
-            if values.CONF_START_ID and index < values.CONF_START_ID:
+            if values.CONF_START_INDEX and index < values.CONF_START_INDEX:
                 continue
-            if values.CONF_END_ID and index > values.CONF_END_ID:
+            if values.CONF_END_INDEX and index > values.CONF_END_INDEX:
                 break
             if values.CONF_SUBJECT_NAME and values.CONF_SUBJECT_NAME != subject_name:
                 continue
 
-            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             directory_name = benchmark.name + "/" + subject_name + "/" + bug_name
             dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name

@@ -32,18 +32,20 @@ def read_arg(argument_list):
                 values.CONF_SETUP_ONLY = True
             elif definitions.ARG_CONFIG_ID_LIST in arg:
                 values.CONF_CONFIG_ID_LIST = str(arg).replace(definitions.ARG_CONFIG_ID_LIST, "").split(",")
+            elif definitions.ARG_BUG_INDEX in arg:
+                values.CONF_BUG_INDEX = int(str(arg).replace(definitions.ARG_BUG_INDEX, ""))
             elif definitions.ARG_BUG_ID in arg:
                 values.CONF_BUG_ID = int(str(arg).replace(definitions.ARG_BUG_ID, ""))
-            elif definitions.ARG_START_ID in arg:
-                values.CONF_START_ID = int(str(arg).replace(definitions.ARG_START_ID, ""))
-            elif definitions.ARG_END_ID in arg:
-                values.CONF_END_ID = int(str(arg).replace(definitions.ARG_END_ID, ""))
+            elif definitions.ARG_START_INDEX in arg:
+                values.CONF_START_INDEX = int(str(arg).replace(definitions.ARG_START_INDEX, ""))
+            elif definitions.ARG_END_INDEX in arg:
+                values.CONF_END_INDEX = int(str(arg).replace(definitions.ARG_END_INDEX, ""))
             elif definitions.ARG_BENCHMARK in arg:
                 values.CONF_BENCHMARK = str(arg).replace(definitions.ARG_BENCHMARK, "")
             elif definitions.ARG_SKIP_LIST in arg:
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
-            elif definitions.ARG_BUG_ID_LIST in arg:
-                values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
+            elif definitions.ARG_BUG_INDEX_LIST in arg:
+                values.CONF_BUG_INDEX_LIST = str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")
             elif arg in ["--help", "-help", "-h"]:
                 emitter.emit_help()
                 exit(0)
@@ -58,7 +60,7 @@ def read_arg(argument_list):
             exit(1)
     if values.CONF_SUBJECT_NAME:
         emitter.normal("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
-    if values.CONF_START_ID is None and values.CONF_BUG_ID is None and values.CONF_BUG_ID_LIST is None and values.CONF_SUBJECT_NAME is None:
+    if values.CONF_START_INDEX is None and values.CONF_BUG_INDEX is None and values.CONF_BUG_INDEX_LIST is None and values.CONF_SUBJECT_NAME is None:
         emitter.warning("[warning] experiment id is not specified, running all experiments")
     if values.CONF_BENCHMARK is None:
         emitter.error("[invalid] --benchmark is missing")
