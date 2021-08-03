@@ -123,7 +123,7 @@ class ManyBugs(AbstractBenchmark):
             else:
                 emitter.success("\t\t\t\t[success] no unexpected passing test cases")
             log_file.close()
-        emitter.highlight("\t\t\t\tsummary of tests written to: " + self.log_test_path)
+        emitter.highlight("\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
     def save_artefacts(self, results_dir_path, exp_dir_path):
