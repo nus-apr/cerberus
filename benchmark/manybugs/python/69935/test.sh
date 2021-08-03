@@ -29,16 +29,16 @@ else
 
   if [[ $pattern == 'n' ]]; then
       cd $dir_name
-      timeout 5 bash test.sh $TEST_ID
+      timeout 40 bash test.sh $TEST_ID
   elif [[ $pattern == 'p' ]]; then
       cd $dir_name
-      timeout 5 bash test.sh $TEST_ID
+      timeout 40 bash test.sh $TEST_ID
   else
       if [[ $TEST_ID == '250' ]]; then
          TEST_ID=249
       fi
       cd $dir_name/src
-      timeout 5 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
+      timeout 40 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
       ret=$?
       if [[ $ret == 0 ]]; then
          exit 0;
