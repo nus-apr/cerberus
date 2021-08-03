@@ -35,7 +35,7 @@ def read_arg(argument_list):
             elif definitions.ARG_BUG_INDEX in arg:
                 values.CONF_BUG_INDEX = int(str(arg).replace(definitions.ARG_BUG_INDEX, ""))
             elif definitions.ARG_BUG_ID in arg:
-                values.CONF_BUG_ID = int(str(arg).replace(definitions.ARG_BUG_ID, ""))
+                values.CONF_BUG_ID = str(arg).replace(definitions.ARG_BUG_ID, ""
             elif definitions.ARG_START_INDEX in arg:
                 values.CONF_START_INDEX = int(str(arg).replace(definitions.ARG_START_INDEX, ""))
             elif definitions.ARG_END_INDEX in arg:
