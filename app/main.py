@@ -162,8 +162,8 @@ def run(repair_tool, benchmark, setup):
                 benchmark.clean(dir_exp)
             utilities.clean_results(dir_result)
             benchmark.setup(index, definitions.DIR_LOGS, values.DEFAULT_RUN_TESTS_ONLY)
-            benchmark.save_artefacts(dir_result, dir_exp)
             if not values.DEFAULT_SETUP_ONLY:
+                benchmark.save_artefacts(dir_result, dir_exp)
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
                 save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
