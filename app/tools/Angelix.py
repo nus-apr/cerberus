@@ -125,8 +125,10 @@ class Angelix(AbstractTool):
                         count_enumerations = count_enumerations + 1
                     elif "repair test suite: []" in line:
                         is_error = True
+                        emitter.warning("\t\t\t\t[warning] repair test suite: []")
                     elif "validation test suite: []" in line:
                         is_error = True
+                        emitter.warning("\t\t\t\t[warning] validation test suite: []")
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
