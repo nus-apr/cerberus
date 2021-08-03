@@ -83,9 +83,9 @@ class Fix2Fit(AbstractTool):
             log_lines = log_file.readlines()
             for line in log_lines:
                 if "candidates evaluated: " in line:
-                    count_enumerations = int(line.split("candidates evaluated: ")[-1])
+                    count_enumerations = int(line.split("candidates evaluated: ")[-1].strip())
                 elif "search space size: " in line:
-                    size_search_space = line.split("search space size: ")[-1]
+                    size_search_space = line.split("search space size: ")[-1].strip()
             log_file.close()
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, 'r', encoding='iso-8859-1') as log_file:
