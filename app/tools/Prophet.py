@@ -117,7 +117,7 @@ class Prophet(AbstractTool):
                     elif "Segmentation fault" in line:
                         is_error = True
                     elif "Verification failed!" in line or "Repair error:" in line:
-                        is_error = True
+                        emitter.warning("\t\t\t\t[warning] verification error detected in test suite")
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
