@@ -10,10 +10,10 @@ class AbstractBenchmark:
     meta_file = None
     bench_dir_path = None
     name = None
-    log_deploy_path = None
-    log_config_path = None
-    log_build_path = None
-    log_test_path = None
+    log_deploy_path = "None"
+    log_config_path = "None"
+    log_build_path = "None"
+    log_test_path = "None"
     size = 0
 
     def __init__(self):
