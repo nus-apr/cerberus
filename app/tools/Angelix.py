@@ -136,6 +136,7 @@ class Angelix(AbstractTool):
                         emitter.warning("\t\t\t\t[warning] No negative test exists")
                     elif "no patch generated" in line:
                         is_timeout = False
+                        count_plausible = 0
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
