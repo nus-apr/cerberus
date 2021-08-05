@@ -129,6 +129,9 @@ class Angelix(AbstractTool):
                     elif "validation test suite: []" in line:
                         is_error = True
                         emitter.warning("\t\t\t\t[warning] validation test suite: []")
+                    elif "No negative test exists":
+                        is_error = True
+                        emitter.warning("\t\t\t\t[warning] No negative test exists")
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
