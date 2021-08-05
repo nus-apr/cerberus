@@ -93,9 +93,8 @@ class Angelix(AbstractTool):
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
-        dir_patches = dir_expr + "/src/repair"
-        if os.path.isdir(dir_patches):
-            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
+        copy_command = "mv src-2021-* " + dir_results + "/patches"
+        execute_command(copy_command)
         return
 
     def post_process(self, dir_expr, dir_results):
