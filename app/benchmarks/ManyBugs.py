@@ -24,18 +24,18 @@ class ManyBugs(AbstractBenchmark):
                         if self.test_all(directory_name, experiment_item, dir_logs):
                             emitter.success("\t\t\t[status] setting up completed successfully")
                         else:
-                            error_exit("\t[error] testing failed")
+                            emitter.error("\t\t\t[error] testing failed")
                     else:
                         if self.test(directory_name, bug_id, dir_logs):
                             emitter.success("\t\t\t[status] setting up completed successfully")
                         else:
-                            emitter.error("\t[error] testing failed")
+                            emitter.error("\t\t\t[error] testing failed")
                 else:
-                    emitter.error("\t[error] build failed")
+                    emitter.error("\t\t\t[error] build failed")
             else:
-                emitter.error("\t[error] config failed")
+                emitter.error("\t\t\t[error] config failed")
         else:
-            emitter.error("\t[error] deploy failed")
+            emitter.error("\t\t\t[error] deploy failed")
         return
 
     def deploy(self, exp_dir_path, bug_id, log_dir_path):
