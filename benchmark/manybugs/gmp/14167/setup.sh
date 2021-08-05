@@ -41,6 +41,7 @@ cd $dir_name/src
 
 mkdir tests/mpbsd/
 touch tests/mpbsd/Makefile.in
+rm $dir_name/src/ltmain.sh
 cp $script_dir/ltmain.sh ltmain.sh
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' configure.in
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile.am
