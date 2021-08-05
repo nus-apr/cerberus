@@ -129,7 +129,7 @@ class Angelix(AbstractTool):
                     elif "validation test suite: []" in line:
                         is_error = True
                         emitter.warning("\t\t\t\t[warning] validation test suite: []")
-                    elif "No negative test exists":
+                    elif "No negative test exists" in line:
                         is_error = True
                         emitter.warning("\t\t\t\t[warning] No negative test exists")
                 log_file.close()
