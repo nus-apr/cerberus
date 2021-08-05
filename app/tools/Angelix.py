@@ -132,6 +132,7 @@ class Angelix(AbstractTool):
                         emitter.warning("\t\t\t\t[warning] validation test suite: []")
                     elif "No negative test exists" in line:
                         is_error = True
+                        is_timeout = False
                         emitter.warning("\t\t\t\t[warning] No negative test exists")
                     elif "no patch generated" in line:
                         is_timeout = False
