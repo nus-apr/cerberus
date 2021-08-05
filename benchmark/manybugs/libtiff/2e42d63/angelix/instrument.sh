@@ -3,7 +3,7 @@ set -euo pipefail
 version=5b02179-3dfb33b #this is the angelix version
 gold_file=tools/tiffcrop.c-2e42d63
 aux_dir=/experiments/benchmark/manybugs/libtiff/.aux
-export ANGELIX_ARGS="--assert $aux_dir/assert.json"
+echo "--assert $aux_dir/assert.json" > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
