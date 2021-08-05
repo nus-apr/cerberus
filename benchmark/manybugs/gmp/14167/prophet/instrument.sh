@@ -8,7 +8,8 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 sed -i '79d' /prophet-gpl/tools/gmp-build.py
 sed -i '79i \\tret = subprocess.call(["make", "CFLAGS=\\"-static\\""], env = my_env);'  /prophet-gpl/tools/gmp-build.py
 
-
+cp $dir_name/src/gmp.h $dir_name/src/mpz/
+cp $dir_name/src/gmp-impl.h $dir_name/src/mpz/
 mkdir $dir_name/prophet
 
 cat <<EOF > $dir_name/prophet/prophet.conf
