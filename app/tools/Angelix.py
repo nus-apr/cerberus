@@ -68,9 +68,14 @@ class Angelix(AbstractTool):
         if fix_location:
             angelix_command += " --lines {0}  ".format(line_number)
 
-        if os.getenv("ANGELIX_ARGS", False):
-            angelix_command += " " + os.environ["ANGELIX_ARGS"] + " "
-
+        if os.path.isfile("/tmp/ANGELIX_ARGS"):
+            with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
+                arg_line = arg_file.readline()
+                angelix_command += " " + arg_line.strip() + " "
+        if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
+            with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
+                load_line = arg_file.readline()
+                os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
         angelix_command += "  --generate-all {0} " \
                            " --timeout {1} >> {2} 2>&1 ".format(additional_tool_param, str(timeout_s), self.log_output_path)
         status = execute_command(angelix_command)

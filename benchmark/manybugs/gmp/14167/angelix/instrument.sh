@@ -9,8 +9,8 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 version=14166-14167 #this is the angelix version
 gold_file=mpz/gcdext.c-$fix_id
 # buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
-export ANGELIX_ARGS=" --defect assignments --group-size 1 --klee-solver-timeout 100 --klee-timeout 600 --klee-search dfs --klee-max-forks 100 --synthesis-levels variables --synthesis-bool-only  "
-export ANGELIX_KLEE_LOAD="-load=/experiments/.angelix/validation/.libs/libgmp.so"
+echo " --defect assignments --group-size 1 --klee-solver-timeout 100 --klee-timeout 600 --klee-search dfs --klee-max-forks 100 --synthesis-levels variables --synthesis-bool-only  " > /tmp/ANGELIX_ARGS
+echo "-load=/experiments/.angelix/validation/.libs/libgmp.so" > /tmp/ANGELIX_KLEE_LOAD
 aux=/experiments/benchmark/manybugs/gmp/.aux
 
 
