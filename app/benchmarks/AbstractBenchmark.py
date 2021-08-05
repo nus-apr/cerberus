@@ -72,11 +72,14 @@ class AbstractBenchmark:
         """Method documentation"""
         return
 
-
     def save_logs(self, results_dir):
-        shutil.move(self.log_deploy_path, results_dir)
-        shutil.move(self.log_config_path, results_dir)
-        shutil.move(self.log_build_path, results_dir)
-        shutil.move(self.log_test_path, results_dir)
+        if os.path.isfile(self.log_deploy_path):
+            shutil.move(self.log_deploy_path, results_dir)
+        if os.path.isfile(self.log_config_path):
+            shutil.move(self.log_config_path, results_dir)
+        if os.path.isfile(self.log_build_path):
+            shutil.move(self.log_build_path, results_dir)
+        if os.path.isfile(self.log_test_path):
+            shutil.move(self.log_test_path, results_dir)
 
 
