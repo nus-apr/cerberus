@@ -1,8 +1,17 @@
 #!/bin/bash
 set -euo pipefail
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
+project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
+fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+dir_name=/data/$benchmark_name/$project_name/$fix_id
+
 version=14166-14167 #this is the angelix version
-gold_file=mpz/gcdext.c-14167
+gold_file=mpz/gcdext.c-$fix_id
+# buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
+export ANGELIX_ARGS=" --defect assignments --group-size 1 --klee-solver-timeout 100 --klee-timeout 600 --klee-search dfs --klee-max-forks 100 --synthesis-levels variables --synthesis-bool-only  "
 aux=/experiments/benchmark/manybugs/gmp/.aux
+
 
 clean-source () {
     local directory="$1"
@@ -228,7 +237,7 @@ fi
 instrument $buggy_directory
 instrument $golden_directory
 
-run_tests_script=$(readlink -f "$root_directory/gmp-run-tests.pl")
+run_tests_script=$(readlink -f "$aux/gmp-run-tests.pl")
 
 cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
