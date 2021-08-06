@@ -9,7 +9,7 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 version=311346-311348 #this is the angelix version
 gold_file=ext/standard/url_scanner_ex.c-$fix_id
 # buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
-export ANGELIX_ARGS=" --synthesis-levels boolean-constants --klee-max-forks 100 --group-size 1 "
+echo " --synthesis-levels boolean-constants --klee-max-forks 100 --group-size 1 " > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
