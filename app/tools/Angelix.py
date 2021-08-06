@@ -126,6 +126,8 @@ class Angelix(AbstractTool):
                 for line in log_lines:
                     if "candidate fix synthesized" in line:
                         count_plausible = count_plausible + 1
+                    elif "counterexample test" in line:
+                        count_plausible = count_plausible - 1
                     elif "selected expressions" in line:
                         size_search_space = size_search_space + 1
                     elif "considering suspicious expressions" in line:
