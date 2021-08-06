@@ -9,7 +9,7 @@ dir_name=/data/$benchmark_name/$project_name/$fix_id
 version=309986-310009 #this is the angelix version
 gold_file=Zend/zend_object_handlers.c-$fix_id
 # buggy_file=ext/tokenizer/tokenizer.c-e65d361fde
-export ANGELIX_ARGS="--redundant-test --synthesis-levels extended-logic --synthesis-ptr-vars --klee-max-forks 100 --group-size 1  "
+echo "--redundant-test --synthesis-levels extended-logic --synthesis-ptr-vars --klee-max-forks 100 --group-size 1  " > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
