@@ -4,7 +4,7 @@ version=d13be72c-ccadf48a #this is the angelix version
 gold_file=libtiff/tif_dirread.c-3edb9cd
 aux_dir=/experiments/benchmark/manybugs/libtiff/.aux
 #echo "--assert $aux_dir/assert.json" > /tmp/ANGELIX_ARGS
-
+echo  "--klee-max-forks 100  --group-size 1  --ignore-trivial   --klee-search dfs  --synthesis-levels integer-constants  --synthesis-timeout 200000 " > /tmp/ANGELIX_ARGS
 clean-source () {
     local directory="$1"
     pushd "$directory" &> /dev/null

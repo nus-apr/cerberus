@@ -4,6 +4,7 @@ version=5b02179-3dfb33b #this is the angelix version
 gold_file=tools/tiffcrop.c-2e42d63
 aux_dir=/experiments/benchmark/manybugs/libtiff/.aux
 #echo "--assert $aux_dir/assert.json" > /tmp/ANGELIX_ARGS
+echo " --klee-max-forks 20   --group-size 1  --synthesis-ptr-vars  --synthesis-func-params --synthesis-used-vars --ignore-trivial --synthesis-levels variables " > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
