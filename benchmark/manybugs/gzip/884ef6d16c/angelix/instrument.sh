@@ -3,6 +3,9 @@ set -euo pipefail
 version=3eb6091d69-884ef6d16c #this is the angelix version
 gold_file=gzip.c-884ef6d16c
 test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
+echo "--group-size 1 --klee-max-forks 100  --ignore-trivial --synthesis-level boolean-constants --suspicious 30"  > /tmp/ANGELIX_ARGS
+
+
 clean-source () {
     local directory="$1"
     pushd "$directory" &> /dev/null
