@@ -71,7 +71,7 @@ add-angelix-runner () {
 
     local line=$(grep -n -v "^\s*[#;]" "$script" | grep -v "echo" | grep "$call" | grep -e "-d" | cut -d: -f 1)
     #echo "line:$line::script: $script"
-    sed -i "$line"'s/\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
+    sed -i "$line"'s/^\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
     #sed -i "s/-S ''/-S \\\'\\\'/" "$script"
 }
 
@@ -279,7 +279,8 @@ cat <<EOF > $root_directory/angelix/oracle
 #!/bin/bash
 FILE=/tmp/testo
 perl "$run_tests_script" "\$1" &> "\$FILE"
-if [[ -s \$FILE ]] ; then
+res="\$(cat \$FILE | grep FAIL | wc -l)"
+if [[ res -ne 0 ]] ; then
   pwd >> "\$FILE"
   exit 1;
 else
