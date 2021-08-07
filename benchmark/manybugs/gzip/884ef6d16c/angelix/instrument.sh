@@ -3,8 +3,7 @@ set -euo pipefail
 version=3eb6091d69-884ef6d16c #this is the angelix version
 gold_file=gzip.c-884ef6d16c
 test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
-echo "--group-size 1 --klee-max-forks 100  --ignore-trivial --synthesis-level boolean-constants --suspicious 30"  > /tmp/ANGELIX_ARGS
-
+echo "--group-size 1 --klee-max-forks 100  --ignore-trivial --synthesis-level boolean-constants --suspicious 30 --test-timeout 50  "   > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
@@ -297,6 +296,6 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-make -j`nproc`
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build

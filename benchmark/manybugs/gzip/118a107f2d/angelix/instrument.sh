@@ -2,7 +2,7 @@
 set -euo pipefail
 version=1a085b1446-118a107f2d #this is the angelix version
 gold_file=gzip.c-118a107f2d
-
+echo " --test-timeout 50  " > /tmp/ANGELIX_ARGS
 test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
 clean-source () {
     local directory="$1"
@@ -258,6 +258,6 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-make -j`nproc`
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build

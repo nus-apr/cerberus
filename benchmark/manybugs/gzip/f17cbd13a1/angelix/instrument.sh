@@ -4,7 +4,7 @@ version=a1d3d4019d-f17cbd13a1 #this is the angelix version
 gold_file=gzip.c-f17cbd13a1
 test_array=( "helin-segv" "help-version" "hufts" "mixed" "null-suffix-clobber" "stdin" "trailing-nul" )
 
-echo "--group-size 1 --klee-max-forks 100 --synthesis-level variables    --synthesis-used-vars  --invalid-localization --suspicious 30" > /tmp/ANGELIX_ARGS
+echo "--group-size 1 --klee-max-forks 100 --synthesis-level variables --test-timeout 50   --synthesis-used-vars  --invalid-localization --suspicious 30" > /tmp/ANGELIX_ARGS
 
 clean-source () {
     local directory="$1"
@@ -297,6 +297,6 @@ chmod +x $root_directory/angelix/config
 
 cat <<EOF > $root_directory/angelix/build
 #!/bin/bash
-make -j`nproc`
+make -e -j`nproc`
 EOF
 chmod u+x $root_directory/angelix/build
