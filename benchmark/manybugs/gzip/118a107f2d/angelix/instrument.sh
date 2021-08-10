@@ -86,6 +86,13 @@ prepare-angelix-runner () {
 
     sed -i 's/compare/diff/' "$script"
 
+    if [[ $script == *"trailing-nul" ]]; then
+      sed -i '23i rm -f 0 00 1' $script
+      sed -i "38i if [ \$fail -ne 0 ]; then" $script
+      sed -i "39i echo 'FAIL:'" $script
+      sed -i "40i fi" $script
+    fi
+
     local kline=$(grep -n "gzip" "$script")
     #echo "kline:$kline"
 }
