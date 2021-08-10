@@ -122,12 +122,12 @@ class Prophet(AbstractTool):
                     elif "Verification failed!" in line or "Repair error:" in line:
                         emitter.warning("\t\t\t\t[warning] verification error detected in test suite")
                 log_file.close()
+        count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if os.path.isdir(dir_results):
             output_patch_list = [f for f in listdir(dir_results) if isfile(join(dir_results, f)) and ".c" in f]
             count_plausible = len(output_patch_list)
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
