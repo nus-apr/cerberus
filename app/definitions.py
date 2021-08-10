@@ -1,6 +1,6 @@
 import os
-
-DIR_MAIN = os.path.abspath(os.getcwd())
+from os.path import dirname
+DIR_MAIN = dirname(dirname(os.path.realpath(__file__)))
 DIR_LOGS = "/logs"
 DIR_RESULT = "/results"
 DIR_EXPERIMENT = "/experiments"
