@@ -108,3 +108,10 @@ class CPR(AbstractTool):
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
+
+    def pre_process(self):
+        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
+        super(CPR, self).pre_process()
+        if not os.path.isdir("/tmp"):
+            os.mkdir("/tmp")
+        return
