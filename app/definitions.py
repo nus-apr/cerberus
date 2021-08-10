@@ -51,7 +51,6 @@ ARG_ANALYSE_ONLY = "--analyse-only"
 
 FILE_META_DATA = None
 FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse21.json"
-FILE_ERROR_LOG = "error-log"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
