@@ -85,7 +85,7 @@ class CPR(AbstractTool):
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "|P|=" in line:
-                        count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", ""))
+                        count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", "").split(":")[0])
                     elif "Runtime Error" in line:
                         is_error = True
                     elif "statistics" in line:
