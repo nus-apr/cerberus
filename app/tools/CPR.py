@@ -84,28 +84,11 @@ class CPR(AbstractTool):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
                 for line in log_lines:
-                    if "candidate fix synthesized" in line:
-                        count_plausible = count_plausible + 1
-                    elif "counterexample test" in line:
-                        count_plausible = count_plausible - 1
-                    elif "selected expressions" in line:
-                        size_search_space = size_search_space + 1
-                    elif "considering suspicious expressions" in line:
-                        count_enumerations = count_enumerations + 1
-                    elif "repair test suite: []" in line:
+                    if "|P|=" in line:
+                        count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", ""))
+                    elif "Runtime Error" in line:
                         is_error = True
-                        emitter.warning("\t\t\t\t[warning] repair test suite: []")
-                    elif "validation test suite: []" in line:
-                        is_error = True
-                        emitter.warning("\t\t\t\t[warning] validation test suite: []")
-                    elif "No negative test exists" in line:
-                        is_error = True
-                        is_timeout = False
-                        emitter.warning("\t\t\t\t[warning] No negative test exists")
-                    elif "no patch generated" in line:
-                        is_timeout = False
-                        count_plausible = 0
-                    elif "patches successfully generated" in line:
+                    elif "statistics" in line:
                         is_timeout = False
 
                 log_file.close()
