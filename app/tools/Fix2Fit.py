@@ -77,6 +77,9 @@ class Fix2Fit(AbstractTool):
                 if regex.match(file):
                     self.log_output_path = dir_results + "/" + file
                     break
+        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no log file found")
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         with open(dir_results + "/original.txt", "r") as log_file:

@@ -78,6 +78,11 @@ class F1X(AbstractTool):
                 if regex.match(file):
                     self.log_output_path = dir_results + "/" + file
                     break
+        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no log file found")
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_error = False
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -90,7 +95,8 @@ class F1X(AbstractTool):
                 elif "failed to infer compile commands" in line:
                     size_search_space = -1
             log_file.close()
-
+        if is_error:
+            emitter.error("\t\t\t\t[error] error detected in logs")
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))

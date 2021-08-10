@@ -102,6 +102,9 @@ class Prophet(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no log file found")
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         if os.path.isfile(self.log_output_path):
