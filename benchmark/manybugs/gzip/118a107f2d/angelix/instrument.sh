@@ -60,7 +60,7 @@ add-angelix-runner-simple () {
 
     local line=$(grep -n -v "^\s*[#;]" "$script" | grep -v "echo" | grep "$call" | cut -d: -f 1)
     #echo "line:$line::script: $script"
-    sed -i "$line"'s/^\.\.\/gzip/${ANGELIX_RUN:-eval} \.\.\/gzip/' "$script"
+    sed -i "$line"'s/\.\.\/gzip/${ANGELIX_RUN:-eval} \.\.\/gzip/' "$script"
 }
 
 add-angelix-runner () {
@@ -69,7 +69,7 @@ add-angelix-runner () {
 
     local line=$(grep -n -v "^\s*[#;]" "$script" | grep -v "echo" | grep "$call" | grep -e "-d" | cut -d: -f 1)
     #echo "line:$line::script: $script"
-    sed -i "$line"'s/^\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
+    sed -i "$line"'s/\.\.\/gzip/exe() { "$@"; }; ${ANGELIX_RUN:-exe} \.\.\/gzip/' "$script"
     #sed -i "s/-S ''/-S \\\'\\\'/" "$script"
 }
 
