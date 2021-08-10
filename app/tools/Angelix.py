@@ -167,7 +167,7 @@ class Angelix(AbstractTool):
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
 
     def pre_process(self):
-        emitter.normal("\t\t\t post-processing for {}".format(self.name))
+        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
         super(Angelix, self).pre_process()
         if not os.path.isdir("/tmp"):
             os.mkdir("/tmp")
