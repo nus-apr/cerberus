@@ -86,6 +86,9 @@ class CPR(AbstractTool):
                 for line in log_lines:
                     if "|P|=" in line:
                         count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", "").split(":")[0])
+                    elif "number of concrete patches explored" in line:
+                        count_enumerations = int(line.split("number of concrete patches explored: ")[-1].strip().replace("^[[0m", "").split(":")[0])
+                        size_search_space = count_enumerations
                     elif "Runtime Error" in line:
                         is_error = True
                     elif "statistics" in line:
