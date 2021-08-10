@@ -100,10 +100,17 @@ class Fix2Fit(AbstractTool):
                         is_error = True
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
-        dir_patch = dir_results + "/patches"
-        if os.path.isdir(dir_patch):
+        regex_dir = re.compile('(f1x.*$)')
+        dir_patch = None
+        for root, dirs, files in os.walk(dir_results):
+            for dir in dirs:
+                if regex_dir.match(dir):
+                    dir_patch = dir_results + "/" + dir
+                    break
+        if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_plausible = len(output_patch_list)
+
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))

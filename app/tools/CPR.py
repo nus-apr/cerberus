@@ -1,5 +1,6 @@
 import os
 import shutil
+import re
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
@@ -59,3 +60,65 @@ class CPR(AbstractTool):
         clean_command = "rm -rf " + dir_results + "/output/klee-out-*"
         execute_command(clean_command)
 
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
+        emitter.normal("\t\t\t analysing output of " + self.name)
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
+        regex = re.compile('(.*-output.log$)')
+        for root, dirs, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file):
+                    self.log_output_path = dir_results + "/" + file
+                    break
+        count_non_compilable = 0
+        count_plausible = 0
+        size_search_space = 0
+        count_enumerations = 0
+        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no log file found")
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_error = False
+        is_timeout = True
+        if os.path.isfile(self.log_output_path):
+            with open(self.log_output_path, "r") as log_file:
+                log_lines = log_file.readlines()
+                for line in log_lines:
+                    if "candidate fix synthesized" in line:
+                        count_plausible = count_plausible + 1
+                    elif "counterexample test" in line:
+                        count_plausible = count_plausible - 1
+                    elif "selected expressions" in line:
+                        size_search_space = size_search_space + 1
+                    elif "considering suspicious expressions" in line:
+                        count_enumerations = count_enumerations + 1
+                    elif "repair test suite: []" in line:
+                        is_error = True
+                        emitter.warning("\t\t\t\t[warning] repair test suite: []")
+                    elif "validation test suite: []" in line:
+                        is_error = True
+                        emitter.warning("\t\t\t\t[warning] validation test suite: []")
+                    elif "No negative test exists" in line:
+                        is_error = True
+                        is_timeout = False
+                        emitter.warning("\t\t\t\t[warning] No negative test exists")
+                    elif "no patch generated" in line:
+                        is_timeout = False
+                        count_plausible = 0
+                    elif "patches successfully generated" in line:
+                        is_timeout = False
+
+                log_file.close()
+        count_implausible = count_enumerations - count_plausible - count_non_compilable
+        if is_error:
+            emitter.error("\t\t\t\t[error] error detected in logs")
+        if is_timeout:
+            emitter.warning("\t\t\t\t[warning] timeout before ending")
+        with open(self.log_analysis_path, 'w') as log_file:
+            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            log_file.write("\t\t any errors: {0}\n".format(is_error))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable
