@@ -18,7 +18,7 @@ cd $dir_name/src
 
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;
 make -e fib_table.h;make -e mp_bases.h;
-make CC=clang CXX=clang++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
+make CC=wllvm CXX=wllvm++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
 
 cp ../diffs/mpn/generic/powm.c-13420 mpn/generic/powm.c
