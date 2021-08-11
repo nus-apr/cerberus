@@ -1,1 +1,1 @@
-[[7,"gzip","-d $POC_trailing-nul-0.gz", "cpr/test-expected-output/trailing-nul-0.smt2"],[7,"gzip","-d $POC_trailing-nul-00.gz", "cpr/test-expected-output/trailing-nul-00.smt2"],[7,"gzip","-d $POC_trailing-nul-1.gz", "cpr/test-expected-output/trailing-nul-1.smt2"]]
+[[19,"tests/mpz/t-gcd","-d $POC_t-gcd.txt", "cpr/test-expected-output/t-gcd.smt2"]]
