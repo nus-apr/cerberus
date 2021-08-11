@@ -57,7 +57,7 @@ class CPR(AbstractTool):
     def post_process(self, dir_expr, dir_results):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
         super(CPR, self).post_process(dir_expr, dir_results)
-        clean_command = "rm -rf " + dir_results + "/output/klee-out-*"
+        clean_command = "rm -rf " + dir_results + "/patches/klee-out-*"
         execute_command(clean_command)
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
