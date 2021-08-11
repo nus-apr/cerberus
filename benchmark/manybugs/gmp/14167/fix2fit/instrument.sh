@@ -26,7 +26,7 @@ sed -i "111d" tests/mpz/t-gcd.c
 sed -i "111i int reps = atoi(argv[1]); " tests/mpz/t-gcd.c
 sed -i "111i char* filename = argv[2];" tests/mpz/t-gcd.c
 sed -i "139i char line1 [1000];\n char line2 [1000];" tests/mpz/t-gcd.c
-sed -i "141i FILE *file = fopen ( filename, "r" );" tests/mpz/t-gcd.c
+sed -i "141i FILE *file = fopen ( filename, \"r\" );" tests/mpz/t-gcd.c
 sed -i "142i if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }" tests/mpz/t-gcd.c
 sed -i "143i else {    perror(filename); }" tests/mpz/t-gcd.c
 sed -i "145,149d" tests/mpz/t-gcd.c

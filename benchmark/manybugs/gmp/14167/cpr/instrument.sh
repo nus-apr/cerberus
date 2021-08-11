@@ -14,15 +14,11 @@ if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
 fi
 
 
-# Compile gmp.
-CC=wllvm CXX=wllvm++ ./configure --disable-shared --enable-static --disable-fft --disable-mpbsd --disable-cxx --disable-fast-install --disable-minithres
-CC=wllvm CXX=wllvm++ ./configure --disable-shared --disable-cxx --disable-fast-install --enable-static;
-
 cd $dir_name/src
 
 sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;
 make -e fib_table.h;make -e mp_bases.h;
-CC=clang CXX=clang++ make CFLAGS="-g -O0 -static -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
+make CC=clang CXX=clang++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
 
 cp ../diffs/mpn/generic/powm.c-13420 mpn/generic/powm.c
@@ -43,7 +39,7 @@ sed -i "111d" tests/mpz/t-gcd.c
 sed -i "111i int reps = atoi(argv[1]); " tests/mpz/t-gcd.c
 sed -i "111i char* filename = argv[2];" tests/mpz/t-gcd.c
 sed -i "139i char line1 [1000];\n char line2 [1000];" tests/mpz/t-gcd.c
-sed -i "141i FILE *file = fopen ( filename, "r" );" tests/mpz/t-gcd.c
+sed -i "141i FILE *file = fopen ( filename, \"r\" );" tests/mpz/t-gcd.c
 sed -i "142i if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }" tests/mpz/t-gcd.c
 sed -i "143i else {    perror(filename); }" tests/mpz/t-gcd.c
 sed -i "145,149d" tests/mpz/t-gcd.c
@@ -52,12 +48,11 @@ sed -i "145i mpz_set_str (op1, line1, 16);\n mpz_set_str (op2, line2, 16);" test
 
 sed -i 's/wllvm++/\/CPR\/tools\/trident-cxx/g' mpn/Makefile
 sed -i 's/wllvm/\/CPR\/tools\/trident-cc/g' mpn/Makefile
-CC=$TRIDENT_CC CXX=$TRIDENT_CXX make CFLAGS="-g -O0 -static -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
+make CC=$TRIDENT_CC CXX=$TRIDENT_CXX  CFLAGS="-g -O0 -static -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 cd tests/mpz
 sed -i 's/wllvm++/\/CPR\/tools\/trident-cxx/g' Makefile
 sed -i 's/wllvm/\/CPR\/tools\/trident-cc/g' Makefile
-CC=$TRIDENT_CC CXX=$TRIDENT_CXX make CFLAGS="-g -O0 -static -I/klee/source/include -L/klee/build/lib -lkleeRuntest" t-gcd
-
+make CC=$TRIDENT_CC CXX=$TRIDENT_CXX CFLAGS="-g -O0 -static -I/klee/source/include -L/klee/build/lib -lkleeRuntest" t-gcd
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
