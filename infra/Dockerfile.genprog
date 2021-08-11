@@ -66,7 +66,8 @@ RUN apt-get update && apt-get install -y  \
     tk-dev \
     mercurial \
     tcl-dev \
-    tix-dev
+    tix-dev \
+    libgdbm-compat-dev
 
 ENV PATH "/root/.opam/system/bin/:/opt/genprog/bin:${PATH}"
 
