@@ -187,7 +187,7 @@ def end(time_info, is_error=False):
 
 
 def emit_help():
-    write("Usage: python driver.py [OPTIONS] --benchmark={manybugs} --tool={cpr/genprog/angelix/prophet/fix2fit} ", WHITE)
+    write("Usage: cerberus [OPTIONS] --benchmark={manybugs} --tool={cpr/genprog/angelix/prophet/fix2fit/f1x} ", WHITE)
     write("Options are:", WHITE)
     write("\t" + definitions.ARG_DATA_PATH + "\t| " + "directory for experiments", WHITE)
     write("\t" + definitions.ARG_TOOL_NAME + "\t| " + "name of the tool", WHITE)
