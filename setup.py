@@ -44,7 +44,7 @@ class build_py(_build_py):
 
 
 setup(
-    name='cpr',
+    name='cerberus',
     version='0.1.0',
     packages=find_packages(),
     ext_modules=cythonize(
