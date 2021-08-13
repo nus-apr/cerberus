@@ -40,7 +40,7 @@ chown -R root $dir_name
 
 cd $dir_name/src
 sed -i "35i int siz;" mpz/gcdext.c
-sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tint siz = SIZ (a) >= 0;\
+sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\t siz = SIZ (a) >= 0;\
 \tif (siz) {\
 \tssize = 1;\
 \t} else {\
