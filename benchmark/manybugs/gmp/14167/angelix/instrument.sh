@@ -158,6 +158,19 @@ instrument () {
         else
             local src1="$directory/mpz/gcdext.c"
             restore_original $src1
+            sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tsiz = SIZ (a) >= 0;\
+\tif (siz) {\
+\tssize = 1;\
+\t} else {\
+\tssize = -1;\
+\t}/' $src1
+
+            replace-in-range "$src1" \
+                '^mpz_gcdext (' \
+                10 \
+                '  __mpz_struct stmp, gtmp;' \
+                '  __mpz_struct stmp, gtmp;\
+  int siz;'
 
             sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/configure.in"
             sed -i 's/no-dependencies ansi2knr/no-dependencies/g' "$directory/Makefile.am"
