@@ -39,6 +39,12 @@ sed -i "s#\$abs_srcdir#/data/manybugs/${project_name}/${fix_id}/src/tests#g" tes
 chown -R root $dir_name
 
 cd $dir_name/src
+sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tsiz = SIZ (a) >= 0;\
+\tif (siz) {\
+\tssize = 1;\
+\t} else {\
+\tssize = -1;\
+\t}/' mpz/gcdext.c
 
 mkdir tests/mpbsd/
 touch tests/mpbsd/Makefile.in

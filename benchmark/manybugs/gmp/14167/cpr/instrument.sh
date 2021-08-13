@@ -22,18 +22,23 @@ make -e fib_table.h;make -e mp_bases.h;
 make CC=wllvm CXX=wllvm++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
 
-cp ../diffs/mpn/generic/powm.c-13420 mpn/generic/powm.c
-sed -i '76i #include <klee/klee.h>' mpn/generic/powm.c
-sed -i '213d' mpn/generic/powm.c
-sed -i '213i b2p = ( __trident_choice("L1634", "i32", (int[]){rp, tp, n}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0));' mpn/generic/powm.c
-sed -i '228i klee_silent_exit(0);' mpn/generic/powm.c
 
-sed -i '23i #include <klee/klee.h>' mpn/generic/add_n.c
-sed -i '23i #endif' mpn/generic/add_n.c
-sed -i '23i #define TRIDENT_OUTPUT(id, typestr, value) value' mpn/generic/add_n.c
-sed -i '23i #ifndef TRIDENT_OUTPUT' mpn/generic/add_n.c
-sed -i '45i klee_assert(vp - rp == 1 || up - rp == 1);' mpn/generic/add_n.c
-sed -i '45i TRIDENT_OUTPUT("obs", "i32", vp - rp == 1 || up - rp == 1);' mpn/generic/add_n.c
+sed -i '25i #include <klee/klee.h>' mpz/gcdext.c
+sed -i '25i #endif' mpz/gcdext.c
+sed -i '25i #define TRIDENT_OUTPUT(id, typestr, value) value' mpz/gcdext.c
+sed -i '25i #ifndef TRIDENT_OUTPUT' mpz/gcdext.c
+sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tsiz = SIZ (a) >= 0;\
+\tif (siz) {\
+\tssize = 1;\
+\t} else {\
+\tssize = -1;\
+\t}/' mpz/gcdext.c
+sed -i '61d' mpz/gcdext.c
+sed -i '61i if( __trident_choice("L1634", "bool", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)){' mpz/gcdext.c
+#sed -i '228i klee_silent_exit(0);' mpz/gcdext.c
+#sed -i '45i klee_assert(vp - rp == 1 || up - rp == 1);' mpn/generic/add_n.c
+sed -i '62i TRIDENT_OUTPUT("obs", "i32", siz > 0);' mpn/generic/add_n.c
+
 
 # instrument driver for input generation
 sed -i "111d" tests/mpz/t-gcd.c
