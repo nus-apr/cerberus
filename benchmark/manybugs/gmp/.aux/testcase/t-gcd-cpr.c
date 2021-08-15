@@ -34,25 +34,25 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 void print_info(mpz_t op1, mpz_t op2, mpz_t gcd, mpz_t s, mpz_t t){
 	printf("gcd =  (s*op1 + t*op2)\n");
 	printf("op1:");
-	mpz_out_str(stdout, 16, op1);
+	mpz_out_str(stdout, 10, op1);
 	printf("\t");
 	printf("op2:");
-	mpz_out_str(stdout, 16, op2);
+	mpz_out_str(stdout, 10, op2);
 	printf("\t");
 	printf("gcd:");
-	mpz_out_str(stdout, 16, gcd);
+	mpz_out_str(stdout, 10, gcd);
 	printf("\t");
 	printf("s:");
-	mpz_out_str(stdout, 16, s);
+	mpz_out_str(stdout, 10, s);
 	printf("\t");
 	printf("t:");
-	mpz_out_str(stdout, 16, t);
+	mpz_out_str(stdout, 10, t);
 	printf("\n");
 }
 
 void test(const char * s1, const char * s2, mpz_t op1, mpz_t op2, mpz_t gcd, mpz_t s, mpz_t t){
-  mpz_set_str(op1, s1,16);
-  mpz_set_str(op2, s2,16);
+  mpz_set_str(op1, s1,10);
+  mpz_set_str(op2, s2,10);
   //a*s + b*t = g -> mpz(g,s,t,a(inp),b(inp))
   mpz_gcdext(gcd, s,t, op1, op2);
   TRIDENT_OUTPUT("obs", "i32", mpz_sgn(gcd));
