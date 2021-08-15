@@ -5,7 +5,8 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/cpr
-
+diff_file=mpz/gcdext.c-14166
+cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 
 cd $dir_name/src
 make clean
@@ -22,35 +23,13 @@ make -e fib_table.h;make -e mp_bases.h;
 make CC=wllvm CXX=wllvm++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
 
+sed -i '59d' mpz/gcdext.c
+sed -i '59i ssize = __trident_choice("L1634", "i32", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0));' mpz/gcdext.c
 
-sed -i '25i #include <klee/klee.h>' mpz/gcdext.c
-sed -i '25i #endif' mpz/gcdext.c
-sed -i '25i #define TRIDENT_OUTPUT(id, typestr, value) value' mpz/gcdext.c
-sed -i '25i #ifndef TRIDENT_OUTPUT' mpz/gcdext.c
-sed -i 's/ssize = SIZ (a) >= 0 ? 1 : -1;/\tsiz = SIZ (a) >= 0;\
-\tif (siz) {\
-\tssize = 1;\
-\t} else {\
-\tssize = -1;\
-\t}/' mpz/gcdext.c
-sed -i '61d' mpz/gcdext.c
-sed -i '61i if( __trident_choice("L1634", "bool", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)){' mpz/gcdext.c
-#sed -i '228i klee_silent_exit(0);' mpz/gcdext.c
-#sed -i '45i klee_assert(vp - rp == 1 || up - rp == 1);' mpn/generic/add_n.c
-sed -i '62i TRIDENT_OUTPUT("obs", "i32", siz > 0);' mpn/generic/add_n.c
 
 
 # instrument driver for input generation
-sed -i "111d" tests/mpz/t-gcd.c
-sed -i "111i int reps = atoi(argv[1]); " tests/mpz/t-gcd.c
-sed -i "111i char* filename = argv[2];" tests/mpz/t-gcd.c
-sed -i "139i char line1 [1000];\n char line2 [1000];" tests/mpz/t-gcd.c
-sed -i "141i FILE *file = fopen ( filename, \"r\" );" tests/mpz/t-gcd.c
-sed -i "142i if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }" tests/mpz/t-gcd.c
-sed -i "143i else {    perror(filename); }" tests/mpz/t-gcd.c
-sed -i "145,149d" tests/mpz/t-gcd.c
-sed -i "145i mpz_set_str (op1, line1, 16);\n mpz_set_str (op2, line2, 16);" tests/mpz/t-gcd.c
-
+cp /experiments/benchmark/manybugs/gmp/.aux/testcase/t-gcd-cpr.c t-gcd.c
 
 sed -i 's/wllvm++/\/CPR\/tools\/trident-cxx/g' mpn/Makefile
 sed -i 's/wllvm/\/CPR\/tools\/trident-cc/g' mpn/Makefile
@@ -81,6 +60,7 @@ test_output_dir:cpr/test-expected-output
 seed_dir:cpr/seed-dir
 path_seed_suite:cpr/seed-config.json
 path_test_suite:cpr/test-config.json
+klee_flags:-no-exit-on-error
 EOF
 
 
