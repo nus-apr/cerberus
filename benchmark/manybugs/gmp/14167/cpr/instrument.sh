@@ -27,7 +27,7 @@ sed -i '59i ssize = __trident_choice("L1634", "i32", (int[]){siz, bsize, asize},
 
 
 # instrument driver for input generation
-cp /experiments/benchmark/manybugs/gmp/.aux/testcase/t-gcd-cpr.c t-gcd.c
+cp /experiments/benchmark/manybugs/gmp/.aux/testcase/t-gcd-cpr.c $dir_name/src/tests/mpz/t-gcd.c
 
 sed -i 's/wllvm++/\/CPR\/tools\/trident-cxx/g' mpn/Makefile
 sed -i 's/wllvm/\/CPR\/tools\/trident-cc/g' mpn/Makefile
