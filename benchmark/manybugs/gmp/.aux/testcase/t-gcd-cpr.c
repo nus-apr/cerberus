@@ -75,7 +75,6 @@ FILE *file = fopen ( filename, "r" );
 if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }
 else {    perror(filename); }
 
-
   test(line1,line2, op1, op2, gcd, s, t);
   //test("1", "-1",op1, op2, gcd, s, t);
  //test("60", "30",op1, op2, gcd, s, t);

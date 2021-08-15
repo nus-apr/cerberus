@@ -21,9 +21,7 @@ make -e fib_table.h;make -e mp_bases.h;
 make CC=wllvm CXX=wllvm++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
 
-sed -i '59d' mpz/gcdext.c
-sed -i '59i ssize = __trident_choice("L1634", "i32", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0));' mpz/gcdext.c
-
+sed -i '60i if (__trident_choice("L1634", "bool", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) ssize = 0;' mpz/gcdext.c
 
 
 # instrument driver for input generation
