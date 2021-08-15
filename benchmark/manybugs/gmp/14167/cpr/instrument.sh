@@ -6,8 +6,6 @@ fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/data/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/cpr
 diff_file=mpz/gcdext.c-14166
-cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
-
 cd $dir_name/src
 make clean
 
