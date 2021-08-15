@@ -50,8 +50,8 @@ build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/mpn/generic/powm.c:213
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/mpn/generic/add_n.c:45
+loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/mpz/gcdext.c:60
+loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/mpz/gcdext.c:61
 gen_limit:80
 stack_size:15000
 dist_metric:angelic
