@@ -9,8 +9,9 @@ cd $dir_name/src
 # Config gmp.
 grep -v '"tests/mpbsd/Makefile") ' configure |   sed "s#tests/mpbsd/Makefile ##g" |   sponge configure
 make distclean
+CC=gcc CXX=g++ ./configure CFLAGS="-g -O0 -static"
 autoreconf --force --install
-./configure --disable-shared --enable-static \
+CC=gcc CXX=g++ ./configure CFLAGS="-g -O0 -static" --disable-shared --enable-static \
             --disable-fft \
             --disable-mpbsd \
             --disable-cxx \
