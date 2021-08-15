@@ -20,8 +20,13 @@ sed -i 's/no-dependencies ansi2knr/no-dependencies/g' Makefile;
 make -e fib_table.h;make -e mp_bases.h;
 make CC=wllvm CXX=wllvm++  CFLAGS="-g -O0 -static -std=c99 -I/klee/source/include -L/klee/build/lib -lkleeRuntest" -j32
 
-
+sed -i '25i #endif' mpz/gcdext.c
+sed -i '25i #define TRIDENT_OUTPUT(id, typestr, value) value' mpz/gcdext.c
+sed -i '25i #ifndef TRIDENT_OUTPUT' mpz/gcdext.c
+sed -i '25i #include <klee/klee.h>' mpz/gcdext.c
+sed -i '25i // KLEE' mpz/gcdext.c
 sed -i '60i if (__trident_choice("L1634", "bool", (int[]){siz, bsize, asize}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) ssize = 0;' mpz/gcdext.c
+sed -i '61i TRIDENT_OUTPUT("obs", "i32", ssize - (asize!=0));' mpz/gcdext.c
 
 
 # instrument driver for input generation
@@ -43,7 +48,7 @@ src_directory:src
 config_command:skip
 build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
-general_comp_list:addition.smt2
+general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2
 depth:3
 loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/mpn/generic/powm.c:213
 loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/mpn/generic/add_n.c:45

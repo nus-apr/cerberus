@@ -55,7 +55,6 @@ void test(const char * s1, const char * s2, mpz_t op1, mpz_t op2, mpz_t gcd, mpz
   mpz_set_str(op2, s2,10);
   //a*s + b*t = g -> mpz(g,s,t,a(inp),b(inp))
   mpz_gcdext(gcd, s,t, op1, op2);
-  TRIDENT_OUTPUT("obs", "i32", mpz_sgn(gcd));
   print_info(op1, op2, gcd, s, t);
 	
 }
@@ -70,10 +69,10 @@ main (int argc, char **argv)
   mpz_inits(op1, op2, gcd,s,t, 0);
   //BINARY GCD TEST
   char line1 [1000];
- char line2 [1000];
-FILE *file = fopen ( filename, "r" );
-if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }
-else {    perror(filename); }
+  char line2 [1000];
+  FILE *file = fopen ( filename, "r" );
+  if (file != NULL) { fgets(line1,sizeof line1,file);  fgets(line2,sizeof line2,file); fclose(file);  }
+  else {    perror(filename); }
 
   test(line1,line2, op1, op2, gcd, s, t);
   //test("1", "-1",op1, op2, gcd, s, t);
