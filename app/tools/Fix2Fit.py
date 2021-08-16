@@ -95,7 +95,7 @@ class Fix2Fit(AbstractTool):
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "Fail to execute f1x" in line:
-                        is_error = True
+                        is_error = False
                     elif "tests are not specified" in line:
                         is_error = True
         if is_error:
