@@ -308,7 +308,7 @@ instrument () {
                 15 \
                 'int token_type;' \
                 'int token_type = 1;'
-
+            sed -i "152d" "$src1"
             local src2="/experiments/benchmark/manybugs/php/.aux/php-run-tests.c"
             restore_original $src2
 
