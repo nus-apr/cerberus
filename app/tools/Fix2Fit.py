@@ -98,6 +98,8 @@ class Fix2Fit(AbstractTool):
                         is_error = False
                     elif "tests are not specified" in line:
                         is_error = True
+                    elif "no negative tests" in line:
+                        is_error = True
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         regex_dir = re.compile('(f1x.*$)')
