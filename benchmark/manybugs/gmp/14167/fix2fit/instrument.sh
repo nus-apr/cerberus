@@ -3,11 +3,12 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
+exp_dir_name=/data/$benchmark_name/$project_name/$fix_id
 src_dir_name=/data/$benchmark_name/$project_name/$fix_id/src
 test_dir_name=/data/$benchmark_name/$project_name/$fix_id/tests
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
-cd $test_dir_name
-
+cd $exp_dir_name
+sed -i 's/make/make -e/g' gmp-run-tests.pl
 # Create Seed Files
 mkdir $target_dir/seed-dir
 echo "76429e12e4fdd8929d89c21657097fbac09d1dc08cf7f1323a34e78ca34226e1a7a29b86fee0fa7fe2cc2a183d46d50df1fe7029590974ad7da77605f35f902cb8b9b8d22dd881eaae5919675d49a337145a029c3b33fc2b0" > $target_dir/seed-dir/seed-1.txt;
