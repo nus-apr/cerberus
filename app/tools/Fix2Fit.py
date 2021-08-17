@@ -122,8 +122,8 @@ class Fix2Fit(AbstractTool):
             emitter.error("\t\t\t\t[error] error detected in logs")
         if reported_failing_test != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
-            emitter.highlight("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
-            emitter.highlight("\t\t\t\treported fail list: {0}".format(",".join(reported_failing_test)))
+            emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
+            emitter.warning("\t\t\t\treported fail list: {0}".format(",".join(reported_failing_test)))
         regex_dir = re.compile('(f1x.*$)')
         dir_patch = None
         for root, dirs, files in os.walk(dir_results):
