@@ -72,6 +72,8 @@ class Fix2Fit(AbstractTool):
             filter_list = [88, 173, 210, 223, 227, 241, 324, 325, 326]
         elif str(subject).lower() == "php":
             filter_list = [3836, 4037, 5553, 5797, 5806, 9563]
+        elif str(subject).lower() == "gmp":
+            filter_list = [34]
         for t_id in test_id_list:
             if int(t_id) not in filter_list:
                 filtered_list.append(t_id)
