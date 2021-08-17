@@ -96,6 +96,7 @@ RUN sed -i '273i\ \ \ \ \ \ \ \ \ \ \ \ all_tests = [t.strip() for t in f]' /pro
 RUN sed -i "275,278d"  /prophet-gpl/tools/php_tester.py
 RUN sed -i "275i\ \ \ \ \ \ \ \ \ \ \ \ arg_list.append( all_tests[(2*(i))])" /prophet-gpl/tools/php_tester.py
 RUN sed -i "49d" /prophet-gpl/tools/libtiff-build.py
+RUN sed -i "33d" /prophet-gpl/tools/python-test.py
 #change configure command in libtiff-build.py to only ./configure
 
 # Install cerberus dependencies
