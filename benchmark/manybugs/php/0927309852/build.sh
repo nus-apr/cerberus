@@ -7,4 +7,4 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
 # Compile libtiff.
-make -e  CFLAGS="-march=x86-64" -j`nproc`
+make -e  --ignore-errors CFLAGS="-march=x86-64" -j`nproc`
