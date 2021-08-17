@@ -18,3 +18,5 @@ make clean
 if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
     touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
 fi
+
+sed -i 's/T_TIMEOUT=50000/T_TIMEOUT=300000/' /src/scripts/run.sh
