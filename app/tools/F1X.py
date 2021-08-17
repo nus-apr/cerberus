@@ -64,7 +64,7 @@ class F1X(AbstractTool):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         return
 
-    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"

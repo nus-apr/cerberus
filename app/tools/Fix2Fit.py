@@ -78,7 +78,7 @@ class Fix2Fit(AbstractTool):
 
         return filtered_list
 
-    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
+    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
@@ -97,6 +97,7 @@ class Fix2Fit(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
+        reported_failing_test = []
         with open(dir_results + "/original.txt", "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -104,6 +105,8 @@ class Fix2Fit(AbstractTool):
                     count_enumerations = int(line.split("candidates evaluated: ")[-1].strip())
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1].strip()
+                elif "negative tests: [" in line:
+                    reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
             log_file.close()
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, 'r', encoding='iso-8859-1') as log_file:
@@ -117,6 +120,10 @@ class Fix2Fit(AbstractTool):
                         emitter.warning("\t\t\t\t[warning] no negative tests")
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
+        if reported_failing_test != fail_list:
+            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
+            emitter.highlight("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
+            emitter.highlight("\t\t\t\treported fail list: {0}".format(",".join(reported_failing_test)))
         regex_dir = re.compile('(f1x.*$)')
         dir_patch = None
         for root, dirs, files in os.walk(dir_results):
