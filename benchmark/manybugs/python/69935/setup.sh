@@ -29,7 +29,6 @@ rm -rf  coverage* \
         fixed-program.txt
 mv bugged-program.txt manifest.txt
 mv *.lines bug-info
-mv fix-failures bug-info
 mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
