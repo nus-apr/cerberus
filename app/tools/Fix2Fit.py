@@ -67,11 +67,15 @@ class Fix2Fit(AbstractTool):
 
     def filter_tests(self, test_id_list, subject):
         filtered_list = []
+        filter_list = []
         if str(subject).lower() == "python":
             filter_list = [88, 173, 210, 223, 227, 241, 324, 325, 326]
-            for t_id in test_id_list:
-                if int(t_id) not in filter_list:
-                    filtered_list.append(t_id)
+        elif str(subject).lower() == "php":
+            filter_list = [3836, 4037, 5553, 5797, 5806, 9563]
+        for t_id in test_id_list:
+            if int(t_id) not in filter_list:
+                filtered_list.append(t_id)
+
         return filtered_list
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
