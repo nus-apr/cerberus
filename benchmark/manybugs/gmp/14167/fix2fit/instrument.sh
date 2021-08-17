@@ -7,6 +7,13 @@ exp_dir_name=/data/$benchmark_name/$project_name/$fix_id
 src_dir_name=/data/$benchmark_name/$project_name/$fix_id/src
 test_dir_name=/data/$benchmark_name/$project_name/$fix_id/tests
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
+
+cp target_dir/config.sh $src_dir_name
+sed -i '2,7d' $src_dir_name/config.sh
+cp target_dir/build.sh $src_dir_name
+sed -i '2,7d' $src_dir_name/build.sh
+
+
 cd $exp_dir_name
 sed -i 's/make/make -e/g' gmp-run-tests.pl
 # Create Seed Files
