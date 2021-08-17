@@ -119,6 +119,7 @@ class Fix2Fit(AbstractTool):
                     elif "no negative tests" in line:
                         emitter.warning("\t\t\t\t[warning] no negative tests")
                     elif "failed to infer compile commands" in line:
+                        is_error = True
                         emitter.error("\t\t\t\t[error] compilation command not found")
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
