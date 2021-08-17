@@ -7,6 +7,7 @@ from app import definitions, values, emitter
 from os import listdir
 from os.path import isfile, join
 
+
 class Fix2Fit(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
@@ -21,7 +22,8 @@ class Fix2Fit(AbstractTool):
         for test_id in failing_test_list:
             test_id_list += test_id + " "
         if passing_test_list:
-            for test_id in passing_test_list:
+            filtered_list = self.filter_tests(passing_test_list, subject_name)
+            for test_id in filtered_list:
                 test_id_list += test_id + " "
 
         if fix_location:
@@ -62,6 +64,15 @@ class Fix2Fit(AbstractTool):
         super(Fix2Fit, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
         patch_gen_log = dir_setup + "/original.txt"
         shutil.copy(patch_gen_log, dir_results)
+
+    def filter_tests(self, test_id_list, subject):
+        filtered_list = []
+        if str(subject).lower() == "python":
+            filter_list = [88, 173, 210, 223, 227, 241, 324, 325, 326]
+            for t_id in test_id_list:
+                if int(t_id) not in filter_list:
+                    filtered_list.append(t_id)
+        return filtered_list
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id):
         emitter.normal("\t\t\t analysing output of " + self.name)
