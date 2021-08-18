@@ -15,8 +15,8 @@ find . -type f -iname 'test_*.py' -exec cp  {} $target_dir/seed-dir/ \;
 
 cd $exp_dir_name
 sed -i "11d" python-run-tests.pl
-#sed -i "s/run_test 243/run_test 244/" test.sh
-#sed -i "s/n1\) run_test 244/n1\) run_test 243/" test.sh
+sed -i "s/run_test 243/run_test 244/" test.sh
+sed -i "s/n1\) run_test 244/n1\) run_test 243/" test.sh
 make clean
 
 if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
