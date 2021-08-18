@@ -43,6 +43,9 @@ sed -i "s#/data/manybugs/${project_name}/${fix_id}/limit#timeout 300#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "s#&> /dev/null##" python-run-tests.pl
+sed -i "11d" python-run-tests.pl
+sed -i "s/run_test 243/run_test 244/" test.sh
+sed -i "s/n1\) run_test 244/n1\) run_test 243/" test.sh
 
 # disable 'test_create_connection' in 'test_socket'
 sed -i "s#def test_create_connection_timeout(self):#def test_create_connection(self):\n        return#" src/Lib/test/test_socket.py
