@@ -69,7 +69,7 @@ class Fix2Fit(AbstractTool):
         filtered_list = []
         filter_list = []
         if str(subject).lower() == "python":
-            filter_list = [87, 172, 209, 222, 226, 240, 322, 323, 324]
+            filter_list = [87, 172, 209, 222, 226, 240, 322, 323, 324, 31, 157]
         elif str(subject).lower() == "php":
             filter_list = [3836, 4037, 5553, 5797, 5806, 9563]
         elif str(subject).lower() == "gmp":
