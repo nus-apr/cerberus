@@ -44,6 +44,7 @@ sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 sed -i "s#&> /dev/null##" python-run-tests.pl
 sed -i "11d" python-run-tests.pl
+sed -i "317d" python-run-tests.pl
 sed -i "s/run_test 243/run_test 244/" test.sh
 sed -i "s/n1\) run_test 244/n1\) run_test 243/" test.sh
 
