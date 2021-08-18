@@ -109,7 +109,7 @@ class Fix2Fit(AbstractTool):
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1].strip()
                 elif "plausible patches: " in line:
-                    count_plausible = line.split("plausible patches: ")[-1].strip()
+                    count_plausible = int(line.split("plausible patches: ")[-1].strip())
                 elif "negative tests: [" in line:
                     reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
             log_file.close()
