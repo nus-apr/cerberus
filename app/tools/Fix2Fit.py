@@ -88,6 +88,7 @@ class Fix2Fit(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        count_filtered = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -107,6 +108,8 @@ class Fix2Fit(AbstractTool):
                     count_enumerations = int(line.split("candidates evaluated: ")[-1].strip())
                 elif "search space size: " in line:
                     size_search_space = line.split("search space size: ")[-1].strip()
+                elif "plausible patches: " in line:
+                    count_plausible = line.split("plausible patches: ")[-1].strip()
                 elif "negative tests: [" in line:
                     reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
             log_file.close()
@@ -129,22 +132,18 @@ class Fix2Fit(AbstractTool):
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
             emitter.warning("\t\t\t\treported fail list: {0}".format(",".join(reported_failing_test)))
-        regex_dir = re.compile('(f1x.*$)')
-        dir_patch = None
-        for root, dirs, files in os.walk(dir_results):
-            for dir in dirs:
-                if regex_dir.match(dir):
-                    dir_patch = dir_results + "/" + dir
-                    break
+
+        dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
-            count_plausible = len(output_patch_list)
+            count_filtered = len(output_patch_list)
 
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count filtered patches: {0}\n".format(count_filtered))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
