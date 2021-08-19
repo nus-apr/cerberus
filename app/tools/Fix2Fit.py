@@ -71,7 +71,21 @@ class Fix2Fit(AbstractTool):
         if str(subject).lower() == "python":
             filter_list = [87, 172, 209, 222, 226, 240, 322, 323, 324, 31, 157, 94]
         elif str(subject).lower() == "php":
-            filter_list = [3836, 4037, 5553, 5797, 5806, 6548, 9563, 404, 6633, 6777, 7049, 7612, 8695, 8766]
+            filter_list = [3836, 4037, 5797, 5806]
+            if bug_id == "5bb0a44e06":
+                filter_list.extend([5553, 6548, 9563])
+            elif bug_id == "1e91069eb4":
+                filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766])
+            elif bug_id == "1f49902999":
+                filter_list.extend([5553, 6110, 6472, 6475, 6478, 6485, 6489, 6494, 6501, 6503, 6507, 6853, 7165, 9563])
+            elif bug_id == "b84967d3e2":
+                filter_list.extend([5553, 9563])
+            elif bug_id == "1d984a7ffd":
+                filter_list.extend([3339, 5553, 9563])
+            elif bug_id == "6e74d95f34":
+                filter_list.extend([5553, 9563])
+            elif bug_id == "1f49902999":
+                filter_list.extend([])
         elif str(subject).lower() == "gmp":
             filter_list = [34]
 
@@ -127,6 +141,9 @@ class Fix2Fit(AbstractTool):
                     elif "failed to infer compile commands" in line:
                         is_error = True
                         emitter.error("\t\t\t\t[error] compilation command not found")
+                    elif "At-risk data found" in line:
+                        is_error = True
+                        emitter.error("\t\t\t\t[error] previous results have corrupted")
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if reported_failing_test != fail_list:
