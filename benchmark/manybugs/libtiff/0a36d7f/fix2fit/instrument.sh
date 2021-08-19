@@ -18,8 +18,6 @@ find . -type f -iname '*.pbm' -exec cp  {} $target_dir/seed-dir/ \;
 
 cd $src_dir_name
 
-make clean
-
 if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
     touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
 fi

@@ -16,3 +16,6 @@ find . -type f -iname '*.pgm' -exec cp  {} $target_dir/seed-dir/ \;
 find . -type f -iname '*.ppm' -exec cp  {} $target_dir/seed-dir/ \;
 find . -type f -iname '*.pbm' -exec cp  {} $target_dir/seed-dir/ \;
 
+if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
+    touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
+fi
