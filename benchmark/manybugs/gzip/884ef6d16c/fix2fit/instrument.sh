@@ -6,11 +6,7 @@ fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 src_dir_name=/data/$benchmark_name/$project_name/$fix_id/src
 test_dir_name=/data/$benchmark_name/$project_name/$fix_id/tests
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
-cd $test_dir_name
 
-
-cd $src_dir_name
-make clean
 
 if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
     touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
