@@ -30,9 +30,5 @@ sed -i '81i main(int argc, char** argv)' test/short_tag.c
 sed -i '82d' test/short_tag.c
 sed -i '151i \\tfilename = argv[1];'  test/short_tag.c
 
-
-## Instrument Long_TAG
-sed -i '122i \\tfilename = argv[1];'  test/long_tag.c
-
 cd test
 make -j32 long_tag.log short_tag.log
