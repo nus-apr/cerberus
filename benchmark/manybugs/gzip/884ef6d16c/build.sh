@@ -7,7 +7,7 @@ dir_name=/data/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
 # Compile gzip
-make -e  CFLAGS="-g -O0 -static" -j`nproc`
+make -e  CFLAGS="-g -O0" -j`nproc`
 
 cd tests
 make mixed.log znew-k.log
