@@ -73,11 +73,11 @@ class Fix2Fit(AbstractTool):
         elif str(subject).lower() == "php":
             filter_list = []
             if bug_id == "5bb0a44e06":
-                filter_list.extend([5553, 6548, 9563])
+                filter_list.extend([5553, 6548, 9563, 280, 3471])
             elif bug_id == "1e91069eb4":
-                filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766])
+                filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766, 1597, 3908, 6948])
             elif bug_id == "1f49902999":
-                filter_list.extend([5553, 6110, 6472, 6475, 6478, 6485, 6489, 6494, 6501, 6503, 6507, 6853, 7165, 9563])
+                filter_list.extend([5553, 6110, 6472, 6475, 6478, 6485, 6489, 6494, 6501, 6503, 6507, 6853, 7165, 9563, 3471, 10368])
             elif bug_id == "b84967d3e2":
                 filter_list.extend([5553, 9563])
             elif bug_id == "1d984a7ffd":
