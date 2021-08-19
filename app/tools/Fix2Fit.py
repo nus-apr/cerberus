@@ -71,21 +71,89 @@ class Fix2Fit(AbstractTool):
         if str(subject).lower() == "python":
             filter_list = [87, 172, 209, 222, 226, 240, 322, 323, 324, 31, 157, 94]
         elif str(subject).lower() == "php":
-            filter_list = [3836, 4037, 5797, 5806]
+            filter_list = []
             if bug_id == "5bb0a44e06":
-                filter_list.extend([5553, 6548, 9563])
+                filter_list.extend([5553, 6548, 9563, 280, 3471])
             elif bug_id == "1e91069eb4":
-                filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766])
+                filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766, 1597, 3908, 6948])
             elif bug_id == "1f49902999":
-                filter_list.extend([5553, 6110, 6472, 6475, 6478, 6485, 6489, 6494, 6501, 6503, 6507, 6853, 7165, 9563])
+                filter_list.extend([5553, 6110, 6472, 6475, 6478, 6485, 6489, 6494, 6501, 6503, 6507, 6853, 7165, 9563, 3471, 10368])
             elif bug_id == "b84967d3e2":
                 filter_list.extend([5553, 9563])
             elif bug_id == "1d984a7ffd":
                 filter_list.extend([3339, 5553, 9563])
             elif bug_id == "6e74d95f34":
                 filter_list.extend([5553, 9563])
-            elif bug_id == "1f49902999":
-                filter_list.extend([])
+            elif bug_id == "8deb11c0c3":
+                filter_list.extend([404, 6633, 6777, 7049, 7615, 8695, 8766])
+            elif bug_id == "2adf58cfcf":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "3acdca4703":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "5a8c917c37":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "2e25ec9eb7":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 10569])
+            elif bug_id == "77ed819430":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "efcb9a71cd":
+                filter_list.extend([404, 6633, 6777, 7049, 8695, 8766])
+            elif bug_id == "09b990f499":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "821d7169d9":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "daecb2c0f4":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "964f44a280":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "1056c57fa9":
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+            elif bug_id == "05c5c8958e":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "d4ae4e79db":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+            elif bug_id == "b5f15ef561":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "2e5d5e5ac6":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "9b86852d6e":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 10578, 10976, 11133, 11135])
+            elif bug_id == "c1e510aea8":
+                filter_list.extend([3940, 4144, 5912, 5921, 6648, 9787])
+            elif bug_id == "fb37f3b20d":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "13ba2da5f6":
+                filter_list.extend([3940, 4144, 5912, 5921, 6028, 6061, 6072, 9787, 9834])
+            elif bug_id == "3c7a573a2c":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "bc810a443d":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 10160, 11381, 11682, 11713])
+            elif bug_id == "d3b20b4058":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+            elif bug_id == "f330c8ab4e":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+            elif bug_id == "b548293b99":
+                filter_list.extend([418, 7062, 7333, 8997, 9069])
+            elif bug_id == "db0888dfc1":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "dfa08dc325":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+            elif bug_id == "52c36e60c4":
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
+            elif bug_id == "acaf9c5227":
+                filter_list.extend([3958, 4162, 5936, 5945, 9824])
+            elif bug_id == "6672171672":
+                filter_list.extend([3958, 4162, 5936, 5945, 9824, 9871])
+            elif bug_id == "34fe62619d":
+                filter_list.extend([325, 418, 963, 7200, 7471, 9145, 9216])
+            elif bug_id == "cdc512afb3":
+                filter_list.extend([4017, 4221, 6004, 6013, 9983, 10030])
+            elif bug_id == "d4f05fbffc":
+                filter_list.extend([4017, 4221, 6004, 6013, 9983])
+            elif bug_id == "efc94f3115":
+                filter_list.extend([4017, 4221, 6004, 6013, 9983, 10030])
+            elif bug_id == "7337a901b7":
+                filter_list.extend([4017, 4221, 6004, 6013, 9983])
         elif str(subject).lower() == "gmp":
             filter_list = [34]
 

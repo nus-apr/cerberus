@@ -122,16 +122,12 @@ def program_output(output_message):
         write("\t\t\t" + output_message, PROG_OUTPUT_COLOR)
 
 
-def emit_var_map(var_map):
-    write("\t\tVar Map:", WHITE)
-    for var_a in var_map:
-        highlight("\t\t\t " + var_a + " ==> " + var_map[var_a])
-
-
-def emit_ast_script(ast_script):
-    write("\t\tAST Script:", WHITE)
-    for line in ast_script:
-        special("\t\t\t " + line.strip())
+def emit_patch(patch_lines, jump_line=True, message=""):
+    output = message
+    indent_length = 2
+    prefix = "\t\t" * indent_length
+    for line in patch_lines:
+        write(line, ROSE, jump_line, indent_level=indent_length, prefix=prefix)
 
 
 def warning(message):

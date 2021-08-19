@@ -30,6 +30,8 @@ def read_arg(argument_list):
                 values.CONF_ANALYSE_ONLY = True
             elif definitions.ARG_ONLY_SETUP in arg:
                 values.CONF_SETUP_ONLY = True
+            elif definitions.ARG_SHOW_DEV_PATCH in arg:
+                values.CONF_SHOW_DEV_PATCH = True
             elif definitions.ARG_CONFIG_ID_LIST in arg:
                 values.CONF_CONFIG_ID_LIST = str(arg).replace(definitions.ARG_CONFIG_ID_LIST, "").split(",")
             elif definitions.ARG_BUG_INDEX in arg:
