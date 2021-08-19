@@ -123,7 +123,7 @@ class Angelix(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
-        reported_fail_list = fail_list
+        reported_fail_list = fail_list.copy()
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -159,7 +159,10 @@ class Angelix(AbstractTool):
         if reported_fail_list != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
-            emitter.warning("\t\t\t\treported fail list: {0}".format(",".join(reported_fail_list)))
+            reported_list_str = ",".join(reported_fail_list)
+            if len(reported_fail_list) > 10:
+                reported_list_str = ",".join(reported_fail_list)[10:] + "..."
+            emitter.warning("\t\t\t\treported fail list: {0}".format(reported_list_str))
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
