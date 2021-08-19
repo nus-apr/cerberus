@@ -166,3 +166,14 @@ class Fix2Fit(AbstractTool):
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
+
+    def pre_process(self, dir_logs, dir_expr, dir_setup):
+        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
+        super(Fix2Fit, self).pre_process(dir_logs, dir_expr, dir_setup)
+        if os.path.isdir(dir_setup + "/out"):
+            shutil.rmtree(dir_setup + "/out")
+        if os.path.isdir(dir_setup + "/patches"):
+            shutil.rmtree(dir_setup + "/patches")
+        if os.path.isdir(dir_setup + "/seed-dir"):
+            shutil.rmtree(dir_setup + "/seed-dir")
+        return

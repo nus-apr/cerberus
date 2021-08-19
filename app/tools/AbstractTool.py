@@ -33,7 +33,7 @@ class AbstractTool:
         """invoking the tool for the repair process"""
         return
 
-    def pre_process(self):
+    def pre_process(self, dir_logs, dir_expr, dir_setup):
         """any pre-processing required for the repair"""
         self.check_tool_exists()
         return

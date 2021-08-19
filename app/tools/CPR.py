@@ -109,9 +109,9 @@ class CPR(AbstractTool):
             log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
 
-    def pre_process(self):
+    def pre_process(self, dir_logs, dir_expr, dir_setup):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(CPR, self).pre_process()
+        super(CPR, self).pre_process(dir_logs, dir_expr, dir_setup)
         if not os.path.isdir("/tmp"):
             os.mkdir("/tmp")
         return

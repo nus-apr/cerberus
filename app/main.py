@@ -51,7 +51,7 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     additional_tool_param = values.CONF_TOOL_PARAMS
     dir_logs = values.DIR_LOGS
     utilities.check_space()
-    tool.pre_process()
+    tool.pre_process(dir_logs, dir_expr, dir_setup)
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
     tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                 failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
