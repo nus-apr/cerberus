@@ -124,10 +124,10 @@ def program_output(output_message):
 
 def emit_patch(patch_lines, jump_line=True, message=""):
     output = message
-    indent_length = 0
-    prefix = "\t" * indent_length
+    indent_length = 2
+    prefix = "\t\t" * indent_length
     for line in patch_lines:
-        write(line, WHITE, jump_line, indent_level=indent_length, prefix=prefix)
+        write(line, CYAN, jump_line, indent_level=indent_length, prefix=prefix)
 
 
 def warning(message):

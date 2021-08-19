@@ -94,13 +94,13 @@ def save_results(dir_expr, dir_setup, dir_results, experiment_info, tool: Abstra
     tool.post_process(dir_expr, dir_results)
 
 
-def show_dev_patch(dir_setup):
+def show_dev_patch(dir_diff):
     regex = re.compile('(.*-diff$)')
     diff_file_path = None
-    for root, dirs, files in os.walk(dir_setup):
+    for root, dirs, files in os.walk(dir_diff):
         for file in files:
             if regex.match(file):
-                diff_file = dir_setup + "/" + file
+                diff_file_path = os.path.join(root, file)
                 break
     if diff_file_path:
         with open(diff_file_path, 'r') as diff_file:
@@ -188,7 +188,7 @@ def run(repair_tool, benchmark, setup):
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp)
             if values.CONF_SHOW_DEV_PATCH:
-
+                show_dev_patch(dir_exp + "/diffs")
 
 
 def timeout_handler(signum, frame):
