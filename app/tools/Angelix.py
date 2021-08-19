@@ -123,6 +123,7 @@ class Angelix(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
+        reported_fail_list = fail_list
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -150,9 +151,15 @@ class Angelix(AbstractTool):
                         count_plausible = 0
                     elif "patches successfully generated" in line:
                         is_timeout = False
-
+                    elif "because it fails in golden version" in line:
+                        t_id = line.split("excluding test ")[-1].split(" ")[0]
+                        reported_fail_list.append(t_id)
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
+        if reported_fail_list != fail_list:
+            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
+            emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
+            emitter.warning("\t\t\t\treported fail list: {0}".format(",".join(reported_fail_list)))
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
