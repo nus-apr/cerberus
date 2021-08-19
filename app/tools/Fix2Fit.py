@@ -22,7 +22,7 @@ class Fix2Fit(AbstractTool):
         for test_id in failing_test_list:
             test_id_list += test_id + " "
         if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name)
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
             for test_id in filtered_list:
                 test_id_list += test_id + " "
 
@@ -65,15 +65,16 @@ class Fix2Fit(AbstractTool):
         patch_gen_log = dir_setup + "/original.txt"
         shutil.copy(patch_gen_log, dir_results)
 
-    def filter_tests(self, test_id_list, subject):
+    def filter_tests(self, test_id_list, subject, bug_id):
         filtered_list = []
         filter_list = []
         if str(subject).lower() == "python":
             filter_list = [87, 172, 209, 222, 226, 240, 322, 323, 324, 31, 157, 94]
         elif str(subject).lower() == "php":
-            filter_list = [3836, 4037, 5553, 5797, 5806, 9563]
+            filter_list = [3836, 4037, 5553, 5797, 5806, 6548, 9563, 404, 6633, 6777, 7049, 7612, 8695, 8766]
         elif str(subject).lower() == "gmp":
             filter_list = [34]
+
         for t_id in test_id_list:
             if int(t_id) not in filter_list:
                 filtered_list.append(t_id)
