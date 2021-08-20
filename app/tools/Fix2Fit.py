@@ -69,8 +69,12 @@ class Fix2Fit(AbstractTool):
         filtered_list = []
         filter_list = []
         if str(subject).lower() == "python":
-            filter_list = [87, 172, 209, 222, 226, 31, 157, 94]
+            filter_list = [87, 172, 209, 222, 226]
             if bug_id == "69372":
+                filter_list.extend([240, 322, 323, 324])
+            elif bug_id == "69935":
+                filter_list.extend([240, 322, 323, 324])
+            elif bug_id == "69935":
                 filter_list.extend([240, 322, 323, 324])
 
         elif str(subject).lower() == "php":
@@ -156,7 +160,7 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "efc94f3115":
                 filter_list.extend([4017, 4221, 6004, 6013, 9983, 10030, 3650, 5572, 6052, 6314])
             elif bug_id == "7337a901b7":
-                filter_list.extend([4017, 4221, 6004, 6013, 9983])
+                filter_list.extend([4017, 4221, 6004, 6013, 9983, 3650, 6314])
         elif str(subject).lower() == "gmp":
             filter_list = [34]
 
