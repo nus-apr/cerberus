@@ -48,6 +48,10 @@ cat ../libxml.patch | patch -p0
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
 
+#instrument for fix
+sed -i '152d' ext/tokenizer/tokenizer.c
+sed -i '153i if (0 == 1) break;' ext/tokenizer/tokenizer.c
+
 #make distclean
 ./configure && make -j`nproc`
 
