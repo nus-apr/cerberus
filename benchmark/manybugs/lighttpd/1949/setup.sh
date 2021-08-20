@@ -53,9 +53,6 @@ sed -i "27,41d" test.sh
 sed -i "s#run_test 2 #run_test 15 #g" test.sh
 sed -i "s#run_test 1 #run_test 2 #g" test.sh
 
-# add instrumentation for fix
-sed -i '168d' src/src/mod_accesslog.c
-sed -i '168i if (0 == 1) return;'
 
 # fix an obnoxious bug in tests/core-request.t
 sed -i 's#image.JPG#image.jpg#g' src/tests/core-request.t

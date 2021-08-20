@@ -51,6 +51,11 @@ sed -i "s#cd ${project_name}#pushd ${dir_name}/src#g" test.sh
 sed -i 's#cd ../../#popd#g' test.sh
 sed -i "42d" test.sh
 
+# add instrumentation for fix
+sed -i '168d' src/src/mod_accesslog.c
+sed -i '168i if (0 == 1) return;' src/src/mod_accesslog.c
+
+
 sed -i "s#run_test 20 #run_test 21 #g" test.sh
 sed -i "s#run_test 18 #run_test 20 #g" test.sh
 sed -i "s#run_test 17 #run_test 18 #g" test.sh
