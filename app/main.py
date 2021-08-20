@@ -53,8 +53,9 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     utilities.check_space()
     tool.pre_process(dir_logs, dir_expr, dir_setup)
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
-    tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
+    if not values.CONF_INSTRUMENT_ONLY:
+        tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
+                    failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
 
 
 def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
