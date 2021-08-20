@@ -19,7 +19,6 @@ export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
   --disable-xmlreader  \
   --disable-xmlwriter  \
   --disable-pear  \
-  --disable-phar \
   --disable-inline-optimization  \
   --without-pcre-dir  \
   --disable-fileinfo \
