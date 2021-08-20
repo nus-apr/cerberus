@@ -128,6 +128,8 @@ def run(repair_tool, benchmark, setup):
 
             if values.CONF_BUG_ID and bug_name != values.CONF_BUG_ID:
                 continue
+            if values.CONF_BUG_ID_LIST and str(bug_name) not in values.CONF_BUG_ID_LIST:
+                continue
             if values.CONF_BUG_INDEX and index != values.CONF_BUG_INDEX:
                 continue
             if values.CONF_BUG_INDEX_LIST and str(index) not in values.CONF_BUG_INDEX_LIST:

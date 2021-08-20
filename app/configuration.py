@@ -48,6 +48,8 @@ def read_arg(argument_list):
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
             elif definitions.ARG_BUG_INDEX_LIST in arg:
                 values.CONF_BUG_INDEX_LIST = str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")
+            elif definitions.ARG_BUG_ID_LIST in arg:
+                values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
             elif arg in ["--help", "-help", "-h"]:
                 emitter.emit_help()
                 exit(0)
