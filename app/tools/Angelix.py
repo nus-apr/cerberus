@@ -4,6 +4,8 @@ import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
+from os import listdir
+from os.path import isfile, join
 
 
 class Angelix(AbstractTool):
@@ -128,11 +130,7 @@ class Angelix(AbstractTool):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
                 for line in log_lines:
-                    if "candidate fix synthesized" in line:
-                        count_plausible = count_plausible + 1
-                    elif "counterexample test" in line:
-                        count_plausible = count_plausible - 1
-                    elif "selected expressions" in line:
+                    if "selected expressions" in line:
                         size_search_space = size_search_space + 1
                     elif "considering suspicious expressions" in line:
                         count_enumerations = count_enumerations + 1
@@ -155,6 +153,10 @@ class Angelix(AbstractTool):
                         t_id = line.split("excluding test ")[-1].split(" ")[0]
                         reported_fail_list.append(t_id)
                 log_file.close()
+        dir_patch = dir_results + "/patches"
+        if dir_patch and os.path.isdir(dir_patch):
+            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+            count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if reported_fail_list != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
