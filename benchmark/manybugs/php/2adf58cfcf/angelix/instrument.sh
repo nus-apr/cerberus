@@ -218,7 +218,7 @@ instrument () {
         309579-309580 )
             local src="$directory/ext/date/php_date.c"
             restore_original $src
-            sed -i '3,12d' $src
+            sed -i '4,12d' $src
             sed -i '1s/^/#define UNKNOWN_OR_BAD_FORMAT 255\n/' $src
             sed -i '2s/^/#define FAILED_TO_PARSE_INTERVAL 254\n/' $src
             sed -i '3s/^/#define DID_NOT_CONTAIN_START_DATE 253\n/' $src
