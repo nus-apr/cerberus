@@ -82,7 +82,7 @@ class Fix2Fit(AbstractTool):
             if bug_id == "5bb0a44e06":
                 filter_list.extend([5553, 6548, 9563, 280, 3471])
             elif bug_id == "0927309852":
-                filter_list.extend([7384, 7440, 7551])
+                filter_list.extend([7384, 7440, 7551, 7511, 7527, 7639, 9563, 7780])
             elif bug_id == "1e91069eb4":
                 filter_list.extend([404, 6633, 6777, 7049, 7612, 8695, 8766, 1597, 3908, 6948])
             elif bug_id == "1f49902999":
@@ -92,13 +92,13 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "1d984a7ffd":
                 filter_list.extend([3339, 5553, 9563, 3471, 10638])
             elif bug_id == "6e74d95f34":
-                filter_list.extend([5553, 9563, 3471, 10638])
+                filter_list.extend([5553, 9563, 3471, 10638, 2298])
             elif bug_id == "8deb11c0c3":
                 filter_list.extend([404, 6633, 6777, 7049, 7615, 8695, 8766, 1597, 6948])
             elif bug_id == "2adf58cfcf":
                 filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 280, 3471, 10638])
             elif bug_id == "3acdca4703":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471, 7527, 10638, 6512])
             elif bug_id == "5a8c917c37":
                 filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471, 5137, 6336, 9617])
             elif bug_id == "2e25ec9eb7":
@@ -192,6 +192,7 @@ class Fix2Fit(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
+        is_timeout = True
         reported_failing_test = []
         with open(dir_results + "/original.txt", "r") as log_file:
             log_lines = log_file.readlines()
@@ -204,6 +205,10 @@ class Fix2Fit(AbstractTool):
                     count_plausible = int(line.split("plausible patches: ")[-1].strip())
                 elif "negative tests: [" in line:
                     reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
+                elif "patches successfully generated" in line:
+                    is_timeout = False
+                elif "no patch found" in line:
+                    is_timeout = False
             log_file.close()
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, 'r', encoding='iso-8859-1') as log_file:
@@ -223,7 +228,7 @@ class Fix2Fit(AbstractTool):
                         emitter.error("\t\t\t\t[error] previous results have corrupted")
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
-        if reported_failing_test != fail_list:
+        if reported_failing_test != fail_list and reported_failing_test and not is_timeout:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
             emitter.warning("\t\t\t\treported fail list: {0}".format(",".join(reported_failing_test)))
