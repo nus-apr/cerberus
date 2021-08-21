@@ -108,7 +108,7 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "efcb9a71cd":
                 filter_list.extend([404, 6633, 6777, 7049, 8695, 8766, 303, 1778, 3908, 6948])
             elif bug_id == "09b990f499":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563])
+                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471, 7237, 7357, 10638])
             elif bug_id == "821d7169d9":
                 filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471])
             elif bug_id == "daecb2c0f4":
