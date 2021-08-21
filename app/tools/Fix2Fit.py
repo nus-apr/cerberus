@@ -228,6 +228,8 @@ class Fix2Fit(AbstractTool):
                         emitter.error("\t\t\t\t[error] previous results have corrupted")
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
+        if is_timeout:
+            emitter.warning("\t\t\t\t[warning] timeout detected")
         if reported_failing_test != fail_list and reported_failing_test and not is_timeout:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
