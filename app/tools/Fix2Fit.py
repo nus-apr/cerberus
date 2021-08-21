@@ -138,9 +138,9 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "bc810a443d":
                 filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 10160, 11381, 11682, 11713])
             elif bug_id == "d3b20b4058":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 3575, 6219, 7561, 7642])
             elif bug_id == "f330c8ab4e":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787])
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 3575, 6219, 7561, 7642])
             elif bug_id == "b548293b99":
                 filter_list.extend([418, 7062, 7333, 8997, 9069, 7232, 9267])
             elif bug_id == "db0888dfc1":
@@ -148,7 +148,7 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "dfa08dc325":
                 filter_list.extend([3940, 4144, 5912, 5921, 9787, 3442, 3575, 6219])
             elif bug_id == "52c36e60c4":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 2400, 3390])
+                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 2400, 3390, 3431, 3443])
             elif bug_id == "acaf9c5227":
                 filter_list.extend([3958, 4162, 5936, 5945, 9824, 3593, 6245, 6247, 6681])
             elif bug_id == "6672171672":
