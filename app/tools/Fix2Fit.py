@@ -239,7 +239,7 @@ class Fix2Fit(AbstractTool):
         if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_filtered = len(output_patch_list)
-
+        count_plausible = count_filtered
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
