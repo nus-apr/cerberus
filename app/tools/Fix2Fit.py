@@ -160,7 +160,7 @@ class Fix2Fit(AbstractTool):
             elif bug_id == "d4f05fbffc":
                 filter_list.extend([4017, 4221, 6004, 6013, 9983, 3650, 6314])
             elif bug_id == "efc94f3115":
-                filter_list.extend([4017, 4221, 6004, 6013, 9983, 10030, 3650, 5572, 6052, 6314])
+                filter_list.extend([4017, 4221, 6004, 6013, 9983, 10030, 3650, 5572, 6052, 6314, 5332])
             elif bug_id == "7337a901b7":
                 filter_list.extend([4017, 4221, 6004, 6013, 9983, 3650, 6314])
         elif str(subject).lower() == "gmp":
