@@ -54,7 +54,8 @@ class Angelix(AbstractTool):
         for test_id in failing_test_list:
             test_id_list += test_id + " "
         if passing_test_list:
-            for test_id in passing_test_list:
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+            for test_id in filtered_list:
                 test_id_list += test_id + " "
 
         timestamp_command = "echo $(date) > " + self.log_output_path
@@ -184,3 +185,24 @@ class Angelix(AbstractTool):
         if not os.path.isdir("/tmp"):
             os.mkdir("/tmp")
         return
+
+    def filter_tests(self, test_id_list, subject, bug_id):
+        filtered_list = []
+        filter_list = []
+        if str(subject).lower() == "gzip":
+            filter_list = []
+            if bug_id == "884ef6d16c":
+                filter_list.extend([4, 11])
+
+        # elif str(subject).lower() == "php":
+        #     filter_list = []
+        #     if bug_id == "5bb0a44e06":
+        #         filter_list.extend([5553, 6548, 9563, 280, 3471])
+        #     elif bug_id == "0927309852":
+        #         filter_list.extend([7384, 7440, 7551, 7511, 7527, 7639, 9563, 7780])
+
+        for t_id in test_id_list:
+            if int(t_id) not in filter_list:
+                filtered_list.append(t_id)
+
+        return filtered_list
