@@ -154,7 +154,7 @@ class Angelix(AbstractTool):
                     elif "running negative tests" in line:
                         collect_neg = True
                     elif collect_neg and "running test" in line:
-                        t_id = line.split("running test ")[-1].split(" ")[0]
+                        t_id = line.split("running test ")[-1].split(" ")[0].replace("'", "")
                         reported_fail_list.append(t_id)
                     elif collect_neg and "running test" not in line:
                         collect_neg = False
