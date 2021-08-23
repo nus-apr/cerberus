@@ -204,7 +204,7 @@ class Fix2Fit(AbstractTool):
                         reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
                     elif "search space size: " in line:
                         size_search_space = line.split("search space size: ")[-1].strip()
-        with open(self.log_output_path, "r") as log_file:
+        with open(self.log_output_path, "r", encoding='iso-8859-1') as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
                 if "candidates evaluated: " in line:
