@@ -153,13 +153,13 @@ class Angelix(AbstractTool):
                         is_timeout = False
                     elif "running negative tests" in line:
                         collect_neg = True
-                    elif "failed to build" and "golden" in line:
+                    elif "failed to build" in line and "golden" in line:
                         is_error = True
                         emitter.error("\t\t\t\t[error] failed to build golden")
-                    elif "failed to build" and "validation" in line:
+                    elif "failed to build" in line and "validation" in line:
                         is_error = True
                         emitter.error("\t\t\t\t[error] failed to build validation")
-                    elif "failed to build" and "frontend" in line:
+                    elif "failed to build" in line and "frontend" in line:
                         is_error = True
                         emitter.error("\t\t\t\t[error] failed to build frontend")
                     elif collect_neg and "running test" in line:
