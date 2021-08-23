@@ -164,7 +164,7 @@ class Angelix(AbstractTool):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
-        if reported_fail_list != fail_list:
+        if list(reported_fail_list) != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
             reported_list_str = ",".join(reported_fail_list)
