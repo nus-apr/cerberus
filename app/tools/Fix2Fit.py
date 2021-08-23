@@ -194,6 +194,14 @@ class Fix2Fit(AbstractTool):
         is_error = False
         is_timeout = True
         reported_failing_test = []
+        if os.path.isfile(dir_results + "/original.txt"):
+            with open(dir_results + "/original.txt", 'r', encoding='iso-8859-1') as log_file:
+                log_lines = log_file.readlines()
+                for line in log_lines:
+                    if "no patch found" in line:
+                        emitter.warning("\t\t\t\t[warning] no patch found by F1X")
+                    elif "negative tests: [" in line:
+                        reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
@@ -203,13 +211,12 @@ class Fix2Fit(AbstractTool):
                     size_search_space = line.split("search space size: ")[-1].strip()
                 elif "plausible patches: " in line:
                     count_plausible = int(line.split("plausible patches: ")[-1].strip())
-                elif "negative tests: [" in line:
-                    reported_failing_test = str(line).split("negative tests: [")[-1].split("]")[0].split(", ")
                 elif "patches successfully generated" in line:
                     is_timeout = False
                 elif "no patch found" in line:
                     is_timeout = False
             log_file.close()
+
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, 'r', encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
