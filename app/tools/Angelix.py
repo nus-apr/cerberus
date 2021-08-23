@@ -136,9 +136,8 @@ class Angelix(AbstractTool):
                         size_search_space = size_search_space + 1
                     elif "considering suspicious expressions" in line:
                         count_enumerations = count_enumerations + 1
-                    elif "repair test suite: []" in line:
-                        is_error = True
-                        emitter.warning("\t\t\t\t[warning] repair test suite: []")
+                    elif "repair test suite:" in line:
+                        reported_fail_list = str(line).split("repair test suite: [")[-1].split("]")[0].split(", ").replace("'", "")
                     elif "validation test suite: []" in line:
                         is_error = True
                         emitter.warning("\t\t\t\t[warning] validation test suite: []")
@@ -159,6 +158,9 @@ class Angelix(AbstractTool):
                     elif collect_neg and "running test" not in line:
                         collect_neg = False
                 log_file.close()
+        if not reported_fail_list:
+            is_error = True
+            emitter.warning("\t\t\t\t[warning] repair test suite: []")
         dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
