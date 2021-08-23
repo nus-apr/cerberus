@@ -604,7 +604,7 @@ make clean
   --disable-xmlreader  \
   --disable-xmlwriter  \
   --disable-pear  \
-  --disable-phar \
+  --disable-pear  \
   --disable-inline-optimization  \
   --without-pcre-dir  \
   --disable-fileinfo \
