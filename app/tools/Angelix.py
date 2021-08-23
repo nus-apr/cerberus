@@ -126,10 +126,11 @@ class Angelix(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
-        reported_fail_list = fail_list.copy()
+        reported_fail_list = []
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
+                collect_neg = False
                 for line in log_lines:
                     if "selected expressions" in line:
                         size_search_space = size_search_space + 1
@@ -150,9 +151,13 @@ class Angelix(AbstractTool):
                         count_plausible = 0
                     elif "patches successfully generated" in line:
                         is_timeout = False
-                    elif "because it fails in golden version" in line:
-                        t_id = line.split("excluding test ")[-1].split(" ")[0]
+                    elif "running negative tests" in line:
+                        collect_neg = True
+                    elif collect_neg and "running test" in line:
+                        t_id = line.split("running test ")[-1].split(" ")[0]
                         reported_fail_list.append(t_id)
+                    elif collect_neg and "running test" not in line:
+                        collect_neg = False
                 log_file.close()
         dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
