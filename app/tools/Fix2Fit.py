@@ -194,7 +194,7 @@ class Fix2Fit(AbstractTool):
         is_error = False
         is_timeout = True
         reported_failing_test = []
-        with open(dir_results + "/original.txt", "r") as log_file:
+        with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             for line in log_lines:
                 if "candidates evaluated: " in line:
@@ -215,9 +215,10 @@ class Fix2Fit(AbstractTool):
                 log_lines = log_file.readlines()
                 for line in log_lines:
                     if "Fail to execute f1x" in line:
-                        is_error = False
+                        is_error = True
                     elif "tests are not specified" in line:
                         is_error = True
+                        emitter.warning("\t\t\t\t[warning] no tests provided")
                     elif "no negative tests" in line:
                         emitter.warning("\t\t\t\t[warning] no negative tests")
                     elif "failed to infer compile commands" in line:
