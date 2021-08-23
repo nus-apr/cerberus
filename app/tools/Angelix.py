@@ -159,6 +159,8 @@ class Angelix(AbstractTool):
                     elif collect_neg and "repair test suite" in line:
                         collect_neg = False
                 log_file.close()
+        if is_timeout:
+            count_enumerations = count_enumerations - 1
         dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
