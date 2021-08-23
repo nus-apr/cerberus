@@ -126,7 +126,7 @@ class Angelix(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
-        reported_fail_list = []
+        reported_fail_list = set()
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -155,7 +155,7 @@ class Angelix(AbstractTool):
                         collect_neg = True
                     elif collect_neg and "running test" in line:
                         t_id = line.split("running test ")[-1].split(" ")[0].replace("'", "")
-                        reported_fail_list.append(t_id)
+                        reported_fail_list.add(t_id)
                     elif collect_neg and "repair test suite" in line:
                         collect_neg = False
                 log_file.close()
