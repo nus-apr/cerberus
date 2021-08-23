@@ -87,7 +87,7 @@ class CPR(AbstractTool):
                     if "|P|=" in line:
                         count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", "").split(":")[0])
                     elif "number of concrete patches explored" in line:
-                        count_enumerations = int(line.split("number of concrete patches explored: ")[-1].strip().split("^")[0])
+                        count_enumerations = int(line.split("number of concrete patches explored: ")[-1].strip().split("\x1b")[0].split(".0")[0])
                         size_search_space = count_enumerations
                     elif "Runtime Error" in line:
                         is_error = True
