@@ -153,6 +153,10 @@ class Angelix(AbstractTool):
                         is_timeout = False
                     elif "running negative tests" in line:
                         collect_neg = True
+                    elif "excluding test" in line:
+                        removing_test_id = line.split("excluding test ")[-1].split(" ")[0]
+                        if removing_test_id in reported_fail_list:
+                            reported_fail_list.remove(removing_test_id)
                     elif "failed to build" in line and "golden" in line:
                         is_error = True
                         emitter.error("\t\t\t\t[error] failed to build golden")

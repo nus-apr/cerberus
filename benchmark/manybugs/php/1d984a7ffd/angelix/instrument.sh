@@ -598,9 +598,6 @@ make clean
 ./configure \
   --enable-cli \
   --disable-dom \
-  --disable-libxml  \
-  --disable-xml \
-  --disable-simplexml \
   --disable-xmlreader  \
   --disable-xmlwriter  \
   --disable-pear  \
