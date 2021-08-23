@@ -167,9 +167,9 @@ class Angelix(AbstractTool):
         if list(reported_fail_list) != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
-            reported_list_str = ",".join(reported_fail_list)
+            reported_list_str = ",".join(list(reported_fail_list))
             if len(reported_fail_list) > 10:
-                reported_list_str = ",".join(reported_fail_list[:10]) + "..."
+                reported_list_str = ",".join(list(reported_fail_list)[:10]) + "..."
             emitter.warning("\t\t\t\treported fail list: {0}".format(reported_list_str))
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
