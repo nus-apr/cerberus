@@ -137,7 +137,7 @@ class Angelix(AbstractTool):
                     elif "considering suspicious expressions" in line:
                         count_enumerations = count_enumerations + 1
                     elif "repair test suite:" in line:
-                        reported_fail_list = str(line).split("repair test suite: [")[-1].split("]")[0].split(", ").replace("'", "")
+                        reported_fail_list = str(line).split("repair test suite: [")[-1].split("]")[0].replace("'", "").split(", ")
                     elif "validation test suite: []" in line:
                         is_error = True
                         emitter.warning("\t\t\t\t[warning] validation test suite: []")
