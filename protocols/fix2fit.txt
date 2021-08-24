@@ -1,0 +1,45 @@
+### M1	"number of enumerated patches"
+Check "candidates evaluated" in the output.log
+
+Search Term:
+candidates evaluated
+
+
+### M2	"number of patches non-compilable"
+Always zero because of the transformation schema.
+
+
+### M3  "number of patches in-plausible"
+M3 = M1 - M2 - M4
+
+
+### M4  "number of plausible patches"
+Check "plausible patches:" in the output.log
+
+Search Term:
+plausible patches
+
+
+### M5	"number of correct patches"
+Check the directory "patches" Note that the patch file name provides the ranking.
+patchScore_patchGenOrder-xxx.patch. Using the command "ls -v" we can sort the patches and combining with "head" command
+we can filter the top-10 using the command "ls -v | head -n10"
+
+
+
+### M6	"order of generation of correct patch"
+Patch file name provides the order of the patch generation as
+patchScore_patchGenOrder-xxx.patch
+
+
+### M7	"rank of the correct patch"
+The order in the filtered list using the command  "ls -v | head -n10"
+
+
+### M8	"time until correct patch is identified"
+The time for generation would the time needed for the full exploration and
+is the same for all plausible patches. Time can be measure since the log contains timestamps.
+
+Search Term:
+patches successfully generated
+
