@@ -185,9 +185,10 @@ def run(repair_tool, benchmark, setup):
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_result, dir_exp)
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
-                save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
-                analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
-                archive_results(dir_result)
+                if not values.CONF_INSTRUMENT_ONLY:
+                    save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp)
             if values.CONF_SHOW_DEV_PATCH:
