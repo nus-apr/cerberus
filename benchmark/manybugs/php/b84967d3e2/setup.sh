@@ -48,6 +48,9 @@ cat ../libxml.patch | patch -p0
 #./configure CFLAGS="-save-temps=obj"
 #make -j`nproc`
 
+# add fix transformation
+sed -i "1261i if (1 == 1)" $dir_name/src/Zend/zend_execute.c
+
 #make distclean
 ./configure && make -j`nproc`
 
