@@ -296,12 +296,12 @@ instrument () {
             local src1="$directory/ext/tokenizer/tokenizer.c"
             restore_original $src1
 
-            replace-in-range "$src1" \
-                '^static void tokenize' \
-                55 \
-                'token_line = CG(zend_lineno);' \
-                'token_line = CG(zend_lineno);\
-\t\tif (0 == 1) break;'
+#            replace-in-range "$src1" \
+#                '^static void tokenize' \
+#                55 \
+#                'token_line = CG(zend_lineno);' \
+#                'token_line = CG(zend_lineno);\
+#\t\tif (0 == 1) break;'
 
             replace-in-range "$src1" \
                 '^static void tokenize' \

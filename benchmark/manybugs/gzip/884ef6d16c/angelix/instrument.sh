@@ -150,6 +150,7 @@ instrument_source () {
         # sed -i '/invalid suffix/i ANGELIX_REACHABLE("stderr");' "$gzip_error"
         sed -i '/invalid suffix/i ANGELIX_REACHABLE("incorrect_suffix");' "$gzip_error"
         #sed -i '/work = lzw/i ANGELIX_REACHABLE("stderr2");' "$gzip_error"
+        sed -i "11,14d"  "$gzip_error"
 
     fi
 }
@@ -200,7 +201,7 @@ preinstrument(){
     preinstrument_test "$directory"
 
     case $version in
-        3eb6091d69a-884ef6d16c6 )
+        3eb6091d69-884ef6d16c )
             if [[ "$is_golden" ==  *"notgolden"* ]]; then
                 local test6_script="$directory/tests/null-suffix-clobber"
                 sed -i "s/invalid suffix/incorrect suffix/" "$test6_script"
@@ -208,7 +209,7 @@ preinstrument(){
             ;;
     esac
 
-    # if [[ "$version" == *"3eb6091d69a"* ]]
+    # if [[ "$version" == *"3eb6091d69"* ]]
     # then
     #    if [[ "$is_golden" ==  *"notgolden"* ]]
     #     then

@@ -19,7 +19,6 @@ make clean
   --disable-pear  \
   --disable-phar \
   --disable-inline-optimization  \
-  --without-pcre-dir  \
   --disable-fileinfo \
   --disable-shared
 

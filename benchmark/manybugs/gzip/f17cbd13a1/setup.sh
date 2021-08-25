@@ -52,3 +52,5 @@ sed -i "s#run_test 1 #run_test 2 #g" test.sh
 sed -i "27d" test.sh
 sed -i "s#run_test 7 #run_test 6 #g" test.sh
 
+# add fix instrumentation
+sed -i '652iifd =ifd;' $dir_name/src/gzip.c
