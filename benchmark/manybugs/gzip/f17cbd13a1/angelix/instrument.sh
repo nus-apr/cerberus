@@ -119,7 +119,7 @@ instrument_test() {
 
 instrument_source () {
     local directory="$1"
-    if [[ "$version" == *"a1d3d4019ddd22"* ]]
+    if [[ "$version" == *"a1d3d4019d"* ]]
     then
         instrument_test "$directory"
         #  local test7_script="$directory/tests/stdin"
@@ -130,7 +130,7 @@ instrument_source () {
         #    if ! grep -q ANGELIX "$gzip_write"; then
         add-header "$gzip_write"
         sed -i 's/put_byte(bi_buf)/put_byte(ANGELIX_OUTPUT(int, bi_buf, "stdout"))/g' "$gzip_write"
-        sed -i '653iifd =ifd;' "$gzip_main"
+        sed -i '11,17d' "$gzip_main"
         #   fi
     else
         #  local test6_script="$directory/tests/null-suffix-clobber"
