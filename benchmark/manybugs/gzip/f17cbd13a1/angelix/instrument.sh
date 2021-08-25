@@ -130,7 +130,7 @@ instrument_source () {
         #    if ! grep -q ANGELIX "$gzip_write"; then
         add-header "$gzip_write"
         sed -i 's/put_byte(bi_buf)/put_byte(ANGELIX_OUTPUT(int, bi_buf, "stdout"))/g' "$gzip_write"
-        sed -i '11,17d' "$gzip_main"
+
         #   fi
     else
         #  local test6_script="$directory/tests/null-suffix-clobber"
