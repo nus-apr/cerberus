@@ -325,6 +325,8 @@ instrument () {
             sed -i 's/if (SUCCESS == zend_hash_find/if (1 \&\& SUCCESS == zend_hash_find/g' $src1
             sed -i 's/if (SUCCESS == phar_split_fname/if (1 \&\& SUCCESS == phar_split_fname/g' $src1
 
+            sed -i '7,12d' $src1
+
             replace-in-range "$src1" \
                 '^PHP_METHOD(Phar, mount)' \
                 10 \
