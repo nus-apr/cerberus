@@ -258,7 +258,7 @@ instrument () {
             local src1="$directory/ext/standard/string.c"
             restore_original $src1
             add-header $src1
-
+            sed -i '11,18d' $src1
             replace-all-in-range "$src1" \
                 '^PHP_FUNCTION(substr_compare)' \
                55 \
