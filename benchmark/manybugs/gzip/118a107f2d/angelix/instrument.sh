@@ -149,6 +149,7 @@ instrument_source () {
         # sed -i '/invalid suffix/i ANGELIX_REACHABLE("stderr");' "$gzip_error"
         sed -i '/invalid suffix/i ANGELIX_REACHABLE("incorrect_suffix");' "$gzip_error"
         #sed -i '/work = lzw/i ANGELIX_REACHABLE("stderr2");' "$gzip_error"
+        sed -i "11,15d"  "$gzip_error"
 
     fi
 }
