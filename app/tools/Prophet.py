@@ -26,11 +26,13 @@ class Prophet(AbstractTool):
             else:
                 test_config_str += test_id + " "
         test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
-        for test_id in passing_test_list:
-            if test_id == passing_test_list[-1]:
-                test_config_str += test_id + "\n"
-            else:
-                test_config_str += test_id + " "
+        if passing_test_list:
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+            for test_id in filtered_list:
+                if test_id == filtered_list[-1]:
+                    test_config_str += test_id + "\n"
+                else:
+                    test_config_str += test_id + " "
         test_config_str += "Regression Cases: Tot 0\n"
         test_config_file = dir_expr + "/prophet/prophet.revlog"
 
@@ -87,6 +89,19 @@ class Prophet(AbstractTool):
         copy_command = "mv  " + regex_for_fix + " " + dir_results
         execute_command(copy_command)
         return
+
+    def filter_tests(self, test_id_list, subject, bug_id):
+        filtered_list = []
+        filter_list = []
+        if str(subject).lower() == "python":
+            filter_list = []
+            if bug_id == "69935":
+                filter_list.extend([157, 159, 160, 161, 163, 164])
+        for t_id in test_id_list:
+            if int(t_id) not in filter_list:
+                filtered_list.append(t_id)
+
+        return filtered_list
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
