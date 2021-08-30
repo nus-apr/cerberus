@@ -96,7 +96,7 @@ class Prophet(AbstractTool):
         if str(subject).lower() == "python":
             filter_list = []
             if bug_id == "69935":
-                filter_list.extend([157, 159, 160, 161, 163, 164, 162, 60, 70, 98])
+                filter_list.extend([157, 158, 159, 160, 161, 163, 164, 162, 60, 70, 98, 156])
         for t_id in test_id_list:
             if int(t_id) not in filter_list:
                 filtered_list.append(t_id)
