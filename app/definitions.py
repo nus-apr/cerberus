@@ -55,7 +55,7 @@ ARG_SHOW_DEV_PATCH = "--show-dev-patch"
 
 
 FILE_META_DATA = None
-FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse21.json"
+FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse22.json"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
