@@ -55,7 +55,7 @@ CONF_SUBJECT_NAME = None
 CONF_PURGE = False
 
 FILE_META_DATA = None
-FILE_CONFIGURATION = "configurations/icse21.json"
+FILE_CONFIGURATION = "configurations/icse22.json"
 FILE_ERROR_LOG = "error-log"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
