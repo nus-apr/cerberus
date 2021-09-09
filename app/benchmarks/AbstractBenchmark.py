@@ -46,6 +46,7 @@ class AbstractBenchmark:
         dir_setup = self.bench_dir_path + "/" + subject_name + "/" + bug_id
         volume_list = definitions.VOLUME_LIST
         volume_list[dir_setup] = {'bind': '/setup', 'mode': 'rw'}
+        container_id = None
         if values.CONF_USE_CONTAINER:
             container_id = container.get_container(tool_name, self.name, subject_name, bug_id)
             if container_id:
@@ -56,39 +57,39 @@ class AbstractBenchmark:
             self.log_dir_path = "/logs"
         else:
             self.log_dir_path = dir_logs
-        return
+        return container_id
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id):
+    def config(self, exp_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id):
+    def build(self, exp_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, exp_dir_path, bug_id):
+    def test(self, exp_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id):
+    def test_all(self, exp_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, results_dir_path, exp_dir_path):
+    def save_artefacts(self, results_dir_path, exp_dir_path, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def clean(self, exp_dir_path):
+    def clean(self, exp_dir_path, container_id):
         """Method documentation"""
         return
 
-    def save_logs(self, results_dir):
+    def save_logs(self, results_dir, container_id):
         if os.path.isfile(self.log_deploy_path):
             shutil.move(self.log_deploy_path, results_dir)
         if os.path.isfile(self.log_config_path):

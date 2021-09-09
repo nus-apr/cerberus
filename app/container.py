@@ -114,9 +114,11 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
 
 def exec_command(container_id, command):
     client = docker.from_env()
+    exit_code = -1
+    output = ""
     try:
         container = client.containers.get(container_id)
-        container.exec_run(command, stdout=False, stderr=False)
+        exit_code, output = container.exec_run(command, stdout=False, stderr=False, demux=True)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: container not found: " + str(container_id))
@@ -126,7 +128,7 @@ def exec_command(container_id, command):
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: unhandled exception")
-    return container
+    return exit_code, output
 
 
 def remove_container(container_id):
