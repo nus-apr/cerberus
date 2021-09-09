@@ -52,7 +52,7 @@ class AbstractBenchmark:
             if container_id:
                 container.stop_container(container_id)
                 container.remove_container(container_id)
-            container.build_container(tool_name, self.name, subject_name, bug_id, definitions.VOLUME_LIST)
+            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, definitions.VOLUME_LIST)
             self.setup_dir_path = "/setup"
             self.log_dir_path = "/logs"
         else:
