@@ -118,7 +118,7 @@ def exec_command(container_id, command, workdir="/experiments"):
     output = ""
     try:
         container = client.containers.get(container_id)
-        exit_code, output = container.exec_run(command, stdout=False, stderr=False, demux=True, workdir=workdir)
+        exit_code, output = container.exec_run(command, demux=True, workdir=workdir)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: container not found: " + str(container_id))
