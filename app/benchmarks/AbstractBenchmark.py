@@ -85,7 +85,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path):
         """Method documentation"""
         return
 

@@ -144,7 +144,7 @@ class ManyBugs(AbstractBenchmark):
         execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
         return
 
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path):
         if os.path.isdir(exp_dir_path):
             rm_command = "rm -rf " + exp_dir_path
             execute_command(rm_command)
