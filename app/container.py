@@ -2,7 +2,7 @@ import docker
 import os
 from app import definitions, utilities, emitter
 
-IMAGE_PREFIX = "rshariffdeen/cerberus"
+IMAGE_NAME = "rshariffdeen/cerberus"
 
 
 def check_image_exist(tool_name):
@@ -10,6 +10,8 @@ def check_image_exist(tool_name):
     image_list = client.images.list()
     for image in image_list:
         tag_list = image.tags
+        if IMAGE_NAME not  in tag_list[0]:
+            continue
         for tag in tag_list:
             if tool_name in tag:
                 return True
@@ -18,7 +20,7 @@ def check_image_exist(tool_name):
 
 def get_tool_image(tool_name):
     client = docker.from_env()
-    image_name = IMAGE_PREFIX + ":" + tool_name
+    image_name = IMAGE_NAME + ":" + tool_name
     image = None
     try:
         image = client.images.get(image_name)
@@ -29,7 +31,7 @@ def get_tool_image(tool_name):
 
 def build_tool_image(tool_name):
     client = docker.from_env()
-    image_name = IMAGE_PREFIX + ":" + tool_name
+    image_name = IMAGE_NAME + ":" + tool_name
     image = None
     dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
     if os.path.isfile(dockerfile_path):
@@ -49,7 +51,7 @@ def build_tool_image(tool_name):
 
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
     client = docker.from_env()
-    image_name = IMAGE_PREFIX + ":" + tool
+    image_name = IMAGE_NAME + ":" + tool
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
