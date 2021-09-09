@@ -40,6 +40,7 @@ class AbstractBenchmark:
 
     @abc.abstractmethod
     def setup(self, tool_name, bug_index, dir_logs, test_all=False):
+        self.log_dir_path = dir_logs
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -54,9 +55,6 @@ class AbstractBenchmark:
                 container.remove_container(container_id)
             container_id = container.build_container(tool_name, self.name, subject_name, bug_id, definitions.VOLUME_LIST)
             self.setup_dir_path = "/setup"
-            self.log_dir_path = "/logs"
-        else:
-            self.log_dir_path = dir_logs
         return container_id
 
     @abc.abstractmethod

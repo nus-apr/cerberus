@@ -50,8 +50,10 @@ class ManyBugs(AbstractBenchmark):
             status, output = container.exec_command(container_id, command_str)
             stdout, stderr = output
             with open(self.log_deploy_path, 'w') as log_file:
-                log_file.writelines(stdout)
-                log_file.writelines(stderr)
+                if stdout:
+                    log_file.writelines(stdout.decode("utf-8"))
+                if stderr:
+                    log_file.writelines(stderr.decode("utf-8"))
         else:
             command_str += " > {0} 2>&1".format(self.log_deploy_path)
             status = execute_command(command_str)
