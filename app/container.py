@@ -70,13 +70,33 @@ def build_tool_image(tool_name):
     return image
 
 
+def get_container(tool, benchmark, subject, bug_id, config_id='default'):
+    client = docker.from_env()
+    image_name = IMAGE_NAME + ":" + tool
+    container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
+    container_id = None
+    try:
+        container_id = client.containers.get(container_name).id
+    except docker.errors.NotFound as ex:
+        # emitter.error(ex)
+        emitter.warning("[warning] Unable to find container")
+    except docker.errors.APIError as exp:
+        emitter.error(exp)
+        utilities.error_exit("[error] Unable to find container: docker daemon error")
+    except Exception as ex:
+        emitter.error(ex)
+        utilities.error_exit("[error] Unable to find container: unhandled exception")
+    return container_id
+
+
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
     client = docker.from_env()
     image_name = IMAGE_NAME + ":" + tool
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
-        container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list).id
+        container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list,
+                                             tty=True).id
     except docker.errors.ContainerError as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: container exited with a non-zero exit code")
