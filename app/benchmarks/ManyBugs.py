@@ -12,8 +12,8 @@ class ManyBugs(AbstractBenchmark):
         self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
 
-    def setup(self, tool_name, bug_index, dir_logs, test_all=False):
-        container_id = super(ManyBugs, self).setup(tool_name, bug_index, dir_logs, test_all)
+    def setup(self, tool_name, bug_index, test_all=False):
+        container_id = super(ManyBugs, self).setup(tool_name, bug_index, test_all)
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])

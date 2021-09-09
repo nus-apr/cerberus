@@ -39,22 +39,21 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def setup(self, tool_name, bug_index, dir_logs, test_all=False):
-        self.log_dir_path = dir_logs
+    def setup(self, tool_name, bug_index, test_all=False):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        self.log_dir_path = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
         container_id = None
         if values.CONF_USE_CONTAINER:
             self.setup_dir_path = "/setup"
             dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_log_local = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
             volume_list = {
                 dir_exp_local: {'bind': '/experiments', 'mode': 'rw'},
-                dir_log_local: {'bind': '/logs', 'mode': 'rw'},
+                self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
                 dir_result_local: {'bind': '/results', 'mode': 'rw'},
                 dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
             }
