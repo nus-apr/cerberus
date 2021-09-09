@@ -50,6 +50,8 @@ class AbstractBenchmark:
             dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+            if os.path.isdir(dir_exp_local):
+                shutil.rmtree(dir_exp_local)
             dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
             volume_list = {
                 dir_exp_local: {'bind': '/experiments', 'mode': 'rw'},

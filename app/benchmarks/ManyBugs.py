@@ -46,7 +46,7 @@ class ManyBugs(AbstractBenchmark):
         self.log_deploy_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-deploy.log"
 
         if values.CONF_USE_CONTAINER:
-            command_str = "rm -rf /experiments; bash setup.sh"
+            command_str = "bash setup.sh"
             status, output = container.exec_command(container_id, command_str, exp_dir_path)
             stdout, stderr = output
             with open(self.log_deploy_path, 'w') as log_file:
