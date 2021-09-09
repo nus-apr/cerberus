@@ -183,7 +183,7 @@ def run(repair_tool, benchmark, setup):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp)
             utilities.clean_results(dir_result)
-            benchmark.setup(index, repair_tool.name, definitions.DIR_LOGS, values.DEFAULT_RUN_TESTS_ONLY)
+            benchmark.setup(repair_tool.name, index, definitions.DIR_LOGS, values.DEFAULT_RUN_TESTS_ONLY)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_result, dir_exp)
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
