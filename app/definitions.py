@@ -67,8 +67,3 @@ FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
 
 
-VOLUME_LIST = {
-    DIR_EXPERIMENT: {'bind': '/experiments', 'mode': 'rw'},
-    DIR_LOGS: {'bind': '/logs', 'mode': 'rw'},
-    DIR_RESULT: {'bind': '/results', 'mode': 'rw'}
-}

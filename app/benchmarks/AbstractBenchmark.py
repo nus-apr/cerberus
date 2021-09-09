@@ -49,13 +49,20 @@ class AbstractBenchmark:
             self.setup_dir_path = "/setup"
             dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-            volume_list = definitions.VOLUME_LIST
-            volume_list[dir_setup_local] = {'bind': dir_setup_container, 'mode': 'rw'}
+            dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+            dir_log_local = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
+            dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
+            volume_list = {
+                dir_exp_local: {'bind': '/experiments', 'mode': 'rw'},
+                dir_log_local: {'bind': '/logs', 'mode': 'rw'},
+                dir_result_local: {'bind': '/results', 'mode': 'rw'},
+                dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
+            }
             container_id = container.get_container(tool_name, self.name, subject_name, bug_id)
             if container_id:
                 container.stop_container(container_id)
                 container.remove_container(container_id)
-            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, definitions.VOLUME_LIST)
+            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list)
 
         return container_id
 

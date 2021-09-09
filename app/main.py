@@ -164,7 +164,7 @@ def run(repair_tool, benchmark, setup):
             emitter.highlight("\t[info] experiment directory: " + dir_exp)
 
             if not os.path.isdir(tool_inst_dir):
-                emitter.warning("\t\t[warning] instrumentation not exist for tool, skipping experiment")
+                emitter.warning("\t\t[warning] there is no instrumentation for " + repair_tool.name)
                 # continue
             dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
                                                                   repair_tool.name,
