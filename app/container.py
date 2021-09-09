@@ -2,7 +2,7 @@ import docker
 import os
 from app import definitions, utilities, emitter
 
-IMAGE_PREFIX = "rshariffdeen/cerberus:"
+IMAGE_PREFIX = "rshariffdeen/cerberus"
 
 
 def check_image_exist(tool_name):
@@ -39,7 +39,7 @@ def build_tool_image(tool_name):
         except docker.errors.BuildError as ex:
             utilities.error_exit("[error] Unable to build image: build failed")
         except docker.errors.APIError as exp:
-            utilities.error_exit("[error] Unable to build container: docker daemon error")
+            utilities.error_exit("[error] Unable to build image: docker daemon error")
         except Exception as ex:
             utilities.error_exit("[error] Unable to build image: unhandled exception")
     else:
