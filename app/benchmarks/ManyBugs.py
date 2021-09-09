@@ -8,7 +8,7 @@ from app import definitions, values, emitter, container
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/" + self.name)
+        self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/")
         self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
 
@@ -17,7 +17,7 @@ class ManyBugs(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        directory_name = self.setup_dir_path + "/" + subject_name + "/" + bug_id
+        directory_name = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
         emitter.normal("\t\tpreparing experiment subject")
         if self.deploy(directory_name, bug_id, container_id):
             if self.config(directory_name, bug_id, container_id):

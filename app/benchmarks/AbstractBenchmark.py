@@ -18,7 +18,7 @@ class AbstractBenchmark:
     size = 0
 
     def __init__(self):
-        self.meta_file = self.bench_dir_path + "/meta-data.json"
+        self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
         self.load()
 
     def get_list(self):
@@ -47,7 +47,7 @@ class AbstractBenchmark:
         container_id = None
         if values.CONF_USE_CONTAINER:
             self.setup_dir_path = "/setup"
-            dir_setup_local = self.bench_dir_path + "/" + subject_name + "/" + bug_id
+            dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             volume_list = definitions.VOLUME_LIST
             volume_list[dir_setup_local] = {'bind': dir_setup_container, 'mode': 'rw'}
