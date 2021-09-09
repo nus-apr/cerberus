@@ -11,10 +11,8 @@ class AbstractTool:
     name = None
 
     def __init__(self, tool_name):
-        if values.CONF_USE_CONTAINER:
-            if not container.check_image_exist(tool_name):
-                emitter.normal("[container] building docker image")
-                container.build_tool_image(tool_name)
+        """add initialization commands to all tools here"""
+        emitter.debug("using tool: " + tool_name)
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
@@ -47,10 +45,15 @@ class AbstractTool:
 
     def check_tool_exists(self):
         """any pre-processing required for the repair"""
-        check_command = "which {}".format(self.name.lower())
-        ret_code = execute_command(check_command)
-        if int(ret_code) != 0:
-            error_exit("{} not Found".format(self.name))
+        if values.CONF_USE_CONTAINER:
+            if not container.check_image_exist(self.name.lower()):
+                emitter.normal("[container] building docker image")
+                container.build_tool_image(self.name.lower())
+        else:
+            check_command = "which {}".format(self.name.lower())
+            ret_code = execute_command(check_command)
+            if int(ret_code) != 0:
+                error_exit("{} not Found".format(self.name))
         return
 
     def post_process(self, dir_expr, dir_results):
