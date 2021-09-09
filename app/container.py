@@ -12,7 +12,7 @@ def check_image_exist(tool_name):
         tag_list = image.tags
         if not tag_list:
             continue
-        if IMAGE_NAME not  in tag_list[0]:
+        if IMAGE_NAME not in tag_list[0]:
             continue
         for tag in tag_list:
             if tool_name in tag:
@@ -33,6 +33,7 @@ def get_tool_image(tool_name):
 
 def pull_image(tool_name):
     client = docker.from_env()
+    emitter.normal("pulling docker image")
     image = None
     try:
         image, _ = client.images.pull(repository=IMAGE_NAME, tag=tool_name)
@@ -47,6 +48,7 @@ def pull_image(tool_name):
 
 def build_tool_image(tool_name):
     client = docker.from_env()
+    emitter.normal("building docker image")
     image_name = IMAGE_NAME + ":" + tool_name
     image = None
     dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()

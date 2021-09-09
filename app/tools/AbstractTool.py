@@ -47,7 +47,7 @@ class AbstractTool:
         """any pre-processing required for the repair"""
         if values.CONF_USE_CONTAINER:
             if not container.check_image_exist(self.name.lower()):
-                emitter.normal("[container] building docker image")
+                emitter.warning("[warning] docker image not found")
                 if container.pull_image(self.name.lower()) is None:
                     container.build_tool_image(self.name.lower())
         else:
