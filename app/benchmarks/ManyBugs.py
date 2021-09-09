@@ -44,10 +44,10 @@ class ManyBugs(AbstractBenchmark):
         emitter.normal("\t\t\tdownloading experiment subject")
         conf_id = str(values.CONFIG_ID)
         self.log_deploy_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-deploy.log"
-        command_str = "cd " + exp_dir_path + "; bash setup.sh"
 
         if values.CONF_USE_CONTAINER:
-            status, output = container.exec_command(container_id, command_str)
+            command_str = "bash setup.sh"
+            status, output = container.exec_command(container_id, command_str, exp_dir_path)
             stdout, stderr = output
             with open(self.log_deploy_path, 'w') as log_file:
                 if stdout:
@@ -55,6 +55,7 @@ class ManyBugs(AbstractBenchmark):
                 if stderr:
                     log_file.writelines(stderr.decode("utf-8"))
         else:
+            command_str = "cd " + exp_dir_path + "; bash setup.sh"
             command_str += " > {0} 2>&1".format(self.log_deploy_path)
             status = execute_command(command_str)
         return status == 0

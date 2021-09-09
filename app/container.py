@@ -112,13 +112,13 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
     return container_id
 
 
-def exec_command(container_id, command):
+def exec_command(container_id, command, workdir="/experiments"):
     client = docker.from_env()
     exit_code = -1
     output = ""
     try:
         container = client.containers.get(container_id)
-        exit_code, output = container.exec_run(command, stdout=False, stderr=False, demux=True)
+        exit_code, output = container.exec_run(command, stdout=False, stderr=False, demux=True, workdir=workdir)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: container not found: " + str(container_id))
