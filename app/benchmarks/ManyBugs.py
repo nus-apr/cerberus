@@ -64,27 +64,60 @@ class ManyBugs(AbstractBenchmark):
         emitter.normal("\t\t\tconfiguring experiment subject")
         conf_id = str(values.CONFIG_ID)
         self.log_config_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-config.log"
-        command_str = "cd " + exp_dir_path + "; bash config.sh"
-        command_str += " > {0} 2>&1".format(self.log_config_path)
-        status = execute_command(command_str)
+        if values.CONF_USE_CONTAINER:
+            command_str = "bash config.sh"
+            status, output = container.exec_command(container_id, command_str, exp_dir_path)
+            stdout, stderr = output
+            with open(self.log_config_path, 'w') as log_file:
+                if stdout:
+                    log_file.writelines(stdout.decode("utf-8"))
+                if stderr:
+                    log_file.writelines(stderr.decode("utf-8"))
+        else:
+            command_str = "cd " + exp_dir_path + "; bash config.sh"
+            command_str += " > {0} 2>&1".format(self.log_config_path)
+            status = execute_command(command_str)
+
         return status == 0
 
     def build(self, exp_dir_path, bug_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
         conf_id = str(values.CONFIG_ID)
         self.log_build_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-build.log"
-        command_str = "cd " + exp_dir_path + "; bash build.sh"
-        command_str += " > {0} 2>&1".format(self.log_build_path)
-        status = execute_command(command_str)
+
+        if values.CONF_USE_CONTAINER:
+            command_str = "bash build.sh"
+            status, output = container.exec_command(container_id, command_str, exp_dir_path)
+            stdout, stderr = output
+            with open(self.log_build_path, 'w') as log_file:
+                if stdout:
+                    log_file.writelines(stdout.decode("utf-8"))
+                if stderr:
+                    log_file.writelines(stderr.decode("utf-8"))
+        else:
+            command_str = "cd " + exp_dir_path + "; bash build.sh"
+            command_str += " > {0} 2>&1".format(self.log_build_path)
+            status = execute_command(command_str)
         return status == 0
 
     def test(self, exp_dir_path, bug_id, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
         conf_id = str(values.CONFIG_ID)
         self.log_test_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test.log"
-        command_str = "cd " + exp_dir_path + "; bash test.sh p1"
-        command_str += " > {0} 2>&1".format(self.log_test_path)
-        status = execute_command(command_str)
+
+        if values.CONF_USE_CONTAINER:
+            command_str = "bash test.sh p1"
+            status, output = container.exec_command(container_id, command_str, exp_dir_path)
+            stdout, stderr = output
+            with open(self.log_test_path, 'w') as log_file:
+                if stdout:
+                    log_file.writelines(stdout.decode("utf-8"))
+                if stderr:
+                    log_file.writelines(stderr.decode("utf-8"))
+        else:
+            command_str = "cd " + exp_dir_path + "; bash test.sh p1"
+            command_str += " > {0} 2>&1".format(self.log_test_path)
+            status = execute_command(command_str)
         return status == 0
 
     def test_all(self, exp_dir_path, experiment_item, container_id):
