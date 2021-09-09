@@ -1,11 +1,15 @@
 import os
 from os.path import dirname
 DIR_MAIN = dirname(dirname(os.path.realpath(__file__)))
-DIR_LOGS = "/logs"
-DIR_RESULT = "/results"
-DIR_EXPERIMENT = "/experiments"
-DIRECTORY_LOG_BASE = DIR_MAIN + "/logs"
 DIR_INFRA = DIR_MAIN + "/infra"
+DIRECTORY_LOG_BASE = DIR_MAIN + "/logs"
+DIRECTORY_OUTPUT_BASE = DIR_MAIN + "/output"
+DIR_EXPERIMENT = DIR_MAIN + "/experiments"
+DIR_LOGS = DIRECTORY_OUTPUT_BASE + "/logs"
+DIR_RESULT = DIRECTORY_OUTPUT_BASE + "/results"
+
+
+
 FILE_MAIN_LOG = ""
 FILE_ERROR_LOG = DIRECTORY_LOG_BASE + "/log-error"
 FILE_LAST_LOG = DIRECTORY_LOG_BASE + "/log-latest"
