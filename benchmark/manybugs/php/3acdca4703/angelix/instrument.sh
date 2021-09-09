@@ -5,7 +5,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-dir_name=/data/$benchmark_name/$project_name/$fix_id
+dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
 
 version=309688-309716 #this is the angelix version
 gold_file=ext/phar/phar_object.c-$fix_id

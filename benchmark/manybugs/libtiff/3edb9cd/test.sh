@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
-dir_name=/data/$benchmark_name/$project_name/$bug_id
+dir_name=$1/experiments/$benchmark_name/$project_name/$bug_id
 scenario_id=libtiff-bug-2005-12-21-3b848a7-3edb9cd
 cd $dir_name
 TEST_ID=$1

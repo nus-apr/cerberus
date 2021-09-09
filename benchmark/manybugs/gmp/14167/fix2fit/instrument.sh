@@ -3,9 +3,9 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-exp_dir_name=/data/$benchmark_name/$project_name/$fix_id
-src_dir_name=/data/$benchmark_name/$project_name/$fix_id/src
-test_dir_name=/data/$benchmark_name/$project_name/$fix_id/tests
+exp_dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+src_dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id/src
+test_dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id/tests
 target_dir=/experiments/benchmark/$benchmark_name/$project_name/$fix_id
 
 cp target_dir/config.sh $src_dir_name

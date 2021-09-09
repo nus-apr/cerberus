@@ -20,6 +20,8 @@ def create_directories():
         os.makedirs(definitions.DIR_LOGS)
     if not os.path.isdir(definitions.DIR_RESULT):
         os.makedirs(definitions.DIR_RESULT)
+    if not os.path.isdir(definitions.DIR_EXPERIMENT):
+        os.makedirs(definitions.DIR_EXPERIMENT)
     if not os.path.isdir(definitions.DIRECTORY_LOG_BASE):
         os.makedirs(definitions.DIRECTORY_LOG_BASE)
 
@@ -148,7 +150,7 @@ def run(repair_tool, benchmark, setup):
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             directory_name = benchmark.name + "/" + subject_name + "/" + bug_name
             dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name
-            dir_exp = values.CONF_DATA_PATH + "/" + directory_name + "/"
+            dir_exp = definitions.DIR_EXPERIMENT + "/" + directory_name + "/"
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
             iteration = iteration + 1
             values.ITERATION_NO = iteration

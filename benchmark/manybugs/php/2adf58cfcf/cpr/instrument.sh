@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-dir_name=/data/$benchmark_name/$project_name/$fix_id
+dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
 
 mkdir $dir_name/cpr
 cd $dir_name/src
@@ -129,7 +129,7 @@ llvm-as php.ll
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
-project_path:/data/$benchmark_name/$project_name/$fix_id
+project_path:$1/experiments/$benchmark_name/$project_name/$fix_id
 tag_id:$fix_id
 src_directory:src
 config_command:skip
@@ -138,8 +138,8 @@ binary_path:sapi/cli/php
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2
 depth:3
-loc_patch:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3770
-loc_bug:/data/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3771
+loc_patch:$1/experiments/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3770
+loc_bug:$1/experiments/$benchmark_name/$project_name/$fix_id/src/ext/phar/phar_object.c:3771
 gen_limit:30
 stack_size:15000
 dist_metric:angelic
