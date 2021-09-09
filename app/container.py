@@ -1,6 +1,7 @@
 import docker
 import os
 from app import definitions, utilities, emitter
+from pathlib import Path
 
 IMAGE_NAME = "rshariffdeen/cerberus"
 
@@ -35,7 +36,7 @@ def build_tool_image(tool_name):
     client = docker.from_env()
     image_name = IMAGE_NAME + ":" + tool_name
     image = None
-    dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
+    dockerfile_path = Path(definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower())
     if os.path.isfile(dockerfile_path):
         image = None
         try:
