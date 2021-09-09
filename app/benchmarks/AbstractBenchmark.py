@@ -2,7 +2,7 @@ import abc
 import os
 import json
 import shutil
-from app import emitter, utilities
+from app import emitter, utilities, values, container, definitions
 
 
 class AbstractBenchmark:
@@ -10,6 +10,7 @@ class AbstractBenchmark:
     meta_file = None
     bench_dir_path = None
     name = None
+    log_dir_path = "None"
     log_deploy_path = "None"
     log_config_path = "None"
     log_build_path = "None"
@@ -38,27 +39,38 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def setup(self, bug_index, dir_logs, test_all=False):
+    def setup(self, tool_name, bug_index, dir_logs, test_all=False):
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        dir_setup = self.bench_dir_path + "/" + subject_name + "/" + bug_id
+        volume_list = definitions.VOLUME_LIST
+        volume_list[dir_setup] = {'bind': '/setup', 'mode': 'rw'}
+        if values.CONF_USE_CONTAINER:
+            container.build_container(tool_name, self.name, subject_name, bug_id, definitions.VOLUME_LIST)
+            self.setup_dir_path = "/setup"
+            self.log_dir_path = "/logs"
+        else:
+            self.log_dir_path = dir_logs
+        return
+
+    @abc.abstractmethod
+    def config(self, exp_dir_path, bug_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id, log_dir_path):
+    def build(self, exp_dir_path, bug_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id, log_dir_path):
+    def test(self, exp_dir_path, bug_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, exp_dir_path, bug_id, log_dir_path):
-        """Method documentation"""
-        return
-
-    @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id, log_dir_path):
+    def test_all(self, exp_dir_path, bug_id):
         """Method documentation"""
         return
 

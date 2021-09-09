@@ -9,24 +9,26 @@ class ManyBugs(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/" + self.name)
+        self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
 
-    def setup(self, bug_index, dir_logs, test_all=False):
-        experiment_item = self.experiment_subjects[bug_index-1]
+    def setup(self, tool_name, bug_index, dir_logs, test_all=False):
+        super(ManyBugs, self).setup(bug_index, dir_logs, test_all)
+        experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        directory_name = self.bench_dir_path + "/" + subject_name + "/" + bug_id
+        directory_name = self.setup_dir_path + "/" + subject_name + "/" + bug_id
         emitter.normal("\t\tpreparing experiment subject")
-        if self.deploy(directory_name, bug_id, dir_logs):
-            if self.config(directory_name, bug_id, dir_logs):
-                if self.build(directory_name, bug_id, dir_logs):
+        if self.deploy(directory_name, bug_id):
+            if self.config(directory_name, bug_id):
+                if self.build(directory_name, bug_id):
                     if test_all:
-                        if self.test_all(directory_name, experiment_item, dir_logs):
+                        if self.test_all(directory_name, experiment_item):
                             emitter.success("\t\t\t[status] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[error] testing failed")
                     else:
-                        if self.test(directory_name, bug_id, dir_logs):
+                        if self.test(directory_name, bug_id):
                             emitter.success("\t\t\t[status] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[error] testing failed")
@@ -38,47 +40,47 @@ class ManyBugs(AbstractBenchmark):
             emitter.error("\t\t\t[error] deploy failed")
         return
 
-    def deploy(self, exp_dir_path, bug_id, log_dir_path):
+    def deploy(self, exp_dir_path, bug_id):
         emitter.normal("\t\t\tdownloading experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_deploy_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-deploy.log"
+        self.log_deploy_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-deploy.log"
         command_str = "cd " + exp_dir_path + "; bash setup.sh"
         command_str += " > {0} 2>&1".format(self.log_deploy_path)
         status = execute_command(command_str)
         return status == 0
 
-    def config(self, exp_dir_path, bug_id, log_dir_path):
+    def config(self, exp_dir_path, bug_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_config_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-config.log"
+        self.log_config_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-config.log"
         command_str = "cd " + exp_dir_path + "; bash config.sh"
         command_str += " > {0} 2>&1".format(self.log_config_path)
         status = execute_command(command_str)
         return status == 0
 
-    def build(self, exp_dir_path, bug_id, log_dir_path):
+    def build(self, exp_dir_path, bug_id):
         emitter.normal("\t\t\tbuilding experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_build_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-build.log"
+        self.log_build_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-build.log"
         command_str = "cd " + exp_dir_path + "; bash build.sh"
         command_str += " > {0} 2>&1".format(self.log_build_path)
         status = execute_command(command_str)
         return status == 0
 
-    def test(self, exp_dir_path, bug_id, log_dir_path):
+    def test(self, exp_dir_path, bug_id):
         emitter.normal("\t\t\ttesting experiment subject")
         conf_id = str(values.CONFIG_ID)
-        self.log_test_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test.log"
         command_str = "cd " + exp_dir_path + "; bash test.sh p1"
         command_str += " > {0} 2>&1".format(self.log_test_path)
         status = execute_command(command_str)
         return status == 0
 
-    def test_all(self, exp_dir_path, experiment_item, log_dir_path):
+    def test_all(self, exp_dir_path, experiment_item):
         emitter.normal("\t\t\ttesting(full) experiment subject")
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         conf_id = str(values.CONFIG_ID)
-        self.log_test_path = log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test-all.log"
+        self.log_test_path = self.log_dir_path + "/" + conf_id + "-" + self.name + "-" + bug_id + "-test-all.log"
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
         unexpected_fail_list = []

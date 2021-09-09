@@ -47,13 +47,13 @@ def build_tool_image(tool_name):
     return image
 
 
-def build_container(tool, benchmark, subject, bug_id, config_id='default'):
+def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
     client = docker.from_env()
     image_name = IMAGE_PREFIX + ":" + tool
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
-        container_id = client.containers.run(image_name, detach=True, name=container_name).id
+        container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list).id
     except docker.errors.ContainerError as ex:
         utilities.error_exit("[error] Unable to build container: container exited with a non-zero exit code")
     except docker.errors.ImageNotFound as ex:
