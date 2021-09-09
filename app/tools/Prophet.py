@@ -11,6 +11,7 @@ from os.path import isfile, join
 class Prophet(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        super(Prophet, self).__init__(self.name)
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
@@ -151,3 +152,4 @@ class Prophet(AbstractTool):
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
+

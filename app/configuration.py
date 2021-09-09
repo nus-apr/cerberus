@@ -30,6 +30,8 @@ def read_arg(argument_list):
                 values.CONF_ANALYSE_ONLY = True
             elif definitions.ARG_ONLY_SETUP in arg:
                 values.CONF_SETUP_ONLY = True
+            elif definitions.ARG_USE_CONTAINER in arg:
+                values.CONF_USE_CONTAINER = True
             elif definitions.ARG_INSTRUMENT_ONLY in arg:
                 values.CONF_INSTRUMENT_ONLY = True
             elif definitions.ARG_SHOW_DEV_PATCH in arg:

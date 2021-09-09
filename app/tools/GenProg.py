@@ -10,6 +10,7 @@ import mmap
 class GenProg(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        super(GenProg, self).__init__(self.name)
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):

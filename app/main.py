@@ -110,6 +110,7 @@ def show_dev_patch(dir_diff):
     else:
         emitter.error("\t\t\t[error] dev-patch file not found")
 
+
 def run(repair_tool, benchmark, setup):
     emitter.sub_title("Repairing benchmark")
     emitter.highlight("[configuration] repair-tool: " + repair_tool.name)
@@ -143,7 +144,6 @@ def run(repair_tool, benchmark, setup):
                 break
             if values.CONF_SUBJECT_NAME and values.CONF_SUBJECT_NAME != subject_name:
                 continue
-
 
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             directory_name = benchmark.name + "/" + subject_name + "/" + bug_name

@@ -1,13 +1,20 @@
 import abc
 import os
 import shutil
-from app.utilities import execute_command, error_exit, values, emitter
+from app.utilities import execute_command, error_exit
+from app import emitter, values, container
 
 
 class AbstractTool:
     log_instrument_path = None
     log_output_path = None
     name = None
+
+    def __init__(self, tool_name):
+        if values.CONF_USE_CONTAINER:
+            if not container.check_image_exist(tool_name):
+                emitter.normal("[container] building docker image")
+                container.build_tool_image(tool_name)
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""

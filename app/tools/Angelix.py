@@ -11,6 +11,7 @@ from os.path import isfile, join
 class Angelix(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        super(Angelix, self).__init__(self.name)
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
         """instrumentation for the experiment as needed by the tool"""
