@@ -48,7 +48,8 @@ class AbstractTool:
         if values.CONF_USE_CONTAINER:
             if not container.check_image_exist(self.name.lower()):
                 emitter.normal("[container] building docker image")
-                container.build_tool_image(self.name.lower())
+                if container.pull_image(self.name.lower()) is None:
+                    container.build_tool_image(self.name.lower())
         else:
             check_command = "which {}".format(self.name.lower())
             ret_code = execute_command(check_command)

@@ -1,7 +1,6 @@
 import docker
 import os
 from app import definitions, utilities, emitter
-from pathlib import Path
 
 IMAGE_NAME = "rshariffdeen/cerberus"
 
@@ -32,11 +31,25 @@ def get_tool_image(tool_name):
     return image
 
 
+def pull_image(tool_name):
+    client = docker.from_env()
+    image = None
+    try:
+        image, _ = client.images.pull(repository=IMAGE_NAME, tag=tool_name)
+    except docker.errors.APIError as exp:
+        emitter.warning(exp)
+        emitter.warning("[error] Unable to pull image: docker daemon error")
+    except Exception as ex:
+        emitter.warning(ex)
+        emitter.warning("[error] Unable to pull image: unhandled exception")
+    return image
+
+
 def build_tool_image(tool_name):
     client = docker.from_env()
     image_name = IMAGE_NAME + ":" + tool_name
     image = None
-    dockerfile_path = Path(definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower())
+    dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
     if os.path.isfile(dockerfile_path):
         image = None
         try:
