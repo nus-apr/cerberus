@@ -54,7 +54,7 @@ class AbstractBenchmark:
                 shutil.rmtree(dir_exp_local)
             dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
             volume_list = {
-                dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
+                # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
                 self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
                 dir_result_local: {'bind': '/results', 'mode': 'rw'},
                 dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
