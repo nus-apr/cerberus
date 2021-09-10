@@ -79,7 +79,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
         container_id = client.containers.get(container_name).id
     except docker.errors.NotFound as ex:
         # emitter.error(ex)
-        emitter.warning("[warning] Unable to find container")
+        emitter.warning("\t\t[warning] Unable to find container")
     except docker.errors.APIError as exp:
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
@@ -91,6 +91,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
 
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
     client = docker.from_env()
+    emitter.normal("building docker container")
     image_name = IMAGE_NAME + ":" + tool
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
@@ -133,6 +134,7 @@ def exec_command(container_id, command, workdir="/experiments"):
 
 def remove_container(container_id):
     client = docker.from_env()
+    emitter.normal("removing docker container")
     try:
         container = client.containers.get(container_id)
         container.remove(force=True)
@@ -146,6 +148,7 @@ def remove_container(container_id):
 
 def stop_container(container_id):
     client = docker.from_env()
+    emitter.normal("stopping docker container")
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=20)
