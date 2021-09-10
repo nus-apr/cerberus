@@ -46,6 +46,7 @@ class AbstractBenchmark:
         self.log_dir_path = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
         container_id = None
         if values.CONF_USE_CONTAINER:
+            emitter.normal("\t\tpreparing docker environment")
             self.setup_dir_path = "/setup"
             dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
             dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
