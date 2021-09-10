@@ -91,11 +91,11 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_results(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
-    emitter.normal("\t\tsaving results and cleaning up")
+def save_artifacts(dir_expr, dir_setup, dir_artifacts, experiment_info, tool: AbstractTool, container_id):
+    emitter.normal("\t\t[framework] saving artifacts and cleaning up")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    tool.save_artefacts(dir_results, dir_expr, dir_setup, bug_id)
-    tool.post_process(dir_expr, dir_results)
+    tool.save_artefacts(dir_artifacts, dir_expr, dir_setup, bug_id, container_id)
+    tool.post_process(dir_expr, dir_artifacts, container_id)
 
 
 def show_dev_patch(dir_diff):
@@ -204,7 +204,7 @@ def run(repair_tool, benchmark, setup):
                 benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
                 repair(dir_exp, dir_setup, dir_log, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
-                    save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    save_artifacts(dir_exp, dir_setup, dir_artifact, experiment_item, repair_tool, container_id)
                     analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                     archive_results(dir_result)
                 if values.CONF_PURGE:

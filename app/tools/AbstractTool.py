@@ -93,13 +93,6 @@ class AbstractTool:
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
 
-    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
-        if os.path.isfile(self.log_instrument_path):
-            shutil.move(self.log_instrument_path, dir_results)
-        if os.path.isfile(self.log_output_path):
-            shutil.move(self.log_output_path, dir_results)
-        return
-
     def clean_up(self, exp_dir):
         if os.path.isdir(exp_dir):
             rm_command = "rm -rf " + exp_dir

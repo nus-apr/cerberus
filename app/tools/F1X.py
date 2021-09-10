@@ -48,12 +48,12 @@ class F1X(AbstractTool):
             repair_command += " -T 15000"
             repair_command += " --driver={0} ".format(test_driver_path)
             repair_command += " -b {0} ".format(build_script_path)
-            dry_command = repair_command + " --disable-dteq"
-            self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
+            # dry_command = repair_command + " --disable-dteq"
+            # self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
             all_command = repair_command + " --disable-dteq  -a -o patches -v "
-            self.run_command(all_command, self.log_output_path, dir_expr, container_id)
-            repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
-            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+            status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
+            # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
+            # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
             else:
@@ -66,11 +66,9 @@ class F1X(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
-        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_patches = dir_expr + "/patches"
-        if os.path.isdir(dir_patches):
-            save_command = "cp -rf " + dir_patches + " " + dir_results + "/patches"
-            self.run_command(save_command, "/dev/null", "/", container_id)
+        save_command = "cp -rf " + dir_patches + " " + dir_results + "/patches"
+        self.run_command(save_command, "/dev/null", "/", container_id)
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
