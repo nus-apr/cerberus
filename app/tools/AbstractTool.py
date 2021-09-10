@@ -14,6 +14,22 @@ class AbstractTool:
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
 
+    def run_command(self, command_str, log_file_path, container_id=None, exp_dir_path="/experiment"):
+        if container_id:
+            exit_code, output = container.exec_command(container_id, command_str, exp_dir_path)
+            stdout, stderr = output
+            if log_file_path:
+                with open(log_file_path, 'w') as log_file:
+                    if stdout:
+                        log_file.writelines(stdout.decode("utf-8"))
+                    if stderr:
+                        log_file.writelines(stderr.decode("utf-8"))
+        else:
+            command_str += " > {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command_str)
+        return exit_code
+
+
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
@@ -29,7 +45,7 @@ class AbstractTool:
                 with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
                     pass
         else:
-            error_exit("no instrumentation available for ", self.name)
+            emitter.warning("\t[warning] no instrumentation available for " + self.name)
         return
 
     @abc.abstractmethod

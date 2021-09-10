@@ -13,7 +13,7 @@ class Angelix(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Angelix, self).__init__(self.name)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)

@@ -178,15 +178,16 @@ def run(repair_tool, benchmark, setup):
                         continue
                 analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 continue
-
+            utilities.clean_results(dir_result)
+            container_id = benchmark.setup(repair_tool.name, bug_index, values.CONFIG_ID,
+                                           values.DEFAULT_RUN_TESTS_ONLY,
+                                           values.CONF_USE_CONTAINER)
             if os.path.isdir(dir_exp):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
-                benchmark.clean(dir_exp)
-            utilities.clean_results(dir_result)
-            container_id = benchmark.setup(repair_tool.name, bug_index, values.DEFAULT_RUN_TESTS_ONLY)
+                benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_result, dir_exp, container_id, bug_index)
-                repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
+                repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                     analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
