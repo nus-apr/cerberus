@@ -61,11 +61,10 @@ def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, c
     tool.repair(dir_info, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
 
 
-def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
+def analyse_result(dir_logs, dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t[framework] analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    dir_logs = values.DIR_LOGS
     size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_results,
                                                                               dir_expr, dir_setup, bug_id,
                                                                               failing_test_list)
@@ -205,7 +204,7 @@ def run(repair_tool, benchmark, setup):
                 repair(dir_exp, dir_setup, dir_log, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_artifacts(dir_exp, dir_setup, dir_artifact, experiment_item, repair_tool, container_id)
-                    analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    analyse_result(dir_log, dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                     archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp, container_id)
