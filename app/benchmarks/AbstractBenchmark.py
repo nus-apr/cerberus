@@ -139,21 +139,8 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, tool_name, bug_index, config_id, container_id):
-        experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_exp = definitions.DIR_EXPERIMENT + "/" + "-".join([config_id, self.name,
-                                                              tool_name,
-                                                              subject_name, bug_id])
-        dir_artifact = definitions.DIR_ARTIFACTS + "/" + "-".join([config_id, self.name,
-                                                              tool_name,
-                                                              subject_name, bug_id])
-        if container_id:
-            dir_exp = "/experiment/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_artifact = "/output"
+    def save_artefacts(self, dir_exp, dir_artifact, container_id):
         emitter.normal("\t\t\tsaving experiment dev-patch")
-
         if self.list_artifact_dirs:
             for art_dir in self.list_artifact_dirs:
                 art_dir_path = dir_exp + "/" + art_dir

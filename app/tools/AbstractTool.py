@@ -14,38 +14,36 @@ class AbstractTool:
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
 
-    def run_command(self, command_str, log_file_path, container_id=None, exp_dir_path="/experiment"):
+    def run_command(self, command_str, log_file_path, exp_dir_path, container_id):
         if container_id:
             exit_code, output = container.exec_command(container_id, command_str, exp_dir_path)
             stdout, stderr = output
-            if log_file_path:
+            if "/dev/null" not in log_file_path:
                 with open(log_file_path, 'w') as log_file:
                     if stdout:
                         log_file.writelines(stdout.decode("utf-8"))
                     if stderr:
                         log_file.writelines(stderr.decode("utf-8"))
         else:
+            command_str = "cd " + exp_dir_path + ";" + command_str
             command_str += " > {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command_str)
         return exit_code
-
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
-            if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
-                command_str = "cd " + dir_setup + "/{}; bash instrument.sh ".format(self.name.lower())
-                command_str += " > {0} 2>&1".format(self.log_instrument_path)
-                status = execute_command(command_str)
-                if not status == 0:
-                    error_exit("error with instrumentation of ", self.name)
-                with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
-                    pass
+        command_str = "bash instrument.sh"
+        if container_id:
+            dir_setup = "/setup"
+        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
+        status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+        if not status == 0:
+            error_exit("error with instrumentation of ", self.name)
         else:
-            emitter.warning("\t[warning] no instrumentation available for " + self.name)
+            emitter.warning("\t\t[warning] no instrumentation available for " + self.name)
         return
 
     @abc.abstractmethod

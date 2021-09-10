@@ -18,17 +18,11 @@ class Angelix(AbstractTool):
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        if os.path.isfile(dir_setup + "/{}/instrument.sh".format(self.name.lower())):
-            if not os.path.isfile(dir_setup + "/src/INSTRUMENTED"):
-                command_str = "cd " + dir_setup + "/{0}; bash instrument.sh {1}".format(self.name.lower(), dir_expr)
-                command_str += " > {0} 2>&1".format(self.log_instrument_path)
-                status = execute_command(command_str)
-                if not status == 0:
-                    error_exit("error with instrumentation of ", self.name)
-                with open(dir_expr + "/src/INSTRUMENTED", 'w') as fp:
-                    pass
-        else:
-            error_exit("no instrumentation available for ", self.name)
+        command_str = "bash instrument.sh {}".format(dir_expr)
+        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
+        status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+        if not status == 0:
+            error_exit("error with instrumentation of ", self.name)
         return
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,

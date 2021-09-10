@@ -148,10 +148,19 @@ def run(repair_tool, benchmark, setup):
                 continue
 
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-            directory_name = benchmark.name + "/" + subject_name + "/" + bug_name
-            dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name
-            dir_exp = definitions.DIR_EXPERIMENT + "/" + directory_name + "/"
+
+            # setup dir_paths
+            directory_name = benchmark.name + "/" + subject_name + "/" + bug_name + "/"
+            if values.CONF_USE_CONTAINER:
+                dir_setup = "/setup/" + directory_name
+                dir_exp = "/experiment/" + directory_name
+                dir_artifact = "/output"
+            else:
+                dir_setup = definitions.DIR_MAIN + "/benchmark/" + directory_name
+                dir_exp = definitions.DIR_EXPERIMENT + "/" + directory_name
+                dir_artifact = definitions.DIR_ARTIFACTS + "/" + directory_name
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
+
             iteration = iteration + 1
             values.ITERATION_NO = iteration
             emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(bug_index))
@@ -172,8 +181,8 @@ def run(repair_tool, benchmark, setup):
             if values.CONF_ANALYSE_ONLY:
                 if not os.path.isdir(dir_result):
                     archive_name = "-".join([config_id, benchmark.name,
-                                                                  repair_tool.name,
-                                                                  subject_name, bug_name]) + ".tar.gz"
+                                             repair_tool.name,
+                                             subject_name, bug_name]) + ".tar.gz"
                     if not retrieve_results(archive_name, repair_tool):
                         continue
                 analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
@@ -186,7 +195,7 @@ def run(repair_tool, benchmark, setup):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
-                benchmark.save_artefacts(repair_tool.name, bug_index, config_id, container_id)
+                benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
