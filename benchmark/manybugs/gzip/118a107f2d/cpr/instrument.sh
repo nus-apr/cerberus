@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+dir_name=/experiment/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/cpr
 
 
@@ -42,7 +42,7 @@ make CXX=$TRIDENT_CXX CC=$TRIDENT_CC CFLAGS="-ltrident_proxy -L/concolic-repair/
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
-project_path:$1/experiments/$benchmark_name/$project_name/$fix_id
+project_path:/experiment/$benchmark_name/$project_name/$fix_id
 tag_id:$fix_id
 src_directory:src
 config_command:skip
@@ -50,8 +50,8 @@ build_command:skip
 custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2,cpr/components/z.smt2,cpr/components/constant_a.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,logical-and.smt2,logical-or.smt2
 depth:2
-loc_patch:$1/experiments/$benchmark_name/$project_name/$fix_id/src/gzip.c:1274
-loc_bug:$1/experiments/$benchmark_name/$project_name/$fix_id/src/gzip.c:1277
+loc_patch:/experiment/$benchmark_name/$project_name/$fix_id/src/gzip.c:1274
+loc_bug:/experiment/$benchmark_name/$project_name/$fix_id/src/gzip.c:1277
 gen_limit:80
 stack_size:15000
 dist_metric:angelic

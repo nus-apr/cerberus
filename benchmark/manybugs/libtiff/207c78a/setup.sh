@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
-dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+dir_name=/experiment/$benchmark_name/$project_name/$fix_id
 scenario_id=libtiff-bug-2006-02-23-b2ce5d8-207c78a
 diff_file=libtiff/tif_dirwrite.c-b2ce5d8
 bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
@@ -44,7 +44,7 @@ sed -i '978 s/./\t&/' test/Makefile
 
 cd $dir_name
 ## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#$1/experiments/manybugs/${project_name}/${fix_id}#g" test.sh
-sed -i "s#$1/experiments/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" test.sh
+sed -i "s#/experiment/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh

@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
-dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+dir_name=/experiment/$benchmark_name/$project_name/$fix_id
 scenario_id=lighttpd-bug-1948-1949
 diff_file=src/response.c-1948
 bug_id=$(echo $scenario_id | rev | cut -d "-" -f 2 | rev)
@@ -43,8 +43,8 @@ svn checkout -r $bug_id svn://svn.lighttpd.net/lighttpd/branches/lighttpd-1.4.x 
 cd $dir_name
 
 ## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#$1/experiments/manybugs/${project_name}/${fix_id}#g" test.sh
-sed -i "s#$1/experiments/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" test.sh
+sed -i "s#/experiment/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i 's#lt-\.\*#lt-\.\* \&\> /dev/null#g' test.sh
 sed -i "s#cd ${project_name}#pushd ${dir_name}/src#g" test.sh

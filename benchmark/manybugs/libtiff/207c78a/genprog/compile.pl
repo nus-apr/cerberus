@@ -5,7 +5,7 @@ use File::Basename ;
 #flatten the path
 $ARGV[0]  =~ s/\/[.]\//\//g ;
 my $subdir = basename(dirname($ARGV[0])) ;
-my $project = "$1/experiments/manybugs/libtiff/207c78a/src" ;
+my $project = "/experiment/manybugs/libtiff/207c78a/src" ;
 my $project_list = "bugged-program.txt" ;
 
 

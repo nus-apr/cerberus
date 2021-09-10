@@ -3,14 +3,14 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+dir_name=/experiment/$benchmark_name/$project_name/$fix_id
 
 mkdir $dir_name/prophet
 
 cat <<EOF > $dir_name/prophet/prophet.conf
-revision_file=$1/experiments/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
-src_dir=$1/experiments/$benchmark_name/$project_name/$fix_id/src
-test_dir=$1/experiments/$benchmark_name/$project_name/$fix_id/src/test
+revision_file=/experiment/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
+src_dir=/experiment/$benchmark_name/$project_name/$fix_id/src
+test_dir=/experiment/$benchmark_name/$project_name/$fix_id/src/test
 bugged_file=libtiff/tif_dirinfo.c
 fixed_out_file=$project_name-fix-$fix_id.c
 build_cmd=/prophet-gpl/tools/$project_name-build.py

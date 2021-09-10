@@ -3,7 +3,7 @@ script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 fix_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
-dir_name=$1/experiments/$benchmark_name/$project_name/$fix_id
+dir_name=/experiment/$benchmark_name/$project_name/$fix_id
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
 cfile=$(head -n 1 $dir_name/manifest.txt)
 cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
@@ -11,7 +11,7 @@ cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
 
 cp -rf $dir_name/preprocessed $dir_name/src
 cd $dir_name/src
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#$1/experiments/manybugs/${project_name}/${fix_id}#g" preprocessed/$cfile
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" preprocessed/$cfile
 cp preprocessed/$cfile $cfile
 
 rm -rf coverage
