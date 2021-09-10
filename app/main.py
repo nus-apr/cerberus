@@ -151,7 +151,7 @@ def run(repair_tool, benchmark, setup):
 
             # setup dir_paths
             directory_name = benchmark.name + "/" + subject_name + "/" + bug_name + "/"
-            if values.CONF_USE_CONTAINER:
+            if values.DEFAULT_USE_CONTAINER:
                 dir_setup = "/setup/" + directory_name
                 dir_exp = "/experiment/" + directory_name
                 dir_artifact = "/output"
@@ -195,7 +195,7 @@ def run(repair_tool, benchmark, setup):
             utilities.clean_results(dir_result)
             container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                            values.DEFAULT_RUN_TESTS_ONLY,
-                                           values.CONF_USE_CONTAINER)
+                                           values.DEFAULT_USE_CONTAINER)
             if os.path.isdir(dir_exp):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp, container_id)

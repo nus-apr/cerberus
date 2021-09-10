@@ -124,5 +124,7 @@ def update_configuration():
         values.DEFAULT_SETUP_ONLY = True
     if values.CONF_ANALYSE_ONLY:
         values.DEFAULT_ANALYSE_ONLY = True
+    if values.CONF_USE_CONTAINER:
+        values.DEFAULT_USE_CONTAINER = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
 
