@@ -163,7 +163,7 @@ class ManyBugs(AbstractBenchmark):
         exp_dir_path = exp_dir_local
         if values.CONF_USE_CONTAINER:
             exp_dir_path = "/experiment/" + self.name + "/" + subject_name + "/" + bug_id
-        emitter.normal("\t\tsaving experiment artefacts")
+        emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.save_logs(results_dir_path)
         self.save_dev_patch(results_dir_path, exp_dir_path, container_id)
 

@@ -110,7 +110,7 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: unhandled exception")
-    return container_id
+    return container_id[:12]
 
 
 def exec_command(container_id, command, workdir="/experiments"):

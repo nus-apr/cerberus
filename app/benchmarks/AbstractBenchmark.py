@@ -118,7 +118,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, results_dir_path, exp_dir_path):
+    def save_artefacts(self, results_dir_path, exp_dir_local, container_id, bug_index):
         """Method documentation"""
         return
 
