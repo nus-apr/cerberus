@@ -22,8 +22,8 @@ class F1X(AbstractTool):
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             fix_file = experiment_info[definitions.KEY_FIX_FILE]
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
-            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
+            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
+            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
             test_driver_path = dir_setup + "/test.sh"
