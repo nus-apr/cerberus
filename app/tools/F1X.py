@@ -41,7 +41,7 @@ class F1X(AbstractTool):
                 abs_path_buggy_file = dir_expr + "/src/" + fix_file
 
             timestamp_command = "echo $(date) >> " + self.log_output_path
-            self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
+            execute_command(timestamp_command)
             repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(dir_expr, str(timeout))
             repair_command += " -f {0} ".format(abs_path_buggy_file)
             repair_command += " -t {0} ".format(test_id_list)
@@ -62,7 +62,7 @@ class F1X(AbstractTool):
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
             timestamp_command = "echo $(date) >> " + self.log_output_path
-            self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
+            execute_command(timestamp_command)
 
         return
 

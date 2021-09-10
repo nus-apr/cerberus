@@ -52,7 +52,6 @@ class AbstractTool:
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         """any pre-processing required for the repair"""
-        emitter.normal("\t\trepairing experiment subject")
         self.check_tool_exists()
         return
 
