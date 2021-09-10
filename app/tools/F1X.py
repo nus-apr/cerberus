@@ -48,8 +48,8 @@ class F1X(AbstractTool):
             repair_command += " -T 15000"
             repair_command += " --driver={0} ".format(test_driver_path)
             repair_command += " -b {0} ".format(build_script_path)
-            # dry_command = repair_command + " --disable-dteq"
-            # self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
+            dry_command = repair_command + " --disable-dteq"
+            self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
             all_command = repair_command + " --disable-dteq  -a -o patches -v "
             status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
             # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"

@@ -69,10 +69,10 @@ class AbstractTool:
                 error_exit("{} not Found".format(self.name))
         return
 
-    def post_process(self, dir_expr, dir_results):
+    def post_process(self, dir_expr, dir_results, container_id):
         """any post-processing required for the repair"""
         if values.CONF_PURGE:
-            self.clean_up(dir_expr)
+            self.clean_up(dir_expr, container_id)
         return
 
     @abc.abstractmethod
@@ -93,8 +93,11 @@ class AbstractTool:
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
 
-    def clean_up(self, exp_dir):
-        if os.path.isdir(exp_dir):
-            rm_command = "rm -rf " + exp_dir
-            execute_command(rm_command)
+    def clean_up(self, exp_dir, container_id):
+        if container_id:
+            container.remove_container(container_id)
+        else:
+            if os.path.isdir(exp_dir):
+                rm_command = "rm -rf " + exp_dir
+                execute_command(rm_command)
 
