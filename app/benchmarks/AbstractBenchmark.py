@@ -89,7 +89,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, results_dir_path, exp_dir_path, container_id):
+    def save_artefacts(self, results_dir_path, exp_dir_path):
         """Method documentation"""
         return
 
@@ -98,7 +98,8 @@ class AbstractBenchmark:
         """Method documentation"""
         return
 
-    def save_logs(self, results_dir, container_id):
+    def save_logs(self, results_dir):
+        emitter.normal("\t\t\tsaving experiment logs")
         if os.path.isfile(self.log_deploy_path):
             shutil.move(self.log_deploy_path, results_dir)
         if os.path.isfile(self.log_config_path):
@@ -108,4 +109,11 @@ class AbstractBenchmark:
         if os.path.isfile(self.log_test_path):
             shutil.move(self.log_test_path, results_dir)
 
+    def save_dev_patch(self, results_dir_path, exp_dir_path):
+        emitter.normal("\t\t\tsaving experiment dev-patch")
+        if values.CONF_USE_CONTAINER:
+            utilities.execute_command("docker cp " + exp_dir_path + "/diffs/. " + results_dir_path + "/dev-fix")
+        else:
+            utilities.execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
+        return
 

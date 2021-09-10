@@ -38,7 +38,7 @@ class ManyBugs(AbstractBenchmark):
                 emitter.error("\t\t\t[error] config failed")
         else:
             emitter.error("\t\t\t[error] deploy failed")
-        return
+        return container_id
 
     def deploy(self, exp_dir_path, bug_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
@@ -172,10 +172,16 @@ class ManyBugs(AbstractBenchmark):
         emitter.highlight("\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
-    def save_artefacts(self, results_dir_path, exp_dir_path, container_id):
+    def save_artefacts(self, results_dir_path, exp_dir_local, container_id, bug_index):
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        exp_dir_path = exp_dir_local
+        if values.CONF_USE_CONTAINER:
+            exp_dir_path = "/experiment/" + self.name + "/" + subject_name + "/" + bug_id
+        emitter.normal("\t\tsaving experiment artefacts")
         self.save_logs(results_dir_path)
-        execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
-        return
+        self.save_dev_patch(results_dir_path, exp_dir_path)
 
     def clean(self, exp_dir_path):
         if os.path.isdir(exp_dir_path):
