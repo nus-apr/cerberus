@@ -96,9 +96,9 @@ class F1X(AbstractTool):
                 if "candidates evaluated: " in line:
                     count_enumerations = int(line.split("candidates evaluated: ")[-1])
                 elif "search space size: " in line:
-                    size_search_space = line.split("search space size: ")[-1]
+                    size_search_space = int(line.split("search space size: ")[-1])
                 elif "plausible patches: " in line:
-                    count_plausible = line.split("plausible patches: ")[-1]
+                    count_plausible = int(line.split("plausible patches: ")[-1])
                 elif "failed to infer compile commands" in line:
                     size_search_space = -1
             log_file.close()
