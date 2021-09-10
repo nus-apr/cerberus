@@ -35,28 +35,30 @@ def archive_results(dir_results):
 
 
 def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, config_info, container_id):
-    emitter.normal("\t\trepairing experiment subject")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
-    passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    passing_test_list = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
     subject_name = experiment_info[definitions.KEY_SUBJECT]
-    fix_location = None
     binary_path = experiment_info[definitions.KEY_BINARY_PATH]
+    fix_location = None
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
-    additional_tool_param = values.CONF_TOOL_PARAMS
-    utilities.check_space()
-    tool.pre_process(dir_logs, dir_expr, dir_setup, container_id)
-    tool.instrument(dir_logs, dir_expr, dir_setup, bug_id, container_id)
-    if not values.CONF_INSTRUMENT_ONLY:
-        tool.repair(dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-                    failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg, container_id)
+    experiment_info[definitions.KEY_FIX_LOC] = fix_location
+    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
+    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+    config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
+    dir_info = {
+        "logs": dir_logs,
+        "setup": dir_setup,
+        "expr": dir_expr
+    }
+    tool.repair(dir_info, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
 
 
 def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):

@@ -11,52 +11,58 @@ class F1X(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(F1X, self).__init__(self.name)
 
-    def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg,
-               container_id):
-
-        print("\t[INFO] running repair with", self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-        test_driver_path = dir_setup + "/test.sh"
-        build_script_path = dir_setup + "/build.sh"
-        test_id_list = ""
-        for test_id in failing_test_list:
-            test_id_list += test_id + " "
-        if passing_test_list:
-            for test_id in passing_test_list:
+    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
+        super(F1X, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
+        if not instrument_only:
+            emitter.normal("\t\t\t running repair with " + self.name)
+            conf_id = config_info[definitions.KEY_ID]
+            dir_logs = dir_info["logs"]
+            dir_setup = dir_info["setup"]
+            dir_expr = dir_info["expr"]
+            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+            fix_file = experiment_info[definitions.KEY_FIX_FILE]
+            fix_location = experiment_info[definitions.KEY_FIX_LOC]
+            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
+            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
+            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+            self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+            test_driver_path = dir_setup + "/test.sh"
+            build_script_path = dir_setup + "/build.sh"
+            test_id_list = ""
+            for test_id in failing_test_list:
                 test_id_list += test_id + " "
+            if passing_test_list:
+                for test_id in passing_test_list:
+                    test_id_list += test_id + " "
 
-        if fix_location:
-            abs_path_buggy_file = dir_expr + "/src/" + fix_location
-        else:
-            with open(dir_expr + "/manifest.txt", "r") as man_file:
-                abs_path_buggy_file = dir_expr + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
+            if fix_location:
+                abs_path_buggy_file = dir_expr + "/src/" + fix_location
+            else:
+                abs_path_buggy_file = dir_expr + "/src/" + fix_file
 
-        print("\t[INFO] running F1X")
-        timestamp_command = "echo $(date) >> " + self.log_output_path
-        self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
-        repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(dir_expr, str(timeout))
-        repair_command += " -f {0} ".format(abs_path_buggy_file)
-        repair_command += " -t {0} ".format(test_id_list)
-        repair_command += " -T 15000"
-        repair_command += " --driver={0} ".format(test_driver_path)
-        repair_command += " -b {0} ".format(build_script_path)
-        dry_command = repair_command + " --disable-dteq"
-        self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
-        all_command = repair_command + " --disable-dteq  -a -o patches -v "
-        self.run_command(all_command, self.log_output_path, dir_expr, container_id)
-        repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
-        repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
-        if status != 0:
-            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
-        else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+            timestamp_command = "echo $(date) >> " + self.log_output_path
+            self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
+            repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(dir_expr, str(timeout))
+            repair_command += " -f {0} ".format(abs_path_buggy_file)
+            repair_command += " -t {0} ".format(test_id_list)
+            repair_command += " -T 15000"
+            repair_command += " --driver={0} ".format(test_driver_path)
+            repair_command += " -b {0} ".format(build_script_path)
+            dry_command = repair_command + " --disable-dteq"
+            self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
+            all_command = repair_command + " --disable-dteq  -a -o patches -v "
+            self.run_command(all_command, self.log_output_path, dir_expr, container_id)
+            repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
+            repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
+            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+            if status != 0:
+                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+            else:
+                emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-        timestamp_command = "echo $(date) >> " + self.log_output_path
-        self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
+            timestamp_command = "echo $(date) >> " + self.log_output_path
+            self.run_command(timestamp_command, self.log_output_path, dir_expr, container_id)
 
         return
 

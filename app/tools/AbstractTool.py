@@ -2,7 +2,7 @@ import abc
 import os
 import shutil
 from app.utilities import execute_command, error_exit
-from app import emitter, values, container
+from app import emitter, values, container, utilities
 
 
 class AbstractTool:
@@ -43,14 +43,16 @@ class AbstractTool:
         return
 
     @abc.abstractmethod
-    def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg,
-               container_id):
-        """invoking the tool for the repair process"""
+    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
+        emitter.normal("\t\t[repair-tool] repairing experiment subject")
+        utilities.check_space()
+        self.pre_process(dir_info['logs'], dir_info['expr'], dir_info['setup'], container_id)
+        self.instrument(dir_info['logs'], dir_info['expr'], dir_info['setup'], experiment_info['bug_id'], container_id)
         return
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         """any pre-processing required for the repair"""
+        emitter.normal("\t\trepairing experiment subject")
         self.check_tool_exists()
         return
 
