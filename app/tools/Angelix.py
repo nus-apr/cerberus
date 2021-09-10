@@ -26,7 +26,8 @@ class Angelix(AbstractTool):
         return
 
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
+               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg,
+               container_id):
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"

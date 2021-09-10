@@ -44,7 +44,8 @@ class AbstractTool:
 
     @abc.abstractmethod
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg, container_id):
+               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg,
+               container_id):
         """invoking the tool for the repair process"""
         return
 
