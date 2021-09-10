@@ -181,7 +181,7 @@ class ManyBugs(AbstractBenchmark):
             exp_dir_path = "/experiment/" + self.name + "/" + subject_name + "/" + bug_id
         emitter.normal("\t\tsaving experiment artefacts")
         self.save_logs(results_dir_path)
-        self.save_dev_patch(results_dir_path, exp_dir_path)
+        self.save_dev_patch(results_dir_path, exp_dir_path, container_id)
 
     def clean(self, exp_dir_path):
         if os.path.isdir(exp_dir_path):

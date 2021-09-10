@@ -109,10 +109,10 @@ class AbstractBenchmark:
         if os.path.isfile(self.log_test_path):
             shutil.move(self.log_test_path, results_dir)
 
-    def save_dev_patch(self, results_dir_path, exp_dir_path):
+    def save_dev_patch(self, results_dir_path, exp_dir_path, container_id=None):
         emitter.normal("\t\t\tsaving experiment dev-patch")
-        if values.CONF_USE_CONTAINER:
-            utilities.execute_command("docker cp " + exp_dir_path + "/diffs/. " + results_dir_path + "/dev-fix")
+        if container_id:
+            utilities.execute_command("docker cp "+ container_id + ":" + exp_dir_path + "/diffs/. " + results_dir_path + "/dev-fix")
         else:
             utilities.execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
         return

@@ -125,8 +125,8 @@ def run(repair_tool, benchmark, setup):
         config_info = setup[config_id]
         values.CONFIG_ID = config_info[definitions.KEY_ID]
         experiment_list = benchmark.get_list()
-        for index in range(1, benchmark.size + 1):
-            experiment_item = experiment_list[index - 1]
+        for bug_index in range(1, benchmark.size + 1):
+            experiment_item = experiment_list[bug_index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
 
@@ -134,15 +134,15 @@ def run(repair_tool, benchmark, setup):
                 continue
             if values.CONF_BUG_ID_LIST and str(bug_name) not in values.CONF_BUG_ID_LIST:
                 continue
-            if values.CONF_BUG_INDEX and index != values.CONF_BUG_INDEX:
+            if values.CONF_BUG_INDEX and bug_index != values.CONF_BUG_INDEX:
                 continue
-            if values.CONF_BUG_INDEX_LIST and str(index) not in values.CONF_BUG_INDEX_LIST:
+            if values.CONF_BUG_INDEX_LIST and str(bug_index) not in values.CONF_BUG_INDEX_LIST:
                 continue
-            if values.CONF_SKIP_LIST and str(index) in values.CONF_SKIP_LIST:
+            if values.CONF_SKIP_LIST and str(bug_index) in values.CONF_SKIP_LIST:
                 continue
-            if values.CONF_START_INDEX and index < values.CONF_START_INDEX:
+            if values.CONF_START_INDEX and bug_index < values.CONF_START_INDEX:
                 continue
-            if values.CONF_END_INDEX and index > values.CONF_END_INDEX:
+            if values.CONF_END_INDEX and bug_index > values.CONF_END_INDEX:
                 break
             if values.CONF_SUBJECT_NAME and values.CONF_SUBJECT_NAME != subject_name:
                 continue
@@ -154,7 +154,7 @@ def run(repair_tool, benchmark, setup):
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
             iteration = iteration + 1
             values.ITERATION_NO = iteration
-            emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(index))
+            emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(bug_index))
             emitter.highlight("\t[configuration] identifier: " + str(config_info[definitions.KEY_ID]))
             emitter.highlight("\t[configuration] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
             emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
@@ -183,9 +183,9 @@ def run(repair_tool, benchmark, setup):
                 emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 benchmark.clean(dir_exp)
             utilities.clean_results(dir_result)
-            container_id = benchmark.setup(repair_tool.name, index, values.DEFAULT_RUN_TESTS_ONLY)
+            container_id = benchmark.setup(repair_tool.name, bug_index, values.DEFAULT_RUN_TESTS_ONLY)
             if not values.DEFAULT_SETUP_ONLY:
-                benchmark.save_artefacts(dir_result, dir_exp)
+                benchmark.save_artefacts(dir_result, dir_exp, container_id, bug_index)
                 repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
