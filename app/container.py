@@ -76,7 +76,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
-        container_id = client.containers.get(container_name).id
+        container_id = client.containers.get(container_name).id[:12]
     except docker.errors.NotFound as ex:
         # emitter.error(ex)
         emitter.warning("\t\t[warning] Unable to find container")
@@ -86,7 +86,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: unhandled exception")
-    return container_id[:12]
+    return container_id
 
 
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
