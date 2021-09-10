@@ -38,10 +38,8 @@ class AbstractTool:
         command_str = "bash instrument.sh"
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
-        if not status == 0:
-            error_exit("error with instrumentation of ", self.name)
-        else:
-            emitter.warning("\t\t[warning] no instrumentation available for " + self.name)
+        if status not in [0, 126]:
+            error_exit("error with instrumentation of " + self.name + "; exit code " + str(status))
         return
 
     @abc.abstractmethod
