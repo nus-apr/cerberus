@@ -62,9 +62,9 @@ def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, c
 
 
 def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
-    emitter.normal("\t\tanalysing experiment results")
+    emitter.normal("\t\t[framework] analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
+    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
     dir_logs = values.DIR_LOGS
     size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_results,
                                                                               dir_expr, dir_setup, bug_id,
