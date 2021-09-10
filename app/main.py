@@ -34,7 +34,7 @@ def archive_results(dir_results):
     utilities.execute_command(archive_command)
 
 
-def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool, config_info):
+def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool, config_info, container_id):
     emitter.normal("\t\trepairing experiment subject")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
@@ -53,11 +53,11 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     additional_tool_param = values.CONF_TOOL_PARAMS
     dir_logs = values.DIR_LOGS
     utilities.check_space()
-    tool.pre_process(dir_logs, dir_expr, dir_setup)
-    tool.instrument(dir_logs, dir_expr, dir_setup, bug_id)
+    tool.pre_process(dir_logs, dir_expr, dir_setup, container_id)
+    tool.instrument(dir_logs, dir_expr, dir_setup, bug_id, container_id)
     if not values.CONF_INSTRUMENT_ONLY:
         tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-                    failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg)
+                    failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg, container_id)
 
 
 def analyse_result(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):

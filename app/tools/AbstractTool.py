@@ -14,7 +14,7 @@ class AbstractTool:
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
@@ -34,11 +34,11 @@ class AbstractTool:
 
     @abc.abstractmethod
     def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg):
+               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg, container_id):
         """invoking the tool for the repair process"""
         return
 
-    def pre_process(self, dir_logs, dir_expr, dir_setup):
+    def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         """any pre-processing required for the repair"""
         self.check_tool_exists()
         return
@@ -64,7 +64,7 @@ class AbstractTool:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
+    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
         """store all artefacts from the tool"""
         return
 
@@ -81,7 +81,7 @@ class AbstractTool:
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
 
-    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
+    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
         if os.path.isfile(self.log_instrument_path):
             shutil.move(self.log_instrument_path, dir_results)
         if os.path.isfile(self.log_output_path):

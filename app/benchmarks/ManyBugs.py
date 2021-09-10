@@ -13,31 +13,15 @@ class ManyBugs(AbstractBenchmark):
         super(ManyBugs, self).__init__()
 
     def setup(self, tool_name, bug_index, test_all=False):
-        container_id = super(ManyBugs, self).setup(tool_name, bug_index, test_all)
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        self.log_dir_path = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
+        container_id = None
+        if values.CONF_USE_CONTAINER:
+            container_id = self.setup_container(tool_name, bug_index)
         directory_name = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-        emitter.normal("\t\tpreparing experiment subject")
-        if self.deploy(directory_name, bug_id, container_id):
-            if self.config(directory_name, bug_id, container_id):
-                if self.build(directory_name, bug_id, container_id):
-                    if test_all:
-                        if self.test_all(directory_name, experiment_item, container_id):
-                            emitter.success("\t\t\t[status] setting up completed successfully")
-                        else:
-                            emitter.error("\t\t\t[error] testing failed")
-                    else:
-                        if self.test(directory_name, bug_id, container_id):
-                            emitter.success("\t\t\t[status] setting up completed successfully")
-                        else:
-                            emitter.error("\t\t\t[error] testing failed")
-                else:
-                    emitter.error("\t\t\t[error] build failed")
-            else:
-                emitter.error("\t\t\t[error] config failed")
-        else:
-            emitter.error("\t\t\t[error] deploy failed")
+        self.setup_experiment(directory_name, bug_index, container_id, test_all)
         return container_id
 
     def deploy(self, exp_dir_path, bug_id, container_id):
@@ -187,4 +171,12 @@ class ManyBugs(AbstractBenchmark):
         if os.path.isdir(exp_dir_path):
             rm_command = "rm -rf " + exp_dir_path
             execute_command(rm_command)
+        return
+
+    def save_dev_patch(self, results_dir_path, exp_dir_path, container_id=None):
+        emitter.normal("\t\t\tsaving experiment dev-patch")
+        if container_id:
+            execute_command("docker cp "+ container_id + ":" + exp_dir_path + "/diffs/. " + results_dir_path + "/dev-fix")
+        else:
+            execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
         return

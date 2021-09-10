@@ -38,35 +38,64 @@ class AbstractBenchmark:
             utilities.error_exit("Meta file does not exist")
         return
 
-    @abc.abstractmethod
-    def setup(self, tool_name, bug_index, test_all=False):
+    def setup_container(self, tool_name, bug_index):
+        emitter.normal("\t\t[benchmark] preparing docker environment")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        self.log_dir_path = definitions.DIR_LOGS + "/" + self.name + "/" + subject_name + "/" + bug_id
-        container_id = None
-        if values.CONF_USE_CONTAINER:
-            emitter.normal("\t\tpreparing docker environment")
-            self.setup_dir_path = "/setup"
-            dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
-            if os.path.isdir(dir_exp_local):
-                shutil.rmtree(dir_exp_local)
-            dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
-            volume_list = {
-                # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
-                self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
-                dir_result_local: {'bind': '/results', 'mode': 'rw'},
-                dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
-            }
-            container_id = container.get_container(tool_name, self.name, subject_name, bug_id)
-            if container_id:
-                container.stop_container(container_id)
-                container.remove_container(container_id)
-            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list)
-
+        self.setup_dir_path = "/setup"
+        dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
+        dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
+        dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+        if os.path.isdir(dir_exp_local):
+            shutil.rmtree(dir_exp_local)
+        dir_result_local = definitions.DIR_RESULT + "/" + self.name + "/" + subject_name + "/" + bug_id
+        volume_list = {
+            # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
+            self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
+            dir_result_local: {'bind': '/results', 'mode': 'rw'},
+            dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
+        }
+        container_id = container.get_container(tool_name, self.name, subject_name, bug_id)
+        if container_id:
+            container.stop_container(container_id)
+            container.remove_container(container_id)
+        container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list)
         return container_id
+
+    def setup_experiment(self, directory_name, bug_index, container_id, test_all=False):
+        emitter.normal("\t\t[benchmark] preparing experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        if self.deploy(directory_name, bug_id, container_id):
+            if self.config(directory_name, bug_id, container_id):
+                if self.build(directory_name, bug_id, container_id):
+                    if test_all:
+                        if self.test_all(directory_name, experiment_item, container_id):
+                            emitter.success("\t\t\t[benchmark] setting up completed successfully")
+                        else:
+                            emitter.error("\t\t\t[benchmark] testing failed")
+                    else:
+                        if self.test(directory_name, bug_id, container_id):
+                            emitter.success("\t\t\t[benchmark] setting up completed successfully")
+                        else:
+                            emitter.error("\t\t\t[benchmark] testing failed")
+                else:
+                    emitter.error("\t\t\t[benchmark] build failed")
+            else:
+                emitter.error("\t\t\t[benchmark] config failed")
+        else:
+            emitter.error("\t\t\t[benchmark] deploy failed")
+
+    @abc.abstractmethod
+    def setup(self, tool_name, bug_index, test_all=False):
+        """Method documentation"""
+        return
+
+    @abc.abstractmethod
+    def deploy(self, exp_dir_path, bug_id, container_id):
+        """Method documentation"""
+        return
 
     @abc.abstractmethod
     def config(self, exp_dir_path, bug_id, container_id):
@@ -109,11 +138,8 @@ class AbstractBenchmark:
         if os.path.isfile(self.log_test_path):
             shutil.move(self.log_test_path, results_dir)
 
+    @abc.abstractmethod
     def save_dev_patch(self, results_dir_path, exp_dir_path, container_id=None):
-        emitter.normal("\t\t\tsaving experiment dev-patch")
-        if container_id:
-            utilities.execute_command("docker cp "+ container_id + ":" + exp_dir_path + "/diffs/. " + results_dir_path + "/dev-fix")
-        else:
-            utilities.execute_command("cp -rf " + exp_dir_path + "/diffs " + results_dir_path + "/dev-fix")
+        """Method documentation"""
         return
 
