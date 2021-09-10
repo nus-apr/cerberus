@@ -91,7 +91,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
 
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
     client = docker.from_env()
-    emitter.normal("building docker container")
+    emitter.normal("\t\t\tbuilding docker container")
     image_name = IMAGE_NAME + ":" + tool
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
@@ -134,7 +134,7 @@ def exec_command(container_id, command, workdir="/experiments"):
 
 def remove_container(container_id):
     client = docker.from_env()
-    emitter.normal("removing docker container")
+    emitter.normal("\t\t\tremoving docker container")
     try:
         container = client.containers.get(container_id)
         container.remove(force=True)
@@ -148,7 +148,7 @@ def remove_container(container_id):
 
 def stop_container(container_id):
     client = docker.from_env()
-    emitter.normal("stopping docker container")
+    emitter.normal("\t\t\tstopping docker container")
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=20)
