@@ -62,7 +62,6 @@ class F1X(AbstractTool):
 
             timestamp_command = "echo $(date) >> " + self.log_output_path
             execute_command(timestamp_command)
-
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
