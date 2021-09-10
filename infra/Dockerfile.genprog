@@ -95,5 +95,6 @@ RUN cd /deps/php &&  wget ftp://ftp.gnu.org/gnu/bison/bison-2.2.tar.gz && \
 # Install cerberus dependencies
 RUN apt install -y software-properties-common &&  add-apt-repository -y ppa:pypy/ppa && apt update && apt install -y pypy3 pypy3-dev
 
-RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
-WORKDIR /experiments
+RUN mkdir /experiment
+#RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
+WORKDIR /experiment
