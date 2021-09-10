@@ -42,7 +42,7 @@ class F1X(AbstractTool):
 
             timestamp_command = "echo $(date) >> " + self.log_output_path
             execute_command(timestamp_command)
-            repair_command = "cd {0}; timeout -k 5m {1}h f1x ".format(dir_expr, str(timeout))
+            repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
             repair_command += " -f {0} ".format(abs_path_buggy_file)
             repair_command += " -t {0} ".format(test_id_list)
             repair_command += " -T 15000"
@@ -53,7 +53,6 @@ class F1X(AbstractTool):
             all_command = repair_command + " --disable-dteq  -a -o patches -v "
             self.run_command(all_command, self.log_output_path, dir_expr, container_id)
             repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
-            repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
             status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
