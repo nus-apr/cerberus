@@ -86,7 +86,7 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to find container: unhandled exception")
-    return container_id
+    return container_id[:12]
 
 
 def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
