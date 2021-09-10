@@ -36,8 +36,6 @@ class AbstractTool:
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         command_str = "bash instrument.sh"
-        if container_id:
-            dir_setup = "/setup"
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
         if not status == 0:

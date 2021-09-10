@@ -34,7 +34,7 @@ def archive_results(dir_results):
     utilities.execute_command(archive_command)
 
 
-def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool, config_info, container_id):
+def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, config_info, container_id):
     emitter.normal("\t\trepairing experiment subject")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
@@ -51,12 +51,11 @@ def repair(dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + fix_line_number
     additional_tool_param = values.CONF_TOOL_PARAMS
-    dir_logs = values.DIR_LOGS
     utilities.check_space()
     tool.pre_process(dir_logs, dir_expr, dir_setup, container_id)
     tool.instrument(dir_logs, dir_expr, dir_setup, bug_id, container_id)
     if not values.CONF_INSTRUMENT_ONLY:
-        tool.repair(values.DIR_LOGS, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
+        tool.repair(dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
                     failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg, container_id)
 
 
@@ -160,6 +159,13 @@ def run(repair_tool, benchmark, setup):
                 dir_exp = definitions.DIR_EXPERIMENT + "/" + directory_name
                 dir_artifact = definitions.DIR_ARTIFACTS + "/" + directory_name
             tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
+            dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
+                                                                  repair_tool.name,
+                                                                  subject_name, bug_name])
+
+            dir_log = definitions.DIR_LOGS + "/" + "-".join([config_id, benchmark.name,
+                                                             repair_tool.name,
+                                                             subject_name, bug_name])
 
             iteration = iteration + 1
             values.ITERATION_NO = iteration
@@ -175,9 +181,7 @@ def run(repair_tool, benchmark, setup):
             if not os.path.isdir(tool_inst_dir):
                 emitter.warning("\t\t[warning] there is no instrumentation for " + repair_tool.name)
                 # continue
-            dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
-                                                                  repair_tool.name,
-                                                                  subject_name, bug_name])
+
             if values.CONF_ANALYSE_ONLY:
                 if not os.path.isdir(dir_result):
                     archive_name = "-".join([config_id, benchmark.name,
@@ -196,7 +200,7 @@ def run(repair_tool, benchmark, setup):
                 benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
-                repair(dir_exp, dir_setup, dir_result, experiment_item, repair_tool, config_info, container_id)
+                repair(dir_exp, dir_setup, dir_log, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_results(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                     analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
