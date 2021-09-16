@@ -6,6 +6,5 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 
 current_dir=$PWD
-mkdir -p $dir_name/src
-cp $current_dir/test.c $dir_name/src/test.c
-cp $current_dir/Makefile $dir_name/src/Makefile
+mkdir -p $dir_name
+cp -rf $current_dir/src $dir_name
