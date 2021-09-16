@@ -9,6 +9,7 @@
    "passing_test": "1,2,4,5",
    "count_neg": 1,
    "count_pos": 4,
-   "binary_path": "test"
+   "binary_path": "test",
+   "crash_input": "1"
  }
 ]
