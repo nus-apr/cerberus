@@ -19,7 +19,7 @@ class AbstractTool:
             exit_code, output = container.exec_command(container_id, command_str, exp_dir_path)
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
-                with open(log_file_path, 'w') as log_file:
+                with open(log_file_path, 'a') as log_file:
                     if stdout:
                         log_file.writelines(stdout.decode("utf-8"))
                     if stderr:
