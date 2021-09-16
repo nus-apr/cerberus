@@ -1,0 +1,23 @@
+#!/bin/bash
+
+assert-equal () {
+    diff -q <($1) <(echo -ne "$2") > /dev/null
+}
+
+case "$1" in
+    1)
+        assert-equal "./test 21" '50\n'
+        ;;
+    2)
+        assert-equal "./test 11" '100\n'
+        ;;
+    3)
+        assert-equal "./test 1" '0\n'
+        ;;
+    4)
+        assert-equal "./test 101" '10\n'
+        ;;
+    5)
+        assert-equal "./test 51" '2\n'
+        ;;
+esac

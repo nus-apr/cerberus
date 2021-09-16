@@ -1,0 +1,14 @@
+[
+ {
+   "id": 1,
+   "subject": "crashes",
+   "bug_id": "div-zero",
+   "source_file": "test.c",
+   "line_number": 6,
+   "failing_test": "3",
+   "passing_test": "1,2,4,5",
+   "count_neg": 1,
+   "count_pos": 4,
+   "binary_path": "test"
+ }
+]
