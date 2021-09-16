@@ -3,7 +3,7 @@ import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter
+from app import definitions, values, emitter, container
 from os import listdir
 from os.path import isfile, join
 
@@ -59,34 +59,52 @@ class Prophet(AbstractTool):
                         test_config_str += test_id + " "
             test_config_str += "Regression Cases: Tot 0\n"
             test_config_file = dir_expr + "/prophet/prophet.revlog"
-
-            if not os.path.isfile(test_config_file):
-                open(test_config_file, "w")
-            with open(test_config_file, "r+") as conf_file:
+            tmp_config_file = "/tmp/prophet.revlog"
+            if not os.path.isfile(tmp_config_file):
+                open(tmp_config_file, "w")
+            with open(tmp_config_file, "r+") as conf_file:
                 conf_file.seek(0)
                 conf_file.write(test_config_str)
                 conf_file.truncate()
+            if container_id:
+                copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
+            else:
+                copy_command = "cp " + tmp_config_file + " " + test_config_file
+            execute_command(copy_command)
             timestamp_command = "echo $(date) > " + self.log_output_path
             execute_command(timestamp_command)
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only "
             self.run_command(instrument_command, self.log_output_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
+            tmp_localization_file = "/tmp/profile_localization.res"
             if fix_location:
                 source_file, line_number = fix_location.split(":")
                 fault_loc = "{file_path} {line} {column} {file_path} {line} {column}" \
                             " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(file_path=source_file, line=line_number,
                                                                               column=3)
-                if not os.path.isfile(localization_file):
-                    open(localization_file, "w")
-                with open(localization_file, "r+") as res_file:
+                if not os.path.isfile(tmp_localization_file):
+                    open(tmp_localization_file, "w")
+                with open(tmp_localization_file, "r+") as res_file:
                     res_file.seek(0)
                     res_file.write(fault_loc)
                     res_file.truncate()
+                if container_id:
+                    copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
+                else:
+                    copy_command = "cp " + tmp_config_file + " " + test_config_file
+                execute_command(copy_command)
             else:
-                if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
-                    if os.path.isfile(dir_setup + "/prophet/profile_localization.res"):
-                        shutil.copy(dir_setup + "/prophet/profile_localization.res", localization_file)
+                if container_id:
+                    if not container.is_file(container_id, localization_file) or \
+                        container.is_file_empty(container_id, localization_file) :
+                        if container.is_file(dir_setup + "/prophet/profile_localization.res"):
+                            copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
+                            execute_command(copy_command)
+                else:
+                    if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
+                        if os.path.isfile(dir_setup + "/prophet/profile_localization.res"):
+                            shutil.copy(dir_setup + "/prophet/profile_localization.res", localization_file)
 
             repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
             repair_command += " -full-synthesis -full-explore "
