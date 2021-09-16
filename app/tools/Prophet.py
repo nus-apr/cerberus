@@ -90,21 +90,22 @@ class Prophet(AbstractTool):
                     res_file.write(fault_loc)
                     res_file.truncate()
                 if container_id:
-                    copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
+                    copy_command = "docker cp " + tmp_localization_file + " " + container_id + ":" + localization_file
                 else:
-                    copy_command = "cp " + tmp_config_file + " " + test_config_file
+                    copy_command = "cp " + tmp_localization_file + " " + localization_file
                 execute_command(copy_command)
             else:
+                default_localization_file = dir_setup + "/prophet/profile_localization.res"
                 if container_id:
                     if not container.is_file(container_id, localization_file) or \
                         container.is_file_empty(container_id, localization_file) :
-                        if container.is_file(dir_setup + "/prophet/profile_localization.res"):
-                            copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
-                            execute_command(copy_command)
+                        if container.is_file(default_localization_file):
+                            copy_command = "cp " + default_localization_file + " " + localization_file
+                            self.run_command(copy_command, "/dev/null", "/", container_id)
                 else:
                     if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
-                        if os.path.isfile(dir_setup + "/prophet/profile_localization.res"):
-                            shutil.copy(dir_setup + "/prophet/profile_localization.res", localization_file)
+                        if os.path.isfile(default_localization_file):
+                            shutil.copy(default_localization_file, localization_file)
 
             repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
             repair_command += " -full-synthesis -full-explore "
