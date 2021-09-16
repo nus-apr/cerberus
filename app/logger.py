@@ -58,6 +58,11 @@ def command(message):
     message = "[COMMAND]: " + str(message) + "\n"
     log(message)
 
+def docker_command(message):
+    message = str(message).strip().replace("[command]", "")
+    message = "[DOCKER-COMMAND]: " + str(message) + "\n"
+    log(message)
+
 
 def data(message, data=None, is_patch=False):
     if values.DEBUG or is_patch:

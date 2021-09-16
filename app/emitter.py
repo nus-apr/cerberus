@@ -58,6 +58,13 @@ def command(message):
     logger.command(message)
 
 
+def docker_command(message):
+    if values.CONF_DEBUG:
+        prefix = "\t\t[docker-command] "
+        write(message, ROSE, prefix=prefix, indent_level=2)
+    logger.docker_command(message)
+
+
 def debug(message):
     if values.CONF_DEBUG:
         prefix = "\t\t[debug] "
