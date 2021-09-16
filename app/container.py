@@ -165,10 +165,10 @@ def stop_container(container_id):
 
 def is_file(container_id, file_path):
     exist_command = "test -f " + file_path
-    return exec_command(container_id, "/", exist_command)[0] == 0
+    return exec_command(container_id, exist_command)[0] == 0
 
 
 def is_file_empty(container_id, file_path):
     exist_command = "[ -s " + file_path + " ]"
-    return exec_command(container_id, "/", exist_command)[0] == 0
+    return exec_command(container_id, exist_command)[0] == 0
 
