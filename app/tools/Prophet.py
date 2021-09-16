@@ -38,7 +38,7 @@ class Prophet(AbstractTool):
             if container_id:
                 if not container.is_file(container_id, localization_file) or \
                         container.is_file_empty(container_id, localization_file):
-                    if container.is_file(default_localization_file):
+                    if container.is_file(container_id, default_localization_file):
                         copy_command = "cp " + default_localization_file + " " + localization_file
                         self.run_command(copy_command, "/dev/null", "/", container_id)
             else:
