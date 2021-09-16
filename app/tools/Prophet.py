@@ -113,6 +113,7 @@ class Prophet(AbstractTool):
             execute_command(timestamp_command)
             repair_file = dir_expr + "/prophet/prophet.conf"
             if not container.is_file(container_id, repair_file):
+                emitter.error("\t\t[error] no repair config file detected")
                 return
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only "
             self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
