@@ -31,7 +31,7 @@ class Examples(AbstractBenchmark):
         return status == 0
 
     def config(self, setup_dir_path, bug_id, config_id, container_id):
-        return 0
+        return True
 
     def build(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
