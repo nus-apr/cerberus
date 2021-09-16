@@ -106,6 +106,6 @@ class Examples(AbstractBenchmark):
 
     def save_artefacts(self, dir_exp, dir_artifact, container_id):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
-        self.list_artifact_dirs = ["/diffs"]  # path should be relative to experiment directory
+        self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = [] # path should be relative to experiment directory
         super(Examples, self).save_artefacts(dir_exp, dir_artifact, container_id)
