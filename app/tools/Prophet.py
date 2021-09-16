@@ -13,6 +13,73 @@ class Prophet(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Prophet, self).__init__(self.name)
 
+    def generate_localization(self, experiment_info, localization_file, dir_setup, container_id):
+        fix_file = experiment_info[definitions.KEY_FIX_FILE]
+        fix_location = experiment_info[definitions.KEY_FIX_LOC]
+        tmp_localization_file = "/tmp/profile_localization.res"
+        if fix_location:
+            source_file, line_number = fix_location.split(":")
+            fault_loc = "{file_path} {line} {column} {file_path} {line} {column}" \
+                        " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(file_path=source_file, line=line_number,
+                                                                          column=3)
+            if not os.path.isfile(tmp_localization_file):
+                open(tmp_localization_file, "w")
+            with open(tmp_localization_file, "r+") as res_file:
+                res_file.seek(0)
+                res_file.write(fault_loc)
+                res_file.truncate()
+            if container_id:
+                copy_command = "docker cp " + tmp_localization_file + " " + container_id + ":" + localization_file
+            else:
+                copy_command = "cp " + tmp_localization_file + " " + localization_file
+            execute_command(copy_command)
+        else:
+            default_localization_file = dir_setup + "/prophet/profile_localization.res"
+            if container_id:
+                if not container.is_file(container_id, localization_file) or \
+                        container.is_file_empty(container_id, localization_file):
+                    if container.is_file(default_localization_file):
+                        copy_command = "cp " + default_localization_file + " " + localization_file
+                        self.run_command(copy_command, "/dev/null", "/", container_id)
+            else:
+                if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
+                    if os.path.isfile(default_localization_file):
+                        shutil.copy(default_localization_file, localization_file)
+
+    def generate_revlog(self, experiment_info, revlog_file, bug_id, container_id):
+        test_config_str = "-\n"
+        test_config_str += "-\n"
+        subject_name = experiment_info[definitions.KEY_SUBJECT]
+        failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
+        test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
+        for test_id in failing_test_list:
+            if test_id == failing_test_list[-1]:
+                test_config_str += test_id + "\n"
+            else:
+                test_config_str += test_id + " "
+        passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
+        test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
+        if passing_test_list:
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+            for test_id in filtered_list:
+                if test_id == filtered_list[-1]:
+                    test_config_str += test_id + "\n"
+                else:
+                    test_config_str += test_id + " "
+        test_config_str += "Regression Cases: Tot 0\n"
+        tmp_config_file = "/tmp/prophet.revlog"
+        if not os.path.isfile(tmp_config_file):
+            open(tmp_config_file, "w")
+        with open(tmp_config_file, "r+") as conf_file:
+            conf_file.seek(0)
+            conf_file.write(test_config_str)
+            conf_file.truncate()
+        if container_id:
+            copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + revlog_file
+        else:
+            copy_command = "cp " + tmp_config_file + " " + revlog_file
+        execute_command(copy_command)
+
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
@@ -37,79 +104,19 @@ class Prophet(AbstractTool):
             dir_setup = dir_info["setup"]
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            subject_name = experiment_info[definitions.KEY_SUBJECT]
-            fix_file = experiment_info[definitions.KEY_FIX_FILE]
-            fix_location = experiment_info[definitions.KEY_FIX_LOC]
+
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-            test_config_str = "-\n"
-            test_config_str += "-\n"
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-            test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
-            for test_id in failing_test_list:
-                if test_id == failing_test_list[-1]:
-                    test_config_str += test_id + "\n"
-                else:
-                    test_config_str += test_id + " "
-            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-            test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
-            if passing_test_list:
-                filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
-                for test_id in filtered_list:
-                    if test_id == filtered_list[-1]:
-                        test_config_str += test_id + "\n"
-                    else:
-                        test_config_str += test_id + " "
-            test_config_str += "Regression Cases: Tot 0\n"
-            test_config_file = dir_expr + "/prophet/prophet.revlog"
-            tmp_config_file = "/tmp/prophet.revlog"
-            if not os.path.isfile(tmp_config_file):
-                open(tmp_config_file, "w")
-            with open(tmp_config_file, "r+") as conf_file:
-                conf_file.seek(0)
-                conf_file.write(test_config_str)
-                conf_file.truncate()
-            if container_id:
-                copy_command = "docker cp " + tmp_config_file + " " + container_id + ":" + test_config_file
-            else:
-                copy_command = "cp " + tmp_config_file + " " + test_config_file
-            execute_command(copy_command)
             timestamp_command = "echo $(date) > " + self.log_output_path
             execute_command(timestamp_command)
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only "
             self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
-            tmp_localization_file = "/tmp/profile_localization.res"
-            if fix_location:
-                source_file, line_number = fix_location.split(":")
-                fault_loc = "{file_path} {line} {column} {file_path} {line} {column}" \
-                            " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(file_path=source_file, line=line_number,
-                                                                              column=3)
-                if not os.path.isfile(tmp_localization_file):
-                    open(tmp_localization_file, "w")
-                with open(tmp_localization_file, "r+") as res_file:
-                    res_file.seek(0)
-                    res_file.write(fault_loc)
-                    res_file.truncate()
-                if container_id:
-                    copy_command = "docker cp " + tmp_localization_file + " " + container_id + ":" + localization_file
-                else:
-                    copy_command = "cp " + tmp_localization_file + " " + localization_file
-                execute_command(copy_command)
-            else:
-                default_localization_file = dir_setup + "/prophet/profile_localization.res"
-                if container_id:
-                    if not container.is_file(container_id, localization_file) or \
-                        container.is_file_empty(container_id, localization_file) :
-                        if container.is_file(default_localization_file):
-                            copy_command = "cp " + default_localization_file + " " + localization_file
-                            self.run_command(copy_command, "/dev/null", "/", container_id)
-                else:
-                    if not os.path.isfile(localization_file) or os.path.getsize(localization_file) == 0:
-                        if os.path.isfile(default_localization_file):
-                            shutil.copy(default_localization_file, localization_file)
-
+            self.generate_localization(experiment_info, localization_file, dir_setup, container_id)
+            revlog_file = dir_expr + "/prophet/prophet.revlog"
+            if not container.is_file(container_id, revlog_file):
+                self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
             repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
             repair_command += " -full-synthesis -full-explore "
             repair_command += " -r {0}".format(dir_expr + "/workdir")
