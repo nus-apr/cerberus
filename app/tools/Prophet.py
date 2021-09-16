@@ -105,8 +105,7 @@ class Prophet(AbstractTool):
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             revlog_file = dir_expr + "/prophet/prophet.revlog"
-            if not container.is_file(container_id, revlog_file):
-                self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
+            self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
             timestamp_command = "echo $(date) > " + self.log_output_path
