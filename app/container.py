@@ -120,7 +120,8 @@ def exec_command(container_id, command, workdir="/experiments"):
     try:
         container = client.containers.get(container_id)
         command = command.encode().decode('ascii', 'ignore')
-        emitter.docker_command(command)
+        print_command = "[{}]".format(workdir) + " " + command
+        emitter.docker_command(print_command)
         exit_code, output = container.exec_run(command, demux=True, workdir=workdir)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
