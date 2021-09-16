@@ -74,7 +74,7 @@ class Prophet(AbstractTool):
             timestamp_command = "echo $(date) > " + self.log_output_path
             execute_command(timestamp_command)
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only "
-            self.run_command(instrument_command, self.log_output_path, dir_expr, container_id)
+            self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
             tmp_localization_file = "/tmp/profile_localization.res"
