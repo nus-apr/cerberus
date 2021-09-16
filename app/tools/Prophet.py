@@ -104,19 +104,22 @@ class Prophet(AbstractTool):
             dir_setup = dir_info["setup"]
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-
+            revlog_file = dir_expr + "/prophet/prophet.revlog"
+            if not container.is_file(container_id, revlog_file):
+                self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
             timestamp_command = "echo $(date) > " + self.log_output_path
             execute_command(timestamp_command)
+            repair_file = dir_expr + "/prophet/prophet.conf"
+            if not container.is_file(container_id, repair_file):
+                return
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only "
             self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
             self.generate_localization(experiment_info, localization_file, dir_setup, container_id)
-            revlog_file = dir_expr + "/prophet/prophet.revlog"
-            if not container.is_file(container_id, revlog_file):
-                self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
+
             repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
             repair_command += " -full-synthesis -full-explore "
             repair_command += " -r {0}".format(dir_expr + "/workdir")
