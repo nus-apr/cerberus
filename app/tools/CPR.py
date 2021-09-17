@@ -58,6 +58,7 @@ class CPR(AbstractTool):
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
         shutil.copy(dir_setup + "/cpr/instrument.sh", dir_results)
+        super(CPR, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def post_process(self, dir_expr, dir_results):

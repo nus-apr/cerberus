@@ -62,6 +62,7 @@ class Fix2Fit(AbstractTool):
         dir_patches = dir_setup + "/patches"
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
+        super(Fix2Fit, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):

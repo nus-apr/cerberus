@@ -160,7 +160,7 @@ class Prophet(AbstractTool):
             patch_id = patch_id + 1
         save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
         execute_command(save_command)
-        super(Prophet).save_artefacts(dir_info, experiment_info, container_id)
+        super(Prophet, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):

@@ -71,7 +71,7 @@ class F1X(AbstractTool):
         dir_patches = dir_expr + "/patches"
         save_command = "cp -rf " + dir_patches + " " + dir_artifact
         self.run_command(save_command, "/dev/null", "/", container_id)
-        super(F1X).save_artefacts(dir_info, experiment_info, container_id)
+        super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):

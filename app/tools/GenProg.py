@@ -61,6 +61,7 @@ class GenProg(AbstractTool):
             shutil.copytree(dir_preprocessed, dir_results + "/preprocessed")
         if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
             shutil.copy(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
+        super(GenProg, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):

@@ -94,6 +94,7 @@ class Angelix(AbstractTool):
         dir_results = dir_info["result"]
         copy_command = "mv src-2021-* " + dir_results + "/patches"
         execute_command(copy_command)
+        super(Angelix, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def post_process(self, dir_expr, dir_results):
