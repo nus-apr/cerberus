@@ -25,68 +25,77 @@ class Angelix(AbstractTool):
             error_exit("error with instrumentation of ", self.name)
         return
 
-    def repair(self, dir_logs, dir_expr, dir_setup, bug_id, timeout, passing_test_list,
-               failing_test_list, fix_location, subject_name, binary_path, additional_tool_param, binary_input_arg,
-               container_id):
-        emitter.normal("\t\t\t running repair with " + self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-        line_number = ""
-        if fix_location:
-            source_file, line_number = fix_location.split(":")
-        else:
-            with open(dir_expr + "/manifest.txt", "r") as man_file:
-                source_file = man_file.readlines()[0].strip().replace("\n", "")
+    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
+        super(Angelix, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
+        if not instrument_only:
+            emitter.normal("\t\t\t running repair with " + self.name)
+            conf_id = config_info[definitions.KEY_ID]
+            dir_logs = dir_info["logs"]
+            dir_expr = dir_info["expr"]
+            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+            fix_location = experiment_info[definitions.KEY_FIX_LOC]
+            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
+            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
+            subject_name = experiment_info[definitions.KEY_SUBJECT]
+            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+            self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+            line_number = ""
+            if fix_location:
+                source_file, line_number = fix_location.split(":")
+            else:
+                with open(dir_expr + "/manifest.txt", "r") as man_file:
+                    source_file = man_file.readlines()[0].strip().replace("\n", "")
 
-        src_path = dir_expr + "/src"
-        gold_path = dir_expr + "/src-gold"
-        angelix_dir_path = dir_expr + '/angelix'
-        oracle_path = angelix_dir_path + "/oracle"
-        config_script_path = angelix_dir_path + '/config'
-        build_script_path = angelix_dir_path + '/build'
-        timeout_s = int(timeout) * 3600
-        syn_timeout = int(0.25 * timeout_s * 1000)
-        test_id_list = ""
-        for test_id in failing_test_list:
-            test_id_list += test_id + " "
-        if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
-            for test_id in filtered_list:
+            src_path = dir_expr + "/src"
+            gold_path = dir_expr + "/src-gold"
+            angelix_dir_path = dir_expr + '/angelix'
+            oracle_path = angelix_dir_path + "/oracle"
+            config_script_path = angelix_dir_path + '/config'
+            build_script_path = angelix_dir_path + '/build'
+            timeout_s = int(timeout) * 3600
+            syn_timeout = int(0.25 * timeout_s * 1000)
+            test_id_list = ""
+            for test_id in failing_test_list:
                 test_id_list += test_id + " "
+            if passing_test_list:
+                filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+                for test_id in filtered_list:
+                    test_id_list += test_id + " "
 
-        timestamp_command = "echo $(date) > " + self.log_output_path
-        execute_command(timestamp_command)
-        angelix_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
-                          "--configure {4}  " \
-                          "--golden {5}  " \
-                          "--build {6} " \
-                          "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
-                                                            test_id_list, config_script_path, gold_path,
-                                                            build_script_path, str(syn_timeout), str(timeout))
+            timestamp_command = "echo $(date) > " + self.log_output_path
+            execute_command(timestamp_command)
+            repair_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
+                              "--configure {4}  " \
+                              "--golden {5}  " \
+                              "--build {6} " \
+                              "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
+                                                                test_id_list, config_script_path, gold_path,
+                                                                build_script_path, str(syn_timeout), str(timeout))
 
-        if fix_location:
-            angelix_command += " --lines {0}  ".format(line_number)
+            if fix_location:
+                repair_command += " --lines {0}  ".format(line_number)
 
-        if os.path.isfile("/tmp/ANGELIX_ARGS"):
-            with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
-                arg_line = arg_file.readline()
-                angelix_command += " " + arg_line.strip() + " "
-            os.remove("/tmp/ANGELIX_ARGS")
-        if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
-            with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
-                load_line = arg_file.readline()
-                os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
-            os.remove("/tmp/ANGELIX_KLEE_LOAD")
-        angelix_command += "  --generate-all {0} " \
-                           " --timeout {1} >> {2} 2>&1 ".format(additional_tool_param, str(timeout_s), self.log_output_path)
-        status = execute_command(angelix_command)
-        if status != 0:
-            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
-        else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = "echo $(date) >> " + self.log_output_path
-        execute_command(timestamp_command)
+            if os.path.isfile("/tmp/ANGELIX_ARGS"):
+                with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
+                    arg_line = arg_file.readline()
+                    repair_command += " " + arg_line.strip() + " "
+                os.remove("/tmp/ANGELIX_ARGS")
+            if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
+                with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
+                    load_line = arg_file.readline()
+                    os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
+                os.remove("/tmp/ANGELIX_KLEE_LOAD")
+            repair_command += "  --generate-all {0} " \
+                               " --timeout {1}".format(additional_tool_param, str(timeout_s))
+            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+            if status != 0:
+                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+            else:
+                emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+            timestamp_command = "echo $(date) >> " + self.log_output_path
+            execute_command(timestamp_command)
         return
 
     def save_artefacts(self, dir_info, experiment_info, container_id):
@@ -97,11 +106,11 @@ class Angelix(AbstractTool):
         super(Angelix, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
-    def post_process(self, dir_expr, dir_results):
+    def post_process(self, dir_expr, dir_results, container_id):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(Angelix, self).post_process(dir_expr, dir_results)
-        clean_command = "rm -rf /tmp/* /experiments/.angelix/"
-        execute_command(clean_command)
+        super(Angelix, self).post_process(dir_expr, dir_results, container_id)
+        clean_command = "rm -rf /tmp/* {}/.angelix/".format(dir_expr)
+        self.run_command(clean_command, "/dev/null", dir_expr, container_id)
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
@@ -196,9 +205,9 @@ class Angelix(AbstractTool):
             log_file.write("\t\t any errors: {0}\n".format(is_error))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable
 
-    def pre_process(self, dir_logs, dir_expr, dir_setup):
+    def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(Angelix, self).pre_process(dir_logs, dir_expr, dir_setup)
+        super(Angelix, self).pre_process(dir_logs, dir_expr, dir_setup, container_id)
         if not os.path.isdir("/tmp"):
             os.mkdir("/tmp")
         return
