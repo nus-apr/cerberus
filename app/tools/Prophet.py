@@ -138,10 +138,11 @@ class Prophet(AbstractTool):
     def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_expr = dir_info["experiment"]
+        dir_artifact = dir_info["artifact"]
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
         dir_patch = dir_output + "/patches"
-        copy_command = "cp -rf  " + dir_patch + " " + dir_results
+        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         fix_file = experiment_info[definitions.KEY_FIX_FILE]
         copy_command = "docker cp " + container_id + ":" + dir_expr + "/" + fix_file + " /tmp/orig.c"
