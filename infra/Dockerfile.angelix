@@ -58,8 +58,7 @@ RUN apt-get install -y  \
     tk-dev \
     mercurial \
     tcl-dev \
-    tix-dev \
-    libgdbm-compat-dev
+    tix-dev
 
 
 # Compile PHP dependencies from source
