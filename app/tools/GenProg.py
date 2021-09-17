@@ -49,8 +49,10 @@ class GenProg(AbstractTool):
         execute_command(timestamp_command)
         return
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
-        bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+    def save_artefacts(self, dir_info, experiment_info, container_id):
+        emitter.normal("\t\t\t saving artefacts of " + self.name)
+        dir_expr = dir_info["experiment"]
+        dir_results = dir_info["result"]
         dir_patches = dir_expr + "/src/repair"
         if os.path.isdir(dir_patches):
             shutil.copytree(dir_patches, dir_results + "/patches")

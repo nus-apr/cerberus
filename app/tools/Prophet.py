@@ -135,11 +135,23 @@ class Prophet(AbstractTool):
             execute_command(timestamp_command)
         return
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
-        patched_dir = dir_expr + "/patched"
-        copy_command = "cp -rf  " + patched_dir + " " + dir_results
+    def save_artefacts(self, dir_info, experiment_info, container_id):
+        emitter.normal("\t\t\t saving artefacts of " + self.name)
+        dir_expr = dir_info["experiment"]
+        dir_results = dir_info["result"]
+        dir_output = dir_info["output"]
+        dir_patch = dir_output + "/patches"
+        copy_command = "cp -rf  " + dir_patch + " " + dir_results
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         fix_file = experiment_info[definitions.KEY_FIX_FILE]
+        copy_command = "docker cp " + container_id + ":" + dir_expr + "/" + fix_file + " /tmp/orig.c"
+        execute_command(copy_command)
+        patch_id = 0
+        output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f)) and ".c" in f]
+        for f in output_patch_list:
+            patch_file = dir_patch + "/" + str(patch_id) + ".patch"
+            diff_command = "diff --unified /tmp/orig.c " + dir_patch + "/" + f + "> {}".format(patch_file)
+            execute_command(diff_command)
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):

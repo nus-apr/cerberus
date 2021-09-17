@@ -34,7 +34,10 @@ def archive_results(dir_results):
     utilities.execute_command(archive_command)
 
 
-def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, config_info, container_id):
+def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id):
+    dir_expr = dir_info["experiment"]
+    dir_setup = dir_info["setup"]
+    dir_log = dir_info["log"]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
@@ -56,16 +59,20 @@ def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, c
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
-    dir_info = {
-        "logs": dir_logs,
+    dir_info_container = {
+        "log": dir_log,
         "setup": dir_setup,
         "expr": dir_expr
     }
-    tool.repair(dir_info, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
+    tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
 
 
-def analyse_result(dir_logs, dir_expr, dir_setup, dir_results, experiment_info, tool: AbstractTool):
+def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t[framework] analysing experiment results")
+    dir_logs = dir_info["log"]
+    dir_expr = dir_info["experiment"]
+    dir_setup = dir_info["setup"]
+    dir_results = dir_info["result"]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
     size_space, n_enumerated, n_plausible, n_noncompile = tool.analyse_output(dir_logs, dir_results,
@@ -93,9 +100,11 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_expr, dir_setup, dir_artifacts, experiment_info, tool: AbstractTool, container_id):
+def save_artifacts(dir_info, experiment_info, tool: AbstractTool, container_id):
     emitter.normal("\t\t[framework] saving artifacts and cleaning up")
-    tool.save_artefacts(dir_artifacts, dir_expr, dir_setup, experiment_info, container_id)
+    dir_expr = dir_info["experiment"]
+    dir_artifacts = dir_info["artifact"]
+    tool.save_artefacts(dir_info, experiment_info, container_id)
     tool.post_process(dir_expr, dir_artifacts, container_id)
 
 
@@ -169,7 +178,18 @@ def run(repair_tool, benchmark, setup):
             dir_log = definitions.DIR_LOGS + "/" + "-".join([config_id, benchmark.name,
                                                              repair_tool.name,
                                                              subject_name, bug_name])
+            dir_output = definitions.DIR_ARTIFACTS + "/" + "-".join([config_id, benchmark.name,
+                                                             repair_tool.name,
+                                                             subject_name, bug_name])
+            dir_info = {
+                "log": dir_log,
+                "output": dir_output,
+                "result": dir_result,
+                "setup": dir_setup,
+                "experiment": dir_exp,
+                "artifact": dir_artifact
 
+            }
             iteration = iteration + 1
             values.ITERATION_NO = iteration
             emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(bug_index))
@@ -192,7 +212,7 @@ def run(repair_tool, benchmark, setup):
                                              subject_name, bug_name]) + ".tar.gz"
                     if not retrieve_results(archive_name, repair_tool):
                         continue
-                analyse_result(dir_log, dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                analyse_result(dir_info, experiment_item, repair_tool)
                 continue
             utilities.clean_results(dir_result)
             container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
@@ -203,10 +223,10 @@ def run(repair_tool, benchmark, setup):
                 benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
-                repair(dir_exp, dir_setup, dir_log, experiment_item, repair_tool, config_info, container_id)
+                repair(dir_info, experiment_item, repair_tool, config_info, container_id)
                 if not values.CONF_INSTRUMENT_ONLY:
-                    save_artifacts(dir_exp, dir_setup, dir_artifact, experiment_item, repair_tool, container_id)
-                    analyse_result(dir_log, dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                    save_artifacts(dir_info, experiment_item, repair_tool, container_id)
+                    analyse_result(dir_info, experiment_item, repair_tool)
                     archive_results(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp, container_id)

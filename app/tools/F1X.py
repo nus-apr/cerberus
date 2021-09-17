@@ -64,7 +64,10 @@ class F1X(AbstractTool):
             execute_command(timestamp_command)
         return
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
+    def save_artefacts(self, dir_info, experiment_info, container_id):
+        emitter.normal("\t\t\t saving artefacts of " + self.name)
+        dir_expr = dir_info["experiment"]
+        dir_results = dir_info["result"]
         dir_patches = dir_expr + "/patches"
         save_command = "cp -rf " + dir_patches + " " + dir_results + "/patches"
         self.run_command(save_command, "/dev/null", "/", container_id)

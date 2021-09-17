@@ -89,9 +89,9 @@ class Angelix(AbstractTool):
         execute_command(timestamp_command)
         return
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
+    def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+        dir_results = dir_info["result"]
         copy_command = "mv src-2021-* " + dir_results + "/patches"
         execute_command(copy_command)
         return
