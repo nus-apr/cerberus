@@ -18,6 +18,6 @@ case "$1" in
         assert-equal "./src/test 101" '10\n'
         ;;
     5)
-        assert-equal "./src/test 51" '2\n'
+        assert-equal "./src/test 51" '20\n'
         ;;
 esac

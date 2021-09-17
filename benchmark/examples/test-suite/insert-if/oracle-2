@@ -15,7 +15,7 @@ case "$1" in
         assert-equal "./src/test 101" '10\n'
         ;;
     p4)
-        assert-equal "./src/test 51" '2\n'
+        assert-equal "./src/test 51" '20\n'
         ;;
     n1)
         assert-equal "./src/test 1" '0\n'
