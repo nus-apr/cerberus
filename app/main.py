@@ -95,8 +95,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
 
 def save_artifacts(dir_expr, dir_setup, dir_artifacts, experiment_info, tool: AbstractTool, container_id):
     emitter.normal("\t\t[framework] saving artifacts and cleaning up")
-    bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    tool.save_artefacts(dir_artifacts, dir_expr, dir_setup, bug_id, container_id)
+    tool.save_artefacts(dir_artifacts, dir_expr, dir_setup, experiment_info, container_id)
     tool.post_process(dir_expr, dir_artifacts, container_id)
 
 
@@ -193,7 +192,7 @@ def run(repair_tool, benchmark, setup):
                                              subject_name, bug_name]) + ".tar.gz"
                     if not retrieve_results(archive_name, repair_tool):
                         continue
-                analyse_result(dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
+                analyse_result(dir_log, dir_exp, dir_setup, dir_result, experiment_item, repair_tool)
                 continue
             utilities.clean_results(dir_result)
             container_id = benchmark.setup(repair_tool.name, bug_index, config_id,

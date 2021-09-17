@@ -135,10 +135,11 @@ class Prophet(AbstractTool):
             execute_command(timestamp_command)
         return
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
+    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
         patched_dir = dir_expr + "/patched"
         copy_command = "cp -rf  " + patched_dir + " " + dir_results
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+        fix_file = experiment_info[definitions.KEY_FIX_FILE]
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):

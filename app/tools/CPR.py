@@ -49,8 +49,9 @@ class CPR(AbstractTool):
         dir_logs = "/CPR/logs/" + bug_id
         execute_command("cp -rf" + dir_logs + " " + dir_results + "/logs")
 
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id):
-        self.save_logs(dir_results, dir_expr, dir_setup, bug_id)
+    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
+        emitter.normal("\t\t\t saving artefacts of " + self.name)
+        bug_id = str(experiment_info[definitions.KEY_BUG_ID])
         dir_patches = "/CPR/output/" + bug_id
         if os.path.isdir(dir_patches):
             execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")

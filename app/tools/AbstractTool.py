@@ -76,7 +76,7 @@ class AbstractTool:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
+    def save_artefacts(self, dir_results, dir_expr, dir_setup, experiment_info, container_id):
         """store all artefacts from the tool"""
         return
 
