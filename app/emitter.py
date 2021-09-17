@@ -153,7 +153,7 @@ def configuration(setting, value):
     logger.configuration(setting + ":" + str(value))
 
 
-def end(time_info, is_error=False):
+def end(time_total, is_error=False):
     if values.CONF_ARG_PASS:
         statistics("\nRun time statistics:\n-----------------------\n")
         statistics("Iteration Count: " + str(values.ITERATION_NO))
@@ -181,12 +181,10 @@ def end(time_info, is_error=False):
         # statistics("Component Count Gen: " + str(values.COUNT_COMPONENTS_GEN))
         # statistics("Component Count Cus: " + str(values.COUNT_COMPONENTS_CUS))
         # statistics("Gen Limit: " + str(values.DEFAULT_GEN_SEARCH_LIMIT))
-        # if is_error:
-        #     error("\n" + values.TOOL_NAME + " exited with an error after " + time_info[
-        #         definitions.KEY_DURATION_TOTAL] + " minutes \n")
-        # else:
-        #     success("\n" + values.TOOL_NAME + " finished successfully after " + time_info[
-        #         definitions.KEY_DURATION_TOTAL] + " minutes \n")
+        if is_error:
+            error("\n" + values.TOOL_NAME + " exited with an error after " + time_total + " minutes \n")
+        else:
+            success("\n" + values.TOOL_NAME + " finished successfully after " + time_total + " minutes \n")
 
 
 def emit_help():
