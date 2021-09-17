@@ -77,7 +77,7 @@ class AbstractBenchmark:
                 dir_output_local: {'bind': '/output', 'mode': 'rw'},
                 dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'}
             }
-            container_id = container.get_container(tool_name, self.name, subject_name, bug_id)
+            container_id = container.get_container(tool_name, self.name, subject_name, bug_id, config_id)
             if container_id:
                 container.stop_container(container_id)
                 container.remove_container(container_id)
