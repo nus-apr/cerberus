@@ -60,7 +60,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
     dir_info_container = {
-        "log": dir_log,
+        "logs": dir_log,
         "setup": dir_setup,
         "expr": dir_expr
     }
