@@ -6,18 +6,6 @@ assert-equal () {
 
 case "$1" in
     1)
-        assert-equal "./src/test 21" '50\n'
-        ;;
-    2)
-        assert-equal "./src/test 11" '100\n'
-        ;;
-    3)
         assert-equal "./src/test 1" '0\n'
-        ;;
-    4)
-        assert-equal "./src/test 101" '10\n'
-        ;;
-    5)
-        assert-equal "./src/test 51" '2\n'
         ;;
 esac

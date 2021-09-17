@@ -41,61 +41,9 @@ class Examples(AbstractBenchmark):
         return status == 0
 
     def test(self, setup_dir_path, bug_id, config_id, container_id):
-        emitter.normal("\t\t\ttesting experiment subject")
-        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
-        command_str = "bash test.sh p1"
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
-        return status == 0
+        return True
 
     def test_all(self, setup_dir_path, experiment_item, config_id, container_id):
-        emitter.normal("\t\t\ttesting(full) experiment subject")
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test-all.log"
-        failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
-        passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
-        unexpected_fail_list = []
-        unexpected_pass_list = []
-        with open(self.log_test_path, "w") as log_file:
-            log_file.write("FAILING TEST CASES\n")
-            for test_id in failing_test_cases:
-                command_str = "bash test.sh {}".format(test_id)
-                status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
-                if status != 0:
-                    log_file.write("{}: FAIL\n".format(test_id))
-                else:
-                    log_file.write("{}: PASS\n".format(test_id))
-                    unexpected_pass_list.append(test_id)
-
-            log_file.write("PASSING TEST CASES\n")
-            for test_id in passing_test_cases:
-                command_str = "bash test.sh {}".format(test_id)
-                status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
-                if status != 0:
-                    log_file.write("{}: FAIL\n".format(test_id))
-                    unexpected_fail_list.append(test_id)
-                else:
-                    log_file.write("{}: PASS\n".format(test_id))
-
-            if unexpected_fail_list:
-                emitter.warning("\t\t\t\t[warning] unexpected failing test cases")
-                log_file.write("unexpected failing list: ")
-                for test_id in unexpected_fail_list:
-                    log_file.write(str(test_id) + " ")
-                    emitter.warning("\t\t\t\t\t" + str(test_id))
-                log_file.write("\n")
-            else:
-                emitter.success("\t\t\t\t[success] no unexpected failing test cases")
-            if unexpected_pass_list:
-                log_file.write("unexpected passing list: ")
-                emitter.warning("\t\t\t\t[warning] unexpected passing test cases")
-                for test_id in unexpected_pass_list:
-                    log_file.write(str(test_id) + " ")
-                    emitter.warning("\t\t\t\t\t" + str(test_id))
-                log_file.write("\n")
-            else:
-                emitter.success("\t\t\t\t[success] no unexpected passing test cases")
-            log_file.close()
-        emitter.highlight("\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
     def clean(self, exp_dir_path, container_id):

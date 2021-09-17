@@ -5,18 +5,6 @@ assert-equal () {
 }
 
 case "$1" in
-    p1)
-        assert-equal "./src/test 21" '50\n'
-        ;;
-    p2)
-        assert-equal "./src/test 11" '100\n'
-        ;;
-    p3)
-        assert-equal "./src/test 101" '10\n'
-        ;;
-    p4)
-        assert-equal "./src/test 51" '2\n'
-        ;;
     n1)
         assert-equal "./src/test 1" '0\n'
         ;;
