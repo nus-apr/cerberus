@@ -161,8 +161,8 @@ class Prophet(AbstractTool):
             patch_id = patch_id + 1
 
         save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
-        save_command += "cp -rf " + dir_output + " " + dir_results  + ";"
-        save_command += "cp -rf " + dir_logs + " " + dir_results + ";"
+        save_command += "cp -rf " + dir_output + " " + dir_results + ";"
+        save_command += "cp -rf " + dir_logs + " " + dir_results
         execute_command(save_command)
         return
 
@@ -215,8 +215,9 @@ class Prophet(AbstractTool):
                 log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
+        dir_patch = dir_results + "/patches"
         if os.path.isdir(dir_results):
-            output_patch_list = [f for f in listdir(dir_results) if isfile(join(dir_results, f)) and ".c" in f]
+            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
