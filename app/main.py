@@ -48,7 +48,10 @@ def repair(dir_expr, dir_setup, dir_logs, experiment_info, tool: AbstractTool, c
         fix_location = fix_source_file + ":" + fix_line_number
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    passing_test_list = experiment_info[definitions.KEY_PASSING_TEST].split(",")
+    passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
+    passing_test_list = []
+    if str(passing_id_list_str).isnumeric():
+        passing_test_list = passing_id_list_str.split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
