@@ -143,7 +143,7 @@ class Prophet(AbstractTool):
         dir_output = dir_info["output"]
         dir_logs = dir_info["log"]
         dir_patch = dir_expr + "/patches"
-        copy_command = "cp -rf  " + dir_expr + " " + dir_artifact
+        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         fix_file = experiment_info[definitions.KEY_FIX_FILE]
         copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + fix_file + " /tmp/orig.c"
