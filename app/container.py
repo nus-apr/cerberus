@@ -168,6 +168,11 @@ def is_file(container_id, file_path):
     return exec_command(container_id, exist_command)[0] == 0
 
 
+def is_dir(container_id, dir_path):
+    exist_command = "test -d " + dir_path
+    return exec_command(container_id, exist_command)[0] == 0
+
+
 def is_file_empty(container_id, file_path):
     exist_command = "[ -s " + file_path + " ]"
     return exec_command(container_id, exist_command)[0] == 0
