@@ -229,6 +229,7 @@ def run(repair_tool, benchmark, setup):
                     save_artifacts(dir_info, experiment_item, repair_tool, container_id)
                     analyse_result(dir_info, experiment_item, repair_tool)
                     archive_results(dir_result)
+                    utilities.clean_artifacts(dir_result)
                 if values.CONF_PURGE:
                     benchmark.clean(dir_exp, container_id)
             if values.CONF_SHOW_DEV_PATCH:
