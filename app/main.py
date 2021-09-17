@@ -214,7 +214,8 @@ def run(repair_tool, benchmark, setup):
                         continue
                 analyse_result(dir_info, experiment_item, repair_tool)
                 continue
-            utilities.clean_results(dir_result)
+            utilities.clean_artifacts(dir_output)
+            utilities.clean_artifacts(dir_log)
             container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                            values.DEFAULT_RUN_TESTS_ONLY,
                                            values.DEFAULT_USE_CONTAINER)

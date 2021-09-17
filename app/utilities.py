@@ -41,11 +41,11 @@ def clean_files():
         execute_command(clean_command)
 
 
-def clean_results(exp_dir):
-    if os.path.isdir(exp_dir):
-        rm_command = "rm -rf " + exp_dir
+def clean_artifacts(output_dir):
+    if os.path.isdir(output_dir):
+        rm_command = "rm -rf " + output_dir
         execute_command(rm_command)
-    mk_command = "mkdir " + exp_dir
+    mk_command = "mkdir " + output_dir
     execute_command(mk_command)
 
 
