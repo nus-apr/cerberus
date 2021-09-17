@@ -156,13 +156,13 @@ class Prophet(AbstractTool):
             patched_source = dir_patch_local + "/" + f
             diff_command = "diff --unified /tmp/orig.c " + patched_source + "> {}".format(patch_file)
             execute_command(diff_command)
-            del_command = "rm " + patched_source
+            del_command = "rm -f" + patched_source
             execute_command(del_command)
             patch_id = patch_id + 1
 
-        save_command = "cp -rf " + dir_patch_local + " " + dir_results
-        save_command += "cp -rf " + dir_output + " " + dir_results
-        save_command += "cp -rf " + dir_logs + " " + dir_results
+        save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
+        save_command += "cp -rf " + dir_output + " " + dir_results  + ";"
+        save_command += "cp -rf " + dir_logs + " " + dir_results + ";"
         execute_command(save_command)
         return
 
