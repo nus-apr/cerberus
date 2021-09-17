@@ -9,13 +9,13 @@ mkdir $dir_name/prophet
 cp $script_dir/test.py $dir_name/prophet
 cp $script_dir/tester_common.py $dir_name/prophet
 cp $script_dir/build.py $dir_name/prophet
-
+mkdir patched
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/experiment/$benchmark_name/$project_name/$bug_id/prophet/prophet.revlog
 src_dir=/experiment/$benchmark_name/$project_name/$bug_id/src
 test_dir=/experiment/$benchmark_name/$project_name/$bug_id/tests
 bugged_file=test.c
-fixed_out_file=$project_name-fix-$bug_id.c
+fixed_out_file=patched/$project_name-fix-$bug_id.c
 build_cmd=$dir_name/prophet/build.py
 test_cmd=$dir_name/prophet/test.py
 localizer=profile

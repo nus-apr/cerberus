@@ -136,8 +136,8 @@ class Prophet(AbstractTool):
         return
 
     def save_artefacts(self, dir_results, dir_expr, dir_setup, bug_id, container_id):
-        regex_for_fix = "*-fix-" + str(bug_id) + "*"
-        copy_command = "mv  " + regex_for_fix + " " + dir_results
+        patched_dir = dir_expr + "/patched"
+        copy_command = "cp -rf  " + patched_dir + " " + dir_results
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         return
 
