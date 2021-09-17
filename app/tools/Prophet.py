@@ -162,7 +162,7 @@ class Prophet(AbstractTool):
 
         save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
         save_command += "cp -rf " + dir_output + "/* " + dir_results + ";"
-        save_command += "cp -rf " + dir_logs + " " + dir_results
+        save_command += "cp -rf " + dir_logs + "/* " + dir_results
         execute_command(save_command)
         return
 
