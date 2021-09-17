@@ -230,8 +230,6 @@ def run(repair_tool, benchmark, setup):
                     analyse_result(dir_info, experiment_item, repair_tool)
                     archive_results(dir_result)
                     utilities.clean_artifacts(dir_result)
-                if values.CONF_PURGE:
-                    benchmark.clean(dir_exp, container_id)
             if values.CONF_SHOW_DEV_PATCH:
                 show_dev_patch(dir_exp + "/diffs")
 
