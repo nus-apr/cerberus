@@ -141,7 +141,6 @@ class Prophet(AbstractTool):
         dir_artifact = dir_info["artifact"]
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
-        dir_logs = dir_info["log"]
         dir_patch = dir_expr + "/patches"
         copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
@@ -159,11 +158,9 @@ class Prophet(AbstractTool):
             del_command = "rm -f" + patched_source
             execute_command(del_command)
             patch_id = patch_id + 1
-
         save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
-        save_command += "cp -rf " + dir_output + "/* " + dir_results + ";"
-        save_command += "cp -rf " + dir_logs + "/* " + dir_results
         execute_command(save_command)
+        super(Prophet).save_artefacts(dir_info, experiment_info, container_id)
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):

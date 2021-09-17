@@ -78,6 +78,12 @@ class AbstractTool:
     @abc.abstractmethod
     def save_artefacts(self, dir_info, experiment_info, container_id):
         """store all artefacts from the tool"""
+        dir_results = dir_info["result"]
+        dir_output = dir_info["output"]
+        dir_logs = dir_info["log"]
+        save_command = "cp -rf " + dir_output + "/* " + dir_results + ";"
+        save_command += "cp -rf " + dir_logs + "/* " + dir_results
+        execute_command(save_command)
         return
 
     @abc.abstractmethod
