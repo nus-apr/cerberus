@@ -141,18 +141,23 @@ class Prophet(AbstractTool):
         dir_artifact = dir_info["artifact"]
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
-        dir_patch = dir_output + "/patches"
-        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
+        dir_patch = dir_expr + "/patches"
+        copy_command = "cp -rf  " + dir_expr + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         fix_file = experiment_info[definitions.KEY_FIX_FILE]
-        copy_command = "docker cp " + container_id + ":" + dir_expr + "/" + fix_file + " /tmp/orig.c"
+        copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + fix_file + " /tmp/orig.c"
         execute_command(copy_command)
         patch_id = 0
-        output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f)) and ".c" in f]
+        dir_patch_local = dir_output + "/patches"
+        output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".c" in f]
         for f in output_patch_list:
-            patch_file = dir_patch + "/" + str(patch_id) + ".patch"
-            diff_command = "diff --unified /tmp/orig.c " + dir_patch + "/" + f + "> {}".format(patch_file)
+            patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
+            patched_source = dir_patch_local + "/" + f
+            diff_command = "diff --unified /tmp/orig.c " + patched_source + "> {}".format(patch_file)
             execute_command(diff_command)
+            del_command = "rm " + patched_source
+            execute_command(del_command)
+            patch_id = patch_id + 1
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):
