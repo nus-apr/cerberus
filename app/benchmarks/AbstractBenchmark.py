@@ -81,7 +81,7 @@ class AbstractBenchmark:
             if container_id:
                 container.stop_container(container_id)
                 container.remove_container(container_id)
-            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list)
+            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list, config_id)
         return container_id
 
     def setup_experiment(self, directory_name, bug_index, config_id, container_id, test_all):
