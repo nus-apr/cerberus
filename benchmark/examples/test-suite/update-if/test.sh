@@ -6,7 +6,7 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 cd $dir_name
 TEST_ID=$1
-POS_N=3
+POS_N=4
 NEG_N=1
 
 
@@ -27,7 +27,6 @@ else
   pattern=`expr substr "$TEST_ID" 1 1`
   num=`expr substr "$TEST_ID" 2 ${#TEST_ID}`
   cd $dir_name
-  timeout 25 bash test.sh $TEST_ID
   if [[ $pattern == 'n' ]]; then
       cd $dir_name
       timeout 25 bash oracle-2 $TEST_ID
@@ -35,7 +34,7 @@ else
       cd $dir_name
       timeout 25 bash oracle-2 $TEST_ID
   else
-      cd $dir_name/src
+      cd $dir_name
       timeout 25 bash oracle-1 $TEST_ID
   fi
 

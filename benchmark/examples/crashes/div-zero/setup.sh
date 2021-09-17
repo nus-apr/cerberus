@@ -9,4 +9,4 @@ current_dir=$PWD
 mkdir -p $dir_name
 cp -rf $current_dir/src $dir_name
 cp $current_dir/oracle* $dir_name
-
+cp -rf $current_dir/tests $dir_name
