@@ -9,7 +9,7 @@ mkdir $dir_name/prophet
 cp $script_dir/test.py $dir_name/prophet
 cp $script_dir/tester_common.py $dir_name/prophet
 cp $script_dir/build.py $dir_name/prophet
-mkdir patched
+mkdir $dir_name/patched
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/experiment/$benchmark_name/$project_name/$bug_id/prophet/prophet.revlog
 src_dir=/experiment/$benchmark_name/$project_name/$bug_id/src
