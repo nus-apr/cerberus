@@ -113,7 +113,7 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
     return container_id[:12]
 
 
-def exec_command(container_id, command, workdir="/experiments"):
+def exec_command(container_id, command, workdir="/experiment"):
     client = docker.from_env()
     exit_code = -1
     output = ""
