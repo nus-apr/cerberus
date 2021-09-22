@@ -53,7 +53,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
     passing_test_list = []
-    if str(passing_id_list_str).isnumeric():
+    if str(passing_id_list_str).replace(",", "").isnumeric():
         passing_test_list = passing_id_list_str.split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
