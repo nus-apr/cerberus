@@ -42,6 +42,8 @@ def read_arg(argument_list):
                 values.CONF_BUG_INDEX = int(str(arg).replace(definitions.ARG_BUG_INDEX, ""))
             elif definitions.ARG_BUG_ID in arg:
                 values.CONF_BUG_ID = str(arg).replace(definitions.ARG_BUG_ID, "")
+            elif definitions.ARG_DUMP_PATCHES in arg:
+                values.CONF_DUMP_PATCHES = True
             elif definitions.ARG_START_INDEX in arg:
                 values.CONF_START_INDEX = int(str(arg).replace(definitions.ARG_START_INDEX, ""))
             elif definitions.ARG_END_INDEX in arg:
@@ -128,5 +130,7 @@ def update_configuration():
         values.DEFAULT_ANALYSE_ONLY = True
     if values.CONF_USE_CONTAINER:
         values.DEFAULT_USE_CONTAINER = True
+    if values.CONF_DUMP_PATCHES:
+        values.DEFAULT_DUMP_PATCHES = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
 

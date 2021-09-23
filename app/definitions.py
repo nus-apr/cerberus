@@ -61,6 +61,7 @@ ARG_RUN_TESTS_ONLY = "--run-tests-only"
 ARG_ANALYSE_ONLY = "--analyse-only"
 ARG_SHOW_DEV_PATCH = "--show-dev-patch"
 ARG_USE_CONTAINER = "--container"
+ARG_DUMP_PATCHES = "--dump"
 
 
 FILE_META_DATA = None
