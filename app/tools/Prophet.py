@@ -157,7 +157,7 @@ class Prophet(AbstractTool):
             for f in output_patch_list:
                 patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
                 patched_source = dir_patch_local + "/" + f
-                diff_command = "diff --unified /tmp/orig.c " + patched_source + "> {}".format(patch_file)
+                diff_command = "diff -U 0 /tmp/orig.c " + patched_source + "> {}".format(patch_file)
                 execute_command(diff_command)
                 del_command = "rm -f" + patched_source
                 execute_command(del_command)
