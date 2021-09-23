@@ -151,6 +151,7 @@ class Prophet(AbstractTool):
         execute_command(copy_command)
         patch_id = 0
         dir_patch_local = dir_output + "/patches"
+        container.fix_permissions(container_id, "/output")
         if os.path.isdir(dir_patch_local):
             output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".c" in f]
             for f in output_patch_list:

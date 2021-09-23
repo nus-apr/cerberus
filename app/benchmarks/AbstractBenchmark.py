@@ -82,7 +82,6 @@ class AbstractBenchmark:
                 container.stop_container(container_id)
                 container.remove_container(container_id)
             container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list, config_id)
-            container.fix_permissions(container_id, "/output")
         return container_id
 
     def setup_experiment(self, directory_name, bug_index, config_id, container_id, test_all):
