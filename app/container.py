@@ -177,3 +177,7 @@ def is_file_empty(container_id, file_path):
     exist_command = "[ -s " + file_path + " ]"
     return exec_command(container_id, exist_command)[0] == 0
 
+
+def fix_permissions(container_id, dir_path):
+    permission_command = "chmod -R g+w  {}".format(dir_path)
+    return exec_command(container_id, permission_command)
