@@ -12,12 +12,13 @@ mkdir $dir_name/prophet
 export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
 export PATH=/deps/php/bison-2.2-build/bin:$PATH
 
+mkdir $dir_name/patches
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/experiment/$benchmark_name/$project_name/$fix_id/prophet/prophet.revlog
 src_dir=/experiment/$benchmark_name/$project_name/$fix_id/src
 test_dir=/experiment/$benchmark_name/$project_name/$fix_id/tests
 bugged_file=Zend/zend_API.c
-fixed_out_file=$project_name-fix-$fix_id.c
+fixed_out_file=patches/$project_name-fix-$fix_id.c
 build_cmd=/prophet-gpl/tools/$project_name-build.py
 test_cmd=/prophet-gpl/tools/$project_name-test.py
 dep_dir=/prophet-gpl/benchmarks/$project_name-deps
