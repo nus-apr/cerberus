@@ -155,13 +155,15 @@ class Prophet(AbstractTool):
         if os.path.isdir(dir_patch_local):
             output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".c" in f]
             for f in output_patch_list:
-                patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
                 patched_source = dir_patch_local + "/" + f
+                patch_id = str(f).split("-")[-1]
+                if not str(patch_id).isnumeric():
+                    patch_id = 0
+                patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
                 diff_command = "diff -U 0 /tmp/orig.c " + patched_source + "> {}".format(patch_file)
                 execute_command(diff_command)
                 del_command = "rm -f" + patched_source
                 execute_command(del_command)
-                patch_id = patch_id + 1
             save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
             execute_command(save_command)
         super(Prophet, self).save_artefacts(dir_info, experiment_info, container_id)
