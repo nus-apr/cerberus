@@ -33,6 +33,8 @@ class Angelix(AbstractTool):
             dir_logs = dir_info["logs"]
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
+            source_file = str(experiment_info[definitions.KEY_FIX_FILE])
+            fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
@@ -40,13 +42,6 @@ class Angelix(AbstractTool):
             subject_name = experiment_info[definitions.KEY_SUBJECT]
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-            line_number = ""
-            if fix_location:
-                source_file, line_number = fix_location.split(":")
-            else:
-                with open(dir_expr + "/manifest.txt", "r") as man_file:
-                    source_file = man_file.readlines()[0].strip().replace("\n", "")
-
             src_path = dir_expr + "/src"
             gold_path = dir_expr + "/src-gold"
             angelix_dir_path = dir_expr + '/angelix'
@@ -73,8 +68,8 @@ class Angelix(AbstractTool):
                                                                 test_id_list, config_script_path, gold_path,
                                                                 build_script_path, str(syn_timeout), str(timeout))
 
-            if fix_location:
-                repair_command += " --lines {0}  ".format(line_number)
+            if fix_line_number:
+                repair_command += " --lines {0}  ".format(fix_line_number)
 
             if os.path.isfile("/tmp/ANGELIX_ARGS"):
                 with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
