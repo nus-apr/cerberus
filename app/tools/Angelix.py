@@ -83,6 +83,8 @@ class Angelix(AbstractTool):
                 os.remove("/tmp/ANGELIX_KLEE_LOAD")
             repair_command += "  --generate-all {0} " \
                                " --timeout {1}".format(additional_tool_param, str(timeout_s))
+            if container_id:
+                repair_command = "/bin/bash -c \"source /angelix/activate;" + repair_command + "\""
             status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
