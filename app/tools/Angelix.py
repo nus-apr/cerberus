@@ -71,6 +71,9 @@ class Angelix(AbstractTool):
             if fix_line_number:
                 repair_command += " --lines {0}  ".format(fix_line_number)
 
+            if values.DEFAULT_DUMP_PATCHES:
+                repair_command += " --dump-patches "
+
             if os.path.isfile("/tmp/ANGELIX_ARGS"):
                 with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
                     arg_line = arg_file.readline()
