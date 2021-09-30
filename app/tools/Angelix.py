@@ -64,6 +64,7 @@ class Angelix(AbstractTool):
                               "--configure {4}  " \
                               "--golden {5}  " \
                               "--build {6} " \
+                              "--output patches " \
                               "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
                                                                 test_id_list, config_script_path, gold_path,
                                                                 build_script_path, str(syn_timeout), str(timeout))
@@ -106,7 +107,9 @@ class Angelix(AbstractTool):
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
         source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-        copy_command = "mv {}/src-2021-* {}/patches".format(dir_expr, dir_artifact)
+        execute_command("rm /tmp/find_dir")
+        dir_patch = dir_expr + "/patches"
+        copy_command = "cp -rf {} {}".format(dir_patch, dir_artifact)
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + source_file + " /tmp/orig_angelix.c"
         execute_command(copy_command)
