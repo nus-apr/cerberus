@@ -3,7 +3,7 @@ import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter
+from app import definitions, values, emitter, container
 from os import listdir
 from os.path import isfile, join
 
@@ -101,8 +101,39 @@ class Angelix(AbstractTool):
     def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["result"]
-        copy_command = "mv src-2021-* " + dir_results + "/patches"
+        dir_expr = dir_info["experiment"]
+        dir_artifact = dir_info["artifact"]
+        dir_results = dir_info["result"]
+        dir_output = dir_info["output"]
+        source_file = str(experiment_info[definitions.KEY_FIX_FILE])
+        copy_command = "mv {}/src-2021-* {}/patches".format(dir_expr, dir_artifact)
+        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+        copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + source_file + " /tmp/orig_angelix.c"
         execute_command(copy_command)
+
+        dir_patch_local = dir_output + "/patches"
+        container.fix_permissions(container_id, "/output")
+        if os.path.isdir(dir_patch_local):
+            output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".patch" in f]
+            for f in output_patch_list:
+                context_patch = dir_patch_local + "/" + f
+                patched_source = "/tmp/applied"
+                patch_command = "patch /tmp/orig_angelix.c {} -o {}".format(context_patch, patched_source)
+                execute_command(patch_command)
+                patch_id = str(f).split(".")[0]
+                patch_file = dir_patch_local + "/" + str(patch_id) + "_angelix.patch"
+                diff_command = "diff -U 0 /tmp/orig.c " + patched_source + "> {}".format(patch_file)
+                execute_command(diff_command)
+                del_command = "rm -f {} {}".format(patched_source, context_patch)
+                execute_command(del_command)
+            save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
+            execute_command(save_command)
+
+
+        output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+        for f in output_patch_list:
+            patch_abs_path = join(dir_patch, f)
+
         super(Angelix, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
