@@ -53,6 +53,9 @@ class AbstractTool:
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         """any pre-processing required for the repair"""
         self.check_tool_exists()
+        clean_command = "rm -rf /output /logs"
+        if container_id:
+            self.run_command(clean_command, "/dev/null", "/", container_id)
         return
 
     def check_tool_exists(self):
