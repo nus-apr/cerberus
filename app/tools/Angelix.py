@@ -69,7 +69,7 @@ class Angelix(AbstractTool):
                                                                 test_id_list, config_script_path, gold_path,
                                                                 build_script_path, str(syn_timeout), str(timeout))
 
-            if fix_line_number:
+            if fix_location:
                 repair_command += " --lines {0}  ".format(fix_line_number)
 
             if values.DEFAULT_DUMP_PATCHES:
