@@ -164,7 +164,7 @@ class Prophet(AbstractTool):
                 execute_command(diff_command)
                 del_command = "rm -f" + patched_source
                 execute_command(del_command)
-            save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
+            save_command = "cp -rf " + dir_patch_local + " " + dir_results
             execute_command(save_command)
         super(Prophet, self).save_artefacts(dir_info, experiment_info, container_id)
         return
