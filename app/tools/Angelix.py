@@ -129,11 +129,6 @@ class Angelix(AbstractTool):
             save_command = "cp -rf " + dir_patch_local + " " + dir_results + ";"
             execute_command(save_command)
 
-
-        output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
-        for f in output_patch_list:
-            patch_abs_path = join(dir_patch, f)
-
         super(Angelix, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
