@@ -4,6 +4,8 @@ import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
+from os import listdir
+from os.path import isfile, join
 
 
 class F1X(AbstractTool):
@@ -109,6 +111,10 @@ class F1X(AbstractTool):
             log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
+        dir_patch = dir_results + "/patches"
+        if dir_patch and os.path.isdir(dir_patch):
+            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+            count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
