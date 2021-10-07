@@ -33,10 +33,7 @@ class VulnLoc(AbstractBenchmark):
     def config(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tconfiguring experiment subject")
         self.log_config_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-config.log"
-        if tool_name == "f1x":
-            command_str = "bash CC=f1x-cc CXX=f1x-cxx config.sh"
-        else:
-            command_str = "bash config.sh"
+        command_str = "bash config.sh"
         status = self.run_command(command_str, self.log_config_path, setup_dir_path, container_id)
         return status == 0
 
