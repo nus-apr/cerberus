@@ -34,7 +34,7 @@ class Angelix(AbstractTool):
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-            fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
+            fix_line_number = str(experiment_info[definitions.KEY_FIX_LINES])
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]

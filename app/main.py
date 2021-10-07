@@ -40,7 +40,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     dir_log = dir_info["log"]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-    fix_line_number = str(experiment_info[definitions.KEY_FIX_LINE])
+    fix_line_numbers = experiment_info[definitions.KEY_FIX_LINES]
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
@@ -48,7 +48,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     binary_path = experiment_info[definitions.KEY_BINARY_PATH]
     fix_location = None
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
-        fix_location = fix_source_file + ":" + fix_line_number
+        fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
