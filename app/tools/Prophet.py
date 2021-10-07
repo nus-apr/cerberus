@@ -127,7 +127,7 @@ class Prophet(AbstractTool):
             repair_command += " -full-synthesis -full-explore "
             repair_command += " -r {0}".format(dir_expr + "/workdir")
             repair_command += " -cond-ext -replace-ext -skip-verify "
-            repair_command += " --output {}".format(dir_patch)
+            repair_command += " -o {}".format(dir_patch)
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " -dump-all "
             repair_command += " -timeout {0} ".format(int(timeout))
