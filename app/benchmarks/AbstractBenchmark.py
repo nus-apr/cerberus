@@ -84,12 +84,12 @@ class AbstractBenchmark:
             container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list, config_id)
         return container_id
 
-    def setup_experiment(self, directory_name, bug_index, config_id, container_id, test_all):
+    def setup_experiment(self, directory_name, bug_index, config_id, container_id, test_all, tool_name):
         emitter.normal("\t\t[benchmark] preparing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         if self.deploy(directory_name, bug_id, config_id, container_id):
-            if self.config(directory_name, bug_id, config_id, container_id):
+            if self.config(directory_name, bug_id, config_id, container_id, tool_name):
                 if self.build(directory_name, bug_id, config_id, container_id):
                     if test_all:
                         if self.test_all(directory_name, experiment_item, config_id, container_id):
@@ -119,7 +119,7 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id, config_id, container_id):
+    def config(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
         """Method documentation"""
         return
 

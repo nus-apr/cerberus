@@ -20,7 +20,7 @@ class Examples(AbstractBenchmark):
                             tool_name + "-" + subject_name + "-" + bug_id
         container_id = self.setup_container(tool_name, bug_index, config_id, use_container)
         exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-        self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all)
+        self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id):
@@ -30,7 +30,7 @@ class Examples(AbstractBenchmark):
         status = self.run_command(command_str, self.log_deploy_path, setup_dir_path, container_id)
         return status == 0
 
-    def config(self, setup_dir_path, bug_id, config_id, container_id):
+    def config(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         return True
 
     def build(self, setup_dir_path, bug_id, config_id, container_id):
