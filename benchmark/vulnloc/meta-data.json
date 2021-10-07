@@ -2,7 +2,7 @@
  {
    "id": 1,
    "subject": "binutils",
-   "bug_id": "cve_2017_14745",
+   "bug_id": "CVE-2017-14745",
    "source_file": "bfd/elf64-x86-64.c",
    "line_numbers": 6720,
    "failing_test": "1",
@@ -15,7 +15,7 @@
  {
    "id": 2,
    "subject": "binutils",
-   "bug_id": "cve_2017_15020",
+   "bug_id": "CVE-2017-15020",
    "source_file": "bfd/dwarf1.c",
    "line_numbers": 0,
    "failing_test": "1",
@@ -28,7 +28,7 @@
   {
    "id": 3,
    "subject": "binutils",
-   "bug_id": "cve_2017_15025",
+   "bug_id": "CVE-2017-15025",
    "source_file": "bfd/dwarf2.c",
    "line_numbers": 2440,
    "failing_test": "1",
@@ -41,7 +41,7 @@
   {
    "id": 4,
    "subject": "binutils",
-   "bug_id": "cve_2017_6965",
+   "bug_id": "CVE-2017-6965",
    "source_file": "binutils/readelf.c",
    "line_numbers": 11640,
    "failing_test": "1",
@@ -54,7 +54,7 @@
   {
    "id": 5,
    "subject": "coreutils",
-   "bug_id": "gnubug_19784",
+   "bug_id": "gnubug-19784",
    "source_file": "src/make-prime-list.c",
    "line_numbers": 214,
    "failing_test": "1",
@@ -67,7 +67,7 @@
     {
    "id": 6,
    "subject": "coreutils",
-   "bug_id": "gnubug_25003",
+   "bug_id": "gnubug-25003",
    "source_file": "src/split.c",
    "line_numbers": 985,
    "failing_test": "1",
@@ -80,7 +80,7 @@
   {
    "id": 7,
    "subject": "coreutils",
-   "bug_id": "gnubug_25023",
+   "bug_id": "gnubug-25023",
    "source_file": "src/pr.c",
    "line_numbers": 1236,
    "failing_test": "1",
@@ -93,7 +93,7 @@
   {
    "id": 8,
    "subject": "coreutils",
-   "bug_id": "gnubug_26545",
+   "bug_id": "gnubug-26545",
    "source_file": "src/shred.c",
    "line_numbers": 290,
    "failing_test": "1",
@@ -106,7 +106,7 @@
   {
    "id": 9,
    "subject": "ffmpeg",
-   "bug_id": "bugchrom_1404",
+   "bug_id": "bugchrom-1404",
    "source_file": "libavcodec/cavsdec.c",
    "line_numbers": 1034,
    "failing_test": "1",
@@ -119,7 +119,7 @@
   {
    "id": 10,
    "subject": "ffmpeg",
-   "bug_id": "cve_2017_9992",
+   "bug_id": "CVE-2017-9992",
    "source_file": "libavcodec/dfa.c",
    "line_numbers": 178,
    "failing_test": "1",
@@ -132,7 +132,7 @@
   {
    "id": 11,
    "subject": "jasper",
-   "bug_id": "cve_2016_8691",
+   "bug_id": "CVE-2016-8691",
    "source_file": "src/libjasper/jpc/jpc_cs.c",
    "line_numbers": 515,
    "failing_test": "1",
@@ -145,7 +145,7 @@
   {
    "id": 12,
    "subject": "jasper",
-   "bug_id": "cve_2016_9557",
+   "bug_id": "CVE-2016-9557",
    "source_file": "src/libjasper/base/jas_image.c",
    "line_numbers": 180,
    "failing_test": "1",
@@ -158,7 +158,7 @@
   {
    "id": 13,
    "subject": "libarchive",
-   "bug_id": "cve_2016_5844",
+   "bug_id": "CVE-2016-5844",
    "source_file": "libarchive/archive_read_support_format_iso9660.c",
    "line_numbers": 1094,
    "failing_test": "1",
@@ -171,7 +171,7 @@
   {
    "id": 14,
    "subject": "libjpeg",
-   "bug_id": "cve_2012_2806",
+   "bug_id": "CVE-2012-2806",
    "source_file": "jdmarker.c",
    "line_numbers": [326,333],
    "failing_test": "1",
@@ -184,7 +184,7 @@
   {
    "id": 15,
    "subject": "libjpeg",
-   "bug_id": "cve_2017_15232",
+   "bug_id": "CVE-2017-15232",
    "source_file": "jquant1.c",
    "line_numbers": 534,
    "failing_test": "1",
@@ -197,7 +197,7 @@
   {
    "id": 16,
    "subject": "libjpeg",
-   "bug_id": "cve_2018_14498",
+   "bug_id": "CVE-2018-14498",
    "source_file": "rdbmp.c",
    "line_numbers": 217,
    "failing_test": "1",
@@ -210,7 +210,7 @@
  {
    "id": 17,
    "subject": "libjpeg",
-   "bug_id": "cve_2018_19664",
+   "bug_id": "CVE-2018-19664",
    "source_file": "wrbmp.c",
    "line_numbers": 505,
    "failing_test": "1",
@@ -223,7 +223,7 @@
   {
    "id": 18,
    "subject": "libming",
-   "bug_id": "cve_2016_9264",
+   "bug_id": "CVE-2016-9264",
    "source_file": "util/listmp3.c",
    "line_numbers": 107,
    "failing_test": "1",
@@ -236,7 +236,7 @@
    {
    "id": 19,
    "subject": "libming",
-   "bug_id": "cve_2018_8806",
+   "bug_id": "CVE-2018-8806",
    "source_file": "util/listmp3.c",
    "line_numbers": 107,
    "failing_test": "1",
@@ -249,7 +249,7 @@
    {
    "id": 20,
    "subject": "libming",
-   "bug_id": "cve_2018_8964",
+   "bug_id": "CVE-2018-8964",
    "source_file": "util/listmp3.c",
    "line_numbers": 107,
    "failing_test": "1",
@@ -262,7 +262,7 @@
   {
    "id": 21,
    "subject": "libtiff",
-   "bug_id": "bugzilla_2611",
+   "bug_id": "bugzilla-2611",
    "source_file": "libtiff/tif_ojpeg.c",
    "line_numbers": 792,
    "failing_test": "1",
@@ -275,7 +275,7 @@
   {
    "id": 22,
    "subject": "libtiff",
-   "bug_id": "bugzilla_2633",
+   "bug_id": "bugzilla-2633",
    "source_file": "tools/tiff2ps.c",
    "line_numbers": [2443,2700],
    "failing_test": "1",
@@ -288,7 +288,7 @@
    {
    "id": 23,
    "subject": "libtiff",
-   "bug_id": "cve_2016_10092",
+   "bug_id": "CVE-2016-10092",
    "source_file": "tools/tiffcrop.c",
    "line_numbers": 3701,
    "failing_test": "1",
@@ -301,7 +301,7 @@
    {
    "id": 24,
    "subject": "libtiff",
-   "bug_id": "cve_2016_10094",
+   "bug_id": "CVE-2016-10094",
    "source_file": "tools/tiff2pdf.c",
    "line_numbers": 2898,
    "failing_test": "1",
@@ -314,7 +314,7 @@
   {
    "id": 25,
    "subject": "libtiff",
-   "bug_id": "cve_2016_10272",
+   "bug_id": "CVE-2016-10272",
    "source_file": "tools/tiffcrop.c",
    "line_numbers": 3701,
    "failing_test": "1",
@@ -327,7 +327,7 @@
   {
    "id": 26,
    "subject": "libtiff",
-   "bug_id": "cve_2016_3186",
+   "bug_id": "CVE-2016-3186",
    "source_file": "tools/gif2tiff.c",
    "line_numbers": 352,
    "failing_test": "1",
@@ -340,7 +340,7 @@
   {
    "id": 27,
    "subject": "libtiff",
-   "bug_id": "cve_2016_5314",
+   "bug_id": "CVE-2016-5314",
    "source_file": "libtiff/tif_pixarlog.c",
    "line_numbers": 785,
    "failing_test": "1",
@@ -353,7 +353,7 @@
   {
    "id": 28,
    "subject": "libtiff",
-   "bug_id": "cve_2016_5321",
+   "bug_id": "CVE-2016-5321",
    "source_file": "tools/tiffcrop.c",
    "line_numbers": 3741,
    "failing_test": "1",
@@ -366,7 +366,7 @@
   {
    "id": 29,
    "subject": "libtiff",
-   "bug_id": "cve_2016_9273",
+   "bug_id": "CVE-2016-9273",
    "source_file": "libtiff/tif_strip.c",
    "line_numbers": 65,
    "failing_test": "1",
@@ -379,7 +379,7 @@
   {
    "id": 30,
    "subject": "libtiff",
-   "bug_id": "cve_2016_9532",
+   "bug_id": "CVE-2016-9532",
    "source_file": "tools/tiffcrop.c",
    "line_numbers": 1167,
    "failing_test": "1",
@@ -392,7 +392,7 @@
   {
    "id": 31,
    "subject": "libtiff",
-   "bug_id": "cve_2017_5225",
+   "bug_id": "CVE-2017-5225",
    "source_file": "tools/tiffcp.c",
    "line_numbers": 1069,
    "failing_test": "1",
@@ -405,7 +405,7 @@
   {
    "id": 32,
    "subject": "libtiff",
-   "bug_id": "cve_2017_7595",
+   "bug_id": "CVE-2017-7595",
    "source_file": "libtiff/tif_jpeg.c",
    "line_numbers": 1628,
    "failing_test": "1",
@@ -418,7 +418,7 @@
     {
    "id": 33,
    "subject": "libtiff",
-   "bug_id": "cve_2017_7599",
+   "bug_id": "CVE-2017-7599",
    "source_file": "libtiff/tif_jpeg.c",
    "line_numbers": 1634,
    "failing_test": "1",
@@ -431,7 +431,7 @@
     {
    "id": 34,
    "subject": "libtiff",
-   "bug_id": "cve_2017_7600",
+   "bug_id": "CVE-2017-7600",
    "source_file": "libtiff/tif_jpeg.c",
    "line_numbers": 1634,
    "failing_test": "1",
@@ -444,7 +444,7 @@
     {
    "id": 35,
    "subject": "libtiff",
-   "bug_id": "cve_2017_7601",
+   "bug_id": "CVE-2017-7601",
    "source_file": "libtiff/tif_jpeg.c",
    "line_numbers": 1634,
    "failing_test": "1",
@@ -457,7 +457,7 @@
   {
    "id": 36,
    "subject": "libxml2",
-   "bug_id": "cve_2012_5134",
+   "bug_id": "CVE-2012-5134",
    "source_file": "parser.c",
    "line_numbers": 4079,
    "failing_test": "1",
@@ -470,7 +470,7 @@
   {
    "id": 37,
    "subject": "libxml2",
-   "bug_id": "cve_2016_1838",
+   "bug_id": "CVE-2016-1838",
    "source_file": "parser.c",
    "line_numbers": 9837,
    "failing_test": "1",
@@ -483,7 +483,7 @@
   {
    "id": 38,
    "subject": "libxml2",
-   "bug_id": "cve_2016_1839",
+   "bug_id": "CVE-2016-1839",
    "source_file": "HTMLparser.c",
    "line_numbers": 2516,
    "failing_test": "1",
@@ -496,7 +496,7 @@
   {
    "id": 39,
    "subject": "libxml2",
-   "bug_id": "cve_2017_5969",
+   "bug_id": "CVE-2017-5969",
    "source_file": "valid.c",
    "line_numbers": 1197,
    "failing_test": "1",
@@ -509,7 +509,7 @@
   {
    "id": 40,
    "subject": "potrace",
-   "bug_id": "cve_2013_7437",
+   "bug_id": "CVE-2013-7437",
    "source_file": "valid.c",
    "line_numbers": 1197,
    "failing_test": "1",
@@ -522,7 +522,7 @@
   {
    "id": 41,
    "subject": "zziplib",
-   "bug_id": "cve_2017_5974",
+   "bug_id": "CVE-2017-5974",
    "source_file": "zzip/memdisk.c",
    "line_numbers": 198,
    "failing_test": "1",
@@ -535,7 +535,7 @@
   {
    "id": 42,
    "subject": "zziplib",
-   "bug_id": "cve_2017_5975",
+   "bug_id": "CVE-2017-5975",
    "source_file": "zzip/memdisk.c",
    "line_numbers": 175,
    "failing_test": "1",
@@ -548,7 +548,7 @@
   {
    "id": 43,
    "subject": "zziplib",
-   "bug_id": "cve_2017_5976",
+   "bug_id": "CVE-2017-5976",
    "source_file": "zzip/memdisk.c",
    "line_numbers": 208,
    "failing_test": "1",
