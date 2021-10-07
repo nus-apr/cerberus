@@ -11,7 +11,7 @@ mkdir dev-patch
 
 project_url=https://github.com/coreutils/coreutils.git
 fix_commit_id=4954f79
-bug_commit_id=8d34b455f80678125b0fb6edcde2dab66986cc5d
+bug_commit_id=68c5eec
 
 cd $dir_name
 git clone $project_url src
