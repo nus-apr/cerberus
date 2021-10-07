@@ -3,7 +3,7 @@ import sys
 import json
 from app import definitions, values, emitter, utilities
 from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit
-from app.benchmarks import ManyBugs, Examples
+from app.benchmarks import ManyBugs, Examples, VulnLoc
 
 
 def read_arg(argument_list):
@@ -115,6 +115,8 @@ def load_benchmark(benchmark_name):
         return ManyBugs.ManyBugs()
     elif benchmark_name == "examples":
         return Examples.Examples()
+    elif benchmark_name == "vulnloc":
+        return VulnLoc.VulnLoc()
     else:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
 

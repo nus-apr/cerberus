@@ -5,12 +5,12 @@ from app.utilities import execute_command
 from app import definitions, values, emitter
 
 
-class ManyBugs(AbstractBenchmark):
+class VulnLoc(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/")
         self.setup_dir_path = self.bench_dir_path
-        super(ManyBugs, self).__init__()
+        super(VulnLoc, self).__init__()
 
     def setup(self, tool_name, bug_index, config_id, test_all, use_container):
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -61,4 +61,4 @@ class ManyBugs(AbstractBenchmark):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = [] # path should be relative to experiment directory
-        super(ManyBugs, self).save_artefacts(dir_exp, dir_artifact, container_id)
+        super(VulnLoc, self).save_artefacts(dir_exp, dir_artifact, container_id)
