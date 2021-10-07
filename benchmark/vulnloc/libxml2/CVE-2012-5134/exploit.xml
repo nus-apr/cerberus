@@ -1,0 +1,2 @@
+<!DOCTYPE e [<!ATTLIST e a ID #REQUIRED>]>
+<e a="&#32; "/>
