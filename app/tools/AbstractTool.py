@@ -3,7 +3,7 @@ import os
 import shutil
 from app.utilities import execute_command, error_exit
 from app import emitter, values, container, utilities
-
+from datetime import datetime
 
 class AbstractTool:
     log_instrument_path = None
@@ -13,6 +13,14 @@ class AbstractTool:
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
+
+    def time_duration(self, start_time_str, end_time_str):
+        # Fri 08 Oct 2021 04:59:55 PM +08
+        fmt = '%a %d %b %Y %H:%M:%S %p %z'
+        tstart = datetime.strptime(start_time_str, fmt)
+        tend = datetime.strptime(end_time_str, fmt)
+        duration = (tstart - tend).total_seconds()/60
+        return int(duration)
 
     def run_command(self, command_str, log_file_path, exp_dir_path, container_id):
         if container_id:
@@ -94,13 +102,14 @@ class AbstractTool:
         """analyse tool output and collect information"""
         return
 
-    def print_analysis(self, size_space, n_enumerated, n_plausible, n_noncompile):
+    def print_analysis(self, size_space, n_enumerated, n_plausible, n_noncompile, time_duration):
         n_implausible = n_enumerated - n_plausible - n_noncompile
         emitter.highlight("\t\t\t search space size: {0}".format(size_space))
         emitter.highlight("\t\t\t count enumerations: {0}".format(n_enumerated))
         emitter.highlight("\t\t\t count plausible patches: {0}".format(n_plausible))
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
+        emitter.highlight("\t\t\t time duration: {0} min".format(time_duration))
 
     def clean_up(self, exp_dir, container_id):
         if container_id:

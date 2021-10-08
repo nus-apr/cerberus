@@ -97,8 +97,12 @@ class F1X(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
+        time_duration = 0
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
+            time_start = log_lines[0].replace("\n", "")
+            time_end = log_lines[-1].replace("\n", "")
+            time_duration = self.time_duration(time_start, time_end)
             for line in log_lines:
                 if "candidates evaluated: " in line:
                     count_enumerations = int(line.split("candidates evaluated: ")[-1])
@@ -122,4 +126,5 @@ class F1X(AbstractTool):
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            log_file.write("\t\t time duration: {0} mins\n".format(time_duration))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration

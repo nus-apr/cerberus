@@ -162,6 +162,7 @@ class Angelix(AbstractTool):
         is_error = False
         is_timeout = True
         reported_fail_list = set()
+        time_duration = 0
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -232,7 +233,7 @@ class Angelix(AbstractTool):
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable. time_duration
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
