@@ -16,7 +16,7 @@ class AbstractTool:
 
     def time_duration(self, start_time_str, end_time_str):
         # Fri 08 Oct 2021 04:59:55 PM +08
-        fmt = '%a %d %b %Y %H:%M:%S %p %z'
+        fmt = '%a %d %b %Y %H:%M:%S %p'
         start_time_str = start_time_str.split(" +")[0].strip()
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt)
