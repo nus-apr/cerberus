@@ -83,6 +83,7 @@ def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     exp_id = conf_id + "-" + bug_id
     values.ANALYSIS_RESULTS[exp_id] = [size_space, n_enumerated, n_plausible, n_noncompile, time_duration]
     tool.print_analysis(size_space, n_enumerated, n_plausible, n_noncompile, time_duration)
+    tool.log_output_path = None
     logger.analysis(exp_id)
 
 
