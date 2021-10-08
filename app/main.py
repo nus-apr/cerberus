@@ -205,7 +205,7 @@ def run(repair_tool, benchmark, setup):
                 emitter.warning("\t\t[warning] there is no instrumentation for " + repair_tool.name)
                 # continue
 
-            if values.CONF_ANALYSE_ONLY:
+            if values.DEFAULT_ANALYSE_ONLY:
                 if not os.path.isdir(dir_result):
                     archive_name = "-".join([config_id, benchmark.name,
                                              repair_tool.name,
