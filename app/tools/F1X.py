@@ -86,6 +86,7 @@ class F1X(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        time_duration = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -94,10 +95,10 @@ class F1X(AbstractTool):
                     break
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
-        time_duration = 0
+
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_start = log_lines[0].replace("\n", "")
