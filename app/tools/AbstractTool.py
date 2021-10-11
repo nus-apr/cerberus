@@ -31,9 +31,9 @@ class AbstractTool:
             if "/dev/null" not in log_file_path:
                 with open(log_file_path, 'a') as log_file:
                     if stdout:
-                        log_file.writelines(stdout.decode("utf-8"))
+                        log_file.writelines(stdout.decode("iso-8859-1"))
                     if stderr:
-                        log_file.writelines(stderr.decode("utf-8"))
+                        log_file.writelines(stderr.decode("iso-8859-1"))
         else:
             command_str = "cd " + exp_dir_path + ";" + command_str
             command_str += " > {0} 2>&1".format(log_file_path)
