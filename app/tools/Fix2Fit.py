@@ -189,6 +189,7 @@ class Fix2Fit(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         count_filtered = 0
+        time_duration = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -197,7 +198,7 @@ class Fix2Fit(AbstractTool):
                     break
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
@@ -205,6 +206,9 @@ class Fix2Fit(AbstractTool):
         if os.path.isfile(dir_results + "/original.txt"):
             with open(dir_results + "/original.txt", 'r', encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
+                time_start = log_lines[0].replace("\n", "")
+                time_end = log_lines[-1].replace("\n", "")
+                time_duration = self.time_duration(time_start, time_end)
                 for line in log_lines:
                     if "no patch found" in line:
                         emitter.warning("\t\t\t\t[warning] no patch found by F1X")
@@ -265,7 +269,8 @@ class Fix2Fit(AbstractTool):
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            log_file.write("\t\t time duration: {0} mins\n".format(time_duration))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
 
     def pre_process(self, dir_logs, dir_expr, dir_setup):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))

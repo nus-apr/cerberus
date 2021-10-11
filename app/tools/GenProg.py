@@ -72,6 +72,7 @@ class GenProg(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        time_duration = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -80,12 +81,15 @@ class GenProg(AbstractTool):
                     break
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_interrupted = True
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
+            time_start = log_lines[0].replace("\n", "")
+            time_end = log_lines[-1].replace("\n", "")
+            time_duration = self.time_duration(time_start, time_end)
             for line in log_lines:
                 if "variant " in line:
                     count_enumerations = int(line.split("/")[0].split(" ")[-1])
@@ -116,5 +120,6 @@ class GenProg(AbstractTool):
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            log_file.write("\t\t time duration: {0} mins\n".format(time_duration))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
 

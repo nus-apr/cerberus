@@ -81,15 +81,19 @@ class CPR(AbstractTool):
         count_plausible = 0
         size_search_space = 0
         count_enumerations = 0
+        time_duration = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
+                time_start = log_lines[0].replace("\n", "")
+                time_end = log_lines[-1].replace("\n", "")
+                time_duration = self.time_duration(time_start, time_end)
                 for line in log_lines:
                     if "|P|=" in line:
                         count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", "").split(":")[0])
@@ -114,7 +118,8 @@ class CPR(AbstractTool):
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable
+            log_file.write("\t\t time duration: {0} mins\n".format(time_duration))
+        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
 
     def pre_process(self, dir_logs, dir_expr, dir_setup):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
