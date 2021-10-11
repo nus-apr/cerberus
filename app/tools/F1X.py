@@ -107,6 +107,8 @@ class F1X(AbstractTool):
             for line in log_lines:
                 if "candidates evaluated: " in line:
                     count_enumerations = int(line.split("candidates evaluated: ")[-1])
+                if "explored count: " in line:
+                    count_enumerations = int(line.split("explored count: ")[-1])
                 elif "search space size: " in line:
                     size_search_space = int(line.split("search space size: ")[-1])
                 elif "plausible patches: " in line:
