@@ -21,8 +21,8 @@ class AbstractTool:
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt)
         tend = datetime.strptime(end_time_str, fmt)
-        duration = (tend - tstart).total_seconds()/60
-        return int(duration)
+        duration = format((tend - tstart).total_seconds()/60, '.3f')
+        return duration
 
     def run_command(self, command_str, log_file_path, exp_dir_path, container_id):
         if container_id:
