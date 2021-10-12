@@ -207,7 +207,7 @@ def run(repair_tool, benchmark, setup):
                 # continue
 
             if values.DEFAULT_ANALYSE_ONLY:
-                if not os.path.isdir(dir_result):
+                if not os.path.isdir(dir_result) or len(os.listdir(dir_result)) == 0:
                     archive_name = "-".join([config_id, benchmark.name,
                                              repair_tool.name,
                                              subject_name, bug_name]) + ".tar.gz"
