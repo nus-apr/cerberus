@@ -47,13 +47,3 @@ The driver is a frontend to run all experiments with different tools
 python3 driver.py --bug-id=ID --tool-name=[cpr/angelix/prophet/genprog/fix2fit] --benchmark=[manybugs]
 ```
 
-## TODO
-
-### Gao Xiang
-* update Dockerfile.fix2fit to create a self-contained container for Fix2Fit/Prophet and experiments
-* implement the interface in driver.py for Fix2Fit/Prophet (see reference for CPR)
-
-
-### Ridwan
-* update Dockerfiles to create a self-contained container for Angelix/CPR/GenProg and experiments
-* implement the interface in driver.py for Angelix/GenProg/CPR (see reference for CPR)
