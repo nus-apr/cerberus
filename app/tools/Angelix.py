@@ -58,7 +58,7 @@ class Angelix(AbstractTool):
                 for test_id in filtered_list:
                     test_id_list += test_id + " "
 
-            timestamp_command = "echo $(date) > " + self.log_output_path
+            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
             repair_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
                               "--configure {4}  " \
@@ -95,7 +95,7 @@ class Angelix(AbstractTool):
             else:
                 emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = "echo $(date) >> " + self.log_output_path
+            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
         return
 

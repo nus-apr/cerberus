@@ -34,7 +34,7 @@ class GenProg(AbstractTool):
         with open(repair_conf_path, "a") as conf_file:
             conf_file.write(repair_config_str)
 
-        timestamp_command = "echo $(date) > " + self.log_output_path
+        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
         execute_command(timestamp_command)
         repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
         repair_command += "genprog --label-repair --continue "
@@ -45,7 +45,7 @@ class GenProg(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = "echo $(date) >> " + self.log_output_path
+        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
         execute_command(timestamp_command)
         return
 
