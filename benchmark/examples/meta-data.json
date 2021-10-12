@@ -17,7 +17,7 @@
    "subject": "test-suite",
    "bug_id": "insert-if",
    "source_file": "test.c",
-   "line_numbers": [6]
+   "line_numbers": [6],
    "failing_test": "3",
    "passing_test": "1,2,4,5",
    "count_neg": 1,
