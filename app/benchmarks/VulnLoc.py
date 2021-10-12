@@ -47,7 +47,7 @@ class VulnLoc(AbstractBenchmark):
     def test(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
         self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
-        command_str = "bash test.sh"
+        command_str = "bash test.sh 1"
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status != 0
 
