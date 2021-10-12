@@ -61,7 +61,8 @@ RUN apt-get update && apt-get install -y  \
     tk-dev \
     mercurial \
     tcl-dev \
-    tix-dev
+    tix-dev \
+    unzip
 
 #RUN cd /prophet-gpl/benchmarks/lighttpd-deps/ && make -j32
 RUN cd /prophet-gpl/benchmarks/libtiff-deps/ && make -j32
