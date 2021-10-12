@@ -125,10 +125,13 @@ class F1X(AbstractTool):
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            if values.DEFAULT_DUMP_PATCHES:
+                log_file.write("\t\t count enumerations: {0}\n".format(count_plausible))
+            else:
+                log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time duration: {0} mins\n".format(time_duration))
         return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
