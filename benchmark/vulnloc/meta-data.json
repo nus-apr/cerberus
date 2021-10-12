@@ -529,7 +529,7 @@
    "passing_test": "",
    "count_neg": 1,
    "count_pos": 0,
-   "binary_path": "bins/unzzipcat-mem",
+   "binary_path": "linux/bins/unzzipcat-mem",
    "crash_input": "$POC"
  },
   {
@@ -542,7 +542,7 @@
    "passing_test": "",
    "count_neg": 1,
    "count_pos": 0,
-   "binary_path": "bins/unzzipcat-mem",
+   "binary_path": "linux/bins/unzzipcat-mem",
    "crash_input": "$POC"
  },
   {
@@ -555,7 +555,7 @@
    "passing_test": "",
    "count_neg": 1,
    "count_pos": 0,
-   "binary_path": "bins/unzzipcat-mem",
+   "binary_path": "linux/bins/unzzipcat-mem",
    "crash_input": "$POC"
  }
 ]
