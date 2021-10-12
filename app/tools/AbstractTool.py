@@ -21,7 +21,7 @@ class AbstractTool:
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt)
         tend = datetime.strptime(end_time_str, fmt)
-        duration = format((tend - tstart).total_seconds()/60, '.3f')
+        duration = (tend - tstart).total_seconds()
         return duration
 
     def run_command(self, command_str, log_file_path, exp_dir_path, container_id):
@@ -111,7 +111,7 @@ class AbstractTool:
         emitter.highlight("\t\t\t count plausible patches: {0}".format(n_plausible))
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
-        emitter.highlight("\t\t\t time duration: {0} min".format(time_duration))
+        emitter.highlight("\t\t\t time duration: {0} seconds".format(time_duration))
 
     def clean_up(self, exp_dir, container_id):
         if container_id:

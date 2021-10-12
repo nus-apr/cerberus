@@ -122,7 +122,7 @@ def analysis(exp_id):
         log_file.write("\t\t count plausible patches: {0}\n".format(n_plausible))
         log_file.write("\t\t count non-compiling patches: {0}\n".format(n_noncompile))
         log_file.write("\t\t count implausible patches: {0}\n".format(n_implausible))
-        log_file.write("\t\t time duration: {0} min\n".format(time_duration))
+        log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
 
 
 
