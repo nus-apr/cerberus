@@ -26,11 +26,14 @@ def create_directories():
         os.makedirs(definitions.DIRECTORY_LOG_BASE)
 
 
-def archive_results(dir_results):
+def archive_results(dir_results, dir_archive):
     if not os.path.isdir(dir_results):
         os.makedirs(dir_results)
     experiment_id = dir_results.split("/")[-1]
+    if os.path.isdir(dir_archive):
+        os.makedirs(dir_archive)
     archive_command = "cd " + dirname(abspath(dir_results)) + "; tar cvzf " + experiment_id + ".tar.gz " + experiment_id
+    archive_command += "; mv {} {}".format(experiment_id + ".tar.gz", dir_archive)
     utilities.execute_command(archive_command)
 
 
@@ -229,7 +232,8 @@ def run(repair_tool, benchmark, setup):
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_artifacts(dir_info, experiment_item, repair_tool, container_id)
                     analyse_result(dir_info, experiment_item, repair_tool)
-                    archive_results(dir_result)
+                    dir_archive = dir_result + "/" + repair_tool.name
+                    archive_results(dir_result, dir_archive)
                     utilities.clean_artifacts(dir_result)
             if values.CONF_SHOW_DEV_PATCH:
                 show_dev_patch(dir_exp + "/diffs")
