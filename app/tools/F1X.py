@@ -27,6 +27,7 @@ class F1X(AbstractTool):
             passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
             failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
             test_driver_path = dir_setup + "/test.sh"
             build_script_path = dir_setup + "/build.sh"
@@ -55,6 +56,8 @@ class F1X(AbstractTool):
             dry_command = repair_command + " --disable-dteq"
             self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
             all_command = repair_command + "--enable-assignment --disable-dteq  -a -o patches -v "
+            if additional_tool_param:
+                all_command = all_command + " " + additional_tool_param
             status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
             # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
             # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
