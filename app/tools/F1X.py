@@ -106,11 +106,11 @@ class F1X(AbstractTool):
             time_duration = self.time_duration(time_start, time_end)
             for line in log_lines:
                 if "candidates evaluated: " in line:
-                    count = line.split("candidates evaluated: ")[-1]
+                    count = line.split("candidates evaluated: ")[-1].strip().replace("\n", "")
                     if str(count).isnumeric():
                         count_enumerations = int(count)
                 if "explored count: " in line:
-                    count = line.split("explored count: ")[-1]
+                    count = line.split("explored count: ")[-1].strip().replace("\n", "")
                     if str(count).isnumeric():
                         count_enumerations = int(count)
                 elif "search space size: " in line:
