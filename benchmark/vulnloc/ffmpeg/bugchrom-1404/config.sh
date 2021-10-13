@@ -6,8 +6,9 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
+CC=clang
+CXX=clang++
 cflags="-g -D__NO_STRING_INLINES  -D_FORTIFY_SOURCE=0 -U__OPTIMIZE__ -Wno-everything"
-
 
 CFLAGS="$cflags"
 CXXFLAGS="$cflags"
