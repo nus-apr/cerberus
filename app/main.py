@@ -232,7 +232,7 @@ def run(repair_tool, benchmark, setup):
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_artifacts(dir_info, experiment_item, repair_tool, container_id)
                     analyse_result(dir_info, experiment_item, repair_tool)
-                    dir_archive = dir_result + "/" + repair_tool.name
+                    dir_archive = definitions.DIR_RESULT + "/" + repair_tool.name
                     archive_results(dir_result, dir_archive)
                     utilities.clean_artifacts(dir_result)
             if values.CONF_SHOW_DEV_PATCH:
