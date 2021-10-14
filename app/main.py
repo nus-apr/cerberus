@@ -30,7 +30,7 @@ def archive_results(dir_results, dir_archive):
     if not os.path.isdir(dir_results):
         os.makedirs(dir_results)
     experiment_id = dir_results.split("/")[-1]
-    if os.path.isdir(dir_archive):
+    if not os.path.isdir(dir_archive):
         os.makedirs(dir_archive)
     archive_command = "cd " + dirname(abspath(dir_results)) + "; tar cvzf " + experiment_id + ".tar.gz " + experiment_id
     archive_command += "; mv {} {}".format(experiment_id + ".tar.gz", dir_archive)
