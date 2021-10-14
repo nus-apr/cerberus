@@ -80,12 +80,12 @@ class Prophet(AbstractTool):
             copy_command = "cp " + tmp_config_file + " " + revlog_file
         execute_command(copy_command)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "bash instrument.sh {}".format(dir_expr)
+        command_str = "FIX_FILE={} bash instrument.sh {}".format(source_file, dir_expr)
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         script_path = dir_setup_exp + "/instrument.sh"
         if not container.is_file(container_id, script_path):

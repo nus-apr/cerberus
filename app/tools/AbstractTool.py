@@ -40,12 +40,12 @@ class AbstractTool:
             exit_code = execute_command(command_str)
         return exit_code
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "bash instrument.sh"
+        command_str = "FIX_FILE={} bash instrument.sh".format(source_file)
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
         if status not in [0, 126]:
@@ -57,7 +57,9 @@ class AbstractTool:
         emitter.normal("\t\t[repair-tool] repairing experiment subject")
         utilities.check_space()
         self.pre_process(dir_info['logs'], dir_info['expr'], dir_info['setup'], container_id)
-        self.instrument(dir_info['logs'], dir_info['expr'], dir_info['setup'], experiment_info['bug_id'], container_id)
+        self.instrument(dir_info['logs'], dir_info['expr'],
+                        dir_info['setup'], experiment_info['bug_id'],
+                        container_id, experiment_info['source_file'])
         return
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):

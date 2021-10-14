@@ -4,7 +4,7 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
-fix_file=$1
+
 
 mkdir $dir_name/prophet
 mkdir $dir_name/patches
@@ -13,7 +13,7 @@ mkdir $dir_name/patches
 cat <<EOF > $dir_name/prophet/prophet.conf
 revision_file=/experiment/$benchmark_name/$project_name/$bug_id/prophet/prophet.revlog
 src_dir=/experiment/$benchmark_name/$project_name/$bug_id/src
-bugged_file=$fix_file
+bugged_file=$FIX_FILE
 fixed_out_file=patches/$project_name-fix-$bug_id.c
 build_cmd=/setup/$benchmark_name/$project_name/$bug_id/prophet/build.py
 test_cmd=/setup/$benchmark_name/$project_name/$bug_id/prophet/test.py
