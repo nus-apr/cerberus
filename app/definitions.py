@@ -7,6 +7,7 @@ DIRECTORY_OUTPUT_BASE = DIR_MAIN + "/output"
 DIR_RESULT = DIR_MAIN + "/results"
 DIR_EXPERIMENT = DIR_MAIN + "/experiments"
 DIR_LOGS = DIRECTORY_OUTPUT_BASE + "/logs"
+DIR_SCRIPTS = DIR_MAIN + "/scripts"
 DIR_ARTIFACTS = DIRECTORY_OUTPUT_BASE + "/artifacts"
 
 

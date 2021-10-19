@@ -2,7 +2,7 @@ import abc
 import os
 import shutil
 from app.utilities import execute_command, error_exit
-from app import emitter, values, container, utilities
+from app import emitter, values, container, utilities, definitions
 from datetime import datetime
 
 class AbstractTool:
@@ -68,6 +68,9 @@ class AbstractTool:
         clean_command = "rm -rf /output /logs"
         if container_id:
             self.run_command(clean_command, "/dev/null", "/", container_id)
+        script_path = definitions.DIR_SCRIPTS + "/{}-dump-patches.py".format(self.name)
+        cp_script_command = "docker cp {}:{} {}".format(container_id, dir_expr, script_path)
+        execute_command(cp_script_command)
         return
 
     def check_tool_exists(self):

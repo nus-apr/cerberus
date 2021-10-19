@@ -52,7 +52,7 @@ class F1X(AbstractTool):
             repair_command += " --driver={0} ".format(test_driver_path)
             repair_command += " -b {0} ".format(build_script_path)
             if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " --dump-patches "
+                repair_command += " --output-space patch-space "
             dry_command = repair_command + " --disable-dteq"
             self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
             all_command = repair_command + "--enable-assignment --disable-dteq  -a -o patches -v "
@@ -69,7 +69,15 @@ class F1X(AbstractTool):
 
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
+            if values.DEFAULT_DUMP_PATCHES:
+                self.create_patches_from_space(dir_info['result'], fix_file, container_id)
         return
+
+    def create_patches_from_space(self, dir_exp, source_file, container_id):
+        script_name = "/{}-dump-patches.py".format(self.name)
+        abs_path_buggy_file = dir_exp + "/src/" + source_file
+        dump_command = "python3 {} {} {}".format(script_name, abs_path_buggy_file, dir_exp)
+        self.run_command(dump_command, self.log_output_path, dir_exp, container_id)
 
     def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
