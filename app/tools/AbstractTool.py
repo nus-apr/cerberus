@@ -91,6 +91,7 @@ class AbstractTool:
         """any post-processing required for the repair"""
         if values.CONF_PURGE:
             self.clean_up(dir_expr, container_id)
+        container.stop_container(container_id)
         return
 
     @abc.abstractmethod
