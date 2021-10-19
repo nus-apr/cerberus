@@ -67,14 +67,14 @@ class F1X(AbstractTool):
                 emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
+            if values.DEFAULT_DUMP_PATCHES:
+                self.create_patches_from_space(dir_expr, fix_file, container_id)
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
-            if values.DEFAULT_DUMP_PATCHES:
-                self.create_patches_from_space(dir_info['result'], fix_file, container_id)
         return
 
     def create_patches_from_space(self, dir_exp, source_file, container_id):
-        script_name = "/{}-dump-patches.py".format(self.name)
+        script_name = "{}/{}-dump-patches.py".format(dir_exp, self.name)
         abs_path_buggy_file = dir_exp + "/src/" + source_file
         dump_command = "python3 {} {} {}".format(script_name, abs_path_buggy_file, dir_exp)
         self.run_command(dump_command, self.log_output_path, dir_exp, container_id)
