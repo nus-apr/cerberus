@@ -87,8 +87,10 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     utilities.execute_command(copy_command)
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
     oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
+    test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name, subject_name, bug_id)
     valkyrie_oracle_path = dir_output + "/oracle"
     copy_command = "cp {} {}".format(oracle_path, valkyrie_oracle_path)
+    copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
     utilities.execute_command(copy_command)
     patch_dir = dir_output + "/patches"
     if values.CONF_USE_VALKYRIE:
