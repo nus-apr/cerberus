@@ -16,6 +16,6 @@ fi
 case "$1" in
     1)
         POC="-n7/75 7"
-        timeout 25 $BINARY_PATH $POC
+        timeout 10 $BINARY_PATH $POC
 esac
 

@@ -16,6 +16,6 @@ fi
 case "$1" in
     1)
         POC=$script_dir/exploit.txt
-        timeout 25 $BINARY_PATH -n4 -s7 $POC
+        timeout 10 $BINARY_PATH -n4 -s7 $POC
 esac
 

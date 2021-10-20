@@ -16,7 +16,7 @@ fi
 case "$1" in
     1)
         POC=$script_dir/tests/1.mpg
-        timeout 25 $BINARY_PATH $POC;;
+        timeout 10 $BINARY_PATH $POC;;
 
 esac
 
