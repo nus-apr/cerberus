@@ -117,8 +117,8 @@ class Prophet(AbstractTool):
             instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
             self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
             dir_patch = "/output/patches"
-            # mkdir_command = "mkdir " + dir_patch
-            # self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
+            mkdir_command = "mkdir " + dir_patch
+            self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
             self.generate_localization(experiment_info, localization_file, dir_setup, container_id)
