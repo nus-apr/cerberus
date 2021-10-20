@@ -37,10 +37,10 @@ def archive_results(dir_results, dir_archive):
     utilities.execute_command(archive_command)
 
 
-def refine(binary_path, oracle_path, test_id_list, patch_dir):
+def refine(binary_path, oracle_path, test_id_list, patch_dir, fix_file):
     test_id_str = ",".join(test_id_list)
-    validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={}"\
-        .format(binary_path, oracle_path, test_id_str, patch_dir)
+    validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={}"\
+        .format(binary_path, oracle_path, test_id_str, patch_dir, fix_file)
     validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
     utilities.execute_command(validate_command)
     # kill_all_command = "ps -aux | grep valkyrie | awk '{print $2}' | xargs kill -9"
@@ -92,7 +92,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     utilities.execute_command(copy_command)
     patch_dir = dir_output + "/patches"
     if values.CONF_USE_VALKYRIE:
-        refine(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir)
+        refine(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir, fix_source_file)
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
