@@ -138,5 +138,6 @@ def update_configuration():
         values.DEFAULT_DUMP_PATCHES = True
     if values.CONF_USE_VALKYRIE:
         values.DEFAULT_USE_VALKYRIE = True
+        values.DEFAULT_DUMP_PATCHES = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
 
