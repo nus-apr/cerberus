@@ -1,6 +1,7 @@
 import sys
 import json
 import subprocess
+import threading
 import os
 import re
 import traceback
@@ -37,14 +38,25 @@ def archive_results(dir_results, dir_archive):
     utilities.execute_command(archive_command)
 
 
-def refine(binary_path, oracle_path, test_id_list, patch_dir, fix_file):
-    test_id_str = ",".join(test_id_list)
-    validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} "\
-        .format(binary_path, oracle_path, test_id_str, patch_dir, fix_file)
-    validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
-    utilities.execute_command(validate_command)
-    # kill_all_command = "ps -aux | grep valkyrie | awk '{print $2}' | xargs kill -9"
-    # utilities.execute_command(kill_all_command)
+def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir):
+    list_dir = os.path.listdir(patch_dir)
+    while list_dir != values.LIST_PROCESSED and values.APR_TOOL_RUNNING:
+        list_dir = os.path.listdir(patch_dir)
+        if not list_dir:
+            time.sleep(10)
+            continue
+        list_selected = list(list_dir - values.LIST_PROCESSED)[:100]
+        values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
+        os.system("rm -rf {}/*".format(process_dir))
+        for patch in list_selected:
+            os.system("cp {} {}".format(patch_dir + "/" + patch, process_dir))
+        test_id_str = ",".join(test_id_list)
+        validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} "\
+            .format(binary_path, oracle_path, test_id_str, process_dir, fix_file)
+        validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
+        utilities.execute_command(validate_command)
+        kill_all_command = "ps -aux | grep Valkyrie.py | awk '{print $2}' | xargs kill -9"
+        utilities.execute_command(kill_all_command)
 
 
 def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
@@ -85,7 +97,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     else:
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
     utilities.execute_command(copy_command)
-    tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
+
     oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
     test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name, subject_name, bug_id)
     valkyrie_oracle_path = dir_output + "/oracle"
@@ -93,8 +105,16 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
     utilities.execute_command(copy_command)
     patch_dir = dir_output + "/patches"
+    dir_process = dir_output + "/patches-processing"
+    utilities.execute_command("mkdir {}".format(dir_process))
     if values.CONF_USE_VALKYRIE:
-        refine(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir, fix_source_file)
+        values.APR_TOOL_RUNNING = True
+        t1 = threading.Thread(target=validate, args=(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir, fix_source_file, dir_process))
+        t1.start()
+    tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
+    values.APR_TOOL_RUNNING = False
+    if values.CONF_USE_VALKYRIE:
+        t1.join()
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
