@@ -105,6 +105,8 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
     utilities.execute_command(copy_command)
     patch_dir = dir_output + "/patches"
+    if not os.path.isdir(patch_dir):
+        os.makedirs(patch_dir)
     dir_process = dir_output + "/patches-processing"
     utilities.execute_command("mkdir {}".format(dir_process))
     if values.CONF_USE_VALKYRIE:
