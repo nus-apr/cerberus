@@ -39,7 +39,7 @@ def archive_results(dir_results, dir_archive):
 
 def refine(binary_path, oracle_path, test_id_list, patch_dir, fix_file):
     test_id_str = ",".join(test_id_list)
-    validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={}"\
+    validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} "\
         .format(binary_path, oracle_path, test_id_str, patch_dir, fix_file)
     validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
     utilities.execute_command(validate_command)
