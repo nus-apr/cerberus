@@ -115,6 +115,8 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     values.APR_TOOL_RUNNING = False
     if values.CONF_USE_VALKYRIE:
         t1.join()
+        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+        utilities.execute_command(timestamp_command)
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
