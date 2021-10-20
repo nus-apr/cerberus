@@ -37,7 +37,17 @@ def archive_results(dir_results, dir_archive):
     utilities.execute_command(archive_command)
 
 
-def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id):
+def refine(binary_path, oracle_path, test_id_list, patch_dir):
+    test_id_str = ",".join(test_id_list)
+    validate_command = "valkyrie --binary={} --test-oracle={} --test-ide-list={} --patch-dir={}"\
+        .format(binary_path, oracle_path, test_id_str, patch_dir)
+    validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
+    utilities.execute_command(validate_command)
+    kill_all_command = "ps -aux | grep valkyrie | awk '{print $2}' | xargs kill -9"
+    utilities.execute_command(kill_all_command)
+
+
+def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
     dir_expr = dir_info["experiment"]
     dir_setup = dir_info["setup"]
     dir_log = dir_info["log"]
@@ -67,7 +77,22 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         "setup": dir_setup,
         "expr": dir_expr
     }
+    dir_output = dir_info["output"]
+    valkyrie_binary_path = dir_output + "/binary"
+    binary_path = dir_expr + "/src/" + binary_path
+    if container_id:
+        copy_command = "docker cp {}:{} {}".format(container_id, binary_path, valkyrie_binary_path)
+    else:
+        copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
+    utilities.execute_command(copy_command)
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
+    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
+    valkyrie_oracle_path = dir_output + "/oracle"
+    copy_command = "cp {} {}".format(oracle_path, valkyrie_oracle_path)
+    utilities.execute_command(copy_command)
+    patch_dir = dir_output + "/patches"
+    if values.CONF_USE_VALKYRIE:
+        refine(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir)
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
@@ -228,7 +253,7 @@ def run(repair_tool, benchmark, setup):
                 benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
-                repair(dir_info, experiment_item, repair_tool, config_info, container_id)
+                repair(dir_info, experiment_item, repair_tool, config_info, container_id, benchmark.name)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_artifacts(dir_info, experiment_item, repair_tool, container_id)
                     analyse_result(dir_info, experiment_item, repair_tool)

@@ -236,7 +236,6 @@ class Prophet(AbstractTool):
             if values.DEFAULT_DUMP_PATCHES:
                 count_enumerations = count_plausible
             else:
-
                 log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
                 log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
                 log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
