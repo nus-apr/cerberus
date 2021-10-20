@@ -39,13 +39,13 @@ def archive_results(dir_results, dir_archive):
 
 
 def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir):
-    list_dir = os.path.listdir(patch_dir)
+    list_dir = os.listdir(patch_dir)
     while list_dir != values.LIST_PROCESSED and values.APR_TOOL_RUNNING:
-        list_dir = os.path.listdir(patch_dir)
+        list_dir = os.listdir(patch_dir)
         if not list_dir:
             time.sleep(10)
             continue
-        list_selected = list(list_dir - values.LIST_PROCESSED)[:100]
+        list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:100]
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
         os.system("rm -rf {}/*".format(process_dir))
         for patch in list_selected:
