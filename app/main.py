@@ -43,8 +43,8 @@ def refine(binary_path, oracle_path, test_id_list, patch_dir):
         .format(binary_path, oracle_path, test_id_str, patch_dir)
     validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
     utilities.execute_command(validate_command)
-    kill_all_command = "ps -aux | grep valkyrie | awk '{print $2}' | xargs kill -9"
-    utilities.execute_command(kill_all_command)
+    # kill_all_command = "ps -aux | grep valkyrie | awk '{print $2}' | xargs kill -9"
+    # utilities.execute_command(kill_all_command)
 
 
 def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
