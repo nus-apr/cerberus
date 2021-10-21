@@ -107,13 +107,13 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     patch_dir = dir_output + "/patches"
     dir_process = dir_output + "/patches-processing"
     utilities.execute_command("mkdir {}".format(dir_process))
-    if values.CONF_USE_VALKYRIE:
+    if values.DEFAULT_USE_VALKYRIE:
         values.APR_TOOL_RUNNING = True
         t1 = threading.Thread(target=validate, args=(valkyrie_binary_path, valkyrie_oracle_path, failing_test_list, patch_dir, fix_source_file, dir_process))
         t1.start()
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
     values.APR_TOOL_RUNNING = False
-    if values.CONF_USE_VALKYRIE:
+    if values.DEFAULT_USE_VALKYRIE:
         t1.join()
 
 
