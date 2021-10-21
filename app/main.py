@@ -40,12 +40,22 @@ def archive_results(dir_results, dir_archive):
 
 def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir):
     list_dir = os.listdir(patch_dir)
-    while list_dir != values.LIST_PROCESSED or values.APR_TOOL_RUNNING:
+    len_gen = len(list_dir)
+    len_processed = len(values.LIST_PROCESSED)
+    rem_len = len_gen
+    while len_gen != len_processed or values.APR_TOOL_RUNNING:
         list_dir = os.listdir(patch_dir)
+        len_gen = len(list_dir)
+        len_processed = len(values.LIST_PROCESSED)
         if not list_dir:
             time.sleep(10)
             continue
         list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:500]
+        len_sel = len(list_selected)
+        if len_sel < 500 and rem_len != len_gen:
+            rem_len = len_gen
+            time.sleep(10)
+            continue
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
         os.system("rm -rf {}/*".format(process_dir))
         for patch in list_selected:
@@ -57,6 +67,7 @@ def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, proces
         utilities.execute_command(validate_command)
         kill_all_command = "ps -aux | grep Valkyrie.py | awk '{print $2}' | xargs kill -9"
         utilities.execute_command(kill_all_command)
+        rem_len = len_gen
 
 
 def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
