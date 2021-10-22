@@ -6,5 +6,5 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 
 cd $dir_name/src
-
+make clean
 make CFLAGS="-fsanitize=address -static -ggdb" CXXFLAGS="-fsanitize=address -static -ggdb" LDFLAGS="-fsanitize=address" -j32
