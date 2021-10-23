@@ -419,7 +419,7 @@
    "id": 33,
    "subject": "libtiff",
    "bug_id": "CVE-2017-7599",
-   "source_file": "libtiff/tif_jpeg.c",
+   "source_file": "libtiff/tif_dirwrite.c",
    "line_numbers": [1634],
    "failing_test": "1",
    "passing_test": "",
