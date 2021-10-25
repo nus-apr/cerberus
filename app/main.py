@@ -110,7 +110,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     else:
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
     utilities.execute_command(copy_command)
-
+    values.LIST_PROCESSED = []
     oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
     test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name, subject_name, bug_id)
     valkyrie_oracle_path = dir_output + "/oracle"
