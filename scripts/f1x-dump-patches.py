@@ -48,7 +48,7 @@ def generate_patch(p_str, src_file, id, dir_exp, orig_file):
     os.system(cmd)
     #os.system("sed 's/F1X_EXPRESSION_PLACEHOLDER/{}/g' {} > {}".format(p_str, src_file, fix_file))
     # print(cmd)
-    patch_file = "{}/patches/{}_f1x.patch".format(dir_exp, id)
+    patch_file = "/output/patches/{}_f1x.patch".format(id)
     os.system("diff -U 0 {} {} > {}".format(orig_file, fix_file, patch_file))
     #os.system("cp {} {}".format(fix_file, src_file))
 
