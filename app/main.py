@@ -52,6 +52,7 @@ def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, proces
             continue
         list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:consume_limit]
         len_sel = len(list_selected)
+        emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
         if len_sel < consume_limit and rem_len != len_gen:
             rem_len = len_gen
             time.sleep(10)
