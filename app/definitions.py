@@ -73,4 +73,4 @@ FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
 
 
-APR_CONSUME_LIMIT = {"prophet": 500, "f1x": 5000}
+APR_CONSUME_LIMIT = {"prophet": 1000, "f1x": 5000}
