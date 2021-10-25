@@ -52,11 +52,12 @@ def generate_patch(p_str, src_file, id, dir_exp, orig_file):
     os.system("diff -U 0 {} {} > {}".format(orig_file, fix_file, patch_file))
     #os.system("cp {} {}".format(fix_file, src_file))
 
+
 def generate_patches(source_file, dir_exp):
     global pool, result_list
     result_list = []
     loc_list = []
-    dir_patch = dir_exp + "/patches"
+    dir_patch = "/output/patches"
     if not os.path.isdir(dir_patch):
         os.makedirs(dir_patch)
     file_space = dir_exp + "/patch-space"
