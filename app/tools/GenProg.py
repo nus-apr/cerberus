@@ -3,8 +3,10 @@ import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter
+from app import definitions, values, emitter, container
 import mmap
+from os import listdir
+from os.path import isfile, join
 
 
 class GenProg(AbstractTool):
@@ -56,8 +58,12 @@ class GenProg(AbstractTool):
                 with open(repair_conf_path, "a") as conf_file:
                     conf_file.write(repair_config_str)
 
+            save_command = "mkdir {}; cp {} {}".format(dir_expr + "/orig", dir_expr + "/src/" + fix_file,
+                                                       dir_expr + "/orig")
+            self.run_command(save_command,self.log_output_path, dir_expr + "/src", container_id)
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
+
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
             repair_command += "genprog --label-repair --continue "
             repair_command += " repair.conf".format(self.log_output_path)
@@ -76,8 +82,9 @@ class GenProg(AbstractTool):
         dir_expr = dir_info["experiment"]
         dir_results = dir_info["result"]
         dir_patch = dir_expr + "/src/repair"
+        dir_output = dir_info["output"]
         dir_artifact = dir_info["artifact"]
-        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact + "/patches"
+        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
 
         dir_preprocessed = dir_expr + "/src/preprocessed"
@@ -88,6 +95,29 @@ class GenProg(AbstractTool):
         copy_command = "cp -rf  " + dir_coverage + " " + dir_artifact + "/coverage"
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         super(GenProg, self).save_artefacts(dir_info, experiment_info, container_id)
+
+        fix_file = experiment_info[definitions.KEY_FIX_FILE]
+        copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + fix_file + " /tmp/orig.c"
+        execute_command(copy_command)
+        patch_id = 0
+        dir_repair_local = dir_output + "/repair/" + "".join(fix_file.split("/")[:-1])
+        dir_patch_local = dir_output + "/patches"
+        container.fix_permissions(container_id, "/output")
+        if os.path.isdir(dir_repair_local):
+            output_patch_list = [f for f in listdir(dir_repair_local) if isfile(join(dir_repair_local, f)) and ".c" in f]
+            for f in output_patch_list:
+                patched_source = dir_repair_local + "/" + f
+                patch_id = str(f).split("-")[-1]
+                if not str(patch_id).isnumeric():
+                    patch_id = 0
+                patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
+                diff_command = "diff -U 0 /tmp/orig.c " + patched_source + "> {}".format(patch_file)
+                execute_command(diff_command)
+                del_command = "rm -f" + patched_source
+                execute_command(del_command)
+            save_command = "cp -rf " + dir_patch_local + " " + dir_results
+            execute_command(save_command)
+
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
