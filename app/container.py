@@ -96,6 +96,9 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
     container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
+        for local_dir_path in volume_list:
+            if not os.path.isdir(local_dir_path):
+                os.makedirs(local_dir_path)
         container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list,
                                              tty=True).id
     except docker.errors.ContainerError as ex:
