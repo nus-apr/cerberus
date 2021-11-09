@@ -58,10 +58,10 @@ class GenProg(AbstractTool):
 
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
-            repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
+            repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
             repair_command += "genprog --label-repair --continue "
             repair_command += " repair.conf".format(self.log_output_path)
-            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+            status = self.run_command(repair_command, self.log_output_path, dir_expr + "/src", container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
             else:
@@ -75,14 +75,18 @@ class GenProg(AbstractTool):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_expr = dir_info["experiment"]
         dir_results = dir_info["result"]
-        dir_patches = dir_expr + "/src/repair"
-        if os.path.isdir(dir_patches):
-            shutil.copytree(dir_patches, dir_results + "/patches")
+        dir_patch = dir_expr + "/src/repair"
+        dir_artifact = dir_info["artifact"]
+        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact + "/patches"
+        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+
         dir_preprocessed = dir_expr + "/src/preprocessed"
-        if os.path.isdir(dir_preprocessed):
-            shutil.copytree(dir_preprocessed, dir_results + "/preprocessed")
-        if os.path.isfile(dir_expr + "/src/coverage/coverage.path"):
-            shutil.copy(dir_expr + "/src/coverage/coverage.path", dir_results + "/coverage.path")
+        copy_command = "cp -rf  " + dir_preprocessed + " " + dir_artifact + "/preprocessed"
+        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+
+        dir_coverage = dir_expr + "/src/coverage"
+        copy_command = "cp -rf  " + dir_coverage + " " + dir_artifact + "/coverage"
+        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         super(GenProg, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
