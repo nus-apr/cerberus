@@ -24,9 +24,27 @@
     "passing_test_ratio": 0.5
   },
   "C5": {
-    "id": "C4",
-    "timeout": "12",
+    "id": "C5",
+    "timeout": "2",
     "fault_location": "auto",
     "passing_test_ratio": 1
+  },
+  "C6": {
+    "id": "C6",
+    "timeout": "2",
+    "fault_location": "dev",
+    "passing_test_ratio": 1
+  },
+  "C7": {
+    "id": "C7",
+    "timeout": "2",
+    "fault_location": "dev",
+    "passing_test_ratio": 0
+  },
+  "C8": {
+    "id": "C8",
+    "timeout": "2",
+    "fault_location": "dev",
+    "passing_test_ratio": 0.5
   }
 }
