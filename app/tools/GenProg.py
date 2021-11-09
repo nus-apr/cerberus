@@ -61,7 +61,7 @@ class GenProg(AbstractTool):
             repair_command = "cd {0}; timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
             repair_command += "genprog --label-repair --continue "
             repair_command += " repair.conf >> {0} 2>&1 ".format(self.log_output_path)
-            status = execute_command(repair_command)
+            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
             else:
