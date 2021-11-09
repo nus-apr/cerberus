@@ -41,9 +41,20 @@ class GenProg(AbstractTool):
                 repair_config_str += "--fault-scheme line\n" \
                                      "--fault-file fault-loc\n"
 
-            repair_conf_path = dir_expr + "/src/repair.conf"
-            with open(repair_conf_path, "a") as conf_file:
-                conf_file.write(repair_config_str)
+            if container_id:
+                tmp_repair_file = "/tmp/repair.conf"
+                repair_conf_path = dir_expr + "/src/repair.conf"
+                load_command = "docker cp " + container_id + ":" + repair_conf_path + " " + tmp_repair_file
+                execute_command(load_command)
+                with open(tmp_repair_file, "a") as conf_file:
+                    conf_file.write(repair_config_str)
+                save_command = "docker cp " + tmp_repair_file + " " + container_id + ":" + repair_conf_path
+                execute_command(save_command)
+
+            else:
+                repair_conf_path = dir_expr + "/src/repair.conf"
+                with open(repair_conf_path, "a") as conf_file:
+                    conf_file.write(repair_config_str)
 
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
