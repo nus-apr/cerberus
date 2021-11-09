@@ -137,9 +137,9 @@ class Angelix(AbstractTool):
 
     def post_process(self, dir_expr, dir_results, container_id):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(Angelix, self).post_process(dir_expr, dir_results, container_id)
         clean_command = "rm -rf /tmp/* {}/.angelix/".format(dir_expr)
         self.run_command(clean_command, "/dev/null", dir_expr, container_id)
+        super(Angelix, self).post_process(dir_expr, dir_results, container_id)
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
