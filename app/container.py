@@ -160,10 +160,10 @@ def stop_container(container_id):
         container.stop(timeout=20)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
-        emitter.warning("[warning] Unable to remove container: docker daemon error")
+        emitter.warning("[warning] Unable to stop container: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("[warning] Unable to remove container: unhandled exception")
+        emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
 def is_file(container_id, file_path):
