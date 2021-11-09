@@ -45,7 +45,7 @@ class AbstractTool:
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "FIX_FILE={} bash instrument.sh".format(source_file)
+        command_str = "bash instrument.sh".format(source_file)
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
         if status not in [0, 126]:
