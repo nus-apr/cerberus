@@ -73,12 +73,15 @@ class AbstractBenchmark:
                                tool_name + "-" + subject_name + "-" + bug_id
             dir_aux_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/.aux"
             dir_aux_container = "/experiments/benchmark/" + self.name + "/" + subject_name + "/.aux"
+            dir_base_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/base"
+            dir_base_container = "/experiments/benchmark/" + self.name + "/" + subject_name + "/base"
             volume_list = {
                 # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
                 self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
                 dir_output_local: {'bind': '/output', 'mode': 'rw'},
                 dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'},
-                dir_aux_local: {'bind': dir_aux_container, 'mode': 'rw'}
+                dir_aux_local: {'bind': dir_aux_container, 'mode': 'rw'},
+                dir_base_local: {'bind': dir_base_container, 'mode': 'rw'}
             }
             container_id = container.get_container(tool_name, self.name, subject_name, bug_id, config_id)
             if container_id:
