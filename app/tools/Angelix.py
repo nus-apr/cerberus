@@ -34,7 +34,7 @@ class Angelix(AbstractTool):
             dir_expr = dir_info["expr"]
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-            fix_line_number = str(experiment_info[definitions.KEY_FIX_LINES])
+            fix_line_number_list = experiment_info[definitions.KEY_FIX_LINES]
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
@@ -70,7 +70,7 @@ class Angelix(AbstractTool):
                                                                 build_script_path, str(syn_timeout), str(timeout))
 
             if fix_location:
-                repair_command += " --lines {0}  ".format(fix_line_number)
+                repair_command += " --lines {0}  ".format(",".join(fix_line_number_list))
 
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " --dump-patches "
