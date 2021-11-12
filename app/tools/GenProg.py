@@ -38,8 +38,12 @@ class GenProg(AbstractTool):
                                                                                 n_size=count_neg, dir_exp=dir_expr)
             if fix_location:
                 source_file, line_number = fix_location.split(":")
-                with open(dir_expr + "/src/fault-loc", "w") as loc_file:
+                tmp_file = "/tmp/genprog-fault-loc"
+                target_path = dir_expr + "/src/fault-loc"
+                with open(tmp_file, "w") as loc_file:
                     loc_file.write(str(line_number))
+                copy_command = "docker cp {} {}:{}".format(tmp_file,container_id, target_path)
+                execute_command(copy_command)
                 repair_config_str += "--fault-scheme line\n" \
                                      "--fault-file fault-loc\n"
 
