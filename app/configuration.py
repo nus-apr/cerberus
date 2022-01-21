@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from app import definitions, values, emitter, utilities
-from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit
+from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit, SenX
 from app.benchmarks import ManyBugs, Examples, VulnLoc
 
 
@@ -107,6 +107,8 @@ def load_tool(tool_name):
         return F1X.F1X()
     elif tool_name == "genprog":
         return GenProg.GenProg()
+    elif tool_name == "senx":
+        return SenX.SenX()
     else:
         utilities.error_exit("Unknown tool name", tool_name)
 
