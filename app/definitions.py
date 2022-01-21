@@ -64,6 +64,7 @@ ARG_SHOW_DEV_PATCH = "--show-dev-patch"
 ARG_USE_CONTAINER = "--container"
 ARG_DUMP_PATCHES = "--dump"
 ARG_VALKYRIE = "--valkyrie"
+ARG_USE_LOCAL = "--local"
 
 
 FILE_META_DATA = None
