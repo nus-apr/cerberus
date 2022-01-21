@@ -63,7 +63,7 @@ class SenX(AbstractTool):
                 binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
-            senx_command = "timeout -k 5m {0}h senx {1} ".format(str(timeout_h),abs_binary_path)
+            senx_command = "timeout -k 5m {0}h senx {1}.bc ".format(str(timeout_h),abs_binary_path)
             senx_command += binary_input_arg
             senx_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
             status = execute_command(senx_command)
