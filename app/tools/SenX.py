@@ -16,11 +16,18 @@ class SenX(AbstractTool):
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "bash instrument.sh {}".format(dir_expr)
-        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-        status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
-        if not status == 0:
-            error_exit("error with instrumentation of ", self.name)
+        instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
+        instrumentation_exist = False
+        if container_id:
+            instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
+        else:
+            instrumentation_exist = os.path.isfile(instrumentation_script_path)
+        if instrumentation_exist:
+            command_str = "bash instrument.sh {}".format(dir_expr)
+            dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
+            status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+            if not status == 0:
+                error_exit("error with instrumentation of ", self.name)
         return
 
     def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
@@ -92,7 +99,7 @@ class SenX(AbstractTool):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
         super(SenX, self).post_process(dir_expr, dir_results, container_id)
         clean_command = "rm -rf " + dir_results + "/patches/klee-out-*"
-        execute_command(clean_command)
+        self.run_command(clean_command, "/dev/null", dir_expr, container_id)
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
@@ -154,6 +161,4 @@ class SenX(AbstractTool):
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
         super(SenX, self).pre_process(dir_logs, dir_expr, dir_setup, container_id)
-        if not os.path.isdir("/tmp"):
-            os.mkdir("/tmp")
-        return
+
