@@ -17,7 +17,7 @@ class SenX(AbstractTool):
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
-        instrumentation_exist = False
+
         if container_id:
             instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
         else:
