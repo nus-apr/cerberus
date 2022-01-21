@@ -18,6 +18,7 @@ class AbstractBenchmark:
     size = 0
     list_artifact_dirs = []
     list_artifact_files = []
+    base_dir_experiment = "/experiment/"
 
     def __init__(self):
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
