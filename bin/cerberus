@@ -1,3 +1,8 @@
 #!/bin/bash
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-pypy3 "$(dirname $SCRIPT_DIR)/Cerberus.py" "$@"
+check_pypy3=$(pypy3 --help)
+if [ $? -ne 0]; then
+  python3.6 "$(dirname $SCRIPT_DIR)/Cerberus.py" "$@"
+else
+  pypy3 "$(dirname $SCRIPT_DIR)/Cerberus.py" "$@"
+fi
