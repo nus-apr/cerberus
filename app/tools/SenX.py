@@ -46,7 +46,7 @@ class SenX(AbstractTool):
             relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
             abs_binary_path = dir_expr + "/src/" + relative_binary_path
 
-            test_dir = dir_expr + "/tests"
+            test_dir = dir_setup + "/tests"
             test_file_list = []
             if container_id:
                 emitter.error("[Exception] unimplemented functionality: SenX docker support not implemented")
