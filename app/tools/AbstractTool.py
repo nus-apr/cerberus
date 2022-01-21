@@ -65,12 +65,12 @@ class AbstractTool:
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         """any pre-processing required for the repair"""
         self.check_tool_exists()
-        clean_command = "rm -rf /output/patch* /logs"
         if container_id:
+            clean_command = "rm -rf /output/patch* /logs"
             self.run_command(clean_command, "/dev/null", "/", container_id)
-        script_path = definitions.DIR_SCRIPTS + "/{}-dump-patches.py".format(self.name)
-        cp_script_command = "docker cp {} {}:{} ".format(script_path, container_id, dir_expr)
-        execute_command(cp_script_command)
+            script_path = definitions.DIR_SCRIPTS + "/{}-dump-patches.py".format(self.name)
+            cp_script_command = "docker cp {} {}:{} ".format(script_path, container_id, dir_expr)
+            execute_command(cp_script_command)
         return
 
     def check_tool_exists(self):
