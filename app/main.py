@@ -290,9 +290,9 @@ def run(repair_tool, benchmark, setup):
             container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                            values.DEFAULT_RUN_TESTS_ONLY,
                                            values.DEFAULT_USE_CONTAINER)
-            if os.path.isdir(dir_exp):
-                emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
-                benchmark.clean(dir_exp, container_id)
+            # if os.path.isdir(dir_exp):
+            #     emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
+            #     benchmark.clean(dir_exp, container_id)
             if not values.DEFAULT_SETUP_ONLY:
                 benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
                 repair(dir_info, experiment_item, repair_tool, config_info, container_id, benchmark.name)
