@@ -138,6 +138,8 @@ def update_configuration():
         values.DEFAULT_ANALYSE_ONLY = True
     if values.CONF_USE_CONTAINER:
         values.DEFAULT_USE_CONTAINER = True
+    else:
+        values.DEFAULT_USE_CONTAINER = False
     if values.CONF_DUMP_PATCHES:
         values.DEFAULT_DUMP_PATCHES = True
     if values.CONF_USE_VALKYRIE:
