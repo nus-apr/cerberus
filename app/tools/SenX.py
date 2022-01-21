@@ -4,6 +4,8 @@ import re
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
+from os import listdir
+from os.path import isfile, join
 
 
 class SenX(AbstractTool):
@@ -98,8 +100,6 @@ class SenX(AbstractTool):
     def post_process(self, dir_expr, dir_results, container_id):
         emitter.normal("\t\t\t post-processing for {}".format(self.name))
         super(SenX, self).post_process(dir_expr, dir_results, container_id)
-        clean_command = "rm -rf " + dir_results + "/patches/klee-out-*"
-        self.run_command(clean_command, "/dev/null", dir_expr, container_id)
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
