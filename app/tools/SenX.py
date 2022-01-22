@@ -87,13 +87,10 @@ class SenX(AbstractTool):
 
     def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_setup = dir_info["setup"]
+        dir_exp = dir_info["expr"]
         dir_results = dir_info["result"]
         bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-        dir_patches = "/SenX/output/" + bug_id
-        if os.path.isdir(dir_patches):
-            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
-        shutil.copy(dir_setup + "/senx/instrument.sh", dir_results)
+        shutil.copy(dir_exp + "/senx/*", dir_results)
         super(SenX, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
