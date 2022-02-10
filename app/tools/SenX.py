@@ -123,7 +123,7 @@ class SenX(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
-        is_timeout = True
+
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -131,22 +131,16 @@ class SenX(AbstractTool):
                 time_end = log_lines[-1].replace("\n", "")
                 time_duration = self.time_duration(time_start, time_end)
                 for line in log_lines:
-                    if "|P|=" in line:
-                        count_plausible = int(line.split("|P|=")[-1].strip().replace("^[[0m", "").split(":")[0])
-                    elif "number of concrete patches explored" in line:
-                        count_enumerations = int(line.split("number of concrete patches explored: ")[-1].strip().split("\x1b")[0].split(".0")[0])
-                        size_search_space = count_enumerations
+                    if "Creating patch" in line:
+                        count_plausible = 1
+                        count_enumerations = 1
                     elif "Runtime Error" in line:
                         is_error = True
-                    elif "statistics" in line:
-                        is_timeout = False
-
                 log_file.close()
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
-        if is_timeout:
-            emitter.warning("\t\t\t\t[warning] timeout before ending")
+
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             if values.DEFAULT_DUMP_PATCHES:
