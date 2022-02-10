@@ -217,7 +217,7 @@
    "passing_test": "",
    "count_neg": 1,
    "count_pos": 0,
-   "binary_path": "djpeg",
+   "binary_path": "build/djpeg",
    "crash_input": " -colors 256 -bmp $POC"
  },
   {
