@@ -270,7 +270,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffmedian",
-   "crash_input": "$POC"
+   "crash_input": "$POC foo"
  },
   {
    "id": 22,
