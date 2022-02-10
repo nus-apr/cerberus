@@ -47,6 +47,8 @@ class SenX(AbstractTool):
 
             relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
             abs_binary_path = dir_expr + "/src/" + relative_binary_path
+            binary_dir_path = "/".join(abs_binary_path.split("/")[:-1])
+            struct_def_file_path = binary_dir_path + "/def_file"
 
             test_dir = dir_setup + "/tests"
             test_file_list = []
@@ -65,7 +67,9 @@ class SenX(AbstractTool):
                 binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
-            senx_command = "timeout -k 5m {0}h senx -struct-def=def_file {1}.bc ".format(str(timeout_h),abs_binary_path)
+            senx_command = "timeout -k 5m {0}h senx -struct-def={2} {1}.bc ".format(str(timeout_h),
+                                                                                    abs_binary_path,
+                                                                                    struct_def_file_path)
             senx_command += binary_input_arg
             senx_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
             status = execute_command(senx_command)
