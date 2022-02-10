@@ -335,7 +335,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/gif2tiff",
-   "crash_input": "$POC foo"
+   "crash_input": "$POC foo.tif"
  },
   {
    "id": 27,
