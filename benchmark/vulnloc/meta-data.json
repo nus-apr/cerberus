@@ -309,7 +309,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiff2pdf",
-   "crash_input": "$POC foo"
+   "crash_input": "$POC -o foo"
  },
   {
    "id": 25,
