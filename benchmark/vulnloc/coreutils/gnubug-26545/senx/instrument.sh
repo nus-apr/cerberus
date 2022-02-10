@@ -9,11 +9,21 @@ mkdir $dir_name/senx
 cd $dir_name/src
 
 make clean
-CC=wllvm CXX=wllvm++ FORCE_UNSAFE_CONFIGURE=1 ./configure CFLAGS='-g -O0' CXXFLAGS="$CFLAGS"
-CC=wllvm CXX=wllvm++ make CFLAGS="-g -O0 -static" CXXFLAGS="$CFLAGS" -j32
+export FORCE_UNSAFE_CONFIGURE=1 && CC="wllvm" CXX="wllvm++" CFLAGS="-g -O0" CXXFLAGS="$CFLAGS" ./configure
+CC="wllvm" CXX="wllvm++" make CFLAGS="-g -O0 -static" CXXFLAGS="$CFLAGS" -j`nproc`
+CC="wllvm" CXX="wllvm++" make CFLAGS="-g -O0 -static" CXXFLAGS="$CFLAGS" src/shred
 
-extract-bc $dir_name/src/src/shred
+binary_dir=$dir_name/src/src
+binary_name=shred
+
+extract-bc $binary_dir/$binary_name
 cd $dir_name/senx
-cp $dir_name/src/src/shred.bc .
-analyze_bc shred.bc
-cp shred.bc.talos $dir_name/src/src/
+cp $binary_dir/$binary_name .
+cp $binary_dir/$binary_name.bc .
+analyze_bc $binary_name.bc
+cp $binary_name.bc.talos $binary_dir
+
+llvm-dis $binary_name.bc
+cp ../../../../../scripts/senx/prepare_gdb_script.py .
+python3 prepare_gdb_script.py $binary_name
+cp def_file $binary_dir
