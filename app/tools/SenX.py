@@ -60,8 +60,8 @@ class SenX(AbstractTool):
                     test_file_list = [join(test_dir, f) for f in listdir(test_dir) if isfile(join(test_dir, f))]
 
             if len(test_file_list) > 1:
-                emitter.error("[Exception] unimplemented functionality: SenX only supports one failing test-case")
-                error_exit("Unhandled Exception")
+                emitter.error("[warning] unimplemented functionality: SenX only supports one failing test-case")
+
             binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
             if "$POC" in binary_input_arg:
                 binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
