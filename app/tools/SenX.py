@@ -83,7 +83,6 @@ class SenX(AbstractTool):
 
         return
 
-
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         super(SenX, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
         dir_logs = "/SenX/logs/" + bug_id
@@ -94,7 +93,12 @@ class SenX(AbstractTool):
         dir_exp = dir_info["experiment"]
         dir_output = dir_info["output"]
         bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-        copy_command = "cp -rf " +  dir_exp + "/senx " + dir_output
+        copy_command = "cp -rf " + dir_exp + "/senx " + dir_output
+        execute_command(copy_command)
+        relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
+        abs_binary_path = dir_exp + "/src/" + relative_binary_path
+        patch_path = abs_binary_path + ".patch"
+        copy_command = "cp -rf " + patch_path + " " + dir_output + "/patches"
         execute_command(copy_command)
         super(SenX, self).save_artefacts(dir_info, experiment_info, container_id)
         return
