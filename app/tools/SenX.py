@@ -97,7 +97,7 @@ class SenX(AbstractTool):
         execute_command(copy_command)
         relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
         abs_binary_path = dir_exp + "/src/" + relative_binary_path
-        patch_path = abs_binary_path + ".patch"
+        patch_path = abs_binary_path + ".bc.patch"
         copy_command = "cp -rf " + patch_path + " " + dir_output + "/patches"
         execute_command(copy_command)
         super(SenX, self).save_artefacts(dir_info, experiment_info, container_id)
