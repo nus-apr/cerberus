@@ -12,7 +12,8 @@ with open(llvm_ir_path, "r") as input_file:
             break
         if "struct" in line:
             struct_name = line.split(" = ")[0].split(".")[1]
-            struct_list.append(struct_name)
+            first_occ = struct_name.find(next(filter(str.isalpha, struct_name)))
+            struct_list.append(struct_name[first_occ:])
 
 with open(gdb_script_path, "w") as out_file:
     for struct_name in struct_list:
