@@ -4,6 +4,7 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
+echo "libtiff/tif_ojpeg.c" > $dir_name/manifest.txt
 
 cd $dir_name/src
 make clean
@@ -23,7 +24,6 @@ rm -rf coverage.path.*
 rm -rf repair.cache
 rm -rf repair.debug.*
 
-echo "libtiff/tif_ojpeg.c" > $dir_name/manifest.txt
 
 cat <<EOF > $dir_name/test.sh
 TEST_ID=\$1
