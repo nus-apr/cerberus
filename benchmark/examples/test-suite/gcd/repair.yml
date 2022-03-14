@@ -34,9 +34,6 @@ transformations:
     - type: delete-statement
     - type: replace-statement
     - type: append-statement
-optimizations:
-  ignore-equivalent-insertions: yes
-  ignore-dead-code: yes
-  ignore-string-equivalent-snippets: yes
+    - type: prepend-statement
 resource-limits:
-  candidates: 100
+  candidates: 1000
