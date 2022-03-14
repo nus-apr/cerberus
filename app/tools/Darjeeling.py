@@ -81,15 +81,16 @@ class Darjeeling(AbstractTool):
                 repair_conf_path = dir_expr + "/src/repair.conf"
                 with open(repair_conf_path, "a") as conf_file:
                     conf_file.write(repair_config_str)
+            dir_output = dir_info["output"]
+            dir_patch = dir_output + "/patches"
+            mkdir_command = "mkdir " + dir_patch
+            self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
 
-            save_command = "mkdir {}; cp {} {}".format(dir_expr + "/orig", dir_expr + "/src/" + fix_file,
-                                                       dir_expr + "/orig")
-            self.run_command(save_command, self.log_output_path, dir_expr + "/src", container_id)
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
 
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
-            repair_command += "darjeeling repair --continue"
+            repair_command += "darjeeling repair --continue --patch-dir {} ".format(dir_patch)
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " --dump-all "
             repair_command += " repair.yml".format(self.log_output_path)
@@ -155,6 +156,14 @@ class Darjeeling(AbstractTool):
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_interrupted:
             emitter.warning("\t\t\t\t[warning] program interrupted before starting repair")
+        dir_patch = dir_results + "/patches"
+        if os.path.isdir(dir_patch):
+            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+            count_plausible = len(output_patch_list)
+        if values.CONF_USE_VALKYRIE:
+            dir_filtered = dir_results + "/patch-filtered"
+            output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
+            count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
