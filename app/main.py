@@ -41,12 +41,13 @@ def archive_results(dir_results, dir_archive):
 def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir, consume_limit):
     list_dir = os.listdir(patch_dir)
     len_gen = len(list_dir)
-    len_processed = len(values.LIST_PROCESSED)
+    len_processed = -1
     len_last = len_gen
     while len_gen != len_processed or values.APR_TOOL_RUNNING:
         list_dir = os.listdir(patch_dir)
         len_gen = len(list_dir)
-        len_processed = len(values.LIST_PROCESSED)
+        if not values.APR_TOOL_RUNNING:
+            len_processed = len(values.LIST_PROCESSED)
         if not list_dir:
             time.sleep(10)
             continue
@@ -58,12 +59,13 @@ def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, proces
             continue
         emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
+        len_processed = len(values.LIST_PROCESSED)
         os.system("rm -rf {}/*".format(process_dir))
         for patch in list_selected:
             os.system("cp {} {}".format(patch_dir + "/" + patch, process_dir))
         test_id_str = ",".join(test_id_list)
-        validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} "\
-            .format(binary_path, oracle_path, test_id_str, process_dir, fix_file)
+        validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} --test-timeout={} "\
+            .format(binary_path, oracle_path, test_id_str, process_dir, fix_file, values.DEFAULT_TEST_TIMEOUT)
         validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
         utilities.execute_command(validate_command)
         kill_all_command = "ps -aux | grep Valkyrie.py | awk '{print $2}' | xargs kill -9"
@@ -97,13 +99,15 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+    validation_test_list = failing_test_list + passing_test_list
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
+    dir_output = dir_info["output"]
     dir_info_container = {
         "logs": dir_log,
         "setup": dir_setup,
-        "expr": dir_expr
+        "expr": dir_expr,
+        "output": dir_output
     }
-    dir_output = dir_info["output"]
     valkyrie_binary_path = dir_output + "/binary"
     binary_path = dir_expr + "/src/" + binary_path
     if container_id:
@@ -112,11 +116,20 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
     utilities.execute_command(copy_command)
     values.LIST_PROCESSED = []
-    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
+    test_driver_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
     test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name, subject_name, bug_id)
+    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(benchmark_name, subject_name, bug_id)
     valkyrie_oracle_path = dir_output + "/oracle"
-    copy_command = "cp {} {};".format(oracle_path, valkyrie_oracle_path)
+    if os.path.isfile(valkyrie_oracle_path):
+        os.remove(valkyrie_oracle_path)
+    with open(valkyrie_oracle_path, "w") as oracle_file:
+        oracle_file.writelines("#!/bin/bash\n")
+        oracle_file.writelines("script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
+        oracle_file.writelines("$script_dir/test.sh /dev/null $@")
+    os.system("chmod +x {}".format(valkyrie_oracle_path))
+    copy_command = "cp {} {};".format(test_driver_path, dir_output)
     copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
+    copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
     utilities.execute_command(copy_command)
     patch_dir = dir_output + "/patches"
     if not os.path.isdir(patch_dir):
@@ -126,7 +139,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     if values.DEFAULT_USE_VALKYRIE:
         values.APR_TOOL_RUNNING = True
         t1 = threading.Thread(target=validate, args=(valkyrie_binary_path, valkyrie_oracle_path,
-                                                     failing_test_list, patch_dir, fix_source_file,
+                                                     validation_test_list, patch_dir, fix_source_file,
                                                      dir_process, consume_limit))
         t1.start()
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
