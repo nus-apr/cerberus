@@ -20,13 +20,15 @@ class Examples(AbstractBenchmark):
                             tool_name + "-" + subject_name + "-" + bug_id
         container_id = self.setup_container(tool_name, bug_index, config_id, use_container)
         exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
+        if not use_container:
+            self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
         self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\tsetting up experiment subject")
         self.log_deploy_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-deploy.log"
-        command_str = "bash setup.sh"
+        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_deploy_path, setup_dir_path, container_id)
         return status == 0
 
@@ -36,7 +38,7 @@ class Examples(AbstractBenchmark):
     def build(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
         self.log_build_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-build.log"
-        command_str = "bash build.sh"
+        command_str = "bash build.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_build_path, setup_dir_path, container_id)
         return status == 0
 
@@ -55,5 +57,5 @@ class Examples(AbstractBenchmark):
     def save_artefacts(self, dir_exp, dir_artifact, container_id):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
-        self.list_artifact_files = [] # path should be relative to experiment directory
+        self.list_artifact_files = []  # path should be relative to experiment directory
         super(Examples, self).save_artefacts(dir_exp, dir_artifact, container_id)
