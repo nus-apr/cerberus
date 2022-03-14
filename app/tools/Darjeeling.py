@@ -91,7 +91,7 @@ class Darjeeling(AbstractTool):
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
             repair_command += "darjeeling repair --continue"
             if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " -dump-all "
+                repair_command += " --dump-all "
             repair_command += " repair.yml".format(self.log_output_path)
             status = self.run_command(repair_command, self.log_output_path, dir_expr + "/src", container_id)
             if status != 0:
