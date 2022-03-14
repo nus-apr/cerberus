@@ -14,6 +14,25 @@ class Darjeeling(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
 
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
+        """instrumentation for the experiment as needed by the tool"""
+        emitter.normal("\t\t\t instrumenting for " + self.name)
+        conf_id = str(values.CONFIG_ID)
+        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
+        instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
+
+        if container_id:
+            instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
+        else:
+            instrumentation_exist = os.path.isfile(instrumentation_script_path)
+        if instrumentation_exist:
+            command_str = "bash instrument.sh {}".format(dir_expr)
+            dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
+            status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+            if not status == 0:
+                error_exit("error with instrumentation of ", self.name)
+        return
+
     def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
         super(Darjeeling, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
         if not instrument_only:
@@ -26,6 +45,7 @@ class Darjeeling(AbstractTool):
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             emitter.normal("\t\t\t running repair with " + self.name)
             fix_file = experiment_info[definitions.KEY_FIX_FILE]
+            fix_location = experiment_info[definitions.KEY_FIX_LOC]
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
@@ -64,13 +84,15 @@ class Darjeeling(AbstractTool):
 
             save_command = "mkdir {}; cp {} {}".format(dir_expr + "/orig", dir_expr + "/src/" + fix_file,
                                                        dir_expr + "/orig")
-            self.run_command(save_command,self.log_output_path, dir_expr + "/src", container_id)
+            self.run_command(save_command, self.log_output_path, dir_expr + "/src", container_id)
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
 
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
-            repair_command += "darjeeling --label-repair --continue "
-            repair_command += " repair.conf".format(self.log_output_path)
+            repair_command += "darjeeling repair --continue"
+            if values.DEFAULT_DUMP_PATCHES:
+                repair_command += " -dump-all "
+            repair_command += " repair.yml".format(self.log_output_path)
             status = self.run_command(repair_command, self.log_output_path, dir_expr + "/src", container_id)
             if status != 0:
                 emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
@@ -85,43 +107,13 @@ class Darjeeling(AbstractTool):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_expr = dir_info["experiment"]
         dir_results = dir_info["result"]
-        dir_patch = dir_expr + "/src/repair"
+        dir_patch = dir_expr + "/src/patches"
         dir_output = dir_info["output"]
         dir_artifact = dir_info["artifact"]
         copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(copy_command, "/dev/null", dir_expr, container_id)
 
-        dir_preprocessed = dir_expr + "/src/preprocessed"
-        copy_command = "cp -rf  " + dir_preprocessed + " " + dir_artifact + "/preprocessed"
-        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
-
-        dir_coverage = dir_expr + "/src/coverage"
-        copy_command = "cp -rf  " + dir_coverage + " " + dir_artifact + "/coverage"
-        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
         super(Darjeeling, self).save_artefacts(dir_info, experiment_info, container_id)
-
-        fix_file = experiment_info[definitions.KEY_FIX_FILE]
-        copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + fix_file + " /tmp/orig.c"
-        execute_command(copy_command)
-        patch_id = 0
-        dir_repair_local = dir_output + "/repair/" + "".join(fix_file.split("/")[:-1])
-        dir_patch_local = dir_output + "/patches"
-        container.fix_permissions(container_id, "/output")
-        if os.path.isdir(dir_repair_local):
-            output_patch_list = [f for f in listdir(dir_repair_local) if isfile(join(dir_repair_local, f)) and ".c" in f]
-            for f in output_patch_list:
-                patched_source = dir_repair_local + "/" + f
-                patch_id = str(f).split("-")[-1]
-                if not str(patch_id).isnumeric():
-                    patch_id = 0
-                patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
-                diff_command = "diff -U 0 /tmp/orig.c " + patched_source + "> {}".format(patch_file)
-                execute_command(diff_command)
-                del_command = "rm -f" + patched_source
-                execute_command(del_command)
-            save_command = "cp -rf " + dir_patch_local + " " + dir_results
-            execute_command(save_command)
-
         return
 
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
@@ -144,30 +136,21 @@ class Darjeeling(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
-        is_interrupted = True
+        is_interrupted = False
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_start = log_lines[0].replace("\n", "")
             time_end = log_lines[-1].replace("\n", "")
             time_duration = self.time_duration(time_start, time_end)
             for line in log_lines:
-                if "variant " in line:
-                    count_enumerations = int(line.split("/")[0].split(" ")[-1])
+                if "candidate evaluations" in line:
+                    count_enumerations = int(line.split("candidate evaluations: ")[-1])
                 elif "possible edits" in line:
                     size_search_space = line.split(": ")[2].split(" ")[0]
-                elif "fails to compile" in line:
-                    count_non_compilable = count_non_compilable + 1
-                elif "Repair Found" in line:
-                    count_plausible = count_plausible + 1
-                elif "cilrep done serialize" in line:
-                    is_interrupted = False
+                elif "plausible patches" in line:
+                    count_plausible = int(line.split("found ")[-1].replace(" plausible patches", ""))
             log_file.close()
-        if size_search_space == 0:
-            if os.path.isfile(dir_results + "/coverage.path"):
-                if os.path.getsize(dir_results + "/coverage.path"):
-                    emitter.error("\t\t\t\t[error] error detected in coverage")
-            else:
-                emitter.error("\t\t\t\t[error] error detected in coverage")
+
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_interrupted:
@@ -175,12 +158,9 @@ class Darjeeling(AbstractTool):
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.DEFAULT_DUMP_PATCHES:
-                count_enumerations = count_plausible
-            else:
-                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))

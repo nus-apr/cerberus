@@ -74,4 +74,4 @@ FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
 
 APR_CONSUME_LIMIT = {"prophet": 1000, "f1x": 5000, "genprog": 1000, "cpr": 5000, "fix2fit": 5000,
-                     "angelix": 100, "senx":100}
+                     "angelix": 100, "senx":100, "darjeeling": 1000}

@@ -36,7 +36,7 @@ class AbstractTool:
                         log_file.writelines(stderr.decode("iso-8859-1"))
         else:
             command_str = "cd " + exp_dir_path + ";" + command_str
-            command_str += " > {0} 2>&1".format(log_file_path)
+            command_str += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command_str)
         return exit_code
 
