@@ -13,6 +13,25 @@ class F1X(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(F1X, self).__init__(self.name)
 
+    def generate_test_driver(self, dir_setup, container_id):
+        test_script_path = dir_setup + "/test.sh"
+        test_driver_path = dir_setup + "/f1x-test"
+        tmp_driver_file = "/tmp/f1x-driver"
+        if not os.path.isfile(tmp_driver_file):
+            open(tmp_driver_file, "w")
+        with open(tmp_driver_file, "r+") as res_file:
+            res_file.seek(0)
+            res_file.writelines("#!/bin/bash\n")
+            res_file.writelines("bash {0} /experiment $@".format(test_script_path))
+            res_file.truncate()
+        perm_command = "chmod +x {}".format(tmp_driver_file)
+        execute_command(perm_command)
+        if container_id:
+            copy_command = "docker cp " + tmp_driver_file + " " + container_id + ":" + test_driver_path
+        else:
+            copy_command = "cp " + tmp_driver_file + " " + test_driver_path
+        execute_command(copy_command)
+
     def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
         super(F1X, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
         if not instrument_only:
@@ -29,7 +48,8 @@ class F1X(AbstractTool):
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-            test_driver_path = dir_setup + "/test.sh"
+            self.generate_test_driver(dir_setup, container_id)
+            test_driver_path = dir_setup + "/f1x-test"
             build_script_path = dir_setup + "/build.sh"
             test_id_list = ""
             for test_id in failing_test_list:
@@ -50,7 +70,7 @@ class F1X(AbstractTool):
             repair_command += " -t {0} ".format(test_id_list)
             repair_command += " -T 15000"
             repair_command += " --driver={0} ".format(test_driver_path)
-            repair_command += " -b {0} ".format(build_script_path)
+            repair_command += " -b \"{0} /experiment \"".format(build_script_path)
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " --output-space patch-space "
             dry_command = repair_command + " --disable-dteq"
