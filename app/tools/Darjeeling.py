@@ -14,19 +14,19 @@ class Darjeeling(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, fix_location):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
+        source_file, fix_lines = fix_location.split(":")
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
-
         if container_id:
             instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
         else:
             instrumentation_exist = os.path.isfile(instrumentation_script_path)
         if instrumentation_exist:
-            command_str = "bash instrument.sh {}".format(dir_expr)
+            command_str = "bash instrument.sh {0} {1} {2}".format(dir_expr, source_file, fix_lines)
             dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
             status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
             if not status == 0:
@@ -34,7 +34,9 @@ class Darjeeling(AbstractTool):
         return
 
     def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
-        super(Darjeeling, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
+        self.instrument(dir_info['logs'], dir_info['expr'],
+                        dir_info['setup'], experiment_info['bug_id'],
+                        container_id, experiment_info[definitions.KEY_FIX_LOC])
         if not instrument_only:
             conf_id = config_info[definitions.KEY_ID]
             dir_logs = dir_info["logs"]
