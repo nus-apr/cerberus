@@ -18,6 +18,7 @@ class Darjeeling(AbstractTool):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
+        dir_expr_base = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
         if container_id:
@@ -25,7 +26,7 @@ class Darjeeling(AbstractTool):
         else:
             instrumentation_exist = os.path.isfile(instrumentation_script_path)
         if instrumentation_exist:
-            command_str = "bash instrument.sh {0} {1}".format(dir_expr, source_file)
+            command_str = "bash instrument.sh {0} {1}".format(dir_expr_base, source_file)
             dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
             status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
             if not status == 0:
