@@ -26,7 +26,7 @@ class Darjeeling(AbstractTool):
         else:
             instrumentation_exist = os.path.isfile(instrumentation_script_path)
         if instrumentation_exist:
-            command_str = "bash instrument.sh {0} {1} {2}".format(dir_expr, source_file, fix_lines)
+            command_str = "bash instrument.sh {0} {1}".format(dir_expr, source_file)
             dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
             status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
             if not status == 0:
@@ -34,9 +34,7 @@ class Darjeeling(AbstractTool):
         return
 
     def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
-        self.instrument(dir_info['logs'], dir_info['expr'],
-                        dir_info['setup'], experiment_info['bug_id'],
-                        container_id, experiment_info[definitions.KEY_FIX_LOC])
+        super(Darjeeling, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
         if not instrument_only:
             conf_id = config_info[definitions.KEY_ID]
             dir_logs = dir_info["logs"]
@@ -47,7 +45,6 @@ class Darjeeling(AbstractTool):
             bug_id = str(experiment_info[definitions.KEY_BUG_ID])
             emitter.normal("\t\t\t running repair with " + self.name)
             fix_file = experiment_info[definitions.KEY_FIX_FILE]
-            fix_location = experiment_info[definitions.KEY_FIX_LOC]
             fix_location = experiment_info[definitions.KEY_FIX_LOC]
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
