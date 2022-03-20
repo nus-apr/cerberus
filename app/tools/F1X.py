@@ -159,8 +159,9 @@ class F1X(AbstractTool):
             count_plausible = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
             dir_filtered = dir_results + "/patch-filtered"
-            output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
-            count_plausible = len(output_patch_list)
+            if dir_filtered and os.path.isdir(dir_filtered):
+                output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
+                count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
