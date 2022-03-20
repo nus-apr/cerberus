@@ -49,13 +49,13 @@ def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, proces
         if not values.APR_TOOL_RUNNING:
             len_processed = len(values.LIST_PROCESSED)
         if not list_dir:
-            time.sleep(10)
+            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
         list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:consume_limit]
         len_sel = len(list_selected)
         if len_sel < consume_limit and (len_last != len_gen or len_gen == 0):
             len_last = len_gen
-            time.sleep(10)
+            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
         emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
