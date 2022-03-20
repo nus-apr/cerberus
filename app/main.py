@@ -38,7 +38,7 @@ def archive_results(dir_results, dir_archive):
     utilities.execute_command(archive_command)
 
 
-def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir, consume_limit):
+def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir, consume_limit, max_limit):
     list_dir = os.listdir(patch_dir)
     len_gen = len(list_dir)
     len_processed = -1
@@ -49,13 +49,13 @@ def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, proces
         if not values.APR_TOOL_RUNNING:
             len_processed = len(values.LIST_PROCESSED)
         if not list_dir:
-            time.sleep(10)
+            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
-        list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:consume_limit]
+        list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:max_limit]
         len_sel = len(list_selected)
         if len_sel < consume_limit and (len_last != len_gen or len_gen == 0):
             len_last = len_gen
-            time.sleep(10)
+            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
         emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
@@ -87,7 +87,8 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     subject_name = experiment_info[definitions.KEY_SUBJECT]
     binary_path = experiment_info[definitions.KEY_BINARY_PATH]
     fix_location = None
-    consume_limit = definitions.APR_CONSUME_LIMIT[tool.name]
+    consume_limit = definitions.APR_MIN_LIMIT[tool.name]
+    max_limit = definitions.APR_MAX_LIMIT[tool.name]
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
@@ -140,7 +141,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         values.APR_TOOL_RUNNING = True
         t1 = threading.Thread(target=validate, args=(valkyrie_binary_path, valkyrie_oracle_path,
                                                      validation_test_list, patch_dir, fix_source_file,
-                                                     dir_process, consume_limit))
+                                                     dir_process, consume_limit, max_limit))
         t1.start()
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
     values.APR_TOOL_RUNNING = False
