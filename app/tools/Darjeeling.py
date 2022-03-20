@@ -14,11 +14,10 @@ class Darjeeling(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, fix_location):
+    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
-        source_file, fix_lines = fix_location.split(":")
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
         if container_id:
