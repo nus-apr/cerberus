@@ -1,5 +1,6 @@
 import os
 import re
+import multiprocessing as mp
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
@@ -49,37 +50,7 @@ class Darjeeling(AbstractTool):
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-            count_pass = len(passing_test_list)
-            count_neg = len(failing_test_list)
-            repair_config_str = "--pos-tests {p_size}\n" \
-                                "--neg-tests {n_size}\n" \
-                                "--test-script bash {dir_exp}/test.sh\n".format(bug_id=bug_id, p_size=count_pass,
-                                                                                n_size=count_neg, dir_exp=dir_expr)
-            if fix_location:
-                source_file, line_number = fix_location.split(":")
-                tmp_file = "/tmp/genprog-fault-loc"
-                target_path = dir_expr + "/src/fault-loc"
-                with open(tmp_file, "w") as loc_file:
-                    loc_file.write(str(line_number))
-                copy_command = "docker cp {} {}:{}".format(tmp_file,container_id, target_path)
-                execute_command(copy_command)
-                repair_config_str += "--fault-scheme line\n" \
-                                     "--fault-file fault-loc\n"
 
-            if container_id:
-                tmp_repair_file = "/tmp/repair.conf"
-                repair_conf_path = dir_expr + "/src/repair.conf"
-                load_command = "docker cp " + container_id + ":" + repair_conf_path + " " + tmp_repair_file
-                execute_command(load_command)
-                with open(tmp_repair_file, "a") as conf_file:
-                    conf_file.write(repair_config_str)
-                save_command = "docker cp " + tmp_repair_file + " " + container_id + ":" + repair_conf_path
-                execute_command(save_command)
-
-            else:
-                repair_conf_path = dir_expr + "/src/repair.conf"
-                with open(repair_conf_path, "a") as conf_file:
-                    conf_file.write(repair_config_str)
             dir_output = dir_info["output"]
             dir_patch = dir_output + "/patches"
             mkdir_command = "mkdir " + dir_patch
@@ -90,6 +61,8 @@ class Darjeeling(AbstractTool):
 
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
             repair_command += "darjeeling repair --continue --patch-dir {} ".format(dir_patch)
+            repair_command += " --threads {} ".format(mp.cpu_count())
+            repair_command += additional_tool_param + " "
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " --dump-all "
             repair_command += " repair.yml".format(self.log_output_path)
