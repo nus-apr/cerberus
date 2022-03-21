@@ -48,7 +48,7 @@ program:
     time-limit: 5
 
 seed: 0
-threads: 1
+threads: 16
 localization:
   type: spectrum
   metric: tarantula
