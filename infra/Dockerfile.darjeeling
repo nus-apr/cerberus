@@ -102,6 +102,7 @@ RUN apt-get update \
       gcovr \
       libc6-dev \
       cmake \
+      clang \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
