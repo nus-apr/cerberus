@@ -23,6 +23,10 @@ class VulnLoc(AbstractBenchmark):
         if not use_container:
             self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
         self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
+        if self.verify(exp_setup_dir_path, bug_id, config_id, container_id):
+            emitter.success("\t\t\t[benchmark] verified successfully")
+        else:
+            emitter.error("\t\t\t[benchmark] verification failed")
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id):
@@ -52,6 +56,13 @@ class VulnLoc(AbstractBenchmark):
         command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status != 0
+
+    def verify(self, setup_dir_path, bug_id, config_id, container_id):
+        emitter.normal("\t\t\tverify dev patch and test-oracle")
+        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
+        command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
+        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        return status == 0
 
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
