@@ -8,7 +8,7 @@ cd $dir_name/src
 
 PROJECT_CFLAGS="-fsanitize=address -ggdb -fPIC -fPIE -g -O0"
 PROJECT_CXXFLAGS="-fsanitize=address -ggdb -fPIC -fPIE -g -O0"
-PROJECT_LDFLAGS="-static -fsanitize=address"
+PROJECT_LDFLAGS="-fsanitize=address"
 
 if [[ -n "${CFLAGS}" ]]; then
   PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
