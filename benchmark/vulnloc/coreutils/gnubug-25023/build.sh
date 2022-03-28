@@ -7,8 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
 
-PROJECT_CFLAGS="-fsanitize=address -ggdb"
-PROJECT_CXXFLAGS="-fsanitize=address -ggdb"
+PROJECT_CFLAGS="-fsanitize=address -ggdb -Wno-error"
+PROJECT_CXXFLAGS="-fsanitize=address -ggdb -Wno-error"
 PROJECT_LDFLAGS=" -fsanitize=address"
 
 if [[ -n "${CFLAGS}" ]]; then
