@@ -17,8 +17,10 @@ case "$2" in
     1)
         POC=$script_dir/tests/1.txt
         export ASAN_OPTIONS=detect_leaks=0,halt_on_error=0
+        touch a
         timeout 10 $BINARY_PATH "-S$(printf "\t\t\t")" a -m $POC > $BINARY_PATH.out 2>&1
         ret=$?
+        rm a
         if [[ ret -eq 0 ]]
         then
            err=$(cat $BINARY_PATH.out | grep 'AddressSanitizer'  | wc -l)
