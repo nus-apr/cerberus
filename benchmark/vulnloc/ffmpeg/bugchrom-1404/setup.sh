@@ -18,7 +18,7 @@ git clone $project_url src
 cd src
 git checkout $bug_commit_id
 git format-patch -1 $fix_commit_id
-cp *.patch $dir_name/dev-patch
+cp *.patch $dir_name/dev-patch/fix.patch
 cp $script_dir/configure $dir_name/src
 cp $script_dir/Makefile $dir_name/src
 cp $script_dir/deps/afl_driver.cpp $dir_name/src

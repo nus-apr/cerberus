@@ -18,7 +18,7 @@ git clone $project_url src
 cd src
 git checkout $bug_commit_id
 git format-patch -1 $fix_commit_id
-cp *.patch $dir_name/dev-patch
+cp *.patch $dir_name/dev-patch/fix.patch
 
 ./bootstrap
 
