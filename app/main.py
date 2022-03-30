@@ -100,7 +100,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
-    validation_test_list = failing_test_list + passing_test_list
+    validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
     dir_output = dir_info["output"]
     dir_info_container = {
