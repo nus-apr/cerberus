@@ -8,6 +8,6 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 current_dir=$script_dir
 mkdir -p $dir_name
 cp -rf $current_dir/src $dir_name
-cp -rf $current_dir/test $dir_name
+cp -rf $current_dir/tests $dir_name
 cp $current_dir/oracle* $dir_name
-cp $current_dir/repair.yml $dir_name/src
+
