@@ -26,28 +26,28 @@ class ManyBugs(AbstractBenchmark):
     def deploy(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
         self.log_deploy_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-deploy.log"
-        command_str = "bash setup.sh"
+        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_deploy_path, setup_dir_path, container_id)
         return status == 0
 
     def config(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tconfiguring experiment subject")
         self.log_config_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-config.log"
-        command_str = "bash config.sh"
+        command_str = "bash config.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_config_path, setup_dir_path, container_id)
         return status == 0
 
     def build(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
         self.log_build_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-build.log"
-        command_str = "bash build.sh"
+        command_str = "bash build.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_build_path, setup_dir_path, container_id)
         return status == 0
 
     def test(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
         self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
-        command_str = "bash test.sh p1"
+        command_str = "bash test.sh {} p1".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status == 0
 
@@ -62,7 +62,7 @@ class ManyBugs(AbstractBenchmark):
         with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES\n")
             for test_id in failing_test_cases:
-                command_str = "bash test.sh {}".format(test_id)
+                command_str = "bash test.sh {} {}".format(self.base_dir_experiment, test_id)
                 status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
@@ -72,7 +72,7 @@ class ManyBugs(AbstractBenchmark):
 
             log_file.write("PASSING TEST CASES\n")
             for test_id in passing_test_cases:
-                command_str = "bash test.sh {}".format(test_id)
+                command_str = "bash test.sh {} {}".format(self.base_dir_experiment, test_id)
                 status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
