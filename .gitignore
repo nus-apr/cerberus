@@ -9,3 +9,5 @@ venv
 *.DS_Store
 .devcontainer
 *.pyc
+archive
+results
