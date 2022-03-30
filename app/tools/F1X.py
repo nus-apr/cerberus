@@ -75,14 +75,14 @@ class F1X(AbstractTool):
                 repair_command += " --output-space patch-space "
             dry_command = repair_command + " --disable-dteq"
             self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
-            all_command = repair_command + "--enable-assignment --disable-dteq  -a -o patches -v "
+            all_command = repair_command + "--enable-assignment --disable-dteq  -a -o patches -instrumentv "
             if additional_tool_param:
                 all_command = all_command + " " + additional_tool_param
             status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
             # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
             # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
-                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, stainstrumenttus))
             else:
                 emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))

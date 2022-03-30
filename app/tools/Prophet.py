@@ -85,7 +85,7 @@ class Prophet(AbstractTool):
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "bash instrument.sh {}".format(source_file)
+        command_str = "bash instrument.sh /experiment {}".format(source_file)
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
         script_path = dir_setup_exp + "/instrument.sh"
         if not container.is_file(container_id, script_path):
