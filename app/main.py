@@ -7,13 +7,15 @@ import re
 import traceback
 import signal
 import time
-from app import emitter, logger, definitions, values, utilities, configuration
+from app import emitter, logger, definitions, values, utilities, configuration, parallel
 from app.benchmarks import AbstractBenchmark
 from app.tools import AbstractTool
 from os.path import dirname, abspath
 
 start_time = 0
 end_time = 0
+
+
 
 
 def create_directories():
@@ -36,41 +38,6 @@ def archive_results(dir_results, dir_archive):
     archive_command = "cd " + dirname(abspath(dir_results)) + "; tar cvzf " + experiment_id + ".tar.gz " + experiment_id
     archive_command += "; mv {} {}".format(experiment_id + ".tar.gz", dir_archive)
     utilities.execute_command(archive_command)
-
-
-def validate(binary_path, oracle_path, test_id_list, patch_dir, fix_file, process_dir, consume_limit, max_limit):
-    list_dir = os.listdir(patch_dir)
-    len_gen = len(list_dir)
-    len_processed = -1
-    len_last = len_gen
-    while len_gen != len_processed or values.APR_TOOL_RUNNING:
-        list_dir = os.listdir(patch_dir)
-        len_gen = len(list_dir)
-        if not values.APR_TOOL_RUNNING:
-            len_processed = len(values.LIST_PROCESSED)
-        if not list_dir:
-            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
-            continue
-        list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))[:max_limit]
-        len_sel = len(list_selected)
-        if len_sel < consume_limit and (len_last != len_gen or len_gen == 0):
-            len_last = len_gen
-            time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
-            continue
-        emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
-        values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
-        len_processed = len(values.LIST_PROCESSED)
-        os.system("rm -rf {}/*".format(process_dir))
-        for patch in list_selected:
-            os.system("cp {} {}".format(patch_dir + "/" + patch, process_dir))
-        test_id_str = ",".join(test_id_list)
-        validate_command = "valkyrie --binary={} --test-oracle={} --test-id-list={} --patch-dir={} --source={} --test-timeout={} "\
-            .format(binary_path, oracle_path, test_id_str, process_dir, fix_file, values.DEFAULT_TEST_TIMEOUT)
-        validate_command += "--patch-mode=gdb --trace-mode=1 --exec=2 --only-validate"
-        utilities.execute_command(validate_command)
-        kill_all_command = "ps -aux | grep Valkyrie.py | awk '{print $2}' | xargs kill -9"
-        utilities.execute_command(kill_all_command)
-        len_last = len_gen
 
 
 def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
@@ -139,14 +106,14 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     utilities.execute_command("mkdir {}".format(dir_process))
     if values.DEFAULT_USE_VALKYRIE:
         values.APR_TOOL_RUNNING = True
-        t1 = threading.Thread(target=validate, args=(valkyrie_binary_path, valkyrie_oracle_path,
-                                                     validation_test_list, patch_dir, fix_source_file,
-                                                     dir_process, consume_limit, max_limit))
+        parallel.init_threads(valkyrie_binary_path, valkyrie_oracle_path, validation_test_list, fix_source_file)
+        t1 = threading.Thread(target=parallel.consume_patches, args=(patch_dir, dir_process, consume_limit, max_limit))
         t1.start()
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
         t1.join()
+        parallel.wait_validation()
         timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         utilities.execute_command(timestamp_command)
 
