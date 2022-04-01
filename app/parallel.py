@@ -50,14 +50,14 @@ def validate(thread):
                                                                                        patch_file,
                                                                                        thread.source_file,
                                                                                        values.DEFAULT_TEST_TIMEOUT)
-            validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
+            validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0 --only-validate "
             utilities.execute_command(validate_command)
             utilities.execute_command("rm -rf {}".format(patch_file))
             processed_count += 1
 
         else:
             queueLock.release()
-            time.sleep(1)
+            time.sleep(0.1)
 
 
 def init_threads(binary_path, oracle_path, validation_test_list, source_file):
@@ -84,14 +84,19 @@ def consume_patches(patch_dir, process_dir, consume_limit, max_limit):
         if not list_dir:
             time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
+        if len_gen == len_processed:
+            time.sleep(1)
+            continue
         list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))
+        if not list_selected:
+            pass
         queueLock.acquire()
         for patch_file in list_selected:
             utilities.execute_command("cp {} {}".format(patch_dir + "/" + patch_file, process_dir))
             workQueue.put(process_dir + "/" + patch_file)
             consume_count += 1
         queueLock.release()
-        emitter.information("Generated:{} Consumed:{} Processed:{}".format(len_gen, consume_count, processed_count))
+        emitter.information("\t\t\t Generated:{} Consumed:{} Processed:{}".format(len_gen, consume_count, processed_count))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
         len_processed = len(values.LIST_PROCESSED)
 

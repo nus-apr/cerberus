@@ -114,7 +114,6 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         parallel.wait_validation()
         timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         utilities.execute_command(timestamp_command)
-        parallel.analyse_output(patch_dir)
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
@@ -135,6 +134,9 @@ def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     tool.print_analysis(size_space, n_enumerated, n_plausible, n_noncompile, time_duration)
     tool.log_output_path = None
     logger.analysis(exp_id)
+    dir_output = dir_info["output"]
+    patch_dir = dir_output + "/patches"
+    parallel.analyse_output(patch_dir)
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
