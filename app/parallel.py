@@ -48,7 +48,7 @@ def validate(thread):
                                                                                        patch_file,
                                                                                        thread.source_file,
                                                                                        values.DEFAULT_TEST_TIMEOUT)
-            validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0 --only-validate"
+            validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
             utilities.execute_command(validate_command)
             utilities.execute_command("rm -rf {}".format(patch_file))
 
