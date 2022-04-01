@@ -104,13 +104,7 @@ class F1X(AbstractTool):
         dir_expr = dir_info["experiment"]
         dir_artifact = dir_info["artifact"]
         dir_patch_gen = dir_expr + "/patches"
-        dir_patch_valid = dir_expr + "/patch-valid"
-        dir_patch_invalid = dir_expr + "/patch-invalid"
-        dir_patch_error = dir_expr + "/patch-error"
         save_command = "cp -rf " + dir_patch_gen + " " + dir_artifact
-        save_command += ";cp -rf " + dir_patch_valid + " " + dir_artifact
-        save_command += ";cp -rf " + dir_patch_invalid + " " + dir_artifact
-        save_command += ";cp -rf " + dir_patch_error + " " + dir_artifact
         self.run_command(save_command, "/dev/null", "/", container_id)
         super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
         return

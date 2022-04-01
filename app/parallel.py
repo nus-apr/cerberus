@@ -16,6 +16,8 @@ threads = []
 max_thread_count = mp.cpu_count()
 thread_count = 0
 exit_flag = 0
+consume_count = 0
+processed_count = 0
 
 
 class myThread(threading.Thread):
@@ -35,7 +37,7 @@ class myThread(threading.Thread):
 
 
 def validate(thread):
-    global exit_flag, queueLock, workQueue
+    global exit_flag, queueLock, workQueue, processed_count
     while not exit_flag:
         queueLock.acquire()
         if not workQueue.empty():
@@ -51,6 +53,7 @@ def validate(thread):
             validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
             utilities.execute_command(validate_command)
             utilities.execute_command("rm -rf {}".format(patch_file))
+            processed_count += 1
 
         else:
             queueLock.release()
@@ -72,7 +75,7 @@ def consume_patches(patch_dir, process_dir, consume_limit, max_limit):
     list_dir = os.listdir(patch_dir)
     len_gen = len(list_dir)
     len_processed = -1
-    global workQueue, queueLock, exit_flag
+    global workQueue, queueLock, exit_flag, consume_count
     while len_gen != len_processed or values.APR_TOOL_RUNNING:
         list_dir = os.listdir(patch_dir)
         len_gen = len(list_dir)
@@ -82,13 +85,13 @@ def consume_patches(patch_dir, process_dir, consume_limit, max_limit):
             time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
         list_selected = list(set(list_dir) - set(values.LIST_PROCESSED))
-        len_sel = len(list_selected)
         queueLock.acquire()
         for patch_file in list_selected:
             utilities.execute_command("cp {} {}".format(patch_dir + "/" + patch_file, process_dir))
             workQueue.put(process_dir + "/" + patch_file)
+            consume_count += 1
         queueLock.release()
-        emitter.debug("Generated:{} Processed:{} Selected:{}".format(len_gen, len_processed, len_sel))
+        emitter.information("Generated:{} Consumed:{} Processed:{}".format(len_gen, consume_count, processed_count))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
         len_processed = len(values.LIST_PROCESSED)
 
@@ -104,4 +107,20 @@ def wait_validation():
     # Wait for all threads to complete
     for t in threads:
         t.join()
+
+
+def analyse_output(patch_dir):
+    global consume_count, processed_count
+    parent_dir = os.path.dirname(patch_dir)
+    dir_valid = parent_dir + "/patch-valid"
+    dir_invalid = parent_dir + "/patch-invalid"
+    dir_error = parent_dir + "/patch-error"
+    len_dir_valid = len(os.listdir(dir_valid))
+    len_dir_invalid = len(os.listdir(dir_invalid))
+    len_dir_error = len(os.listdir(dir_error))
+    emitter.highlight("\t\t\t count consumed: {0}".format(consume_count))
+    emitter.highlight("\t\t\t count processed: {0}".format(processed_count))
+    emitter.highlight("\t\t\t count valid patches: {0}".format(len_dir_valid))
+    emitter.highlight("\t\t\t count invalid patches: {0}".format(len_dir_invalid))
+    emitter.highlight("\t\t\t count unsupported patches: {0}".format(len_dir_error))
 

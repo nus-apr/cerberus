@@ -95,8 +95,7 @@ def highlight(message, jump_line=True):
 
 
 def information(message, jump_line=True):
-    if values.CONF_DEBUG:
-        write(message, GREY, jump_line)
+    write(message, GREY, jump_line)
     logger.information(message)
 
 
