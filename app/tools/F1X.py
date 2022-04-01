@@ -103,8 +103,14 @@ class F1X(AbstractTool):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_expr = dir_info["experiment"]
         dir_artifact = dir_info["artifact"]
-        dir_patches = dir_expr + "/patches"
-        save_command = "cp -rf " + dir_patches + " " + dir_artifact
+        dir_patch_gen = dir_expr + "/patches"
+        dir_patch_valid = dir_expr + "/patch-valid"
+        dir_patch_invalid = dir_expr + "/patch-invalid"
+        dir_patch_error = dir_expr + "/patch-error"
+        save_command = "cp -rf " + dir_patch_gen + " " + dir_artifact
+        save_command += ";cp -rf " + dir_patch_valid + " " + dir_artifact
+        save_command += ";cp -rf " + dir_patch_invalid + " " + dir_artifact
+        save_command += ";cp -rf " + dir_patch_error + " " + dir_artifact
         self.run_command(save_command, "/dev/null", "/", container_id)
         super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
         return
@@ -158,10 +164,12 @@ class F1X(AbstractTool):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_plausible = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
-            dir_filtered = dir_results + "/patch-filtered"
-            if dir_filtered and os.path.isdir(dir_filtered):
-                output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
+            dir_valid = dir_results + "/patch-valid"
+            count_plausible = 0
+            if dir_valid and os.path.isdir(dir_valid):
+                output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
+
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
