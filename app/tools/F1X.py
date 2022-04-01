@@ -75,7 +75,7 @@ class F1X(AbstractTool):
                 repair_command += " --output-space patch-space "
             dry_command = repair_command + " --disable-dteq"
             self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
-            all_command = repair_command + "--enable-assignment --disable-dteq --enable-validation  -a -o patches -v "
+            all_command = repair_command + " --enable-assignment --disable-dteq --enable-validation  -a -o patches -v "
             if additional_tool_param:
                 all_command = all_command + " " + additional_tool_param
             status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
@@ -118,6 +118,8 @@ class F1X(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
+        time_build = 0
+        time_validation = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -140,7 +142,13 @@ class F1X(AbstractTool):
                     count = line.split("candidates evaluated: ")[-1].strip().replace("\n", "")
                     if str(count).isnumeric():
                         count_enumerations = int(count)
-                if "explored count: " in line:
+                elif "validation time: " in line:
+                    time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                    time_validation += float(time)
+                elif "build time: " in line:
+                    time = line.split("build time: ")[-1].strip().replace("\n", "")
+                    time_build += float(time)
+                elif "explored count: " in line:
                     count = line.split("explored count: ")[-1].strip().replace("\n", "")
                     if str(count).isnumeric():
                         count_enumerations = int(count)
@@ -163,7 +171,6 @@ class F1X(AbstractTool):
             if dir_valid and os.path.isdir(dir_valid):
                 output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
-
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
@@ -173,5 +180,9 @@ class F1X(AbstractTool):
                 log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
+            log_file.write("\t\t time build: {0} seconds\n".format(time_build))
+            log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable)
+        time_info = (time_build, time_validation, time_duration)
+        return patch_space_info, time_info

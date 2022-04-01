@@ -125,14 +125,13 @@ def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     dir_results = dir_info["result"]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    size_space, n_enumerated, n_plausible, n_noncompile, time_duration = tool.analyse_output(dir_logs, dir_results,
-                                                                                             dir_expr, dir_setup, bug_id,
-                                                                                             failing_test_list)
-
+    space_info, time_info = tool.analyse_output(dir_logs, dir_results,
+                                                dir_expr, dir_setup, bug_id,
+                                                failing_test_list)
     conf_id = str(values.CONFIG_ID)
     exp_id = conf_id + "-" + bug_id
-    values.ANALYSIS_RESULTS[exp_id] = [size_space, n_enumerated, n_plausible, n_noncompile, time_duration]
-    tool.print_analysis(size_space, n_enumerated, n_plausible, n_noncompile, time_duration)
+    values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
+    tool.print_analysis(space_info, time_info)
     tool.log_output_path = None
     logger.analysis(exp_id)
     dir_output = dir_info["output"]
