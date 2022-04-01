@@ -7,7 +7,7 @@ import re
 import traceback
 import signal
 import time
-from app import emitter, logger, definitions, values, utilities, configuration, parallel
+from app import emitter, logger, definitions, values, utilities, configuration, valkyrie
 from app.benchmarks import AbstractBenchmark
 from app.tools import AbstractTool
 from os.path import dirname, abspath
@@ -104,14 +104,14 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     utilities.execute_command("mkdir {}".format(dir_process))
     if values.DEFAULT_USE_VALKYRIE:
         values.APR_TOOL_RUNNING = True
-        parallel.init_threads(valkyrie_binary_path, valkyrie_oracle_path, validation_test_list, fix_source_file)
-        t1 = threading.Thread(target=parallel.consume_patches, args=(patch_dir, dir_process, consume_limit, max_limit))
+        valkyrie.init_threads(valkyrie_binary_path, valkyrie_oracle_path, validation_test_list, fix_source_file)
+        t1 = threading.Thread(target=valkyrie.consume_patches, args=(patch_dir, dir_process, consume_limit, max_limit))
         t1.start()
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
         t1.join()
-        parallel.wait_validation()
+        valkyrie.wait_validation()
         timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         utilities.execute_command(timestamp_command)
 
@@ -136,7 +136,7 @@ def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     logger.analysis(exp_id)
     dir_output = dir_info["output"]
     patch_dir = dir_output + "/patches"
-    parallel.analyse_output(patch_dir)
+    valkyrie.analyse_output(patch_dir)
 
 
 def retrieve_results(archive_name, tool: AbstractTool):

@@ -76,9 +76,10 @@ def consume_patches(patch_dir, process_dir, consume_limit, max_limit):
     len_gen = len(list_dir)
     len_processed = -1
     global workQueue, queueLock, exit_flag, consume_count
-    while len_gen != len_processed or values.APR_TOOL_RUNNING:
+    while len_gen != len_processed or values.APR_TOOL_RUNNING or not workQueue.empty():
         list_dir = os.listdir(patch_dir)
         len_gen = len(list_dir)
+        emitter.information("\t\t\t Generated:{} Consumed:{} Processed:{}".format(len_gen, consume_count, processed_count))
         if not values.APR_TOOL_RUNNING:
             len_processed = len(values.LIST_PROCESSED)
         if not list_dir:
@@ -96,13 +97,8 @@ def consume_patches(patch_dir, process_dir, consume_limit, max_limit):
             workQueue.put(process_dir + "/" + patch_file)
             consume_count += 1
         queueLock.release()
-        emitter.information("\t\t\t Generated:{} Consumed:{} Processed:{}".format(len_gen, consume_count, processed_count))
         values.LIST_PROCESSED = values.LIST_PROCESSED + list_selected
         len_processed = len(values.LIST_PROCESSED)
-
-    # Wait for queue to empty
-    while not workQueue.empty():
-        pass
 
 
 def wait_validation():
@@ -116,6 +112,7 @@ def wait_validation():
 
 def analyse_output(patch_dir):
     global consume_count, processed_count
+    emitter.normal("\t\t\t analysing output of Valkyrie")
     parent_dir = os.path.dirname(patch_dir)
     dir_valid = parent_dir + "/patch-valid"
     dir_invalid = parent_dir + "/patch-invalid"
