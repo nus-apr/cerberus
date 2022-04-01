@@ -75,7 +75,7 @@ class F1X(AbstractTool):
                 repair_command += " --output-space patch-space "
             dry_command = repair_command + " --disable-dteq"
             self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
-            all_command = repair_command + "--enable-assignment --disable-dteq  -a -o patches -v "
+            all_command = repair_command + "--enable-assignment --disable-dteq --enable-validation  -a -o patches -v "
             if additional_tool_param:
                 all_command = all_command + " " + additional_tool_param
             status = self.run_command(all_command, self.log_output_path, dir_expr, container_id)
