@@ -95,6 +95,7 @@ class Darjeeling(AbstractTool):
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
         count_non_compilable = 0
         count_plausible = 0
+        count_generated = 0
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
@@ -139,17 +140,18 @@ class Darjeeling(AbstractTool):
         dir_patch = dir_results + "/patches"
         if os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
-            count_plausible = len(output_patch_list)
+            count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
             dir_filtered = dir_results + "/patch-filtered"
-            count_plausible = 0
+            count_generated = 0
             if os.path.isdir(dir_filtered):
                 output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
-                count_plausible = len(output_patch_list)
+                count_generated = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+            log_file.write("\t\t count generated patches: {0}\n".format(count_generated))
             log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
@@ -157,7 +159,7 @@ class Darjeeling(AbstractTool):
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable)
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
         time_info = (time_build, time_validation, time_duration)
         return patch_space_info, time_info
 
