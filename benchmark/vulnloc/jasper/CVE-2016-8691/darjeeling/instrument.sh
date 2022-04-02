@@ -67,7 +67,7 @@ program:
     type: shell
     workdir: $setup_dir_path
 resource-limits:
-  candidates: 1000
+  candidates: 100000
 seed: 0
 threads: 1
 transformations:
