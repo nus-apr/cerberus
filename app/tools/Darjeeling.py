@@ -98,6 +98,8 @@ class Darjeeling(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
+        time_build = 0
+        time_validation = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -118,6 +120,12 @@ class Darjeeling(AbstractTool):
             for line in log_lines:
                 if "candidate evaluations" in line:
                     count_enumerations = int(line.split("candidate evaluations: ")[-1])
+                elif "validation time: " in line:
+                    time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                    time_validation += float(time)
+                elif "build time: " in line:
+                    time = line.split("build time: ")[-1].strip().replace("\n", "")
+                    time_build += float(time)
                 elif "possible edits" in line:
                     size_search_space = line.split(": ")[2].split(" ")[0]
                 elif "plausible patches" in line:
@@ -146,6 +154,10 @@ class Darjeeling(AbstractTool):
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
+            log_file.write("\t\t time build: {0} seconds\n".format(time_build))
+            log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable)
+        time_info = (time_build, time_validation, time_duration)
+        return patch_space_info, time_info
 

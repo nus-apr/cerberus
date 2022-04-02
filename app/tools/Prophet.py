@@ -201,6 +201,8 @@ class Prophet(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
+        time_build = 0
+        time_validation = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
@@ -223,6 +225,12 @@ class Prophet(AbstractTool):
                         is_error = True
                     elif "Verification failed!" in line or "Repair error:" in line:
                         emitter.warning("\t\t\t\t[warning] verification error detected in test suite")
+                    elif "validation time: " in line:
+                        time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                        time_validation += float(time)
+                    elif "build time: " in line:
+                        time = line.split("build time: ")[-1].strip().replace("\n", "")
+                        time_build += float(time)
                 log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
@@ -243,6 +251,10 @@ class Prophet(AbstractTool):
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
+            log_file.write("\t\t time build: {0} seconds\n".format(time_build))
+            log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable)
+        time_info = (time_build, time_validation, time_duration)
+        return patch_space_info, time_info
 
