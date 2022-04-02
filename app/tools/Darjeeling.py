@@ -119,8 +119,8 @@ class Darjeeling(AbstractTool):
             time_end = log_lines[-1].replace("\n", "")
             time_duration = self.time_duration(time_start, time_end)
             for line in log_lines:
-                if "candidate evaluations" in line:
-                    count_enumerations = int(line.split("candidate evaluations: ")[-1])
+                if "evaluated candidate" in line:
+                    count_enumerations += 1
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
                     time_validation += float(time)
