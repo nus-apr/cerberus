@@ -112,12 +112,13 @@ class AbstractTool:
         return
 
     def print_analysis(self, space_info, time_info):
-        size_space, n_enumerated, n_plausible, n_noncompile = space_info
+        size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
         time_build, time_validation, time_duration = time_info
         n_implausible = n_enumerated - n_plausible - n_noncompile
         emitter.highlight("\t\t\t search space size: {0}".format(size_space))
         emitter.highlight("\t\t\t count enumerations: {0}".format(n_enumerated))
         emitter.highlight("\t\t\t count plausible patches: {0}".format(n_plausible))
+        emitter.highlight("\t\t\t count generated: {0}".format(n_generated))
         emitter.highlight("\t\t\t count non-compiling patches: {0}".format(n_noncompile))
         emitter.highlight("\t\t\t count implausible patches: {0}".format(n_implausible))
         emitter.highlight("\t\t\t time build: {0} seconds".format(time_build))

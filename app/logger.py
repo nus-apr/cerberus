@@ -114,7 +114,7 @@ def warning(message):
 
 def analysis(exp_id):
     space_info, time_info = values.ANALYSIS_RESULTS[exp_id]
-    size_space, n_enumerated, n_plausible, n_noncompile = space_info
+    size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
     time_build, time_validation, time_duration = time_info
     n_implausible = n_enumerated - n_plausible - n_noncompile
     with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
@@ -122,6 +122,7 @@ def analysis(exp_id):
         log_file.write("\t\t search space size: {0}\n".format(size_space))
         log_file.write("\t\t count enumerations: {0}\n".format(n_enumerated))
         log_file.write("\t\t count plausible patches: {0}\n".format(n_plausible))
+        log_file.write("\t\t count generated patches: {0}\n".format(n_generated))
         log_file.write("\t\t count non-compiling patches: {0}\n".format(n_noncompile))
         log_file.write("\t\t count implausible patches: {0}\n".format(n_implausible))
         log_file.write("\t\t time build: {0} seconds\n".format(time_build))

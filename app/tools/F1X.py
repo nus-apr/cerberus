@@ -115,6 +115,7 @@ class F1X(AbstractTool):
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
         count_non_compilable = 0
         count_plausible = 0
+        count_generated = 0
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
@@ -148,10 +149,8 @@ class F1X(AbstractTool):
                 elif "build time: " in line:
                     time = line.split("build time: ")[-1].strip().replace("\n", "")
                     time_build += float(time)
-                elif "explored count: " in line:
-                    count = line.split("explored count: ")[-1].strip().replace("\n", "")
-                    if str(count).isnumeric():
-                        count_enumerations = int(count)
+                elif "validating patch " in line:
+                    count_enumerations += 1
                 elif "search space size: " in line:
                     size_search_space = int(line.split("search space size: ")[-1])
                 elif "plausible patches: " in line:
@@ -164,10 +163,10 @@ class F1X(AbstractTool):
         dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
-            count_plausible = len(output_patch_list)
+            count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
             dir_valid = dir_results + "/patch-valid"
-            count_plausible = 0
+            count_generated = 0
             if dir_valid and os.path.isdir(dir_valid):
                 output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
@@ -179,10 +178,11 @@ class F1X(AbstractTool):
                 log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
                 log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+            log_file.write("\t\t count generated: {0}\n".format(count_generated))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable)
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
         time_info = (time_build, time_validation, time_duration)
         return patch_space_info, time_info
