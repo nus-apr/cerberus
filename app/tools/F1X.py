@@ -170,7 +170,7 @@ class F1X(AbstractTool):
             if dir_valid and os.path.isdir(dir_valid):
                 output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
+        count_implausible = (size_search_space - count_plausible) + (count_enumerations - count_generated)
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             if not values.DEFAULT_DUMP_PATCHES:
