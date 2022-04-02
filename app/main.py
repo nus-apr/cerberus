@@ -19,6 +19,8 @@ end_time = 0
 def create_directories():
     if not os.path.isdir(definitions.DIR_LOGS):
         os.makedirs(definitions.DIR_LOGS)
+    if not os.path.isdir(definitions.DIR_ARTIFACTS):
+        os.makedirs(definitions.DIR_ARTIFACTS)
     if not os.path.isdir(definitions.DIR_RESULT):
         os.makedirs(definitions.DIR_RESULT)
     if not os.path.isdir(definitions.DIR_EXPERIMENT):
