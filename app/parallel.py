@@ -47,13 +47,16 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
         if os.path.isdir(dir_error):
             len_error = len(os.listdir(dir_error))
         len_processing = len(os.listdir(dir_process))
+        len_processed = len(result_list)
         if len_gen > 0:
-            emitter.information("\t\t\t Generated:{} Consumed:{} Processing:{} Valid:{} Invalid:{} Error:{}".format(len_gen,
-                                                                                                                    len_consumed,
-                                                                                                                    len_processing,
-                                                                                                                    len_valid,
-                                                                                                                    len_invalid,
-                                                                                                                    len_error))
+            emitter.information("\t\t\t Generated:{} Consumed:{} Processed: {}"
+                                " Processing:{} Valid:{} Invalid:{} Error:{}".format(len_gen,
+                                                                                     len_consumed,
+                                                                                     len_processed,
+                                                                                     len_processing,
+                                                                                     len_valid,
+                                                                                     len_invalid,
+                                                                                     len_error))
         if not values.APR_TOOL_RUNNING:
             len_consumed = len(values.LIST_CONSUMED)
         if not list_dir:

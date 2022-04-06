@@ -29,6 +29,7 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     remove_command = "rm -rf {}".format(patch_file)
     os.system(remove_command)
     processed_count += 1
+    return patch_file
 
 
 def analyse_output(patch_dir):
