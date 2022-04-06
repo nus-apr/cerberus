@@ -27,6 +27,10 @@ class VulnLoc(AbstractBenchmark):
             emitter.success("\t\t\t[benchmark] verified successfully")
         else:
             emitter.error("\t\t\t[benchmark] verification failed")
+        if self.transform(exp_setup_dir_path, bug_id, config_id, container_id):
+            emitter.success("\t\t\t[benchmark] transformation successful")
+        else:
+            emitter.error("\t\t\t[benchmark] transformation failed")
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id):
@@ -61,6 +65,13 @@ class VulnLoc(AbstractBenchmark):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
         self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
         command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
+        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        return status == 0
+
+    def transform(self, setup_dir_path, bug_id, config_id, container_id):
+        emitter.normal("\t\t\ttransform fix-file")
+        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
+        command_str = "bash transform.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status == 0
 
