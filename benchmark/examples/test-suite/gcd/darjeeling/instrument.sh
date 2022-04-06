@@ -10,16 +10,16 @@ fix_file=$2
 
 cat <<EOF > darjeeling-driver
 #!/bin/bash
-$setup_dir_path/test.sh /experiment $1
+$setup_dir_path/test.sh /experiment 1 \${1:-}
 EOF
-chmod+x darjeeling-driver
+chmod +x darjeeling-driver
 
 cat <<EOF > Dockerfile
 FROM rshariffdeen/cerberus:darjeeling
 RUN mkdir -p /setup/$benchmark_name/$project_name/$bug_id
 COPY . $setup_dir_path
+COPY darjeeling/darjeeling-driver $setup_dir_path
 RUN /setup/$benchmark_name/$project_name/$bug_id/setup.sh /experiment
-COPY darjeeling/darjeeling-driver $benchmark_name/$project_name/$bug_id/src/test.sh
 WORKDIR /experiment
 EOF
 
