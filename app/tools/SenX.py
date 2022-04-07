@@ -123,6 +123,10 @@ class SenX(AbstractTool):
         size_search_space = 0
         count_enumerations = 0
         time_duration = 0
+        count_generated = 0
+        time_first = 0
+        time_validation = 0
+        time_build = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
@@ -157,7 +161,9 @@ class SenX(AbstractTool):
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
+        time_info = (time_build, time_validation, time_duration, time_first)
+        return patch_space_info, time_info
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))
