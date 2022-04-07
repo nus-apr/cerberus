@@ -9,11 +9,13 @@ import os
 import sys
 import re
 
+
 def mute():
     sys.stdout = open(os.devnull, 'w')
     sys.stderr = open(os.devnull, 'w')
 
-max_process_count = mp.cpu_count()
+
+max_process_count = 200
 validator_pool = mp.Pool(max_process_count, initializer=mute)
 exit_consume = 0
 consume_count = 0
@@ -63,7 +65,7 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
             time.sleep(values.DEFAULT_VALKYRIE_WAIT_TIME)
             continue
         if len_gen == len_consumed:
-            time.sleep(1)
+            time.sleep(3)
             continue
         list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
         for patch_file in list_selected:
@@ -80,6 +82,7 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
 def wait_validation():
     global exit_consume, validator_pool
     # Notify threads it's time to exit
+    time.sleep(5)
     validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
     validator_pool.join()
