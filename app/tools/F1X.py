@@ -6,6 +6,7 @@ from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
 from os import listdir
 from os.path import isfile, join
+from datetime import datetime
 
 
 class F1X(AbstractTool):
@@ -63,7 +64,7 @@ class F1X(AbstractTool):
             else:
                 abs_path_buggy_file = dir_expr + "/src/" + fix_file
 
-            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
             repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
             repair_command += " -f {0} ".format(abs_path_buggy_file)
@@ -89,7 +90,7 @@ class F1X(AbstractTool):
 
             if values.DEFAULT_DUMP_PATCHES:
                 self.create_patches_from_space(dir_expr, fix_file, container_id)
-            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
         return
 
@@ -109,6 +110,18 @@ class F1X(AbstractTool):
         super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
+    def compute_latency(self, start_time_str, end_time_str):
+        # Fri 08 Oct 2021 04:59:55 PM +08
+        # 2022-Apr-07 04:38:46.994352
+        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
+        fmt_2 = '%Y-%b-%d %H:%M:%S.%f'
+        start_time_str = start_time_str.split(" +")[0].strip()
+        end_time_str = end_time_str.split(" +")[0].strip()
+        tstart = datetime.strptime(start_time_str, fmt_1)
+        tend = datetime.strptime(end_time_str, fmt_2)
+        duration = (tend - tstart).total_seconds()
+        return duration
+
     def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         conf_id = str(values.CONFIG_ID)
@@ -121,6 +134,7 @@ class F1X(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
+        time_first = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -132,12 +146,12 @@ class F1X(AbstractTool):
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
-
+        time_stamp_first = None
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
-            time_start = log_lines[0].replace("\n", "")
-            time_end = log_lines[-1].replace("\n", "")
-            time_duration = self.time_duration(time_start, time_end)
+            time_stamp_start = log_lines[0].replace("\n", "")
+            time_stamp_end = log_lines[-1].replace("\n", "")
+            time_duration = self.time_duration(time_stamp_start, time_stamp_end)
             for line in log_lines:
                 if "candidates evaluated: " in line:
                     count = line.split("candidates evaluated: ")[-1].strip().replace("\n", "")
@@ -157,7 +171,11 @@ class F1X(AbstractTool):
                     count_plausible = int(line.split("plausible patches: ")[-1])
                 elif "failed to infer compile commands" in line:
                     size_search_space = -1
+                elif "PASS" in line:
+                    if time_stamp_first is None:
+                        time_stamp_first = line.split("[debug]")[0].replace("[", "").replace("]", "")
             log_file.close()
+        time_first = self.compute_latency(time_stamp_start, time_stamp_first)
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
@@ -183,6 +201,7 @@ class F1X(AbstractTool):
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
+            log_file.write("\t\t time latency: {0} seconds\n".format(time_first))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration)
+        time_info = (time_build, time_validation, time_duration, time_first)
         return patch_space_info, time_info
