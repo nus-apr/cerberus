@@ -17,8 +17,10 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     test_id_str = ",".join(test_id_list)
     validate_command = "cp {} {};".format(dir_patch + "/" + patch_file, dir_process)
     patch_file = dir_process + "/" + patch_file
-    validate_command += "valkyrie --binary={} --test-oracle={} --test-id-list={} " \
-                       "--patch-file={} --source={} --test-timeout={} ".format(binary_path,
+    output_dir = os.path.dirname(binary_path)
+    validate_command += "LD_LIBRARY_PATH={} valkyrie --binary={} --test-oracle={} --test-id-list={} " \
+                       "--patch-file={} --source={} --test-timeout={} ".format(output_dir,
+                                                                               binary_path,
                                                                                oracle_path,
                                                                                test_id_str,
                                                                                patch_file,
