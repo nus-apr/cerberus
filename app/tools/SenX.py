@@ -135,7 +135,7 @@ class SenX(AbstractTool):
         is_error = False
 
         if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r") as log_file:
+            with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
                 log_lines = log_file.readlines()
                 time_start = log_lines[0].replace("\n", "")
                 time_end = log_lines[-1].replace("\n", "")
