@@ -212,7 +212,10 @@ class Prophet(AbstractTool):
         time_latency = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+            patch_space_info = (
+            size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
+            time_info = (time_build, time_validation, time_duration, time_latency, "")
+            return patch_space_info, time_info
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         if os.path.isfile(self.log_output_path):

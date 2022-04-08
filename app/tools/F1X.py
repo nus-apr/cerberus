@@ -139,6 +139,7 @@ class F1X(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
+        time_latency = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -147,7 +148,10 @@ class F1X(AbstractTool):
                     break
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+            patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
+            time_info = (time_build, time_validation, time_duration, time_latency, "")
+            return patch_space_info, time_info
+
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         time_stamp_first = None
@@ -179,7 +183,7 @@ class F1X(AbstractTool):
                     if time_stamp_first is None:
                         time_stamp_first = line.split("[debug]")[0].replace("[", "").replace("]", "")
             log_file.close()
-        time_latency = 0
+
         if time_stamp_first:
             time_latency = self.compute_latency_tool(time_stamp_start, time_stamp_first)
 
