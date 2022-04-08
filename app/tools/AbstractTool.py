@@ -113,7 +113,7 @@ class AbstractTool:
 
     def print_analysis(self, space_info, time_info):
         size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
-        time_build, time_validation, time_duration, time_latency = time_info
+        time_build, time_validation, time_duration, time_latency, _ = time_info
         n_implausible = n_enumerated - n_plausible - n_noncompile
         emitter.highlight("\t\t\t search space size: {0}".format(size_space))
         emitter.highlight("\t\t\t count enumerations: {0}".format(n_enumerated))
@@ -134,10 +134,3 @@ class AbstractTool:
                 rm_command = "rm -rf " + exp_dir
                 execute_command(rm_command)
 
-    def compute_latency_valkyrie(self, start_time_str, tend):
-        # Fri 08 Oct 2021 04:59:55 PM +08
-        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
-        start_time_str = start_time_str.split(" +")[0].strip()
-        tstart = datetime.strptime(start_time_str, fmt_1).timestamp()
-        duration = (tend - tstart)
-        return duration

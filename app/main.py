@@ -137,7 +137,7 @@ def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     dir_output = dir_info["output"]
     patch_dir = dir_output + "/patches"
     if values.DEFAULT_USE_VALKYRIE:
-        valkyrie.analyse_output(patch_dir)
+        valkyrie.analyse_output(patch_dir, time_info[4])
 
 
 def retrieve_results(archive_name, tool: AbstractTool):

@@ -191,17 +191,10 @@ class F1X(AbstractTool):
             count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
             dir_valid = dir_output + "/patch-valid"
-            count_generated = 0
-            time_first_patch = datetime.now().timestamp()
             if dir_valid and os.path.isdir(dir_valid):
                 output_patch_list = [join(dir_valid, f) for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
-                for output_patch in output_patch_list:
-                    modified_time = os.stat(output_patch).st_mtime
-                    if modified_time < time_first_patch:
-                        time_first_patch = modified_time
-            time_latency = self.compute_latency_valkyrie(time_stamp_start, time_first_patch)
-
+            count_generated = count_plausible
         count_implausible = (size_search_space - count_plausible) + (count_enumerations - count_generated)
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
@@ -217,5 +210,5 @@ class F1X(AbstractTool):
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
             log_file.write("\t\t time latency: {0} seconds\n".format(time_latency))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency)
+        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
         return patch_space_info, time_info

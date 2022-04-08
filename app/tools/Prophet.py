@@ -209,6 +209,7 @@ class Prophet(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
+        time_latency = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
@@ -217,9 +218,9 @@ class Prophet(AbstractTool):
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r", encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
-                time_start = log_lines[0].replace("\n", "")
-                time_end = log_lines[-1].replace("\n", "")
-                time_duration = self.time_duration(time_start, time_end)
+                time_stamp_start = log_lines[0].replace("\n", "")
+                time_stamp_end = log_lines[-1].replace("\n", "")
+                time_duration = self.time_duration(time_stamp_start, time_stamp_end)
                 for line in log_lines:
                     if "number of explored templates:" in line:
                         count_enumerations = int(line.split("number of explored templates: ")[-1])
@@ -262,6 +263,6 @@ class Prophet(AbstractTool):
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration)
+        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
         return patch_space_info, time_info
 

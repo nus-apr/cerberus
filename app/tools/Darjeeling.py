@@ -106,6 +106,7 @@ class Darjeeling(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
+        time_latency = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -120,9 +121,9 @@ class Darjeeling(AbstractTool):
         is_interrupted = False
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
-            time_start = log_lines[0].replace("\n", "")
-            time_end = log_lines[-1].replace("\n", "")
-            time_duration = self.time_duration(time_start, time_end)
+            time_stamp_start = log_lines[0].replace("\n", "")
+            time_stamp_end = log_lines[-1].replace("\n", "")
+            time_duration = self.time_duration(time_stamp_start, time_stamp_end)
             for line in log_lines:
                 if "evaluated candidate" in line:
                     count_enumerations += 1
@@ -165,6 +166,6 @@ class Darjeeling(AbstractTool):
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration)
+        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
         return patch_space_info, time_info
 

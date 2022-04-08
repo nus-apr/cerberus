@@ -6,8 +6,10 @@ from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import time
 import os
-import sys
-import re
+from os.path import isfile, join
+from os import listdir
+from datetime import datetime
+
 
 processed_count = 0
 
@@ -34,7 +36,16 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     return patch_file
 
 
-def analyse_output(patch_dir):
+def compute_latency_valkyrie(start_time_str, tend):
+        # Fri 08 Oct 2021 04:59:55 PM +08
+        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
+        start_time_str = start_time_str.split(" +")[0].strip()
+        tstart = datetime.strptime(start_time_str, fmt_1).timestamp()
+        duration = (tend - tstart)
+        return duration
+
+
+def analyse_output(patch_dir, time_stamp_start):
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.LIST_CONSUMED)
@@ -45,6 +56,16 @@ def analyse_output(patch_dir):
     len_dir_valid = len(os.listdir(dir_valid))
     len_dir_invalid = len(os.listdir(dir_invalid))
     len_dir_error = len(os.listdir(dir_error))
+
+    time_first_patch = datetime.now().timestamp()
+    if dir_valid and os.path.isdir(dir_valid):
+        output_patch_list = [join(dir_valid, f) for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
+        for output_patch in output_patch_list:
+            modified_time = os.stat(output_patch).st_mtime
+            if modified_time < time_first_patch:
+                time_first_patch = modified_time
+    time_latency = compute_latency_valkyrie(time_stamp_start, time_first_patch)
+    emitter.highlight("\t\t\t time latency: {0} seconds".format(time_latency))
     emitter.highlight("\t\t\t count consumed: {0}".format(consumed_count))
     emitter.highlight("\t\t\t count processed: {0}".format(processed_count))
     emitter.highlight("\t\t\t count valid patches: {0}".format(len_dir_valid))
