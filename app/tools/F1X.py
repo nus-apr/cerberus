@@ -110,7 +110,7 @@ class F1X(AbstractTool):
         super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
-    def compute_latency(self, start_time_str, end_time_str):
+    def compute_latency_tool(self, start_time_str, end_time_str):
         # Fri 08 Oct 2021 04:59:55 PM +08
         # 2022-Apr-07 04:38:46.994352
         fmt_1 = '%a %d %b %Y %H:%M:%S %p'
@@ -134,7 +134,6 @@ class F1X(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
-        time_first = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -175,7 +174,10 @@ class F1X(AbstractTool):
                     if time_stamp_first is None:
                         time_stamp_first = line.split("[debug]")[0].replace("[", "").replace("]", "")
             log_file.close()
-        time_first = self.compute_latency(time_stamp_start, time_stamp_first)
+        time_latency = 0
+        if time_stamp_first:
+            time_latency = self.compute_latency_tool(time_stamp_start, time_stamp_first)
+
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         dir_patch = dir_results + "/patches"
@@ -185,9 +187,16 @@ class F1X(AbstractTool):
         if values.CONF_USE_VALKYRIE:
             dir_valid = dir_results + "/patch-valid"
             count_generated = 0
+            time_first_patch = datetime.now().timestamp()
             if dir_valid and os.path.isdir(dir_valid):
                 output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
+                for output_patch in output_patch_list:
+                    modified_time = os.stat(output_patch).st_mtime
+                    if modified_time < time_first_patch:
+                        time_first_patch = modified_time
+            time_latency = self.compute_latency_valkyrie(time_stamp_start, time_first_patch)
+
         count_implausible = (size_search_space - count_plausible) + (count_enumerations - count_generated)
         with open(self.log_analysis_path, 'w') as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
@@ -201,7 +210,7 @@ class F1X(AbstractTool):
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-            log_file.write("\t\t time latency: {0} seconds\n".format(time_first))
+            log_file.write("\t\t time latency: {0} seconds\n".format(time_latency))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_first)
+        time_info = (time_build, time_validation, time_duration, time_latency)
         return patch_space_info, time_info

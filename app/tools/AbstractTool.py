@@ -134,3 +134,10 @@ class AbstractTool:
                 rm_command = "rm -rf " + exp_dir
                 execute_command(rm_command)
 
+    def compute_latency_valkyrie(self, start_time_str, tend):
+        # Fri 08 Oct 2021 04:59:55 PM +08
+        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
+        start_time_str = start_time_str.split(" +")[0].strip()
+        tstart = datetime.strptime(start_time_str, fmt_1).timestamp()
+        duration = (tend - tstart)
+        return duration
