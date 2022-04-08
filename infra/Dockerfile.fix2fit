@@ -100,6 +100,5 @@ RUN sed -i "9i if [ -z \"\$T_TIMEOUT\" ]\nthen\n      T_TIMEOUT=50000\nfi" /src/
 RUN ln -s /src/scripts/run.sh /usr/bin/fix2fit
 
 RUN mkdir /experiment
-#RUN git clone https://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:x-oauth-basic@github.com/rshariffdeen/APR-Study.git /experiments
 WORKDIR /experiment
 
