@@ -124,14 +124,9 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t[framework] analysing experiment results")
-    dir_logs = dir_info["log"]
-    dir_expr = dir_info["experiment"]
-    dir_setup = dir_info["setup"]
-    dir_results = dir_info["result"]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    space_info, time_info = tool.analyse_output(dir_logs, dir_results,
-                                                dir_expr, dir_setup, bug_id,
+    space_info, time_info = tool.analyse_output(dir_info, bug_id,
                                                 failing_test_list)
     conf_id = str(values.CONFIG_ID)
     exp_id = conf_id + "-" + bug_id

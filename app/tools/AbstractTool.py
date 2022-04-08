@@ -107,7 +107,7 @@ class AbstractTool:
         return
 
     @abc.abstractmethod
-    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
+    def analyse_output(self, dir_info, bug_id, fail_list):
         """analyse tool output and collect information"""
         return
 

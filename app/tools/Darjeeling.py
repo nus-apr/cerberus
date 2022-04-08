@@ -89,8 +89,13 @@ class Darjeeling(AbstractTool):
         super(Darjeeling, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
-    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
+    def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
+        dir_logs = dir_info["log"]
+        dir_expr = dir_info["experiment"]
+        dir_setup = dir_info["setup"]
+        dir_results = dir_info["result"]
+        dir_output = dir_info["output"]
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
         count_non_compilable = 0

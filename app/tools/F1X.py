@@ -122,8 +122,13 @@ class F1X(AbstractTool):
         duration = (tend - tstart).total_seconds()
         return duration
 
-    def analyse_output(self, dir_logs, dir_results, dir_expr, dir_setup, bug_id, fail_list):
+    def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
+        dir_logs = dir_info["log"]
+        dir_expr = dir_info["experiment"]
+        dir_setup = dir_info["setup"]
+        dir_results = dir_info["result"]
+        dir_output = dir_info["output"]
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
         count_non_compilable = 0
@@ -185,11 +190,11 @@ class F1X(AbstractTool):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
-            dir_valid = dir_results + "/patch-valid"
+            dir_valid = dir_output + "/patch-valid"
             count_generated = 0
             time_first_patch = datetime.now().timestamp()
             if dir_valid and os.path.isdir(dir_valid):
-                output_patch_list = [f for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
+                output_patch_list = [join(dir_valid, f) for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
                 count_plausible = len(output_patch_list)
                 for output_patch in output_patch_list:
                     modified_time = os.stat(output_patch).st_mtime
