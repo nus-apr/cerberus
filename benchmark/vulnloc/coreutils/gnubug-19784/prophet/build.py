@@ -33,7 +33,7 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
     # my_env["PATH"] = deps_dir + "/apr-util-1.5.3-build/bin:" + my_env["PATH"]
 
     if not compile_only:
-        my_env["CFLAGS"] = "-g -O0 -static -fPIE"
+        my_env["CFLAGS"] = "-g -O0 -Wno-error"
         my_env["CXXFLAGS"] = my_env["CFLAGS"]
         my_env["FORCE_UNSAFE_CONFIGURE"] = "1"
         config_command = "./configure".split(" ")
@@ -45,14 +45,14 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
         system("make clean")
 
     if not config_only:
-        my_env["CFLAGS"] = "-fsanitize=address -ggdb -fPIC -fPIE -g -O0"
-        my_env["CXXFLAGS"] = "-fsanitize=address -ggdb -fPIC -fPIE -g -O0"
+        my_env["CFLAGS"] = "-fsanitize=address -g -O0 -Wno-error"
+        my_env["CXXFLAGS"] = "-fsanitize=address -g -O0 -Wno-error"
         my_env["LDFLAGS"] = "-fsanitize=address"
         my_env["ASAN_OPTIONS"] = "detect_leaks = 0"
         if (paraj == 0):
-            ret = subprocess.call(["make"], env=my_env)
+            ret = subprocess.call(["make", "src/make-prime-list"], env=my_env)
         else:
-            ret = subprocess.call(["make", "-j", str(paraj)], env=my_env)
+            ret = subprocess.call(["make","src/make-prime-list", "-j", str(paraj)], env=my_env)
         if ret != 0:
             print("Failed to make!")
             exit(1)

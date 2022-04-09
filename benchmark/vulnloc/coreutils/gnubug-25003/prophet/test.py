@@ -40,6 +40,7 @@ if __name__ == "__main__":
         if (profile_dir != ""):
             cur_dir = profile_dir
 
+        system("mkdir " + test_dir)
         if (not path.exists(cur_dir + "/my-test")):
             system("cp -rf " + test_dir + " " + cur_dir + "/my_test")
         ori_dir = getcwd()
