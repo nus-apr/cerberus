@@ -114,19 +114,19 @@ class Prophet(AbstractTool):
             if not container.is_file(container_id, repair_file):
                 emitter.error("\t\t[error] no repair config file detected")
                 return
-            instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
-            self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
+            # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
+            # self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
             dir_patch = "/output/patches"
             mkdir_command = "mkdir " + dir_patch
             self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
             line_number = ""
             localization_file = dir_expr + "/workdir/profile_localization.res"
             self.generate_localization(experiment_info, localization_file, dir_setup, container_id)
-
-            repair_command = "timeout -k 5m {0}h prophet -feature-para /prophet-gpl/crawler/para-all.out ".format(timeout)
+            # -feature-para /prophet-gpl/crawler/para-all.out
+            repair_command = "timeout -k 5m {0}h prophet  prophet/prophet.conf ".format(timeout)
             repair_command += " -full-synthesis -full-explore "
             repair_command += " -r {0}".format(dir_expr + "/workdir")
-            repair_command += " -cond-ext -replace-ext -skip-verify "
+            repair_command += " -cond-ext -replace-ext "
             repair_command += " -o {}".format(dir_patch)
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " -dump-all "
