@@ -63,5 +63,5 @@ if __name__ == "__main__":
             if "AddressSanitizer" in error_log.read():
                 error = True
             if not error and (ret == 0 or ret == 1):
-                print(i, )
+                print(i)
         chdir(ori_dir)

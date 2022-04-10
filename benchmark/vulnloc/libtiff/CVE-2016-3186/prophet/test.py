@@ -56,5 +56,5 @@ if __name__ == "__main__":
             # print("timeout 10s /projects/jasper/src/appl/imginfo -f /workspace/jasper/poc/" + i + ".jp2 1>/dev/null 2>/dev/null")
             # print(i, ret)
             if (ret == 0 or ret == 1):
-                print(i,)
+                print(i)
         chdir(ori_dir)
