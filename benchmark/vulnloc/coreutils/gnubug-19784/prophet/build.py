@@ -50,9 +50,12 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
         my_env["LDFLAGS"] = "-fsanitize=address"
         my_env["ASAN_OPTIONS"] = "detect_leaks = 0"
         if (paraj == 0):
-            ret = subprocess.call(["make", "src/make-prime-list"], env=my_env)
+            ret = subprocess.call(["make", "CFLAGS=\"-fsanitize=address\"", "CXXFLAGS=\"-fsanitize=address\""],
+                                  env=my_env)
         else:
-            ret = subprocess.call(["make","src/make-prime-list", "-j", str(paraj)], env=my_env)
+            ret = subprocess.call(
+                ["make", "CFLAGS=\"-fsanitize=address\"", "CXXFLAGS=\"-fsanitize=address\"", "-j", str(paraj)],
+                env=my_env)
         if ret != 0:
             print("Failed to make!")
             exit(1)
