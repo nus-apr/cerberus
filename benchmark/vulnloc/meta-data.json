@@ -17,7 +17,7 @@
    "subject": "binutils",
    "bug_id": "CVE-2017-15020",
    "source_file": "bfd/dwarf1.c",
-   "line_numbers": [0],
+   "line_numbers": [236],
    "failing_test": "1",
    "passing_test": "",
    "count_neg": 1,
