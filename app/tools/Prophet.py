@@ -241,6 +241,10 @@ class Prophet(AbstractTool):
                     elif "build time: " in line:
                         time = line.split("build time: ")[-1].strip().replace("\n", "")
                         time_build += float(time)
+                    elif "Passed!" in line:
+                        if time_latency == 0:
+                            time_latency = int(line.replace("[", "").replace("] Passed!", " ").strip())
+                        count_plausible += 1
                 log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
