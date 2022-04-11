@@ -46,8 +46,7 @@ if __name__ == "__main__":
 
         # chdir(cur_dir + "/my-test")
         my_env = environ
-        
-        my_env["ASAN_OPTIONS"] = "detect_leaks=0"
+        my_env["ASAN_OPTIONS"] = "detect_leaks=0,halt_on_error=0"
 
         # super hacky, because fbc itself calls *ld*, damn it fbc
         for i in ids:
