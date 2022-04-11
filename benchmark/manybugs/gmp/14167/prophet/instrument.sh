@@ -37,3 +37,8 @@ Positive Cases: Tot 4
 Regression Cases: Tot 0
 
 EOF
+
+cd $dir_name
+prophet prophet/prophet.conf  -r workdir -init-only -o patches
+cp $script_dir/profile_localization.res $dir_name/workdir
+
