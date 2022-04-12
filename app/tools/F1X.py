@@ -179,7 +179,7 @@ class F1X(AbstractTool):
                     count_plausible = int(line.split("plausible patches: ")[-1])
                 elif "failed to infer compile commands" in line:
                     size_search_space = -1
-                elif "PASS" in line:
+                elif "PASS" in line and "[debug]" in line:
                     if time_stamp_first is None:
                         time_stamp_first = line.split("[debug]")[0].replace("[", "").replace("]", "")
             log_file.close()
