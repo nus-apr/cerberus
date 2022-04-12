@@ -39,9 +39,9 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
             print("Autoreconf failed!")
             chdir(ori_dir)
             exit(1)
-        my_env["CFLAGS"] = "-g -O0 -Wno-error"
-        my_env["CPPFLAGS"] = "-g -O0 -Wno-error"
-
+        my_env["CFLAGS"] = "-g -O0 -Wno-error -static -fPIC"
+        my_env["CPPFLAGS"] = "-g -O0 -Wno-error -static -fPIC"
+        my_env["LDFLAGS"] = "-static -fPIC"
         ret = subprocess.call(["./configure", "--disable-fast-install", "--disable-dependency-tracking"], env=my_env)
         if ret != 0:
             print("Configure Error!")
@@ -51,9 +51,9 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
 
     if not config_only:
         my_env["ASAN_OPTIONS"] = "detect_leaks=0,halt_on_error=0"
-        # my_env["CFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
-        # my_env["CPPFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
-        # my_env["LDFLAGS"] = " -static  -fsanitize=address -fPIC"
+        my_env["CFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
+        my_env["CPPFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
+        my_env["LDFLAGS"] = " -static  -fsanitize=address -fPIC"
         if (paraj == 0):
             ret = subprocess.call(["make", "CFLAGS=\"-fsanitize=address\"", "CPPFLAGS=\"-fsanitize=address\"", "LDFLAGS=\"-fsanitize=address\""],
                                   env=my_env)
