@@ -33,7 +33,7 @@ algorithm:
 coverage:
   method:
     files-to-instrument:
-    - $fix_file
+    - tools/tiffmedian.c
     type: gcov
 localization:
   type: spectrum-based
