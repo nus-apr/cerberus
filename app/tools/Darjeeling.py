@@ -144,6 +144,7 @@ class Darjeeling(AbstractTool):
                 if "evaluated candidate" in line:
                     count_enumerations += 1
                 elif "found plausible patch" in line:
+                    count_plausible += 1
                     if time_stamp_first is None:
                         time_stamp_first = line.split(" | ")[0]
                 elif "validation time: " in line:
