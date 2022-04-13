@@ -93,7 +93,7 @@ class Darjeeling(AbstractTool):
         # Fri 08 Oct 2021 04:59:55 PM +08
         # 2022-Apr-07 04:38:46.994352
         fmt_1 = '%a %d %b %Y %H:%M:%S %p'
-        fmt_2 = '%Y-%b-%d %H:%M:%S.%f'
+        fmt_2 = '%Y-%m-%d %H:%M:%S.%f'
         start_time_str = start_time_str.split(" +")[0].strip()
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt_1)
@@ -145,7 +145,7 @@ class Darjeeling(AbstractTool):
                     count_enumerations += 1
                 elif "found plausible patch" in line:
                     if time_stamp_first is None:
-                        time_stamp_first = line
+                        time_stamp_first = line.split(" | ")[0]
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
                     time_validation += float(time)
