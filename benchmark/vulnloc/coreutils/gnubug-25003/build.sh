@@ -6,9 +6,9 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
-PROJECT_CFLAGS="-fsanitize=address -ggdb"
-PROJECT_CXXFLAGS="-fsanitize=address -ggdb"
-PROJECT_LDFLAGS="-fsanitize=address"
+PROJECT_CFLAGS="-fsanitize=address -ggdb -Wno-error"
+PROJECT_CXXFLAGS="-fsanitize=address -ggdb -Wno-error"
+PROJECT_LDFLAGS="-fsanitize=address -Wno-error"
 
 if [[ -n "${CFLAGS}" ]]; then
   PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"

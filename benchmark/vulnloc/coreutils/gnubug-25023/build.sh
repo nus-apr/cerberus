@@ -9,7 +9,7 @@ cd $dir_name/src
 
 PROJECT_CFLAGS="-fsanitize=address -ggdb -Wno-error"
 PROJECT_CXXFLAGS="-fsanitize=address -ggdb -Wno-error"
-PROJECT_LDFLAGS=" -fsanitize=address"
+PROJECT_LDFLAGS=" -fsanitize=address -Wno-error"
 
 if [[ -n "${CFLAGS}" ]]; then
   PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
