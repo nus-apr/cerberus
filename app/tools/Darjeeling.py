@@ -8,7 +8,7 @@ from app import definitions, values, emitter, container
 import mmap
 from os import listdir
 from os.path import isfile, join
-
+from datetime import datetime
 
 class Darjeeling(AbstractTool):
     def __init__(self):
@@ -89,6 +89,18 @@ class Darjeeling(AbstractTool):
         super(Darjeeling, self).save_artefacts(dir_info, experiment_info, container_id)
         return
 
+    def compute_latency_tool(self, start_time_str, end_time_str):
+        # Fri 08 Oct 2021 04:59:55 PM +08
+        # 2022-Apr-07 04:38:46.994352
+        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
+        fmt_2 = '%Y-%b-%d %H:%M:%S.%f'
+        start_time_str = start_time_str.split(" +")[0].strip()
+        end_time_str = end_time_str.split(" +")[0].strip()
+        tstart = datetime.strptime(start_time_str, fmt_1)
+        tend = datetime.strptime(end_time_str, fmt_2)
+        duration = (tend - tstart).total_seconds()
+        return duration
+
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_logs = dir_info["log"]
@@ -122,6 +134,7 @@ class Darjeeling(AbstractTool):
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_interrupted = False
+        time_stamp_first = None
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_stamp_start = log_lines[0].replace("\n", "")
@@ -130,6 +143,9 @@ class Darjeeling(AbstractTool):
             for line in log_lines:
                 if "evaluated candidate" in line:
                     count_enumerations += 1
+                elif "found plausible patch" in line:
+                    if time_stamp_first is None:
+                        time_stamp_first = line
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
                     time_validation += float(time)
@@ -141,7 +157,8 @@ class Darjeeling(AbstractTool):
                 elif "plausible patches" in line:
                     count_plausible = int(line.split("found ")[-1].replace(" plausible patches", ""))
             log_file.close()
-
+        if time_stamp_first:
+            time_latency = self.compute_latency_tool(time_stamp_start, time_stamp_first)
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_interrupted:
@@ -165,6 +182,7 @@ class Darjeeling(AbstractTool):
             log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
+            log_file.write("\t\t time latency: {0} seconds\n".format(time_latency))
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
