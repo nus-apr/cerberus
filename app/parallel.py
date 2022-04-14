@@ -20,6 +20,7 @@ validator_pool = mp.Pool(max_process_count, initializer=mute)
 exit_consume = 0
 consume_count = 0
 result_list = []
+len_gen = 0
 
 
 def collect_result(result):
@@ -28,10 +29,10 @@ def collect_result(result):
 
 
 def consume_patches(binary_path, oracle_path, validation_test_list, source_file, dir_patch, dir_process):
+    global exit_consume, consume_count, validator_pool, len_gen
     list_dir = os.listdir(dir_patch)
     len_gen = len(list_dir)
     len_consumed = -1
-    global exit_consume, consume_count, validator_pool
     dir_base = os.path.dirname(dir_process)
     dir_valid = dir_base + "/patch-valid"
     dir_invalid = dir_base + "/patch-invalid"
@@ -80,9 +81,11 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
 
 
 def wait_validation():
-    global exit_consume, validator_pool
+    global exit_consume, validator_pool, len_gen, consume_count
     # Notify threads it's time to exit
     time.sleep(5)
+    while len_gen != consume_count:
+        pass
     validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
     validator_pool.join()

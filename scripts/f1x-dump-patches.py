@@ -86,6 +86,9 @@ def generate_patches(source_file, dir_exp):
                 os.system("cp {} {}".format(source_file, transform_file))
                 os.system("cp {0}_bk {0}".format(source_file))
                 # print("cp {0}_bk {0}".format(source_file))
+            else:
+                loc_id = loc_list.index(patch_loc) + 1
+                transform_file = "/tmp/f1x_{}".format(loc_id)
             patch_str = patch_desc.split(" in ")[0].replace(" ".join(patch_info[:6]), "")
             #generate_patch(patch_str, transform_file, patch_id, dir_exp, back_up)
             pool.apply_async(generate_patch,
