@@ -253,7 +253,7 @@ class Prophet(AbstractTool):
             output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
             count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
-            dir_filtered = dir_results + "/patch-filtered"
+            dir_filtered = dir_results + "/patch-valid"
             output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
             count_generated = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
