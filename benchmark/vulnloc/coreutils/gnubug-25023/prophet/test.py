@@ -52,7 +52,7 @@ if __name__ == "__main__":
         # super hacky, because fbc itself calls *ld*, damn it fbc
         for i in ids:
             # ret = system(test_cmd)
-            system("rm {0}/a; touch {0}/a".format(cur_dir))
+            system("rm a; touch a")
             ret = subprocess.call(["timeout 10s " + cur_dir + "/src/pr " + ' "-S$(printf "\t\t\t")" a -m ' + test_dir + "/" + i + ".txt 1>" + test_dir + "/" + i + ".out  2>" + test_dir + "/" + i + ".err"],
                                   shell=True, env=my_env)
             # print("timeout 12s /jasper/src/appl/imginfo -f /data/" + i + ".jp2 1>/dev/null 2>/dev/null")

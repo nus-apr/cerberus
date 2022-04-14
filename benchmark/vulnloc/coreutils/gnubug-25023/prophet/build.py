@@ -33,6 +33,7 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
     # my_env["PATH"] = deps_dir + "/apr-util-1.5.3-build/bin:" + my_env["PATH"]
 
     if not compile_only:
+        system("make clean")
         my_env["CFLAGS"] = "-g -O0 -Wno-error"
         my_env["CXXFLAGS"] = my_env["CFLAGS"]
         my_env["FORCE_UNSAFE_CONFIGURE"] = "1"
@@ -42,9 +43,9 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
             print("Configure Error!")
             chdir(ori_dir)
             exit(1)
-        system("make clean")
 
     if not config_only:
+        system("make clean")
         my_env["CFLAGS"] = "-fsanitize=address  -g -O0 -Wno-error"
         my_env["CXXFLAGS"] = "-fsanitize=address -g -O0 -Wno-error"
         my_env["LDFLAGS"] = "-fsanitize=address"
