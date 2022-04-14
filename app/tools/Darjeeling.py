@@ -83,8 +83,8 @@ class Darjeeling(AbstractTool):
         dir_patch = dir_expr + "/src/patches"
         dir_output = dir_info["output"]
         dir_artifact = dir_info["artifact"]
-        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
-        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+        # copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
+        # self.run_command(copy_command, "/dev/null", dir_expr, container_id)
 
         super(Darjeeling, self).save_artefacts(dir_info, experiment_info, container_id)
         return
