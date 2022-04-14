@@ -118,7 +118,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     if values.DEFAULT_USE_VALKYRIE:
         parallel.wait_validation()
         t1.join()
-        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         utilities.execute_command(timestamp_command)
 
 

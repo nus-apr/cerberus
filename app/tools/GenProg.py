@@ -65,7 +65,7 @@ class GenProg(AbstractTool):
             save_command = "mkdir {}; cp {} {}".format(dir_expr + "/orig", dir_expr + "/src/" + fix_file,
                                                        dir_expr + "/orig")
             self.run_command(save_command,self.log_output_path, dir_expr + "/src", container_id)
-            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
 
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
@@ -77,7 +77,7 @@ class GenProg(AbstractTool):
             else:
                 emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
         return
 

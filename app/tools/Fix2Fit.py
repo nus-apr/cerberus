@@ -34,7 +34,7 @@ class Fix2Fit(AbstractTool):
             with open(dir_expr + "/manifest.txt", "r") as man_file:
                 abs_path_buggy_file = dir_expr + "/src/" + man_file.readlines()[0].strip().replace("\n", "")
 
-        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
         execute_command(timestamp_command)
         repair_command = "export SUBJECT_DIR={0}; ".format(dir_setup)
         repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
@@ -51,7 +51,7 @@ class Fix2Fit(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
         execute_command(timestamp_command)
         return
 
