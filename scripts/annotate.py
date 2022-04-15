@@ -70,14 +70,18 @@ print(sorted_control_node_list.keys())
 print(len(sorted_control_node_list.keys()))
 
 
-for line_number,c_node in sorted_control_node_list.items():
+for line_number, c_node in sorted_control_node_list.items():
 	node_range = c_node["range"]
-	start_line_no = int(node_range["begin"]["line"])
-	last_line_no = int(node_range["end"]["line"])
-	child_list = c_node["inner"]
-	start_line = source_content[start_line_no - 1]
-	start_line = " /* jump:{} */".format(last_line_no) + start_line
-	source_content[start_line_no-1] = start_line
+	try:
+		start_line_no = int(node_range["begin"]["line"])
+		last_line_no = int(node_range["end"]["line"])
+		child_list = c_node["inner"]
+		start_line = source_content[start_line_no - 1]
+		start_line = " /* jump:{} */".format(last_line_no) + start_line
+		source_content[start_line_no-1] = start_line
+	except Exception as e:
+		print(c_node)
+
 
 
 with open("formatted.c", "w") as out_file:
