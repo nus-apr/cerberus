@@ -70,7 +70,7 @@ class VulnLoc(AbstractBenchmark):
 
     def transform(self, setup_dir_path, bug_id, config_id, container_id):
         emitter.normal("\t\t\ttransform fix-file")
-        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = self.log_dir_path + "/" + config_id + "-" + self.name + "-" + bug_id + "-transform.log"
         command_str = "bash transform.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status == 0
