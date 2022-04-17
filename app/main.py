@@ -85,7 +85,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 
     if container_id:
         copy_command = "docker cp {}:{} {};".format(container_id, binary_path, valkyrie_binary_path)
-        copy_command += "docker cp {}:{} {}".format(container_id, libubsan_path_container, libubsan_path_local)
+        copy_command += "docker cp {}:{} {};".format(container_id, libubsan_path_container, libubsan_path_local)
         copy_command += "docker cp {}:{} {}".format(container_id, libasan2_path_container, libasan2_path_local)
     else:
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
