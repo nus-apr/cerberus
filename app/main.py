@@ -80,8 +80,12 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     binary_path = dir_expr + "/src/" + binary_path
     libasan2_path_container = "/usr/lib/x86_64-linux-gnu/libasan.so.2.0.0"
     libasan2_path_local = dir_output + "/libasan.so.2"
+    libubsan_path_container = "/usr/lib/x86_64-linux-gnu/libubsan.so.0.0.0"
+    libubsan_path_local = dir_output + "/libubsan.so.0"
+
     if container_id:
         copy_command = "docker cp {}:{} {};".format(container_id, binary_path, valkyrie_binary_path)
+        copy_command += "docker cp {}:{} {}".format(container_id, libubsan_path_container, libubsan_path_local)
         copy_command += "docker cp {}:{} {}".format(container_id, libasan2_path_container, libasan2_path_local)
     else:
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
