@@ -8,9 +8,8 @@ exp_dir_path=/experiment/$benchmark_name/$project_name/$bug_id
 setup_dir_path=/setup/$benchmark_name/$project_name/$bug_id
 fix_file=$2
 
-POS_N=33
-NEG_N=2
-
+POS_N=34
+NEG_N=1
 
 cat <<EOF > darjeeling-driver
 #!/bin/bash
