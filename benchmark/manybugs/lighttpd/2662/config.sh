@@ -9,7 +9,7 @@ cd $dir_name/src
 # Config lighttpd.
 make clean
 
-PROJECT_CFLAGS="-g -O0 -static"
+PROJECT_CFLAGS="-g -O0"
 if [[ -n "${CFLAGS}" ]]; then
   PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
 fi
