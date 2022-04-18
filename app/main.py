@@ -48,6 +48,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_numbers = [str(x) for x in experiment_info[definitions.KEY_FIX_LINES]]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
+    experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
     timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
