@@ -34,14 +34,14 @@ mv $project_name src
 cd $dir_name/src
 cp $dir_name/diffs/${diff_file} $dir_name/src/$(echo $diff_file| cut -d'-' -f 1)
 sed -i "s#_GL_WARN_ON_USE (gets,#//#g" lib/stdio.in.h
-sed -i "s#root/mountpoint-genprog/genprog-many-bugs/${scenario_id}/gzip#/experiment/manybugs/${project_name}/${fix_id}/src#g" tests/Makefile
-sed -i "s#\$abs_srcdir#/experiment/manybugs/${project_name}/${fix_id}/src/tests#g" tests/hufts
+sed -i "s#root/mountpoint-genprog/genprog-many-bugs/${scenario_id}/gzip#${dir_name}/src#g" tests/Makefile
+sed -i "s#\$abs_srcdir#${dir_name}/src/tests#g" tests/hufts
 chown -R root $dir_name
 
 cd $dir_name
 ## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" test.sh
-sed -i "s#/experiment/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#${dir_name}#g" test.sh
+sed -i "s#${dir_name}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh
 

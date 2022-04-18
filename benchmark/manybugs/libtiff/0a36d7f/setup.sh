@@ -44,7 +44,7 @@ git checkout $(cat ../manifest.txt)
 
 cd $dir_name
 ## fix the test harness and the configuration script
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" test.sh
-sed -i "s#/experiment/manybugs/${project_name}/${fix_id}/limit#timeout 5#g" test.sh
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#${dir_name}#g" test.sh
+sed -i "s#${dir_name}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh
 sed -i "s#cd ${project_name}#cd src#g" test.sh

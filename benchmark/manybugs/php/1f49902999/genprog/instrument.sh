@@ -11,7 +11,7 @@ cilfile=$(echo $(echo $cfile | cut -d$"." -f1).cil.c)
 
 cp -rf $dir_name/preprocessed $dir_name/src
 cd $dir_name/src
-sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#/experiment/manybugs/${project_name}/${fix_id}#g" preprocessed/$cfile
+sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#${dir_name}#g" preprocessed/$cfile
 cp preprocessed/$cfile $cfile
 
 rm -rf coverage
