@@ -8,7 +8,13 @@ cd $dir_name/src
 
 # Config lighttpd.
 make clean
-./configure CFLAGS='-g -O0' --enable-static \
+
+PROJECT_CFLAGS="-g -O0 -static"
+if [[ -n "${CFLAGS}" ]]; then
+  PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
+fi
+
+PROJECT_CONFIG_OPTIONS="--enable-static \
             --with-pcre=yes \
             --with-ldap \
             --with-bzip2 \
@@ -16,4 +22,10 @@ make clean
             --with-gdbm \
             --with-memcache \
             --with-webdav-props \
-            --with-webdav-locks;
+            --with-webdav-locks "
+
+if [[ -n "${CONFIG_OPTIONS}" ]]; then
+  PROJECT_CONFIG_OPTIONS="${PROJECT_CONFIG_OPTIONS} ${CONFIG_OPTIONS}"
+fi
+
+./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}

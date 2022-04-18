@@ -8,4 +8,17 @@ cd $dir_name/src
 
 
 # Compile libtiff.
-make -e  CFLAGS="-march=x86-64" -j`nproc`
+
+PROJECT_CFLAGS="-g -O0 -static -march=x86-64"
+PROJECT_LDFLAGS="-static"
+
+
+if [[ -n "${CFLAGS}" ]]; then
+  PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
+fi
+
+if [[ -n "${LDFLAGS}" ]]; then
+  PROJECT_LDFLAGS="${PROJECT_LDFLAGS} ${LDFLAGS}"
+fi
+
+make -e CFLAGS="${PROJECT_CFLAGS}" LDFLAGS="${PROJECT_LDFLAGS}" -j`nproc`
