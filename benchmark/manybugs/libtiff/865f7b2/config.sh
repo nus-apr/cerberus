@@ -8,12 +8,23 @@ cd $dir_name/src
 
 # Config libtiff.
 make clean
-./configure CFLAGS='-g -O0' --enable-static --disable-shared \
+
+PROJECT_CFLAGS="-g -O0 -static"
+if [[ -n "${CFLAGS}" ]]; then
+  PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
+fi
+
+PROJECT_CONFIG_OPTIONS="--enable-static --disable-shared \
             --disable-nls                                 \
             --disable-shared                              \
             --disable-cxx                                 \
             --disable-jpeg                                \
             --disable-zlib                                \
             --disable-pixarlog                            \
-            --disable-jbig;
+            --disable-jbig "
 
+if [[ -n "${CONFIG_OPTIONS}" ]]; then
+  PROJECT_CONFIG_OPTIONS="${PROJECT_CONFIG_OPTIONS} ${CONFIG_OPTIONS}"
+fi
+
+./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}
