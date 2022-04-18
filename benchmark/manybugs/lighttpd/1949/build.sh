@@ -9,8 +9,7 @@ cd $dir_name/src
 
 # Compile libtiff.
 
-PROJECT_CFLAGS="-g -O0 -static -march=x86-64"
-PROJECT_LDFLAGS="-static"
+PROJECT_CFLAGS="-g -O0 -march=x86-64"
 
 
 if [[ -n "${CFLAGS}" ]]; then

@@ -58,7 +58,7 @@ program:
     - command: CFLAGS="--coverage " CXXFLAGS="--coverage " LDFLAGS="--coverage " ./build.sh /experiment
       directory: $setup_dir_path
     time-limit: 30
-  image: $tag_id
+  image: "$tag_id"
   language: c
   source-directory: $exp_dir_path/src
   tests:
