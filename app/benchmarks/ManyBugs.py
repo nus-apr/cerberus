@@ -16,6 +16,8 @@ class ManyBugs(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        if not use_container:
+            self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
         self.log_dir_path = definitions.DIR_LOGS + "/" + str(config_id) + "-" + self.name + "-" + \
                             tool_name + "-" + subject_name + "-" + bug_id
         container_id = self.setup_container(tool_name, bug_index, config_id, use_container)
