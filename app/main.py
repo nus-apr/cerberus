@@ -121,15 +121,15 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         repair_tool = tool_list[index]
         container_id = container_id_list[index]
         dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_log = dir_info["log"]
         dir_output = dir_info["output"]
-        dir_info_container = {
-            "logs": dir_log,
-            "setup": dir_setup,
-            "expr": dir_expr,
-            "output": dir_output
-        }
+        passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
+        passing_test_list = []
+        test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+        if str(passing_id_list_str).replace(",", "").isnumeric():
+            passing_test_list = passing_id_list_str.split(",")
+        failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
+        experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+        experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[: int(len(passing_test_list) * test_ratio)]
         if index == 0:
             binary_path = experiment_info[definitions.KEY_BINARY_PATH]
             valkyrie_binary_path = dir_output + "/binary"
@@ -177,12 +177,6 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 os.makedirs(patch_dir)
             dir_process = dir_output + "/patches-processing"
             utilities.execute_command("mkdir {}".format(dir_process))
-            test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-            passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
-            passing_test_list = []
-            if str(passing_id_list_str).replace(",", "").isnumeric():
-                passing_test_list = passing_id_list_str.split(",")
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
             validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
             if values.DEFAULT_USE_VALKYRIE:
@@ -196,7 +190,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
 
         if values.DEFAULT_USE_VALKYRIE:
             values.APR_TOOL_RUNNING = True
-        t_thread = threading.Thread(target=repair, args=(dir_info_container, experiment_info,
+        t_thread = threading.Thread(target=repair, args=(dir_info, experiment_info,
                                                          repair_tool, config_info,
                                                          container_id, benchmark_name))
         t_thread.start()
