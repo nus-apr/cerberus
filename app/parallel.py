@@ -29,7 +29,7 @@ def collect_result(result):
     result_list.append(result)
 
 
-def consume_patches(binary_path, oracle_path, validation_test_list, source_file, dir_patch, dir_process):
+def consume_patches(binary_path, oracle_path, validation_test_list, source_file, dir_patch, dir_process, is_rank):
     global exit_consume, consume_count, validator_pool, len_gen, len_processed
     list_dir = os.listdir(dir_patch)
     len_gen = len(list_dir)
@@ -73,12 +73,13 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
         for patch_file in list_selected:
             validator_pool.apply_async(valkyrie.validate_patch,
                                        args=(binary_path, oracle_path, validation_test_list, source_file, dir_patch,
-                                             dir_process, patch_file),
+                                             dir_process, patch_file, is_rank),
                                        callback=collect_result)
 
             consume_count += 1
         values.LIST_CONSUMED = values.LIST_CONSUMED + list_selected
         len_consumed = len(values.LIST_CONSUMED)
+
 
 
 def wait_validation():

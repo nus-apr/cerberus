@@ -14,7 +14,7 @@ from datetime import datetime
 processed_count = 0
 
 
-def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patch, dir_process, patch_file):
+def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patch, dir_process, patch_file, is_rank):
     global processed_count, exit_consume
     test_id_str = ",".join(test_id_list)
     validate_command = "cp {} {};".format(dir_patch + "/" + patch_file, dir_process)
@@ -28,7 +28,10 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
                                                                                patch_file,
                                                                                source_file,
                                                                                values.DEFAULT_TEST_TIMEOUT)
-    validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0 --only-validate > /dev/null 2>&1"
+    validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
+    if not is_rank:
+        validate_command += "  --only-validate "
+    validate_command += " > /dev/null 2>&1"
     os.system(validate_command)
     remove_command = "rm -rf {}".format(patch_file)
     os.system(remove_command)
