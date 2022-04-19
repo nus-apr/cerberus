@@ -230,51 +230,51 @@ class Prophet(AbstractTool):
                 elif bug_id == "05c5c8958e":
                     filter_list.extend([6618,9379,9389])
                 elif bug_id == "d4ae4e79db":
-                    filter_list.extend([])
+                    filter_list.extend([6597, 9378, 9383])
                 elif bug_id == "b5f15ef561":
-                    filter_list.extend([])
+                    filter_list.extend([6795,9414,9429])
                 elif bug_id == "2e5d5e5ac6":
-                    filter_list.extend([])
+                    filter_list.extend([6795,9414,9429])
                 elif bug_id == "9b86852d6e":
-                    filter_list.extend([])
+                    filter_list.extend([6795,9417,9431])
                 elif bug_id == "8d520d6296":
-                    filter_list.extend([])
+                    filter_list.extend([7185,10612,10807,11063,11071])
                 elif bug_id == "c1e510aea8":
-                    filter_list.extend([])
+                    filter_list.extend([6791,9406,9422])
                 elif bug_id == "fb37f3b20d":
-                    filter_list.extend([])
+                    filter_list.extend([6716,9396,9410])
                 elif bug_id == "13ba2da5f6":
-                    filter_list.extend([])
+                    filter_list.extend([6783,9400,9416])
                 elif bug_id == "3c7a573a2c":
-                    filter_list.extend([])
+                    filter_list.extend([6714,9393,9409])
                 elif bug_id == "bc810a443d":
-                    filter_list.extend([])
+                    filter_list.extend([6714,9392,9408])
                 elif bug_id == "d3b20b4058":
-                    filter_list.extend([])
+                    filter_list.extend([6687,7636,9381,9396])
                 elif bug_id == "f330c8ab4e":
-                    filter_list.extend([])
+                    filter_list.extend([6687,7636,9381,9396])
                 elif bug_id == "b548293b99":
-                    filter_list.extend([])
+                    filter_list.extend([5394,5405,7956])
                 elif bug_id == "db0888dfc1":
-                    filter_list.extend([])
+                    filter_list.extend([6712,9389,9404])
                 elif bug_id == "dfa08dc325":
-                    filter_list.extend([])
+                    filter_list.extend([6653,9379,9389])
                 elif bug_id == "52c36e60c4":
-                    filter_list.extend([])
+                    filter_list.extend([6655,9378,9388])
                 elif bug_id == "acaf9c5227":
-                    filter_list.extend([])
+                    filter_list.extend([6668,9414,9418])
                 elif bug_id == "6672171672":
-                    filter_list.extend([])
+                    filter_list.extend([6659, 9414, 9424])
                 elif bug_id == "34fe62619d":
-                    filter_list.extend([])
+                    filter_list.extend([5540, 5556, 8131])
                 elif bug_id == "cdc512afb3":
-                    filter_list.extend([])
+                    filter_list.extend([6749,9569,9578])
                 elif bug_id == "d4f05fbffc":
-                    filter_list.extend([])
+                    filter_list.extend([6948, 9570, 9582])
                 elif bug_id == "efc94f3115":
-                    filter_list.extend([])
+                    filter_list.extend([6745, 9569, 9574])
                 elif bug_id == "7337a901b7":
-                    filter_list.extend([])
+                    filter_list.extend([6930, 9568, 9570])
 
 
         for t_id in test_id_list:
