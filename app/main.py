@@ -368,7 +368,7 @@ def run(repair_tool_list, benchmark, setup):
                     utilities.clean_artifacts(dir_log)
                 container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                                values.DEFAULT_RUN_TESTS_ONLY,
-                                               values.DEFAULT_USE_CONTAINER, True)
+                                               values.DEFAULT_USE_CONTAINER, len(repair_tool_list) > 1)
                 if not values.DEFAULT_SETUP_ONLY:
                     benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
                 container_id_list.append(container_id)
