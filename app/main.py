@@ -120,17 +120,17 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         dir_info = dir_info_list[index]
         repair_tool = tool_list[index]
         container_id = container_id_list[index]
+        dir_expr = dir_info["experiment"]
+        dir_setup = dir_info["setup"]
+        dir_log = dir_info["log"]
+        dir_output = dir_info["output"]
+        dir_info_container = {
+            "logs": dir_log,
+            "setup": dir_setup,
+            "expr": dir_expr,
+            "output": dir_output
+        }
         if index == 0:
-            dir_expr = dir_info["experiment"]
-            dir_setup = dir_info["setup"]
-            dir_log = dir_info["log"]
-            dir_output = dir_info["output"]
-            dir_info_container = {
-                "logs": dir_log,
-                "setup": dir_setup,
-                "expr": dir_expr,
-                "output": dir_output
-            }
             binary_path = experiment_info[definitions.KEY_BINARY_PATH]
             valkyrie_binary_path = dir_output + "/binary"
             binary_path = dir_expr + "/src/" + binary_path
@@ -196,7 +196,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
 
         if values.DEFAULT_USE_VALKYRIE:
             values.APR_TOOL_RUNNING = True
-        t_thread = threading.Thread(target=repair, args=(dir_info, experiment_info, repair_tool, config_info,
+        t_thread = threading.Thread(target=repair, args=(dir_info_container, experiment_info,
+                                                         repair_tool, config_info,
                                                          container_id, benchmark_name))
         t_thread.start()
         tool_thread_list.append(t_thread)
