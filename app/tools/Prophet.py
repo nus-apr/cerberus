@@ -59,8 +59,9 @@ class Prophet(AbstractTool):
                 test_config_str += test_id + " "
         passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
         test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
+        benchmark_name = experiment_info[definitions.KEY_BENCHMARK]
         if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id, benchmark_name)
             for test_id in filtered_list:
                 if test_id == filtered_list[-1]:
                     test_config_str += test_id + "\n"
