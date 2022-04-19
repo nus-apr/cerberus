@@ -96,16 +96,16 @@ class AbstractBenchmark:
         emitter.normal("\t\t[benchmark] preparing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        if self.deploy(directory_name, bug_id, config_id, container_id):
+        if self.deploy(directory_name, bug_id, config_id, container_id, tool_name):
             if self.config(directory_name, bug_id, config_id, container_id, tool_name):
-                if self.build(directory_name, bug_id, config_id, container_id):
+                if self.build(directory_name, bug_id, config_id, container_id, tool_name):
                     if test_all:
-                        if self.test_all(directory_name, experiment_item, config_id, container_id):
+                        if self.test_all(directory_name, experiment_item, config_id, container_id, tool_name):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
                     else:
-                        if self.test(directory_name, bug_id, config_id, container_id):
+                        if self.test(directory_name, bug_id, config_id, container_id, tool_name):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
@@ -117,12 +117,12 @@ class AbstractBenchmark:
             emitter.error("\t\t\t[benchmark] deploy failed")
 
     @abc.abstractmethod
-    def setup(self, tool_name, bug_index, config_ig, test_all, use_container):
+    def setup(self, tool_name, bug_index, config_ig, test_all, use_container, is_multi):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def deploy(self, exp_dir_path, bug_id, config_id, container_id):
+    def deploy(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
         """Method documentation"""
         return
 
@@ -132,17 +132,17 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id, config_id, container_id):
+    def build(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, exp_dir_path, bug_id, config_id, container_id):
+    def test(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id, config_id, container_id):
+    def test_all(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
         """Method documentation"""
         return
 

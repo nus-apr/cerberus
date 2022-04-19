@@ -49,13 +49,9 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     fix_line_numbers = [str(x) for x in experiment_info[definitions.KEY_FIX_LINES]]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
-    timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-    binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
     subject_name = experiment_info[definitions.KEY_SUBJECT]
     binary_path = experiment_info[definitions.KEY_BINARY_PATH]
     fix_location = None
-    consume_limit = definitions.APR_MIN_LIMIT[tool.name]
-    max_limit = definitions.APR_MAX_LIMIT[tool.name]
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
@@ -64,10 +60,12 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
         passing_test_list = passing_id_list_str.split(",")
-    failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(",")
+    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    if isinstance(failing_test_list, str):
+        failing_test_list = failing_test_list.split(",")
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
-    validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
+
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
     dir_output = dir_info["output"]
     dir_info_container = {
@@ -127,9 +125,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
-        failing_test_list = experiment_info[definitions.KEY_FAILING_TEST].split(",")
-        experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
-        experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[: int(len(passing_test_list) * test_ratio)]
+        failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(",")
+
         if index == 0:
             binary_path = experiment_info[definitions.KEY_BINARY_PATH]
             valkyrie_binary_path = dir_output + "/binary"
@@ -206,7 +203,6 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
     if values.DEFAULT_USE_VALKYRIE:
         parallel.wait_validation()
         consume_thread.join()
-
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
@@ -326,17 +322,20 @@ def run(repair_tool_list, benchmark, setup):
             dir_info_list = []
             container_id_list = []
             for repair_tool in repair_tool_list:
+                tool_name = repair_tool.name
+                if len(repair_tool_list) > 1:
+                    tool_name = "multi"
                 tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
                 dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
-                                                                      repair_tool.name,
+                                                                      tool_name,
                                                                       subject_name, bug_name])
 
                 dir_log = definitions.DIR_LOGS + "/" + "-".join([config_id, benchmark.name,
-                                                                 repair_tool.name,
+                                                                 tool_name,
                                                                  subject_name, bug_name])
                 dir_output = definitions.DIR_ARTIFACTS + "/" + "-".join([config_id, benchmark.name,
-                                                                 repair_tool.name,
-                                                                 subject_name, bug_name])
+                                                                         tool_name,
+                                                                         subject_name, bug_name])
                 dir_info = {
                     "log": dir_log,
                     "output": dir_output,
@@ -366,7 +365,7 @@ def run(repair_tool_list, benchmark, setup):
                 utilities.clean_artifacts(dir_log)
                 container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                                values.DEFAULT_RUN_TESTS_ONLY,
-                                               values.DEFAULT_USE_CONTAINER)
+                                               values.DEFAULT_USE_CONTAINER, True)
                 if not values.DEFAULT_SETUP_ONLY:
                     benchmark.save_artefacts(dir_exp, dir_artifact, container_id)
                 container_id_list.append(container_id)
