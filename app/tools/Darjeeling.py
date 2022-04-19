@@ -28,7 +28,7 @@ class Darjeeling(AbstractTool):
             dir_expr_base = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
             instrumentation_exist = os.path.isfile(instrumentation_script_path)
         if instrumentation_exist:
-            command_str = "bash instrument.sh {0} {1}".format(dir_expr_base, source_file)
+            command_str = "sudo bash instrument.sh {0} {1}".format(dir_expr_base, source_file)
             dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
             status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
             if not status == 0:

@@ -16,6 +16,8 @@ chmod +x darjeeling-driver
 
 cat <<EOF > Dockerfile
 FROM rshariffdeen/cerberus:darjeeling
+USER root
+USER root
 RUN mkdir -p /setup/$benchmark_name/$project_name/$bug_id
 COPY . $setup_dir_path
 COPY darjeeling/darjeeling-driver $setup_dir_path
