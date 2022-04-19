@@ -21,7 +21,7 @@ class VulnLoc(AbstractBenchmark):
             tool_name_dir = "multi"
         self.log_dir_path = definitions.DIR_LOGS + "/" + str(config_id) + "-" + self.name + "-" + \
                             tool_name_dir + "-" + subject_name + "-" + bug_id
-        container_id = self.setup_container(tool_name_dir, bug_index, config_id, use_container)
+        container_id = self.setup_container(tool_name, bug_index, config_id, use_container, is_multi)
         exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
         if not use_container:
             self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")

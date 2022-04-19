@@ -57,7 +57,7 @@ class AbstractBenchmark:
             exit_code = utilities.execute_command(command_str)
         return exit_code
 
-    def setup_container(self, tool_name, bug_index, config_id, use_container):
+    def setup_container(self, tool_name, bug_index, config_id, use_container, is_multi):
         container_id = None
         if use_container:
             emitter.normal("\t\t[benchmark] preparing docker environment")
@@ -70,8 +70,11 @@ class AbstractBenchmark:
             dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
             if os.path.isdir(dir_exp_local):
                 shutil.rmtree(dir_exp_local)
+            tool_name_dir = tool_name
+            if is_multi:
+                tool_name_dir = "multi"
             dir_output_local = definitions.DIR_ARTIFACTS + "/" + str(config_id) + "-" + self.name + "-" + \
-                               tool_name + "-" + subject_name + "-" + bug_id
+                               tool_name_dir + "-" + subject_name + "-" + bug_id
             dir_aux_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/.aux"
             dir_aux_container = "/experiments/benchmark/" + self.name + "/" + subject_name + "/.aux"
             dir_base_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/base"
