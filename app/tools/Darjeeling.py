@@ -19,12 +19,13 @@ class Darjeeling(AbstractTool):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
-        dir_expr_base = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
         self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
         if container_id:
+            dir_expr_base = "/experiment"
             instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
         else:
+            dir_expr_base = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
             instrumentation_exist = os.path.isfile(instrumentation_script_path)
         if instrumentation_exist:
             command_str = "bash instrument.sh {0} {1}".format(dir_expr_base, source_file)
@@ -52,14 +53,19 @@ class Darjeeling(AbstractTool):
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
 
             dir_output = dir_info["output"]
-            dir_patch = dir_output + "/patches"
-            mkdir_command = "mkdir " + dir_patch
-            self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
+            if container_id:
+                dir_patch = "/output/patches"
+            else:
+                dir_patch = dir_output + "/patches"
+                mkdir_command = "mkdir " + dir_patch
+                self.run_command(mkdir_command, self.log_output_path, dir_expr, container_id)
 
             timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
 
             repair_command = "timeout -k 5m {1}h  ".format(dir_expr + "/src", str(timeout))
+            if container_id:
+                repair_command+= "sudo "
             repair_command += "darjeeling repair --continue --patch-dir {} ".format(dir_patch)
             repair_command += " --threads {} ".format(mp.cpu_count())
             repair_command += additional_tool_param + " "

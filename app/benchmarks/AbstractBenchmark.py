@@ -82,7 +82,8 @@ class AbstractBenchmark:
                 dir_output_local: {'bind': '/output', 'mode': 'rw'},
                 dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'},
                 dir_aux_local: {'bind': dir_aux_container, 'mode': 'rw'},
-                dir_base_local: {'bind': dir_base_container, 'mode': 'rw'}
+                dir_base_local: {'bind': dir_base_container, 'mode': 'rw'},
+                "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
             }
             container_id = container.get_container(tool_name, self.name, subject_name, bug_id, config_id)
             if container_id:

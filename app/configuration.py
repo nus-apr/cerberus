@@ -14,6 +14,8 @@ def read_arg(argument_list):
                 values.CONF_DATA_PATH = str(arg).replace(definitions.ARG_DATA_PATH, "")
             elif definitions.ARG_TOOL_NAME in arg:
                 values.CONF_TOOL_NAME = str(arg).replace(definitions.ARG_TOOL_NAME, "").lower()
+            elif definitions.ARG_TOOL_LIST in arg:
+                values.CONF_TOOL_LIST = str(arg).replace(definitions.ARG_TOOL_LIST, "").lower().split(",")
             elif definitions.ARG_SUBJECT_NAME in arg:
                 values.CONF_SUBJECT_NAME = str(arg).replace(definitions.ARG_SUBJECT_NAME, "").lower()
             elif definitions.ARG_TOOL_PATH in arg:
@@ -68,8 +70,8 @@ def read_arg(argument_list):
                 emitter.emit_help()
                 exit(1)
     if not values.CONF_SETUP_ONLY:
-        if values.CONF_TOOL_NAME is None:
-            emitter.error("[invalid] --tool is missing")
+        if values.CONF_TOOL_NAME is None and not values.CONF_TOOL_LIST:
+            emitter.error("[invalid] --tool/-tool-list is missing")
             emitter.emit_help()
             exit(1)
     if values.CONF_SUBJECT_NAME:
@@ -96,7 +98,6 @@ def load_configuration_details(config_file_path):
 
 
 def load_tool(tool_name):
-    emitter.normal("loading repair tool")
     if tool_name == "cpr":
         return CPR.CPR()
     elif tool_name == "angelix":

@@ -182,12 +182,13 @@ def show_dev_patch(dir_diff):
         emitter.error("\t\t\t[error] dev-patch file not found")
 
 
-def run(repair_tool, benchmark, setup):
+def run(repair_tool_list, benchmark, setup):
     emitter.sub_title("Repairing benchmark")
-    emitter.highlight("[configuration] repair-tool: " + repair_tool.name)
+    emitter.highlight("[configuration] repair-tool(s): " + " ".join([x.name for x in repair_tool_list]))
     emitter.highlight("[configuration] repair-benchmark: " + benchmark.name)
     run_config_id_list = values.CONF_CONFIG_ID_LIST
     iteration = 0
+    repair_tool = repair_tool_list[0]
     for config_id in run_config_id_list:
         if config_id not in setup:
             utilities.error_exit("invalid configuration id " + config_id)
@@ -314,11 +315,19 @@ def bootstrap(arg_list):
 
 def initialize():
     emitter.sub_title("Initializing setup")
-    tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
-    tool.check_tool_exists()
+    tool_list = []
+    if values.CONF_TOOL_LIST:
+        for tool_name in values.CONF_TOOL_LIST:
+            tool = configuration.load_tool(tool_name)
+            tool.check_tool_exists()
+            tool_list.append(tool)
+    elif values.CONF_TOOL_NAME:
+        tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
+        tool.check_tool_exists()
+        tool_list.append(tool)
     benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
     setup = configuration.load_configuration_details(definitions.FILE_CONFIGURATION)
-    return tool, benchmark, setup
+    return tool_list, benchmark, setup
 
 
 def main():
@@ -332,8 +341,8 @@ def main():
     try:
         emitter.title("Starting " + values.TOOL_NAME + " (Program Repair Framework) ")
         bootstrap(sys.argv[1:])
-        repair_tool, benchmark, setup = initialize()
-        run(repair_tool, benchmark, setup)
+        repair_tool_list, benchmark, setup = initialize()
+        run(repair_tool_list, benchmark, setup)
     except SystemExit as e:
         total_duration = format((time.time() - start_time) / 60, '.3f')
         emitter.end(total_duration, is_error)

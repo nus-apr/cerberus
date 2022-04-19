@@ -97,6 +97,8 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
     container_id = None
     try:
         for local_dir_path in volume_list:
+            if local_dir_path == "/var/run/docker.sock":
+                continue
             if not os.path.isdir(local_dir_path):
                 os.makedirs(local_dir_path)
         container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list,
