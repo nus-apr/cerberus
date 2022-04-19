@@ -66,7 +66,7 @@ class VulnLoc(AbstractBenchmark):
 
     def verify(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
-        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-verify.log"
         command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
         return status == 0
