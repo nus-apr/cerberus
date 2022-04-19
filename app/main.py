@@ -321,7 +321,9 @@ def run(repair_tool_list, benchmark, setup):
             emitter.highlight("\t[meta-data] bug ID: " + bug_name)
             dir_info_list = []
             container_id_list = []
+            index = 0
             for repair_tool in repair_tool_list:
+                index = index + 1
                 tool_name = repair_tool.name
                 if len(repair_tool_list) > 1:
                     tool_name = "multi"
@@ -361,8 +363,9 @@ def run(repair_tool_list, benchmark, setup):
                             continue
                     analyse_result(dir_info, experiment_item, repair_tool)
                     continue
-                utilities.clean_artifacts(dir_output)
-                utilities.clean_artifacts(dir_log)
+                if index == 1:
+                    utilities.clean_artifacts(dir_output)
+                    utilities.clean_artifacts(dir_log)
                 container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
                                                values.DEFAULT_RUN_TESTS_ONLY,
                                                values.DEFAULT_USE_CONTAINER, True)
