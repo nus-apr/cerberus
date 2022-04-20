@@ -18,11 +18,14 @@ $setup_dir_path/test.sh /experiment \$1
 EOF
 chmod +x darjeeling-driver
 
+cp -rf /experiments/benchmark/$benchmark_name/$project_name/base .
+
 cat <<EOF > Dockerfile
 FROM rshariffdeen/cerberus:darjeeling
 USER root
 RUN mkdir -p /setup/$benchmark_name/$project_name/$bug_id
 COPY . $setup_dir_path
+COPY darjeeling/base  /experiments/benchmark/$benchmark_name/$project_name/base
 COPY darjeeling/darjeeling-driver $setup_dir_path/darjeeling/test.sh
 RUN /setup/$benchmark_name/$project_name/$bug_id/setup.sh /experiment
 WORKDIR /experiment
