@@ -8,10 +8,16 @@ cd $dir_name/src
 export PHP_AUTOHEADER=/deps/php/autoconf-2.13-build/bin/autoheader PHP_AUTOCONF=/deps/php/autoconf-2.13-build/bin/autoconf
 PATH_ORIG=$PATH
 export PATH=/deps/php/bison-2.2-build/bin:$PATH_ORIG
-# Config libtiff.
+# Config PHP
 make clean
-./configure \
-  --enable-cli \
+
+
+PROJECT_CFLAGS=""
+if [[ -n "${CFLAGS}" ]]; then
+  PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
+fi
+
+PROJECT_CONFIG_OPTIONS="  --enable-cli \
   --disable-dom \
   --disable-libxml  \
   --disable-xml \
@@ -23,4 +29,10 @@ make clean
   --disable-inline-optimization  \
   --without-pcre-dir  \
   --disable-fileinfo \
-  --disable-shared
+  --disable-shared "
+
+if [[ -n "${CONFIG_OPTIONS}" ]]; then
+  PROJECT_CONFIG_OPTIONS="${PROJECT_CONFIG_OPTIONS} ${CONFIG_OPTIONS}"
+fi
+
+./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}

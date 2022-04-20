@@ -6,10 +6,17 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 cd $dir_name/src
 
-# Config libtiff.
+# Config PHP.
 make clean
-./configure \
-  --enable-cli \
+
+
+
+PROJECT_CFLAGS=""
+if [[ -n "${CFLAGS}" ]]; then
+  PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
+fi
+
+PROJECT_CONFIG_OPTIONS="  --enable-cli \
   --disable-dom \
   --disable-libxml  \
   --disable-xml \
@@ -21,7 +28,11 @@ make clean
   --disable-inline-optimization  \
   --without-pcre-dir  \
   --disable-fileinfo \
-  --disable-shared
+  --disable-shared "
 
+if [[ -n "${CONFIG_OPTIONS}" ]]; then
+  PROJECT_CONFIG_OPTIONS="${PROJECT_CONFIG_OPTIONS} ${CONFIG_OPTIONS}"
+fi
 
+./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}
 
