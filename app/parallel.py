@@ -85,7 +85,6 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
         len_consumed = len(values.LIST_CONSUMED)
 
 
-
 def wait_validation():
     global exit_consume, validator_pool, len_gen, consume_count, len_processed
     # Notify threads it's time to exit
