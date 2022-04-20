@@ -1,5 +1,5 @@
-SRC_FILE=experiments/vulnloc/libming/CVE-2016-9264/src/util/listmp3.c
-TRANS_FILE=benchmark/vulnloc/libming/CVE-2016-9264/valkyrie/listmp3.c
+SRC_FILE=/experiment/vulnloc/coreutils/gnubug-25003/src/src/split.c
+TRANS_FILE=/setup/vulnloc/coreutils/gnubug-25003/valkyrie/split.c
 clang-tidy $SRC_FILE -fix -checks="readability-braces-around-statements"
 clang-format -style=LLVM  $SRC_FILE > $TRANS_FILE
 cp $TRANS_FILE $SRC_FILE
