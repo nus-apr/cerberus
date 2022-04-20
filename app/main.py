@@ -204,24 +204,38 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
     if values.DEFAULT_USE_VALKYRIE:
         parallel.wait_validation()
         consume_thread.join()
+    for t in tool_list:
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
+        utilities.execute_command(timestamp_command)
 
 
-def analyse_result(dir_info, experiment_info, tool: AbstractTool):
+def analyse_result(dir_info_list, experiment_info, tool_list):
     emitter.normal("\t\t[framework] analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    space_info, time_info = tool.analyse_output(dir_info, bug_id,
-                                                failing_test_list)
-    conf_id = str(values.CONFIG_ID)
-    exp_id = conf_id + "-" + bug_id
-    values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
-    tool.print_analysis(space_info, time_info)
-    tool.log_output_path = None
-    logger.analysis(exp_id)
-    dir_output = dir_info["output"]
-    patch_dir = dir_output + "/patches"
+    first_start = None
+    patch_dir = None
+    index = -1
+    for tool in tool_list:
+        index = index + 1
+        dir_info = dir_info_list[index]
+        space_info, time_info = tool.analyse_output(dir_info, bug_id,
+                                                    failing_test_list)
+        if first_start is None:
+            first_start = time_info[4]
+        else:
+            if first_start > time_info[4]:
+                first_start = time_info[4]
+        conf_id = str(values.CONFIG_ID)
+        exp_id = conf_id + "-" + bug_id
+        values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
+        tool.print_analysis(space_info, time_info)
+        tool.log_output_path = None
+        logger.analysis(exp_id)
+        dir_output = dir_info["output"]
+        patch_dir = dir_output + "/patches"
     if values.DEFAULT_USE_VALKYRIE:
-        valkyrie.analyse_output(patch_dir, time_info[4])
+        valkyrie.analyse_output(patch_dir, first_start)
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
@@ -362,7 +376,7 @@ def run(repair_tool_list, benchmark, setup):
                                                  subject_name, bug_name]) + ".tar.gz"
                         if not retrieve_results(archive_name, repair_tool):
                             continue
-                    analyse_result(dir_info, experiment_item, repair_tool)
+                    analyse_result([dir_info], experiment_item, [repair_tool])
                     continue
                 if index == 1:
                     utilities.clean_artifacts(dir_output)
@@ -382,7 +396,7 @@ def run(repair_tool_list, benchmark, setup):
                 repair_all(dir_info_list, experiment_item, repair_tool_list, config_info, container_id_list, benchmark.name)
                 if not values.CONF_INSTRUMENT_ONLY:
                     save_artifacts(dir_info, experiment_item, repair_tool, container_id)
-                    analyse_result(dir_info, experiment_item, repair_tool)
+                    analyse_result(dir_info_list, experiment_item, repair_tool_list)
                     dir_archive = definitions.DIR_RESULT + "/" + repair_tool.name
                     archive_results(dir_result, dir_archive)
                     utilities.clean_artifacts(dir_result)
