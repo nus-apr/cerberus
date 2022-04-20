@@ -39,5 +39,7 @@ EOF
 
 
 cd $dir_name
-prophet prophet/prophet.conf  -r workdir -init-only -o patches
+prophet prophet/prophet.conf  -r workdir -init-only -o patches -skip-verify
 cp $script_dir/profile_localization.res $dir_name/workdir
+
+
