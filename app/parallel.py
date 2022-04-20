@@ -41,9 +41,13 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
     len_valid = 0
     len_invalid = 0
     len_error = 0
+    time.sleep(5)
+    timeout = time.time() + 60 * 60
     while len_gen != len_consumed or values.APR_TOOL_RUNNING or not exit_consume:
         list_dir = os.listdir(dir_patch)
         len_gen = len(list_dir)
+        if time.time() > timeout:
+            break
         if os.path.isdir(dir_valid):
             len_valid = len(os.listdir(dir_valid))
         if os.path.isdir(dir_invalid):
@@ -86,11 +90,12 @@ def wait_validation():
     global exit_consume, validator_pool, len_gen, consume_count, len_processed
     # Notify threads it's time to exit
     time.sleep(5)
-    while len_gen != consume_count:
+    timeout = time.time() + 60 * 60
+    while len_gen != consume_count and time.time() <= timeout:
         pass
     validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
-    while len_gen != len_processed:
+    while len_gen != len_processed and time.time() <= timeout:
         pass
     validator_pool.join()
     exit_consume = 1

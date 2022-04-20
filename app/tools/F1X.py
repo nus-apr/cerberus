@@ -100,7 +100,7 @@ class F1X(AbstractTool):
     def create_patches_from_space(self, dir_exp, source_file, container_id):
         script_name = "{}/{}-dump-patches.py".format(dir_exp, self.name)
         abs_path_buggy_file = dir_exp + "/src/" + source_file
-        dump_command = "python3 {} {} {}".format(script_name, abs_path_buggy_file, dir_exp)
+        dump_command = "timeout -k 5m 1h python3 {} {} {}".format(script_name, abs_path_buggy_file, dir_exp)
         self.run_command(dump_command, self.log_output_path, dir_exp, container_id)
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
