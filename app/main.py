@@ -14,7 +14,7 @@ from os.path import dirname, abspath
 
 start_time = 0
 end_time = 0
-tool_thread_list = []
+
 
 def create_directories():
     if not os.path.isdir(definitions.DIR_LOGS):
@@ -114,6 +114,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 
 def repair_all(dir_info_list, experiment_info, tool_list, config_info, container_id_list, benchmark_name):
     consume_thread = None
+    tool_thread_list = []
     for index in range(0, len(tool_list)):
         dir_info = dir_info_list[index]
         repair_tool = tool_list[index]
@@ -192,14 +193,13 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                                                          repair_tool, config_info,
                                                          container_id, benchmark_name))
         t_thread.start()
-        tool_thread_list.append(t_thread)
+        tool_thread_list.append((t_thread, repair_tool))
 
-    index = 0
-    for t in tool_thread_list:
-        t.join()
-        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool_list[index].log_output_path
+    for thread, tool in tool_thread_list:
+        thread.join()
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         utilities.execute_command(timestamp_command)
-        index = index + 1
+
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
         parallel.wait_validation()
