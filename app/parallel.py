@@ -22,6 +22,7 @@ consume_count = 0
 result_list = []
 len_gen = 0
 len_processed = 0
+timeout = 0
 
 
 def collect_result(result):
@@ -30,7 +31,7 @@ def collect_result(result):
 
 
 def consume_patches(binary_path, oracle_path, validation_test_list, source_file, dir_patch, dir_process, is_rank):
-    global exit_consume, consume_count, validator_pool, len_gen, len_processed
+    global exit_consume, consume_count, validator_pool, len_gen, len_processed, timeout
     list_dir = os.listdir(dir_patch)
     len_gen = len(list_dir)
     len_consumed = -1
@@ -89,7 +90,6 @@ def wait_validation():
     global exit_consume, validator_pool, len_gen, consume_count, len_processed
     # Notify threads it's time to exit
     time.sleep(5)
-    timeout = time.time() + 60 * 60
     while len_gen != consume_count and time.time() <= timeout:
         pass
     validator_pool.close()
