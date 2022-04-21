@@ -153,7 +153,7 @@ class Angelix(AbstractTool):
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
-                if regex.match(file):
+                if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
         count_non_compilable = 0

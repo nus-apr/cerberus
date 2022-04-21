@@ -198,7 +198,7 @@ class Fix2Fit(AbstractTool):
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
-                if regex.match(file):
+                if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
