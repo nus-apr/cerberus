@@ -75,7 +75,10 @@ sudo apt-get install -y  \
     mercurial \
     tcl-dev \
     tix-dev \
-    unzip
+    unzip \
+    libasan4 \
+    libasan5 \
+    libasan6
 
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/Darjeeling
 python3.9 -m pip install .

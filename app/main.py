@@ -203,7 +203,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             wait_time = timeout - time.time()
         thread.join(wait_time)
         if thread.is_alive():
-            print("{}: thread is not done, setting event to kill thread.".format(tool.name))
+            emitter.highlight("[info] {}: thread is not done, setting event to kill thread.".format(tool.name))
             event = threading.Event()
             event.set()
             # The thread can still be running at this point. For example, if the
@@ -211,7 +211,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             # the thread will still perform the full 1 second sleep and the rest of
             # the loop before finally stopping.
         else:
-            print("{}: thread has already finished.".format(tool.name))
+            emitter.highlight("[info] {}: thread has already finished.".format(tool.name))
 
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.
