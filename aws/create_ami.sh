@@ -75,3 +75,6 @@ sudo apt-get install -y  \
     tcl-dev \
     tix-dev \
     unzip
+
+git clone https://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:x-oauth-basic@github.com/rshariffdeen/Darjeeling
+python3.9 -m pip install .

@@ -71,8 +71,8 @@ program:
   tests:
     tests:
     type: genprog
-    number-of-failing-tests: $POS_N
-    number-of-passing-tests: $NEG_N
+    number-of-failing-tests: $NEG_N
+    number-of-passing-tests: $POS_N
     time-limit: 10
     workdir: $setup_dir_path/darjeeling
 resource-limits:
