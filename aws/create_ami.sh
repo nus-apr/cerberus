@@ -1,18 +1,15 @@
 sudo apt update
-sudo apt install -y docker.io
+sudo apt install -y docker.io pypy3 pypy3-dev python3.9 python3.9-distutils gdb make g++ unzip afl++
 sudo usermod -aG docker ubuntu
-sudo apt install -y pypy3 pypy3-dev
 sudo pypy3 -m easy_install docker more_itertools
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/cerberus
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/valkyrie
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/valkyrie-experiments
-sudo apt install python3.9 python3.9-distutils
 # PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.9 get-pip.py && rm get-pip.py
 python3.9 -m pip install pipenv virtualenv docker
 git submodule update --init --recursive
-sudo apt update
-sudo apt install gdb make g++ unzip afl++
+
 cd ~;git clone https://github.com/GJDuck/e9patch.git ~/e9patch; cd ~/e9patch; bash build.sh
 cd ~; git clone https://github.com/GJDuck/e9afl.git ~/e9afl; cd ~/e9afl; bash build.sh
 sudo ln -s ~/e9afl/e9afl /usr/local/bin/e9afl
@@ -82,3 +79,17 @@ sudo apt-get install -y  \
 
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/Darjeeling
 python3.9 -m pip install .
+
+docker pull rshariffdeen/cerberus:prophet
+docker pull rshariffdeen/cerberus:f1x
+docker pull rshariffdeen/cerberus:darjeeling
+
+/etc/sysctl.conf
+fs.file-max=500000
+
+/etc/security/limits.conf
+*               hard    nofile             10000
+*               soft    nofile             5000
+
+~/.profile
+PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"

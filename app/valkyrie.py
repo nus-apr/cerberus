@@ -20,7 +20,7 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     validate_command = "cp {} {};".format(dir_patch + "/" + patch_file, dir_process)
     patch_file = dir_process + "/" + patch_file
     output_dir = os.path.dirname(binary_path)
-    validate_command += "LD_LIBRARY_PATH={} valkyrie --binary={} --test-oracle={} --test-id-list={} " \
+    validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \
                        "--patch-file={} --source={} --test-timeout={} ".format(output_dir,
                                                                                binary_path,
                                                                                oracle_path,
