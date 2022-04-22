@@ -86,12 +86,12 @@ docker pull rshariffdeen/cerberus:prophet
 docker pull rshariffdeen/cerberus:f1x
 docker pull rshariffdeen/cerberus:darjeeling
 
-#/etc/sysctl.conf
-#fs.file-max=500000
+# /etc/sysctl.conf
+# fs.file-max=500000
 #
-#/etc/security/limits.conf
-#*               hard    nofile             10000
-#*               soft    nofile             5000
+# /etc/security/limits.conf
+# *               hard    nofile             1000000
+# *               soft    nofile             100000
 #
-#~/.profile
-#PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"
+# ~/.profile
+# PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"
