@@ -110,7 +110,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 def repair_all(dir_info_list, experiment_info, tool_list, config_info, container_id_list, benchmark_name):
     consume_thread = None
     tool_thread_list = []
-    time_duration = int(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    time_duration = config_info[definitions.KEY_CONFIG_TIMEOUT]
     timeout = time.time() + 60 * time_duration
     for index in range(0, len(tool_list)):
         dir_info = dir_info_list[index]

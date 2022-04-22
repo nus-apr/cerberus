@@ -45,7 +45,6 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
     len_invalid = 0
     len_error = 0
     time.sleep(5)
-    timeout = time.time() + 60 * 60
     while len_gen != len_consumed or values.APR_TOOL_RUNNING or not exit_consume:
         list_dir = os.listdir(dir_patch)
         len_gen = len(list_dir)
