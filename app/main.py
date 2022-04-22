@@ -175,7 +175,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                                                                                          fix_source_file,
                                                                                          patch_dir,
                                                                                          dir_process,
-                                                                                         len(tool_list) > 1))
+                                                                                         len(tool_list) > 1,
+                                                                                         timeout))
                 consume_thread.start()
 
         if values.DEFAULT_USE_VALKYRIE:
