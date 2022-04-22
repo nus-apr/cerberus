@@ -17,11 +17,12 @@ processed_count = 0
 def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patch, dir_process, patch_file, is_rank):
     global processed_count, exit_consume
     test_id_str = ",".join(test_id_list)
+    lib_dir_path = definitions.DIR_LIBS
     validate_command = "cp {} {};".format(dir_patch + "/" + patch_file, dir_process)
     patch_file = dir_process + "/" + patch_file
     output_dir = os.path.dirname(binary_path)
     validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \
-                       "--patch-file={} --source={} --test-timeout={} ".format(output_dir,
+                       "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
                                                                                binary_path,
                                                                                oracle_path,
                                                                                test_id_str,
