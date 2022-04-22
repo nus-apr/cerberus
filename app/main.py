@@ -110,6 +110,8 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 def repair_all(dir_info_list, experiment_info, tool_list, config_info, container_id_list, benchmark_name):
     consume_thread = None
     tool_thread_list = []
+    time_duration = int(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    timeout = time.time() + 60 * time_duration
     for index in range(0, len(tool_list)):
         dir_info = dir_info_list[index]
         repair_tool = tool_list[index]
@@ -184,14 +186,13 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         t_thread.start()
         tool_thread_list.append((t_thread, repair_tool))
 
-    timeout = time.time() + 60 * 60
     for thread, tool in tool_thread_list:
         wait_time = 5
         if time.time() <= timeout:
             wait_time = timeout - time.time()
         thread.join(wait_time)
         if thread.is_alive():
-            emitter.highlight("[info] {}: thread is not done, setting event to kill thread.".format(tool.name))
+            emitter.highlight("\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(tool.name))
             event = threading.Event()
             event.set()
             # The thread can still be running at this point. For example, if the
@@ -199,7 +200,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             # the thread will still perform the full 1 second sleep and the rest of
             # the loop before finally stopping.
         else:
-            emitter.highlight("[info] {}: thread has already finished.".format(tool.name))
+            emitter.highlight("\t\t\t[info] {}: thread has already finished.".format(tool.name))
 
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.

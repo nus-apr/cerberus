@@ -102,7 +102,7 @@ def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='de
             if not os.path.isdir(local_dir_path):
                 os.makedirs(local_dir_path)
         container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list,
-                                             tty=True).id
+                                             mem_limit="30g", tty=True).id
     except docker.errors.ContainerError as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: container exited with a non-zero exit code")
