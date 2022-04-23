@@ -77,7 +77,7 @@ def analyse_output(patch_dir, time_stamp_start):
     if dir_valid and os.path.isdir(dir_valid):
         output_patch_list = [join(dir_valid, f) for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
         for output_patch in output_patch_list:
-            modified_time = os.stat(output_patch).st_mtime
+            modified_time = os.lstat(output_patch).st_mtime
             if modified_time < time_first_patch:
                 time_first_patch = modified_time
     time_latency = compute_latency_valkyrie(time_stamp_start, time_first_patch)
