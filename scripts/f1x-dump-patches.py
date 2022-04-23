@@ -5,6 +5,8 @@ import sys
 import re
 import shlex
 
+LIMIT_PATCHES = 150000
+
 def mute():
     sys.stdout = open(os.devnull, 'w')
     sys.stderr = open(os.devnull, 'w')
@@ -54,7 +56,7 @@ def generate_patch(p_str, src_file, id, dir_exp, orig_file):
 
 
 def generate_patches(source_file, dir_exp):
-    global pool, result_list
+    global pool, result_list, LIMIT_PATCHES
     result_list = []
     loc_list = []
     dir_patch = "/output/patches"
@@ -69,7 +71,7 @@ def generate_patches(source_file, dir_exp):
         patch_space = f.readlines()
         patch_id = 0
         loc_id = 0
-        for patch_desc in patch_space:
+        for patch_desc in patch_space[:LIMIT_PATCHES]:
             patch_id = patch_id + 1
             patch_info = patch_desc.split(" ")
             sl = patch_info[2]
