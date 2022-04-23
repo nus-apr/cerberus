@@ -18,8 +18,8 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     global processed_count, exit_consume
     test_id_str = ",".join(test_id_list)
     lib_dir_path = definitions.DIR_LIBS
-    patch_file = dir_patch + "/" + patch_file
     link_file = dir_process + "/" + patch_file
+    patch_file = dir_patch + "/" + patch_file
     validate_command = "ln -sf {} {};".format(patch_file, link_file)
     output_dir = os.path.dirname(binary_path)
     validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \

@@ -95,3 +95,4 @@ docker pull rshariffdeen/cerberus:darjeeling
 #
 # ~/.profile
 # PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"
+source ~/.profile
