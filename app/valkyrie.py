@@ -58,11 +58,21 @@ def analyse_output(patch_dir, time_stamp_start):
     dir_invalid = parent_dir + "/patch-invalid"
     dir_error = parent_dir + "/patch-error"
     dir_ranked = parent_dir + "/patch-ranked"
-    len_dir_valid = len(os.listdir(dir_valid))
-    len_dir_invalid = len(os.listdir(dir_invalid))
-    len_dir_error = len(os.listdir(dir_error))
-    len_dir_ranked = len(os.listdir(dir_ranked))
+    len_dir_valid = 0
+    len_dir_invalid = 0
+    len_dir_error = 0
+    len_dir_ranked = 0
     time_first_patch = datetime.now().timestamp()
+
+    if dir_valid and os.path.isdir(dir_valid):
+        len_dir_valid = len(os.listdir(dir_valid))
+    if dir_error and os.path.isdir(dir_error):
+        len_dir_error = len(os.listdir(dir_error))
+    if dir_invalid and os.path.isdir(dir_invalid):
+        len_dir_invalid = len(os.listdir(dir_invalid))
+    if dir_ranked and os.path.isdir(dir_ranked):
+        len_dir_ranked = len(os.listdir(dir_ranked))
+
     if dir_valid and os.path.isdir(dir_valid):
         output_patch_list = [join(dir_valid, f) for f in listdir(dir_valid) if isfile(join(dir_valid, f))]
         for output_patch in output_patch_list:

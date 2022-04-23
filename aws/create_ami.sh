@@ -1,9 +1,5 @@
 sudo apt update
 sudo apt install -y docker.io pypy3 pypy3-dev python3.9 python3.9-distutils gdb make g++ unzip afl++
-sudo usermod -aG docker ubuntu
-sudo pypy3 -m easy_install docker more_itertools
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.9 get-pip.py && rm get-pip.py
-python3.9 -m pip install pipenv virtualenv docker
 
 sudo apt-get install -y  \
     automake \
@@ -67,6 +63,10 @@ sudo apt-get install -y  \
     libasan4 \
     libasan5 \
     libasan6
+sudo usermod -aG docker ubuntu
+sudo pypy3 -m easy_install docker more_itertools
+curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.9 get-pip.py && rm get-pip.py
+python3.9 -m pip install pipenv virtualenv docker
 
 
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/cerberus
