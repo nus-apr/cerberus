@@ -60,12 +60,12 @@ class SenX(AbstractTool):
                     test_file_list = [join(test_dir, f) for f in listdir(test_dir) if isfile(join(test_dir, f))]
 
             if len(test_file_list) > 1:
-                emitter.warning("\t[warning] unimplemented functionality: SenX only supports one failing test-case")
+                emitter.warning("\t\t[warning] unimplemented functionality: SenX only supports one failing test-case")
 
             binary_input_arg = experiment_info[definitions.KEY_CRASH_CMD]
             if "$POC" in binary_input_arg:
                 binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
-            timestamp_command = "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
             senx_command = "cd {};".format(binary_dir_path)
             senx_command += "timeout -k 5m {0}h senx -struct-def={2} {1}.bc ".format(str(timeout_h),
@@ -80,7 +80,7 @@ class SenX(AbstractTool):
                 emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
             timestamp_command = "printf \"\\n\" >> " + self.log_output_path
-            timestamp_command += ";echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            timestamp_command += ";echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
             execute_command(timestamp_command)
 
         return
