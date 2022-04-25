@@ -1,7 +1,7 @@
 #!/bin/bash
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 TEST_ID=$1
-
-cd tests
+cd $script_dir/tests
 cp hufts-segv.gz /tmp/
 
 case "$TEST_ID" in
