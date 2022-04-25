@@ -26,6 +26,11 @@ class ManyBugs(AbstractBenchmark):
         container_id = self.setup_container(tool_name, bug_index, config_id, use_container, is_multi)
         exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
         self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
+        if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
+            emitter.success("\t\t\t[benchmark] transformation successful")
+        else:
+            emitter.error("\t\t\t[benchmark] transformation failed")
+
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
@@ -108,7 +113,7 @@ class ManyBugs(AbstractBenchmark):
         return True
 
     def transform(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
-        emitter.normal("\t\t\ttransform fix-file")
+        emitter.normal("\t\t\ttransform test-suite/fix-file")
         self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-transform.log"
         command_str = "bash transform.sh {}".format(self.base_dir_experiment)
         status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
