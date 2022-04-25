@@ -135,6 +135,10 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
             else:
                 copy_command = "cp -rf {} {}".format(test_suite_path, dir_output)
+                file_list = os.listdir(test_suite_path)
+                for f in file_list:
+                    if ".orig" in f:
+                        os.system("e9afl {} -o {}".format(f, f.replace(".orig", ".inst_coverage")))
                 valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
                 valkyrie_binary_path = None
             utilities.execute_command(copy_command)
