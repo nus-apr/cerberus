@@ -22,7 +22,8 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     patch_file = dir_patch + "/" + patch_file
     validate_command = "ln -sf {} {};".format(patch_file, link_file)
     output_dir = os.path.dirname(binary_path)
-    validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \
+    if binary_path:
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \
                        "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
                                                                                binary_path,
                                                                                oracle_path,
@@ -30,6 +31,14 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
                                                                                patch_file,
                                                                                source_file,
                                                                                values.DEFAULT_TEST_TIMEOUT)
+    else:
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie  --test-suite={} --test-id-list={} " \
+                        "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
+                                                                                oracle_path,
+                                                                                test_id_str,
+                                                                                patch_file,
+                                                                                source_file,
+                                                                                values.DEFAULT_TEST_TIMEOUT)
     validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
     if not is_rank:
         validate_command += "  --only-validate "

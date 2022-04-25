@@ -121,18 +121,22 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                                                                                       subject_name,
                                                                                       bug_id)
             valkyrie_oracle_path = dir_output + "/oracle"
-            if os.path.isfile(valkyrie_oracle_path):
-                os.remove(valkyrie_oracle_path)
-            with open(valkyrie_oracle_path, "w") as oracle_file:
-                oracle_file.writelines("#!/bin/bash\n")
-                oracle_file.writelines( "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
-                oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs")
-                oracle_file.writelines("$script_dir/test.sh /dev/null $@")
-            os.system("chmod +x {}".format(valkyrie_oracle_path))
-            copy_command = "cp {} {};".format(test_driver_path, dir_output)
-            copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
-            copy_command += "cp -rf {} {}".format(test_suite_path, dir_output)
-            copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
+            if not os.path.isdir(test_suite_path):
+                if os.path.isfile(valkyrie_oracle_path):
+                    os.remove(valkyrie_oracle_path)
+                with open(valkyrie_oracle_path, "w") as oracle_file:
+                    oracle_file.writelines("#!/bin/bash\n")
+                    oracle_file.writelines( "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
+                    oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs")
+                    oracle_file.writelines("$script_dir/test.sh /dev/null $@")
+                os.system("chmod +x {}".format(valkyrie_oracle_path))
+                copy_command = "cp {} {};".format(test_driver_path, dir_output)
+                copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
+                copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
+            else:
+                copy_command = "cp -rf {} {}".format(test_suite_path, dir_output)
+                valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
+                valkyrie_binary_path = None
             utilities.execute_command(copy_command)
             patch_dir = dir_output + "/patches"
             if not os.path.isdir(patch_dir):
