@@ -45,13 +45,10 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     dir_expr = dir_info["experiment"]
     dir_setup = dir_info["setup"]
     dir_log = dir_info["log"]
-    bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_numbers = [str(x) for x in experiment_info[definitions.KEY_FIX_LINES]]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
-    subject_name = experiment_info[definitions.KEY_SUBJECT]
-    binary_path = experiment_info[definitions.KEY_BINARY_PATH]
     fix_location = None
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
@@ -75,35 +72,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         "expr": dir_expr,
         "output": dir_output
     }
-    valkyrie_binary_path = dir_output + "/binary"
-    binary_path = dir_expr + "/src/" + binary_path
 
-    if container_id:
-        copy_command = "docker cp {}:{} {}".format(container_id, binary_path, valkyrie_binary_path)
-    else:
-        copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
-    utilities.execute_command(copy_command)
-    values.LIST_PROCESSED = []
-    test_driver_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name, subject_name, bug_id)
-    test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name, subject_name, bug_id)
-    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(benchmark_name, subject_name, bug_id)
-    valkyrie_oracle_path = dir_output + "/oracle"
-    if os.path.isfile(valkyrie_oracle_path):
-        os.remove(valkyrie_oracle_path)
-    with open(valkyrie_oracle_path, "w") as oracle_file:
-        oracle_file.writelines("#!/bin/bash\n")
-        oracle_file.writelines("script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
-        oracle_file.writelines("$script_dir/test.sh /dev/null $@")
-    os.system("chmod +x {}".format(valkyrie_oracle_path))
-    copy_command = "cp {} {};".format(test_driver_path, dir_output)
-    copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
-    copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
-    utilities.execute_command(copy_command)
-    patch_dir = dir_output + "/patches"
-    if not os.path.isdir(patch_dir):
-        os.makedirs(patch_dir)
-    dir_process = dir_output + "/patches-processing"
-    utilities.execute_command("mkdir {}".format(dir_process))
     tool.repair(dir_info_container, experiment_info, config_info, container_id, values.CONF_INSTRUMENT_ONLY)
 
 
@@ -153,8 +122,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 os.remove(valkyrie_oracle_path)
             with open(valkyrie_oracle_path, "w") as oracle_file:
                 oracle_file.writelines("#!/bin/bash\n")
-                oracle_file.writelines(
-                    "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
+                oracle_file.writelines( "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
                 oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs")
                 oracle_file.writelines("$script_dir/test.sh /dev/null $@")
             os.system("chmod +x {}".format(valkyrie_oracle_path))
