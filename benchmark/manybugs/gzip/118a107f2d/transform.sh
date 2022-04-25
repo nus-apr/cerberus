@@ -25,6 +25,6 @@ cp -f $dir_name/src/gzip test-suite/gzip.orig
 cp -rf $dir_name/src/tests test-suite
 
 # update path for test case
-sed -i 's#/experiment/manybugs/gzip/118a107f2d/src/tests#/tmp#g' test-suite/tests/hufts
+sed -i 's#/experiment//manybugs/gzip/118a107f2d/src/tests#/tmp#g' test-suite/tests/hufts
 
 

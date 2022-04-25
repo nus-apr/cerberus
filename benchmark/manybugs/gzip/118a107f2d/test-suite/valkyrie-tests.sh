@@ -2,7 +2,7 @@
 TEST_ID=$1
 
 cd tests
-cp tests/hufts-segv.gz /tmp/
+cp hufts-segv.gz /tmp/
 
 case "$TEST_ID" in
     1) bash helin-segv;;
