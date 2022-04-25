@@ -19,7 +19,12 @@ cp $dir_name/src/zcmp test-suite
 
 # copy binary executables
 #find -type f -executable -exec file -i '{}' \; | grep 'charset=binary' | grep -v "shellscript" | awk '{print $1}'
-cp -f $dir_name/src/gzip test-suite/src/gzip.orig
+cp -f $dir_name/src/gzip test-suite/gzip.orig
 
 # copy test cases
-cp -rf $dir_name/tests test-suite
+cp -rf $dir_name/src/tests test-suite
+
+# update path for test case
+sed -i 's#/experiment/manybugs/gzip/118a107f2d/src/tests#/tmp#g' test-suite/tests/hufts
+
+

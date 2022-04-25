@@ -1,10 +1,10 @@
 #!/bin/bash
 script_file=$GDB_SCRIPT
-
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 if [[ -f $script_file ]];then
     sed -i '$ d' $script_file
     echo "run $@" >> $script_file
     gdb -return-child-result -batch-silent -x $script_file ./gzip.orig
 else
-    ./gzip.orig $@
+    $script_dir/gzip.orig $@
 fi
