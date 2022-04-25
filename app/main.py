@@ -114,6 +114,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name,
                                                                                       subject_name,
                                                                                       bug_id)
+            test_suite_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test-suite".format(benchmark_name,
+                                                                                             subject_name,
+                                                                                             bug_id)
             oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(benchmark_name,
                                                                                       subject_name,
                                                                                       bug_id)
@@ -128,6 +131,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             os.system("chmod +x {}".format(valkyrie_oracle_path))
             copy_command = "cp {} {};".format(test_driver_path, dir_output)
             copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
+            copy_command += "cp -rf {} {}".format(test_suite_path, dir_output)
             copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
             utilities.execute_command(copy_command)
             patch_dir = dir_output + "/patches"
