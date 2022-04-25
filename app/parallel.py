@@ -77,6 +77,8 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
             continue
         list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
         for patch_file in list_selected:
+            valkyrie.validate_patch(binary_path, oracle_path, validation_test_list, source_file, dir_patch,
+                                             dir_process, patch_file, is_rank)
             validator_pool.apply_async(valkyrie.validate_patch,
                                        args=(binary_path, oracle_path, validation_test_list, source_file, dir_patch,
                                              dir_process, patch_file, is_rank),
