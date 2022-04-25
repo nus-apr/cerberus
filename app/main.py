@@ -138,7 +138,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 file_list = os.listdir(test_suite_path)
                 for f in file_list:
                     if ".orig" in f:
-                        os.system("e9afl {} -o {}".format(f, f.replace(".orig", ".inst_coverage")))
+                        binary_file = test_suite_path + "/" + f
+                        os.system("e9afl {} -o {} > /dev/null 2>&1".format(binary_file, binary_file.replace(".orig", ".inst_coverage")))
                 valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
                 valkyrie_binary_path = None
             utilities.execute_command(copy_command)
