@@ -21,10 +21,11 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
     link_file = dir_process + "/" + patch_file
     patch_file = dir_patch + "/" + patch_file
     validate_command = "ln -sf {} {};".format(patch_file, link_file)
+    timeout = len(test_id_list) * 60
     output_dir = os.path.dirname(binary_path)
     if binary_path:
-        validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie --binary={} --test-oracle={} --test-id-list={} " \
-                       "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie --binary={} --test-oracle={} --test-id-list={} " \
+                       "--patch-file={} --source={} --test-timeout={} ".format(timeout, lib_dir_path,
                                                                                binary_path,
                                                                                oracle_path,
                                                                                test_id_str,
@@ -32,8 +33,8 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
                                                                                source_file,
                                                                                values.DEFAULT_TEST_TIMEOUT)
     else:
-        validate_command += "LD_LIBRARY_PATH={} timeout -k1m 5m valkyrie  --test-suite={} --test-id-list={} " \
-                        "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie  --test-suite={} --test-id-list={} " \
+                        "--patch-file={} --source={} --test-timeout={} ".format(timeout, lib_dir_path,
                                                                                 oracle_path,
                                                                                 test_id_str,
                                                                                 patch_file,
