@@ -107,6 +107,13 @@ class ManyBugs(AbstractBenchmark):
         emitter.highlight("\t\t\tsummary of tests written to: " + self.log_test_path)
         return True
 
+    def transform(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
+        emitter.normal("\t\t\ttransform fix-file")
+        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-transform.log"
+        command_str = "bash transform.sh {}".format(self.base_dir_experiment)
+        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        return status == 0
+
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path

@@ -20,3 +20,6 @@ cp $dir_name/src/zcmp test-suite
 # copy binary executables
 #find -type f -executable -exec file -i '{}' \; | grep 'charset=binary' | grep -v "shellscript" | awk '{print $1}'
 cp -f $dir_name/src/gzip test-suite/src/gzip.orig
+
+# copy test cases
+cp -rf $dir_name/tests test-suite
