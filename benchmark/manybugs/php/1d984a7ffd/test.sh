@@ -1,4 +1,3 @@
-
 #!/bin/bash
 script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
@@ -9,7 +8,6 @@ cd $dir_name
 TEST_ID=$2
 POS_N=7588
 NEG_N=2
-
 
 
 if [ -z "$TEST_ID" ]
@@ -26,6 +24,18 @@ then
   bash test.sh $i /data
   done
 else
-  timeout 5 bash test.sh $TEST_ID
+  pattern=`expr substr "$TEST_ID" 1 1`
+  num=`expr substr "$TEST_ID" 2 ${#TEST_ID}`
+
+  if [[ $pattern == 'n' ]]; then
+      cd $dir_name
+      timeout 10 bash test.sh $TEST_ID
+  elif [[ $pattern == 'p' ]]; then
+      cd $dir_name
+      timeout 10 bash test.sh $TEST_ID
+  else
+      cd $dir_name/src
+      timeout 10 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
+  fi
 
 fi

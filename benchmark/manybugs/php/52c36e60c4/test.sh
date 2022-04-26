@@ -26,6 +26,19 @@ then
   bash test.sh $i /data
   done
 else
-  timeout 5 bash test.sh $TEST_ID
+  pattern=`expr substr "$TEST_ID" 1 1`
+  num=`expr substr "$TEST_ID" 2 ${#TEST_ID}`
+
+  if [[ $pattern == 'n' ]]; then
+      cd $dir_name
+      timeout 10 bash test.sh $TEST_ID
+  elif [[ $pattern == 'p' ]]; then
+      cd $dir_name
+      timeout 10 bash test.sh $TEST_ID
+  else
+      cd $dir_name/src
+      timeout 10 perl $dir_name/${project_name}-run-tests.pl $TEST_ID
+  fi
+
 
 fi
