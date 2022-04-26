@@ -1,0 +1,21 @@
+#!/bin/bash
+patch_id=$PATCH_ID
+is_coverage=$COVERAGE
+script_file=/tmp/gdb_patch_script_$patch_id
+script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+binary_path=$script_dir/TEMP.orig
+
+if [[ -f $script_file ]];then
+    sed -i '$ d' $script_file
+    echo "run $@" >> $script_file
+
+    if [[ $is_coverage -eq 1 ]];then
+      binary_path=$script_dir/TEMP.inst_coverage
+      coverage_file=/tmp/p$patch_id.coverage
+      afl-showmap -m 1234 -o $coverage_file  gdb -return-child-result -batch-silent -x $script_file $binary_path
+    else
+      gdb -return-child-result -batch-silent -x $script_file $binary_path
+    fi
+else
+    $script_dir/TEMP.orig $@
+fi
