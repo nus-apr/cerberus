@@ -26,23 +26,8 @@ cp  $TRANS_FILE $SRC_FILE
 bash build.sh $1
 
 
-# copy test cases
-cp -rf $dir_name/src/test $script_dir/test-suite
 
-
-cd $dir_name/src
-driver_list=($(find -type f -executable -exec file -i '{}' \; | grep 'charset=binary' | grep -v "shellscript" | awk '{print $1}'))
-for i in "${driver_list[@]}"
-do
-  driver_path=${i::-1}
-  directories=$(dirname $driver_path)
-  driver_name=$(basename $driver_path)
-  mkdir -p $script_dir/test-suite/$directories
-  cp $script_dir/test-suite/template $script_dir/test-suite/$directories/$driver_name
-  cp $driver_path $script_dir/test-suite/$directories/$driver_name.orig
-  sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
-done
-
+cd $dir_name/src/test
 script_list=($(find -type f -executable -exec file -i '{}' \; |grep  "shellscript" | grep "\.sh" | awk '{print $1}'))
 for i in "${script_list[@]}"
 do
@@ -60,5 +45,21 @@ sed -i "62 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src
 cd $script_dir
 bash build.sh $1
 
+# copy test cases
+cp -rf $dir_name/src/test $script_dir/test-suite
+
+
+cd $dir_name/src
+driver_list=($(find -type f -executable -exec file -i '{}' \; | grep 'charset=binary' | grep -v "shellscript" | awk '{print $1}'))
+for i in "${driver_list[@]}"
+do
+  driver_path=${i::-1}
+  directories=$(dirname $driver_path)
+  driver_name=$(basename $driver_path)
+  mkdir -p $script_dir/test-suite/$directories
+  cp $script_dir/test-suite/template $script_dir/test-suite/$directories/$driver_name
+  cp $driver_path $script_dir/test-suite/$directories/$driver_name.orig
+  sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
+done
 
 
