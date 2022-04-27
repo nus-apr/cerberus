@@ -4,11 +4,11 @@ TEST_ID=$1
 cd $script_dir/test
 
 case "$TEST_ID" in
-    1)   ./ascii_tag;;
-    2)   ./long_tag;;
-    3)   ./short_tag;;
-    4)   ./strip_rw;;
-    5)   ./rewrite;;
+    1)   ./ascii_tag $PATCH_ID ;;
+    2)   ./long_tag $PATCH_ID ;;
+    3)   ./short_tag $PATCH_ID ;;
+    4)   ./strip_rw $PATCH_ID ;;
+    5)   ./rewrite $PATCH_ID  ;;
     6)   ./bmp2tiff_palette.sh;;
     7)   ./bmp2tiff_rgb.sh;;
     8)   ./gif2tiff.sh;;
@@ -83,7 +83,7 @@ case "$TEST_ID" in
     77)   ./tiff2rgba-rgb-3c-16b.sh;;
     78)   ./tiff2rgba-rgb-3c-8b.sh;;
 esac
-
 ret=$?
+rm $PATCH_ID-o-*
 exit $ret;
 
