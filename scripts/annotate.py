@@ -72,10 +72,15 @@ print(len(sorted_control_node_list.keys()))
 
 for line_number, c_node in sorted_control_node_list.items():
 	node_range = c_node["range"]
+	node_type = c_node["kind"]
 	try:
 		start_line_no = int(node_range["begin"]["line"])
 		last_line_no = int(node_range["end"]["line"])
 		child_list = c_node["inner"]
+		if node_type == "IfStmt":
+			compound_node = child_list[1]
+			compound_range = compound_node["range"]
+			last_line_no = int(compound_range["end"]["line"])
 		start_line = source_content[start_line_no - 1]
 		start_line = " /* jump:{} */".format(last_line_no) + start_line
 		source_content[start_line_no-1] = start_line
