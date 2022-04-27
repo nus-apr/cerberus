@@ -184,7 +184,7 @@ static int _TIFFWriteDirectory(TIFF *tif, int done) {
     ** is set or not.  For normal fields, we just use the
     ** FieldSet test.
     */
- /* jump:199 */    if (fip->field_bit == FIELD_CUSTOM) {
+ /* jump:197 */    if (fip->field_bit == FIELD_CUSTOM) {
       int ci, is_set = FALSE;
 
  /* jump:192 */      for (ci = 0; ci < td->td_customValueCount; ci++) {
@@ -326,7 +326,7 @@ static int _TIFFWriteDirectory(TIFF *tif, int done) {
  /* jump:335 */      if (dir->tdir_count > 0) {
         tif->tif_flags |= TIFF_INSUBIFD;
         tif->tif_nsubifd = (uint16)dir->tdir_count;
- /* jump:334 */        if (dir->tdir_count > 1) {
+ /* jump:331 */        if (dir->tdir_count > 1) {
           tif->tif_subifdoff = dir->tdir_offset;
         } else {
           tif->tif_subifdoff = (uint32)(tif->tif_diroff + sizeof(uint16) +
@@ -440,9 +440,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
   switch (fip->field_type) {
   case TIFF_SHORT:
   case TIFF_SSHORT:
- /* jump:467 */    if (fip->field_passcount) {
+ /* jump:455 */    if (fip->field_passcount) {
       uint16 *wp;
- /* jump:451 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:448 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &wp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -453,7 +453,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:466 */      if (wc == 1) {
+ /* jump:460 */      if (wc == 1) {
         uint16 sv;
         TIFFGetField(tif, fip->field_tag, &sv);
         dir->tdir_offset = TIFFInsertData(tif, dir->tdir_type, sv);
@@ -469,9 +469,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
   case TIFF_LONG:
   case TIFF_SLONG:
   case TIFF_IFD:
- /* jump:495 */    if (fip->field_passcount) {
+ /* jump:484 */    if (fip->field_passcount) {
       uint32 *lp;
- /* jump:480 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:477 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &lp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -482,7 +482,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:494 */      if (wc == 1) {
+ /* jump:488 */      if (wc == 1) {
         /* XXX handle LONG->SHORT conversion */
         TIFFGetField(tif, fip->field_tag, &dir->tdir_offset);
       } else {
@@ -496,9 +496,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
     break;
   case TIFF_RATIONAL:
   case TIFF_SRATIONAL:
- /* jump:525 */    if (fip->field_passcount) {
+ /* jump:511 */    if (fip->field_passcount) {
       float *fp;
- /* jump:507 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:504 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &fp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -509,7 +509,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:524 */      if (wc == 1) {
+ /* jump:518 */      if (wc == 1) {
         float fv;
         TIFFGetField(tif, fip->field_tag, &fv);
  /* jump:517 */        if (!TIFFWriteRationalArray(tif, dir, &fv)) {
@@ -525,9 +525,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
     }
     break;
   case TIFF_FLOAT:
- /* jump:554 */    if (fip->field_passcount) {
+ /* jump:540 */    if (fip->field_passcount) {
       float *fp;
- /* jump:536 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:533 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &fp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -538,7 +538,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:553 */      if (wc == 1) {
+ /* jump:547 */      if (wc == 1) {
         float fv;
         TIFFGetField(tif, fip->field_tag, &fv);
  /* jump:546 */        if (!TIFFWriteFloatArray(tif, dir, &fv)) {
@@ -554,9 +554,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
     }
     break;
   case TIFF_DOUBLE:
- /* jump:583 */    if (fip->field_passcount) {
+ /* jump:569 */    if (fip->field_passcount) {
       double *dp;
- /* jump:565 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:562 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &dp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -567,7 +567,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:582 */      if (wc == 1) {
+ /* jump:576 */      if (wc == 1) {
         double dv;
         TIFFGetField(tif, fip->field_tag, &dv);
  /* jump:575 */        if (!TIFFWriteDoubleArray(tif, dir, &dv)) {
@@ -584,7 +584,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
     break;
   case TIFF_ASCII: {
     char *cp;
- /* jump:591 */    if (fip->field_passcount) {
+ /* jump:589 */    if (fip->field_passcount) {
       TIFFGetField(tif, fip->field_tag, &wc, &cp);
     } else {
       TIFFGetField(tif, fip->field_tag, &cp);
@@ -598,9 +598,9 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
 
   case TIFF_BYTE:
   case TIFF_SBYTE:
- /* jump:627 */    if (fip->field_passcount) {
+ /* jump:613 */    if (fip->field_passcount) {
       char *cp;
- /* jump:609 */      if (wc == (uint16)TIFF_VARIABLE2) {
+ /* jump:606 */      if (wc == (uint16)TIFF_VARIABLE2) {
         TIFFGetField(tif, fip->field_tag, &wc2, &cp);
         dir->tdir_count = wc2;
       } else { /* Assume TIFF_VARIABLE */
@@ -611,7 +611,7 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
         return 0;
       }
     } else {
- /* jump:626 */      if (wc == 1) {
+ /* jump:620 */      if (wc == 1) {
         char cv;
         TIFFGetField(tif, fip->field_tag, &cv);
  /* jump:619 */        if (!TIFFWriteByteArray(tif, dir, &cv)) {
@@ -629,10 +629,10 @@ static int TIFFWriteNormalTag(TIFF *tif, TIFFDirEntry *dir,
 
   case TIFF_UNDEFINED: {
     char *cp;
- /* jump:640 */    if (wc == (unsigned short)TIFF_VARIABLE) {
+ /* jump:635 */    if (wc == (unsigned short)TIFF_VARIABLE) {
       TIFFGetField(tif, fip->field_tag, &wc, &cp);
       dir->tdir_count = wc;
- /* jump:640 */    } else if (wc == (unsigned short)TIFF_VARIABLE2) {
+ /* jump:638 */    } else if (wc == (unsigned short)TIFF_VARIABLE2) {
       TIFFGetField(tif, fip->field_tag, &wc2, &cp);
       dir->tdir_count = wc2;
     } else {
@@ -657,7 +657,7 @@ static void TIFFSetupShortLong(TIFF *tif, ttag_t tag, TIFFDirEntry *dir,
                                uint32 v) {
   dir->tdir_tag = (uint16)tag;
   dir->tdir_count = 1;
- /* jump:666 */  if (v > 0xffffL) {
+ /* jump:663 */  if (v > 0xffffL) {
     dir->tdir_type = (short)TIFF_LONG;
     dir->tdir_offset = v;
   } else {
@@ -788,7 +788,7 @@ static int TIFFWriteShortTable(TIFF *tif, ttag_t tag, TIFFDirEntry *dir,
  * Write/copy data associated with an ASCII or opaque tag value.
  */
 static int TIFFWriteByteArray(TIFF *tif, TIFFDirEntry *dir, char *cp) {
- /* jump:797 */  if (dir->tdir_count > 4) {
+ /* jump:795 */  if (dir->tdir_count > 4) {
  /* jump:794 */    if (!TIFFWriteData(tif, dir, cp)) {
       return (0);
     }
@@ -803,8 +803,8 @@ static int TIFFWriteByteArray(TIFF *tif, TIFFDirEntry *dir, char *cp) {
  * or SSHORT and write the associated indirect values.
  */
 static int TIFFWriteShortArray(TIFF *tif, TIFFDirEntry *dir, uint16 *v) {
- /* jump:821 */  if (dir->tdir_count <= 2) {
- /* jump:817 */    if (tif->tif_header.tiff_magic == TIFF_BIGENDIAN) {
+ /* jump:819 */  if (dir->tdir_count <= 2) {
+ /* jump:812 */    if (tif->tif_header.tiff_magic == TIFF_BIGENDIAN) {
       dir->tdir_offset = (uint32)((long)v[0] << 16);
  /* jump:811 */      if (dir->tdir_count == 2) {
         dir->tdir_offset |= v[1] & 0xffff;
@@ -826,7 +826,7 @@ static int TIFFWriteShortArray(TIFF *tif, TIFFDirEntry *dir, uint16 *v) {
  * or SLONG and write the associated indirect values.
  */
 static int TIFFWriteLongArray(TIFF *tif, TIFFDirEntry *dir, uint32 *v) {
- /* jump:834 */  if (dir->tdir_count == 1) {
+ /* jump:832 */  if (dir->tdir_count == 1) {
     dir->tdir_offset = v[0];
     return (1);
   } else {
@@ -855,7 +855,7 @@ static int TIFFWriteRationalArray(TIFF *tif, TIFFDirEntry *dir, float *v) {
     uint32 den;
 
  /* jump:867 */    if (fv < 0) {
- /* jump:866 */      if (dir->tdir_type == TIFF_RATIONAL) {
+ /* jump:864 */      if (dir->tdir_type == TIFF_RATIONAL) {
         TIFFWarningExt(tif->tif_clientdata, tif->tif_name,
                        "\"%s\": Information lost writing value (%g) as "
                        "(unsigned) RATIONAL",
@@ -881,7 +881,7 @@ static int TIFFWriteRationalArray(TIFF *tif, TIFFDirEntry *dir, float *v) {
 
 static int TIFFWriteFloatArray(TIFF *tif, TIFFDirEntry *dir, float *v) {
   TIFFCvtNativeToIEEEFloat(tif, dir->tdir_count, v);
- /* jump:889 */  if (dir->tdir_count == 1) {
+ /* jump:887 */  if (dir->tdir_count == 1) {
     dir->tdir_offset = *(uint32 *)&v[0];
     return (1);
   } else {
@@ -1102,7 +1102,7 @@ int TIFFRewriteDirectory(TIFF *tif) {
   */
 
   /* Is it the first directory in the file? */
- /* jump:1148 */  if (tif->tif_header.tiff_diroff == tif->tif_diroff) {
+ /* jump:1116 */  if (tif->tif_header.tiff_diroff == tif->tif_diroff) {
     tif->tif_header.tiff_diroff = 0;
     tif->tif_diroff = 0;
 
@@ -1184,7 +1184,7 @@ static int TIFFLinkDirectory(TIFF *tif) {
      * the last one configured, revert back to the
      * normal directory linkage.
      */
- /* jump:1191 */    if (--tif->tif_nsubifd) {
+ /* jump:1189 */    if (--tif->tif_nsubifd) {
       tif->tif_subifdoff += sizeof(diroff);
     } else {
       tif->tif_flags &= ~TIFF_INSUBIFD;
