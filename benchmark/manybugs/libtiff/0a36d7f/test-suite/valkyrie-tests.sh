@@ -83,7 +83,7 @@ case "$TEST_ID" in
     77)   ./tiff2rgba-rgb-3c-16b.sh;;
     78)   ./tiff2rgba-rgb-3c-8b.sh;;
 esac
-
 ret=$?
+rm $PATCH_ID-o-*
 exit $ret;
 

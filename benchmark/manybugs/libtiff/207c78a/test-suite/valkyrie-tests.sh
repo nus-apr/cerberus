@@ -85,5 +85,6 @@ case "$TEST_ID" in
 esac
 
 ret=$?
+rm $PATCH_ID-o-*
 exit $ret;
 

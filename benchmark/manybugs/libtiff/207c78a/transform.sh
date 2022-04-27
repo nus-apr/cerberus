@@ -43,3 +43,18 @@ do
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
 done
 
+script_list=($(find -type f -executable -exec file -i '{}' \; |grep  "shellscript" | grep "\.sh" | awk '{print $1}'))
+for i in "${script_list[@]}"
+do
+  script_path=${i::-1}
+  sed -i "s#o-#\$PATCH_ID-o-#g" $script_path
+done
+
+
+sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/long_tag.c
+sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/short_tag.c
+sed -i "67 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/long_tag.c
+sed -i "86 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/short_tag.c
+sed -i "62 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/strip_rw.c
+bash build.sh $1
+
