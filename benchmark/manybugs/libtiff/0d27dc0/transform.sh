@@ -47,7 +47,7 @@ script_list=($(find -type f -executable -exec file -i '{}' \; |grep  "shellscrip
 for i in "${script_list[@]}"
 do
   script_path=${i::-1}
-  sed -i "s#o-#\$PATCH_ID-o-#g" $script_path
+  sed -i "s#o-#\${PATCH_ID:+\$PATCH_ID-}o-#g" $script_path
 done
 
 sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/long_tag.c
