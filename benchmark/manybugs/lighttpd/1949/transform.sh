@@ -9,6 +9,9 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 # copy test cases
 cp -rf $dir_name/src/tests $script_dir/test-suite/
 
+# copy libraries
+cp -rf $dir_name/src/src/.libs $script_dir/test-suite/src
+cp -rf $dir_name/src/src/*.la $script_dir/test-suite/src
 
 cd $dir_name/src
 driver_list=($(find -type f -executable -exec file -i '{}' \; | grep 'charset=binary' | grep -v "shellscript" | awk '{print $1}'  | grep -v ".so" ))
