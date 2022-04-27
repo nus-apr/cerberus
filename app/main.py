@@ -333,7 +333,7 @@ def run(repair_tool_list, benchmark, setup):
                 tool_name = repair_tool.name
                 if len(repair_tool_list) > 1:
                     tool_name = "multi"
-                tool_inst_dir = dir_setup + "/" + str(repair_tool.name).lower()
+                tool_inst_dir = definitions.DIR_MAIN + "/benchmark/" + directory_name + "/" + str(repair_tool.name).lower()
                 dir_result = definitions.DIR_RESULT + "/" + "-".join([config_id, benchmark.name,
                                                                       tool_name,
                                                                       subject_name, bug_name])

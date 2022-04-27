@@ -25,6 +25,9 @@ class Examples(AbstractBenchmark):
         exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
         if not use_container:
             self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
+            dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+            if os.path.isdir(dir_exp_local):
+                os.system("rm -rf {}".format(dir_exp_local))
         self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
         return container_id
 
