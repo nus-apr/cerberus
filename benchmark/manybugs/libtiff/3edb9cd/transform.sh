@@ -53,8 +53,13 @@ done
 
 sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/long_tag.c
 sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/short_tag.c
-sed -i "67 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/long_tag.c
-sed -i "86 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/short_tag.c
-sed -i "62 i if (argc > 1) filename = argv[1] + '-' + filename; " $dir_name/src/test/strip_rw.c
+sed -i 's#static const char filename\[\]#const char \*filename#g' $dir_name/src/test/short_tag.c
+sed -i "67 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/long_tag.c
+sed -i "86 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/short_tag.c
+sed -i "62 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/strip_rw.c
+
+cd $script_dir
 bash build.sh $1
+
+
 
