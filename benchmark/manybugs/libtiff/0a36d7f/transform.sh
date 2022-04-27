@@ -22,7 +22,7 @@ if [[ ! -f $TRANS_FILE ]]; then
   mv formatted.c $TRANS_FILE
 fi
 
-cp  $TRANS_FILE $SRC_FILE
+cp -f $TRANS_FILE $SRC_FILE
 bash build.sh $1
 
 
@@ -38,9 +38,10 @@ done
 sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/long_tag.c
 sed -i 's#main()#main(int argc, char **argv)#g' $dir_name/src/test/short_tag.c
 sed -i 's#static const char filename\[\]#const char \*filename#g' $dir_name/src/test/short_tag.c
-sed -i "67 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/long_tag.c
-sed -i "86 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/short_tag.c
-sed -i "62 i if (argc > 1) filename = argv[1] + '-' + *filename; " $dir_name/src/test/strip_rw.c
+sed -i "67 i if (argc > 1) filename = *argv[1] + \"-long_test.tiff\"; " $dir_name/src/test/long_tag.c
+sed -i "86 i if (argc > 1) filename = *argv[1] + \"-short_test.tiff\"; " $dir_name/src/test/short_tag.c
+sed -i "62 i if (argc > 1) filename = *argv[1] + \"-strip_test.tiff\"; " $dir_name/src/test/strip_rw.c
+
 
 cd $script_dir
 bash build.sh $1
@@ -61,6 +62,7 @@ do
   cp $driver_path $script_dir/test-suite/$directories/$driver_name.orig
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
 done
+
 
 
 
