@@ -2,7 +2,7 @@ import os
 import json
 import sys
 import collections
-from common import generate_reversed_indexed_list, fetch_control_nodes, read_json
+from common import generate_reversed_indexed_node_list, fetch_control_nodes, read_json, fetch_function_nodes
 
 
 def annotate_jump(sorted_node_list, orig_content):
@@ -34,7 +34,7 @@ def annotate():
 	with open(source_file, "r") as s_f:
 		source_content = s_f.readlines()
 	translation_unit = read_json(json_file)
-	function_node_list = []
+	function_node_list = fetch_function_nodes(translation_unit, source_file)
 	for ast_node in translation_unit["inner"]:
 		node_type = ast_node["kind"]
 		if node_type == "FunctionDecl":
@@ -46,9 +46,9 @@ def annotate():
 		control_node_list = control_node_list + fetch_control_nodes(func_node)
 
 	print("# Control Nodes", len(control_node_list))
-	sorted_control_node_list = generate_reversed_indexed_list(control_node_list)
+	sorted_control_node_list = generate_reversed_indexed_node_list(control_node_list)
 	updated_content = annotate_jump(sorted_control_node_list, source_content)
-	with open("formatted.c", "w") as out_file:
+	with open("annotated.c", "w") as out_file:
 		out_file.writelines(updated_content)
 
 
