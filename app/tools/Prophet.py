@@ -133,7 +133,7 @@ class Prophet(AbstractTool):
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " -dump-all "
             if additional_tool_param:
-                all_command = all_command + " " + additional_tool_param
+                repair_command = repair_command + " " + additional_tool_param
             # repair_command += " -timeout {0} ".format(int(timeout))
             status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
