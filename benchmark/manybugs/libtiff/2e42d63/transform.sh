@@ -8,7 +8,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 SRC_FILE=$dir_name/src/tools/tiffcrop.c
 TRANS_FILE=$script_dir/valkyrie/tiffcrop.c
-ANNOTATE_SCRIPT=$script_dir/../../../../scripts/annotate.py
+ANNOTATE_SCRIPT=$script_dir/../../../../scripts/transform/annotate.py
+MERGE_SCRIPT=$script_dir/../../../../scripts/transform/merge.py
 
 if [[ ! -f $TRANS_FILE ]]; then
   mkdir -p $(dirname $TRANS_FILE)
@@ -18,12 +19,18 @@ if [[ ! -f $TRANS_FILE ]]; then
   clang -Xclang -ast-dump=json $SRC_FILE > $TRANS_FILE.ast
   tr --delete '\n' <  $TRANS_FILE.ast  >  $TRANS_FILE.ast.single
   # check for multi-line if condition / for condition  / while condition
-  python3 $ANNOTATE_SCRIPT $TRANS_FILE $TRANS_FILE.ast.single
-  mv formatted.c $TRANS_FILE
+  python3 $MERGE_SCRIPT $TRANS_FILE $TRANS_FILE.ast.single
+  mv merged.c $TRANS_FILE
+  cp $TRANS_FILE $SRC_FILE
+  clang -Xclang -ast-dump=json $SRC_FILE > $TRANS_FILE.ast.merged
+  tr --delete '\n' <  $TRANS_FILE.ast.merged  >  $TRANS_FILE.ast.merged.single
+  python3 $ANNOTATE_SCRIPT $TRANS_FILE $TRANS_FILE.ast.merged.single
+  mv annotated.c $TRANS_FILE
 fi
 
 cp  $TRANS_FILE $SRC_FILE
 bash build.sh $1
+
 
 
 
