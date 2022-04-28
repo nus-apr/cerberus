@@ -54,4 +54,12 @@ cp -rf $dir_name/src/tests test-suite
 # update path for test case
 sed -i 's#/experiment//manybugs/gzip/$bug_id/src/tests#/tmp#g' test-suite/tests/hufts
 
+cd $script_dir/test-suite/tests
+script_list=($(find -type f -executable -exec file -i '{}' \; |grep  "shellscript" |awk '{print $1}'))
+for i in "${script_list[@]}"
+do
+  script_path=${i::-1}
+  sed -i "s#out#\${PATCH_ID:+\$PATCH_ID-}out#g" $script_path
+done
+
 
