@@ -5,7 +5,7 @@ import sys
 import re
 import shlex
 
-LIMIT_PATCHES = 150000
+LIMIT_PATCHES = 250000
 
 def mute():
     sys.stdout = open(os.devnull, 'w')
