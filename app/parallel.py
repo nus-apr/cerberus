@@ -34,6 +34,8 @@ def initialize():
     len_gen = 0
     len_processed = 0
     timeout = 0
+    values.LIST_CONSUMED = []
+
 
 def collect_result(result):
     global result_list
