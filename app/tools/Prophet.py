@@ -108,6 +108,7 @@ class Prophet(AbstractTool):
             revlog_file = dir_expr + "/prophet/prophet.revlog"
             self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
             timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
             self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
             timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
             execute_command(timestamp_command)
@@ -131,6 +132,8 @@ class Prophet(AbstractTool):
             repair_command += " -o {}".format(dir_patch)
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " -dump-all "
+            if additional_tool_param:
+                repair_command = repair_command + " " + additional_tool_param
             # repair_command += " -timeout {0} ".format(int(timeout))
             status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
             if status != 0:
