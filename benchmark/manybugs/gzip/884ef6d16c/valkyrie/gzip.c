@@ -1010,7 +1010,7 @@ local char *get_suffix(name) char *name;
   }
   strlwr(suffix);
   slen = strlen(suffix);
-  do {
+ /* jump:1019 */  do {
     int s = strlen(*suf);
  /* jump:1018 */    if (slen > s && suffix[slen - s - 1] != PATH_SEP &&
         strequ(suffix + slen - s, *suf)) {
@@ -1111,7 +1111,7 @@ struct stat *sbuf;
     suf++;
 
   /* Search for all suffixes */
-  do {
+ /* jump:1139 */  do {
     char const *s0 = s = *suf;
     strcpy(ifname, iname);
 #ifdef NO_MULTIPLE_DOTS
@@ -1353,7 +1353,7 @@ local int get_method(in) int in; /* input file descriptor */
  /* jump:1359 */      if (no_name || (to_stdout && !list) || part_nb > 1) {
         /* Discard the old name */
         char c; /* dummy used for NeXTstep 3.0 cc optimizer bug */
-        do {
+ /* jump:1358 */        do {
           c = get_byte();
         } while (c != 0);
       } else {
@@ -1598,7 +1598,7 @@ local void shorten_name(name) char *name;
   /* Try keeping short extensions intact:
    * 1234.678.012.gz -> 123.678.012.gz
    */
-  do {
+ /* jump:1612 */  do {
     p = strrchr(name, PATH_SEP);
     p = p ? p + 1 : name;
  /* jump:1611 */    while (*p) {
@@ -1612,7 +1612,7 @@ local void shorten_name(name) char *name;
   } while (trunc == NULL && --min_part != 0);
 
  /* jump:1619 */  if (trunc != NULL) {
-    do {
+ /* jump:1617 */    do {
       trunc[0] = trunc[1];
     } while (*trunc++);
     trunc--;
