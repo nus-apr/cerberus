@@ -79,6 +79,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
 def repair_all(dir_info_list, experiment_info, tool_list, config_info, container_id_list, benchmark_name):
     consume_thread = None
     tool_thread_list = []
+    parallel.initialize()
     time_duration = float(config_info[definitions.KEY_CONFIG_TIMEOUT])
     timeout = time.time() + 60 * 60 * time_duration
     for index in range(0, len(tool_list)):
@@ -90,7 +91,6 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
         passing_test_list = []
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-        parallel.initialize()
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
         failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(",")
@@ -285,7 +285,6 @@ def run(repair_tool_list, benchmark, setup):
             experiment_item = experiment_list[bug_index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-
             if values.CONF_BUG_ID and bug_name != values.CONF_BUG_ID:
                 continue
             if values.CONF_BUG_ID_LIST and str(bug_name) not in values.CONF_BUG_ID_LIST:
