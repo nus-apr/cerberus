@@ -25,6 +25,16 @@ len_processed = 0
 timeout = 0
 
 
+def initialize():
+    global validator_pool, exit_consume, consume_count, len_gen, len_processed, timeout, result_list
+    validator_pool = mp.Pool(max_process_count, initializer=mute)
+    exit_consume = 0
+    consume_count = 0
+    result_list = []
+    len_gen = 0
+    len_processed = 0
+    timeout = 0
+
 def collect_result(result):
     global result_list
     result_list.append(result)

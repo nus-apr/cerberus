@@ -90,6 +90,7 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
         passing_test_list = []
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+        parallel.initialize()
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
         failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(",")
