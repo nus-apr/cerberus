@@ -69,4 +69,5 @@ do
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
 done
 
-
+cd $script_dir
+bash build.sh $1

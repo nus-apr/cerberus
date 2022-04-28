@@ -32,7 +32,6 @@ cp  $TRANS_FILE $SRC_FILE
 bash build.sh $1
 
 
-
 cd $dir_name/src/test
 script_list=($(find -type f -executable -exec file -i '{}' \; |grep  "shellscript" | grep "\.sh" | awk '{print $1}'))
 for i in "${script_list[@]}"
@@ -69,3 +68,5 @@ do
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
 done
 
+cd $script_dir
+bash build.sh $1

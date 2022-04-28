@@ -1117,7 +1117,7 @@ int TIFFRewriteDirectory(TIFF *tif) {
     toff_t nextdir, off;
 
     nextdir = tif->tif_header.tiff_diroff;
-    do {
+ /* jump:1140 */    do {
       uint16 dircount;
 
  /* jump:1127 */      if (!SeekOK(tif, nextdir) || !ReadOK(tif, &dircount, sizeof(dircount))) {
@@ -1210,7 +1210,7 @@ static int TIFFLinkDirectory(TIFF *tif) {
    * Not the first directory, search to the last and append.
    */
   nextdir = tif->tif_header.tiff_diroff;
-  do {
+ /* jump:1233 */  do {
     uint16 dircount;
 
  /* jump:1220 */    if (!SeekOK(tif, nextdir) || !ReadOK(tif, &dircount, sizeof(dircount))) {
