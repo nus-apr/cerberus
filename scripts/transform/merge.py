@@ -22,8 +22,8 @@ def transform_single_line(sorted_range_list, orig_content):
 				del_lines = []
 				for i in range(0, no_lines):
 					line_number = start_line_no + i
-					next_line = orig_content[line_number].strip().replace("\n", " ").replace("\t", " ")
-					merged_line = merged_line + next_line
+					next_line = orig_content[line_number].strip().replace("\n", " ").replace("\t", "")
+					merged_line = merged_line.rstrip() + " " + next_line.lstrip()
 					del_lines.append(line_number)
 					if "{" in next_line:
 						break
@@ -50,9 +50,10 @@ def merge():
 	print("# Function Nodes", len(function_node_list))
 	control_node_list = []
 	call_range_list = []
+	condition_range_list = []
 	for func_node in function_node_list:
 		control_node_list = control_node_list + fetch_control_nodes(func_node)
-		# call_range_list = call_range_list + fetch_call_ranges(func_node)
+		call_range_list = call_range_list + fetch_call_ranges(func_node)
 	condition_range_list = fetch_condition_ranges(control_node_list)
 	print("# Control Nodes", len(control_node_list))
 	print("# Call Ranges", len(call_range_list))

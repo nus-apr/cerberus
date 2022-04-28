@@ -34,7 +34,7 @@ def fetch_control_nodes(ast_tree):
 		if "kind" not in ast_node.keys():
 			continue
 		node_type = ast_node["kind"]
-		if node_type in ["IfStmt", "ForStmt", "WhileStmt"]:
+		if node_type in ["IfStmt", "ForStmt", "WhileStmt", "DoStmt"]:
 			node_list.append(ast_node)	
 	
 		if "inner" in ast_node.keys():
@@ -53,15 +53,57 @@ def fetch_condition_ranges(control_node_list):
 			compound_range_info = compound_first_node["range"]
 			begin_loc = cond_range_info["begin"]
 			end_loc = cond_range_info["end"]
+
 			if "line" not in begin_loc.keys():
 				continue
+			start_line_no = int(begin_loc["line"])
 			if "line" not in end_loc.keys():
 				end_loc = compound_range_info["begin"]
 				if "line" not in end_loc.keys():
 					continue
-			start_line_no = int(begin_loc["line"])
-			last_line_no = int(end_loc["line"]) - 1
+				last_line_no = int(end_loc["line"]) - 1
+			else:
+				last_line_no = int(end_loc["line"])
 			condition_range_list.append((start_line_no, last_line_no))
+		elif node_type == "ForStmt":
+			cond_node = control_node["inner"][0]
+			compound_first_node = control_node["inner"][3]["inner"][0]
+			cond_range_info = cond_node["range"]
+			compound_range_info = compound_first_node["range"]
+			begin_loc = cond_range_info["begin"]
+			end_loc = cond_range_info["end"]
+
+			if "line" not in begin_loc.keys():
+				continue
+			start_line_no = int(begin_loc["line"])
+			if "line" not in end_loc.keys():
+				end_loc = compound_range_info["begin"]
+				if "line" not in end_loc.keys():
+					continue
+				last_line_no = int(end_loc["line"]) - 1
+			else:
+				last_line_no = int(end_loc["line"])
+			condition_range_list.append((start_line_no, last_line_no))
+		# elif node_type == "DoStmt":
+		# 	cond_node = control_node["inner"][-1]
+		# 	compound_last_node = cond_node["inner"][-1]
+		# 	cond_range_info = cond_node["range"]
+		# 	compound_range_info = compound_last_node["range"]
+		# 	begin_loc = cond_range_info["begin"]
+		# 	end_loc = cond_range_info["end"]
+		#
+		# 	if "line" not in begin_loc.keys():
+		# 		continue
+		# 	start_line_no = int(begin_loc["line"])
+		# 	if "line" not in end_loc.keys():
+		# 		end_loc = compound_range_info["end"]
+		# 		if "line" not in end_loc.keys():
+		# 			continue
+		# 		last_line_no = int(end_loc["line"]) - 1
+		# 	else:
+		# 		last_line_no = int(end_loc["line"])
+		# 	condition_range_list.append((start_line_no, last_line_no))
+
 	print(condition_range_list)
 	return condition_range_list
 
@@ -84,7 +126,7 @@ def fetch_call_ranges(ast_tree):
 			if "line" not in begin_loc.keys() or "line" not in end_loc.keys():
 				continue
 			start_line_no = int(begin_loc["line"])
-			last_line_no = int(end_loc["line"])
+			last_line_no = int(end_loc["line"]) - 1
 			node_range_list.append((start_line_no, last_line_no))
 
 		if "inner" in ast_node.keys():
@@ -108,7 +150,14 @@ def generate_reversed_indexed_range_list(range_list):
 	indexed_list = dict()
 	for loc_range in range_list:
 		start_line = loc_range[0]
-		indexed_list[int(start_line)] = loc_range
+		if int(start_line) in indexed_list.keys():
+			existing_loc_range = indexed_list[start_line]
+			existing_end_line = existing_loc_range[1]
+			new_end_line = loc_range[1]
+			if new_end_line > existing_end_line:
+				indexed_list[int(start_line)] = loc_range
+		else:
+			indexed_list[int(start_line)] = loc_range
 	sorted_node_list = collections.OrderedDict(sorted(indexed_list.items(), reverse=True))
 	return sorted_node_list
 
