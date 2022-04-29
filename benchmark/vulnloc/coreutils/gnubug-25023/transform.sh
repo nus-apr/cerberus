@@ -5,8 +5,9 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 
-SRC_FILE=$dir_name/src/src/split.c
-TRANS_FILE=$script_dir/valkyrie/split.c
+
+SRC_FILE=$dir_name/src/src/pr.c
+TRANS_FILE=$script_dir/valkyrie/pr.c
 ANNOTATE_SCRIPT=$script_dir/../../../../scripts/transform/annotate.py
 MERGE_SCRIPT=$script_dir/../../../../scripts/transform/merge.py
 
@@ -35,6 +36,4 @@ git commit -m 'add formatted file'
 cd $script_dir
 cp  $TRANS_FILE $SRC_FILE
 bash build.sh $1
-
-
 
