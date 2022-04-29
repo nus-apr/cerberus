@@ -10,7 +10,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "binutils/objdump",
-   "crash_input": "-D $POC"
+   "crash_input": "-D $POC",
+   "test_timeout": 5
  },
  {
    "id": 2,
@@ -23,7 +24,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "binutils/nm-new",
-   "crash_input": "-A -a -l -S -s --special-syms --synthetic --with-symbol-versions -D $POC"
+   "crash_input": "-A -a -l -S -s --special-syms --synthetic --with-symbol-versions -D $POC",
+   "test_timeout": 5
  },
   {
    "id": 3,
@@ -36,7 +38,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "binutils/nm-new",
-   "crash_input": "-A -a -l -S -s --special-syms --synthetic --with-symbol-versions $POC"
+   "crash_input": "-A -a -l -S -s --special-syms --synthetic --with-symbol-versions $POC",
+   "test_timeout": 5
  },
   {
    "id": 4,
@@ -49,7 +52,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "binutils/readelf",
-   "crash_input": "-w $POC"
+   "crash_input": "-w $POC",
+   "test_timeout": 5
  },
   {
    "id": 5,
@@ -62,7 +66,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/make-prime-list",
-   "crash_input": "5"
+   "crash_input": "5",
+   "test_timeout": 5
  },
     {
    "id": 6,
@@ -75,7 +80,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/split",
-   "crash_input": "-n7/75 7"
+   "crash_input": "-n7/75 7",
+   "test_timeout": 5
  },
   {
    "id": 7,
@@ -88,7 +94,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/pr",
-   "crash_input": "\"-S$(printf \"\\t\\t\\t\")\" a -m a"
+   "crash_input": "\"-S$(printf \"\\t\\t\\t\")\" a -m a",
+   "test_timeout": 5
  },
   {
    "id": 8,
@@ -101,7 +108,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/shred",
-   "crash_input": "-n4 -s7 abc"
+   "crash_input": "-n4 -s7 abc",
+   "test_timeout": 5
  },
   {
    "id": 9,
@@ -114,7 +122,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/target_dec_cavs_fuzzer",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 10,
@@ -127,7 +136,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/target_dec_cavs_fuzzer",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 11,
@@ -140,7 +150,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/appl/imginfo",
-   "crash_input": " -f $POC"
+   "crash_input": " -f $POC",
+   "test_timeout": 5
  },
   {
    "id": 12,
@@ -153,7 +164,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/appl/imginfo",
-   "crash_input": " -f $POC"
+   "crash_input": " -f $POC",
+   "test_timeout": 5
  },
   {
    "id": 13,
@@ -166,7 +178,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "bsdtar",
-   "crash_input": " -tf $POC"
+   "crash_input": " -tf $POC",
+   "test_timeout": 5
  },
   {
    "id": 14,
@@ -179,7 +192,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "djpeg",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 15,
@@ -192,7 +206,8 @@
    "count_neg": 2,
    "count_pos": 0,
    "binary_path": "djpeg",
-   "crash_input": " -crop \"1x1+16+16\" -onepass -dither ordered -dct float -colors 8 -targa -grayscale -outfile o $POC"
+   "crash_input": " -crop \"1x1+16+16\" -onepass -dither ordered -dct float -colors 8 -targa -grayscale -outfile o $POC",
+   "test_timeout": 5
  },
   {
    "id": 16,
@@ -205,7 +220,8 @@
    "count_neg": 5,
    "count_pos": 0,
    "binary_path": "cjpeg",
-   "crash_input": " -outfile out $POC"
+   "crash_input": " -outfile out $POC",
+   "test_timeout": 5
   },
  {
    "id": 17,
@@ -218,7 +234,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "build/djpeg",
-   "crash_input": " -colors 256 -bmp $POC"
+   "crash_input": " -colors 256 -bmp $POC",
+   "test_timeout": 5
  },
   {
    "id": 18,
@@ -231,7 +248,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "util/listmp3",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
    {
    "id": 19,
@@ -244,7 +262,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "util/swftophp",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
    {
    "id": 20,
@@ -257,7 +276,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "util/swftophp",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 21,
@@ -270,7 +290,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffmedian",
-   "crash_input": "$POC foo"
+   "crash_input": "$POC foo",
+   "test_timeout": 5
  },
   {
    "id": 22,
@@ -283,7 +304,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiff2ps",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
    {
    "id": 23,
@@ -296,7 +318,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcrop",
-   "crash_input": "-i $POC foo"
+   "crash_input": "-i $POC foo",
+   "test_timeout": 5
  },
    {
    "id": 24,
@@ -309,7 +332,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiff2pdf",
-   "crash_input": "$POC -o foo"
+   "crash_input": "$POC -o foo",
+   "test_timeout": 5
  },
   {
    "id": 25,
@@ -322,7 +346,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcrop",
-   "crash_input": "-i $POC foo"
+   "crash_input": "-i $POC foo",
+   "test_timeout": 5
  },
   {
    "id": 26,
@@ -335,7 +360,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/gif2tiff",
-   "crash_input": "$POC foo.tif"
+   "crash_input": "$POC foo.tif",
+   "test_timeout": 5
  },
   {
    "id": 27,
@@ -348,7 +374,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/rgb2ycbcr",
-   "crash_input": "$POC out.tif"
+   "crash_input": "$POC out.tif",
+   "test_timeout": 5
  },
   {
    "id": 28,
@@ -361,7 +388,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcrop",
-   "crash_input": "$POC out.tif"
+   "crash_input": "$POC out.tif",
+   "test_timeout": 5
  },
   {
    "id": 29,
@@ -374,7 +402,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffsplit",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 30,
@@ -387,7 +416,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcrop",
-   "crash_input": "$POC out.tif"
+   "crash_input": "$POC out.tif",
+   "test_timeout": 5
  },
   {
    "id": 31,
@@ -400,7 +430,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-p separate $POC out.tiff"
+   "crash_input": "-p separate $POC out.tiff",
+   "test_timeout": 5
  },
   {
    "id": 32,
@@ -413,7 +444,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-i $POC out.tiff"
+   "crash_input": "-i $POC out.tiff",
+   "test_timeout": 5
  },
     {
    "id": 33,
@@ -426,7 +458,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-i $POC out.tiff"
+   "crash_input": "-i $POC out.tiff",
+   "test_timeout": 5
  },
     {
    "id": 34,
@@ -439,7 +472,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-i $POC out.tiff"
+   "crash_input": "-i $POC out.tiff",
+   "test_timeout": 5
  },
     {
    "id": 35,
@@ -452,7 +486,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-i $POC out.tiff"
+   "crash_input": "-i $POC out.tiff",
+   "test_timeout": 5
  },
   {
    "id": 36,
@@ -465,7 +500,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "xmllint",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 37,
@@ -478,7 +514,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "xmllint",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 38,
@@ -491,7 +528,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "xmllint",
-   "crash_input": "-html $POC"
+   "crash_input": "-html $POC",
+   "test_timeout": 5
  },
   {
    "id": 39,
@@ -504,7 +542,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "xmllint",
-   "crash_input": "--recover  $POC"
+   "crash_input": "--recover  $POC",
+   "test_timeout": 5
  },
   {
    "id": 40,
@@ -517,7 +556,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/potrace",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 41,
@@ -530,7 +570,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "linux/bins/unzzipcat-mem",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 42,
@@ -543,7 +584,8 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "linux/bins/unzzipcat-mem",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
   {
    "id": 43,
@@ -556,6 +598,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "linux/bins/unzzipcat-mem",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  }
 ]
