@@ -42,10 +42,13 @@ def collect_result(result):
     result_list.append(result)
 
 
-def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
-                    dir_patch, dir_process, is_rank, timeout_c):
+def consume_patches(path_info, dir_info, config_info):
     global exit_consume, consume_count, validator_pool, len_gen, len_processed, timeout
-    timeout = timeout_c
+
+    binary_path, oracle_path, source_file = path_info
+    dir_patch, dir_process = dir_info
+    validation_test_list, is_rank, total_timeout, test_timeout = config_info
+
     list_dir = os.listdir(dir_patch)
     len_gen = len(list_dir)
     len_consumed = -1
@@ -89,9 +92,9 @@ def consume_patches(binary_path, oracle_path, validation_test_list, source_file,
             continue
         list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
         for patch_file in list_selected:
+            file_info = (binary_path, oracle_path, source_file, patch_file)
             validator_pool.apply_async(valkyrie.validate_patch,
-                                       args=(binary_path, oracle_path, validation_test_list, source_file, dir_patch,
-                                             dir_process, patch_file, is_rank),
+                                       args=(dir_info, file_info, config_info),
                                        callback=collect_result)
 
             consume_count += 1

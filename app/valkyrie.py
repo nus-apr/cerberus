@@ -14,31 +14,38 @@ from datetime import datetime
 processed_count = 0
 
 
-def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patch, dir_process, patch_file, is_rank):
-    global processed_count, exit_consume
+def validate_patch(dir_info, file_info, config_info):
+    global processed_count
+    dir_patch, dir_process = dir_info
+    binary_path, oracle_path, source_file, patch_file = file_info
+    test_id_list, is_rank, _, single_test_timeout = config_info
     test_id_str = ",".join(test_id_list)
     lib_dir_path = definitions.DIR_LIBS
     link_file = dir_process + "/" + patch_file
     patch_file = dir_patch + "/" + patch_file
     validate_command = "ln -sf {} {};".format(patch_file, link_file)
-    timeout = len(test_id_list) * 60
+    total_timeout = len(test_id_list) * single_test_timeout
     if binary_path:
-        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie --binary={} --test-oracle={} --test-id-list={} " \
-                       "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path, timeout,
-                                                                               binary_path,
-                                                                               oracle_path,
-                                                                               test_id_str,
-                                                                               patch_file,
-                                                                               source_file,
-                                                                               values.DEFAULT_TEST_TIMEOUT)
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie --binary={} " \
+                            "--test-oracle={} --test-id-list={} " \
+                            "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
+                                                                                    total_timeout,
+                                                                                    binary_path,
+                                                                                    oracle_path,
+                                                                                    test_id_str,
+                                                                                    patch_file,
+                                                                                    source_file,
+                                                                                    single_test_timeout)
     else:
-        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie  --test-suite={} --test-id-list={} " \
-                        "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path, timeout,
-                                                                                oracle_path,
-                                                                                test_id_str,
-                                                                                patch_file,
-                                                                                source_file,
-                                                                                values.DEFAULT_TEST_TIMEOUT)
+        validate_command += "LD_LIBRARY_PATH={} timeout -k1m {}s valkyrie  " \
+                            "--test-suite={} --test-id-list={} " \
+                            "--patch-file={} --source={} --test-timeout={} ".format(lib_dir_path,
+                                                                                    total_timeout,
+                                                                                    oracle_path,
+                                                                                    test_id_str,
+                                                                                    patch_file,
+                                                                                    source_file,
+                                                                                    single_test_timeout)
     validate_command += "--patch-mode=gdb --trace-mode=1 --exec=0"
     if not is_rank:
         validate_command += "  --only-validate "
@@ -51,12 +58,12 @@ def validate_patch(binary_path, oracle_path, test_id_list, source_file, dir_patc
 
 
 def compute_latency_valkyrie(start_time_str, tend):
-        # Fri 08 Oct 2021 04:59:55 PM +08
-        fmt_1 = '%a %d %b %Y %H:%M:%S %p'
-        start_time_str = start_time_str.split(" +")[0].strip()
-        tstart = datetime.strptime(start_time_str, fmt_1).timestamp()
-        duration = (tend - tstart)
-        return duration
+    # Fri 08 Oct 2021 04:59:55 PM +08
+    fmt_1 = '%a %d %b %Y %H:%M:%S %p'
+    start_time_str = start_time_str.split(" +")[0].strip()
+    tstart = datetime.strptime(start_time_str, fmt_1).timestamp()
+    duration = (tend - tstart)
+    return duration
 
 
 def analyse_output(patch_dir, time_stamp_start):

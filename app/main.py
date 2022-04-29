@@ -54,6 +54,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
         fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
     passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
@@ -63,6 +64,7 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+    experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
 
     config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
     dir_output = dir_info["output"]
@@ -81,7 +83,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
     tool_thread_list = []
     parallel.initialize()
     time_duration = float(config_info[definitions.KEY_CONFIG_TIMEOUT])
-    timeout = time.time() + 60 * 60 * time_duration
+    test_timeout = int(experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
+    total_timeout = time.time() + 60 * 60 * time_duration
     for index in range(0, len(tool_list)):
         dir_info = dir_info_list[index]
         repair_tool = tool_list[index]
@@ -149,17 +152,18 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 os.makedirs(patch_dir)
             dir_process = dir_output + "/patches-processing"
             utilities.execute_command("mkdir {}".format(dir_process))
+            is_rank = len(tool_list) > 1
             validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
             if values.DEFAULT_USE_VALKYRIE:
-                consume_thread = threading.Thread(target=parallel.consume_patches, args=(valkyrie_binary_path,
-                                                                                         valkyrie_oracle_path,
-                                                                                         validation_test_list,
-                                                                                         fix_source_file,
-                                                                                         patch_dir,
-                                                                                         dir_process,
-                                                                                         len(tool_list) > 1,
-                                                                                         timeout))
+                path_info = (valkyrie_binary_path, valkyrie_oracle_path, fix_source_file)
+                dir_info = (patch_dir, dir_process)
+                config_info = (validation_test_list, is_rank, total_timeout, test_timeout)
+
+                consume_thread = threading.Thread(target=parallel.consume_patches, args=(path_info,
+                                                                                         dir_info,
+                                                                                         config_info
+                                                                                         ))
                 consume_thread.start()
 
         if values.DEFAULT_USE_VALKYRIE:
@@ -172,8 +176,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
 
     for thread, tool in tool_thread_list:
         wait_time = 5
-        if time.time() <= timeout:
-            wait_time = timeout - time.time()
+        if time.time() <= total_timeout:
+            wait_time = total_timeout - time.time()
         thread.join(wait_time)
         if thread.is_alive():
             emitter.highlight("\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(tool.name))
