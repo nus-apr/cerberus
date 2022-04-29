@@ -22,6 +22,30 @@ def fetch_function_nodes(translation_unit, source_file):
 	return function_node_list
 
 
+def fetch_operator_ranges(ast_tree):
+	node_range_list = []
+	if "kind" not in ast_tree.keys():
+		return []
+	if "inner" not in ast_tree.keys():
+		return []
+	for ast_node in ast_tree["inner"]:
+		if "kind" not in ast_node.keys():
+			continue
+		node_type = ast_node["kind"]
+		if node_type in ["UnaryOperator", "BinaryOperator", "ConditionalOperator"]:
+			node_range = ast_node["range"]
+			begin_loc = node_range["begin"]
+			end_loc = node_range["end"]
+			if "line" not in begin_loc.keys() or "line" not in end_loc.keys():
+				continue
+			start_line_no = int(begin_loc["line"])
+			last_line_no = int(end_loc["line"]) - 1
+			node_range_list.append((start_line_no, last_line_no))
+		if "inner" in ast_node.keys():
+			node_range_list = node_range_list + fetch_operator_ranges(ast_node)
+	return node_range_list
+
+
 def fetch_control_nodes(ast_tree):
 	node_list = []
 	if "kind" not in ast_tree.keys():
@@ -35,7 +59,7 @@ def fetch_control_nodes(ast_tree):
 			continue
 		node_type = ast_node["kind"]
 		if node_type in ["IfStmt", "ForStmt", "WhileStmt", "DoStmt"]:
-			node_list.append(ast_node)	
+			node_list.append(ast_node)
 	
 		if "inner" in ast_node.keys():
 				node_list = node_list + fetch_control_nodes(ast_node)
@@ -84,25 +108,25 @@ def fetch_condition_ranges(control_node_list):
 			else:
 				last_line_no = int(end_loc["line"])
 			condition_range_list.append((start_line_no, last_line_no))
-		# elif node_type == "DoStmt":
-		# 	cond_node = control_node["inner"][-1]
-		# 	compound_last_node = cond_node["inner"][-1]
-		# 	cond_range_info = cond_node["range"]
-		# 	compound_range_info = compound_last_node["range"]
-		# 	begin_loc = cond_range_info["begin"]
-		# 	end_loc = cond_range_info["end"]
-		#
-		# 	if "line" not in begin_loc.keys():
-		# 		continue
-		# 	start_line_no = int(begin_loc["line"])
-		# 	if "line" not in end_loc.keys():
-		# 		end_loc = compound_range_info["end"]
-		# 		if "line" not in end_loc.keys():
-		# 			continue
-		# 		last_line_no = int(end_loc["line"]) - 1
-		# 	else:
-		# 		last_line_no = int(end_loc["line"])
-		# 	condition_range_list.append((start_line_no, last_line_no))
+		elif node_type == "DoStmt":
+			cond_node = control_node["inner"][-1]
+			compound_last_node = cond_node["inner"][-1]
+			cond_range_info = cond_node["range"]
+			compound_range_info = compound_last_node["range"]
+			begin_loc = cond_range_info["begin"]
+			end_loc = cond_range_info["end"]
+
+			if "line" not in begin_loc.keys():
+				continue
+			start_line_no = int(begin_loc["line"])
+			if "line" not in end_loc.keys():
+				end_loc = compound_range_info["end"]
+				if "line" not in end_loc.keys():
+					continue
+				last_line_no = int(end_loc["line"]) - 1
+			else:
+				last_line_no = int(end_loc["line"])
+			condition_range_list.append((start_line_no, last_line_no))
 
 	print(condition_range_list)
 	return condition_range_list

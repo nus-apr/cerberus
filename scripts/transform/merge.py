@@ -3,7 +3,7 @@ import json
 import sys
 import collections
 from common import generate_reversed_indexed_range_list, fetch_control_nodes, read_json, \
-	fetch_condition_ranges, fetch_call_ranges, fetch_function_nodes
+	fetch_condition_ranges, fetch_call_ranges, fetch_function_nodes, fetch_operator_ranges
 
 
 def transform_single_line(sorted_range_list, orig_content):
@@ -51,15 +51,18 @@ def merge():
 	control_node_list = []
 	call_range_list = []
 	condition_range_list = []
+	operator_range_list = []
 	for func_node in function_node_list:
 		control_node_list = control_node_list + fetch_control_nodes(func_node)
 		call_range_list = call_range_list + fetch_call_ranges(func_node)
+		operator_range_list = operator_range_list + fetch_operator_ranges(func_node)
 	condition_range_list = fetch_condition_ranges(control_node_list)
 	print("# Control Nodes", len(control_node_list))
 	print("# Call Ranges", len(call_range_list))
 	print("# Condition Ranges", len(condition_range_list))
+	print("# Operator Ranges", len(operator_range_list))
 
-	required_range_list = condition_range_list + call_range_list
+	required_range_list = condition_range_list + call_range_list + operator_range_list
 	sorted_range_list = generate_reversed_indexed_range_list(required_range_list)
 	merged_content = transform_single_line(sorted_range_list, source_content)
 	with open("merged.c", "w") as out_file:
