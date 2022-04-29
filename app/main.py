@@ -131,8 +131,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 with open(valkyrie_oracle_path, "w") as oracle_file:
                     oracle_file.writelines("#!/bin/bash\n")
                     oracle_file.writelines( "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
-                    oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs")
-                    oracle_file.writelines("$script_dir/test.sh /dev/null $@")
+                    oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs\n")
+                    oracle_file.writelines("$script_dir/test.sh /dev/null $@\n")
                 os.system("chmod +x {}".format(valkyrie_oracle_path))
                 copy_command = "cp {} {};".format(test_driver_path, dir_output)
                 copy_command += "cp -rf {} {}".format(test_dir_path, dir_output)
