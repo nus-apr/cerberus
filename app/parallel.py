@@ -113,7 +113,7 @@ def wait_validation():
     while len_gen != len_processed and time.time() <= timeout:
         pass
     emitter.normal("\t\t\tterminating validator")
-    validator_pool.terminate()
+    #validator_pool.terminate()
     validator_pool.join()
     exit_consume = 1
 

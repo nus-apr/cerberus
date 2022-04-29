@@ -199,7 +199,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
 
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
+        emitter.normal("\t\t\twaiting for validation pool")
         parallel.wait_validation()
+        emitter.normal("\t\t\twaiting for consumer pool")
         consume_thread.join()
     for t in tool_list:
         timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
