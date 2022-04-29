@@ -47,5 +47,6 @@ do
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/tests/$directories/$driver_name
 done
 
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
 
 

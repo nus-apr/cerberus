@@ -54,6 +54,7 @@ bash build.sh $1
 
 # copy test cases
 cp -rf $dir_name/src/test $script_dir/test-suite
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
 
 
 cd $dir_name/src

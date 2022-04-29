@@ -49,6 +49,7 @@ cp -f $dir_name/src/gzip test-suite/gzip.orig
 
 # copy test cases
 cp -rf $dir_name/src/tests test-suite
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
 
 # update path for test case
 sed -i 's#/experiment//manybugs/gzip/$bug_id/src/tests#/tmp#g' test-suite/tests/hufts

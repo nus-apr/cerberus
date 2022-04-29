@@ -27,6 +27,7 @@ bash build.sh $1
 
 # copy test cases
 cp -rf $dir_name/src/*  $script_dir/test-suite
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
 
 cd $dir_name/src
 driver_list=('./python')
