@@ -255,6 +255,9 @@ def save_artifacts(dir_info, experiment_info, tool: AbstractTool, container_id):
     emitter.normal("\t\t[framework] saving artifacts and cleaning up")
     dir_expr = dir_info["experiment"]
     dir_artifacts = dir_info["artifact"]
+    dir_results = dir_info["result"]
+    if not os.path.isdir(dir_results):
+        os.system("mkdir -p {}".format(dir_results))
     tool.save_artefacts(dir_info, experiment_info, container_id)
     tool.post_process(dir_expr, dir_artifacts, container_id)
 
