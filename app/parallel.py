@@ -15,7 +15,7 @@ def mute():
     sys.stderr = open(os.devnull, 'w')
 
 
-max_process_count = 200
+max_process_count = 1
 validator_pool = mp.Pool(max_process_count, initializer=mute)
 exit_consume = 0
 consume_count = 0
