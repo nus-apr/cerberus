@@ -102,7 +102,7 @@ def consume_patches(path_info, dir_info, config_info):
                                            args=(dir_info, file_info, config_info),
                                            callback=collect_result)
             else:
-                valkyrie.validate_patch(dir_info, file_info, config_info)
+                result_list.append(valkyrie.validate_patch(dir_info, file_info, config_info))
 
 
             consume_count += 1
