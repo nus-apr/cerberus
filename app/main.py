@@ -156,13 +156,13 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
             if values.DEFAULT_USE_VALKYRIE:
-                path_info = (valkyrie_binary_path, valkyrie_oracle_path, fix_source_file)
-                dir_info = (patch_dir, dir_process)
-                config_info = (validation_test_list, is_rank, total_timeout, test_timeout)
+                v_path_info = (valkyrie_binary_path, valkyrie_oracle_path, fix_source_file)
+                v_dir_info = (patch_dir, dir_process)
+                v_config_info = (validation_test_list, is_rank, total_timeout, test_timeout)
 
-                consume_thread = threading.Thread(target=parallel.consume_patches, args=(path_info,
-                                                                                         dir_info,
-                                                                                         config_info
+                consume_thread = threading.Thread(target=parallel.consume_patches, args=(v_path_info,
+                                                                                         v_dir_info,
+                                                                                         v_config_info
                                                                                          ))
                 consume_thread.start()
 
@@ -193,8 +193,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.
         thread.join()
-        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
-        utilities.execute_command(timestamp_command)
+        if tool.log_output_path:
+            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+            utilities.execute_command(timestamp_command)
 
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
@@ -289,6 +290,7 @@ def run(repair_tool_list, benchmark, setup):
             experiment_item = experiment_list[bug_index - 1]
             subject_name = experiment_item[definitions.KEY_SUBJECT]
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+            config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = experiment_item[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
             if values.CONF_BUG_ID and bug_name != values.CONF_BUG_ID:
                 continue
             if values.CONF_BUG_ID_LIST and str(bug_name) not in values.CONF_BUG_ID_LIST:
