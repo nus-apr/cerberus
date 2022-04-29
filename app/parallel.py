@@ -91,7 +91,10 @@ def consume_patches(path_info, dir_info, config_info):
         if len_gen == len_consumed:
             time.sleep(3)
             continue
-        list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
+        if values.DEFAULT_USE_VTHREADS:
+            list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
+        else:
+            list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:100]
         for patch_file in list_selected:
             file_info = (binary_path, oracle_path, source_file, patch_file)
             if values.DEFAULT_USE_VTHREADS:
