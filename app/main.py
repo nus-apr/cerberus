@@ -139,7 +139,10 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
             else:
                 copy_command = "cp -rf {} {}".format(test_suite_path, dir_output)
-                file_list = os.listdir(test_suite_path)
+                file_list = list()
+                for (dir_path, dir_names, file_names) in os.walk(test_suite_path):
+                    file_list += [os.path.join(dir_path, file) for file in file_names]
+
                 for f in file_list:
                     if ".orig" in f:
                         binary_file = test_suite_path + "/" + f
