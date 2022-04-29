@@ -7,6 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 exp_dir_path=/experiment/$benchmark_name/$project_name/$bug_id
 setup_dir_path=/setup/$benchmark_name/$project_name/$bug_id
 fix_file=$2
+IFS='/' read -r -a array <<< "$fix_file"
+file_name=${array[-1]}
 
 POS_N=7621
 NEG_N=1
@@ -29,6 +31,7 @@ COPY . $setup_dir_path
 COPY darjeeling/base  /experiments/benchmark/$benchmark_name/$project_name/base
 COPY darjeeling/darjeeling-driver $setup_dir_path/darjeeling/test.sh
 RUN /setup/$benchmark_name/$project_name/$bug_id/setup.sh /experiment
+RUN cp /setup/$benchmark_name/$project_name/$bug_id/valkyrie/$file_name  /experiment/$benchmark_name/$project_name/$bug_id/src/$fix_file
 WORKDIR /experiment
 EOF
 
