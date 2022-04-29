@@ -10,7 +10,8 @@
    "count_neg": 2,
    "count_pos": 32,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-c g3:1d:fill $POC out.tiff"
+   "crash_input": "-c g3:1d:fill $POC out.tiff",
+   "test_timeout": 2
  },
  {
    "id": 2,
@@ -23,7 +24,8 @@
    "count_neg": 1,
    "count_pos": 33,
    "binary_path": "test/short_tag",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 2
  },
  {
    "id": 3,
@@ -36,7 +38,8 @@
    "count_neg": 5,
    "count_pos": 21,
    "binary_path": "test/long_tag",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 2
  },
  {
    "id": 4,
@@ -49,7 +52,8 @@
    "count_neg": 1,
    "count_pos": 59,
    "binary_path": "tools/tiffcp",
-   "crash_input": "-c g3:1d:fill $POC out.tiff"
+   "crash_input": "-c g3:1d:fill $POC out.tiff",
+   "test_timeout": 2
  },
  {
    "id": 5,
@@ -62,7 +66,8 @@
    "count_neg": 1,
    "count_pos": 60,
    "binary_path": "test/short_tag",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 2
  },
  {
    "id": 6,
@@ -75,7 +80,8 @@
    "count_neg": 9,
    "count_pos": 63,
    "binary_path": "tools/tiffcrop",
-   "crash_input": "-U px -E top -X 60 -Y 60 $POC out.tiff"
+   "crash_input": "-U px -E top -X 60 -Y 60 $POC out.tiff",
+   "test_timeout": 2
  },
  {
    "id": 7,
@@ -88,7 +94,8 @@
    "count_neg": 1,
    "count_pos": 75,
    "binary_path": "tools/tiff2pdf",
-   "crash_input": "$POC out.pdf"
+   "crash_input": "$POC out.pdf",
+   "test_timeout": 2
  },
  {
    "id": 8,
@@ -101,7 +108,8 @@
    "count_neg": 1,
    "count_pos": 2,
    "binary_path": "tests/driver.t",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
  {
    "id": 9,
@@ -114,7 +122,8 @@
    "count_neg": 2,
    "count_pos": 17,
    "binary_path": "tests/driver.t",
-   "crash_input": "$POC"
+   "crash_input": "$POC",
+   "test_timeout": 5
  },
  {
    "id": 10,
@@ -127,7 +136,8 @@
    "count_neg": 1,
    "count_pos": 7579,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 11,
@@ -140,7 +150,8 @@
    "count_neg": 1,
    "count_pos": 7581,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 12,
@@ -153,7 +164,8 @@
    "count_neg": 2,
    "count_pos": 7565,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 13,
@@ -166,7 +178,8 @@
    "count_neg": 1,
    "count_pos": 7567,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 14,
@@ -179,7 +192,8 @@
    "count_neg": 1,
    "count_pos": 7592,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 15,
@@ -192,7 +206,8 @@
    "count_neg": 2,
    "count_pos": 7588,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 16,
@@ -205,7 +220,8 @@
    "count_neg": 1,
    "count_pos": 7590,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 17,
@@ -218,7 +234,8 @@
    "count_neg": 1,
    "count_pos": 7591,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 18,
@@ -231,7 +248,8 @@
    "count_neg": 1,
    "count_pos": 7594,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 19,
@@ -244,7 +262,8 @@
    "count_neg": 1,
    "count_pos": 7595,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 20,
@@ -257,7 +276,8 @@
    "count_neg": 1,
    "count_pos": 7605,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 21,
@@ -270,7 +290,8 @@
    "count_neg": 1,
    "count_pos": 7608,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 22,
@@ -283,7 +304,8 @@
    "count_neg": 1,
    "count_pos": 7609,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 23,
@@ -296,7 +318,8 @@
    "count_neg": 1,
    "count_pos": 7618,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 24,
@@ -309,7 +332,8 @@
    "count_neg": 1,
    "count_pos": 7613,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 25,
@@ -322,7 +346,8 @@
    "count_neg": 1,
    "count_pos": 7620,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 26,
@@ -335,7 +360,8 @@
    "count_neg": 1,
    "count_pos": 7621,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 27,
@@ -348,7 +374,8 @@
    "count_neg": 1,
    "count_pos": 7621,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 28,
@@ -361,7 +388,8 @@
    "count_neg": 1,
    "count_pos": 7621,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 29,
@@ -374,7 +402,8 @@
    "count_neg": 1,
    "count_pos": 7728,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 30,
@@ -387,7 +416,8 @@
    "count_neg": 1,
    "count_pos": 7729,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 31,
@@ -400,7 +430,8 @@
    "count_neg": 1,
    "count_pos": 7786,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 32,
@@ -413,7 +444,8 @@
    "count_neg": 1,
    "count_pos": 7785,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 33,
@@ -426,7 +458,8 @@
    "count_neg": 1,
    "count_pos": 7752,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 34,
@@ -439,7 +472,8 @@
    "count_neg": 5,
    "count_pos": 7793,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 35,
@@ -452,7 +486,8 @@
    "count_neg": 1,
    "count_pos": 7809,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 36,
@@ -465,7 +500,8 @@
    "count_neg": 1,
    "count_pos": 7814,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 37,
@@ -478,7 +514,8 @@
    "count_neg": 4,
    "count_pos": 7810,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 38,
@@ -491,7 +528,8 @@
    "count_neg": 1,
    "count_pos": 7815,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 39,
@@ -504,7 +542,8 @@
    "count_neg": 6,
    "count_pos": 7824,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 40,
@@ -517,7 +556,8 @@
    "count_neg": 1,
    "count_pos": 7829,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 41,
@@ -530,7 +570,8 @@
    "count_neg": 1,
    "count_pos": 7829,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 42,
@@ -543,7 +584,8 @@
    "count_neg": 1,
    "count_pos": 7830,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 43,
@@ -556,7 +598,8 @@
    "count_neg": 1,
    "count_pos": 7831,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 44,
@@ -569,7 +612,8 @@
    "count_neg": 1,
    "count_pos": 7853,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 45,
@@ -582,7 +626,8 @@
    "count_neg": 3,
    "count_pos": 7858,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 46,
@@ -595,7 +640,8 @@
    "count_neg": 1,
    "count_pos": 7878,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 47,
@@ -608,7 +654,8 @@
    "count_neg": 1,
    "count_pos": 7886,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 48,
@@ -621,7 +668,8 @@
    "count_neg": 1,
    "count_pos": 7934,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 49,
@@ -634,7 +682,8 @@
    "count_neg": 4,
    "count_pos": 7937,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 50,
@@ -647,7 +696,8 @@
    "count_neg": 1,
    "count_pos": 7942,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 51,
@@ -660,7 +710,8 @@
    "count_neg": 1,
    "count_pos": 7946,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 52,
@@ -673,7 +724,8 @@
    "count_neg": 3,
    "count_pos": 7943,
    "binary_path": "sapi/cli/php",
-   "crash_input": "run-tests.php -p sapi/cli/php $POC"
+   "crash_input": "run-tests.php -p sapi/cli/php $POC",
+   "test_timeout": 2
  },
  {
    "id": 53,
@@ -686,7 +738,8 @@
    "count_neg": 1,
    "count_pos": 144,
    "binary_path": "tests/mpz/t-gcd",
-   "crash_input": "200"
+   "crash_input": "200",
+   "test_timeout": 2
  },
  {
    "id": 54,
@@ -699,7 +752,8 @@
    "count_neg": 1,
    "count_pos": 2,
    "binary_path": "gzip",
-   "crash_input": "-dc $POC"
+   "crash_input": "-dc $POC",
+   "test_timeout": 2
  },
  {
    "id": 55,
@@ -712,7 +766,8 @@
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "gzip",
-   "crash_input": "-d $POC"
+   "crash_input": "-d $POC",
+   "test_timeout": 2
  },
  {
    "id": 56,
@@ -725,7 +780,8 @@
    "count_neg": 1,
    "count_pos": 8,
    "binary_path": "gzip",
-   "crash_input": "---presume-input-tty -d -S '' $POC < yes"
+   "crash_input": "---presume-input-tty -d -S '' $POC < yes",
+   "test_timeout": 2
  },
  {
    "id": 57,
@@ -738,7 +794,8 @@
    "count_neg": 1,
    "count_pos": 284,
    "binary_path": "python",
-   "crash_input": "-m test $POC"
+   "crash_input": "-m test $POC",
+   "test_timeout": 2
  },
  {
    "id": 58,
@@ -751,7 +808,8 @@
    "count_neg": 1,
    "count_pos": 292,
    "binary_path": "python",
-   "crash_input": "-m test $POC"
+   "crash_input": "-m test $POC",
+   "test_timeout": 2
  },
  {
    "id": 59,
@@ -764,7 +822,8 @@
    "count_neg": 1,
    "count_pos": 312,
    "binary_path": "python",
-   "crash_input": "-m test $POC"
+   "crash_input": "-m test $POC",
+   "test_timeout": 2
  },
  {
    "id": 60,
@@ -777,6 +836,7 @@
    "count_neg": 1,
    "count_pos": 318,
    "binary_path": "python",
-   "crash_input": "-m test $POC"
+   "crash_input": "-m test $POC",
+   "test_timeout": 2
  }
 ]
