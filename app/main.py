@@ -143,9 +143,8 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 for (dir_path, dir_names, file_names) in os.walk(test_suite_path):
                     file_list += [os.path.join(dir_path, file) for file in file_names]
 
-                for f in file_list:
-                    if ".orig" in f:
-                        binary_file = test_suite_path + "/" + f
+                for binary_file in file_list:
+                    if ".orig" in binary_file:
                         os.system("e9afl {} -o {} > /dev/null 2>&1".format(binary_file, binary_file.replace(".orig", ".inst_coverage")))
                 valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
                 valkyrie_binary_path = None
