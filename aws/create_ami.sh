@@ -1,14 +1,21 @@
 sudo apt update
-sudo apt install -y docker.io pypy3 pypy3-dev python3.9 python3.9-distutils gdb make g++ unzip afl++
-
 sudo apt-get install -y  \
+    afl++ \
     automake \
     autopoint \
     bison \
+    docker.io \
     flex \
+    g++ \
+    g++-multilib \
+    gcc-multilib \
+    gdb \
     gettext \
     git \
     gperf \
+    libasan4 \
+    libasan5 \
+    libasan6 \
     libass-dev \
     libfreetype6 \
     libfreetype6-dev \
@@ -26,11 +33,17 @@ sudo apt-get install -y  \
     libxcb1-dev \
     libxcb-shm0-dev \
     libxml2-dev \
+    make \
+    mercurial \
     nasm \
     nano \
     pkg-config \
     psmisc \
+    pypy3 \
+    pypy3-dev \
     python3 \
+    python3.9 \
+    python3.9-distutils \
     texinfo \
     xutils-dev \
     yasm \
@@ -53,16 +66,11 @@ sudo apt-get install -y  \
     libbz2-dev \
     psmisc \
     libsqlite3-dev \
-    gcc-multilib \
-    g++-multilib \
     tk-dev \
-    mercurial \
     tcl-dev \
     tix-dev \
-    unzip \
-    libasan4 \
-    libasan5 \
-    libasan6
+    unzip
+
 sudo usermod -aG docker ubuntu
 sudo pypy3 -m easy_install docker more_itertools
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py && python3.9 get-pip.py && rm get-pip.py
@@ -71,7 +79,8 @@ python3.9 -m pip install pipenv virtualenv docker
 
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/cerberus
 git clone https://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:x-oauth-basic@github.com/rshariffdeen/valkyrie
-git clone https://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:x-oauth-basic@github.com/rshariffdeen/valkyrie-experiments
+#git clone https://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:x-oauth-basic@github.com/rshariffdeen/valkyrie-experiments
+git clone https://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:x-oauth-basic@github.com/rshariffdeen/cfr-experiments
 cd ~;git clone https://github.com/GJDuck/e9patch.git ~/e9patch; cd ~/e9patch; bash build.sh
 cd ~; git clone https://github.com/GJDuck/e9afl.git ~/e9afl; cd ~/e9afl; bash build.sh
 sudo ln -s ~/e9afl/e9afl /usr/local/bin/e9afl
@@ -86,13 +95,10 @@ docker pull rshariffdeen/cerberus:prophet
 docker pull rshariffdeen/cerberus:f1x
 docker pull rshariffdeen/cerberus:darjeeling
 
-# /etc/sysctl.conf
-# fs.file-max=500000
-#
-# /etc/security/limits.conf
-# *               hard    nofile             1000000
-# *               soft    nofile             100000
-#
-# ~/.profile
-# PATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"
+sudo sed -i -e '$afs.file-max=500000' /etc/sysctl.conf
+sudo sed -i -e '$a*               hard    nofile             1000000' /etc/security/limits.conf
+sudo sed -i -e '$a*               soft    nofile             100000' /etc/security/limits.conf
+sudo sed -i -e '$aPATH="$PATH:$HOME/valkyrie/bin:$HOME/cerberus/bin"'  ~/.profile
 source ~/.profile
+
+
