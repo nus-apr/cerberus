@@ -24,6 +24,8 @@ def read_arg(argument_list):
                 values.CONF_TOOL_PARAMS = str(arg).replace(definitions.ARG_TOOL_PARAMS, "")
             elif definitions.ARG_DEBUG_MODE in arg:
                 values.CONF_DEBUG = True
+            elif definitions.ARG_VALIDATOR_THREADS in arg:
+                values.CONF_USE_VTHREADS = True
             elif definitions.ARG_RUN_TESTS_ONLY in arg:
                 values.CONF_RUN_TESTS_ONLY = True
             elif definitions.ARG_PURGE in arg:
@@ -148,5 +150,7 @@ def update_configuration():
     if values.CONF_USE_VALKYRIE:
         values.DEFAULT_USE_VALKYRIE = True
         values.DEFAULT_DUMP_PATCHES = True
+    if values.CONF_USE_VTHREADS:
+        values.DEFAULT_USE_VTHREADS = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
 

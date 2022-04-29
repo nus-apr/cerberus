@@ -5,7 +5,9 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 
-FIX_FILE=$2
+fix_file=$2
+IFS='/' read -r -a array <<< "$fix_file"
+file_name=${array[-1]}
 
 mkdir $dir_name/prophet
 mkdir $dir_name/patches

@@ -93,9 +93,13 @@ def consume_patches(path_info, dir_info, config_info):
         list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
         for patch_file in list_selected:
             file_info = (binary_path, oracle_path, source_file, patch_file)
-            validator_pool.apply_async(valkyrie.validate_patch,
-                                       args=(dir_info, file_info, config_info),
-                                       callback=collect_result)
+            if values.DEFAULT_USE_VTHREADS:
+                validator_pool.apply_async(valkyrie.validate_patch,
+                                           args=(dir_info, file_info, config_info),
+                                           callback=collect_result)
+            else:
+                valkyrie.validate_patch(dir_info, file_info, config_info)
+
 
             consume_count += 1
         values.LIST_CONSUMED = values.LIST_CONSUMED + list_selected
