@@ -23,11 +23,11 @@ consume_count = 0
 result_list = []
 len_gen = 0
 len_processed = 0
-timeout = 0
+total_timeout = 0
 
 
 def initialize():
-    global validator_pool, exit_consume, consume_count, len_gen, len_processed, timeout, result_list
+    global validator_pool, exit_consume, consume_count, len_gen, len_processed, total_timeout, result_list
     set_start_method("spawn")
     if values.DEFAULT_USE_VTHREADS:
         validator_pool = mp.Pool(max_process_count, initializer=mute)
@@ -36,7 +36,7 @@ def initialize():
     result_list = []
     len_gen = 0
     len_processed = 0
-    timeout = 0
+    total_timeout = 0
     values.LIST_CONSUMED = []
 
 
@@ -46,7 +46,7 @@ def collect_result(result):
 
 
 def consume_patches(path_info, dir_info, config_info):
-    global exit_consume, consume_count, validator_pool, len_gen, len_processed, timeout
+    global exit_consume, consume_count, validator_pool, len_gen, len_processed, total_timeout
 
     binary_path, oracle_path, source_file = path_info
     dir_patch, dir_process = dir_info
@@ -116,15 +116,15 @@ def consume_patches(path_info, dir_info, config_info):
 
 
 def wait_validation():
-    global exit_consume, validator_pool, len_gen, consume_count, len_processed, timeout
+    global exit_consume, validator_pool, len_gen, consume_count, len_processed, total_timeout
     # Notify threads it's time to exit
     time.sleep(5)
-    while len_gen != consume_count and time.time() <= timeout:
+    while len_gen != consume_count and time.time() <= total_timeout:
         pass
     if values.DEFAULT_USE_VTHREADS:
         validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
-    while len_gen != len_processed and time.time() <= timeout:
+    while len_gen != len_processed and time.time() <= total_timeout:
         pass
     emitter.normal("\t\t\tterminating validator")
     if values.DEFAULT_USE_VTHREADS:
