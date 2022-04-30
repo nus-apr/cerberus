@@ -71,10 +71,13 @@ def fetch_condition_ranges(control_node_list):
 	for control_node in control_node_list:
 		node_type = control_node["kind"]
 		if node_type in ["IfStmt", "WhileStmt"]:
+			print(control_node)
 			cond_node = control_node["inner"][0]
-			compound_first_node = control_node["inner"][1]["inner"][0]
 			cond_range_info = cond_node["range"]
-			compound_range_info = compound_first_node["range"]
+			compound_range_info = None
+			if "inner" in control_node["inner"][1].keys():
+				compound_first_node = control_node["inner"][1]["inner"][0]
+				compound_range_info = compound_first_node["range"]
 			begin_loc = cond_range_info["begin"]
 			end_loc = cond_range_info["end"]
 
@@ -82,10 +85,11 @@ def fetch_condition_ranges(control_node_list):
 				continue
 			start_line_no = int(begin_loc["line"])
 			if "line" not in end_loc.keys():
-				end_loc = compound_range_info["begin"]
-				if "line" not in end_loc.keys():
-					continue
-				last_line_no = int(end_loc["line"]) - 1
+				if compound_range_info:
+					end_loc = compound_range_info["begin"]
+					if "line" not in end_loc.keys():
+						continue
+					last_line_no = int(end_loc["line"]) - 1
 			else:
 				last_line_no = int(end_loc["line"])
 			condition_range_list.append((start_line_no, last_line_no))
@@ -110,9 +114,11 @@ def fetch_condition_ranges(control_node_list):
 			condition_range_list.append((start_line_no, last_line_no))
 		elif node_type == "DoStmt":
 			cond_node = control_node["inner"][-1]
-			compound_last_node = cond_node["inner"][-1]
 			cond_range_info = cond_node["range"]
-			compound_range_info = compound_last_node["range"]
+			compound_range_info = None
+			if "inner" in cond_node.keys():
+				compound_last_node = cond_node["inner"][-1]
+				compound_range_info = compound_last_node["range"]
 			begin_loc = cond_range_info["begin"]
 			end_loc = cond_range_info["end"]
 
@@ -120,10 +126,11 @@ def fetch_condition_ranges(control_node_list):
 				continue
 			start_line_no = int(begin_loc["line"])
 			if "line" not in end_loc.keys():
-				end_loc = compound_range_info["end"]
-				if "line" not in end_loc.keys():
-					continue
-				last_line_no = int(end_loc["line"]) - 1
+				if compound_range_info:
+					end_loc = compound_range_info["end"]
+					if "line" not in end_loc.keys():
+						continue
+					last_line_no = int(end_loc["line"]) - 1
 			else:
 				last_line_no = int(end_loc["line"])
 			condition_range_list.append((start_line_no, last_line_no))
