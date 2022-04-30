@@ -728,7 +728,7 @@ static int OJPEGPreDecode(TIFF *tif, uint16 s) {
       return (0);
     }
   }
- /* jump:734 */  if isTiled (tif)
+  if isTiled (tif)
     m = tif->tif_curtile;
   else
     m = tif->tif_curstrip;
@@ -759,7 +759,7 @@ static int OJPEGPreDecode(TIFF *tif, uint16 s) {
     }
   }
  /* jump:772 */  while (sp->write_curstrile < m) {
- /* jump:770 */    if (sp->libjpeg_jpeg_query_style == 0) {
+ /* jump:766 */    if (sp->libjpeg_jpeg_query_style == 0) {
  /* jump:765 */      if (OJPEGPreDecodeSkipRaw(tif) == 0) {
         return (0);
       }
@@ -830,7 +830,7 @@ static int OJPEGPreDecodeSkipScanlines(TIFF *tif) {
 static int OJPEGDecode(TIFF *tif, uint8 *buf, tmsize_t cc, uint16 s) {
   OJPEGState *sp = (OJPEGState *)tif->tif_data;
   (void)s;
- /* jump:841 */  if (sp->libjpeg_jpeg_query_style == 0) {
+ /* jump:837 */  if (sp->libjpeg_jpeg_query_style == 0) {
  /* jump:836 */    if (OJPEGDecodeRaw(tif, buf, cc) == 0) {
       return (0);
     }
@@ -861,7 +861,7 @@ static int OJPEGDecodeRaw(TIFF *tif, uint8 *buf, tmsize_t cc) {
   assert(cc > 0);
   m = buf;
   n = cc;
-  do {
+ /* jump:898 */  do {
  /* jump:871 */    if (sp->subsampling_convert_state == 0) {
  /* jump:870 */      if (jpeg_read_raw_data_encap(sp, &(sp->libjpeg_jpeg_decompress_struct),
                                    sp->subsampling_convert_ycbcrimage,
@@ -911,7 +911,7 @@ static int OJPEGDecodeScanlines(TIFF *tif, uint8 *buf, tmsize_t cc) {
   assert(cc > 0);
   m = buf;
   n = cc;
-  do {
+ /* jump:921 */  do {
  /* jump:918 */    if (jpeg_read_scanlines_encap(sp, &(sp->libjpeg_jpeg_decompress_struct), &m,
                                   1) == 0) {
       return (0);
@@ -1038,7 +1038,7 @@ static void OJPEGSubsamplingCorrect(TIFF *tif) {
   _TIFFFillStriles(tif);
 
   assert(sp->subsamplingcorrect_done == 0);
- /* jump:1104 */  if ((tif->tif_dir.td_samplesperpixel != 3) ||
+ /* jump:1052 */  if ((tif->tif_dir.td_samplesperpixel != 3) ||
       ((tif->tif_dir.td_photometric != PHOTOMETRIC_YCBCR) &&
        (tif->tif_dir.td_photometric != PHOTOMETRIC_ITULAB))) {
  /* jump:1048 */    if (sp->subsampling_tag != 0) {
@@ -1062,7 +1062,7 @@ static void OJPEGSubsamplingCorrect(TIFF *tif) {
     sp->subsamplingcorrect = 0;
  /* jump:1078 */    if (((sp->subsampling_hor != mh) || (sp->subsampling_ver != mv)) &&
         (sp->subsampling_force_desubsampling_inside_decompression == 0)) {
- /* jump:1077 */      if (sp->subsampling_tag == 0) {
+ /* jump:1071 */      if (sp->subsampling_tag == 0) {
         TIFFWarningExt(tif->tif_clientdata, module,
                        "Subsampling tag is not set, yet subsampling inside "
                        "JPEG data [%d,%d] does not match default values [2,2]; "
@@ -1077,7 +1077,7 @@ static void OJPEGSubsamplingCorrect(TIFF *tif) {
       }
     }
  /* jump:1096 */    if (sp->subsampling_force_desubsampling_inside_decompression != 0) {
- /* jump:1095 */      if (sp->subsampling_tag == 0) {
+ /* jump:1087 */      if (sp->subsampling_tag == 0) {
         TIFFWarningExt(
             tif->tif_clientdata, module,
             "Subsampling tag is not set, yet subsampling inside JPEG data does "
@@ -1111,7 +1111,7 @@ static int OJPEGReadHeaderInfo(TIFF *tif) {
   assert(sp->readheader_done == 0);
   sp->image_width = tif->tif_dir.td_imagewidth;
   sp->image_length = tif->tif_dir.td_imagelength;
- /* jump:1124 */  if isTiled (tif) {
+ /* jump:1120 */  if isTiled (tif) {
     sp->strile_width = tif->tif_dir.td_tilewidth;
     sp->strile_length = tif->tif_dir.td_tilelength;
     sp->strile_length_total =
@@ -1122,7 +1122,7 @@ static int OJPEGReadHeaderInfo(TIFF *tif) {
     sp->strile_length = tif->tif_dir.td_rowsperstrip;
     sp->strile_length_total = sp->image_length;
   }
- /* jump:1146 */  if (tif->tif_dir.td_samplesperpixel == 1) {
+ /* jump:1131 */  if (tif->tif_dir.td_samplesperpixel == 1) {
     sp->samples_per_pixel = 1;
     sp->plane_sample_offset = 0;
     sp->samples_per_pixel_per_plane = sp->samples_per_pixel;
@@ -1138,7 +1138,7 @@ static int OJPEGReadHeaderInfo(TIFF *tif) {
     }
     sp->samples_per_pixel = 3;
     sp->plane_sample_offset = 0;
- /* jump:1145 */    if (tif->tif_dir.td_planarconfig == PLANARCONFIG_CONTIG) {
+ /* jump:1143 */    if (tif->tif_dir.td_planarconfig == PLANARCONFIG_CONTIG) {
       sp->samples_per_pixel_per_plane = 3;
     } else {
       sp->samples_per_pixel_per_plane = 1;
@@ -1192,12 +1192,12 @@ static int OJPEGReadSecondarySos(TIFF *tif, uint16 s) {
   sp->in_buffer_togo = 0;
   sp->in_buffer_cur = 0;
  /* jump:1226 */  while (sp->plane_sample_offset < s) {
-    do {
+ /* jump:1212 */    do {
  /* jump:1198 */      if (OJPEGReadByte(sp, &m) == 0) {
         return (0);
       }
  /* jump:1211 */      if (m == 255) {
-        do {
+ /* jump:1207 */        do {
  /* jump:1203 */          if (OJPEGReadByte(sp, &m) == 0) {
             return (0);
           }
@@ -1263,7 +1263,7 @@ static int OJPEGWriteHeaderInfo(TIFF *tif) {
       0) {
     return (0);
   }
- /* jump:1343 */  if ((sp->subsampling_force_desubsampling_inside_decompression == 0) &&
+ /* jump:1337 */  if ((sp->subsampling_force_desubsampling_inside_decompression == 0) &&
       (sp->samples_per_pixel_per_plane > 1)) {
     sp->libjpeg_jpeg_decompress_struct.raw_data_out = 1;
 #if JPEG_LIB_VERSION >= 70
@@ -1366,7 +1366,7 @@ static int OJPEGReadHeaderInfoSec(TIFF *tif) {
     sp->file_size = TIFFGetFileSize(tif);
   }
  /* jump:1380 */  if (sp->jpeg_interchange_format != 0) {
- /* jump:1379 */    if (sp->jpeg_interchange_format >= sp->file_size) {
+ /* jump:1372 */    if (sp->jpeg_interchange_format >= sp->file_size) {
       sp->jpeg_interchange_format = 0;
       sp->jpeg_interchange_format_length = 0;
     } else {
@@ -1383,7 +1383,7 @@ static int OJPEGReadHeaderInfoSec(TIFF *tif) {
   sp->in_buffer_strile_count = tif->tif_dir.td_nstrips;
   sp->in_buffer_file_togo = 0;
   sp->in_buffer_togo = 0;
-  do {
+ /* jump:1474 */  do {
  /* jump:1389 */    if (OJPEGReadBytePeek(sp, &m) == 0) {
       return (0);
     }
@@ -1391,7 +1391,7 @@ static int OJPEGReadHeaderInfoSec(TIFF *tif) {
       break;
     }
     OJPEGReadByteAdvance(sp);
-    do {
+ /* jump:1398 */    do {
  /* jump:1397 */      if (OJPEGReadByte(sp, &m) == 0) {
         return (0);
       }
@@ -1543,11 +1543,11 @@ static int OJPEGReadHeaderInfoSecStreamDqt(TIFF *tif) {
     }
     return (0);
   }
- /* jump:1584 */  if (sp->subsamplingcorrect != 0) {
+ /* jump:1548 */  if (sp->subsamplingcorrect != 0) {
     OJPEGReadSkip(sp, m - 2);
   } else {
     m -= 2;
-    do {
+ /* jump:1583 */    do {
  /* jump:1555 */      if (m < 65) {
         TIFFErrorExt(tif->tif_clientdata, module,
                      "Corrupt DQT marker in JPEG data");
@@ -1606,7 +1606,7 @@ static int OJPEGReadHeaderInfoSecStreamDht(TIFF *tif) {
     }
     return (0);
   }
- /* jump:1658 */  if (sp->subsamplingcorrect != 0) {
+ /* jump:1611 */  if (sp->subsamplingcorrect != 0) {
     OJPEGReadSkip(sp, m - 2);
   } else {
     na = sizeof(uint32) + 2 + m;
@@ -1625,7 +1625,7 @@ static int OJPEGReadHeaderInfoSecStreamDht(TIFF *tif) {
       return (0);
     }
     o = nb[sizeof(uint32) + 4];
- /* jump:1657 */    if ((o & 240) == 0) {
+ /* jump:1639 */    if ((o & 240) == 0) {
  /* jump:1634 */      if (3 < o) {
         TIFFErrorExt(tif->tif_clientdata, module,
                      "Corrupt DHT marker in JPEG data");
@@ -1717,7 +1717,7 @@ static int OJPEGReadHeaderInfoSecStreamSof(TIFF *tif, uint8 marker_id) {
     return (0);
   }
   /* Y: Number of lines, X: Number of samples per line */
- /* jump:1750 */  if (sp->subsamplingcorrect) {
+ /* jump:1722 */  if (sp->subsamplingcorrect) {
     OJPEGReadSkip(sp, 4);
   } else {
     /* Y: Number of lines */
@@ -1774,8 +1774,8 @@ static int OJPEGReadHeaderInfoSecStreamSof(TIFF *tif, uint8 marker_id) {
  /* jump:1776 */    if (OJPEGReadByte(sp, &o) == 0) {
       return (0);
     }
- /* jump:1811 */    if (sp->subsamplingcorrect != 0) {
- /* jump:1791 */      if (q == 0) {
+ /* jump:1792 */    if (sp->subsamplingcorrect != 0) {
+ /* jump:1787 */      if (q == 0) {
         sp->subsampling_hor = (o >> 4);
         sp->subsampling_ver = (o & 15);
  /* jump:1786 */        if (((sp->subsampling_hor != 1) && (sp->subsampling_hor != 2) &&
@@ -1792,7 +1792,7 @@ static int OJPEGReadHeaderInfoSecStreamSof(TIFF *tif, uint8 marker_id) {
     } else {
       sp->sof_hv[q] = o;
  /* jump:1810 */      if (sp->subsampling_force_desubsampling_inside_decompression == 0) {
- /* jump:1809 */        if (q == 0) {
+ /* jump:1802 */        if (q == 0) {
  /* jump:1801 */          if (o != ((sp->subsampling_hor << 4) | sp->subsampling_ver)) {
             TIFFErrorExt(
                 tif->tif_clientdata, module,
@@ -1888,7 +1888,7 @@ static int OJPEGReadHeaderInfoSecTablesQTable(TIFF *tif) {
   }
   sp->in_buffer_file_pos_log = 0;
  /* jump:1922 */  for (m = 0; m < sp->samples_per_pixel; m++) {
- /* jump:1921 */    if ((sp->qtable_offset[m] != 0) &&
+ /* jump:1919 */    if ((sp->qtable_offset[m] != 0) &&
         ((m == 0) || (sp->qtable_offset[m] != sp->qtable_offset[m - 1]))) {
  /* jump:1899 */      for (n = 0; n < m - 1; n++) {
  /* jump:1898 */        if (sp->qtable_offset[m] == sp->qtable_offset[n]) {
@@ -1939,7 +1939,7 @@ static int OJPEGReadHeaderInfoSecTablesDcTable(TIFF *tif) {
   }
   sp->in_buffer_file_pos_log = 0;
  /* jump:1984 */  for (m = 0; m < sp->samples_per_pixel; m++) {
- /* jump:1983 */    if ((sp->dctable_offset[m] != 0) &&
+ /* jump:1981 */    if ((sp->dctable_offset[m] != 0) &&
         ((m == 0) || (sp->dctable_offset[m] != sp->dctable_offset[m - 1]))) {
  /* jump:1950 */      for (n = 0; n < m - 1; n++) {
  /* jump:1949 */        if (sp->dctable_offset[m] == sp->dctable_offset[n]) {
@@ -2001,7 +2001,7 @@ static int OJPEGReadHeaderInfoSecTablesAcTable(TIFF *tif) {
   }
   sp->in_buffer_file_pos_log = 0;
  /* jump:2046 */  for (m = 0; m < sp->samples_per_pixel; m++) {
- /* jump:2045 */    if ((sp->actable_offset[m] != 0) &&
+ /* jump:2043 */    if ((sp->actable_offset[m] != 0) &&
         ((m == 0) || (sp->actable_offset[m] != sp->actable_offset[m - 1]))) {
  /* jump:2012 */      for (n = 0; n < m - 1; n++) {
  /* jump:2011 */        if (sp->actable_offset[m] == sp->actable_offset[n]) {
@@ -2053,7 +2053,7 @@ static int OJPEGReadBufferFill(OJPEGState *sp) {
   /* TODO: double-check: when subsamplingcorrect is set, no call to TIFFErrorExt
    * or TIFFWarningExt should be made in any other case, seek or read errors
    * should be passed through */
-  do {
+ /* jump:2132 */  do {
  /* jump:2080 */    if (sp->in_buffer_file_togo != 0) {
  /* jump:2061 */      if (sp->in_buffer_file_pos_log == 0) {
         TIFFSeekFile(sp->tif, sp->in_buffer_file_pos, SEEK_SET);
@@ -2097,15 +2097,15 @@ static int OJPEGReadBufferFill(OJPEGState *sp) {
         return 0;
       }
 
- /* jump:2127 */      if (sp->in_buffer_next_strile == sp->in_buffer_strile_count) {
+ /* jump:2102 */      if (sp->in_buffer_next_strile == sp->in_buffer_strile_count) {
         sp->in_buffer_source = osibsEof;
       } else {
         sp->in_buffer_file_pos =
             sp->tif->tif_dir.td_stripoffset[sp->in_buffer_next_strile];
  /* jump:2125 */        if (sp->in_buffer_file_pos != 0) {
- /* jump:2124 */          if (sp->in_buffer_file_pos >= sp->file_size) {
+ /* jump:2108 */          if (sp->in_buffer_file_pos >= sp->file_size) {
             sp->in_buffer_file_pos = 0;
- /* jump:2124 */          } else if (sp->tif->tif_dir.td_stripbytecount == NULL) {
+ /* jump:2110 */          } else if (sp->tif->tif_dir.td_stripbytecount == NULL) {
             sp->in_buffer_file_togo = sp->file_size - sp->in_buffer_file_pos;
           } else {
  /* jump:2115 */            if (sp->tif->tif_dir.td_stripbytecount == 0) {
@@ -2115,7 +2115,7 @@ static int OJPEGReadBufferFill(OJPEGState *sp) {
             }
             sp->in_buffer_file_togo =
                 sp->tif->tif_dir.td_stripbytecount[sp->in_buffer_next_strile];
- /* jump:2123 */            if (sp->in_buffer_file_togo == 0) {
+ /* jump:2120 */            if (sp->in_buffer_file_togo == 0) {
               sp->in_buffer_file_pos = 0;
  /* jump:2123 */            } else if (sp->in_buffer_file_pos + sp->in_buffer_file_togo >
                        sp->file_size) {
@@ -2183,7 +2183,7 @@ static int OJPEGReadBlock(OJPEGState *sp, uint16 len, void *mem) {
   assert(len > 0);
   mlen = len;
   mmem = mem;
-  do {
+ /* jump:2202 */  do {
  /* jump:2192 */    if (sp->in_buffer_togo == 0) {
  /* jump:2190 */      if (OJPEGReadBufferFill(sp) == 0) {
         return (0);
@@ -2235,7 +2235,7 @@ static void OJPEGReadSkip(OJPEGState *sp, uint16 len) {
 static int OJPEGWriteStream(TIFF *tif, void **mem, uint32 *len) {
   OJPEGState *sp = (OJPEGState *)tif->tif_data;
   *len = 0;
-  do {
+ /* jump:2301 */  do {
     assert(sp->out_state <= ososEoi);
     switch (sp->out_state) {
     case ososSoi:
@@ -2434,7 +2434,7 @@ static int OJPEGWriteStreamCompressed(TIFF *tif, void **mem, uint32 *len) {
  /* jump:2449 */  if (sp->in_buffer_file_togo == 0) {
     switch (sp->in_buffer_source) {
     case osibsStrile:
- /* jump:2441 */      if (sp->in_buffer_next_strile < sp->in_buffer_strile_count) {
+ /* jump:2439 */      if (sp->in_buffer_next_strile < sp->in_buffer_strile_count) {
         sp->out_state = ososRst;
       } else {
         sp->out_state = ososEoi;
@@ -2476,7 +2476,7 @@ static void OJPEGWriteStreamEoi(TIFF *tif, void **mem, uint32 *len) {
 #ifndef LIBJPEG_ENCAP_EXTERNAL
 static int jpeg_create_decompress_encap(OJPEGState *sp,
                                         jpeg_decompress_struct *cinfo) {
- /* jump:2484 */  if (SETJMP(sp->exit_jmpbuf)) {
+ /* jump:2481 */  if (SETJMP(sp->exit_jmpbuf)) {
     return 0;
   } else {
     jpeg_create_decompress(cinfo);
@@ -2488,7 +2488,7 @@ static int jpeg_create_decompress_encap(OJPEGState *sp,
 #ifndef LIBJPEG_ENCAP_EXTERNAL
 static int jpeg_read_header_encap(OJPEGState *sp, jpeg_decompress_struct *cinfo,
                                   uint8 require_image) {
- /* jump:2496 */  if (SETJMP(sp->exit_jmpbuf)) {
+ /* jump:2493 */  if (SETJMP(sp->exit_jmpbuf)) {
     return 0;
   } else {
     jpeg_read_header(cinfo, require_image);
@@ -2500,7 +2500,7 @@ static int jpeg_read_header_encap(OJPEGState *sp, jpeg_decompress_struct *cinfo,
 #ifndef LIBJPEG_ENCAP_EXTERNAL
 static int jpeg_start_decompress_encap(OJPEGState *sp,
                                        jpeg_decompress_struct *cinfo) {
- /* jump:2508 */  if (SETJMP(sp->exit_jmpbuf)) {
+ /* jump:2505 */  if (SETJMP(sp->exit_jmpbuf)) {
     return 0;
   } else {
     jpeg_start_decompress(cinfo);
@@ -2513,7 +2513,7 @@ static int jpeg_start_decompress_encap(OJPEGState *sp,
 static int jpeg_read_scanlines_encap(OJPEGState *sp,
                                      jpeg_decompress_struct *cinfo,
                                      void *scanlines, uint32 max_lines) {
- /* jump:2521 */  if (SETJMP(sp->exit_jmpbuf)) {
+ /* jump:2518 */  if (SETJMP(sp->exit_jmpbuf)) {
     return 0;
   } else {
     jpeg_read_scanlines(cinfo, scanlines, max_lines);
@@ -2526,7 +2526,7 @@ static int jpeg_read_scanlines_encap(OJPEGState *sp,
 static int jpeg_read_raw_data_encap(OJPEGState *sp,
                                     jpeg_decompress_struct *cinfo, void *data,
                                     uint32 max_lines) {
- /* jump:2534 */  if (SETJMP(sp->exit_jmpbuf)) {
+ /* jump:2531 */  if (SETJMP(sp->exit_jmpbuf)) {
     return 0;
   } else {
     jpeg_read_raw_data(cinfo, data, max_lines);

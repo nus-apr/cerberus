@@ -256,8 +256,8 @@ int main(int argc, char *argv[]) {
 
   pageOrientation[0] = '\0';
 
- /* jump:410 */  while ((c = getopt(argc, argv,
-                     "b:d:h:H:W:L:i:w:l:o:O:P:C:r:t:acemxyzps1238DT")) != -1) {
+ /* jump:409 */  while ((c = getopt(argc, argv,
+                     "b:d:h:H:W:L:i:w:l:o:O:P:C:r:t:acemxyzps1238DT")) != -1)
     switch (c) {
     case 'b':
       bottommargin = atof(optarg);
@@ -351,7 +351,7 @@ int main(int argc, char *argv[]) {
       generateEPSF = FALSE;
       break;
     case 'r':
- /* jump:360 */      if (strcmp(optarg, "auto") == 0) {
+ /* jump:357 */      if (strcmp(optarg, "auto") == 0) {
         rotation = 0;
         auto_rotate = TRUE;
       } else {
@@ -407,87 +407,82 @@ int main(int argc, char *argv[]) {
     case '?':
       usage(-1);
     }
-  }
 
- /* jump:418 */  if (useImagemask == TRUE) {
- /* jump:417 */    if ((level2 == FALSE) && (level3 == FALSE)) {
+ /* jump:417 */  if (useImagemask == TRUE) {
+ /* jump:416 */    if ((level2 == FALSE) && (level3 == FALSE)) {
       TIFFError("-m ",
                 " imagemask operator requres Postscript Level2 or Level3");
       exit(1);
     }
   }
 
- /* jump:423 */  if (pageWidth && (maxPageWidth > pageWidth)) {
+ /* jump:422 */  if (pageWidth && (maxPageWidth > pageWidth)) {
     TIFFError("-W", "Max viewport width cannot exceed page width");
     exit(1);
   }
 
   /* auto rotate requires a specified page width and height */
- /* jump:437 */  if (auto_rotate == TRUE) {
+ /* jump:436 */  if (auto_rotate == TRUE) {
     /*
   if ((pageWidth == 0) || (pageHeight == 0))
     TIFFWarning ("-r auto", " requires page height and width specified with -h
   and -w");
     */
- /* jump:436 */    if ((maxPageWidth > 0) || (maxPageHeight > 0)) {
+ /* jump:435 */    if ((maxPageWidth > 0) || (maxPageHeight > 0)) {
       TIFFError("-r auto", " is incompatible with maximum page width/height "
                            "specified by -H or -W");
       exit(1);
     }
   }
- /* jump:441 */  if ((maxPageWidth > 0) && (maxPageHeight > 0)) {
+ /* jump:440 */  if ((maxPageWidth > 0) && (maxPageHeight > 0)) {
     TIFFError("-H and -W", " Use only one of -H or -W to define a viewport");
     exit(1);
   }
 
- /* jump:448 */  if ((generateEPSF == TRUE) && (printAll == TRUE)) {
+ /* jump:447 */  if ((generateEPSF == TRUE) && (printAll == TRUE)) {
     TIFFError(
         " -e and -a",
         "Warning: Cannot generate Encapsulated Postscript for multiple images");
     generateEPSF = FALSE;
   }
 
- /* jump:455 */  if ((generateEPSF == TRUE) && (PSduplex == TRUE)) {
+ /* jump:454 */  if ((generateEPSF == TRUE) && (PSduplex == TRUE)) {
     TIFFError(
         " -e and -D",
         "Warning: Encapsulated Postscript does not support Duplex option");
     PSduplex = FALSE;
   }
 
- /* jump:461 */  if ((generateEPSF == TRUE) && (PStumble == TRUE)) {
+ /* jump:460 */  if ((generateEPSF == TRUE) && (PStumble == TRUE)) {
     TIFFError(" -e and -T", "Warning: Encapsulated Postscript does not support "
                             "Top Edge Binding option");
     PStumble = FALSE;
   }
 
- /* jump:465 */  if ((generateEPSF == TRUE) && (PSavoiddeadzone == TRUE)) {
+  if ((generateEPSF == TRUE) && (PSavoiddeadzone == TRUE))
     PSavoiddeadzone = FALSE;
-  }
 
- /* jump:482 */  for (; argc - optind > 0; optind++) {
+ /* jump:479 */  for (; argc - optind > 0; optind++) {
     TIFF *tif = TIFFOpen(filename = argv[optind], "r");
- /* jump:481 */    if (tif != NULL) {
- /* jump:474 */      if (dirnum != -1 && !TIFFSetDirectory(tif, (tdir_t)dirnum)) {
+ /* jump:478 */    if (tif != NULL) {
+      if (dirnum != -1 && !TIFFSetDirectory(tif, (tdir_t)dirnum))
         return (-1);
- /* jump:474 */      } else if (diroff != 0 && !TIFFSetSubDirectory(tif, diroff)) {
+      else if (diroff != 0 && !TIFFSetSubDirectory(tif, diroff))
         return (-1);
-      }
       np = TIFF2PS(output, tif, pageWidth, pageHeight, leftmargin, bottommargin,
                    centered);
- /* jump:479 */      if (np < 0) {
+ /* jump:476 */      if (np < 0) {
         TIFFError("Error", "Unable to process %s", filename);
       }
       TIFFClose(tif);
     }
   }
- /* jump:487 */  if (np) {
+  if (np)
     PSTail(output, np);
-  } else {
+  else
     usage(-1);
-  }
- /* jump:490 */  if (output != stdout) {
+  if (output != stdout)
     fclose(output);
-  }
   return (0);
 }
 
@@ -508,9 +503,8 @@ static int checkImage(TIFF *tif) {
       TIFFSetField(tif, TIFFTAG_JPEGCOLORMODE, JPEGCOLORMODE_RGB);
       photometric = PHOTOMETRIC_RGB;
     } else {
-      if (level2 || level3) {
+      if (level2 || level3)
         break;
-      }
       TIFFError(filename, "Can not handle image with %s",
                 "PhotometricInterpretation=YCbCr");
       return (0);
@@ -562,9 +556,8 @@ static int checkImage(TIFF *tif) {
     TIFFError(filename, "Can not handle %d-bit/sample image", bitspersample);
     return (0);
   }
- /* jump:567 */  if (planarconfiguration == PLANARCONFIG_SEPARATE && extrasamples > 0) {
+  if (planarconfiguration == PLANARCONFIG_SEPARATE && extrasamples > 0)
     TIFFWarning(filename, "Ignoring extra samples");
-  }
   return (1);
 }
 
@@ -621,22 +614,16 @@ static void setupPageState(TIFF *tif, uint32 *pw, uint32 *ph, double *pprw,
 
   TIFFGetField(tif, TIFFTAG_IMAGEWIDTH, pw);
   TIFFGetField(tif, TIFFTAG_IMAGELENGTH, ph);
- /* jump:628 */  if (res_unit == 0) { /* Not specified as command line option */
- /* jump:627 */    if (!TIFFGetFieldDefaulted(tif, TIFFTAG_RESOLUTIONUNIT, &res_unit)) {
+  if (res_unit == 0) /* Not specified as command line option */
+    if (!TIFFGetFieldDefaulted(tif, TIFFTAG_RESOLUTIONUNIT, &res_unit))
       res_unit = RESUNIT_INCH;
-    }
-  }
   /*
    * Calculate printable area.
    */
- /* jump:635 */  if (!TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xres) ||
-      fabs(xres) < 0.0000001) {
+  if (!TIFFGetField(tif, TIFFTAG_XRESOLUTION, &xres) || fabs(xres) < 0.0000001)
     xres = PS_UNIT_SIZE;
-  }
- /* jump:639 */  if (!TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yres) ||
-      fabs(yres) < 0.0000001) {
+  if (!TIFFGetField(tif, TIFFTAG_YRESOLUTION, &yres) || fabs(yres) < 0.0000001)
     yres = PS_UNIT_SIZE;
-  }
   switch (res_unit) {
   case RESUNIT_CENTIMETER:
     xres *= 2.54F, yres *= 2.54F;
@@ -657,16 +644,14 @@ static void setupPageState(TIFF *tif, uint32 *pw, uint32 *ph, double *pprw,
   /* This is a hack to deal with images that have no meaningful Resolution Size
    * but may have x and/or y resolutions of 1 pixel per undefined unit.
    */
- /* jump:664 */  if ((xres > 1.0) && (xres != PS_UNIT_SIZE)) {
+  if ((xres > 1.0) && (xres != PS_UNIT_SIZE))
     *pprw = PSUNITS(*pw, xres);
-  } else {
+  else
     *pprw = PSUNITS(*pw, PS_UNIT_SIZE);
-  }
- /* jump:669 */  if ((yres > 1.0) && (yres != PS_UNIT_SIZE)) {
+  if ((yres > 1.0) && (yres != PS_UNIT_SIZE))
     *pprh = PSUNITS(*ph, yres);
-  } else {
+  else
     *pprh = PSUNITS(*ph, PS_UNIT_SIZE);
-  }
 }
 
 static int isCCITTCompression(TIFF *tif) {
@@ -706,7 +691,7 @@ int get_subimage_count(double pagewidth, double pageheight, double imagewidth,
   pagewidth *= PS_UNIT_SIZE;
   pageheight *= PS_UNIT_SIZE;
 
- /* jump:712 */  if ((imagewidth < 1.0) || (imageheight < 1.0)) {
+ /* jump:697 */  if ((imagewidth < 1.0) || (imageheight < 1.0)) {
     TIFFError("get_subimage_count", "Invalid image width or height");
     return (0);
   }
@@ -714,51 +699,47 @@ int get_subimage_count(double pagewidth, double pageheight, double imagewidth,
   switch (rotation) {
   case 0:
   case 180:
- /* jump:767 */    if (splitheight > 0) /* -H maxPageHeight */
+ /* jump:722 */    if (splitheight > 0) /* -H maxPageHeight */
     {
- /* jump:738 */      if (imageheight > splitheight) /* More than one vertical image segment */
+ /* jump:713 */      if (imageheight > splitheight) /* More than one vertical image segment */
       {
- /* jump:725 */        if (pagewidth) {
+        if (pagewidth)
           *ximages = (int)ceil((scale * imagewidth) / (pagewidth - overlap));
-        } else {
+        else
           *ximages = 1;
-        }
         *yimages =
             (int)ceil((scale * imageheight) /
                       (splitheight - overlap)); /* Max vert pages needed */
       } else {
- /* jump:736 */        if (pagewidth) {
+ /* jump:717 */        if (pagewidth)
           *ximages =
               (int)ceil((scale * imagewidth) /
                         (pagewidth - overlap)); /* Max horz pages needed */
-        } else {
+        else
           *ximages = 1;
-        }
         *yimages = 1; /* Max vert pages needed */
       }
     } else {
- /* jump:766 */      if (splitwidth > 0) /* -W maxPageWidth */
+ /* jump:744 */      if (splitwidth > 0) /* -W maxPageWidth */
       {
- /* jump:762 */        if (imagewidth > splitwidth) {
+ /* jump:735 */        if (imagewidth > splitwidth) {
           *ximages =
               (int)ceil((scale * imagewidth) /
                         (splitwidth - overlap)); /* Max horz pages needed */
- /* jump:752 */          if (pageheight) {
+ /* jump:732 */          if (pageheight)
             *yimages =
                 (int)ceil((scale * imageheight) /
                           (pageheight - overlap)); /* Max vert pages needed */
-          } else {
+          else
             *yimages = 1;
-          }
         } else {
           *ximages = 1; /* Max vert pages needed */
- /* jump:761 */          if (pageheight) {
+ /* jump:740 */          if (pageheight)
             *yimages =
                 (int)ceil((scale * imageheight) /
                           (pageheight - overlap)); /* Max vert pages needed */
-          } else {
+          else
             *yimages = 1;
-          }
         }
       } else {
         *ximages = 1;
@@ -768,52 +749,48 @@ int get_subimage_count(double pagewidth, double pageheight, double imagewidth,
     break;
   case 90:
   case 270:
- /* jump:823 */    if (splitheight > 0) /* -H maxPageHeight */
+ /* jump:774 */    if (splitheight > 0) /* -H maxPageHeight */
     {
- /* jump:794 */      if (imagewidth > splitheight) /* More than one vertical image segment */
+ /* jump:765 */      if (imagewidth > splitheight) /* More than one vertical image segment */
       {
         *yimages =
             (int)ceil((scale * imagewidth) /
                       (splitheight - overlap)); /* Max vert pages needed */
- /* jump:784 */        if (pagewidth) {
+ /* jump:762 */        if (pagewidth)
           *ximages =
               (int)ceil((scale * imageheight) /
                         (pagewidth - overlap)); /* Max horz pages needed */
-        } else {
+        else
           *ximages = 1;
-        }
       } else {
         *yimages = 1; /* Max vert pages needed */
- /* jump:793 */        if (pagewidth) {
+ /* jump:770 */        if (pagewidth)
           *ximages =
               (int)ceil((scale * imageheight) /
                         (pagewidth - overlap)); /* Max horz pages needed */
-        } else {
+        else
           *ximages = 1;
-        }
       }
     } else {
- /* jump:822 */      if (splitwidth > 0) /* -W maxPageWidth */
+ /* jump:796 */      if (splitwidth > 0) /* -W maxPageWidth */
       {
- /* jump:818 */        if (imageheight > splitwidth) {
- /* jump:805 */          if (pageheight) {
+ /* jump:787 */        if (imageheight > splitwidth) {
+ /* jump:781 */          if (pageheight)
             *yimages =
                 (int)ceil((scale * imagewidth) /
                           (pageheight - overlap)); /* Max vert pages needed */
-          } else {
+          else
             *yimages = 1;
-          }
           *ximages =
               (int)ceil((scale * imageheight) /
                         (splitwidth - overlap)); /* Max horz pages needed */
         } else {
- /* jump:816 */          if (pageheight) {
+ /* jump:791 */          if (pageheight)
             *yimages =
                 (int)ceil((scale * imagewidth) /
                           (pageheight - overlap)); /* Max horz pages needed */
-          } else {
+          else
             *yimages = 1;
-          }
           *ximages = 1; /* Max vert pages needed */
         }
       } else {
@@ -854,7 +831,7 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
   xscale = scale * imagewidth;
   yscale = scale * imageheight;
 
- /* jump:860 */  if ((xscale < 0.0) || (yscale < 0.0)) {
+ /* jump:837 */  if ((xscale < 0.0) || (yscale < 0.0)) {
     TIFFError("exportMaskedImage", "Invalid parameters.");
     return (-1);
   }
@@ -866,9 +843,9 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
   switch (rotation) {
   case 0:
   case 180:
- /* jump:900 */    if (splitheight > 0) /* -H maxPageHeight */
+ /* jump:861 */    if (splitheight > 0) /* -H maxPageHeight */
     {
- /* jump:883 */      if (splitheight < imageheight) /* More than one vertical image segments */
+ /* jump:856 */      if (splitheight < imageheight) /* More than one vertical image segments */
       {
         /* Intra2net: Keep correct apspect ratio */
         xscale = (imagewidth + overlap) * (pageheight / splitheight) * scale;
@@ -882,9 +859,9 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
         ytran = splitheight - imageheight;
       }
     } else {
- /* jump:899 */      if (splitwidth > 0) /* maxPageWidth */
+ /* jump:872 */      if (splitwidth > 0) /* maxPageWidth */
       {
- /* jump:894 */        if (splitwidth < imagewidth) {
+ /* jump:867 */        if (splitwidth < imagewidth) {
           xtran = -1.0 * column * splitwidth;
           ytran = -1.0 * row * (pageheight - overlap);
         } else /* Only one page in horizontal direction */
@@ -899,10 +876,10 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
       }
     }
 
- /* jump:909 */    if (imagewidth <= pagewidth) {
+ /* jump:886 */    if (imagewidth <= pagewidth) {
       /* Intra2net: Crop page at the bottom instead of the top (-> output starts
          at the top). Only do this in non-page-split mode */
- /* jump:908 */      if (imageheight <= splitheight) {
+ /* jump:885 */      if (imageheight <= splitheight) {
         ytran = pageheight - imageheight; /* Note: Will be negative for images
                                              longer than page size */
       }
@@ -912,28 +889,27 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
     break;
   case 90:
   case 270:
- /* jump:949 */    if (splitheight > 0) /* -H maxPageHeight */
+ /* jump:909 */    if (splitheight > 0) /* -H maxPageHeight */
     {
- /* jump:932 */      if (splitheight < imagewidth) /* More than one vertical image segments */
+ /* jump:904 */      if (splitheight < imagewidth) /* More than one vertical image segments */
       {
         xtran = -1.0 * column * (pageheight - overlap);
         /* Commented code places image at bottom of page instead of top.
             ytran = -1.0 * row * splitheight;
           */
- /* jump:927 */        if (row == 0) {
+        if (row == 0)
           ytran = -1.0 * (imagewidth - splitheight);
-        } else {
+        else
           ytran = -1.0 * (imagewidth - (splitheight - overlap) * (row + 1));
-        }
       } else /* Only one page in vertical direction */
       {
         xtran = -1.0 * column * (pageheight - overlap);
         ytran = splitheight - imagewidth;
       }
     } else {
- /* jump:948 */      if (splitwidth > 0) /* maxPageWidth */
+ /* jump:920 */      if (splitwidth > 0) /* maxPageWidth */
       {
- /* jump:943 */        if (splitwidth < imageheight) {
+ /* jump:915 */        if (splitwidth < imageheight) {
           xtran = -1.0 * column * splitwidth;
           ytran = -1.0 * row * (pagewidth - overlap);
         } else /* Only one page in horizontal direction */
@@ -985,9 +961,8 @@ int exportMaskedImage(FILE *fp, double pagewidth, double pageheight,
 /* Rotate an image without scaling or clipping */
 int psRotateImage(FILE *fd, int rotation, double pswidth, double psheight,
                   double left_offset, double bottom_offset) {
- /* jump:990 */  if ((left_offset != 0.0) || (bottom_offset != 0)) {
+  if ((left_offset != 0.0) || (bottom_offset != 0))
     fprintf(fd, "%f %f translate\n", left_offset, bottom_offset);
-  }
 
   /* Exchange width and height for 90/270 rotations */
   switch (rotation) {
@@ -1018,7 +993,7 @@ int psScaleImage(FILE *fd, double scale, int rotation, int center,
   double hcenter = 0.0, vcenter = 0.0;
 
   /* Adjust offsets for centering */
- /* jump:1083 */  if (center) {
+ /* jump:1027 */  if (center) {
     switch (rotation) {
     case 90:
       vcenter = (reqheight - pswidth * scale) / 2;
@@ -1103,20 +1078,19 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
   switch (rotation) {
   case 0:
   case 180:
- /* jump:1157 */    if ((splitheight > 0) || (splitwidth > 0)) {
- /* jump:1111 */      if (pgwidth != 0 || pgheight != 0) {
+ /* jump:1100 */    if ((splitheight > 0) || (splitwidth > 0)) {
+ /* jump:1086 */      if (pgwidth != 0 || pgheight != 0) {
         xscale = reqwidth / (splitwidth ? splitwidth : pswidth);
         yscale = reqheight / (splitheight ? splitheight : psheight);
         scale = (xscale < yscale) ? xscale : yscale;
       }
       new_width = splitwidth ? splitwidth : scale * pswidth;
       new_height = splitheight ? splitheight : scale * psheight;
- /* jump:1119 */      if (strlen(pageOrientation)) {
+      if (strlen(pageOrientation))
         fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-      } else {
+      else
         fprintf(fd, "%%%%PageOrientation: %s\n",
                 (new_width > new_height) ? "Landscape" : "Portrait");
-      }
       fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)new_width,
               (long)new_height);
       fprintf(fd,
@@ -1125,14 +1099,13 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
               new_width, new_height);
     } else /* No viewport defined with -H or -W */
     {
- /* jump:1156 */      if ((pgwidth == 0) && (pgheight == 0)) /* Image not scaled */
+ /* jump:1115 */      if ((pgwidth == 0) && (pgheight == 0)) /* Image not scaled */
       {
- /* jump:1135 */        if (strlen(pageOrientation)) {
+        if (strlen(pageOrientation))
           fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-        } else {
+        else
           fprintf(fd, "%%%%PageOrientation: %s\n",
                   (pswidth > psheight) ? "Landscape" : "Portrait");
-        }
         fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)pswidth,
                 (long)psheight);
         fprintf(fd,
@@ -1141,12 +1114,11 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
                 pswidth, psheight);
       } else /* Image scaled */
       {
- /* jump:1149 */        if (strlen(pageOrientation)) {
+        if (strlen(pageOrientation))
           fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-        } else {
+        else
           fprintf(fd, "%%%%PageOrientation: %s\n",
                   (reqwidth > reqheight) ? "Landscape" : "Portrait");
-        }
         fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)reqwidth,
                 (long)reqheight);
         fprintf(fd,
@@ -1158,8 +1130,8 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
     break;
   case 90:
   case 270:
- /* jump:1212 */    if ((splitheight > 0) || (splitwidth > 0)) {
- /* jump:1166 */      if (pgwidth != 0 || pgheight != 0) {
+ /* jump:1153 */    if ((splitheight > 0) || (splitwidth > 0)) {
+ /* jump:1138 */      if (pgwidth != 0 || pgheight != 0) {
         xscale = reqwidth / (splitwidth ? splitwidth : pswidth);
         yscale = reqheight / (splitheight ? splitheight : psheight);
         scale = (xscale < yscale) ? xscale : yscale;
@@ -1167,12 +1139,11 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
       new_width = splitwidth ? splitwidth : scale * psheight;
       new_height = splitheight ? splitheight : scale * pswidth;
 
- /* jump:1175 */      if (strlen(pageOrientation)) {
+      if (strlen(pageOrientation))
         fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-      } else {
+      else
         fprintf(fd, "%%%%PageOrientation: %s\n",
                 (new_width > new_height) ? "Landscape" : "Portrait");
-      }
       fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)new_width,
               (long)new_height);
       fprintf(fd,
@@ -1180,14 +1151,13 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
               "setpagedevice\n",
               new_width, new_height);
     } else {
- /* jump:1211 */      if ((pgwidth == 0) && (pgheight == 0)) /* Image not scaled */
+ /* jump:1167 */      if ((pgwidth == 0) && (pgheight == 0)) /* Image not scaled */
       {
- /* jump:1190 */        if (strlen(pageOrientation)) {
+        if (strlen(pageOrientation))
           fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-        } else {
+        else
           fprintf(fd, "%%%%PageOrientation: %s\n",
                   (psheight > pswidth) ? "Landscape" : "Portrait");
-        }
         fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)psheight,
                 (long)pswidth);
         fprintf(fd,
@@ -1196,12 +1166,11 @@ int psPageSize(FILE *fd, int rotation, double pgwidth, double pgheight,
                 psheight, pswidth);
       } else /* Image scaled */
       {
- /* jump:1204 */        if (strlen(pageOrientation)) {
+        if (strlen(pageOrientation))
           fprintf(fd, "%%%%PageOrientation: %s\n", pageOrientation);
-        } else {
+        else
           fprintf(fd, "%%%%PageOrientation: %s\n",
                   (reqwidth > reqheight) ? "Landscape" : "Portrait");
-        }
         fprintf(fd, "%%%%PageBoundingBox: 0 0 %ld %ld\n", (long)reqwidth,
                 (long)reqheight);
         fprintf(fd,
@@ -1233,35 +1202,34 @@ int psMaskImage(FILE *fd, TIFF *tif, int rotation, int center, int *npages,
   double view_width = 0;
   double view_height = 0;
 
- /* jump:1240 */  if (get_viewport(pgwidth, pgheight, pswidth, psheight, &view_width,
+ /* jump:1209 */  if (get_viewport(pgwidth, pgheight, pswidth, psheight, &view_width,
                    &view_height, rotation)) {
     TIFFError("get_viewport", "Unable to set image viewport");
     return (-1);
   }
 
- /* jump:1247 */  if (get_subimage_count(pgwidth, pgheight, pswidth, psheight, &ximages,
+ /* jump:1216 */  if (get_subimage_count(pgwidth, pgheight, pswidth, psheight, &ximages,
                          &yimages, rotation, scale) < 1) {
     TIFFError("get_subimage_count", "Invalid image count: %d columns, %d rows",
               ximages, yimages);
     return (-1);
   }
 
- /* jump:1275 */  for (i = 0; i < yimages; i++) {
- /* jump:1274 */    for (j = 0; j < ximages; j++) {
+ /* jump:1243 */  for (i = 0; i < yimages; i++) {
+ /* jump:1242 */    for (j = 0; j < ximages; j++) {
       pages++;
       *npages = pages;
       fprintf(fd, "%%%%Page: %d %d\n", pages, pages);
 
       /* Write out the PageSize info for non EPS files */
- /* jump:1261 */      if (!generateEPSF && (level2 || level3)) {
- /* jump:1260 */        if (psPageSize(fd, rotation, pgwidth, pgheight, view_width, view_height,
-                       pswidth, psheight)) {
+ /* jump:1229 */      if (!generateEPSF && (level2 || level3)) {
+        if (psPageSize(fd, rotation, pgwidth, pgheight, view_width, view_height,
+                       pswidth, psheight))
           return (-1);
-        }
       }
       fprintf(fd, "gsave\n");
       fprintf(fd, "100 dict begin\n");
- /* jump:1269 */      if (exportMaskedImage(fd, view_width, view_height, pswidth, psheight, i,
+ /* jump:1237 */      if (exportMaskedImage(fd, view_width, view_height, pswidth, psheight, i,
                             j, left_margin, bottom_margin, scale, center,
                             rotation)) {
         TIFFError("exportMaskedImage", "Invalid image parameters.");
@@ -1302,8 +1270,8 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
    * longest dimension of the image to the longest dimension of the
    * target media but we have to ignore auto rotate if user specified
    * maxPageHeight since this makes life way too complicated. */
- /* jump:1342 */  if (auto_rotate) {
- /* jump:1309 */    if ((splitheight != 0) || (splitwidth != 0)) {
+ /* jump:1308 */  if (auto_rotate) {
+ /* jump:1277 */    if ((splitheight != 0) || (splitwidth != 0)) {
       TIFFError("psStart", "Auto-rotate is incompatible with page splitting ");
       return (1);
     }
@@ -1312,7 +1280,7 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
     maxsource = (pswidth >= psheight) ? pswidth : psheight;
     maxtarget = (reqwidth >= reqheight) ? reqwidth : reqheight;
 
- /* jump:1326 */    if (((maxsource == pswidth) && (maxtarget != reqwidth)) ||
+ /* jump:1290 */    if (((maxsource == pswidth) && (maxtarget != reqwidth)) ||
         ((maxsource == psheight) &&
          (maxtarget != reqheight))) { /* optimal orientaion does not match input
                                          orientation */
@@ -1327,16 +1295,14 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
     *scale = (xscale < yscale) ? xscale : yscale;
 
     /* Do not scale image beyound original size */
- /* jump:1332 */    if (*scale > 1.0) {
+    if (*scale > 1.0)
       *scale = 1.0;
-    }
 
     /* Set the size of the displayed image to requested page size
      * and optimal orientation.
      */
- /* jump:1339 */    if (!npages) {
+    if (!npages)
       PSHead(fd, reqwidth, reqheight, ox, oy);
-    }
 
     return (0);
   }
@@ -1349,10 +1315,10 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
   {
   case 0:
   case 180:
- /* jump:1386 */    if ((splitheight != 0) ||
+ /* jump:1336 */    if ((splitheight != 0) ||
         (splitwidth !=
          0)) { /* Viewport clipped to maxPageHeight or maxPageWidth */
- /* jump:1367 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
+ /* jump:1331 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
       {
         xscale = (reqwidth - left_offset) / (page_width ? page_width : pswidth);
         yscale = (reqheight - bottom_offset) /
@@ -1362,15 +1328,14 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
         if (*scale > 1.0)
           *scale = 1.0;
          */
-      } else { /* Image clipped but not scaled */
+      } else /* Image clipped but not scaled */
         *scale = 1.0;
-      }
 
       view_width = splitwidth ? splitwidth : *scale * pswidth;
       view_height = splitheight ? splitheight : *scale * psheight;
     } else /* Viewport not clipped to maxPageHeight or maxPageWidth */
     {
- /* jump:1385 */      if ((page_width != 0) || (page_height != 0)) { /* Image scaled  */
+ /* jump:1344 */      if ((page_width != 0) || (page_height != 0)) { /* Image scaled  */
         xscale = (reqwidth - left_offset) / pswidth;
         yscale = (reqheight - bottom_offset) / psheight;
 
@@ -1387,10 +1352,10 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
     break;
   case 90:
   case 270:
- /* jump:1423 */    if ((splitheight != 0) ||
+ /* jump:1371 */    if ((splitheight != 0) ||
         (splitwidth !=
          0)) { /* Viewport clipped to maxPageHeight or maxPageWidth */
- /* jump:1404 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
+ /* jump:1367 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
       {
         xscale = (reqwidth - left_offset) / psheight;
         yscale = (reqheight - bottom_offset) / pswidth;
@@ -1399,14 +1364,13 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
         if (*scale > 1.0)
           *scale = 1.0;
        */
-      } else { /* Image clipped but not scaled */
+      } else /* Image clipped but not scaled */
         *scale = 1.0;
-      }
       view_width = splitwidth ? splitwidth : *scale * psheight;
       view_height = splitheight ? splitheight : *scale * pswidth;
     } else /* Viewport not clipped to maxPageHeight or maxPageWidth */
     {
- /* jump:1422 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
+ /* jump:1380 */      if ((page_width != 0) || (page_height != 0)) /* Image scaled */
       {
         xscale = (reqwidth - left_offset) / psheight;
         yscale = (reqheight - bottom_offset) / pswidth;
@@ -1427,15 +1391,13 @@ int psStart(FILE *fd, int npages, int auto_rotate, int *rotation, double *scale,
     return (1);
   }
 
- /* jump:1433 */  if (!npages) {
+ /* jump:1396 */  if (!npages)
     PSHead(fd, (page_width ? page_width : view_width),
            (page_height ? page_height : view_height), ox, oy);
-  }
 
   *scale = (xscale < yscale) ? xscale : yscale;
- /* jump:1438 */  if (*scale > 1.0) {
+  if (*scale > 1.0)
     *scale = 1.0;
-  }
 
   return (0);
 }
@@ -1444,19 +1406,18 @@ int get_viewport(double pgwidth, double pgheight, double pswidth,
                  double psheight, double *view_width, double *view_height,
                  int rotation) {
   /* Only one of maxPageHeight or maxPageWidth can be specified */
- /* jump:1481 */  if (maxPageHeight != 0) /* Clip the viewport to maxPageHeight on each page */
+ /* jump:1419 */  if (maxPageHeight != 0) /* Clip the viewport to maxPageHeight on each page */
   {
- /* jump:1453 */    if (pgheight != 0 && pgheight < maxPageHeight) {
+    if (pgheight != 0 && pgheight < maxPageHeight)
       *view_height = pgheight * PS_UNIT_SIZE;
-    } else {
+    else
       *view_height = maxPageHeight * PS_UNIT_SIZE;
-    }
     /*
      * if (res_unit == RESUNIT_CENTIMETER)
      * *view_height /= 2.54F;
      */
   } else {
- /* jump:1480 */    if (pgheight != 0) /* User has set PageHeight with -h flag */
+ /* jump:1428 */    if (pgheight != 0) /* User has set PageHeight with -h flag */
     {
       *view_height =
           pgheight *
@@ -1464,8 +1425,8 @@ int get_viewport(double pgwidth, double pgheight, double pswidth,
       /* if (res_unit == RESUNIT_CENTIMETER)
        *  *view_height /= 2.54F;
        */
-    } else { /* If no width or height are specified, use the original size from
-                image */
+    } else /* If no width or height are specified, use the original size from
+              image */
       switch (rotation) {
       default:
       case 0:
@@ -1477,29 +1438,27 @@ int get_viewport(double pgwidth, double pgheight, double pswidth,
         *view_height = pswidth;
         break;
       }
-    }
   }
 
- /* jump:1515 */  if (maxPageWidth != 0) /* Clip the viewport to maxPageWidth on each page */
+ /* jump:1452 */  if (maxPageWidth != 0) /* Clip the viewport to maxPageWidth on each page */
   {
- /* jump:1489 */    if (pgwidth != 0 && pgwidth < maxPageWidth) {
+    if (pgwidth != 0 && pgwidth < maxPageWidth)
       *view_width = pgwidth * PS_UNIT_SIZE;
-    } else {
+    else
       *view_width = maxPageWidth * PS_UNIT_SIZE;
-    }
     /* if (res_unit == RESUNIT_CENTIMETER)
      *  *view_width /= 2.54F;
      */
   } else {
- /* jump:1514 */    if (pgwidth != 0) /* User has set PageWidth with -w flag */
+ /* jump:1460 */    if (pgwidth != 0) /* User has set PageWidth with -w flag */
     {
       *view_width =
           pgwidth * PS_UNIT_SIZE; /* Postscript size for Page Width in inches */
       /* if (res_unit == RESUNIT_CENTIMETER)
        * *view_width /= 2.54F;
        */
-    } else { /* If no width or height are specified, use the original size from
-                image */
+    } else /* If no width or height are specified, use the original size from
+              image */
       switch (rotation) {
       default:
       case 0:
@@ -1511,7 +1470,6 @@ int get_viewport(double pgwidth, double pgheight, double pswidth,
         *view_width = psheight; /* (*view_height / psheight) * psheight; */
         break;
       }
-    }
   }
 
   return (0);
@@ -1536,12 +1494,10 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
   uint16 *sampleinfo;
   static int npages = 0;
 
- /* jump:1541 */  if (!TIFFGetField(tif, TIFFTAG_XPOSITION, &ox)) {
+  if (!TIFFGetField(tif, TIFFTAG_XPOSITION, &ox))
     ox = 0;
-  }
- /* jump:1544 */  if (!TIFFGetField(tif, TIFFTAG_YPOSITION, &oy)) {
+  if (!TIFFGetField(tif, TIFFTAG_YPOSITION, &oy))
     oy = 0;
-  }
 
   /* Consolidated all the tag information into one code segment, Richard Nolde
    */
@@ -1558,11 +1514,10 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
     if (!TIFFGetField(tif, TIFFTAG_PHOTOMETRIC, &photometric)) {
       switch (samplesperpixel - extrasamples) {
       case 1:
-        if (isCCITTCompression(tif)) {
+        if (isCCITTCompression(tif))
           photometric = PHOTOMETRIC_MINISWHITE;
-        } else {
+        else
           photometric = PHOTOMETRIC_MINISBLACK;
-        }
         break;
       case 3:
         photometric = PHOTOMETRIC_RGB;
@@ -1590,9 +1545,8 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
      * definitions */
     if (psStart(fd, npages, auto_rotate, &rotation, &scale, ox, oy, pgwidth,
                 pgheight, view_width, view_height, pswidth, psheight,
-                left_offset, bottom_offset)) {
+                left_offset, bottom_offset))
       return (-1);
-    }
 
     if (checkImage(tif)) /* Aborts if unsupported image parameters */
     {
@@ -1605,9 +1559,8 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
         {
           if (psMaskImage(fd, tif, rotation, center, &npages, pixwidth,
                           pixheight, left_offset, bottom_offset, pgwidth,
-                          pgheight, pswidth, psheight, scale) < 0) {
+                          pgheight, pswidth, psheight, scale) < 0)
             return (-1);
-          }
         } else /* N.B. Setting maxPageHeight no longer sets pgheight */
         {
           if (pgwidth != 0 || pgheight != 0) {
@@ -1620,17 +1573,15 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
             if (!generateEPSF && (level2 || level3)) {
               /* Write out the PageSize info for non EPS files */
               if (psPageSize(fd, rotation, pgwidth, pgheight, view_width,
-                             view_height, pswidth, psheight)) {
+                             view_height, pswidth, psheight))
                 return (-1);
-              }
             }
             fprintf(fd, "gsave\n");
             fprintf(fd, "100 dict begin\n");
             if (psScaleImage(fd, scale, rotation, center, view_width,
                              view_height, pswidth, psheight, left_offset,
-                             bottom_offset)) {
+                             bottom_offset))
               return (-1);
-            }
 
             PSpage(fd, tif, pixwidth, pixheight);
             fprintf(fd, "end\n");
@@ -1646,16 +1597,14 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
         if (!generateEPSF && (level2 || level3)) {
           /* Write out the PageSize info for non EPS files */
           if (psPageSize(fd, rotation, pgwidth, pgheight, view_width,
-                         view_height, pswidth, psheight)) {
+                         view_height, pswidth, psheight))
             return (-1);
-          }
         }
         fprintf(fd, "gsave\n");
         fprintf(fd, "100 dict begin\n");
         if (psRotateImage(fd, rotation, pswidth, psheight, left_offset,
-                          bottom_offset)) {
+                          bottom_offset))
           return (-1);
-        }
 
         PSpage(fd, tif, pixwidth, pixheight);
         fprintf(fd, "end\n");
@@ -1663,12 +1612,10 @@ int TIFF2PS(FILE *fd, TIFF *tif, double pgwidth, double pgheight, double lm,
         fprintf(fd, "showpage\n");
       }
     }
-    if (generateEPSF) {
+    if (generateEPSF)
       break;
-    }
-    if (auto_rotate) {
+    if (auto_rotate)
       rotation = 0.0;
-    }
     TIFFGetFieldDefaulted(tif, TIFFTAG_SUBFILETYPE, &subfiletype);
   } while (((subfiletype & FILETYPE_PAGE) || printAll) &&
            TIFFReadDirectory(tif));
@@ -1726,42 +1673,35 @@ void PSHead(FILE *fd, double pagewidth, double pageheight, double xoff,
           (long)ceil(pageheight));
 
   fprintf(fd, "%%%%LanguageLevel: %d\n", (level3 ? 3 : (level2 ? 2 : 1)));
- /* jump:1733 */  if (generateEPSF == TRUE) {
+  if (generateEPSF == TRUE)
     fprintf(fd, "%%%%Pages: 1 1\n");
-  } else {
+  else
     fprintf(fd, "%%%%Pages: (atend)\n");
-  }
   fprintf(fd, "%%%%EndComments\n");
- /* jump:1747 */  if (generateEPSF == FALSE) {
+ /* jump:1690 */  if (generateEPSF == FALSE) {
     fprintf(fd, "%%%%BeginSetup\n");
- /* jump:1739 */    if (PSduplex) {
+    if (PSduplex)
       fprintf(fd, "%s", DuplexPreamble);
-    }
- /* jump:1742 */    if (PStumble) {
+    if (PStumble)
       fprintf(fd, "%s", TumblePreamble);
-    }
- /* jump:1745 */    if (PSavoiddeadzone && (level2 || level3)) {
+    if (PSavoiddeadzone && (level2 || level3))
       fprintf(fd, "%s", AvoidDeadZonePreamble);
-    }
     fprintf(fd, "%%%%EndSetup\n");
   }
 }
 
 void PSTail(FILE *fd, int npages) {
   fprintf(fd, "%%%%Trailer\n");
- /* jump:1754 */  if (generateEPSF == FALSE) {
+  if (generateEPSF == FALSE)
     fprintf(fd, "%%%%Pages: %d\n", npages);
-  }
   fprintf(fd, "%%%%EOF\n");
 }
 
 static int checkcmap(TIFF *tif, int n, uint16 *r, uint16 *g, uint16 *b) {
   (void)tif;
- /* jump:1764 */  while (n-- > 0) {
- /* jump:1763 */    if (*r++ >= 256 || *g++ >= 256 || *b++ >= 256) {
+ /* jump:1704 */  while (n-- > 0)
+    if (*r++ >= 256 || *g++ >= 256 || *b++ >= 256)
       return (16);
-    }
-  }
   TIFFWarning(filename, "Assuming 8-bit colormap");
   return (8);
 }
@@ -1789,8 +1729,8 @@ static void PS_Lvl2colorspace(FILE *fd, TIFF *tif) {
    * section 4.8 in the PostScript refenence manual.
    */
   fputs("% PostScript Level 2 only.\n", fd);
- /* jump:1798 */  if (photometric != PHOTOMETRIC_PALETTE) {
- /* jump:1795 */    if (photometric == PHOTOMETRIC_YCBCR) {
+ /* jump:1738 */  if (photometric != PHOTOMETRIC_PALETTE) {
+ /* jump:1735 */    if (photometric == PHOTOMETRIC_YCBCR) {
       /* MORE CODE HERE */
     }
     fprintf(fd, "/Device%s setcolorspace\n", colorspace_p);
@@ -1801,16 +1741,16 @@ static void PS_Lvl2colorspace(FILE *fd, TIFF *tif) {
    * Set up an indexed/palette colorspace
    */
   num_colors = (1 << bitspersample);
- /* jump:1807 */  if (!TIFFGetField(tif, TIFFTAG_COLORMAP, &rmap, &gmap, &bmap)) {
+ /* jump:1747 */  if (!TIFFGetField(tif, TIFFTAG_COLORMAP, &rmap, &gmap, &bmap)) {
     TIFFError(filename, "Palette image w/o \"Colormap\" tag");
     return;
   }
- /* jump:1819 */  if (checkcmap(tif, num_colors, rmap, gmap, bmap) == 16) {
+ /* jump:1759 */  if (checkcmap(tif, num_colors, rmap, gmap, bmap) == 16) {
     /*
      * Convert colormap to 8-bits values.
      */
 #define CVT(x) (((x)*255) / ((1L << 16) - 1))
- /* jump:1817 */    for (i = 0; i < num_colors; i++) {
+ /* jump:1757 */    for (i = 0; i < num_colors; i++) {
       rmap[i] = CVT(rmap[i]);
       gmap[i] = CVT(gmap[i]);
       bmap[i] = CVT(bmap[i]);
@@ -1818,15 +1758,14 @@ static void PS_Lvl2colorspace(FILE *fd, TIFF *tif) {
 #undef CVT
   }
   fprintf(fd, "[ /Indexed /DeviceRGB %d", num_colors - 1);
- /* jump:1827 */  if (ascii85) {
+ /* jump:1765 */  if (ascii85) {
     Ascii85Init();
     fputs("\n<~", fd);
     ascii85breaklen -= 2;
-  } else {
+  } else
     fputs(" <", fd);
-  }
- /* jump:1837 */  for (i = 0; i < num_colors; i++) {
- /* jump:1836 */    if (ascii85) {
+ /* jump:1776 */  for (i = 0; i < num_colors; i++) {
+ /* jump:1772 */    if (ascii85) {
       Ascii85Put((unsigned char)rmap[i], fd);
       Ascii85Put((unsigned char)gmap[i], fd);
       Ascii85Put((unsigned char)bmap[i], fd);
@@ -1835,11 +1774,10 @@ static void PS_Lvl2colorspace(FILE *fd, TIFF *tif) {
       fprintf(fd, "%02x%02x%02x", rmap[i], gmap[i], bmap[i]);
     }
   }
- /* jump:1842 */  if (ascii85) {
+  if (ascii85)
     Ascii85Flush(fd);
-  } else {
+  else
     fputs(">\n", fd);
-  }
   fputs("] setcolorspace\n", fd);
 }
 
@@ -1851,20 +1789,19 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   char im_h[64], im_x[64], im_y[64];
   char *imageOp = "image";
 
- /* jump:1856 */  if (useImagemask && (bitspersample == 1)) {
+  if (useImagemask && (bitspersample == 1))
     imageOp = "imagemask";
-  }
 
   (void)strcpy(im_x, "0");
   (void)snprintf(im_y, sizeof(im_y), "%lu", (long)h);
   (void)snprintf(im_h, sizeof(im_h), "%lu", (long)h);
   tile_width = w;
   tile_height = h;
- /* jump:1895 */  if (TIFFIsTiled(tif)) {
+ /* jump:1820 */  if (TIFFIsTiled(tif)) {
     repeat_count = TIFFNumberOfTiles(tif);
     TIFFGetField(tif, TIFFTAG_TILEWIDTH, &tile_width);
     TIFFGetField(tif, TIFFTAG_TILELENGTH, &tile_height);
- /* jump:1874 */    if (tile_width > w || tile_height > h || (w % tile_width) != 0 ||
+ /* jump:1811 */    if (tile_width > w || tile_height > h || (w % tile_width) != 0 ||
         (h % tile_height != 0)) {
       /*
        * The tiles does not fit image width and height.
@@ -1872,21 +1809,20 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
        */
       fputs("0 0 1 1 rectclip\n", fd);
     }
- /* jump:1878 */    if (tile_width < w) {
+ /* jump:1815 */    if (tile_width < w) {
       fputs("/im_x 0 def\n", fd);
       (void)strcpy(im_x, "im_x neg");
     }
- /* jump:1882 */    if (tile_height < h) {
+ /* jump:1819 */    if (tile_height < h) {
       fputs("/im_y 0 def\n", fd);
       (void)snprintf(im_y, sizeof(im_y), "%lu im_y sub", (unsigned long)h);
     }
   } else {
     repeat_count = tf_numberstrips;
     tile_height = tf_rowsperstrip;
- /* jump:1888 */    if (tile_height > h) {
+    if (tile_height > h)
       tile_height = h;
-    }
- /* jump:1894 */    if (repeat_count > 1) {
+ /* jump:1830 */    if (repeat_count > 1) {
       fputs("/im_y 0 def\n", fd);
       fprintf(fd, "/im_h %lu def\n", (unsigned long)tile_height);
       (void)strcpy(im_h, "im_h");
@@ -1899,16 +1835,14 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
    */
   fputs("{ % exec\n", fd);
 
- /* jump:1904 */  if (repeat_count > 1) {
+  if (repeat_count > 1)
     fprintf(fd, "%d { %% repeat\n", repeat_count);
-  }
 
   /*
    * Output filter options and image dictionary.
    */
- /* jump:1911 */  if (ascii85) {
+  if (ascii85)
     fputs(" /im_stream currentfile /ASCII85Decode filter def\n", fd);
-  }
   fputs(" <<\n", fd);
   fputs("  /ImageType 1\n", fd);
   fprintf(fd, "  /Width %lu\n", (unsigned long)tile_width);
@@ -1922,15 +1856,13 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
    * contain number of scanlines in tile (or image height in case of
    * one-stripped image).
    */
- /* jump:1929 */  if (TIFFIsTiled(tif) || tf_numberstrips == 1) {
+  if (TIFFIsTiled(tif) || tf_numberstrips == 1)
     fprintf(fd, "  /Height %lu\n", (unsigned long)tile_height);
-  } else {
+  else
     fprintf(fd, "  /Height im_h\n");
-  }
 
- /* jump:1933 */  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1) {
+  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1)
     fputs("  /MultipleDataSources true\n", fd);
-  }
   fprintf(fd, "  /ImageMatrix [ %lu 0 0 %ld %s %s ]\n", (unsigned long)w,
           -(long)h, im_x, im_y);
   fprintf(fd, "  /BitsPerComponent %d\n", bitspersample);
@@ -1998,14 +1930,12 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     break;
   }
   fputs("  /DataSource", fd);
- /* jump:2003 */  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1) {
+  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1)
     fputs(" [", fd);
-  }
- /* jump:2008 */  if (ascii85) {
+  if (ascii85)
     fputs(" im_stream", fd);
-  } else {
+  else
     fputs(" currentfile /ASCIIHexDecode filter", fd);
-  }
 
   use_rawdata = TRUE;
   switch (compression) {
@@ -2021,40 +1951,33 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
       fputs("\t /EndOfLine true\n", fd);
       fputs("\t /EndOfBlock false\n", fd);
-      if (!TIFFGetField(tif, TIFFTAG_GROUP3OPTIONS, &g3_options)) {
+      if (!TIFFGetField(tif, TIFFTAG_GROUP3OPTIONS, &g3_options))
         g3_options = 0;
-      }
-      if (g3_options & GROUP3OPT_2DENCODING) {
+      if (g3_options & GROUP3OPT_2DENCODING)
         fprintf(fd, "\t /K %s\n", im_h);
-      }
-      if (g3_options & GROUP3OPT_UNCOMPRESSED) {
+      if (g3_options & GROUP3OPT_UNCOMPRESSED)
         fputs("\t /Uncompressed true\n", fd);
-      }
-      if (g3_options & GROUP3OPT_FILLBITS) {
+      if (g3_options & GROUP3OPT_FILLBITS)
         fputs("\t /EncodedByteAlign true\n", fd);
-      }
     }
     if (compression == COMPRESSION_CCITTFAX4) {
       uint32 g4_options;
 
       fputs("\t /K -1\n", fd);
       TIFFGetFieldDefaulted(tif, TIFFTAG_GROUP4OPTIONS, &g4_options);
-      if (g4_options & GROUP4OPT_UNCOMPRESSED) {
+      if (g4_options & GROUP4OPT_UNCOMPRESSED)
         fputs("\t /Uncompressed true\n", fd);
-      }
     }
-    if (!(tile_width == w && w == 1728U)) {
+    if (!(tile_width == w && w == 1728U))
       fprintf(fd, "\t /Columns %lu\n", (unsigned long)tile_width);
-    }
     fprintf(fd, "\t /Rows %s\n", im_h);
     if (compression == COMPRESSION_CCITTRLE ||
         compression == COMPRESSION_CCITTRLEW) {
       fputs("\t /EncodedByteAlign true\n", fd);
       fputs("\t /EndOfBlock false\n", fd);
     }
-    if (photometric == PHOTOMETRIC_MINISBLACK) {
+    if (photometric == PHOTOMETRIC_MINISBLACK)
       fputs("\t /BlackIs1 true\n", fd);
-    }
     fprintf(fd, "\t>> /CCITTFaxDecode filter");
     break;
   case COMPRESSION_LZW: /* 5: Lempel-Ziv & Welch */
@@ -2120,36 +2043,34 @@ static int PS_Lvl2ImageDict(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     use_rawdata = FALSE;
     break;
   }
- /* jump:2133 */  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1) {
+ /* jump:2055 */  if (planarconfiguration == PLANARCONFIG_SEPARATE && samplesperpixel > 1) {
     uint16 i;
 
     /*
      * NOTE: This code does not work yet...
      */
-    for (i = 1; i < samplesperpixel; i++) {
+    for (i = 1; i < samplesperpixel; i++)
       fputs(" dup", fd);
-    }
     fputs(" ]", fd);
   }
 
   fprintf(fd, "\n >> %s\n", imageOp);
- /* jump:2138 */  if (ascii85) {
+  if (ascii85)
     fputs(" im_stream status { im_stream flushfile } if\n", fd);
-  }
- /* jump:2160 */  if (repeat_count > 1) {
- /* jump:2148 */    if (tile_width < w) {
+ /* jump:2081 */  if (repeat_count > 1) {
+ /* jump:2069 */    if (tile_width < w) {
       fprintf(fd, " /im_x im_x %lu add def\n", (unsigned long)tile_width);
- /* jump:2147 */      if (tile_height < h) {
+ /* jump:2068 */      if (tile_height < h) {
         fprintf(fd, " im_x %lu ge {\n", (unsigned long)w);
         fputs("  /im_x 0 def\n", fd);
         fprintf(fd, " /im_y im_y %lu add def\n", (unsigned long)tile_height);
         fputs(" } if\n", fd);
       }
     }
- /* jump:2158 */    if (tile_height < h) {
- /* jump:2157 */      if (tile_width >= w) {
+ /* jump:2079 */    if (tile_height < h) {
+ /* jump:2078 */      if (tile_width >= w) {
         fprintf(fd, " /im_y im_y %lu add def\n", (unsigned long)tile_height);
- /* jump:2156 */        if (!TIFFIsTiled(tif)) {
+ /* jump:2077 */        if (!TIFFIsTiled(tif)) {
           fprintf(fd, " /im_h %lu im_y sub", (unsigned long)h);
           fprintf(fd, " dup %lu gt { pop", (unsigned long)tile_height);
           fprintf(fd, " %lu } if def\n", (unsigned long)tile_height);
@@ -2171,7 +2092,7 @@ static void PS_FlipBytes(unsigned char *buf, tsize_t count) {
   int i;
   unsigned char temp;
 
- /* jump:2176 */  if (count <= 0 || bitspersample <= 8) {
+ /* jump:2097 */  if (count <= 0 || bitspersample <= 8) {
     return;
   }
 
@@ -2209,7 +2130,7 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   fputs("exec\n", fd);
 
   tiled_image = TIFFIsTiled(tif);
- /* jump:2218 */  if (tiled_image) {
+ /* jump:2136 */  if (tiled_image) {
     num_chunks = TIFFNumberOfTiles(tif);
     TIFFGetField(tif, TIFFTAG_TILEBYTECOUNTS, &bc);
   } else {
@@ -2217,29 +2138,26 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     TIFFGetField(tif, TIFFTAG_STRIPBYTECOUNTS, &bc);
   }
 
- /* jump:2233 */  if (use_rawdata) {
+ /* jump:2146 */  if (use_rawdata) {
     chunk_size = (tsize_t)bc[0];
-    for (chunk_no = 1; chunk_no < num_chunks; chunk_no++) {
-      if ((tsize_t)bc[chunk_no] > chunk_size) {
+    for (chunk_no = 1; chunk_no < num_chunks; chunk_no++)
+      if ((tsize_t)bc[chunk_no] > chunk_size)
         chunk_size = (tsize_t)bc[chunk_no];
-      }
-    }
   } else {
- /* jump:2232 */    if (tiled_image) {
+    if (tiled_image)
       chunk_size = TIFFTileSize(tif);
-    } else {
+    else
       chunk_size = TIFFStripSize(tif);
-    }
   }
   buf_data = (unsigned char *)_TIFFmalloc(chunk_size);
- /* jump:2239 */  if (!buf_data) {
+ /* jump:2157 */  if (!buf_data) {
     TIFFError(filename, "Can't alloc %lu bytes for %s.",
               (unsigned long)chunk_size, tiled_image ? "tiles" : "strips");
     return (FALSE);
   }
 
 #if defined(EXP_ASCII85ENCODER)
- /* jump:2260 */  if (ascii85) {
+ /* jump:2178 */  if (ascii85) {
     /*
      * Allocate a buffer to hold the ASCII85 encoded data.  Note
      * that it is allocated with sufficient room to hold the
@@ -2251,7 +2169,7 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
     ascii85_p = _TIFFmalloc((chunk_size + (chunk_size / 2)) + 8);
 
- /* jump:2259 */    if (!ascii85_p) {
+ /* jump:2177 */    if (!ascii85_p) {
       _TIFFfree(buf_data);
 
       TIFFError(filename, "Cannot allocate ASCII85 encoding buffer.");
@@ -2262,33 +2180,28 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
   TIFFGetFieldDefaulted(tif, TIFFTAG_FILLORDER, &fillorder);
   for (chunk_no = 0; chunk_no < num_chunks; chunk_no++) {
-    if (ascii85) {
+    if (ascii85)
       Ascii85Init();
-    } else {
+    else
       breaklen = MAXLINE;
-    }
     if (use_rawdata) {
-      if (tiled_image) {
+      if (tiled_image)
         byte_count = TIFFReadRawTile(tif, chunk_no, buf_data, chunk_size);
-      } else {
+      else
         byte_count = TIFFReadRawStrip(tif, chunk_no, buf_data, chunk_size);
-      }
-      if (fillorder == FILLORDER_LSB2MSB) {
+      if (fillorder == FILLORDER_LSB2MSB)
         TIFFReverseBits(buf_data, byte_count);
-      }
     } else {
-      if (tiled_image) {
+      if (tiled_image)
         byte_count = TIFFReadEncodedTile(tif, chunk_no, buf_data, chunk_size);
-      } else {
+      else
         byte_count = TIFFReadEncodedStrip(tif, chunk_no, buf_data, chunk_size);
-      }
     }
     if (byte_count < 0) {
       TIFFError(filename, "Can't read %s %d.", tiled_image ? "tile" : "strip",
                 chunk_no);
-      if (ascii85) {
+      if (ascii85)
         Ascii85Put('\0', fd);
-      }
     }
     /*
      * for 16 bits, the two bytes must be most significant
@@ -2331,9 +2244,8 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 #if defined(EXP_ASCII85ENCODER)
       ascii85_l = Ascii85EncodeBlock(ascii85_p, 1, buf_data, byte_count);
 
-      if (ascii85_l > 0) {
+      if (ascii85_l > 0)
         fwrite(ascii85_p, ascii85_l, 1, fd);
-      }
 #else
       for (cp = buf_data; byte_count > 0; byte_count--)
         Ascii85Put(*cp++, fd);
@@ -2352,9 +2264,8 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     }
 
     if (!ascii85) {
-      if (level2 || level3) {
+      if (level2 || level3)
         putc('>', fd);
-      }
       putc('\n', fd);
     }
 #if !defined(EXP_ASCII85ENCODER)
@@ -2364,9 +2275,8 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   }
 
 #if defined(EXP_ASCII85ENCODER)
- /* jump:2369 */  if (ascii85_p) {
+  if (ascii85_p)
     _TIFFfree(ascii85_p);
-  }
 #endif
 
   _TIFFfree(buf_data);
@@ -2379,13 +2289,11 @@ int PS_Lvl2page(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 void PSpage(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   char *imageOp = "image";
 
- /* jump:2384 */  if (useImagemask && (bitspersample == 1)) {
+  if (useImagemask && (bitspersample == 1))
     imageOp = "imagemask";
-  }
 
- /* jump:2388 */  if ((level2 || level3) && PS_Lvl2page(fd, tif, w, h)) {
+  if ((level2 || level3) && PS_Lvl2page(fd, tif, w, h))
     return;
-  }
   ps_bytesperrow = tf_bytesperrow - (extrasamples * bitspersample / 8) * w;
   switch (photometric) {
   case PHOTOMETRIC_RGB:
@@ -2451,16 +2359,14 @@ void PSColorSeparatePreamble(FILE *fd, uint32 w, uint32 h, int nc) {
   int i;
 
   PhotoshopBanner(fd, w, h, ps_bytesperrow, nc, "true %d colorimage");
- /* jump:2456 */  for (i = 0; i < nc; i++) {
+  for (i = 0; i < nc; i++)
     fprintf(fd, "/line%d %ld string def\n", i, (long)ps_bytesperrow);
-  }
   fprintf(fd, "%lu %lu %d\n", (unsigned long)w, (unsigned long)h,
           bitspersample);
   fprintf(fd, "[%lu 0 0 -%lu 0 %lu] \n", (unsigned long)w, (unsigned long)h,
           (unsigned long)h);
- /* jump:2463 */  for (i = 0; i < nc; i++) {
+ /* jump:2369 */  for (i = 0; i < nc; i++)
     fprintf(fd, "{currentfile line%d readhexstring pop}bind\n", i);
-  }
   fprintf(fd, "true %d colorimage\n", nc);
 }
 
@@ -2482,14 +2388,13 @@ void PSDataColorContig(FILE *fd, TIFF *tif, uint32 w, uint32 h, int nc) {
 
   (void)w;
   tf_buf = (unsigned char *)_TIFFmalloc(tf_bytesperrow);
- /* jump:2488 */  if (tf_buf == NULL) {
+ /* jump:2394 */  if (tf_buf == NULL) {
     TIFFError(filename, "No space for scanline buffer");
     return;
   }
   for (row = 0; row < h; row++) {
-    if (TIFFReadScanline(tif, tf_buf, row, 0) < 0) {
+    if (TIFFReadScanline(tif, tf_buf, row, 0) < 0)
       break;
-    }
     cp = tf_buf;
     /*
      * for 16 bits, the two bytes must be most significant
@@ -2561,16 +2466,15 @@ void PSDataColorSeparate(FILE *fd, TIFF *tif, uint32 w, uint32 h, int nc) {
 
   (void)w;
   tf_buf = (unsigned char *)_TIFFmalloc(tf_bytesperrow);
- /* jump:2567 */  if (tf_buf == NULL) {
+ /* jump:2472 */  if (tf_buf == NULL) {
     TIFFError(filename, "No space for scanline buffer");
     return;
   }
   maxs = (samplesperpixel > nc ? nc : samplesperpixel);
   for (row = 0; row < h; row++) {
     for (s = 0; s < maxs; s++) {
-      if (TIFFReadScanline(tif, tf_buf, row, s) < 0) {
+      if (TIFFReadScanline(tif, tf_buf, row, s) < 0)
         break;
-      }
       for (cp = tf_buf, cc = 0; cc < tf_bytesperrow; cc++) {
         DOBREAK(breaklen, 1, fd);
         c = *cp++;
@@ -2595,7 +2499,7 @@ void PSDataPalette(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   unsigned char *cp, c;
 
   (void)w;
- /* jump:2601 */  if (!TIFFGetField(tif, TIFFTAG_COLORMAP, &rmap, &gmap, &bmap)) {
+ /* jump:2505 */  if (!TIFFGetField(tif, TIFFTAG_COLORMAP, &rmap, &gmap, &bmap)) {
     TIFFError(filename, "Palette image w/o \"Colormap\" tag");
     return;
   }
@@ -2611,14 +2515,14 @@ void PSDataPalette(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   }
   nc = 3 * (8 / bitspersample);
   tf_buf = (unsigned char *)_TIFFmalloc(tf_bytesperrow);
- /* jump:2617 */  if (tf_buf == NULL) {
+ /* jump:2521 */  if (tf_buf == NULL) {
     TIFFError(filename, "No space for scanline buffer");
     return;
   }
- /* jump:2627 */  if (checkcmap(tif, 1 << bitspersample, rmap, gmap, bmap) == 16) {
+ /* jump:2531 */  if (checkcmap(tif, 1 << bitspersample, rmap, gmap, bmap) == 16) {
     int i;
 #define CVT(x) ((unsigned short)(((x)*255) / ((1U << 16) - 1)))
- /* jump:2625 */    for (i = (1 << bitspersample) - 1; i >= 0; i--) {
+ /* jump:2529 */    for (i = (1 << bitspersample) - 1; i >= 0; i--) {
       rmap[i] = CVT(rmap[i]);
       gmap[i] = CVT(gmap[i]);
       bmap[i] = CVT(bmap[i]);
@@ -2626,9 +2530,8 @@ void PSDataPalette(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 #undef CVT
   }
   for (row = 0; row < h; row++) {
-    if (TIFFReadScanline(tif, tf_buf, row, 0) < 0) {
+    if (TIFFReadScanline(tif, tf_buf, row, 0) < 0)
       break;
-    }
     for (cp = tf_buf, cc = 0; cc < tf_bytesperrow; cc++) {
       DOBREAK(breaklen, nc, fd);
       switch (bitspersample) {
@@ -2691,7 +2594,7 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   (void)w;
   (void)h;
   tf_buf = (unsigned char *)_TIFFmalloc(stripsize);
- /* jump:2697 */  if (tf_buf == NULL) {
+ /* jump:2600 */  if (tf_buf == NULL) {
     TIFFError(filename, "No space for scanline buffer");
     return;
   }
@@ -2700,7 +2603,7 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   memset(tf_buf, 0, stripsize);
 
 #if defined(EXP_ASCII85ENCODER)
- /* jump:2721 */  if (ascii85) {
+ /* jump:2624 */  if (ascii85) {
     /*
      * Allocate a buffer to hold the ASCII85 encoded data.  Note
      * that it is allocated with sufficient room to hold the
@@ -2712,7 +2615,7 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
     ascii85_p = _TIFFmalloc((stripsize + (stripsize / 2)) + 8);
 
- /* jump:2720 */    if (!ascii85_p) {
+ /* jump:2623 */    if (!ascii85_p) {
       _TIFFfree(tf_buf);
 
       TIFFError(filename, "Cannot allocate ASCII85 encoding buffer.");
@@ -2721,9 +2624,8 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   }
 #endif
 
- /* jump:2726 */  if (ascii85) {
+  if (ascii85)
     Ascii85Init();
-  }
 
   for (s = 0; s < TIFFNumberOfStrips(tif); s++) {
     tmsize_t cc = TIFFReadEncodedStrip(tif, s, tf_buf, stripsize);
@@ -2733,9 +2635,8 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     }
     cp = tf_buf;
     if (photometric == PHOTOMETRIC_MINISWHITE) {
-      for (cp += cc; --cp >= tf_buf;) {
+      for (cp += cc; --cp >= tf_buf;)
         *cp = ~*cp;
-      }
       cp++;
     }
     /*
@@ -2758,9 +2659,8 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
       ascii85_l = Ascii85EncodeBlock(ascii85_p, 1, cp, cc);
 
-      if (ascii85_l > 0) {
+      if (ascii85_l > 0)
         fwrite(ascii85_p, ascii85_l, 1, fd);
-      }
 #else
       while (cc-- > 0)
         Ascii85Put(*cp++, fd);
@@ -2793,18 +2693,16 @@ void PSDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
     }
   }
 
- /* jump:2800 */  if (!ascii85) {
- /* jump:2799 */    if (level2 || level3) {
+ /* jump:2699 */  if (!ascii85) {
+    if (level2 || level3)
       fputs(">\n", fd);
-    }
   }
 #if !defined(EXP_ASCII85ENCODER)
   else
     Ascii85Flush(fd);
 #else
- /* jump:2807 */  if (ascii85_p) {
+  if (ascii85_p)
     _TIFFfree(ascii85_p);
-  }
 #endif
 
   _TIFFfree(tf_buf);
@@ -2837,19 +2735,18 @@ void PSRawDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   bufsize = (uint32)bc[0];
 
   for (s = 0; ++s < (tstrip_t)tf_numberstrips;) {
-    if (bc[s] > bufsize) {
+    if (bc[s] > bufsize)
       bufsize = (uint32)bc[s];
-    }
   }
 
   tf_buf = (unsigned char *)_TIFFmalloc(bufsize);
- /* jump:2849 */  if (tf_buf == NULL) {
+ /* jump:2746 */  if (tf_buf == NULL) {
     TIFFError(filename, "No space for strip buffer");
     return;
   }
 
 #if defined(EXP_ASCII85ENCODER)
- /* jump:2870 */  if (ascii85) {
+ /* jump:2767 */  if (ascii85) {
     /*
      * Allocate a buffer to hold the ASCII85 encoded data.  Note
      * that it is allocated with sufficient room to hold the
@@ -2861,7 +2758,7 @@ void PSRawDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 
     ascii85_p = _TIFFmalloc((bufsize + (bufsize / 2)) + 8);
 
- /* jump:2869 */    if (!ascii85_p) {
+ /* jump:2766 */    if (!ascii85_p) {
       _TIFFfree(tf_buf);
 
       TIFFError(filename, "Cannot allocate ASCII85 encoding buffer.");
@@ -2876,9 +2773,8 @@ void PSRawDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
       TIFFError(filename, "Can't read strip");
       break;
     }
-    if (fillorder == FILLORDER_LSB2MSB) {
+    if (fillorder == FILLORDER_LSB2MSB)
       TIFFReverseBits(tf_buf, cc);
-    }
     if (!ascii85) {
       for (cp = tf_buf; cc > 0; cc--) {
         DOBREAK(breaklen, 1, fd);
@@ -2892,9 +2788,8 @@ void PSRawDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
 #if defined(EXP_ASCII85ENCODER)
       ascii85_l = Ascii85EncodeBlock(ascii85_p, 1, tf_buf, cc);
 
-      if (ascii85_l > 0) {
+      if (ascii85_l > 0)
         fwrite(ascii85_p, ascii85_l, 1, fd);
-      }
 #else
       for (cp = tf_buf; cc > 0; cc--)
         Ascii85Put(*cp++, fd);
@@ -2905,9 +2800,8 @@ void PSRawDataBW(FILE *fd, TIFF *tif, uint32 w, uint32 h) {
   _TIFFfree((char *)tf_buf);
 
 #if defined(EXP_ASCII85ENCODER)
- /* jump:2910 */  if (ascii85_p) {
+  if (ascii85_p)
     _TIFFfree(ascii85_p);
-  }
 #endif
 }
 
@@ -2921,7 +2815,7 @@ static char *Ascii85Encode(unsigned char *raw) {
   uint32 word;
 
   word = (((raw[0] << 8) + raw[1]) << 16) + (raw[2] << 8) + raw[3];
- /* jump:2945 */  if (word != 0L) {
+ /* jump:2837 */  if (word != 0L) {
     uint32 q;
     uint16 w1;
 
@@ -2940,23 +2834,22 @@ static char *Ascii85Encode(unsigned char *raw) {
     encoded[3] = (char)((w1 / 85) + '!');
     encoded[4] = (char)((w1 % 85) + '!');
     encoded[5] = '\0';
-  } else {
+  } else
     encoded[0] = 'z', encoded[1] = '\0';
-  }
   return (encoded);
 }
 
 void Ascii85Put(unsigned char code, FILE *fd) {
   ascii85buf[ascii85count++] = code;
- /* jump:2967 */  if (ascii85count >= 4) {
+ /* jump:2860 */  if (ascii85count >= 4) {
     unsigned char *p;
     int n;
 
- /* jump:2964 */    for (n = ascii85count, p = ascii85buf; n >= 4; n -= 4, p += 4) {
+ /* jump:2857 */    for (n = ascii85count, p = ascii85buf; n >= 4; n -= 4, p += 4) {
       char *cp;
- /* jump:2963 */      for (cp = Ascii85Encode(p); *cp; cp++) {
+ /* jump:2856 */      for (cp = Ascii85Encode(p); *cp; cp++) {
         putc(*cp, fd);
- /* jump:2962 */        if (--ascii85breaklen == 0) {
+ /* jump:2855 */        if (--ascii85breaklen == 0) {
           putc('\n', fd);
           ascii85breaklen = 2 * MAXLINE;
         }
@@ -2968,7 +2861,7 @@ void Ascii85Put(unsigned char code, FILE *fd) {
 }
 
 void Ascii85Flush(FILE *fd) {
- /* jump:2976 */  if (ascii85count > 0) {
+ /* jump:2869 */  if (ascii85count > 0) {
     char *res;
     _TIFFmemset(&ascii85buf[ascii85count], 0, 3);
     res = Ascii85Encode(ascii85buf);
@@ -3030,7 +2923,7 @@ tsize_t Ascii85EncodeBlock(uint8 *ascii85_p, unsigned f_eod, const uint8 *raw_p,
 
   ascii85_l = 0; /* Nothing written yet */
 
- /* jump:3105 */  if (raw_p) {
+ /* jump:2996 */  if (raw_p) {
     --raw_p; /* Prepare for pre-increment fetches */
 
     for (; raw_l > 3; raw_l -= 4) {
@@ -3075,18 +2968,16 @@ tsize_t Ascii85EncodeBlock(uint8 *ascii85_p, unsigned f_eod, const uint8 *raw_p,
      * Output any straggler bytes:
      */
 
- /* jump:3104 */    if (raw_l > 0) {
+ /* jump:2995 */    if (raw_l > 0) {
       tsize_t len; /* Output this many bytes */
 
       len = raw_l + 1;
       val32 = *++raw_p << 24; /* Prime the pump */
 
- /* jump:3086 */      if (--raw_l > 0) {
+      if (--raw_l > 0)
         val32 += *(++raw_p) << 16;
-      }
- /* jump:3089 */      if (--raw_l > 0) {
+      if (--raw_l > 0)
         val32 += *(++raw_p) << 8;
-      }
 
       val32 /= 85;
 
@@ -3108,7 +2999,7 @@ tsize_t Ascii85EncodeBlock(uint8 *ascii85_p, unsigned f_eod, const uint8 *raw_p,
    * If requested add an ASCII85 End Of Data marker:
    */
 
- /* jump:3115 */  if (f_eod) {
+ /* jump:3006 */  if (f_eod) {
     ascii85_p[ascii85_l++] = '~';
     ascii85_p[ascii85_l++] = '>';
     ascii85_p[ascii85_l++] = '\n';
@@ -3166,8 +3057,7 @@ static void usage(int code) {
 
   setbuf(stderr, buf);
   fprintf(stderr, "%s\n\n", TIFFGetVersion());
- /* jump:3171 */  for (i = 0; stuff[i] != NULL; i++) {
+ /* jump:3061 */  for (i = 0; stuff[i] != NULL; i++)
     fprintf(stderr, "%s\n", stuff[i]);
-  }
   exit(code);
 }
