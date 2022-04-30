@@ -16,7 +16,7 @@ def mute():
 
 
 max_process_count = 1
-validator_pool = mp.Pool(max_process_count, initializer=mute)
+validator_pool = None
 exit_consume = 0
 consume_count = 0
 result_list = []
@@ -27,7 +27,8 @@ timeout = 0
 
 def initialize():
     global validator_pool, exit_consume, consume_count, len_gen, len_processed, timeout, result_list
-    validator_pool = mp.Pool(max_process_count, initializer=mute)
+    if values.DEFAULT_USE_VTHREADS:
+        validator_pool = mp.Pool(max_process_count, initializer=mute)
     exit_consume = 0
     consume_count = 0
     result_list = []
@@ -90,12 +91,19 @@ def consume_patches(path_info, dir_info, config_info):
         if len_gen == len_consumed:
             time.sleep(3)
             continue
-        list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
+        if values.DEFAULT_USE_VTHREADS:
+            list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:1000]
+        else:
+            list_selected = list(set(list_dir) - set(values.LIST_CONSUMED))[:100]
         for patch_file in list_selected:
             file_info = (binary_path, oracle_path, source_file, patch_file)
-            validator_pool.apply_async(valkyrie.validate_patch,
-                                       args=(dir_info, file_info, config_info),
-                                       callback=collect_result)
+            if values.DEFAULT_USE_VTHREADS:
+                validator_pool.apply_async(valkyrie.validate_patch,
+                                           args=(dir_info, file_info, config_info),
+                                           callback=collect_result)
+            else:
+                result_list.append(valkyrie.validate_patch(dir_info, file_info, config_info))
+
 
             consume_count += 1
         values.LIST_CONSUMED = values.LIST_CONSUMED + list_selected
@@ -108,13 +116,15 @@ def wait_validation():
     time.sleep(5)
     while len_gen != consume_count and time.time() <= timeout:
         pass
-    validator_pool.close()
+    if values.DEFAULT_USE_VTHREADS:
+        validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
     while len_gen != len_processed and time.time() <= timeout:
         pass
     emitter.normal("\t\t\tterminating validator")
-    #validator_pool.terminate()
-    validator_pool.join()
+    if values.DEFAULT_USE_VTHREADS:
+        validator_pool.terminate()
+        validator_pool.join()
     exit_consume = 1
 
 

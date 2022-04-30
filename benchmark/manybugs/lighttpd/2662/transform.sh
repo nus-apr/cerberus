@@ -28,6 +28,7 @@ bash build.sh $1
 
 # copy test cases
 cp -rf $dir_name/src/tests $script_dir/test-suite/
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
 
 # copy libraries
 cp -rf $dir_name/src/src/.libs $script_dir/test-suite/src

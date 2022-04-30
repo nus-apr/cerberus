@@ -139,10 +139,12 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
                 copy_command += "cp -rf {} {}".format(oracle_path, dir_output)
             else:
                 copy_command = "cp -rf {} {}".format(test_suite_path, dir_output)
-                file_list = os.listdir(test_suite_path)
-                for f in file_list:
-                    if ".orig" in f:
-                        binary_file = test_suite_path + "/" + f
+                file_list = list()
+                for (dir_path, dir_names, file_names) in os.walk(test_suite_path):
+                    file_list += [os.path.join(dir_path, file) for file in file_names]
+
+                for binary_file in file_list:
+                    if ".orig" in binary_file:
                         os.system("e9afl {} -o {} > /dev/null 2>&1".format(binary_file, binary_file.replace(".orig", ".inst_coverage")))
                 valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
                 valkyrie_binary_path = None
@@ -255,6 +257,9 @@ def save_artifacts(dir_info, experiment_info, tool: AbstractTool, container_id):
     emitter.normal("\t\t[framework] saving artifacts and cleaning up")
     dir_expr = dir_info["experiment"]
     dir_artifacts = dir_info["artifact"]
+    dir_results = dir_info["result"]
+    if not os.path.isdir(dir_results):
+        os.system("mkdir -p {}".format(dir_results))
     tool.save_artefacts(dir_info, experiment_info, container_id)
     tool.post_process(dir_expr, dir_artifacts, container_id)
 

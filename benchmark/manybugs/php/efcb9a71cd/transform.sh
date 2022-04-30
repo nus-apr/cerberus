@@ -27,25 +27,6 @@ cp  $TRANS_FILE $SRC_FILE
 bash build.sh $1
 
 
-SRC_FILE=$dir_name/src/Modules/_io/bufferedio.c
-TRANS_FILE=$script_dir/valkyrie/bufferedio.c
-ANNOTATE_SCRIPT=$script_dir/../../../../scripts/annotate.py
-
-if [[ ! -f $TRANS_FILE ]]; then
-  mkdir -p $(dirname $TRANS_FILE)
-  clang-tidy $SRC_FILE -fix -checks="readability-braces-around-statements"
-  clang-format -style=LLVM  $SRC_FILE > $TRANS_FILE
-  cp $TRANS_FILE $SRC_FILE
-  clang -Xclang -ast-dump=json $SRC_FILE > $TRANS_FILE.ast
-  tr --delete '\n' <  $TRANS_FILE.ast  >  $TRANS_FILE.ast.single
-  # check for multi-line if condition / for condition  / while condition
-  python3 $ANNOTATE_SCRIPT $TRANS_FILE $TRANS_FILE.ast.single
-  mv formatted.c $TRANS_FILE
-fi
-
-cp  $TRANS_FILE $SRC_FILE
-bash build.sh $1
-
 # copy test driver
 cp $dir_name/tester.py $script_dir/test-suite
 cp $dir_name/tests.all.txt $script_dir/test-suite
@@ -77,3 +58,4 @@ do
   sed -i "s#TEMP#$driver_name#g" $script_dir/test-suite/$directories/$driver_name
 done
 
+find $script_dir/test-suite -type d -exec chmod 775 {} \;
