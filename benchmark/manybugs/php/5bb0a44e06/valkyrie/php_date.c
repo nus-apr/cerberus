@@ -1925,9 +1925,9 @@ PHP_FUNCTION(getdate) {
   timelib_tzinfo *tzi;
   timelib_time *ts;
 
- /* jump:1931 */  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp) ==
-      FAILURE) {
+ /* jump:1931 */  if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "|l", &timestamp) == FAILURE) {
     RETURN_FALSE;
+
   }
 
   tzi = get_timezone_info(TSRMLS_C);
