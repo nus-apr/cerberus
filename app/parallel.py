@@ -4,6 +4,7 @@ from functools import partial
 from app import definitions, values, emitter, utilities, valkyrie
 from multiprocessing.dummy import Pool as ThreadPool
 import subprocess
+from multiprocessing import get_context, set_start_method
 import time
 import os
 import sys
@@ -27,6 +28,7 @@ timeout = 0
 
 def initialize():
     global validator_pool, exit_consume, consume_count, len_gen, len_processed, timeout, result_list
+    set_start_method("spawn")
     if values.DEFAULT_USE_VTHREADS:
         validator_pool = mp.Pool(max_process_count, initializer=mute)
     exit_consume = 0
@@ -83,6 +85,9 @@ def consume_patches(path_info, dir_info, config_info):
                                                                                      len_valid,
                                                                                      len_invalid,
                                                                                      len_error))
+        if len_consumed > 0 and len_consumed - len_processed > 1000:
+            time.sleep(3)
+            continue
         if not values.APR_TOOL_RUNNING:
             len_consumed = len(values.LIST_CONSUMED)
         if not list_dir:
