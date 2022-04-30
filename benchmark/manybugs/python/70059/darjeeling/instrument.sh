@@ -74,7 +74,7 @@ program:
     time-limit: 10
     workdir: $setup_dir_path/darjeeling
 resource-limits:
-  candidates: 100000
+  candidates: 1000
 seed: 0
 threads: 1
 transformations:
