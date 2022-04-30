@@ -85,6 +85,9 @@ def consume_patches(path_info, dir_info, config_info):
                                                                                      len_valid,
                                                                                      len_invalid,
                                                                                      len_error))
+        if len_consumed - len_processed < 1000:
+            time.sleep(3)
+            continue
         if not values.APR_TOOL_RUNNING:
             len_consumed = len(values.LIST_CONSUMED)
         if not list_dir:
