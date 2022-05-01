@@ -3,11 +3,12 @@
 #include "Python.h"
 
 #include "Python-ast.h"
+#include "node.h"
 #include "ast.h"
 #include "code.h"
-#include "node.h"
-#include "opcode.h"
 #include "symtable.h"
+#include "opcode.h"
+
 
 #define GETARG(arr, i) ((int)((arr[i + 2] << 8) + arr[i + 1]))
 #define UNCONDITIONAL_JUMP(op) (op == JUMP_ABSOLUTE || op == JUMP_FORWARD)
