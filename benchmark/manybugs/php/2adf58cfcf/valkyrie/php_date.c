@@ -18,18 +18,19 @@
 
 /* $Id$ */
 
-#include "php_date.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_math.h"
-#include "ext/standard/php_versioning.h"
-#include "lib/timelib.h"
 #include "php.h"
+#include "php_streams.h"
+#include "php_main.h"
 #include "php_globals.h"
 #include "php_ini.h"
-#include "php_main.h"
-#include "php_streams.h"
+#include "ext/standard/info.h"
+#include "ext/standard/php_versioning.h"
+#include "ext/standard/php_math.h"
+#include "php_date.h"
 #include "zend_interfaces.h"
+#include "lib/timelib.h"
 #include <time.h>
+
 
 #ifdef PHP_WIN32
 static __inline __int64 php_date_llabs(__int64 i) { return i >= 0 ? i : -i; }

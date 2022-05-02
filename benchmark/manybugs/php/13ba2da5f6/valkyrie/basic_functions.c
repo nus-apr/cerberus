@@ -19,21 +19,21 @@
 
 /* $Id$ */
 
-#include "ext/session/php_session.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_dns.h"
-#include "ext/standard/php_uuencode.h"
 #include "php.h"
-#include "php_getopt.h"
+#include "php_streams.h"
+#include "php_main.h"
 #include "php_globals.h"
+#include "php_ini.h"
+#include "php_standard.h"
+#include "php_math.h"
 #include "php_http.h"
 #include "php_incomplete_class.h"
-#include "php_ini.h"
-#include "php_main.h"
-#include "php_math.h"
-#include "php_standard.h"
-#include "php_streams.h"
+#include "php_getopt.h"
+#include "ext/standard/info.h"
+#include "ext/session/php_session.h"
 #include "zend_operators.h"
+#include "ext/standard/php_dns.h"
+#include "ext/standard/php_uuencode.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -47,16 +47,17 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "zend_language_scanner.h"
 #include <zend_language_parser.h>
 
-#include <math.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
+#include <stdio.h>
 
 #ifndef PHP_WIN32
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #endif
+
 
 #ifdef NETWARE
 #include <netinet/in.h>
@@ -102,10 +103,10 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #define INADDR_NONE ((unsigned long int)-1)
 #endif
 
-#include "SAPI.h"
-#include "php_globals.h"
-#include "php_ticks.h"
 #include "zend_globals.h"
+#include "php_globals.h"
+#include "SAPI.h"
+#include "php_ticks.h"
 
 #ifdef ZTS
 PHPAPI int basic_globals_id;

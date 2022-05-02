@@ -27,29 +27,29 @@
 
 /* {{{ includes */
 
-#include "ext/standard/basic_functions.h"
-#include "ext/standard/exec.h"
-#include "ext/standard/flock_compat.h"
-#include "ext/standard/php_filestat.h"
 #include "php.h"
 #include "php_globals.h"
-#include "php_ini.h"
+#include "ext/standard/flock_compat.h"
+#include "ext/standard/exec.h"
+#include "ext/standard/php_filestat.h"
 #include "php_open_temporary_file.h"
+#include "ext/standard/basic_functions.h"
+#include "php_ini.h"
 #include "php_smart_str.h"
 
-#include <errno.h>
-#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <sys/stat.h>
+#include <errno.h>
 #include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 #ifdef PHP_WIN32
 #include <io.h>
 #define O_RDONLY _O_RDONLY
-#include "win32/fnmatch.h"
 #include "win32/param.h"
 #include "win32/winutil.h"
+#include "win32/fnmatch.h"
 #else
 #if HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -60,9 +60,9 @@
 #if defined(NETWARE) && defined(USE_WINSOCK)
 #include <novsock2.h>
 #else
-#include <netdb.h>
-#include <netinet/in.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
@@ -70,8 +70,8 @@
 #endif
 
 #include "ext/standard/head.h"
-#include "file.h"
 #include "php_string.h"
+#include "file.h"
 
 #if HAVE_PWD_H
 #ifdef PHP_WIN32
@@ -81,14 +81,15 @@
 #endif
 #endif
 
+
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
-#include "fopen_wrappers.h"
 #include "fsock.h"
-#include "php_globals.h"
+#include "fopen_wrappers.h"
 #include "streamsfuncs.h"
+#include "php_globals.h"
 
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>

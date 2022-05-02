@@ -19,10 +19,10 @@
 
 /* $Id$ */
 
-#include "ext/standard/file.h"
-#include "ext/standard/flock_compat.h"
 #include "php.h"
 #include "php_globals.h"
+#include "ext/standard/file.h"
+#include "ext/standard/flock_compat.h"
 #ifdef HAVE_SYS_FILE_H
 #include <sys/file.h>
 #endif

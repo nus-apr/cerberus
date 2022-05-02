@@ -19,27 +19,27 @@
 /* $Id$ */
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif
 
-#include "ext/standard/file.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_string.h"
 #include "php.h"
 #include "php_ini.h"
+#include "ext/standard/info.h"
+#include "ext/standard/file.h"
+#include "ext/standard/php_string.h"
 #include "zend_compile.h"
 #include "zend_exceptions.h"
 #include "zend_interfaces.h"
 
 #include "php_spl.h"
-#include "spl_directory.h"
-#include "spl_engine.h"
-#include "spl_exceptions.h"
 #include "spl_functions.h"
+#include "spl_engine.h"
 #include "spl_iterators.h"
+#include "spl_directory.h"
+#include "spl_exceptions.h"
 
-#include "fopen_wrappers.h"
 #include "php.h"
+#include "fopen_wrappers.h"
 
 #include "ext/standard/basic_functions.h"
 #include "ext/standard/php_filestat.h"
