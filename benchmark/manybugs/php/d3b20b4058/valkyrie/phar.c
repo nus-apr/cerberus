@@ -369,7 +369,7 @@ static int phar_tmpclose_apply(void *pDest TSRMLS_DC) /* {{{ */
 
 /**
  * Filename map destructor
- /* jump:374 */ */
+ */
 static void destroy_phar_data(void *pDest) /* {{{ */
 {
   phar_archive_data *phar_data = *(phar_archive_data **)pDest;
@@ -377,7 +377,7 @@ static void destroy_phar_data(void *pDest) /* {{{ */
 
   if (PHAR_GLOBALS->request_ends) {
     /* first, iterate over the manifest and close all PHAR_TMP entry fp handles,
- /* jump:383 */    this prevents unnecessary unfreed stream resources */
+    this prevents unnecessary unfreed stream resources */
     zend_hash_apply(&(phar_data->manifest), phar_tmpclose_apply TSRMLS_CC);
     destroy_phar_data_only(pDest);
     return;
@@ -458,9 +458,8 @@ int phar_entry_delref(phar_entry_data *idata TSRMLS_DC) /* {{{ */
  /* jump:460 */        idata->fp != idata->internal_file->fp) {
       php_stream_close(idata->fp);
     }
- /* jump:465 */    /* if phar_get_or_create_entry_data returns a sub-directory, we have to free
- /* jump:464 */     * it */
-    if (idata->internal_file->is_temp_dir) {
+    /* if phar_get_or_create_entry_data returns a sub-directory, we have to free    * it */
+   /* jump:465 */  if (idata->internal_file->is_temp_dir) {
       destroy_phar_manifest_entry((void *)idata->internal_file);
       efree(idata->internal_file);
     }
@@ -3672,13 +3671,14 @@ static size_t phar_zend_stream_reader(void *handle, char *buf,
   return php_stream_read(phar_get_pharfp((phar_archive_data *)handle TSRMLS_CC),
                          buf, len);
 }
-/* }}} */
+
 
 #if PHP_VERSION_ID >= 50300
 static size_t phar_zend_stream_fsizer(void *handle TSRMLS_DC) /* {{{ */
 {
   return ((phar_archive_data *)handle)->halt_offset + 32;
-} /* }}} */
+}
+
 
 #else /* PHP_VERSION_ID */
 
