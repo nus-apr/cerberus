@@ -29,7 +29,6 @@
 #include "zend_llist.h"
 #include "zend_multibyte.h"
 #include <zend_language_parser.h>
- /* jump:34 */
 #define CONSTANT_EX(op_array, op) (op_array)->literals[op].constant
 
 #define CONSTANT(op) CONSTANT_EX(CG(active_op_array), op)
@@ -37,9 +36,9 @@
 #define SET_NODE(target, src)                                                  \
   do {                                                                         \
     target##_type = (src)->op_type;                                            \
-    if ((src)->op_type == IS_CONST) {                                          \
+  /* jump:42 */    if ((src)->op_type == IS_CONST) {                                          \
       target.constant =                                                        \
- /* jump:44 */          zend_add_literal(CG(active_op_array), &(src)->u.constant TSRMLS_CC); \
+         zend_add_literal(CG(active_op_array), &(src)->u.constant TSRMLS_CC); \
     } else {                                                                   \
       target = (src)->u.op;                                                    \
     }                                                                          \
@@ -76,13 +75,13 @@
   do {                                                                         \
     CG(active_op_array)->literals[literal].cache_slot =                        \
         CG(active_op_array)->last_cache_slot++;                                \
-    if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) &&              \
+   /* jump:85 */  if ((CG(active_op_array)->fn_flags & ZEND_ACC_INTERACTIVE) &&              \
         CG(active_op_array)->run_time_cache) {                                 \
       CG(active_op_array)->run_time_cache =                                    \
- /* jump:90 */          erealloc(CG(active_op_array)->run_time_cache,                        \
+          erealloc(CG(active_op_array)->run_time_cache,                        \
                    CG(active_op_array)->last_cache_slot * sizeof(void *));     \
       CG(active_op_array)                                                      \
- /* jump:89 */          ->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL;   \
+         ->run_time_cache[CG(active_op_array)->last_cache_slot - 1] = NULL;   \
     }                                                                          \
   } while (0)
 

@@ -19,10 +19,10 @@
 
 /* $Id$ */
 
-#include "ext/pcre/php_pcre.h"
-#include "ext/standard/url.h"
-#include "filter_private.h"
 #include "php_filter.h"
+#include "filter_private.h"
+#include "ext/standard/url.h"
+#include "ext/pcre/php_pcre.h"
 
 #include "zend_multiply.h"
 
