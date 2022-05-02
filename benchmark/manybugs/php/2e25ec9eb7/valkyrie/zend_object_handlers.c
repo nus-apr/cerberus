@@ -19,17 +19,17 @@
 
 /* $Id$ */
 
-#include "zend_object_handlers.h"
 #include "zend.h"
-#include "zend_API.h"
-#include "zend_closures.h"
-#include "zend_compile.h"
 #include "zend_globals.h"
-#include "zend_interfaces.h"
+#include "zend_variables.h"
+#include "zend_API.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
-#include "zend_variables.h"
- /* jump:34 */
+#include "zend_object_handlers.h"
+#include "zend_interfaces.h"
+#include "zend_closures.h"
+#include "zend_compile.h"
+
 #define DEBUG_OBJECT_HANDLERS 0
 
 #define Z_OBJ_P(zval_p)                                                        \

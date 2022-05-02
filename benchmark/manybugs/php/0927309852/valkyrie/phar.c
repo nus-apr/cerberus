@@ -20,9 +20,9 @@
 /* $Id$ */
 
 #define PHAR_MAIN 1
+#include "phar_internal.h"
 #include "SAPI.h"
 #include "func_interceptors.h"
-#include "phar_internal.h"
 
 static void destroy_phar_data(void *pDest);
 

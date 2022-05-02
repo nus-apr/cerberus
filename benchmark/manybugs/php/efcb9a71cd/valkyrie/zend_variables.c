@@ -209,7 +209,7 @@ ZEND_API int zval_copy_static_var(zval **p TSRMLS_DC, int num_args,
 /*
  * Local variables:
  * tab-width: 4
- /* jump:214 */ * c-basic-offset: 4
+ * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
  */
