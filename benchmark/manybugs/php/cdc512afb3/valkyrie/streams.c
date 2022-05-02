@@ -22,16 +22,16 @@
 /* $Id$ */
 
 #define _GNU_SOURCE
-#include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
-#include "ext/standard/file.h"
-#include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include "php.h"
 #include "php_globals.h"
 #include "php_network.h"
 #include "php_open_temporary_file.h"
-#include "php_streams_int.h"
-#include <fcntl.h>
+#include "ext/standard/file.h"
+#include "ext/standard/basic_functions.h" /* for BG(mmap_file) (not strictly required) */
+#include "ext/standard/php_string.h" /* for php_memnstr, used by php_stream_get_record() */
 #include <stddef.h>
+#include <fcntl.h>
+#include "php_streams_int.h"
 
 /* {{{ resource and registration code */
 /* Global wrapper hash, copied to FG(stream_wrappers) on registration of
