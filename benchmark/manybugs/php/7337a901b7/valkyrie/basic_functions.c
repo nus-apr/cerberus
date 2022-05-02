@@ -16,24 +16,23 @@
    |          Zeev Suraski <zeev@zend.com>                                |
    +----------------------------------------------------------------------+
  */
-
 /* $Id$ */
 
-#include "ext/session/php_session.h"
-#include "ext/standard/info.h"
-#include "ext/standard/php_dns.h"
-#include "ext/standard/php_uuencode.h"
 #include "php.h"
-#include "php_getopt.h"
+#include "php_streams.h"
+#include "php_main.h"
 #include "php_globals.h"
+#include "php_ini.h"
+#include "php_standard.h"
+#include "php_math.h"
 #include "php_http.h"
 #include "php_incomplete_class.h"
-#include "php_ini.h"
-#include "php_main.h"
-#include "php_math.h"
-#include "php_standard.h"
-#include "php_streams.h"
+#include "php_getopt.h"
+#include "ext/standard/info.h"
+#include "ext/session/php_session.h"
 #include "zend_operators.h"
+#include "ext/standard/php_dns.h"
+#include "ext/standard/php_uuencode.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -47,15 +46,15 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include "zend_language_scanner.h"
 #include <zend_language_parser.h>
 
-#include <math.h>
 #include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <time.h>
+#include <stdio.h>
 
 #ifndef PHP_WIN32
-#include <sys/stat.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 #endif
 
 #ifdef NETWARE
@@ -63,49 +62,49 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
 #ifndef PHP_WIN32
-#include <netdb.h>
+# include <netdb.h>
 #else
 #include "win32/inet.h"
 #endif
 
 #if HAVE_ARPA_INET_H
-#include <arpa/inet.h>
+# include <arpa/inet.h>
 #endif
 
 #if HAVE_UNISTD_H
-#include <unistd.h>
+# include <unistd.h>
 #endif
 
 #if HAVE_STRING_H
-#include <string.h>
+# include <string.h>
 #else
-#include <strings.h>
+# include <strings.h>
 #endif
 
 #if HAVE_LOCALE_H
-#include <locale.h>
+# include <locale.h>
 #endif
 
 #if HAVE_SYS_MMAN_H
-#include <sys/mman.h>
+# include <sys/mman.h>
 #endif
 
 #if HAVE_SYS_LOADAVG_H
-#include <sys/loadavg.h>
+# include <sys/loadavg.h>
 #endif
 
 #ifdef PHP_WIN32
-#include "win32/unistd.h"
+# include "win32/unistd.h"
 #endif
 
 #ifndef INADDR_NONE
 #define INADDR_NONE ((unsigned long int)-1)
 #endif
 
-#include "SAPI.h"
-#include "php_globals.h"
-#include "php_ticks.h"
 #include "zend_globals.h"
+#include "php_globals.h"
+#include "SAPI.h"
+#include "php_ticks.h"
 
 #ifdef ZTS
 PHPAPI int basic_globals_id;
