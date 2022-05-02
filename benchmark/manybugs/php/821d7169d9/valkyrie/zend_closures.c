@@ -20,16 +20,16 @@
 
 /* $Id$ */
 
-#include "zend_closures.h"
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_closures.h"
 #include "zend_exceptions.h"
-#include "zend_globals.h"
 #include "zend_interfaces.h"
 #include "zend_objects.h"
 #include "zend_objects_API.h"
+#include "zend_globals.h"
 
- /* jump:34 */#define ZEND_CLOSURE_PRINT_NAME "Closure object"
+#define ZEND_CLOSURE_PRINT_NAME "Closure object"
 
 #define ZEND_CLOSURE_PROPERTY_ERROR()                                          \
   zend_error(E_RECOVERABLE_ERROR, "Closure object cannot have properties")
@@ -39,7 +39,7 @@ typedef struct _zend_closure {
   zend_function func;
   zval *this_ptr;
   HashTable *debug_info;
- /* jump:44 */} zend_closure;
+} zend_closure;
 
 /* non-static since it needs to be referenced */
 ZEND_API zend_class_entry *zend_ce_closure;

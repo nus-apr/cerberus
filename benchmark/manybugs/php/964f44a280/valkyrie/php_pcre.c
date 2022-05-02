@@ -18,12 +18,12 @@
 
 /* $Id$ */
 
+#include "php.h"
+#include "php_ini.h"
+#include "php_globals.h"
 #include "php_pcre.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_smart_str.h"
-#include "php.h"
-#include "php_globals.h"
-#include "php_ini.h"
 
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 

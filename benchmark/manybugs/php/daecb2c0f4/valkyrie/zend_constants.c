@@ -19,12 +19,12 @@
 
 /* $Id$ */
 
-#include "zend_constants.h"
 #include "zend.h"
+#include "zend_constants.h"
 #include "zend_execute.h"
-#include "zend_globals.h"
-#include "zend_operators.h"
 #include "zend_variables.h"
+#include "zend_operators.h"
+#include "zend_globals.h"
 
 void free_zend_constant(zend_constant *c) {
  /* jump:32 */  if (!(c->flags & CONST_PERSISTENT)) {
