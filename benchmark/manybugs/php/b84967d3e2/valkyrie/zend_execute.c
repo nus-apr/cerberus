@@ -38,7 +38,6 @@
 #include "zend_vm.h"
 #include "zend_dtrace.h"
 
-
 /* Virtual current working directory support */
  /* jump:44 */#include "tsrm_virtual_cwd.h"
 

@@ -31,7 +31,6 @@
 #include "lib/timelib.h"
 #include <time.h>
 
-
 #ifdef PHP_WIN32
 static __inline __int64 php_date_llabs(__int64 i) { return i >= 0 ? i : -i; }
 #elif defined(__GNUC__) && __GNUC__ < 3
