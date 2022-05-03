@@ -8,7 +8,7 @@ import traceback
 import signal
 import time
 from app import emitter, logger, definitions, values, utilities, configuration, parallel, valkyrie
-from app.benchmarks import AbstractBenchmark
+from multiprocessing import get_context, set_start_method
 from app.tools import AbstractTool
 from os.path import dirname, abspath
 import ctypes
@@ -449,6 +449,7 @@ def main():
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
+    set_start_method("spawn")
     start_time = time.time()
     create_directories()
     logger.create()

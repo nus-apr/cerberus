@@ -16,7 +16,7 @@ def mute():
     sys.stderr = open(os.devnull, 'w')
 
 
-max_process_count = 1
+max_process_count = mp.cpu_count()
 validator_pool = None
 exit_consume = 0
 consume_count = 0
@@ -28,7 +28,6 @@ total_timeout = 0
 
 def initialize():
     global validator_pool, exit_consume, consume_count, len_gen, len_processed, total_timeout, result_list
-    set_start_method("spawn")
     if values.DEFAULT_USE_VTHREADS:
         validator_pool = mp.Pool(max_process_count, initializer=mute)
     exit_consume = 0
