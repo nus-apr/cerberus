@@ -19,9 +19,9 @@ License for more details.
 You should have received a copy of the GNU Lesser General Public License
 along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 
-#include "gmp-impl.h"
-#include "gmp.h"
 #include <stdio.h> /* for NULL */
+#include "gmp.h"
+#include "gmp-impl.h"
 
 void mpz_gcdext(mpz_ptr g, mpz_ptr s, mpz_ptr t, mpz_srcptr a, mpz_srcptr b) {
   mp_size_t asize, bsize;
