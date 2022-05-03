@@ -277,7 +277,7 @@
                 Set page width to PAGE_WIDTH characters for multiple
                 text-column output only (default for PAGE_WIDTH is 72). -s[CHAR] turns off the default page width and any line                truncation. Lines of full length will be merged,
                 regardless of the column options set. A POSIX compliant
- /* jump:285 */                formulation.
+                formulation.
 
    -W PAGE_WIDTH, --page-width=PAGE_WIDTH
                 Set the page width to PAGE_WIDTH characters. That's valid
@@ -300,7 +300,6 @@
 */
 
 #include <config.h>
- /* jump:307 */
 #include "die.h"
 #include "error.h"
 #include "fadvise.h"
@@ -737,7 +736,7 @@ static struct option const long_options[] = {
     {"length", required_argument, NULL, 'l'},
     {"merge", no_argument, NULL, 'm'},
     {"number-lines", optional_argument, NULL, 'n'},
- /* jump:741 */    {"first-line-number", required_argument, NULL, 'N'},
+    {"first-line-number", required_argument, NULL, 'N'},
     {"indent", required_argument, NULL, 'o'},
     {"no-file-warnings", no_argument, NULL, 'r'},
     {"separator", optional_argument, NULL, 's'},
