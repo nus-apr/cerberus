@@ -300,6 +300,10 @@
 */
 
 #include <config.h>
+
+#include <getopt.h>
+#include <sys/types.h>
+#include "system.h"
 #include "die.h"
 #include "error.h"
 #include "fadvise.h"
@@ -309,11 +313,8 @@
 #include "stat-time.h"
 #include "stdio--.h"
 #include "strftime.h"
-#include "system.h"
-#include "xdectoint.h"
 #include "xstrtol.h"
-#include <getopt.h>
-#include <sys/types.h>
+#include "xdectoint.h"
 
 /* The official name of this program (e.g., no 'g' prefix).  */
 #define PROGRAM_NAME "pr"
