@@ -126,6 +126,7 @@ class Darjeeling(AbstractTool):
         time_validation = 0
         time_latency_1 = 0
         time_latency_2 = 0
+        time_latency_3 = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -136,13 +137,14 @@ class Darjeeling(AbstractTool):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (
             size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-            time_info = (time_build, time_validation, time_duration, 0, 0, "")
+            time_info = (time_build, time_validation, time_duration, 0, 0,0, "")
             return patch_space_info, time_info
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_interrupted = False
         time_stamp_first_plausible = None
         time_stamp_first_validation = None
+        time_stamp_first_compilation = None
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_stamp_start = log_lines[0].replace("\n", "")
@@ -163,6 +165,8 @@ class Darjeeling(AbstractTool):
                 elif "build time: " in line:
                     time = line.split("build time: ")[-1].strip().replace("\n", "")
                     time_build += float(time)
+                    if time_stamp_first_compilation is None:
+                        time_stamp_first_compilation = line.split(" | ")[0]
                 elif "possible edits" in line:
                     size_search_space = line.split(": ")[2].split(" ")[0]
                 elif "plausible patches" in line:
@@ -172,6 +176,8 @@ class Darjeeling(AbstractTool):
             time_latency_1 = self.compute_latency_tool(time_stamp_start, time_stamp_first_plausible)
         if time_stamp_first_validation:
             time_latency_2 = self.compute_latency_tool(time_stamp_start, time_stamp_first_validation)
+        if time_stamp_first_compilation:
+            time_latency_3 = self.compute_latency_tool(time_stamp_start, time_stamp_first_compilation)
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_interrupted:
@@ -202,6 +208,7 @@ class Darjeeling(AbstractTool):
                 log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
                 log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1,
+                     time_latency_2, time_latency_3, time_stamp_start)
         return patch_space_info, time_info
 
