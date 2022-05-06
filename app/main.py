@@ -435,7 +435,8 @@ def initialize():
     if values.CONF_TOOL_LIST:
         for tool_name in values.CONF_TOOL_LIST:
             tool = configuration.load_tool(tool_name)
-            tool.check_tool_exists()
+            if not values.DEFAULT_ANALYSE_ONLY:
+                tool.check_tool_exists()
             tool_list.append(tool)
     elif values.CONF_TOOL_NAME:
         tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
