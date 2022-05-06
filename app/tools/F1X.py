@@ -257,6 +257,7 @@ class F1X(AbstractTool):
         time_validation = 0
         time_latency_1 = 0
         time_latency_2 = 0
+        time_latency_3 = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -266,13 +267,14 @@ class F1X(AbstractTool):
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-            time_info = (time_build, time_validation, time_duration, 0, 0, "")
+            time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
             return patch_space_info, time_info
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         time_stamp_first_plausible = None
         time_stamp_first_validated = None
+
         if os.path.isdir(os.path.dirname(self.log_output_path)):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
@@ -342,5 +344,6 @@ class F1X(AbstractTool):
                 log_file.write("\t\t time latency 2: {0} seconds\n".format(time_latency_2))
             log_file.close()
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1,
+                     time_latency_2, time_latency_3, time_stamp_start)
         return patch_space_info, time_info
