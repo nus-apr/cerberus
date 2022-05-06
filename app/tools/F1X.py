@@ -255,7 +255,8 @@ class F1X(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
-        time_latency = 0
+        time_latency_1 = 0
+        time_latency_2 = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -265,12 +266,13 @@ class F1X(AbstractTool):
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-            time_info = (time_build, time_validation, time_duration, time_latency, "")
+            time_info = (time_build, time_validation, time_duration, 0, 0, "")
             return patch_space_info, time_info
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
-        time_stamp_first = None
+        time_stamp_first_plausible = None
+        time_stamp_first_validated = None
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_stamp_start = log_lines[0].replace("\n", "")
@@ -296,12 +298,17 @@ class F1X(AbstractTool):
                 elif "failed to infer compile commands" in line:
                     size_search_space = -1
                 elif "PASS" in line and "[debug]" in line:
-                    if time_stamp_first is None:
-                        time_stamp_first = line.split("[debug]")[0].replace("[", "").replace("]", "")
+                    if time_stamp_first_plausible is None:
+                        time_stamp_first_plausible = line.split("[debug]")[0].replace("[", "").replace("]", "")
+                elif "explored count: 1" in line:
+                    if time_stamp_first_validated is None:
+                        time_stamp_first_validated = line.split("[debug]")[0].replace("[", "").replace("]", "")
             log_file.close()
 
-        if time_stamp_first:
-            time_latency = self.compute_latency_tool(time_stamp_start, time_stamp_first)
+        if time_stamp_first_plausible:
+            time_latency_1 = self.compute_latency_tool(time_stamp_start, time_stamp_first_plausible)
+        if time_stamp_first_validated:
+            time_latency_2 = self.compute_latency_tool(time_stamp_start, time_stamp_first_validated)
 
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
@@ -328,7 +335,8 @@ class F1X(AbstractTool):
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-            log_file.write("\t\t time latency: {0} seconds\n".format(time_latency))
+            log_file.write("\t\t time latency 1: {0} seconds\n".format(time_latency_1))
+            log_file.write("\t\t time latency 2: {0} seconds\n".format(time_latency_2))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
         return patch_space_info, time_info
