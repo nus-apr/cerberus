@@ -308,7 +308,8 @@ class Prophet(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
-        time_latency = 0
+        time_latency_1 = 0
+        time_latency_2 = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (
@@ -341,9 +342,12 @@ class Prophet(AbstractTool):
                         time = line.split("build time: ")[-1].strip().replace("\n", "")
                         time_build += float(time)
                     elif "Passed!" in line:
-                        if time_latency == 0:
-                            time_latency = int(line.replace("[", "").replace("] Passed!", " ").strip())
+                        if time_latency_1 == 0:
+                            time_latency_1 = int(line.replace("[", "").replace("] Passed!", " ").strip())
                         count_plausible += 1
+                    elif "Testing" in line:
+                        if time_latency_2 == 0:
+                            time_latency_2 = int(line.split("] ")[0].replace("[", "").strip())
                 log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
@@ -368,8 +372,10 @@ class Prophet(AbstractTool):
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time build: {0} seconds\n".format(time_build))
             log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
+            log_file.write("\t\t time latency validation: {0} seconds\n".format(time_latency_2))
+            log_file.write("\t\t time latency plausible: {0} seconds\n".format(time_latency_1))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
         return patch_space_info, time_info
 
