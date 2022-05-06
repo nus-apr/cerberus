@@ -273,37 +273,38 @@ class F1X(AbstractTool):
         is_error = False
         time_stamp_first_plausible = None
         time_stamp_first_validated = None
-        with open(self.log_output_path, "r") as log_file:
-            log_lines = log_file.readlines()
-            time_stamp_start = log_lines[0].replace("\n", "")
-            time_stamp_end = log_lines[-1].replace("\n", "")
-            time_duration = self.time_duration(time_stamp_start, time_stamp_end)
-            for line in log_lines:
-                if "candidates evaluated: " in line:
-                    count = line.split("candidates evaluated: ")[-1].strip().replace("\n", "")
-                    if str(count).isnumeric():
-                        count_enumerations = int(count)
-                elif "validation time: " in line:
-                    time = line.split("validation time: ")[-1].strip().replace("\n", "")
-                    time_validation += float(time)
-                elif "build time: " in line:
-                    time = line.split("build time: ")[-1].strip().replace("\n", "")
-                    time_build += float(time)
-                elif "validating patch " in line:
-                    count_enumerations += 1
-                elif "search space size: " in line:
-                    size_search_space = int(line.split("search space size: ")[-1])
-                elif "plausible patches: " in line:
-                    count_plausible = int(line.split("plausible patches: ")[-1])
-                elif "failed to infer compile commands" in line:
-                    size_search_space = -1
-                elif "PASS" in line and "[debug]" in line:
-                    if time_stamp_first_plausible is None:
-                        time_stamp_first_plausible = line.split("[debug]")[0].replace("[", "").replace("]", "")
-                elif "explored count: 1" in line:
-                    if time_stamp_first_validated is None:
-                        time_stamp_first_validated = line.split("[debug]")[0].replace("[", "").replace("]", "")
-            log_file.close()
+        if os.path.isdir(os.path.dirname(self.log_output_path)):
+            with open(self.log_output_path, "r") as log_file:
+                log_lines = log_file.readlines()
+                time_stamp_start = log_lines[0].replace("\n", "")
+                time_stamp_end = log_lines[-1].replace("\n", "")
+                time_duration = self.time_duration(time_stamp_start, time_stamp_end)
+                for line in log_lines:
+                    if "candidates evaluated: " in line:
+                        count = line.split("candidates evaluated: ")[-1].strip().replace("\n", "")
+                        if str(count).isnumeric():
+                            count_enumerations = int(count)
+                    elif "validation time: " in line:
+                        time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                        time_validation += float(time)
+                    elif "build time: " in line:
+                        time = line.split("build time: ")[-1].strip().replace("\n", "")
+                        time_build += float(time)
+                    elif "validating patch " in line:
+                        count_enumerations += 1
+                    elif "search space size: " in line:
+                        size_search_space = int(line.split("search space size: ")[-1])
+                    elif "plausible patches: " in line:
+                        count_plausible = int(line.split("plausible patches: ")[-1])
+                    elif "failed to infer compile commands" in line:
+                        size_search_space = -1
+                    elif "PASS" in line and "[debug]" in line:
+                        if time_stamp_first_plausible is None:
+                            time_stamp_first_plausible = line.split("[debug]")[0].replace("[", "").replace("]", "")
+                    elif "explored count: 1" in line:
+                        if time_stamp_first_validated is None:
+                            time_stamp_first_validated = line.split("[debug]")[0].replace("[", "").replace("]", "")
+                log_file.close()
 
         if time_stamp_first_plausible:
             time_latency_1 = self.compute_latency_tool(time_stamp_start, time_stamp_first_plausible)
