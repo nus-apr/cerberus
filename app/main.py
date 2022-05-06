@@ -262,6 +262,9 @@ def save_artifacts(dir_info, experiment_info, tool: AbstractTool, container_id):
         os.system("mkdir -p {}".format(dir_results))
     tool.save_artefacts(dir_info, experiment_info, container_id)
     tool.post_process(dir_expr, dir_artifacts, container_id)
+    save_command = "cp -f " + definitions.FILE_MAIN_LOG + " " + dir_results + ";"
+    save_command += "cp -f " + definitions.FILE_ERROR_LOG + "/* " + dir_results
+    utilities.execute_command(save_command)
 
 
 def show_dev_patch(dir_diff):
