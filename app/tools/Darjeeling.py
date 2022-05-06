@@ -124,7 +124,8 @@ class Darjeeling(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
-        time_latency = 0
+        time_latency_1 = 0
+        time_latency_2 = 0
         regex = re.compile('(.*-output.log$)')
         for root, dirs, files in os.walk(dir_results):
             for file in files:
@@ -135,12 +136,13 @@ class Darjeeling(AbstractTool):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (
             size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-            time_info = (time_build, time_validation, time_duration, time_latency, "")
+            time_info = (time_build, time_validation, time_duration, 0, 0, "")
             return patch_space_info, time_info
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_interrupted = False
-        time_stamp_first = None
+        time_stamp_first_plausible = None
+        time_stamp_first_validation = None
         with open(self.log_output_path, "r") as log_file:
             log_lines = log_file.readlines()
             time_stamp_start = log_lines[0].replace("\n", "")
@@ -149,10 +151,12 @@ class Darjeeling(AbstractTool):
             for line in log_lines:
                 if "evaluated candidate" in line:
                     count_enumerations += 1
+                    if time_stamp_first_validation is None:
+                        time_stamp_first_validation = line.split(" | ")[0]
                 elif "found plausible patch" in line:
                     count_plausible += 1
-                    if time_stamp_first is None:
-                        time_stamp_first = line.split(" | ")[0]
+                    if time_stamp_first_plausible is None:
+                        time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
                     time_validation += float(time)
@@ -164,8 +168,10 @@ class Darjeeling(AbstractTool):
                 elif "plausible patches" in line:
                     count_plausible = int(line.split("found ")[-1].replace(" plausible patches", ""))
             log_file.close()
-        if time_stamp_first:
-            time_latency = self.compute_latency_tool(time_stamp_start, time_stamp_first)
+        if time_stamp_first_plausible:
+            time_latency_1 = self.compute_latency_tool(time_stamp_start, time_stamp_first_plausible)
+        if time_stamp_first_validation:
+            time_latency_2 = self.compute_latency_tool(time_stamp_start, time_stamp_first_validation)
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_interrupted:
@@ -181,19 +187,21 @@ class Darjeeling(AbstractTool):
                 output_patch_list = [f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))]
                 count_generated = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
-        with open(self.log_analysis_path, 'w') as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-            log_file.write("\t\t count generated patches: {0}\n".format(count_generated))
-            log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-            log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time latency: {0} seconds\n".format(time_latency))
-            log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-            log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
+        if os.path.isdir(os.path.dirname(self.log_analysis_path)):
+            with open(self.log_analysis_path, 'w') as log_file:
+                log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+                log_file.write("\t\t count generated patches: {0}\n".format(count_generated))
+                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+                log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+                log_file.write("\t\t any errors: {0}\n".format(is_error))
+                log_file.write("\t\t time latency validation: {0} seconds\n".format(time_latency_2))
+                log_file.write("\t\t time latency plausible: {0} seconds\n".format(time_latency_1))
+                log_file.write("\t\t time build: {0} seconds\n".format(time_build))
+                log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
+                log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
         return patch_space_info, time_info
 
