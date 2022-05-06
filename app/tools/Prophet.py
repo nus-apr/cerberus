@@ -327,7 +327,7 @@ class Prophet(AbstractTool):
                 time_stamp_end = log_lines[-1].replace("\n", "")
                 time_duration = self.time_duration(time_stamp_start, time_stamp_end)
                 for line in log_lines:
-                    if "[" in line and "]" in line:
+                    if "[" == line[0] and "]" in line:
                         timeline = int(line.split("] ")[0].replace("[", "").strip())
                     if "number of explored templates:" in line:
                         count_enumerations = int(line.split("number of explored templates: ")[-1])
