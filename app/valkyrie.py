@@ -80,6 +80,7 @@ def analyse_output(patch_dir, time_stamp_start):
     len_dir_error = 0
     len_dir_ranked = 0
     time_first_patch = datetime.now().timestamp()
+    time_first_validation = datetime.now().timestamp()
 
     if dir_valid and os.path.isdir(dir_valid):
         len_dir_valid = len(os.listdir(dir_valid))
@@ -96,8 +97,20 @@ def analyse_output(patch_dir, time_stamp_start):
             modified_time = os.lstat(output_patch).st_mtime
             if modified_time < time_first_patch:
                 time_first_patch = modified_time
-    time_latency = compute_latency_valkyrie(time_stamp_start, time_first_patch)
-    emitter.highlight("\t\t\t time latency: {0} seconds".format(time_latency))
+
+    time_first_validation = time_first_patch
+    if dir_invalid and os.path.isdir(dir_invalid):
+        output_patch_list = [join(dir_invalid, f) for f in listdir(dir_invalid) if isfile(join(dir_invalid, f))]
+        for output_patch in output_patch_list:
+            modified_time = os.lstat(output_patch).st_mtime
+            if modified_time < time_first_validation:
+                time_first_validation = modified_time
+
+    time_latency_1 = compute_latency_valkyrie(time_stamp_start, time_first_patch)
+    time_latency_2 = compute_latency_valkyrie(time_stamp_start, time_first_validation)
+
+    emitter.highlight("\t\t\t time latency validation: {0} seconds".format(time_latency_2))
+    emitter.highlight("\t\t\t time latency plausible: {0} seconds".format(time_latency_1))
     emitter.highlight("\t\t\t count consumed: {0}".format(consumed_count))
     emitter.highlight("\t\t\t count processed: {0}".format(processed_count))
     emitter.highlight("\t\t\t count valid patches: {0}".format(len_dir_valid))
