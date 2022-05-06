@@ -298,12 +298,13 @@ class F1X(AbstractTool):
                         count_plausible = int(line.split("plausible patches: ")[-1])
                     elif "failed to infer compile commands" in line:
                         size_search_space = -1
+                    elif "explored count: 1" in line:
+                        if time_stamp_first_validated is None:
+                            time_stamp_first_validated = line.split("[info]")[0].replace("[", "").replace("]", "")
                     elif "PASS" in line and "[debug]" in line:
                         if time_stamp_first_plausible is None:
                             time_stamp_first_plausible = line.split("[debug]")[0].replace("[", "").replace("]", "")
-                    elif "explored count: 1" in line:
-                        if time_stamp_first_validated is None:
-                            time_stamp_first_validated = line.split("[debug]")[0].replace("[", "").replace("]", "")
+
                 log_file.close()
 
         if time_stamp_first_plausible:
@@ -324,20 +325,22 @@ class F1X(AbstractTool):
                 count_plausible = len(output_patch_list)
             count_generated = count_plausible
         count_implausible = (size_search_space - count_plausible) + (count_enumerations - count_generated)
-        with open(self.log_analysis_path, 'w') as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if not values.DEFAULT_DUMP_PATCHES:
-                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t count generated: {0}\n".format(count_generated))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-            log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-            log_file.write("\t\t time latency 1: {0} seconds\n".format(time_latency_1))
-            log_file.write("\t\t time latency 2: {0} seconds\n".format(time_latency_2))
+        if os.path.isdir(os.path.dirname(self.log_analysis_path)):
+            with open(self.log_analysis_path, 'w') as log_file:
+                log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+                if not values.DEFAULT_DUMP_PATCHES:
+                    log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+                    log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
+                    log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+                log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
+                log_file.write("\t\t count generated: {0}\n".format(count_generated))
+                log_file.write("\t\t any errors: {0}\n".format(is_error))
+                log_file.write("\t\t time build: {0} seconds\n".format(time_build))
+                log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
+                log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
+                log_file.write("\t\t time latency 1: {0} seconds\n".format(time_latency_1))
+                log_file.write("\t\t time latency 2: {0} seconds\n".format(time_latency_2))
+            log_file.close()
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
         time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
         return patch_space_info, time_info
