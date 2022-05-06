@@ -115,7 +115,7 @@ def warning(message):
 def analysis(exp_id):
     space_info, time_info = values.ANALYSIS_RESULTS[exp_id]
     size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
-    time_build, time_validation, time_duration, time_latency, _ = time_info
+    time_build, time_validation, time_duration, latency_1, latency_2, _ = time_info
     n_implausible = n_enumerated - n_plausible - n_noncompile
     with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
         log_file.write("\n" + exp_id + "\n")
@@ -128,6 +128,8 @@ def analysis(exp_id):
         log_file.write("\t\t time build: {0} seconds\n".format(time_build))
         log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
         log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
+        log_file.write("\t\t latency validation: {0} seconds\n".format(latency_2))
+        log_file.write("\t\t latency plausible: {0} seconds\n".format(latency_1))
 
 
 

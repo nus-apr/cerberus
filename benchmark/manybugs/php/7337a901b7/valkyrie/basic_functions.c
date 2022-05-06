@@ -123,12 +123,10 @@ typedef struct _user_tick_function_entry {
   int calling;
 } user_tick_function_entry;
 
- /* jump:132 *//* some prototypes for local functions */
- /* jump:130 */static void user_shutdown_function_dtor(
-    php_shutdown_function_entry *shutdown_function_entry);
-static void
-user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
- /* jump:148 */ static HashTable basic_submodules; #undef sprintf /* {
+/* some prototypes for local functions */
+static void user_shutdown_function_dtor( php_shutdown_function_entry *shutdown_function_entry);
+static void user_tick_function_dtor(user_tick_function_entry *tick_function_entry);
+static HashTable basic_submodules; #undef sprintf /* {
 	 {
 	 {
 	  arginfo *//* {{{ main/main.c */
@@ -156,7 +154,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ob_clean, 0)
 ZEND_END_ARG_INFO()
 
- /* jump:162 */ZEND_BEGIN_ARG_INFO(arginfo_ob_end_flush, 0)
+ZEND_BEGIN_ARG_INFO(arginfo_ob_end_flush, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_ob_end_clean, 0)
