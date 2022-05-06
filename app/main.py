@@ -395,6 +395,8 @@ def run(repair_tool_list, benchmark, setup):
                 # if os.path.isdir(dir_exp):
                 #     emitter.warning("\t\t[warning] experiment dir exists, cleaning setup")
                 #     benchmark.clean(dir_exp, container_id)
+            if values.DEFAULT_ANALYSE_ONLY:
+                continue
 
             if not values.DEFAULT_SETUP_ONLY:
                 repair_all(dir_info_list, experiment_item, repair_tool_list, config_info, container_id_list, benchmark.name)
