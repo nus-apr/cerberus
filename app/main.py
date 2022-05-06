@@ -440,7 +440,8 @@ def initialize():
             tool_list.append(tool)
     elif values.CONF_TOOL_NAME:
         tool = configuration.load_tool(values.CONF_TOOL_NAME.lower())
-        tool.check_tool_exists()
+        if not values.DEFAULT_ANALYSE_ONLY:
+            tool.check_tool_exists()
         tool_list.append(tool)
     benchmark = configuration.load_benchmark(values.CONF_BENCHMARK.lower())
     setup = configuration.load_configuration_details(definitions.FILE_CONFIGURATION)
