@@ -113,7 +113,7 @@ class AbstractTool:
 
     def print_analysis(self, space_info, time_info):
         size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
-        time_build, time_validation, time_duration, latency_1, latency_2, _ = time_info
+        time_build, time_validation, time_duration, latency_1, latency_2, latency_3, _ = time_info
         n_implausible = n_enumerated - n_plausible - n_noncompile
         emitter.highlight("\t\t\t search space size: {0}".format(size_space))
         emitter.highlight("\t\t\t count enumerations: {0}".format(n_enumerated))
@@ -124,6 +124,7 @@ class AbstractTool:
         emitter.highlight("\t\t\t time build: {0} seconds".format(time_build))
         emitter.highlight("\t\t\t time validation: {0} seconds".format(time_validation))
         emitter.highlight("\t\t\t time duration: {0} seconds".format(time_duration))
+        emitter.highlight("\t\t\t time latency compilation: {0} seconds".format(latency_3))
         emitter.highlight("\t\t\t time latency validation: {0} seconds".format(latency_2))
         emitter.highlight("\t\t\t time latency plausible: {0} seconds".format(latency_1))
 

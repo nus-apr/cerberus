@@ -310,14 +310,16 @@ class Prophet(AbstractTool):
         time_validation = 0
         time_latency_1 = 0
         time_latency_2 = 0
+        time_latency_3 = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             patch_space_info = (
             size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-            time_info = (time_build, time_validation, time_duration, time_latency, "")
+            time_info = (time_build, time_validation, time_duration, 0,0,0, "")
             return patch_space_info, time_info
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
+        timeline = ""
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r", encoding='iso-8859-1') as log_file:
                 log_lines = log_file.readlines()
@@ -325,6 +327,8 @@ class Prophet(AbstractTool):
                 time_stamp_end = log_lines[-1].replace("\n", "")
                 time_duration = self.time_duration(time_stamp_start, time_stamp_end)
                 for line in log_lines:
+                    if "[" in line and "]" in line:
+                        timeline = int(line.split("] ")[0].replace("[", "").strip())
                     if "number of explored templates:" in line:
                         count_enumerations = int(line.split("number of explored templates: ")[-1])
                     elif "Single building" in line and "failed as well!" in line:
@@ -341,13 +345,15 @@ class Prophet(AbstractTool):
                     elif "build time: " in line:
                         time = line.split("build time: ")[-1].strip().replace("\n", "")
                         time_build += float(time)
+                        if time_latency_3 == 0:
+                            time_latency_3 = timeline
                     elif "Passed!" in line:
                         if time_latency_1 == 0:
                             time_latency_1 = int(line.replace("[", "").replace("] Passed!", " ").strip())
                         count_plausible += 1
                     elif "Testing" in line:
                         if time_latency_2 == 0:
-                            time_latency_2 = int(line.split("] ")[0].replace("[", "").strip())
+                            time_latency_2 = timeline
                 log_file.close()
         if is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
@@ -373,11 +379,13 @@ class Prophet(AbstractTool):
                 log_file.write("\t\t any errors: {0}\n".format(is_error))
                 log_file.write("\t\t time build: {0} seconds\n".format(time_build))
                 log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
+                log_file.write("\t\t time latency compilation: {0} seconds\n".format(time_latency_3))
                 log_file.write("\t\t time latency validation: {0} seconds\n".format(time_latency_2))
                 log_file.write("\t\t time latency plausible: {0} seconds\n".format(time_latency_1))
                 log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
             log_file.close()
         patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency_1, time_latency_2, time_stamp_start)
+        time_info = (time_build, time_validation, time_duration, time_latency_1,
+                     time_latency_2, time_latency_3, time_stamp_start)
         return patch_space_info, time_info
 

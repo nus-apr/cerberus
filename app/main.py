@@ -223,10 +223,10 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
         space_info, time_info = tool.analyse_output(dir_info, bug_id,
                                                     failing_test_list)
         if first_start is None:
-            first_start = time_info[5]
+            first_start = time_info[6]
         else:
-            if first_start > time_info[5]:
-                first_start = time_info[5]
+            if first_start > time_info[6]:
+                first_start = time_info[6]
         conf_id = str(values.CONFIG_ID)
         exp_id = conf_id + "-" + bug_id
         values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
