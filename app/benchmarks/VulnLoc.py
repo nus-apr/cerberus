@@ -34,7 +34,7 @@ class VulnLoc(AbstractBenchmark):
         else:
             emitter.error("\t\t\t[benchmark] verification failed")
         if tool_name == "vulnfix":
-            emitter.normal("\t\t\t[benchmark] skipping transformation for vulnfix")
+            emitter.normal("\t\t\tskipping transformation for vulnfix")
         else:
             if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
                 emitter.success("\t\t\t[benchmark] transformation successful")
