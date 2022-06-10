@@ -56,6 +56,7 @@ class VulnFix(AbstractTool):
         exploit_path = sorted(tests_list)[0]
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
+        line_normals = ""
         dir_normal_in = os.path.join(dir_setup, "vulnfix", "normals")
         if os.path.isdir(dir_normal_in):
             normals_list = [ os.path.join(dir_normal_in, t) for t in os.listdir(dir_normal_in) ]
