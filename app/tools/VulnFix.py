@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 
 from app.tools.AbstractTool import AbstractTool
@@ -144,3 +145,58 @@ class VulnFix(AbstractTool):
         shutil.copy2(file_log_debug, dir_output)
 
         return super().save_artefacts(dir_info, experiment_info, container_id)
+
+    def analyse_output(self, dir_info, bug_id, fail_list):
+        emitter.normal("\t\t\t analysing output of " + self.name)
+        dir_logs = dir_info["log"]
+        dir_results = dir_info["result"]
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = os.path.join(dir_logs, conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log")
+
+        # parse this file for time info
+        regex = re.compile('(.*-output.log$)')
+        for _, _, files in os.walk(dir_results):
+            for file in files:
+                if regex.match(file) and self.name in file:
+                    self.log_output_path = os.path.join(dir_results, file)
+                    break
+        count_non_compilable = 0
+        count_plausible = 0
+        size_search_space = 0
+        count_enumerations = 0
+        time_duration = 0
+        count_generated = 0
+        time_first = 0
+        time_latency = 0
+        time_validation = 0
+        time_build = 0
+
+        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no log file found")
+            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+
+
+        if os.path.isfile(self.log_output_path):
+            with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
+                log_lines = log_file.readlines()
+                time_start = log_lines[0].replace("\n", "")
+                time_end = log_lines[-1].replace("\n", "")
+                time_duration = self.time_duration(time_start, time_end)
+
+        # check whether a patch file is there
+        dir_patches = os.path.join(dir_results, "patches")
+        count_generated = len([name for name in os.listdir(dir_patches) if os.path.isfile(name)])
+        count_plausible = count_generated
+
+        with open(self.log_analysis_path, 'w') as log_file:
+            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
+            if values.DEFAULT_DUMP_PATCHES:
+                count_enumerations = count_plausible
+            else:
+                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
+
+            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
+        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
+        time_info = (time_build, time_validation, time_duration, time_latency, time_first)
+        return patch_space_info, time_info
