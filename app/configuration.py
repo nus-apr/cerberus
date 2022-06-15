@@ -2,7 +2,7 @@ import os
 import sys
 import json
 from app import definitions, values, emitter, utilities
-from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit, SenX, Darjeeling
+from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit, SenX, Darjeeling, VulnFix
 from app.benchmarks import ManyBugs, Examples, VulnLoc
 
 
@@ -116,6 +116,8 @@ def load_tool(tool_name):
         return SenX.SenX()
     elif tool_name == "darjeeling":
         return Darjeeling.Darjeeling()
+    elif tool_name == "vulnfix":
+        return VulnFix.VulnFix()
     else:
         utilities.error_exit("Unknown tool name", tool_name)
 
@@ -153,4 +155,3 @@ def update_configuration():
     if values.CONF_USE_VTHREADS:
         values.DEFAULT_USE_VTHREADS = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
-

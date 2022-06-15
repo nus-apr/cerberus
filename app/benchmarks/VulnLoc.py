@@ -33,10 +33,13 @@ class VulnLoc(AbstractBenchmark):
             emitter.success("\t\t\t[benchmark] verified successfully")
         else:
             emitter.error("\t\t\t[benchmark] verification failed")
-        if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
-            emitter.success("\t\t\t[benchmark] transformation successful")
+        if tool_name == "vulnfix":
+            emitter.normal("\t\t\tskipping transformation for vulnfix")
         else:
-            emitter.error("\t\t\t[benchmark] transformation failed")
+            if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
+                emitter.success("\t\t\t[benchmark] transformation successful")
+            else:
+                emitter.error("\t\t\t[benchmark] transformation failed")
         return container_id
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id, tool_name):

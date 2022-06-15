@@ -220,13 +220,14 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
     for tool in tool_list:
         index = index + 1
         dir_info = dir_info_list[index]
-        space_info, time_info = tool.analyse_output(dir_info, bug_id,
-                                                    failing_test_list)
-        if first_start is None:
-            first_start = time_info[6]
-        else:
-            if first_start > time_info[6]:
-                first_start = time_info[6]
+        space_info, time_info = tool.analyse_output(dir_info, bug_id, failing_test_list)
+        first_start_index = 6
+        if len(time_info) >= first_start_index + 1:
+            if first_start is None:
+                first_start = time_info[first_start_index]
+            else:
+                if first_start > time_info[first_start_index]:
+                    first_start = time_info[first_start_index]
         conf_id = str(values.CONFIG_ID)
         exp_id = conf_id + "-" + bug_id
         values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
@@ -484,4 +485,3 @@ def main():
         total_duration = format((time.time() - start_time) / 60, '.3f')
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)
-
