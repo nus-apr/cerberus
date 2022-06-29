@@ -7,7 +7,7 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 cd $dir_name/src
 
-PROJECT_CFLAGS="-g -O0 -static"
+PROJECT_CFLAGS="-g -O0"
 if [[ -n "${CFLAGS}" ]]; then
   PROJECT_CFLAGS="${PROJECT_CFLAGS} ${CFLAGS}"
 fi
@@ -17,4 +17,4 @@ if [[ -n "${CONFIG_OPTIONS}" ]]; then
   PROJECT_CONFIG_OPTIONS="${PROJECT_CONFIG_OPTIONS} ${CONFIG_OPTIONS}"
 fi
 
- ./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}
+CC=wllvm  ./configure CFLAGS="${PROJECT_CFLAGS}" ${PROJECT_CONFIG_OPTIONS}

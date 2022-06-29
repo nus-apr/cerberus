@@ -2,8 +2,7 @@ import os
 import sys
 import json
 from app import definitions, values, emitter, utilities
-from app.tools import Angelix, CPR, F1X, GenProg, Prophet, Fix2Fit, SenX, Darjeeling, VulnFix
-from app.benchmarks import ManyBugs, Examples, VulnLoc
+
 
 
 def read_arg(argument_list):
@@ -98,40 +97,44 @@ def load_configuration_details(config_file_path):
         utilities.error_exit("Configuration file does not exist")
     return json_data
 
+def load_class(class_name):
+    components = class_name.split('.')
+    mod = __import__(components[0])
+    for comp in components[1:]:
+        mod = getattr(mod, comp)
+    return mod
+
 
 def load_tool(tool_name):
-    if tool_name == "cpr":
-        return CPR.CPR()
-    elif tool_name == "angelix":
-        return Angelix.Angelix()
-    elif tool_name == "prophet":
-        return Prophet.Prophet()
-    elif tool_name == "fix2fit":
-        return Fix2Fit.Fix2Fit()
-    elif tool_name == "f1x":
-        return F1X.F1X()
-    elif tool_name == "genprog":
-        return GenProg.GenProg()
-    elif tool_name == "senx":
-        return SenX.SenX()
-    elif tool_name == "darjeeling":
-        return Darjeeling.Darjeeling()
-    elif tool_name == "vulnfix":
-        return VulnFix.VulnFix()
-    else:
+    emitter.normal("loading repair tool")
+    class_file_path = definitions.DIR_TOOLS + tool_name + ".py"
+    existing_tool_list = os.listdir(definitions.DIR_TOOLS)
+    tool_class_name = None
+    for tool in existing_tool_list:
+        if tool.lower().replace(".py", "") == tool_name.lower():
+            tool_class_name = tool.replace(".py", "")
+    if not tool_class_name:
         utilities.error_exit("Unknown tool name", tool_name)
+    mod = __import__('app.tools', fromlist=[tool_class_name])
+    tool_class = getattr(mod, str(tool_class_name))
+    initializer = getattr(tool_class, str(tool_class_name))
+    return initializer()
 
 
 def load_benchmark(benchmark_name):
     emitter.normal("loading benchmark")
-    if benchmark_name == "manybugs":
-        return ManyBugs.ManyBugs()
-    elif benchmark_name == "examples":
-        return Examples.Examples()
-    elif benchmark_name == "vulnloc":
-        return VulnLoc.VulnLoc()
-    else:
+    class_file_path = definitions.DIR_BENCHMARK + benchmark_name + ".py"
+    existing_benchmark_list = os.listdir(definitions.DIR_BENCHMARK)
+    benchmark_class_name = None
+    for benchmark in existing_benchmark_list:
+        if benchmark.lower().replace(".py", "") == benchmark_name.lower():
+            benchmark_class_name = benchmark.replace(".py", "")
+    if not benchmark_class_name:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
+    mod = __import__('app.benchmarks', fromlist=[benchmark_class_name])
+    benchmark_class = getattr(mod, str(benchmark_class_name))
+    initializer = getattr(benchmark_class, str(benchmark_class_name))
+    return initializer()
 
 
 def update_configuration():

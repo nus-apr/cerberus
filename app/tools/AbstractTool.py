@@ -1,14 +1,22 @@
 import abc
 import os
-import shutil
 from app.utilities import execute_command, error_exit
 from app import emitter, values, container, utilities, definitions
 from datetime import datetime
+
 
 class AbstractTool:
     log_instrument_path = None
     log_output_path = None
     name = None
+    dir_logs = ""
+    dir_output = ""
+    dir_expr = ""
+    dir_inst = ""
+    dir_setup = ""
+    container_id = None
+    is_instrument_only = False
+
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
@@ -24,9 +32,39 @@ class AbstractTool:
         duration = (tend - tstart).total_seconds()
         return duration
 
-    def run_command(self, command_str, log_file_path, exp_dir_path, container_id):
-        if container_id:
-            exit_code, output = container.exec_command(container_id, command_str, exp_dir_path)
+
+    def clean_up(self):
+        if self.container_id:
+            container.remove_container(self.container_id)
+        else:
+            if os.path.isdir(self.dir_exp):
+                rm_command = "rm -rf " + self.dir_exp
+                execute_command(rm_command)
+
+    def update_info(self, container_id, instrument_only, dir_info):
+        self.container_id = container_id
+        self.is_instrument_only = instrument_only
+        self.update_dir_info(dir_info)
+
+
+
+    def update_dir_info(self, dir_info):
+        if self.container_id:
+            self.dir_expr = dir_info["container"]["experiment"]
+            self.dir_logs = dir_info["container"]["logs"]
+            self.dir_inst = dir_info["container"]["instrumentation"]
+            self.dir_setup = dir_info["container"]["setup"]
+        else:
+            self.dir_expr = dir_info["local"]["experiment"]
+            self.dir_logs = dir_info["local"]["logs"]
+            self.dir_inst = dir_info["local"]["instrumentation"]
+            self.dir_setup = dir_info["local"]["setup"]
+
+
+    def run_command(self, command_str, log_file_path, dir_path):
+        """executes the specified command at the given dir_path and save the output to log_file"""
+        if self.container_id:
+            exit_code, output = container.exec_command(self.container_id, command_str, dir_path)
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
                 with open(log_file_path, 'a') as log_file:
@@ -35,41 +73,48 @@ class AbstractTool:
                     if stderr:
                         log_file.writelines(stderr.decode("iso-8859-1"))
         else:
-            command_str = "cd " + exp_dir_path + ";" + command_str
+            command_str = "cd " + dir_path + ";" + command_str
             command_str += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command_str)
         return exit_code
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
+
+    def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
+        bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        command_str = "bash instrument.sh".format(source_file)
-        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-        status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+        self.log_instrument_path = self.dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
+        command_str = "bash instrument.sh {} > {} 2>&1".format(self.dir_expr, self.log_instrument_path)
+        status = self.run_command(command_str, "/dev/null", self.dir_inst)
         if status not in [0, 126]:
             error_exit("error with instrumentation of " + self.name + "; exit code " + str(status))
         return
 
+
     @abc.abstractmethod
-    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
+    def repair(self, bug_info, config_info):
         emitter.normal("\t\t[repair-tool] repairing experiment subject")
         utilities.check_space()
-        self.pre_process(dir_info['logs'], dir_info['expr'], dir_info['setup'], container_id)
-        self.instrument(dir_info['logs'], dir_info['expr'],
-                        dir_info['setup'], experiment_info['bug_id'],
-                        container_id, experiment_info['source_file'])
+        self.pre_process()
+        self.instrument(bug_info)
+        emitter.normal("\t\t\t running repair with " + self.name)
+        conf_id = config_info[definitions.KEY_ID]
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        log_file_name = conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+        self.log_output_path = os.path.join(self.dir_logs,log_file_name)
         return
 
-    def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
+
+    def pre_process(self):
         """any pre-processing required for the repair"""
         self.check_tool_exists()
-        if container_id:
+        if self.container_id:
             clean_command = "rm -rf /output/patch* /logs"
-            self.run_command(clean_command, "/dev/null", "/", container_id)
+            self.run_command(clean_command, "/dev/null", "/")
             script_path = definitions.DIR_SCRIPTS + "/{}-dump-patches.py".format(self.name)
-            cp_script_command = "docker cp {} {}:{} ".format(script_path, container_id, dir_expr)
+            cp_script_command = "docker cp {} {}:{} ".format(script_path, self.container_id,
+                                                             self.dir_expr)
             execute_command(cp_script_command)
         return
 
@@ -87,12 +132,12 @@ class AbstractTool:
                 error_exit("{} not Found".format(self.name))
         return
 
-    def post_process(self, dir_expr, dir_results, container_id):
+    def post_process(self):
         """any post-processing required for the repair"""
-        if container_id:
-            container.stop_container(container_id)
+        if self.container_id:
+            container.stop_container(self.container_id)
         if values.CONF_PURGE:
-            self.clean_up(dir_expr, container_id)
+            self.clean_up()
         return
 
     @abc.abstractmethod
@@ -101,7 +146,7 @@ class AbstractTool:
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
         dir_logs = dir_info["log"]
-        save_command = "cp -rf " + dir_output + "/* " + dir_results + ";"
+        save_command = "cp -rf " + self.dir_output + "/* " + dir_results + ";"
         save_command += "cp -rf " + dir_logs + "/* " + dir_results
         execute_command(save_command)
         return
@@ -110,6 +155,7 @@ class AbstractTool:
     def analyse_output(self, dir_info, bug_id, fail_list):
         """analyse tool output and collect information"""
         return
+
 
     def print_analysis(self, space_info, time_info):
         size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
@@ -128,11 +174,42 @@ class AbstractTool:
         emitter.highlight("\t\t\t time latency validation: {0} seconds".format(latency_2))
         emitter.highlight("\t\t\t time latency plausible: {0} seconds".format(latency_1))
 
-    def clean_up(self, exp_dir, container_id):
-        if container_id:
-            container.remove_container(container_id)
-        else:
-            if os.path.isdir(exp_dir):
-                rm_command = "rm -rf " + exp_dir
-                execute_command(rm_command)
 
+    def append_file(self, content, file_path):
+        if self.container_id:
+            container.write_file(file_path, content, self.container_id)
+        else:
+            with open(file_path, "w") as f:
+                for line in content:
+                    f.write(line)
+
+
+    def write_file(self, content, file_path):
+        if self.container_id:
+            container.write_file(file_path, content, self.container_id)
+        else:
+            with open(file_path, "a") as f:
+                for line in content:
+                    f.write(line)
+
+
+    def list_dir(self, dir_path):
+        file_list = []
+        if self.container_id:
+            if container.is_dir(self.container_id, dir_path):
+                list_files = container.list_dir(self.container_id, dir_path)
+                file_list = [ os.path.join(dir_path, t) for t in list_files]
+        else:
+            if os.path.isdir(dir_path):
+                list_files = os.listdir(dir_path)
+                file_list = [ os.path.join(dir_path, t) for t in list_files]
+        return file_list
+
+    def is_dir(self, dir_path):
+        if self.container_id:
+            if container.is_dir(self.container_id, dir_path):
+                return True
+        else:
+            if os.path.isdir(dir_path):
+                return True
+        return False

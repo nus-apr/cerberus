@@ -129,8 +129,8 @@ class ManyBugs(AbstractBenchmark):
         self.run_command(command_str, "/dev/null", "/", container_id)
         return
 
-    def save_artefacts(self, dir_exp, dir_artifact, container_id):
+    def save_artefacts(self, dir_info, container_id):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = ["/diffs"]  # path should be relative to experiment directory
         self.list_artifact_files = [] # path should be relative to experiment directory
-        super(ManyBugs, self).save_artefacts(dir_exp, dir_artifact, container_id)
+        super(ManyBugs, self).save_artefacts(dir_info, container_id)

@@ -186,3 +186,31 @@ def is_file_empty(container_id, file_path):
 def fix_permissions(container_id, dir_path):
     permission_command = "chmod -R g+w  {}".format(dir_path)
     return exec_command(container_id, permission_command)
+
+def list_dir(container_id, dir_path):
+    exist_command = "ls " + dir_path
+    _, output =  exec_command(container_id, exist_command)
+    file_list = []
+    for o in output[:-1]:
+        file_list.append(o.decode("utf-8").strip().replace("\n", ""))
+    return file_list
+
+
+def write_file(file_path, content, container_id):
+    tmp_file_path = os.path.join("/tmp", "write-file")
+    with open(tmp_file_path, "w") as f:
+        for line in content:
+            f.write(line)
+    copy_command = "docker cp " + tmp_file_path + " " + container_id + ":" + file_path
+    utilities.execute_command(copy_command)
+
+
+def append_file(file_path, content, container_id):
+    tmp_file_path = os.path.join("/tmp", "container-file")
+    copy_command = "docker cp " + container_id + ":" + file_path + " " + tmp_file_path
+    utilities.execute_command(copy_command)
+    with open(tmp_file_path, "a") as f:
+        for line in content:
+            f.write(line)
+    copy_command = "docker cp " + tmp_file_path + " " + container_id + ":" + file_path
+    utilities.execute_command(copy_command)

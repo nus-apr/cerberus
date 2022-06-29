@@ -150,7 +150,14 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def save_artefacts(self, dir_exp, dir_artifact, container_id):
+    def save_artefacts(self, dir_info, container_id):
+        if container_id:
+            dir_exp = dir_info["container"]["experiment"]
+            dir_artifact = dir_info["container"]["artifacts"]
+        else:
+            dir_exp = dir_info["local"]["experiment"]
+            dir_artifact = dir_info["local"]["artifacts"]
+
         emitter.normal("\t\t\tsaving experiment dev-patch")
         if self.list_artifact_dirs:
             for art_dir in self.list_artifact_dirs:

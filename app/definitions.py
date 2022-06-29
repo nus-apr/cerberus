@@ -2,6 +2,9 @@ import os
 from os.path import dirname
 DIR_MAIN = dirname(dirname(os.path.realpath(__file__)))
 DIR_INFRA = DIR_MAIN + "/infra"
+DIR_APP = DIR_MAIN + "/app/"
+DIR_TOOLS = DIR_APP + "tools/"
+DIR_BENCHMARK = DIR_APP + "benchmarks/"
 DIRECTORY_LOG_BASE = DIR_MAIN + "/logs"
 DIRECTORY_OUTPUT_BASE = DIR_MAIN + "/output"
 DIR_RESULT = DIR_MAIN + "/results"
@@ -39,6 +42,7 @@ KEY_BINARY_PATH = "binary_path"
 KEY_COUNT_NEG = "count_neg"
 KEY_COUNT_POS = "count_pos"
 KEY_CRASH_CMD = "crash_input"
+KEY_EXPLOIT_LIST = "exploit_file_list"
 
 
 ARG_DATA_PATH = "--data-dir="
