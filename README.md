@@ -36,7 +36,8 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 7  | Fix2Fit       | C/C++    | https://github.com/gaoxiang9430/Fix2Fit  | 349e4ba |  
 | 8  | SenX          | C/C++    | N/A      | N/A |  
 | 9  | GenProg       | C/C++    | https://github.com/squaresLab/genprog-code      | 0b25153  |  
-| 10 | CrashRepair   | C/C++    | https://github.com/rshariffdeen/CrashRepair     | 23430d9 |
+| 10 | CrashRepair   | C/C++    | https://github.com/rshariffdeen/CrashRepair     | 23430d9 |  
+
 
 
 ## Supported Benchmarks of Bugs
