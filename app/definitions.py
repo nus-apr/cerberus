@@ -75,7 +75,7 @@ ARG_USE_LOCAL = "--local"
 
 
 FILE_META_DATA = None
-FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/icse22.json"
+FILE_CONFIGURATION = os.path.dirname(__file__) + "/../configurations/default.json"
 FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
