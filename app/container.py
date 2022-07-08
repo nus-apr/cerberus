@@ -190,9 +190,12 @@ def fix_permissions(container_id, dir_path):
 def list_dir(container_id, dir_path):
     exist_command = "ls " + dir_path
     _, output =  exec_command(container_id, exist_command)
+    stdout, stderr = output
     file_list = []
-    for o in output[:-1]:
-        file_list.append(o.decode("utf-8").strip().replace("\n", ""))
+    if stdout:
+        dir_list = stdout.decode("utf-8").split("\n")
+        for o in dir_list:
+            file_list.append(o.strip().replace("\n", ""))
     return file_list
 
 
