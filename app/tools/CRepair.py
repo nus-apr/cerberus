@@ -14,92 +14,62 @@ class CRepair(AbstractTool):
         super(CRepair, self).__init__(self.name)
 
 
-    def generate_conf_file(self, experiment_info, conf_file_path, dir_setup):
-        print(conf_file_path)
-        with open(conf_file_path, "w") as conf_file:
-            conf_file.write("dir_exp:{}\n".format(dir_setup))
-            conf_file.write("tag_id:{}\n".format(experiment_info[definitions.KEY_BUG_ID]))
-            conf_file.write("src_directory:src\n")
-            conf_file.write("binary_path:{}\n".format(experiment_info[definitions.KEY_BINARY_PATH]))
-            conf_file.write("config_command:{}\n".format(dir_setup + "/config.sh /experiment"))
-            conf_file.write("build_command:{}\n".format(dir_setup + "/build.sh /experiment"))
-            conf_file.write("test_input_list:{}\n".format(experiment_info[definitions.KEY_CRASH_CMD]))
-            conf_file.write("poc_list:{}\n".format(",".join(experiment_info[definitions.KEY_EXPLOIT_LIST])))
-
-
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
-        """instrumentation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t instrumenting for " + self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        instrumentation_script_path = "{0}/{1}/instrument.sh".format(dir_setup, self.name.lower())
-
-        if container_id:
-            instrumentation_exist = container.is_file(container_id, instrumentation_script_path)
-        else:
-            instrumentation_exist = os.path.isfile(instrumentation_script_path)
-        if instrumentation_exist:
-            command_str = "bash instrument.sh {}".format(dir_expr)
-            dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-            status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
-            if not status == 0:
-                error_exit("error with instrumentation of ", self.name)
-        return
-
-    def prepare(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, experiment_info):
-        """preparation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t preparing for " + self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        if container_id:
-            tmp_repair_file = "/tmp/repair.conf"
-            repair_conf_path = dir_expr + "/src/repair.conf"
-            self.generate_conf_file(experiment_info, tmp_repair_file, dir_setup)
-            save_command = "docker cp " + tmp_repair_file + " " + container_id + ":" + repair_conf_path
-            execute_command(save_command)
-
-        else:
-            repair_conf_path = dir_expr + "/src/repair.conf"
-            self.generate_conf_file(experiment_info, repair_conf_path, dir_setup)
+    def generate_conf_file(self, bug_info):
+        repair_conf_path = self.dir_expr + "/src/repair.conf"
+        conf_content = []
+        conf_content.append("dir_exp:{}\n".format(self.dir_expr))
+        conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
+        conf_content.append("src_directory:src\n")
+        conf_content.append("binary_path:{}\n".format(bug_info[definitions.KEY_BINARY_PATH]))
+        conf_content.append("config_command:{}\n".format(self.dir_setup + "/config.sh /experiment"))
+        conf_content.append("build_command:{}\n".format(self.dir_setup + "/build.sh /experiment"))
+        conf_content.append("test_input_list:{}\n".format(bug_info[definitions.KEY_CRASH_CMD]))
+        conf_content.append("poc_list:{}\n".format(",".join(bug_info[definitions.KEY_EXPLOIT_LIST])))
+        self.write_file(conf_content, repair_conf_path)
         return repair_conf_path
 
 
-    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
-        if not instrument_only:
-            emitter.normal("\t\t\t running repair with " + self.name)
-            conf_id = config_info[definitions.KEY_ID]
-            dir_logs = dir_info["logs"]
-            dir_setup = dir_info["setup"]
-            dir_expr = dir_info["expr"]
-            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            repair_conf_path = self.prepare(dir_logs, dir_expr, dir_setup, bug_id, container_id, experiment_info)
-            self.instrument(dir_logs, dir_expr, dir_setup, bug_id, container_id, experiment_info)
-            self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-            relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
-            abs_binary_path = dir_expr + "/src/" + relative_binary_path
-            binary_dir_path = "/".join(abs_binary_path.split("/")[:-1])
-            struct_def_file_path = "def_file"
-            test_dir = dir_setup + "/tests"
+    def prepare(self, bug_info):
+        """preparation for the experiment as needed by the tool"""
+        emitter.normal("\t\t\t preparing for " + self.name)
+        bug_id = str(bug_info[definitions.KEY_ID])
+        conf_id = str(values.CONFIG_ID)
+        self.log_instrument_path = self.dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
+        repair_conf_path = self.generate_conf_file(bug_info)
+        return repair_conf_path
 
-            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-            execute_command(timestamp_command)
-            CRepair_command = "cd {};".format(binary_dir_path)
-            CRepair_command += "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
-                                                                              repair_conf_path)
-            CRepair_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
-            status = execute_command(CRepair_command)
-            if status != 0:
-                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
-            else:
-                emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = "printf \"\\n\" >> " + self.log_output_path
-            timestamp_command += ";echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            execute_command(timestamp_command)
 
-        return
+    def repair(self, bug_info, config_info):
+        emitter.normal("\t\t\t running repair with " + self.name)
+        conf_id = config_info[definitions.KEY_ID]
+        dir_logs = self.dir_logs
+        dir_setup = self.dir_setup
+        dir_expr = self.dir_expr
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        repair_conf_path = self.prepare(bug_info)
+        self.instrument(bug_info)
+        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+        relative_binary_path = bug_info[definitions.KEY_BINARY_PATH]
+        abs_binary_path = dir_expr + "/src/" + relative_binary_path
+        binary_dir_path = "/".join(abs_binary_path.split("/")[:-1])
+        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+        execute_command(timestamp_command)
+        CRepair_command = "cd {};".format(binary_dir_path)
+        CRepair_command += "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
+                                                                          repair_conf_path)
+        CRepair_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
+        status = execute_command(CRepair_command)
+        if status != 0:
+            emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        timestamp_command = "printf \"\\n\" >> " + self.log_output_path
+        timestamp_command += ";echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+        execute_command(timestamp_command)
+
 
     def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
         super(CRepair, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)

@@ -214,9 +214,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.
         thread.join()
-        if tool.log_output_path:
-            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
-            utilities.execute_command(timestamp_command)
+        # if tool.log_output_path:
+        #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+        #     utilities.execute_command(timestamp_command)
 
     values.APR_TOOL_RUNNING = False
     if values.DEFAULT_USE_VALKYRIE:
@@ -224,9 +224,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         parallel.wait_validation()
         emitter.normal("\t\t\twaiting for consumer pool")
         consume_thread.join()
-    for t in tool_list:
-        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
-        utilities.execute_command(timestamp_command)
+    # for t in tool_list:
+    #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
+    #     utilities.execute_command(timestamp_command)
 
 
 def analyse_result(dir_info_list, experiment_info, tool_list):
@@ -239,24 +239,18 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
     for tool in tool_list:
         index = index + 1
         dir_info = dir_info_list[index]
-        space_info, time_info = tool.analyse_output(dir_info, bug_id, failing_test_list)
-        first_start_index = 6
-        if len(time_info) >= first_start_index + 1:
-            if first_start is None:
-                first_start = time_info[first_start_index]
-            else:
-                if first_start > time_info[first_start_index]:
-                    first_start = time_info[first_start_index]
+        space_info, time_info, error_info = tool.analyse_output(dir_info, bug_id, failing_test_list)
         conf_id = str(values.CONFIG_ID)
         exp_id = conf_id + "-" + bug_id
         values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
         tool.print_analysis(space_info, time_info)
         tool.log_output_path = None
         logger.analysis(exp_id)
-        dir_output = dir_info["output"]
+        dir_output = dir_info["local"]["artifacts"]
         patch_dir = dir_output + "/patches"
-    if values.DEFAULT_USE_VALKYRIE:
-        valkyrie.analyse_output(patch_dir, first_start)
+        if values.DEFAULT_USE_VALKYRIE:
+            valkyrie.analyse_output(patch_dir, time_info)
+            break
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
@@ -278,15 +272,15 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
     index = -1
     for tool in tool_list:
         index = index + 1
-        dir_info = dir_info_list[index]
+        dir_info = dir_info_list[index]['local']
         container_id = container_id_list[index]
         dir_expr = dir_info["experiment"]
-        dir_artifacts = dir_info["artifact"]
-        dir_results = dir_info["result"]
+        dir_artifacts = dir_info["artifacts"]
+        dir_results = dir_info["results"]
         if not os.path.isdir(dir_results):
             os.system("mkdir -p {}".format(dir_results))
-        tool.save_artefacts(dir_info, experiment_info, container_id)
-        tool.post_process(dir_expr, dir_artifacts, container_id)
+        tool.save_artefacts(dir_info)
+        tool.post_process()
         save_command = "cp -f " + definitions.FILE_MAIN_LOG + " " + dir_results + ";"
         save_command += "cp -f " + definitions.FILE_ERROR_LOG + "/* " + dir_results
         utilities.execute_command(save_command)
@@ -346,10 +340,12 @@ def run(benchmark, tool_list, bug_info, config_info):
     if not values.DEFAULT_SETUP_ONLY:
         repair_all(dir_info_list, bug_info, tool_list, config_info, container_id_list, benchmark.name)
         if not values.CONF_INSTRUMENT_ONLY:
-            save_artifacts(dir_info_list, experiment_item, repair_tool_list, container_id_list)
-            analyse_result(dir_info_list, experiment_item, repair_tool_list)
-            dir_archive = definitions.DIR_RESULT + "/" + repair_tool.name
+            analyse_result(dir_info_list, bug_info, tool_list)
+            save_artifacts(dir_info_list, bug_info, tool_list, container_id_list)
+            tool_name = tool_list[0].name
+            if len(tool_list) > 1:
+                tool_name = "multi"
+            dir_archive = definitions.DIR_RESULT + "/" + tool_name
+            dir_result = dir_info_list[0]['local']['results']
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)
-    if values.CONF_SHOW_DEV_PATCH:
-        show_dev_patch(dir_exp + "/diffs")

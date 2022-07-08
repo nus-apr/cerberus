@@ -3,7 +3,7 @@
 import time
 import datetime
 import os
-from app import definitions, values
+from app import definitions, values, analysis
 from shutil import copyfile
 
 
@@ -114,23 +114,20 @@ def warning(message):
 
 def analysis(exp_id):
     space_info, time_info = values.ANALYSIS_RESULTS[exp_id]
-    size_space, n_enumerated, n_plausible, n_noncompile, n_generated = space_info
-    time_build, time_validation, time_duration, latency_1, latency_2, latency_3, _ = time_info
-    n_implausible = n_enumerated - n_plausible - n_noncompile
     with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
         log_file.write("\n" + exp_id + "\n")
-        log_file.write("\t\t search space size: {0}\n".format(size_space))
-        log_file.write("\t\t count enumerations: {0}\n".format(n_enumerated))
-        log_file.write("\t\t count plausible patches: {0}\n".format(n_plausible))
-        log_file.write("\t\t count generated patches: {0}\n".format(n_generated))
-        log_file.write("\t\t count non-compiling patches: {0}\n".format(n_noncompile))
-        log_file.write("\t\t count implausible patches: {0}\n".format(n_implausible))
-        log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-        log_file.write("\t\t time validation: {0} seconds\n".format(time_validation))
-        log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        log_file.write("\t\t latency compilation: {0} seconds\n".format(latency_3))
-        log_file.write("\t\t latency validation: {0} seconds\n".format(latency_2))
-        log_file.write("\t\t latency plausible: {0} seconds\n".format(latency_1))
+        log_file.write("\t\t search space size: {0}".format(space_info.size))
+        log_file.write("\t\t count enumerations: {0}".format(space_info.enumerations))
+        log_file.write("\t\t count plausible patches: {0}".format(space_info.plausible))
+        log_file.write("\t\t count generated: {0}".format(space_info.generated))
+        log_file.write("\t\t count non-compiling patches: {0}".format(space_info.non_compilable))
+        log_file.write("\t\t count implausible patches: {0}".format(space_info.get_implausible()))
+        log_file.write("\t\t time build: {0} seconds".format(time_info.total_build))
+        log_file.write("\t\t time validation: {0} seconds".format(time_info.total_validation))
+        log_file.write("\t\t time duration: {0} seconds".format(time_info.get_duration()))
+        log_file.write("\t\t latency compilation: {0} seconds".format(time_info.get_latency_compilation()))
+        log_file.write("\t\t latency validation: {0} seconds".format(time_info.get_latency_validation()))
+        log_file.write("\t\t latency plausible: {0} seconds".format(time_info.get_latency_plausible()))
 
 
 def end(time_duration, is_error=False):

@@ -196,7 +196,7 @@ def list_dir(container_id, dir_path):
     return file_list
 
 
-def write_file(file_path, content, container_id):
+def write_file(container_id, file_path, content):
     tmp_file_path = os.path.join("/tmp", "write-file")
     with open(tmp_file_path, "w") as f:
         for line in content:
@@ -205,8 +205,17 @@ def write_file(file_path, content, container_id):
     utilities.execute_command(copy_command)
 
 
-def append_file(file_path, content, container_id):
+def read_file(container_id, file_path, encoding="utf-8"):
     tmp_file_path = os.path.join("/tmp", "container-file")
+    copy_command = "docker cp " + container_id + ":" + file_path + " " + tmp_file_path
+    utilities.execute_command(copy_command)
+    with open(tmp_file_path, "r", encoding = encoding) as f:
+        file_content = f.readlines()
+    return file_content
+
+
+def append_file(container_id, file_path, content):
+    tmp_file_path = os.path.join("/tmp", "append-file")
     copy_command = "docker cp " + container_id + ":" + file_path + " " + tmp_file_path
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "a") as f:
@@ -214,3 +223,5 @@ def append_file(file_path, content, container_id):
             f.write(line)
     copy_command = "docker cp " + tmp_file_path + " " + container_id + ":" + file_path
     utilities.execute_command(copy_command)
+    del_command = "rm -f {}".format(tmp_file_path)
+    utilities.execute_command(del_command)

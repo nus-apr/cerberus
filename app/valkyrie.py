@@ -1,7 +1,7 @@
 import multiprocessing as mp
 from multiprocessing import TimeoutError
 from functools import partial
-from app import definitions, values, emitter, utilities
+from app import definitions, values, emitter, analysis
 from multiprocessing.dummy import Pool as ThreadPool
 import threading
 import time
@@ -66,7 +66,7 @@ def compute_latency_valkyrie(start_time_str, tend):
     return duration
 
 
-def analyse_output(patch_dir, time_stamp_start):
+def analyse_output(patch_dir, time_info:analysis.TimeAnalysis):
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.LIST_CONSUMED)
@@ -106,8 +106,8 @@ def analyse_output(patch_dir, time_stamp_start):
             if modified_time < time_first_validation:
                 time_first_validation = modified_time
 
-    time_latency_1 = compute_latency_valkyrie(time_stamp_start, time_first_patch)
-    time_latency_2 = compute_latency_valkyrie(time_stamp_start, time_first_validation)
+    time_latency_1 = compute_latency_valkyrie(time_info.timestamp_start, time_first_patch)
+    time_latency_2 = compute_latency_valkyrie(time_info.timestamp_start, time_first_validation)
 
     emitter.highlight("\t\t\t time latency validation: {0} seconds".format(time_latency_2))
     emitter.highlight("\t\t\t time latency plausible: {0} seconds".format(time_latency_1))

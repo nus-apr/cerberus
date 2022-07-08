@@ -14,6 +14,8 @@ class Darjeeling(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
+        self.timestamp_fmt = '%Y-%m-%d %H:%M:%S.%f'
+
 
     def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
         """instrumentation for the experiment as needed by the tool"""
@@ -99,7 +101,7 @@ class Darjeeling(AbstractTool):
         # Fri 08 Oct 2021 04:59:55 PM +08
         # 2022-Apr-07 04:38:46.994352
         fmt_1 = '%a %d %b %Y %H:%M:%S %p'
-        fmt_2 = '%Y-%m-%d %H:%M:%S.%f'
+
         start_time_str = start_time_str.split(" +")[0].strip()
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt_1)
