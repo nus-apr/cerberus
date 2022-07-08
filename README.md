@@ -16,6 +16,15 @@ cerberus --bug-index=ID --tool=[cpr/angelix/prophet/genprog/fix2fit/vulnfix] --b
 ```
 
 
+## Features
+
+* Execution of repair tools on benchmarks of bugs
+* Configuration of the environment to execute repair tools properly on the bugs
+* Concurrent execution of multiple repair tools 
+* Compilation-Free validation
+
+
+
 ## Supported Repair Tools
   
 | #  | Tool          | Language | Repository                          | Commit id |  
@@ -31,10 +40,12 @@ cerberus --bug-index=ID --tool=[cpr/angelix/prophet/genprog/fix2fit/vulnfix] --b
 | 9  | GenProg       | C/C++    | https://github.com/squaresLab/genprog-code      | 0b25153  |  
 | 10 | CrashRepair   | C/C++    | https://github.com/rshariffdeen/CrashRepair     | 23430d9 |
 
+
 ## Supported Benchmarks of Bugs
 
 | # | Benchmark      | Language | # Projects | # Bugs |  
 | - | -------------- | -------- | ----------:| ------:|  
 | 1 | ManyBugs       | C/C++    |          6 |     60 |  
 | 2 | VulnLoc        | C/C++    |         11 |     43 |  
+
 
