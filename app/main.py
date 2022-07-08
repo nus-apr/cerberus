@@ -72,13 +72,13 @@ def filter_experiment_list(benchmark):
 
 def run(repair_tool_list, benchmark, setup):
     emitter.sub_title("Repairing benchmark")
-    emitter.highlight("[configuration] repair-tool(s): " + " ".join([x.name for x in repair_tool_list]))
-    emitter.highlight("[configuration] repair-benchmark: " + benchmark.name)
+    emitter.highlight("[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list]))
+    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
     run_config_id_list = values.CONF_CONFIG_ID_LIST
     iteration = 0
     for config_id in run_config_id_list:
         if config_id not in setup:
-            utilities.error_exit("invalid configuration id " + config_id)
+            utilities.error_exit("invalid profile id " + config_id)
         config_info = setup[config_id]
         values.CONFIG_ID = config_info[definitions.KEY_ID]
         experiment_list = filter_experiment_list(benchmark)

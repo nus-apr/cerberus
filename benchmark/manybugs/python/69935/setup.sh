@@ -36,7 +36,7 @@ chown -R root $dir_name
 
 
 cd $dir_name
-## fix the test harness and the configuration script
+## fix the test harness and the profile script
 sed -i "s/cd python/cd src/" test.sh
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#${dir_name}#g" test.sh
 sed -i "s#${dir_name}/limit#timeout 300#g" test.sh

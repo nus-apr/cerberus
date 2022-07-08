@@ -6,7 +6,7 @@ from app import definitions, values, emitter, utilities
 
 
 def read_arg(argument_list):
-    emitter.normal("reading configuration values")
+    emitter.normal("reading profile values")
     if len(argument_list) > 0:
         for arg in argument_list:
             if definitions.ARG_DATA_PATH in arg:
@@ -88,7 +88,7 @@ def read_arg(argument_list):
 
 
 def load_configuration_details(config_file_path):
-    emitter.normal("loading configuration setup")
+    emitter.normal("loading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, 'r') as conf_file:
@@ -138,7 +138,7 @@ def load_benchmark(benchmark_name):
 
 
 def update_configuration():
-    emitter.normal("updating configuration values")
+    emitter.normal("updating profile values")
     if values.CONF_RUN_TESTS_ONLY:
         values.DEFAULT_RUN_TESTS_ONLY = True
         values.DEFAULT_SETUP_ONLY = True

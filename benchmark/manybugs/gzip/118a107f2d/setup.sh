@@ -39,7 +39,7 @@ sed -i "s#\$abs_srcdir#${dir_name}/src/tests#g" tests/hufts
 chown -R root $dir_name
 
 cd $dir_name
-## fix the test harness and the configuration script
+## fix the test harness and the profile script
 sed -i "s#/root/mountpoint-genprog/genprog-many-bugs/${scenario_id}#${dir_name}#g" test.sh
 sed -i "s#${dir_name}/limit#timeout 5#g" test.sh
 sed -i "s#/usr/bin/perl#perl#g" test.sh

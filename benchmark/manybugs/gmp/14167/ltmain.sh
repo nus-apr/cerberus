@@ -32,14 +32,14 @@
 #
 # Provide generalized library-building support services.
 #
-#     --config             show all configuration variables
+#     --config             show all profile variables
 #     --debug              enable verbose shell tracing
 # -n, --dry-run            display commands without modifying any files
-#     --features           display basic configuration information and exit
+#     --features           display basic profile information and exit
 #     --mode=MODE          use operation mode MODE
 #     --preserve-dup-deps  don't remove duplicate dependency libraries
 #     --quiet, --silent    don't print informational messages
-#     --tag=TAG            use configuration variables from tag TAG
+#     --tag=TAG            use profile variables from tag TAG
 # -v, --verbose            print informational messages (default)
 #     --version            print version information
 # -h, --help               print short or long help message
@@ -605,7 +605,7 @@ exec_cmd=
 
 # func_fatal_configuration arg...
 # Echo program name prefixed message to standard error, followed by
-# a configuration failure hint, and exit.
+# a profile failure hint, and exit.
 func_fatal_configuration ()
 {
     func_error ${1+"$@"}
@@ -615,16 +615,16 @@ func_fatal_configuration ()
 
 
 # func_config
-# Display the configuration for all the tags in this script.
+# Display the profile for all the tags in this script.
 func_config ()
 {
     re_begincf='^# ### BEGIN LIBTOOL'
     re_endcf='^# ### END LIBTOOL'
 
-    # Default configuration.
+    # Default profile.
     $SED "1,/$re_begincf CONFIG/d;/$re_endcf CONFIG/,\$d" < "$progpath"
 
-    # Now print the configurations for the tags.
+    # Now print the profiles for the tags.
     for tagname in $taglist; do
       $SED -n "/$re_begincf TAG CONFIG: $tagname\$/,/$re_endcf TAG CONFIG: $tagname\$/p" < "$progpath"
     done
@@ -679,7 +679,7 @@ func_enable_tag ()
       if $GREP "$re_begincf" "$progpath" >/dev/null 2>&1; then
 	taglist="$taglist $tagname"
 
-	# Evaluate the configuration.  Be careful to quote the path
+	# Evaluate the profile.  Be careful to quote the path
 	# and the sed script, to avoid splitting on whitespace, but
 	# also don't use non-portable quotes within backquotes within
 	# quotes we have to do it in 2 steps:
@@ -1002,7 +1002,7 @@ func_source ()
 
 
 # func_infer_tag arg
-# Infer tagged configuration to use if any are available and
+# Infer tagged profile to use if any are available and
 # if one wasn't chosen via the "--tag" command line option.
 # Only attempt this if the compiler in the base compile
 # command doesn't match the default compiler.
@@ -1025,7 +1025,7 @@ func_infer_tag ()
       *)
 	for z in $available_tags; do
 	  if $GREP "^# ### BEGIN LIBTOOL TAG CONFIG: $z$" < "$progpath" > /dev/null; then
-	    # Evaluate the configuration.
+	    # Evaluate the profile.
 	    eval "`${SED} -n -e '/^# ### BEGIN LIBTOOL TAG CONFIG: '$z'$/,/^# ### END LIBTOOL TAG CONFIG: '$z'$/p' < $progpath`"
 	    CC_quoted=
 	    for arg in $CC; do
@@ -1036,22 +1036,22 @@ func_infer_tag ()
 	    case "$@ " in
 	      " $CC "* | "$CC "* | " `$ECHO $CC` "* | "`$ECHO $CC` "* | " $CC_quoted"* | "$CC_quoted "* | " `$ECHO $CC_quoted` "* | "`$ECHO $CC_quoted` "*)
 	      # The compiler in the base compile command matches
-	      # the one in the tagged configuration.
-	      # Assume this is the tagged configuration we want.
+	      # the one in the tagged profile.
+	      # Assume this is the tagged profile we want.
 	      tagname=$z
 	      break
 	      ;;
 	    esac
 	  fi
 	done
-	# If $tagname still isn't set, then no tagged configuration
+	# If $tagname still isn't set, then no tagged profile
 	# was found and let the user know that the "--tag" command
 	# line option must be used.
 	if test -z "$tagname"; then
 	  func_echo "unable to infer tagged configuration"
 	  func_fatal_error "specify a tag with \`--tag'"
 #	else
-#	  func_verbose "using $tagname tagged configuration"
+#	  func_verbose "using $tagname tagged profile"
 	fi
 	;;
       esac
@@ -8385,9 +8385,9 @@ exit $exit_status
 # the user asked for that or because the platform doesn't support
 # them.  This is particularly important on AIX, because we don't
 # support having both static and shared libraries enabled at the same
-# time on that platform, so we default to a shared-only configuration.
+# time on that platform, so we default to a shared-only profile.
 # If a disable-shared tag is given, we'll fallback to a static-only
-# configuration.  But we'll never go from static-only to shared-only.
+# profile.  But we'll never go from static-only to shared-only.
 
 # ### BEGIN LIBTOOL TAG CONFIG: disable-shared
 build_libtool_libs=no

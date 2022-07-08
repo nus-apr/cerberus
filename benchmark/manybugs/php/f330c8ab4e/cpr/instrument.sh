@@ -193,14 +193,14 @@ cp /CPR/components/$i.smt2 $dir_name/cpr/components
 done
 
 
-# Create seed configuration
+# Create seed profile
 echo " " > $dir_name/cpr/seed-input
 while IFS= read -r line
 do
   sed -i "1i \$POC_${line%.phpt}.php" $dir_name/cpr/seed-input
 done < $dir_name/tests.all.txt.rev
 
-# Create test configuration
+# Create test profile
 echo " " > $dir_name/cpr/test-input
 while IFS= read -r line
 do

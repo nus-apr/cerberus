@@ -7,15 +7,6 @@ benchmarks: ManyBugs and VulnLoc. This platform also provides the necessary mean
 run experiments more efficiently and effectively.
 
 
-## Using Cerberus
-Following is a simple snippet for the command to run an experiment from a selected benchmark.
-
-```bash
-source activate
-cerberus --bug-index=ID --tool=[cpr/angelix/prophet/genprog/fix2fit/vulnfix] --benchmark=[manybugs/vulnloc]
-```
-
-
 ## Features
 
 * Execution of repair tools on benchmarks of bugs
@@ -23,6 +14,13 @@ cerberus --bug-index=ID --tool=[cpr/angelix/prophet/genprog/fix2fit/vulnfix] --b
 * Concurrent execution of multiple repair tools 
 * Compilation-Free validation
 
+## Using Cerberus
+Following is a simple snippet for the command to run an experiment from a selected benchmark.
+
+```bash
+source activate
+cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prophet/f1x]
+```
 
 
 ## Supported Repair Tools
@@ -48,4 +46,30 @@ cerberus --bug-index=ID --tool=[cpr/angelix/prophet/genprog/fix2fit/vulnfix] --b
 | 1 | ManyBugs       | C/C++    |          6 |     60 |  
 | 2 | VulnLoc        | C/C++    |         11 |     43 |  
 
+
+## Bugs ##
+Cerberus should be considered alpha-quality software. Bugs can be reported here:
+
+    https://github.com/rshariffdeen/cerberus/issues
+
+## Documentation ##
+
+* [Getting Started](doc/GetStart.md)
+* [Example Usage](doc/Examples.md)
+* [Manual](doc/Manual.md)
+* [Extending](doc/Extending.md)
+
+
+# Contributions 
+We welcome contributions to improve this work, see [details](doc/Contributing.md)
+
+## Developers ##
+* Ridwan Shariffdeen
+* Gao Xiang
+* Yannic Noller
+* Zhang Yuntong
+
+
+# License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
 

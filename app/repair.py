@@ -295,10 +295,10 @@ def run(benchmark, tool_list, bug_info, config_info):
     config_id = config_info[definitions.KEY_ID]
     config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    emitter.highlight("\t[configuration] identifier: " + str(config_info[definitions.KEY_ID]))
-    emitter.highlight("\t[configuration] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
-    emitter.highlight("\t[configuration] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-    emitter.highlight("\t[configuration] test-suite ratio: " + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
+    emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
+    emitter.highlight("\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
+    emitter.highlight("\t[profile] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
+    emitter.highlight("\t[profile] test-suite ratio: " + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
     emitter.highlight("\t[meta-data] project: " + subject_name)
     emitter.highlight("\t[meta-data] bug ID: " + bug_name)
 

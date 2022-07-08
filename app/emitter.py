@@ -199,4 +199,4 @@ def emit_help():
     write("\t" + definitions.ARG_BUG_INDEX_LIST + "\t| " + "runs a list of experiments", WHITE)
     write("\t" + definitions.ARG_START_INDEX + "\t| " + "specify a range of experiments starting from ID", WHITE)
     write("\t" + definitions.ARG_END_INDEX + "\t| " + "specify a range of experiments that ends at ID", WHITE)
-    write("\t" + definitions.ARG_CONFIG_ID_LIST + "\t| " + "specify a different configuration using config ID", WHITE)
+    write("\t" + definitions.ARG_CONFIG_ID_LIST + "\t| " + "specify a different profile using config ID", WHITE)
