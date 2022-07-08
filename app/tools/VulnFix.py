@@ -135,7 +135,7 @@ class VulnFix(AbstractTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        count_generated = len([name for name in list_output_dir if ".patch" in name])
+        self._space.generated = len([name for name in list_output_dir if ".patch" in name])
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
