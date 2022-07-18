@@ -2,7 +2,7 @@
  {
    "id": 1,
    "subject": "crashes",
-   "bug_id": "div-zero",
+   "bug_id": "user-input",
    "source_file": "test.c",
    "line_numbers": [6],
    "failing_test": "1",
@@ -10,10 +10,25 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "test",
-   "crash_input": "1"
+   "crash_input": "1",
+   "test_timeout": 10
+ },
+ {
+   "id": 2,
+   "subject": "crashes",
+   "bug_id": "file-input",
+   "source_file": "test.c",
+   "line_numbers": [19],
+   "failing_test": "1",
+   "passing_test": "",
+   "count_neg": 1,
+   "count_pos": 0,
+   "binary_path": "test",
+   "crash_input": "$POC",
+   "test_timeout": 10
  },
   {
-   "id": 2,
+   "id": 3,
    "subject": "test-suite",
    "bug_id": "insert-if",
    "source_file": "test.c",
@@ -23,10 +38,11 @@
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "test",
-   "crash_input": "1"
+   "crash_input": "1",
+   "test_timeout": 10
  },
   {
-   "id": 3,
+   "id": 4,
    "subject": "test-suite",
    "bug_id": "update-if",
    "source_file": "test.c",
@@ -36,10 +52,11 @@
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "test",
-   "crash_input": "1"
+   "crash_input": "1",
+   "test_timeout": 10
  },
   {
-   "id": 4,
+   "id": 5,
    "subject": "test-suite",
    "bug_id": "gcd",
    "source_file": "gcd.c",
@@ -49,6 +66,7 @@
    "count_neg": 1,
    "count_pos": 10,
    "binary_path": "gcd",
-   "crash_input": "55"
+   "crash_input": "55",
+   "test_timeout": 10
  }
 ]

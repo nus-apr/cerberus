@@ -160,7 +160,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/appl/imginfo",
-   "crash_input": " -f $POC",
+   "crash_input": "-f $POC",
    "exploit_file_list": ["tests/1.j2k"],
    "test_timeout": 5
  },
@@ -175,7 +175,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "src/appl/imginfo",
-   "crash_input": " -f $POC",
+   "crash_input": "-f $POC",
    "exploit_file_list": ["tests/1.j2k"],
    "test_timeout": 5
  },
@@ -190,7 +190,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "bsdtar",
-   "crash_input": " -tf $POC",
+   "crash_input": "-tf $POC",
    "exploit_file_list": ["tests/1.iso"],
    "test_timeout": 5
  },
@@ -220,7 +220,7 @@
    "count_neg": 2,
    "count_pos": 0,
    "binary_path": "djpeg",
-   "crash_input": " -crop \"1x1+16+16\" -onepass -dither ordered -dct float -colors 8 -targa -grayscale -outfile o $POC",
+   "crash_input": "-crop \"1x1+16+16\" -onepass -dither ordered -dct float -colors 8 -targa -grayscale -outfile o $POC",
    "exploit_file_list": ["tests/1.jpg", "tests/2.jpg"],
    "test_timeout": 5
  },
@@ -235,7 +235,7 @@
    "count_neg": 5,
    "count_pos": 0,
    "binary_path": "cjpeg",
-   "crash_input": " -outfile out $POC",
+   "crash_input": "-outfile out $POC",
    "exploit_file_list": ["tests/1.bmp", "tests/2.bmp", "tests/3.bmp", "tests/4.bmp", "tests/5.bmp"],
    "test_timeout": 5
   },
@@ -250,7 +250,7 @@
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "build/djpeg",
-   "crash_input": " -colors 256 -bmp $POC",
+   "crash_input": "-colors 256 -bmp $POC",
    "exploit_file_list": ["tests/1.jpg"],
    "test_timeout": 5
  },
