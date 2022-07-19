@@ -55,6 +55,19 @@ class VulnFix(AbstractTool):
         Some fields of the VulnFix config file contains information which overlaps with what
         Cerberus already has, and also some of the fields depends on actual paths in the system. These fields are populated here into the existing config file template.
         """
+        # the config template should have been copied here
+        config_path = "/".join([self.dir_expr, "vulnfix", "config"])
+
+        # first check whether config already has a cmd line; 
+        # this is because vulnfix sometimes instrument program for AFL argv fuzzing, which 
+        # changes the command for invoking the program
+        orig_config_lines = self.read_file(config_path)
+        cmd_already_specified = False
+        for config_line in orig_config_lines:
+            config_type = config_line.split('=')[0]
+            if config_type == "cmd":
+                cmd_already_specified = True
+
         # (1) source-dir
         dir_src = "/".join([self.dir_expr, "src"])
         line_source_dir = "source-dir=" + dir_src + "\n"
@@ -62,10 +75,12 @@ class VulnFix(AbstractTool):
         rel_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
         binary_path = "/".join([dir_src, rel_binary_path])
         line_binary = "binary=" + binary_path + "\n"
-        # (3) cmd
-        cmd = experiment_info[definitions.KEY_CRASH_CMD]
-        cmd = cmd.replace("$POC", "<exploit>")
-        line_cmd = "cmd=" + cmd + "\n"
+        # (3) (OPTIONAL) cmd
+        line_cmd = ""
+        if not cmd_already_specified:
+            cmd = experiment_info[definitions.KEY_CRASH_CMD]
+            cmd = cmd.replace("$POC", "<exploit>")
+            line_cmd = "cmd=" + cmd + "\n"
         # (4) exploit
         dir_tests = "/".join([self.dir_setup, "tests"])
         tests_list = self.list_dir(dir_tests)
@@ -84,11 +99,10 @@ class VulnFix(AbstractTool):
         # (6) runtime-dir
         line_runtime_dir = "runtime-dir=" + self.dir_output + "\n"
 
-        # the config template should have been copied here
-        config_path = "/".join([self.dir_expr, "vulnfix", "config"])
         config_updates = list()
         config_updates.append(line_binary)
-        config_updates.append(line_cmd)
+        if line_cmd:
+            config_updates.append(line_cmd)
         config_updates.append(line_exploit)
         if line_normals:
             config_updates.append(line_normals)
