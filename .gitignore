@@ -11,3 +11,5 @@ venv
 *.pyc
 archive
 results
+
+.vscode
