@@ -17,6 +17,9 @@ class CRepair(AbstractTool):
     def generate_conf_file(self, bug_info):
         repair_conf_path = self.dir_expr + "/src/repair.conf"
         conf_content = []
+        poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+        poc_abs_list = ["{}/{}".format(self.dir_setup,x) for x in poc_list]
+
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
         conf_content.append("src_directory:src\n")
@@ -24,7 +27,7 @@ class CRepair(AbstractTool):
         conf_content.append("config_command:{}\n".format(self.dir_setup + "/config.sh /experiment"))
         conf_content.append("build_command:{}\n".format(self.dir_setup + "/build.sh /experiment"))
         conf_content.append("test_input_list:{}\n".format(bug_info[definitions.KEY_CRASH_CMD]))
-        conf_content.append("poc_list:{}\n".format(",".join(bug_info[definitions.KEY_EXPLOIT_LIST])))
+        conf_content.append("poc_list:{}\n".format(",".join(poc_abs_list)))
         self.write_file(conf_content, repair_conf_path)
         return repair_conf_path
 

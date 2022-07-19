@@ -194,7 +194,7 @@ def list_dir(container_id, dir_path):
     file_list = []
     if stdout:
         dir_list = stdout.decode("utf-8").split("\n")
-        for o in dir_list:
+        for o in dir_list[:-1]:
             file_list.append(o.strip().replace("\n", ""))
     return file_list
 
