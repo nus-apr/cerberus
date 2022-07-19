@@ -33,7 +33,7 @@ class VulnLoc(AbstractBenchmark):
             emitter.success("\t\t\t[benchmark] verified successfully")
         else:
             emitter.error("\t\t\t[benchmark] verification failed")
-        if tool_name == "vulnfix":
+        if not values.DEFAULT_USE_VALKYRIE:
             emitter.normal("\t\t\tskipping transformation for vulnfix")
         else:
             if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
