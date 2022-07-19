@@ -15,7 +15,7 @@ touch $dummy_file
 
 # for AFL argv fuzz
 sed -i '1283i #include "/home/yuntong/vulnfix/thirdparty/AFL/experimental/argv_fuzzing/argv-fuzz-inl.h"' src/split.c
-sed -i "1288i AFL_INIT_SET02("./split", "$dummy_file");" src/split.c
+sed -i "1288i AFL_INIT_SET02(\"./split\", \"$dummy_file\");" src/split.c
 # avoid writing out a lot of files during fuzzing
 sed -i '595i return false;' src/split.c
 # not bulding man pages
