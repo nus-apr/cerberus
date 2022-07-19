@@ -10,6 +10,7 @@ from app import definitions, values, emitter, container
 class VulnFix(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.dir_root = "/home/yuntong/vulnfix"
         super(VulnFix, self).__init__(self.name)
 
 
@@ -22,8 +23,7 @@ class VulnFix(AbstractTool):
             self.dir_output - directory to store artifacts/output 
         '''
 
-        dir_vulnfix_root = "/home/yuntong/vulnfix"
-        dir_vulnfix_exist = self.is_dir(dir_vulnfix_root)
+        dir_vulnfix_exist = self.is_dir(self.dir_root)
         if not dir_vulnfix_exist:
             emitter.error(
                 "[Exception] Vulnfix repo is not at the expected location. "
@@ -40,7 +40,7 @@ class VulnFix(AbstractTool):
                                                                             config_path)
         status = self.run_command(vulnfix_command,
                                   log_file_path=self.log_output_path,
-                                  dir_path=dir_vulnfix_root)
+                                  dir_path=self.dir_root)
         self.timestamp_log()
 
         if status != 0:
