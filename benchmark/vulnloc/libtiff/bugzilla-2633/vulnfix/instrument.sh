@@ -9,16 +9,16 @@ mkdir $dir_name/vulnfix
 cd $dir_name/src
 
 make clean
-autoreconf -fiv
 ./configure
 make CFLAGS="-static -fsanitize=address -fsanitize=undefined -g" CXXFLAGS="-static -fsanitize=address -fsanitize=undefined -g" -j`nproc`
 
 config_path=$dir_name/vulnfix/config
 
 cat > $config_path <<EOL
-fix-location=jdmarker.c:327
-crash-location=jdmarker.c:327
-fix-file-path=jdmarker.c
-fix-line=326
+fix-location=tiff2ps.c:2437
+crash-location=tiff2ps.c:2470
+afl-skip-deterministic=false
+fix-file-path=tools/tiff2ps.c
+fix-line=2437
 build-cmd=make clean && make CFLAGS="-static -fsanitize=address -fsanitize=undefined -g" CXXFLAGS="-static -fsanitize=address -fsanitize=undefined -g" -j10
 EOL

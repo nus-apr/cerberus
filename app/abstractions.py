@@ -15,7 +15,7 @@ def append_file(container_id, content, file_path):
     if container_id:
         container.append_file(container_id, file_path, content)
     else:
-        with open(file_path, "w") as f:
+        with open(file_path, "a") as f:
             for line in content:
                 f.write(line)
 
@@ -24,7 +24,7 @@ def write_file(container_id, content, file_path):
     if container_id:
         container.write_file(container_id, file_path, content)
     else:
-        with open(file_path, "a") as f:
+        with open(file_path, "w") as f:
             for line in content:
                 f.write(line)
 
