@@ -1,6 +1,4 @@
 import os
-import re
-import shutil
 
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import error_exit
@@ -10,8 +8,10 @@ from app import definitions, values, emitter, container
 class VulnFix(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.dir_root = "/home/yuntong/vulnfix"
         super(VulnFix, self).__init__(self.name)
+        self.dir_root = "/home/yuntong/vulnfix"
+        activate_cmd = "source " + self.dir_root + "/activate"
+        self.run_command(activate_cmd)
 
 
     def repair(self, bug_info, config_info):
@@ -36,7 +36,7 @@ class VulnFix(AbstractTool):
 
         # start running
         self.timestamp_log()
-        vulnfix_command = "python3.8 src/main.py {0} {1}".format(additional_tool_param,
+        vulnfix_command = "vulnfix {0} {1}".format(additional_tool_param,
                                                                             config_path)
         status = self.run_command(vulnfix_command,
                                   log_file_path=self.log_output_path,
