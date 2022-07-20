@@ -36,8 +36,7 @@ class VulnFix(AbstractTool):
 
         # start running
         self.timestamp_log()
-        vulnfix_command = "vulnfix {0} {1}".format(additional_tool_param,
-                                                                            config_path)
+        vulnfix_command = "vulnfix {0} {1}".format(additional_tool_param, config_path)
         status = self.run_command(vulnfix_command,
                                   log_file_path=self.log_output_path,
                                   dir_path=self.dir_root)
