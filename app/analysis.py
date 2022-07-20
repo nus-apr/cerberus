@@ -6,8 +6,8 @@ from datetime import datetime
 
 
 class TimeAnalysis:
-    timestamp_start = 0
-    timestamp_end = 0
+    timestamp_start = "Wed 20 Jul 2022 10:31:47 AM +08"
+    timestamp_end = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_compilation = 0
     timestamp_validation = 0
     timestamp_plausible = 0
