@@ -7,7 +7,10 @@ RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  \
     automake \
     autopoint \
+    bear \
     bison \
+    ca-certificates \
+    curl \
     flex \
     gettext \
     git \
@@ -32,6 +35,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libxml2-dev \
     nasm \
     nano \
+    openssl \
     pkg-config \
     psmisc \
     python3 \
@@ -63,4 +67,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     mercurial \
     tcl-dev \
     tix-dev \
-    unzip
+    unzip \
+    wget
+
