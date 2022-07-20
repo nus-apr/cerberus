@@ -32,46 +32,22 @@ class CRepair(AbstractTool):
         return repair_conf_path
 
 
-    def prepare(self, bug_info):
-        """preparation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t preparing for " + self.name)
-        bug_id = str(bug_info[definitions.KEY_ID])
-        conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = self.dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
-        repair_conf_path = self.generate_conf_file(bug_info)
-        return repair_conf_path
-
-
     def repair(self, bug_info, config_info):
         emitter.normal("\t\t\t running repair with " + self.name)
-        conf_id = config_info[definitions.KEY_ID]
-        dir_logs = self.dir_logs
-        dir_setup = self.dir_setup
-        dir_expr = self.dir_expr
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        repair_conf_path = self.prepare(bug_info)
-        self.instrument(bug_info)
-        self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
-        relative_binary_path = bug_info[definitions.KEY_BINARY_PATH]
-        abs_binary_path = dir_expr + "/src/" + relative_binary_path
-        binary_dir_path = "/".join(abs_binary_path.split("/")[:-1])
-        timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-        execute_command(timestamp_command)
-        CRepair_command = "cd {};".format(binary_dir_path)
-        CRepair_command += "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
+        repair_conf_path = self.generate_conf_file(bug_info)
+        self.timestamp_log()
+        CRepair_command = "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
                                                                           repair_conf_path)
         CRepair_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
-        status = execute_command(CRepair_command)
+        status = self.run_command(CRepair_command)
         if status != 0:
             emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = "printf \"\\n\" >> " + self.log_output_path
-        timestamp_command += ";echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-        execute_command(timestamp_command)
+        self.timestamp_log()
 
 
     def save_artefacts(self, dir_info):
