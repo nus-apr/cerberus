@@ -204,23 +204,3 @@ class AbstractTool:
                         self.log_output_path = os.path.join(self.dir_logs, file)
                         break
         return self.log_output_path
-
-
-    def save_analysis_log(self, bug_id):
-        conf_id = str(values.CONFIG_ID)
-        exp_id = conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
-        log_analysis_path = os.path.join(self.dir_logs, exp_id)
-        analysis_content = list()
-        analysis_content.append("\t\t search space size: {0}\n".format(size_search_space))
-        analysis_content.append("\t\t count plausible patches: {0}\n".format(count_plausible))
-        analysis_content.append("\t\t count generated patches: {0}\n".format(count_generated))
-        analysis_content.append("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-        analysis_content.append("\t\t count implausible patches: {0}\n".format(count_implausible))
-        analysis_content.append("\t\t count enumerations: {0}\n".format(count_enumerations))
-        analysis_content.append("\t\t any errors: {0}\n".format(is_error))
-        analysis_content.append("\t\t time latency validation: {0} seconds\n".format(time_latency_2))
-        analysis_content.append("\t\t time latency plausible: {0} seconds\n".format(time_latency_1))
-        analysis_content.append("\t\t time build: {0} seconds\n".format(time_build))
-        analysis_content.append("\t\t time validation: {0} seconds\n".format(time_validation))
-        analysis_content.append("\t\t time duration: {0} seconds\n".format(time_duration))
-        self.write_file(analysis_content, log_analysis_path)
