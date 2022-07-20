@@ -74,94 +74,48 @@ class CRepair(AbstractTool):
         execute_command(timestamp_command)
 
 
-    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
-        super(CRepair, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
-        dir_logs = "/CRepair/logs/" + bug_id
-        execute_command("cp -rf" + dir_logs + " " + dir_results + "/logs")
-
-    def save_artefacts(self, dir_info, experiment_info, container_id):
+    def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_exp = dir_info["experiment"]
-        dir_output = dir_info["output"]
-        bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-        copy_command = "cp -rf " + dir_exp + "/CRepair " + dir_output
-        execute_command(copy_command)
-        relative_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
-        abs_binary_path = dir_exp + "/src/" + relative_binary_path
-        patch_path = abs_binary_path + ".bc.patch"
-        copy_command = "cp -rf " + patch_path + " " + dir_output + "/patches"
-        execute_command(copy_command)
-        super(CRepair, self).save_artefacts(dir_info, experiment_info, container_id)
+        tool_log_dir = "/CRepair/logs/"
+        tool_log_files = ["{}/{}".format(tool_log_dir,f)
+                          for f in self.list_dir(tool_log_dir) if ".log" in f]
+        for log_file in tool_log_files:
+            copy_command = "cp {} {}".format(log_file, self.dir_output)
+            self.run_command(copy_command)
+        super(CRepair, self).save_artefacts(dir_info)
         return
 
-    def post_process(self, dir_expr, dir_results, container_id):
-        emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(CRepair, self).post_process(dir_expr, dir_results, container_id)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
-        conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
-        regex = re.compile('(.*-output.log$)')
-        for root, dirs, files in os.walk(dir_results):
-            for file in files:
-                if regex.match(file) and self.name in file:
-                    self.log_output_path = dir_results + "/" + file
-                    break
-        count_non_compilable = 0
-        count_plausible = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        count_generated = 0
-        time_first = 0
-        time_latency = 0
-        time_validation = 0
-        time_build = 0
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+
         is_error = False
+        count_plausible = 0
+        count_enumerations = 0
 
-        if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
-                log_lines = log_file.readlines()
-                time_start = log_lines[0].replace("\n", "")
-                time_end = log_lines[-1].replace("\n", "")
-                time_duration = self.time_duration(time_start, time_end)
-                for line in log_lines:
-                    if "Creating patch" in line:
-                        count_plausible = 1
-                        count_enumerations = 1
-                    elif "Runtime Error" in line:
-                        is_error = True
-                log_file.close()
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
-        if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+        # count number of patch files
+        list_output_dir = self.list_dir(self.dir_output)
+        self._space.generated = len([name for name in list_output_dir if ".patch" in name])
 
-        with open(self.log_analysis_path, 'w') as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.DEFAULT_DUMP_PATCHES:
-                count_enumerations = count_plausible
-            else:
-                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        patch_space_info = (size_search_space, count_enumerations, count_plausible, count_non_compilable, count_generated)
-        time_info = (time_build, time_validation, time_duration, time_latency, time_first)
-        return patch_space_info, time_info
+        # extract information from output log
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
+            return self._space, self._time, self._error
 
-    def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
-        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(CRepair, self).pre_process(dir_logs, dir_expr, dir_setup, container_id)
+        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self._time.timestamp_start = log_lines[0].replace("\n", "")
+            self._time.timestamp_end = log_lines[-1].replace("\n", "")
+
+            for line in log_lines:
+                if "Generating patch" in line:
+                    count_plausible += 1
+                    count_enumerations += 1
+
+        self._space.plausible = count_plausible
+        self._space.enumerations = count_enumerations
+        self._error.is_error = is_error
+        return self._space, self._time, self._error
 
