@@ -11,6 +11,7 @@ from os.path import isfile, join
 class CRepair(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "rshariffdeen/crepair"
         super(CRepair, self).__init__(self.name)
 
 
@@ -24,11 +25,11 @@ class CRepair(AbstractTool):
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
         conf_content.append("src_directory:src\n")
         conf_content.append("binary_path:{}\n".format(bug_info[definitions.KEY_BINARY_PATH]))
-        conf_content.append("config_command:{}\n".format(self.dir_setup + "/config.sh /experiment"))
-        conf_content.append("build_command:{}\n".format(self.dir_setup + "/build.sh /experiment"))
+        conf_content.append("config_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(self.dir_setup + "/config.sh /experiment"))
+        conf_content.append("build_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(self.dir_setup + "/build.sh /experiment"))
         conf_content.append("test_input_list:{}\n".format(bug_info[definitions.KEY_CRASH_CMD]))
         conf_content.append("poc_list:{}\n".format(",".join(poc_abs_list)))
-        self.write_file(conf_content, repair_conf_path)
+        self.append_file(conf_content, repair_conf_path)
         return repair_conf_path
 
 
@@ -38,9 +39,9 @@ class CRepair(AbstractTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         repair_conf_path = self.generate_conf_file(bug_info)
         self.timestamp_log()
-        CRepair_command = "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
-                                                                          repair_conf_path)
-        CRepair_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
+        CRepair_command = "timeout -k 5m {0}h crepair --conf={1} {2}".format(str(timeout_h),
+                                                                          repair_conf_path,
+                                                                          additional_tool_param)
         status = self.run_command(CRepair_command,
                                   log_file_path=self.log_output_path)
         if status != 0:

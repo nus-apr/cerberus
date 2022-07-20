@@ -13,76 +13,77 @@ class VulnLoc(AbstractBenchmark):
         super(VulnLoc, self).__init__()
 
 
-    def setup(self, tool_name, bug_index, config_id, test_all, use_container, is_multi):
+    def setup_experiment(self, bug_index, container_id, test_all):
+        is_error = super(VulnLoc, self).setup_experiment(bug_index, container_id, test_all)
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        tool_name_dir = tool_name
-        if is_multi:
-            tool_name_dir = "multi"
-        self.log_dir_path = definitions.DIR_LOGS + "/" + str(config_id) + "-" + self.name + "-" + \
-                            tool_name_dir + "-" + subject_name + "-" + bug_id
-        container_id = self.setup_container(tool_name, bug_index, config_id, use_container, is_multi)
-        exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-        if not use_container:
+        if not container_id:
             self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
             dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
             if os.path.isdir(dir_exp_local):
                 execute_command("rm -rf {}".format(dir_exp_local))
-        self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all)
-        if self.verify(exp_setup_dir_path, bug_id, container_id):
+        if self.verify(bug_id, container_id):
             emitter.success("\t\t\t[benchmark] verified successfully")
         else:
             emitter.error("\t\t\t[benchmark] verification failed")
+            is_error = True
         if not values.DEFAULT_USE_VALKYRIE:
             emitter.normal("\t\t\tskipping transformation for vulnfix")
         else:
-            if self.transform(exp_setup_dir_path, bug_id, container_id):
+            if self.transform(bug_id, container_id):
                 emitter.success("\t\t\t[benchmark] transformation successful")
             else:
                 emitter.error("\t\t\t[benchmark] transformation failed")
-        return container_id
+                is_error = True
+        return is_error
 
-    def deploy(self, setup_dir_path, bug_id, container_id):
+    def deploy(self, bug_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
-        self.log_deploy_path = self.log_dir_path + "/" + "-" + self.name + "-" + bug_id + "-deploy.log"
+        self.log_deploy_path = self.dir_logs + "/" + "-" + self.name + "-" + bug_id + "-deploy.log"
         command_str = "bash setup.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_deploy_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_deploy_path,
+                                  self.dir_setup_container, container_id)
         return status == 0
 
-    def config(self, setup_dir_path, bug_id, container_id):
+    def config(self, bug_id, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
-        self.log_config_path = self.log_dir_path + "/" + "-" + self.name + "-" + bug_id + "-config.log"
+        self.log_config_path = self.dir_logs + "/" + "-" + self.name + "-" + bug_id + "-config.log"
         command_str = "bash config.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_config_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_config_path,
+                                  self.dir_setup_container, container_id)
         return status == 0
 
-    def build(self, setup_dir_path, bug_id, container_id):
+    def build(self, bug_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
-        self.log_build_path = self.log_dir_path + "/"  + "-" + self.name + "-" + bug_id + "-build.log"
+        self.log_build_path = self.dir_logs + "/"  + "-" + self.name + "-" + bug_id + "-build.log"
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_build_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_build_path,
+                                  self.dir_setup_container, container_id)
         return status == 0
 
-    def test(self, setup_dir_path, bug_id, container_id):
+    def test(self, bug_id, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
-        self.log_test_path = self.log_dir_path + "/" + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = self.dir_logs + "/" + "-" + self.name + "-" + bug_id + "-test.log"
         command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_test_path,
+                                  self.dir_setup_container, container_id)
         return status != 0
 
-    def verify(self, setup_dir_path, bug_id, container_id):
+    def verify(self, bug_id, container_id):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
-        self.log_test_path = self.log_dir_path + "/" + "-" + self.name + "-" + bug_id + "-verify.log"
+        self.log_test_path = self.dir_logs + "/" + "-" + self.name + "-" + bug_id + "-verify.log"
         command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_test_path,
+                                  self.dir_setup_container, container_id)
         return status == 0
 
-    def transform(self, setup_dir_path, bug_id, container_id):
+    def transform(self, bug_id, container_id):
         emitter.normal("\t\t\ttransform fix-file")
-        self.log_test_path = self.log_dir_path + "/" + "-" + self.name + "-" + bug_id + "-transform.log"
+        self.log_test_path = self.dir_logs + "/" + "-" + self.name + "-" + bug_id + "-transform.log"
         command_str = "bash transform.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        status = self.run_command(command_str, self.log_test_path,
+                                  self.dir_setup_container, container_id)
         return status == 0
 
     def clean(self, exp_dir_path, container_id):

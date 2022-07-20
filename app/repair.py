@@ -299,7 +299,6 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
     if container_id:
         container.stop_container(container_id)
         container.remove_container(container_id)
-    tmp_dockerfile = "/tmp/Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
     volume_list = {
         # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
         dir_info["local"]["logs"]: {'bind': '/logs', 'mode': 'rw'},
@@ -308,12 +307,15 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         dir_info["local"]["base"]: {'bind': dir_info["container"]["base"], 'mode': 'rw'},
         "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
     }
-    with open(tmp_dockerfile, 'w') as dock_file:
-        dock_file.write("FROM {}\n".format(repair_tool.image_name))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
-    dock_file.close()
-    container.build_image(tmp_dockerfile, container_name.lower())
+    if not container.is_image_exist(container_name.lower()):
+        tmp_dockerfile = "/tmp/Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+        with open(tmp_dockerfile, 'w') as dock_file:
+            dock_file.write("FROM {}\n".format(repair_tool.image_name))
+            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
+            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
+            dock_file.write("RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"]))
+        dock_file.close()
+        container.build_image(tmp_dockerfile, container_name.lower())
     container_id = container.build_container(container_name, volume_list, container_name.lower())
     return container_id
 

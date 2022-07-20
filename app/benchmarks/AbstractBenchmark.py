@@ -91,7 +91,9 @@ class AbstractBenchmark:
 
     def build_experiment_image(self, bug_index, test_all, exp_image_name):
         container_id = self.setup_container(bug_index, self.image_name)
-        self.setup_experiment(self.dir_setup_container, bug_index, container_id, test_all)
+        is_error = self.setup_experiment(bug_index, container_id, test_all)
+        if is_error:
+            utilities.error_exit("setting up experiment failed")
         container_obj = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
@@ -110,41 +112,53 @@ class AbstractBenchmark:
         volume_list = {
             # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
             self.dir_logs: {'bind': '/logs', 'mode': 'rw'},
-            self.dir_setup: {'bind': self.dir_setup_container, 'mode': 'rw'},
-            "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
+            self.dir_setup: {'bind': '/scripts', 'mode': 'rw'}
         }
+
         container_name = self.name + "-" + subject_name + "-" + bug_id
         container_id = container.get_container_id(container_name)
         if container_id:
             container.stop_container(container_id)
             container.remove_container(container_id)
         container_id = container.build_container(container_name, volume_list, image_name)
+        parent_dirs = "/".join(self.dir_setup_container.split("/")[:-2])
+        mkdir_cmd = "mkdir -p {}".format(parent_dirs)
+        copy_local_cmd = "cp -rf {} {}".format("/scripts",
+                                               self.dir_setup_container)
+        self.run_command(mkdir_cmd, "/dev/null", "/", container_id)
+        self.run_command(copy_local_cmd, "/dev/null", "/", container_id)
         return container_id
 
-    def setup_experiment(self, directory_name, bug_index, container_id, test_all):
+    def setup_experiment(self, bug_index, container_id, test_all):
         emitter.normal("\t\t[benchmark] preparing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        if self.deploy(directory_name, bug_id, container_id):
-            if self.config(directory_name, bug_id, container_id):
-                if self.build(directory_name, bug_id, container_id):
+        setup_error = False
+        if self.deploy(bug_id, container_id):
+            if self.config(bug_id, container_id):
+                if self.build(bug_id, container_id):
                     if test_all:
-                        if self.test_all(directory_name, experiment_item, container_id):
+                        if self.test_all(experiment_item, container_id):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
+                            setup_error = True
                     else:
-                        if self.test(directory_name, bug_id, container_id):
+                        if self.test(bug_id, container_id):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
+                            setup_error = True
                 else:
                     emitter.error("\t\t\t[benchmark] build failed")
+                    setup_error = True
             else:
                 emitter.error("\t\t\t[benchmark] config failed")
+                setup_error = True
         else:
             emitter.error("\t\t\t[benchmark] deploy failed")
-
+            setup_error = True
+        return setup_error
 
     def get_exp_image(self, bug_index, test_all):
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -166,27 +180,27 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def deploy(self, setup_dir_path, bug_id, container_id):
+    def deploy(self, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def config(self, setup_dir_path, bug_id, container_id):
+    def config(self, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, setup_dir_path, bug_id, container_id):
+    def build(self, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, setup_dir_path, bug_id, container_id):
+    def test(self, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test_all(self, setup_dir_path, bug_id, container_id):
+    def test_all(self, bug_id, container_id):
         """Method documentation"""
         return
 
