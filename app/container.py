@@ -1,21 +1,20 @@
 import docker
 import os
+import pathlib
 from app import definitions, utilities, emitter
 
-IMAGE_NAME = "rshariffdeen/cerberus"
 
-
-def check_image_exist(tool_name):
+def is_image_exist(image_name, tag_name="latest"):
     client = docker.from_env()
     image_list = client.images.list()
     for image in image_list:
         tag_list = image.tags
         if not tag_list:
             continue
-        if IMAGE_NAME not in tag_list[0]:
+        if image_name not in tag_list[0]:
             continue
         for tag in tag_list:
-            if tool_name in tag:
+            if tag_name in tag:
                 return True
     return False
 
@@ -31,12 +30,12 @@ def get_tool_image(tool_name):
     return image
 
 
-def pull_image(tool_name):
+def pull_image(image_name, tag_name):
     client = docker.from_env()
     emitter.normal("pulling docker image")
     image = None
     try:
-        image, _ = client.images.pull(repository=IMAGE_NAME, tag=tool_name)
+        image, _ = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
         emitter.warning("[error] Unable to pull image: docker daemon error")
@@ -46,16 +45,15 @@ def pull_image(tool_name):
     return image
 
 
-def build_tool_image(tool_name):
+def build_image(dockerfile_path, image_name):
     client = docker.from_env()
-    emitter.normal("building docker image")
-    image_name = IMAGE_NAME + ":" + tool_name
+    emitter.normal("\t\tbuilding docker image")
     image = None
-    dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
+    context_dir = pathlib.Path(dockerfile_path).parent.absolute()
     if os.path.isfile(dockerfile_path):
-        image = None
+        dockerfile_obj = open(dockerfile_path, "rb")
         try:
-            image, _ = client.images.build(path=definitions.DIR_INFRA, fileobj=dockerfile_path, tag=image_name)
+            image, _ = client.images.build(path=context_dir, fileobj=dockerfile_obj, tag=image_name)
         except docker.errors.BuildError as ex:
             emitter.error(ex)
             utilities.error_exit("[error] Unable to build image: build failed")
@@ -63,17 +61,47 @@ def build_tool_image(tool_name):
             emitter.error(exp)
             utilities.error_exit("[error] Unable to build image: docker daemon error")
         except Exception as ex:
-            emitter.error(ex)
+            print(ex)
             utilities.error_exit("[error] Unable to build image: unhandled exception")
     else:
         utilities.error_exit("[error] Unable to build image: Dockerfile not found")
     return image
 
 
-def get_container(tool, benchmark, subject, bug_id, config_id='default'):
+def build_benchmark_image(image_name):
+    benchmark_name = image_name.split("-")[0]
+    dockerfile_path = "{}/{}/Dockerfile".format(definitions.DIR_BENCHMARK,
+                                                str(benchmark_name).lower())
+    tool_image_id = build_image(dockerfile_path, image_name)
+    return tool_image_id
+
+
+def build_tool_image(tool_name):
+    image_name = "{}-tool".format(tool_name)
+    dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
+    tool_image_id = build_image(dockerfile_path, image_name)
+    return tool_image_id
+
+
+def get_container(container_id):
     client = docker.from_env()
-    image_name = IMAGE_NAME + ":" + tool
-    container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
+    container = None
+    try:
+        container = client.containers.get(container_id)
+    except docker.errors.NotFound as ex:
+        # emitter.error(ex)
+        emitter.warning("\t\t[warning] Unable to find container")
+    except docker.errors.APIError as exp:
+        emitter.error(exp)
+        utilities.error_exit("[error] Unable to find container: docker daemon error")
+    except Exception as ex:
+        emitter.error(ex)
+        utilities.error_exit("[error] Unable to find container: unhandled exception")
+    return container
+
+
+def get_container_id(container_name):
+    client = docker.from_env()
     container_id = None
     try:
         container_id = client.containers.get(container_name).id[:12]
@@ -89,11 +117,9 @@ def get_container(tool, benchmark, subject, bug_id, config_id='default'):
     return container_id
 
 
-def build_container(tool, benchmark, subject, bug_id, volume_list, config_id='default'):
+def build_container(container_name, volume_list, image_name):
     client = docker.from_env()
     emitter.normal("\t\t\tbuilding docker container")
-    image_name = IMAGE_NAME + ":" + tool
-    container_name = tool + "-" + benchmark + "-" + subject + "-" + bug_id + "-" + config_id
     container_id = None
     try:
         for local_dir_path in volume_list:

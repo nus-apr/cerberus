@@ -10,6 +10,15 @@ class AbstractBenchmark:
     meta_file = None
     bench_dir_path = None
     name = None
+    image_name = None
+    dir_logs = ""
+    dir_logs_container = ""
+    dir_expr = ""
+    dir_expr_container = ""
+    dir_base_expr = ""
+    dir_inst = ""
+    dir_setup = ""
+    dir_setup_container = ""
     log_dir_path = "None"
     log_deploy_path = "None"
     log_config_path = "None"
@@ -22,7 +31,21 @@ class AbstractBenchmark:
 
     def __init__(self):
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
+        self.image_name = "{}-benchmark".format(self.name)
+        self.build_benchmark_image()
         self.load()
+
+
+    def update_dir_info(self, dir_info):
+        self.dir_expr_container = dir_info["container"]["experiment"]
+        self.dir_logs_container = dir_info["container"]["logs"]
+        self.dir_setup_container = dir_info["container"]["setup"]
+        self.dir_base_expr = "/experiment/"
+        self.dir_expr = dir_info["local"]["experiment"]
+        self.dir_logs = dir_info["local"]["logs"]
+        self.dir_setup = dir_info["local"]["setup"]
+        self.dir_base_expr = definitions.DIR_EXPERIMENT
+
 
     def get_list(self):
         return self.experiment_subjects
@@ -57,58 +80,61 @@ class AbstractBenchmark:
             exit_code = utilities.execute_command(command_str)
         return exit_code
 
-    def setup_container(self, tool_name, bug_index, config_id, use_container, is_multi):
+    def build_benchmark_image(self):
+        if not container.is_image_exist(self.image_name):
+            emitter.warning("\tbenchmark environment not found")
+            emitter.normal("\tbuilding benchmark environment")
+            container.build_benchmark_image(self.image_name)
+        else:
+            emitter.success("\t\tpre-built benchmark environment found")
+
+
+    def build_experiment_image(self, bug_index, test_all, exp_image_name):
+        container_id = self.setup_container(bug_index, self.image_name)
+        self.setup_experiment(self.dir_setup_container, bug_index, container_id, test_all)
+        container_obj = container.get_container(container_id)
+        container_obj.commit(exp_image_name)
+
+
+    def setup_container(self, bug_index, image_name):
         container_id = None
-        if use_container:
-            emitter.normal("\t\t[benchmark] preparing docker environment")
-            experiment_item = self.experiment_subjects[bug_index - 1]
-            bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-            subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-            self.setup_dir_path = "/setup"
-            dir_setup_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_setup_container = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-            dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
-            if os.path.isdir(dir_exp_local):
-                shutil.rmtree(dir_exp_local)
-            tool_name_dir = tool_name
-            if is_multi:
-                tool_name_dir = "multi"
-            dir_output_local = definitions.DIR_ARTIFACTS + "/" + str(config_id) + "-" + self.name + "-" + \
-                               tool_name_dir + "-" + subject_name + "-" + bug_id
-            dir_aux_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/.aux"
-            dir_aux_container = "/experiments/benchmark/" + self.name + "/" + subject_name + "/.aux"
-            dir_base_local = self.bench_dir_path + "/" + self.name + "/" + subject_name + "/base"
-            dir_base_container = "/experiments/benchmark/" + self.name + "/" + subject_name + "/base"
-            volume_list = {
-                # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
-                self.log_dir_path: {'bind': '/logs', 'mode': 'rw'},
-                dir_output_local: {'bind': '/output', 'mode': 'rw'},
-                dir_setup_local: {'bind': dir_setup_container, 'mode': 'rw'},
-                dir_aux_local: {'bind': dir_aux_container, 'mode': 'rw'},
-                dir_base_local: {'bind': dir_base_container, 'mode': 'rw'},
-                "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
-            }
-            container_id = container.get_container(tool_name, self.name, subject_name, bug_id, config_id)
-            if container_id:
-                container.stop_container(container_id)
-                container.remove_container(container_id)
-            container_id = container.build_container(tool_name, self.name, subject_name, bug_id, volume_list, config_id)
+        emitter.normal("\t\t[benchmark] preparing experiment environment")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+
+        if os.path.isdir(dir_exp_local):
+            shutil.rmtree(dir_exp_local)
+
+        volume_list = {
+            # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
+            self.dir_logs: {'bind': '/logs', 'mode': 'rw'},
+            self.dir_setup: {'bind': self.dir_setup_container, 'mode': 'rw'},
+            "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
+        }
+        container_name = self.name + "-" + subject_name + "-" + bug_id
+        container_id = container.get_container_id(container_name)
+        if container_id:
+            container.stop_container(container_id)
+            container.remove_container(container_id)
+        container_id = container.build_container(container_name, volume_list, image_name)
         return container_id
 
-    def setup_experiment(self, directory_name, bug_index, config_id, container_id, test_all, tool_name):
+    def setup_experiment(self, directory_name, bug_index, container_id, test_all):
         emitter.normal("\t\t[benchmark] preparing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        if self.deploy(directory_name, bug_id, config_id, container_id, tool_name):
-            if self.config(directory_name, bug_id, config_id, container_id, tool_name):
-                if self.build(directory_name, bug_id, config_id, container_id, tool_name):
+        if self.deploy(directory_name, bug_id, container_id):
+            if self.config(directory_name, bug_id, container_id):
+                if self.build(directory_name, bug_id, container_id):
                     if test_all:
-                        if self.test_all(directory_name, experiment_item, config_id, container_id, tool_name):
+                        if self.test_all(directory_name, experiment_item, container_id):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
                     else:
-                        if self.test(directory_name, bug_id, config_id, container_id, tool_name):
+                        if self.test(directory_name, bug_id, container_id):
                             emitter.success("\t\t\t[benchmark] setting up completed successfully")
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
@@ -119,33 +145,48 @@ class AbstractBenchmark:
         else:
             emitter.error("\t\t\t[benchmark] deploy failed")
 
+
+    def get_exp_image(self, bug_index, test_all):
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
+        if not container.is_image_exist(exp_image_name):
+            emitter.warning("\t\t[warning] experiment not built")
+            emitter.normal("\t\t\tpreparing/building experiment")
+            self.build_experiment_image(bug_index, test_all, exp_image_name)
+        else:
+            emitter.success("\t\t\t\tpre-built experiment found")
+        return exp_image_name
+
+
     @abc.abstractmethod
-    def setup(self, tool_name, bug_index, config_ig, test_all, use_container, is_multi):
+    def setup(self, bug_index, config_ig, test_all, use_container, is_multi):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def deploy(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
+    def deploy(self, setup_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def config(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
+    def config(self, setup_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def build(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
+    def build(self, setup_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
+    def test(self, setup_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 
     @abc.abstractmethod
-    def test_all(self, exp_dir_path, bug_id, config_id, container_id, tool_name):
+    def test_all(self, setup_dir_path, bug_id, container_id):
         """Method documentation"""
         return
 

@@ -4,7 +4,7 @@ import re
 import traceback
 import signal
 import time
-from app import emitter, logger, definitions, values, utilities, configuration, parallel, valkyrie
+from app import emitter, logger, definitions, values, utilities, container, parallel, valkyrie
 from multiprocessing import set_start_method
 from app.tools import AbstractTool
 from os.path import dirname, abspath
@@ -26,13 +26,19 @@ def generate_dir_info(config_id, benchmark_name, tool_name, subject_name, bug_na
     dir_artifact_local = definitions.DIR_ARTIFACTS + "/" + dir_name
     dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
     dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
+    dir_aux_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
+    dir_aux_container = dir_exp_container + "/.aux"
+    dir_base_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
+    dir_base_container = dir_exp_container + "/base"
     dir_info_local = {
         "logs": dir_log_local,
         "artifacts": dir_artifact_local,
         "results": dir_result_local,
         "experiment": dir_exp_local,
         "setup": dir_setup_local,
-        "instrumentation": dir_instrumentation_local
+        "instrumentation": dir_instrumentation_local,
+        "base": dir_base_local,
+        "aux": dir_aux_local
     }
 
     dir_info_container = {
@@ -40,7 +46,9 @@ def generate_dir_info(config_id, benchmark_name, tool_name, subject_name, bug_na
         "artifacts": dir_artifact_container,
         "experiment": dir_exp_container,
         "setup": dir_setup_container,
-        "instrumentation": dir_instrumentation_container
+        "instrumentation": dir_instrumentation_container,
+        "base": dir_base_container,
+        "aux": dir_aux_container
     }
 
     dir_info = {
@@ -286,6 +294,31 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
         utilities.execute_command(save_command)
 
 
+def create_running_container(bug_image_id, repair_tool, dir_info, container_name):
+    container_id = container.get_container_id(container_name)
+    if container_id:
+        container.stop_container(container_id)
+        container.remove_container(container_id)
+    tmp_dockerfile = "/tmp/Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+    volume_list = {
+        # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
+        dir_info["local"]["logs"]: {'bind': '/logs', 'mode': 'rw'},
+        dir_info["local"]["setup"]: {'bind': dir_info["container"]["setup"], 'mode': 'rw'},
+        dir_info["local"]["aux"]: {'bind': dir_info["container"]["aux"], 'mode': 'rw'},
+        dir_info["local"]["base"]: {'bind': dir_info["container"]["base"], 'mode': 'rw'},
+        "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
+    }
+    with open(tmp_dockerfile, 'w') as dock_file:
+        dock_file.write("FROM {}\n".format(repair_tool.image_name))
+        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
+        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
+    dock_file.close()
+    container.build_image(tmp_dockerfile, container_name.lower())
+    container_id = container.build_container(container_name, volume_list, container_name.lower())
+    return container_id
+
+
+
 def run(benchmark, tool_list, bug_info, config_info):
     dir_info_list = []
     container_id_list = []
@@ -327,10 +360,18 @@ def run(benchmark, tool_list, bug_info, config_info):
             dir_logs_local = dir_info["local"]["logs"]
             utilities.clean_artifacts(dir_output_local)
             utilities.clean_artifacts(dir_logs_local)
-        container_id = benchmark.setup(repair_tool.name, bug_index, config_id,
-                                       values.DEFAULT_RUN_TESTS_ONLY,
-                                       values.DEFAULT_USE_CONTAINER,
-                                       len(tool_list) > 1)
+
+        benchmark.update_dir_info(dir_info)
+        if values.DEFAULT_USE_CONTAINER:
+            exp_img_id = benchmark.get_exp_image(bug_index,
+                                                 values.DEFAULT_RUN_TESTS_ONLY)
+            container_name = "{}-{}-{}-{}".format(tool_name,
+                                                  benchmark.name,
+                                                  subject_name,
+                                                  bug_name)
+            if repair_tool.image_name is None:
+                utilities.error_exit("Repair tool does not have a Dockerfile: {}".format(repair_tool.name))
+            container_id = create_running_container(exp_img_id, repair_tool, dir_info, container_name)
         if not values.DEFAULT_SETUP_ONLY:
             benchmark.save_artefacts(dir_info, container_id)
         container_id_list.append(container_id)

@@ -107,8 +107,8 @@ def load_class(class_name):
 
 def load_tool(tool_name):
     emitter.normal("loading repair tool")
-    class_file_path = definitions.DIR_TOOLS + tool_name + ".py"
-    existing_tool_list = os.listdir(definitions.DIR_TOOLS)
+    class_file_path = definitions.DIR_TOOL_DRIVERS + tool_name + ".py"
+    existing_tool_list = os.listdir(definitions.DIR_TOOL_DRIVERS)
     tool_class_name = None
     for tool in existing_tool_list:
         if tool.lower().replace(".py", "") == tool_name.lower():
@@ -123,8 +123,8 @@ def load_tool(tool_name):
 
 def load_benchmark(benchmark_name):
     emitter.normal("loading benchmark")
-    class_file_path = definitions.DIR_BENCHMARK + benchmark_name + ".py"
-    existing_benchmark_list = os.listdir(definitions.DIR_BENCHMARK)
+    class_file_path = definitions.DIR_BENCHMARK_DRIVERS + benchmark_name + ".py"
+    existing_benchmark_list = os.listdir(definitions.DIR_BENCHMARK_DRIVERS)
     benchmark_class_name = None
     for benchmark in existing_benchmark_list:
         if benchmark.lower().replace(".py", "") == benchmark_name.lower():

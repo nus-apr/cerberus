@@ -10,6 +10,7 @@ class VulnFix(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(VulnFix, self).__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
+        self.image_name = "yuntongzhang/vulnfix:tool"
         activate_cmd = "source " + self.dir_root + "/activate"
         self.run_command(activate_cmd)
 
@@ -29,14 +30,16 @@ class VulnFix(AbstractTool):
                 "[Exception] Vulnfix repo is not at the expected location. "
                 "Please double check whether we are in VulnFix container.")
             error_exit("Unhandled exception")
-
+        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         # get ready the config file
         config_path = self.populate_config_file(bug_info)
 
         # start running
         self.timestamp_log()
-        vulnfix_command = "vulnfix {0} {1}".format(additional_tool_param, config_path)
+        vulnfix_command = "timeout -k 5m {0}h vulnfix {1} {2}".format(timeout_h,
+                                                                      additional_tool_param,
+                                                                      config_path)
         status = self.run_command(vulnfix_command,
                                   log_file_path=self.log_output_path,
                                   dir_path=self.dir_root)

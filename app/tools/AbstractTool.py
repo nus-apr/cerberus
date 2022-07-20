@@ -8,6 +8,8 @@ from app import emitter, values, container, utilities, definitions, abstractions
 class AbstractTool:
     log_instrument_path = None
     log_output_path = None
+    image_name = None
+    invoke_command = None
     name = None
     dir_logs = ""
     dir_output = ""
@@ -127,10 +129,15 @@ class AbstractTool:
     def check_tool_exists(self):
         """any pre-processing required for the repair"""
         if values.DEFAULT_USE_CONTAINER:
-            if not container.check_image_exist(self.name.lower()):
+            if not container.is_image_exist("rshariffdeen/cerberus", self.name.lower()):
                 emitter.warning("[warning] docker image not found")
                 if container.pull_image(self.name.lower()) is None:
-                    container.build_tool_image(self.name.lower())
+                    if ":" in self.image_name:
+                        repo_name, tag_name = self.image_name.split(":")
+                    else:
+                        repo_name = self.image_name
+                        tag_name = "latest"
+                    container.build_tool_image(repo_name, tag_name)
         else:
             check_command = "which {}".format(self.name.lower())
             ret_code = execute_command(check_command)

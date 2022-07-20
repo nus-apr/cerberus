@@ -3,8 +3,9 @@ from os.path import dirname
 DIR_MAIN = dirname(dirname(os.path.realpath(__file__)))
 DIR_INFRA = DIR_MAIN + "/infra"
 DIR_APP = DIR_MAIN + "/app/"
-DIR_TOOLS = DIR_APP + "tools/"
-DIR_BENCHMARK = DIR_APP + "benchmarks/"
+DIR_TOOL_DRIVERS = DIR_APP + "tools/"
+DIR_BENCHMARK_DRIVERS = DIR_APP + "benchmarks/"
+DIR_BENCHMARK = DIR_MAIN + "/benchmark/"
 DIRECTORY_LOG_BASE = DIR_MAIN + "/logs"
 DIRECTORY_OUTPUT_BASE = DIR_MAIN + "/output"
 DIR_RESULT = DIR_MAIN + "/results"
