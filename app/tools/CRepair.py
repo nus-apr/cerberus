@@ -33,7 +33,7 @@ class CRepair(AbstractTool):
 
 
     def repair(self, bug_info, config_info):
-        emitter.normal("\t\t\t running repair with " + self.name)
+        super(CRepair, self).repair(bug_info, config_info)
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         repair_conf_path = self.generate_conf_file(bug_info)
@@ -41,7 +41,8 @@ class CRepair(AbstractTool):
         CRepair_command = "timeout -k 5m {0}h crepair --conf={1} ".format(str(timeout_h),
                                                                           repair_conf_path)
         CRepair_command += "{0} >> {1} 2>&1 ".format(additional_tool_param, self.log_output_path)
-        status = self.run_command(CRepair_command)
+        status = self.run_command(CRepair_command,
+                                  log_file_path=self.log_output_path)
         if status != 0:
             emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
         else:
