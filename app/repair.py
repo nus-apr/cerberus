@@ -357,8 +357,7 @@ def run(benchmark, tool_list, bug_info, config_info):
         tool_name = repair_tool.name
         if len(tool_list) > 1:
             tool_name = "multi"
-        dir_info = generate_dir_info(config_id, benchmark.name, tool_name,
-                                     subject_name, bug_name)
+        dir_info = generate_dir_info(benchmark.name, tool_name, subject_name, bug_name)
         dir_instr_local = dir_info["local"]["instrumentation"]
         dir_result_local = dir_info["local"]["results"]
         if not os.path.isdir(dir_instr_local):
