@@ -31,7 +31,8 @@ class AbstractBenchmark:
         self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/")
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
         self.image_name = "{}-benchmark".format(self.name)
-        self.build_benchmark_image()
+        if values.DEFAULT_USE_CONTAINER:
+            self.build_benchmark_image()
         self.load()
 
     def read_file(self, container_id, file_path, encoding="utf-8"):
