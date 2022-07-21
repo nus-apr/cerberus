@@ -25,7 +25,7 @@ def pull_image(image_name, tag_name):
     emitter.normal("pulling docker image")
     image = None
     try:
-        image, _ = client.images.pull(repository=image_name, tag=tag_name)
+        image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
         emitter.warning("[error] Unable to pull image: docker daemon error")
