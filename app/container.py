@@ -11,23 +11,13 @@ def is_image_exist(image_name, tag_name="latest"):
         tag_list = image.tags
         if not tag_list:
             continue
-        if image_name not in tag_list[0]:
+        if image_name != tag_list[0].split(":")[0]:
             continue
         for tag in tag_list:
-            if tag_name in tag:
+            _, tag_id = tag.split(":")
+            if tag_name == tag_id:
                 return True
     return False
-
-
-def get_tool_image(tool_name):
-    client = docker.from_env()
-    image_name = IMAGE_NAME + ":" + tool_name
-    image = None
-    try:
-        image = client.images.get(image_name)
-    except Exception as ex:
-        image = None
-    return image
 
 
 def pull_image(image_name, tag_name):

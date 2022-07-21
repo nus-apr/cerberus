@@ -1,8 +1,7 @@
 import threading
 import os
-import re
-import traceback
-import signal
+import hashlib
+import time
 import time
 from app import emitter, logger, definitions, values, utilities, container, parallel, valkyrie
 from multiprocessing import set_start_method
@@ -10,11 +9,11 @@ from app.tools import AbstractTool
 from os.path import dirname, abspath
 
 
-def generate_dir_info(config_id, benchmark_name, tool_name, subject_name, bug_name):
+def generate_dir_info(benchmark_name, tool_name, subject_name, bug_name):
     dir_path = benchmark_name + "/" + subject_name + "/" + bug_name + "/"
-    dir_name = "-".join([config_id, benchmark_name,
-                         tool_name, subject_name, bug_name])
-
+    hash = hashlib.sha1()
+    hash.update(str(time.time()).encode('utf-8'))
+    dir_name = hash.hexdigest()
     dir_setup_container = "/setup/" + dir_path
     dir_exp_container = "/experiment/" + dir_path
     dir_logs_container = "/logs"
@@ -24,6 +23,12 @@ def generate_dir_info(config_id, benchmark_name, tool_name, subject_name, bug_na
     dir_result_local = definitions.DIR_RESULT + "/" + dir_name
     dir_log_local = definitions.DIR_LOGS + "/" + dir_name
     dir_artifact_local = definitions.DIR_ARTIFACTS + "/" + dir_name
+    if not os.path.isdir(dir_log_local):
+        os.makedirs(dir_log_local)
+    if not os.path.isdir(dir_result_local):
+        os.makedirs(dir_result_local)
+    if not os.path.isdir(dir_exp_local):
+        os.makedirs(dir_exp_local)
     dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
     dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
     dir_aux_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
@@ -337,8 +342,18 @@ def run(benchmark, tool_list, bug_info, config_info):
     emitter.highlight("\t[meta-data] project: " + subject_name)
     emitter.highlight("\t[meta-data] bug ID: " + bug_name)
 
+    exp_img_id = None
+    dir_info = generate_dir_info(benchmark.name, None, subject_name, bug_name)
+    benchmark.update_dir_info(dir_info)
+    if values.DEFAULT_USE_CONTAINER:
+        exp_img_id = benchmark.get_exp_image(bug_index, values.DEFAULT_RUN_TESTS_ONLY)
+    else:
+        benchmark.setup_experiment(bug_index, None, values.DEFAULT_RUN_TESTS_ONLY)
+
+
     for repair_tool in tool_list:
         index = index + 1
+        container_id = None
         tool_name = repair_tool.name
         if len(tool_list) > 1:
             tool_name = "multi"
@@ -362,11 +377,10 @@ def run(benchmark, tool_list, bug_info, config_info):
             dir_logs_local = dir_info["local"]["logs"]
             utilities.clean_artifacts(dir_output_local)
             utilities.clean_artifacts(dir_logs_local)
-
-        benchmark.update_dir_info(dir_info)
+        print("OK")
+        benchmark.update_dir_info(dir_info, container_id)
+        print(values.DEFAULT_USE_CONTAINER)
         if values.DEFAULT_USE_CONTAINER:
-            exp_img_id = benchmark.get_exp_image(bug_index,
-                                                 values.DEFAULT_RUN_TESTS_ONLY)
             container_name = "{}-{}-{}-{}".format(tool_name,
                                                   benchmark.name,
                                                   subject_name,
@@ -374,8 +388,6 @@ def run(benchmark, tool_list, bug_info, config_info):
             if repair_tool.image_name is None:
                 utilities.error_exit("Repair tool does not have a Dockerfile: {}".format(repair_tool.name))
             container_id = create_running_container(exp_img_id, repair_tool, dir_info, container_name)
-        if not values.DEFAULT_SETUP_ONLY:
-            benchmark.save_artefacts(dir_info, container_id)
         container_id_list.append(container_id)
         dir_info_list.append(dir_info)
 
