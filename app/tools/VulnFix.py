@@ -10,7 +10,7 @@ class VulnFix(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(VulnFix, self).__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
-        self.image_name = "yuntongzhang/vulnfix:tool"
+        self.image_name = "yuntongzhang/vulnfix:latest"
         pull_cmd = "git pull origin"
         self.run_command(pull_cmd, dir_path=self.dir_root)
         activate_cmd = "source activate"
