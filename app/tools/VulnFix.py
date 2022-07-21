@@ -11,8 +11,10 @@ class VulnFix(AbstractTool):
         super(VulnFix, self).__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
         self.image_name = "yuntongzhang/vulnfix:tool"
-        activate_cmd = "source " + self.dir_root + "/activate"
-        self.run_command(activate_cmd)
+        pull_cmd = "git pull origin"
+        self.run_command(pull_cmd, dir_path=self.dir_root)
+        activate_cmd = "source activate"
+        self.run_command(activate_cmd, dir_path=self.dir_root)
 
 
     def repair(self, bug_info, config_info):
