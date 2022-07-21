@@ -10,6 +10,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     bear \
     bison \
     ca-certificates \
+    cmake \
     curl \
     flex \
     gettext \
