@@ -376,9 +376,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             dir_logs_local = dir_info["local"]["logs"]
             utilities.clean_artifacts(dir_output_local)
             utilities.clean_artifacts(dir_logs_local)
-        print("OK")
-        benchmark.update_dir_info(dir_info, container_id)
-        print(values.DEFAULT_USE_CONTAINER)
+        benchmark.update_dir_info(dir_info)
         if values.DEFAULT_USE_CONTAINER:
             container_name = "{}-{}-{}-{}".format(tool_name,
                                                   benchmark.name,
