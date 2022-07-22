@@ -11,7 +11,7 @@ from os.path import dirname, abspath
 
 def update_dir_info(dir_info, tool_name):
     dir_setup_local = dir_info["local"]["setup"]
-    dir_setup_container = dir_info["local"]["setup"]
+    dir_setup_container = dir_info["container"]["setup"]
     dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
     dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
     dir_info["local"]["instrumentation"] = dir_instrumentation_local
@@ -329,6 +329,14 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             dock_file.write("RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"]))
         dock_file.close()
         container.build_image(tmp_dockerfile, container_name.lower())
+    # Need to copy the logs from benchmark setup before instantiating the running container
+    tmp_container_id = container.build_container(container_name, dict(), container_name.lower())
+    copy_log_cmd = "docker cp {}:{} {}".format(tmp_container_id,
+                                               dir_info["container"]["logs"],
+                                               dir_info["local"]["logs"])
+    utilities.execute_command(copy_log_cmd)
+    container.stop_container(tmp_container_id)
+    container.remove_container(tmp_container_id)
     container_id = container.build_container(container_name, volume_list, container_name.lower())
     return container_id
 
