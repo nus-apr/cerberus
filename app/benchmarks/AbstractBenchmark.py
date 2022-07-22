@@ -117,8 +117,6 @@ class AbstractBenchmark:
             shutil.rmtree(dir_exp_local)
 
         volume_list = {
-            # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
-            self.__dir_info["local"]["logs"]: {'bind': '/logs', 'mode': 'rw'},
             self.__dir_info["local"]["setup"]: {'bind': '/scripts', 'mode': 'rw'}
         }
 

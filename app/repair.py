@@ -325,6 +325,7 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
+            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write("RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"]))
         dock_file.close()
         container.build_image(tmp_dockerfile, container_name.lower())
