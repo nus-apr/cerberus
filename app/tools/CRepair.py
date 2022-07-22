@@ -11,7 +11,7 @@ from os.path import isfile, join
 class CRepair(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.image_name = "rshariffdeen/crepair"
+        self.image_name = "rshariffdeen/crepair:latest"
         super(CRepair, self).__init__(self.name)
 
 
