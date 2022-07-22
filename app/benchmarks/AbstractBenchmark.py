@@ -147,8 +147,8 @@ class AbstractBenchmark:
             if not os.path.isdir(self.dir_logs):
                 utilities.execute_command("mkdir -p {}".format(self.dir_logs))
         else:
-            if not os.path.isdir(self.dir_logs):
-                self.run_command(container_id, "mkdir -p {}".format(self.dir_logs))
+            if not container.is_dir(self.dir_logs):
+                self.run_command(container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/")
         if self.deploy(bug_id, container_id):
             if self.config(bug_id, container_id):
                 if self.build(bug_id, container_id):
