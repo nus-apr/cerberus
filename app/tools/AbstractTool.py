@@ -137,9 +137,9 @@ class AbstractTool:
                 repo_name = self.image_name
                 tag_name = "latest"
             if not container.is_image_exist(repo_name, tag_name):
-                emitter.warning("[warning] docker image not found in Dockerhub")
+                emitter.warning("[warning] docker image not found in Docker registry")
                 if container.pull_image(repo_name, tag_name) is None:
-                    utilities.error_exit("{} does not provide a Dockerfile to build"
+                    utilities.error_exit("{} does not provide a Docker image in Dockerhub"
                                          .format(self.name))
                     # container.build_tool_image(repo_name, tag_name)
         else:
