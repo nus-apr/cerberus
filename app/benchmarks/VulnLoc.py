@@ -15,19 +15,20 @@ class VulnLoc(AbstractBenchmark):
         is_error = super(VulnLoc, self).setup_experiment(bug_index, container_id, test_all)
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        if self.verify(bug_id, container_id):
-            emitter.success("\t\t\t[benchmark] verified successfully")
-        else:
-            emitter.error("\t\t\t[benchmark] verification failed")
-            is_error = True
-        if not values.DEFAULT_USE_VALKYRIE:
-            emitter.normal("\t\t\tskipping transformation for vulnfix")
-        else:
-            if self.transform(bug_id, container_id):
-                emitter.success("\t\t\t[benchmark] transformation successful")
+        if not is_error:
+            if self.verify(bug_id, container_id):
+                emitter.success("\t\t\t[benchmark] verified successfully")
             else:
-                emitter.error("\t\t\t[benchmark] transformation failed")
+                emitter.error("\t\t\t[benchmark] verification failed")
                 is_error = True
+            if not values.DEFAULT_USE_VALKYRIE:
+                emitter.normal("\t\t\tskipping transformation for vulnfix")
+            else:
+                if self.transform(bug_id, container_id):
+                    emitter.success("\t\t\t[benchmark] transformation successful")
+                else:
+                    emitter.error("\t\t\t[benchmark] transformation failed")
+                    is_error = True
         return is_error
 
     def deploy(self, bug_id, container_id):
