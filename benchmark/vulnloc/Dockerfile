@@ -69,5 +69,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     tcl-dev \
     tix-dev \
     unzip \
-    wget
+    wget \
+    rsync
 
