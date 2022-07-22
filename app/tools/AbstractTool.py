@@ -95,7 +95,7 @@ class AbstractTool:
         conf_id = str(values.CONFIG_ID)
         self.log_instrument_path = self.dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
         command_str = "bash instrument.sh {}".format(self.dir_base_expr)
-        status = self.run_command(command_str, "/dev/null", self.dir_inst)
+        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         if status not in [0, 126]:
             error_exit("error with instrumentation of " + self.name + "; exit code " + str(status))
         return
