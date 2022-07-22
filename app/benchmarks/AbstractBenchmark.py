@@ -144,6 +144,11 @@ class AbstractBenchmark:
             self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
             if os.path.isdir(self.dir_expr):
                 utilities.execute_command("rm -rf {}".format(self.dir_expr))
+            if not os.path.isdir(self.dir_logs):
+                utilities.execute_command("mkdir -p {}".format(self.dir_logs))
+        else:
+            if not os.path.isdir(self.dir_logs):
+                self.run_command(container_id, "mkdir -p {}".format(self.dir_logs))
         if self.deploy(bug_id, container_id):
             if self.config(bug_id, container_id):
                 if self.build(bug_id, container_id):
