@@ -9,7 +9,17 @@ from app.tools import AbstractTool
 from os.path import dirname, abspath
 
 
-def generate_dir_info(benchmark_name, tool_name, subject_name, bug_name):
+def update_dir_info(dir_info, tool_name):
+    dir_setup_local = dir_info["local"]["setup"]
+    dir_setup_container = dir_info["local"]["setup"]
+    dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
+    dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
+    dir_info["local"]["instrumentation"] = dir_instrumentation_local
+    dir_info["container"]["instrumentation"] = dir_instrumentation_container
+    return dir_info
+
+
+def generate_dir_info(benchmark_name, subject_name, bug_name):
     dir_path = benchmark_name + "/" + subject_name + "/" + bug_name + "/"
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode('utf-8'))
@@ -29,8 +39,7 @@ def generate_dir_info(benchmark_name, tool_name, subject_name, bug_name):
         os.makedirs(dir_result_local)
     if not os.path.isdir(dir_exp_local):
         os.makedirs(dir_exp_local)
-    dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
-    dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
+
     dir_aux_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
     dir_aux_container = dir_exp_container + "/.aux"
     dir_base_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
@@ -41,7 +50,6 @@ def generate_dir_info(benchmark_name, tool_name, subject_name, bug_name):
         "results": dir_result_local,
         "experiment": dir_exp_local,
         "setup": dir_setup_local,
-        "instrumentation": dir_instrumentation_local,
         "base": dir_base_local,
         "aux": dir_aux_local
     }
@@ -51,7 +59,6 @@ def generate_dir_info(benchmark_name, tool_name, subject_name, bug_name):
         "artifacts": dir_artifact_container,
         "experiment": dir_exp_container,
         "setup": dir_setup_container,
-        "instrumentation": dir_instrumentation_container,
         "base": dir_base_container,
         "aux": dir_aux_container
     }
@@ -335,7 +342,7 @@ def run(benchmark, tool_list, bug_info, config_info):
     config_id = config_info[definitions.KEY_ID]
     config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    dir_info = generate_dir_info(benchmark.name, None, subject_name, bug_name)
+    dir_info = generate_dir_info(benchmark.name, subject_name, bug_name)
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight("\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
     emitter.highlight("\t[profile] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
@@ -359,7 +366,7 @@ def run(benchmark, tool_list, bug_info, config_info):
         tool_name = repair_tool.name
         if len(tool_list) > 1:
             tool_name = "multi"
-        dir_info = generate_dir_info(benchmark.name, tool_name, subject_name, bug_name)
+        dir_info = update_dir_info(dir_info, tool_name)
         dir_instr_local = dir_info["local"]["instrumentation"]
         dir_result_local = dir_info["local"]["results"]
         if not os.path.isdir(dir_instr_local):
