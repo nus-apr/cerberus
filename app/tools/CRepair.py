@@ -11,12 +11,11 @@ from os.path import isfile, join
 class CRepair(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.image_name = "rshariffdeen/crepair:latest"
         super(CRepair, self).__init__(self.name)
 
 
     def generate_conf_file(self, bug_info):
-        repair_conf_path = self.dir_expr + "/src/repair.conf"
+        repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         conf_content = []
         poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
         poc_abs_list = ["{}/{}".format(self.dir_setup,x) for x in poc_list]
@@ -37,7 +36,8 @@ class CRepair(AbstractTool):
         super(CRepair, self).repair(bug_info, config_info)
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        repair_conf_path = self.generate_conf_file(bug_info)
+        # repair_conf_path = self.generate_conf_file(bug_info)
+        repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         self.timestamp_log()
         CRepair_command = "timeout -k 5m {0}h crepair --conf={1} {2}".format(str(timeout_h),
                                                                           repair_conf_path,

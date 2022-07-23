@@ -28,6 +28,8 @@ class AbstractTool:
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
+        self.image_name = "cerberus:{}".format(tool_name.lower())
+
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
