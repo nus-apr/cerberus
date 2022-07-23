@@ -66,9 +66,13 @@ We welcome contributions to improve this work, see [details](doc/Contributing.md
 
 ## Developers ##
 * Ridwan Shariffdeen
+* Martin Mirchev
+* Zhang Yuntong
+
+## Contributors ##
 * Gao Xiang
 * Yannic Noller
-* Zhang Yuntong
+
 
 
 # License
