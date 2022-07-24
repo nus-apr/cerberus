@@ -3,6 +3,17 @@ import sys
 import json
 from app import definitions, values, emitter, utilities
 
+def convert_range(x):
+    parts = x.split('-')
+    if len(parts) == 1:
+            return parts
+    if len(parts) == 0:
+            return []
+    parts[0] = 1 if parts[0] == '' else int(parts[0])
+    parts[1] = 999 if parts[1] == '' else int(parts[1])
+    return range(parts[0],parts[1]+1) 
+
+flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
 
 
 def read_arg(argument_list):
@@ -60,7 +71,7 @@ def read_arg(argument_list):
             elif definitions.ARG_SKIP_LIST in arg:
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
             elif definitions.ARG_BUG_INDEX_LIST in arg:
-                values.CONF_BUG_INDEX_LIST = str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")
+                values.CONF_BUG_INDEX_LIST = list(flat_map(convert_range,str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")))
             elif definitions.ARG_BUG_ID_LIST in arg:
                 values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
             elif arg in ["--help", "-help", "-h"]:
