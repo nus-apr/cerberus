@@ -6,7 +6,7 @@ from app import definitions, values, emitter, utilities
 def convert_range(x):
     parts = x.split('-')
     if len(parts) == 1:
-            return parts
+            return [int(parts[0])]
     if len(parts) == 0:
             return []
     parts[0] = 1 if parts[0] == '' else int(parts[0])
