@@ -187,7 +187,10 @@ def end(time_total, is_error=False):
 
 
 def emit_help():
-    write("Usage: cerberus [OPTIONS] --benchmark={manybugs} --tool={cpr/genprog/angelix/prophet/fix2fit/f1x} ", WHITE)
+    benchmarks = list(filter(lambda x : x != 'examples',os.listdir('./benchmark/')))
+    tools = os.listdir('./tools/')
+
+    write(f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks)} --tool={'/'.join(tools)} ", WHITE)
     write("Options are:", WHITE)
     write("\t" + definitions.ARG_DATA_PATH + "\t| " + "directory for experiments", WHITE)
     write("\t" + definitions.ARG_TOOL_NAME + "\t| " + "name of the tool", WHITE)
