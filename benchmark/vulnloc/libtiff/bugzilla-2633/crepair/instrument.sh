@@ -15,6 +15,7 @@ config_command:CC=crepair-cc ./configure CFLAGS="-g -O0" --enable-static --disab
 build_command:make CC=crepair-cc CXX=crepair-cxx CFLAGS="-g -O0 -static" CXXFLAGS="-g -O0 -static" LDFLAGS="-static"
 test_input_list:\$POC
 poc_list:$script_dir/../tests/1.tif
+klee_flags:--link-llvm-lib=/CrashRepair/lib/libcrepair_proxy.bca
 EOF
 
 cd $dir_name/src
