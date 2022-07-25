@@ -5,7 +5,7 @@ import os
 import textwrap
 from app import definitions, values, logger
 
-rows, columns = os.popen('stty size', 'r').read().split()
+rows, columns = tuple(map(int,os.popen('stty size', 'r').read().split()))
 GREY = '\t\x1b[1;30m'
 RED = '\t\x1b[1;31m'
 GREEN = '\x1b[1;32m'
@@ -20,35 +20,30 @@ STAT_COLOR = '\t\x1b[0;32;47m'
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "\033[K" + print_color + str(print_message) + '\x1b[0m'
+    message = "\033[K{}{}\x1b[0m".format(print_color,print_message)
     if prefix:
-        prefix = "\033[K" + print_color + str(prefix) + '\x1b[0m'
+        prefix = "\033[K{}{}\x1b[0m".format(print_color, prefix)
         len_prefix = ((indent_level+1) * 4) + len(prefix)
         wrapper = textwrap.TextWrapper(initial_indent=prefix, subsequent_indent=' '*len_prefix, width=int(columns))
         message = wrapper.fill(message)
     sys.stdout.write(message)
-    if new_line:
-        r = "\n"
-        sys.stdout.write("\n")
-    else:
-        r = "\033[K\r"
-        sys.stdout.write(r)
+    sys.stdout.write("\n" if new_line else "\033[K\r")
     sys.stdout.flush()
 
 
 def title(title):
-    write("\n" + "="*100 + "\n\n\t" + title + "\n" + "="*100+"\n", CYAN)
+    write("\n" + "="*columns + "\n\n\t" + title + "\n" + "="*columns+"\n", CYAN)
     logger.information(title)
 
 
-def sub_title(subtitle):
-    write("\n\t" + subtitle + "\n\t" + "_"*90+"\n", CYAN)
-    logger.information(subtitle)
+def sub_title(text):
+    write("\n\t" + text + "\n" + "_"* columns +"\n", CYAN)
+    logger.information(text)
 
 
-def sub_sub_title(sub_title):
-    write("\n\t\t" + sub_title + "\n\t\t" + "-"*90+"\n", CYAN)
-    logger.information(sub_title)
+def sub_sub_title(text):
+    write("\n\t\t" + text + "\n" + "_"*columns +"\n", CYAN)
+    logger.information(text)
 
 
 def command(message):
@@ -190,11 +185,11 @@ def emit_help():
     benchmarks = list(filter(lambda x : x != 'examples',os.listdir('./benchmark/')))
     tools = os.listdir('./tools/')
 
-    write(f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks)} --tool={'/'.join(tools)} ", WHITE)
+    write(f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks[0:3])}... --tool={'/'.join(tools[0:3])}... ", WHITE)
     write("Options are:", WHITE)
     write("\t" + definitions.ARG_DATA_PATH + "\t| " + "directory for experiments", WHITE)
-    write("\t" + definitions.ARG_TOOL_NAME + "\t| " + "name of the tool", WHITE)
-    write("\t" + definitions.ARG_BENCHMARK + "\t| " + "name of the benchmark", WHITE)
+    write("\t" + definitions.ARG_TOOL_NAME + "\t| " + "name of the tool ({})".format(','.join(tools)), WHITE)
+    write("\t" + definitions.ARG_BENCHMARK + "\t| " + "name of the benchmark ({})".format(','.join(benchmarks)), WHITE)
     write("\t" + definitions.ARG_TOOL_PATH + "\t| " + "path of the tool", WHITE)
     write("\t" + definitions.ARG_TOOL_PARAMS + "\t| " + "parameters for the tool", WHITE)
     write("\t" + definitions.ARG_DEBUG_MODE + "\t| " + "enable debug mode", WHITE)
