@@ -12,7 +12,7 @@ tag_id:$bug_id
 src_directory:$dir_name/src
 binary_path:$dir_name/src/src/pr
 config_command:FORCE_UNSAFE_CONFIGURE=1 CC=crepair-cc ./configure CFLAGS="-g -O0 -static -fPIE -Wno-error" CXXFLAGS="-g -O0 -static -fPIE -Wno-error"
-build_command:make CC=crepair-cc CXX=crepair-cxx CFLAGS="-ggdb -fPIC -fPIE -g -O0 -Wno-error" CXXFLAGS="-ggdb -fPIC -fPIE -g -O0 -Wno-error" LDFLAGS="-static"
+build_command:make CC=crepair-cc CXX=crepair-cxx CFLAGS="-ggdb -fPIC -fPIE -g -O0 -Wno-error" CXXFLAGS="-ggdb -fPIC -fPIE -g -O0 -Wno-error" LDFLAGS="-static" src/pr
 test_input_list:"-S\$(printf "\t\t\t")" a -m \$POC
 poc_list:$script_dir/../tests/1.txt
 klee_flags:--link-llvm-lib=/CrashRepair/lib/libcrepair_proxy.bca
