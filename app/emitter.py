@@ -200,7 +200,7 @@ def end(time_total, is_error=False):
 def emit_help():
     benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))
     tools = os.listdir("./tools/")
-    max_length = len(definitions.ARG_BUG_INDEX_LIST)
+    max_length = len(definitions.ARG_BUG_INDEX_LIST)  # hardcoded
 
     write(
         f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks[0:3])}... --tool={'/'.join(tools[0:3])}... ",

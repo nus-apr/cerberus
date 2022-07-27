@@ -190,8 +190,12 @@ class AbstractTool:
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["results"]
         if self.container_id:
-            container.copy_file_from_container(self.container_id,self.dir_output,dir_results)
-            container.copy_file_from_container(self.container_id,self.dir_logs,dir_results)
+            container.copy_file_from_container(
+                self.container_id, self.dir_output, dir_results
+            )
+            container.copy_file_from_container(
+                self.container_id, self.dir_logs, dir_results
+            )
             pass
         else:
             save_command = "cp -rf " + self.dir_output + "/* " + dir_results + ";"

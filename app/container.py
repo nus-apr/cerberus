@@ -249,12 +249,14 @@ def list_dir(container_id, dir_path):
             file_list.append(o.strip().replace("\n", ""))
     return file_list
 
+
 def copy_file_from_container(container_id, from_path, to_path):
-    copy_command = "docker cp {}:{} {}".format(container_id,from_path,to_path)
+    copy_command = "docker cp {}:{} {}".format(container_id, from_path, to_path)
     utilities.execute_command(copy_command)
 
+
 def copy_file_to_container(container_id, from_path, to_path):
-    copy_command = "docker cp {} {}:{}".format(from_path,container_id,to_path)
+    copy_command = "docker cp {} {}:{}".format(from_path, container_id, to_path)
     utilities.execute_command(copy_command)
 
 
