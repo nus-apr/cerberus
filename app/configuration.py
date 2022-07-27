@@ -1,8 +1,20 @@
 import os
 import sys
 import json
+from os import path
 from app import definitions, values, emitter, utilities
 
+def convert_range(x):
+    parts = x.split('-')
+    if len(parts) == 1:
+            return [int(parts[0])]
+    if len(parts) == 0:
+            return []
+    parts[0] = 1 if parts[0] == '' else int(parts[0])
+    parts[1] = 999 if parts[1] == '' else int(parts[1])
+    return range(parts[0],parts[1]+1) 
+
+flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
 
 
 def read_arg(argument_list):
@@ -60,14 +72,14 @@ def read_arg(argument_list):
             elif definitions.ARG_SKIP_LIST in arg:
                 values.CONF_SKIP_LIST = str(arg).replace(definitions.ARG_SKIP_LIST, "").split(",")
             elif definitions.ARG_BUG_INDEX_LIST in arg:
-                values.CONF_BUG_INDEX_LIST = str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")
+                values.CONF_BUG_INDEX_LIST = list(flat_map(convert_range,str(arg).replace(definitions.ARG_BUG_INDEX_LIST, "").split(",")))
             elif definitions.ARG_BUG_ID_LIST in arg:
                 values.CONF_BUG_ID_LIST = str(arg).replace(definitions.ARG_BUG_ID_LIST, "").split(",")
             elif arg in ["--help", "-help", "-h"]:
                 emitter.emit_help()
                 exit(0)
             else:
-                emitter.error("Unknown option: " + str(arg))
+                emitter.error("Unknown option: {}".format(arg))
                 emitter.emit_help()
                 exit(1)
     if not values.CONF_SETUP_ONLY:
@@ -76,7 +88,7 @@ def read_arg(argument_list):
             emitter.emit_help()
             exit(1)
     if values.CONF_SUBJECT_NAME:
-        emitter.normal("[info] running experiments for subject " + str(values.CONF_SUBJECT_NAME))
+        emitter.normal("[info] running experiments for subject {}".format(values.CONF_SUBJECT_NAME))
     if values.CONF_START_INDEX is None and values.CONF_BUG_INDEX is None and values.CONF_BUG_INDEX_LIST is None and values.CONF_SUBJECT_NAME is None:
         emitter.warning("[warning] experiment id is not specified, running all experiments")
     if values.CONF_BENCHMARK is None:
@@ -84,7 +96,7 @@ def read_arg(argument_list):
         emitter.emit_help()
         exit(1)
     else:
-        values.FILE_META_DATA = "benchmark/" + values.CONF_BENCHMARK + "/meta-data.json"
+        values.FILE_META_DATA = os.path.join("benchmark", values.CONF_BENCHMARK , "meta-data.json")
 
 
 def load_configuration_details(config_file_path):

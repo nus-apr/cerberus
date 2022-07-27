@@ -56,7 +56,7 @@ def filter_experiment_list(benchmark):
             continue
         if values.CONF_BUG_INDEX and bug_index != values.CONF_BUG_INDEX:
             continue
-        if values.CONF_BUG_INDEX_LIST and str(bug_index) not in values.CONF_BUG_INDEX_LIST:
+        if values.CONF_BUG_INDEX_LIST and int(bug_index) not in values.CONF_BUG_INDEX_LIST:
             continue
         if values.CONF_SKIP_LIST and str(bug_index) in values.CONF_SKIP_LIST:
             continue
