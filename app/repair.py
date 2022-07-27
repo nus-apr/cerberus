@@ -3,7 +3,16 @@ import os
 import hashlib
 import time
 import time
-from app import emitter, logger, definitions, values, utilities, container, parallel, valkyrie
+from app import (
+    emitter,
+    logger,
+    definitions,
+    values,
+    utilities,
+    container,
+    parallel,
+    valkyrie,
+)
 from multiprocessing import set_start_method
 from app.tools import AbstractTool
 from os.path import dirname, abspath
@@ -22,7 +31,7 @@ def update_dir_info(dir_info, tool_name):
 def generate_dir_info(benchmark_name, subject_name, bug_name):
     dir_path = benchmark_name + "/" + subject_name + "/" + bug_name + "/"
     hash = hashlib.sha1()
-    hash.update(str(time.time()).encode('utf-8'))
+    hash.update(str(time.time()).encode("utf-8"))
     dir_name = hash.hexdigest()
     dir_setup_container = "/setup/" + dir_path
     dir_exp_container = "/experiment/" + dir_path
@@ -40,9 +49,13 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
     if not os.path.isdir(dir_exp_local):
         os.makedirs(dir_exp_local)
 
-    dir_aux_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
+    dir_aux_local = (
+        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
+    )
     dir_aux_container = dir_exp_container + "/.aux"
-    dir_base_local = definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
+    dir_base_local = (
+        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
+    )
     dir_base_container = dir_exp_container + "/base"
     dir_info_local = {
         "logs": dir_log_local,
@@ -51,7 +64,7 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
         "experiment": dir_exp_local,
         "setup": dir_setup_local,
         "base": dir_base_local,
-        "aux": dir_aux_local
+        "aux": dir_aux_local,
     }
 
     dir_info_container = {
@@ -60,13 +73,10 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
         "experiment": dir_exp_container,
         "setup": dir_setup_container,
         "base": dir_base_container,
-        "aux": dir_aux_container
+        "aux": dir_aux_container,
     }
 
-    dir_info = {
-        "local": dir_info_local,
-        "container": dir_info_container
-    }
+    dir_info = {"local": dir_info_local, "container": dir_info_container}
     return dir_info
 
 
@@ -76,12 +86,26 @@ def archive_results(dir_results, dir_archive):
     experiment_id = dir_results.split("/")[-1]
     if not os.path.isdir(dir_archive):
         os.makedirs(dir_archive)
-    archive_command = "cd " + dirname(abspath(dir_results)) + "; tar cvzf " + experiment_id + ".tar.gz " + experiment_id
+    archive_command = (
+        "cd "
+        + dirname(abspath(dir_results))
+        + "; tar cvzf "
+        + experiment_id
+        + ".tar.gz "
+        + experiment_id
+    )
     archive_command += "; mv {} {}".format(experiment_id + ".tar.gz", dir_archive)
     utilities.execute_command(archive_command)
 
 
-def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container_id, benchmark_name):
+def repair(
+    dir_info,
+    experiment_info,
+    tool: AbstractTool,
+    config_info,
+    container_id,
+    benchmark_name,
+):
     fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
     fix_line_numbers = [str(x) for x in experiment_info[definitions.KEY_FIX_LINES]]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
@@ -97,7 +121,9 @@ def repair(dir_info, experiment_info, tool: AbstractTool, config_info, container
     if str(passing_id_list_str).replace(",", "").isnumeric():
         passing_test_list = passing_id_list_str.split(",")
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:int(len(passing_test_list) * test_ratio)]
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[
+        : int(len(passing_test_list) * test_ratio)
+    ]
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
@@ -117,7 +143,9 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     valkyrie_binary_path = dir_output_local + "/binary"
     binary_path = dir_expr + "/src/" + binary_path_rel
     if container_id:
-        copy_command = "docker cp {}:{} {}".format(container_id, binary_path, valkyrie_binary_path)
+        copy_command = "docker cp {}:{} {}".format(
+            container_id, binary_path, valkyrie_binary_path
+        )
     else:
         copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
 
@@ -126,18 +154,18 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     subject_name = bug_info[definitions.KEY_SUBJECT]
     bug_id = str(bug_info[definitions.KEY_BUG_ID])
 
-    test_driver_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(benchmark_name,
-                                                                                   subject_name,
-                                                                                   bug_id)
-    test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(benchmark_name,
-                                                                              subject_name,
-                                                                              bug_id)
-    test_suite_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test-suite".format(benchmark_name,
-                                                                                     subject_name,
-                                                                                     bug_id)
-    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(benchmark_name,
-                                                                              subject_name,
-                                                                              bug_id)
+    test_driver_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(
+        benchmark_name, subject_name, bug_id
+    )
+    test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(
+        benchmark_name, subject_name, bug_id
+    )
+    test_suite_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test-suite".format(
+        benchmark_name, subject_name, bug_id
+    )
+    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(
+        benchmark_name, subject_name, bug_id
+    )
     valkyrie_oracle_path = dir_output_local + "/oracle"
     if not os.path.isdir(test_suite_path):
         if os.path.isfile(valkyrie_oracle_path):
@@ -145,7 +173,8 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
         with open(valkyrie_oracle_path, "w") as oracle_file:
             oracle_file.writelines("#!/bin/bash\n")
             oracle_file.writelines(
-                "script_dir=\"$( cd \"$( dirname \"${BASH_SOURCE[0]}\" )\" &> /dev/null && pwd )\"\n")
+                'script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"\n'
+            )
             oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs\n")
             oracle_file.writelines("$script_dir/test.sh /dev/null $@\n")
         os.system("chmod +x {}".format(valkyrie_oracle_path))
@@ -160,8 +189,11 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
 
         for binary_file in file_list:
             if ".orig" in binary_file:
-                os.system("e9afl {} -o {} > /dev/null 2>&1".format(binary_file,
-                                                                   binary_file.replace(".orig", ".inst_coverage")))
+                os.system(
+                    "e9afl {} -o {} > /dev/null 2>&1".format(
+                        binary_file, binary_file.replace(".orig", ".inst_coverage")
+                    )
+                )
         valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
         valkyrie_binary_path = None
     utilities.execute_command(copy_command)
@@ -173,7 +205,14 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     return patch_dir, dir_process, valkyrie_binary_path, valkyrie_oracle_path
 
 
-def repair_all(dir_info_list, experiment_info, tool_list, config_info, container_id_list, benchmark_name):
+def repair_all(
+    dir_info_list,
+    experiment_info,
+    tool_list,
+    config_info,
+    container_id_list,
+    benchmark_name,
+):
     consume_thread = None
     tool_thread_list = []
     parallel.initialize()
@@ -189,29 +228,49 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
-        failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(",")
+        failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(
+            ","
+        )
 
         if index == 0:
-            valkyrie_setup_info = setup_for_valkyrie(dir_info, container_id, experiment_info, benchmark_name)
+            valkyrie_setup_info = setup_for_valkyrie(
+                dir_info, container_id, experiment_info, benchmark_name
+            )
             patch_dir, dir_process, binary_path, oracle_path = valkyrie_setup_info
             is_rank = len(tool_list) > 1
-            validation_test_list = failing_test_list + passing_test_list[:int(len(passing_test_list) * test_ratio)]
+            validation_test_list = (
+                failing_test_list
+                + passing_test_list[: int(len(passing_test_list) * test_ratio)]
+            )
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
             if values.DEFAULT_USE_VALKYRIE:
                 v_path_info = (binary_path, oracle_path, fix_source_file)
                 v_dir_info = (patch_dir, dir_process)
-                v_config_info = (validation_test_list, is_rank, total_timeout, test_timeout)
-                consume_thread = threading.Thread(target=parallel.consume_patches, args=(v_path_info,
-                                                                                         v_dir_info,
-                                                                                         v_config_info
-                                                                                         ))
+                v_config_info = (
+                    validation_test_list,
+                    is_rank,
+                    total_timeout,
+                    test_timeout,
+                )
+                consume_thread = threading.Thread(
+                    target=parallel.consume_patches,
+                    args=(v_path_info, v_dir_info, v_config_info),
+                )
                 consume_thread.start()
 
         if values.DEFAULT_USE_VALKYRIE:
             values.APR_TOOL_RUNNING = True
-        t_thread = threading.Thread(target=repair, args=(dir_info, experiment_info,
-                                                         repair_tool, config_info,
-                                                         container_id, benchmark_name))
+        t_thread = threading.Thread(
+            target=repair,
+            args=(
+                dir_info,
+                experiment_info,
+                repair_tool,
+                config_info,
+                container_id,
+                benchmark_name,
+            ),
+        )
         t_thread.start()
         tool_thread_list.append((t_thread, repair_tool))
 
@@ -221,7 +280,11 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             wait_time = total_timeout - time.time()
         thread.join(wait_time)
         if thread.is_alive():
-            emitter.highlight("\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(tool.name))
+            emitter.highlight(
+                "\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(
+                    tool.name
+                )
+            )
             event = threading.Event()
             event.set()
             # The thread can still be running at this point. For example, if the
@@ -229,7 +292,9 @@ def repair_all(dir_info_list, experiment_info, tool_list, config_info, container
             # the thread will still perform the full 1 second sleep and the rest of
             # the loop before finally stopping.
         else:
-            emitter.highlight("\t\t\t[info] {}: thread has already finished.".format(tool.name))
+            emitter.highlight(
+                "\t\t\t[info] {}: thread has already finished.".format(tool.name)
+            )
 
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.
@@ -259,7 +324,9 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
     for tool in tool_list:
         index = index + 1
         dir_info = dir_info_list[index]
-        space_info, time_info, error_info = tool.analyse_output(dir_info, bug_id, failing_test_list)
+        space_info, time_info, error_info = tool.analyse_output(
+            dir_info, bug_id, failing_test_list
+        )
         conf_id = str(values.CONFIG_ID)
         exp_id = conf_id + "-" + bug_id
         values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
@@ -275,7 +342,9 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
 
 def retrieve_results(archive_name, tool: AbstractTool):
     emitter.normal("\t\tretrieving results for analysis")
-    archive_path = values.DIR_MAIN + "/results/" + tool.name.lower() + "/" + archive_name
+    archive_path = (
+        values.DIR_MAIN + "/results/" + tool.name.lower() + "/" + archive_name
+    )
     if os.path.isfile(archive_path):
         extract_command = "cp " + archive_path + " " + definitions.DIR_RESULT + ";"
         extract_command += "cd " + definitions.DIR_RESULT + ";"
@@ -292,7 +361,7 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
     index = -1
     for tool in tool_list:
         index = index + 1
-        dir_info = dir_info_list[index]['local']
+        dir_info = dir_info_list[index]["local"]
         container_id = container_id_list[index]
         dir_expr = dir_info["experiment"]
         dir_artifacts = dir_info["artifacts"]
@@ -313,33 +382,46 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         container.remove_container(container_id)
     volume_list = {
         # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
-        dir_info["local"]["logs"]: {'bind': '/logs', 'mode': 'rw'},
-        dir_info["local"]["setup"]: {'bind': dir_info["container"]["setup"], 'mode': 'rw'},
-        dir_info["local"]["aux"]: {'bind': dir_info["container"]["aux"], 'mode': 'rw'},
-        dir_info["local"]["base"]: {'bind': dir_info["container"]["base"], 'mode': 'rw'},
-        "/var/run/docker.sock": {'bind': "/var/run/docker.sock", 'mode': 'rw'}
+        dir_info["local"]["logs"]: {"bind": "/logs", "mode": "rw"},
+        dir_info["local"]["setup"]: {
+            "bind": dir_info["container"]["setup"],
+            "mode": "rw",
+        },
+        dir_info["local"]["aux"]: {"bind": dir_info["container"]["aux"], "mode": "rw"},
+        dir_info["local"]["base"]: {
+            "bind": dir_info["container"]["base"],
+            "mode": "rw",
+        },
+        "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
     if not container.is_image_exist(container_name.lower()):
         tmp_dockerfile = "/tmp/Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
-        with open(tmp_dockerfile, 'w') as dock_file:
+        with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
-            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
+            dock_file.write(
+                "COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment")
+            )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-            dock_file.write("RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"]))
+            dock_file.write(
+                "RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"])
+            )
         dock_file.close()
         container.build_image(tmp_dockerfile, container_name.lower())
     # Need to copy the logs from benchmark setup before instantiating the running container
-    tmp_container_id = container.build_container(container_name, dict(), container_name.lower())
-    copy_log_cmd = "docker cp {}:{} {}".format(tmp_container_id,
-                                               dir_info["container"]["logs"],
-                                               dir_info["local"]["logs"])
+    tmp_container_id = container.build_container(
+        container_name, dict(), container_name.lower()
+    )
+    copy_log_cmd = "docker cp {}:{} {}".format(
+        tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
+    )
     utilities.execute_command(copy_log_cmd)
     container.stop_container(tmp_container_id)
     container.remove_container(tmp_container_id)
-    container_id = container.build_container(container_name, volume_list, container_name.lower())
+    container_id = container.build_container(
+        container_name, volume_list, container_name.lower()
+    )
     return container_id
-
 
 
 def run(benchmark, tool_list, bug_info, config_info):
@@ -349,17 +431,28 @@ def run(benchmark, tool_list, bug_info, config_info):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     config_id = config_info[definitions.KEY_ID]
-    config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
+    config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
+        definitions.KEY_CONFIG_TIMEOUT_TESTCASE
+    ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     dir_info = generate_dir_info(benchmark.name, subject_name, bug_name)
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
-    emitter.highlight("\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT]))
-    emitter.highlight("\t[profile] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC])
-    emitter.highlight("\t[profile] test-suite ratio: " + str(config_info[definitions.KEY_CONFIG_TEST_RATIO]))
+    emitter.highlight(
+        "\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    )
+    emitter.highlight(
+        "\t[profile] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
+    )
+    emitter.highlight(
+        "\t[profile] test-suite ratio: "
+        + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    )
     emitter.highlight("\t[meta-data] project: " + subject_name)
     emitter.highlight("\t[meta-data] bug ID: " + bug_name)
     emitter.highlight("\t[meta-data] logs directory: " + dir_info["local"]["logs"])
-    emitter.highlight("\t[meta-data] output directory: " + dir_info["local"]["artifacts"])
+    emitter.highlight(
+        "\t[meta-data] output directory: " + dir_info["local"]["artifacts"]
+    )
     exp_img_id = None
 
     benchmark.update_dir_info(dir_info)
@@ -367,7 +460,6 @@ def run(benchmark, tool_list, bug_info, config_info):
         exp_img_id = benchmark.get_exp_image(bug_index, values.DEFAULT_RUN_TESTS_ONLY)
     else:
         benchmark.setup_experiment(bug_index, None, values.DEFAULT_RUN_TESTS_ONLY)
-
 
     for repair_tool in tool_list:
         index = index + 1
@@ -378,13 +470,28 @@ def run(benchmark, tool_list, bug_info, config_info):
         dir_info = update_dir_info(dir_info, tool_name)
         dir_instr_local = dir_info["local"]["instrumentation"]
         dir_result_local = dir_info["local"]["results"]
+        # emitter.information("directory is {}".format(dir_instr_local))
         if not os.path.isdir(dir_instr_local):
-            emitter.warning("\t\t[warning] there is no instrumentation for " + repair_tool.name)
+            emitter.warning(
+                "\t\t[warning] there is no instrumentation for " + repair_tool.name
+            )
         if values.DEFAULT_ANALYSE_ONLY:
-            if not os.path.isdir(dir_result_local) or len(os.listdir(dir_result_local)) == 0:
-                archive_name = "-".join([config_id, benchmark.name,
-                                         repair_tool.name,
-                                         subject_name, bug_name]) + ".tar.gz"
+            if (
+                not os.path.isdir(dir_result_local)
+                or len(os.listdir(dir_result_local)) == 0
+            ):
+                archive_name = (
+                    "-".join(
+                        [
+                            config_id,
+                            benchmark.name,
+                            repair_tool.name,
+                            subject_name,
+                            bug_name,
+                        ]
+                    )
+                    + ".tar.gz"
+                )
                 if not retrieve_results(archive_name, repair_tool):
                     continue
             analyse_result(dir_info, bug_info, [repair_tool])
@@ -396,19 +503,30 @@ def run(benchmark, tool_list, bug_info, config_info):
             utilities.clean_artifacts(dir_logs_local)
         benchmark.update_dir_info(dir_info)
         if values.DEFAULT_USE_CONTAINER:
-            container_name = "{}-{}-{}-{}".format(tool_name,
-                                                  benchmark.name,
-                                                  subject_name,
-                                                  bug_name)
+            container_name = "{}-{}-{}-{}".format(
+                tool_name, benchmark.name, subject_name, bug_name
+            )
             if repair_tool.image_name is None:
-                utilities.error_exit("Repair tool does not have a Dockerfile: {}".format(repair_tool.name))
-            container_id = create_running_container(exp_img_id, repair_tool, dir_info, container_name)
+                utilities.error_exit(
+                    "Repair tool does not have a Dockerfile: {}".format(
+                        repair_tool.name
+                    )
+                )
+            container_id = create_running_container(
+                exp_img_id, repair_tool, dir_info, container_name
+            )
         container_id_list.append(container_id)
         dir_info_list.append(dir_info)
 
-
     if not values.DEFAULT_SETUP_ONLY:
-        repair_all(dir_info_list, bug_info, tool_list, config_info, container_id_list, benchmark.name)
+        repair_all(
+            dir_info_list,
+            bug_info,
+            tool_list,
+            config_info,
+            container_id_list,
+            benchmark.name,
+        )
         if not values.CONF_INSTRUMENT_ONLY:
             analyse_result(dir_info_list, bug_info, tool_list)
             save_artifacts(dir_info_list, bug_info, tool_list, container_id_list)
@@ -416,6 +534,6 @@ def run(benchmark, tool_list, bug_info, config_info):
             if len(tool_list) > 1:
                 tool_name = "multi"
             dir_archive = definitions.DIR_RESULT + "/" + tool_name
-            dir_result = dir_info_list[0]['local']['results']
+            dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)

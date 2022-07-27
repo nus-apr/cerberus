@@ -18,6 +18,7 @@
 from os import getcwd, chdir
 import subprocess
 
+
 def get_fix_revisions(out_dir):
     ori_dir = getcwd()
     chdir(out_dir)
@@ -40,34 +41,55 @@ def get_fix_revisions(out_dir):
             cur_revision = tokens[1]
             if last_fix_revision != "":
                 chdir(out_dir)
-                p = subprocess.Popen(["git", "rev-list", "--parents", "-n", "1", last_fix_revision], stdout=subprocess.PIPE)
+                p = subprocess.Popen(
+                    ["git", "rev-list", "--parents", "-n", "1", last_fix_revision],
+                    stdout=subprocess.PIPE,
+                )
                 chdir(ori_dir)
                 (out, err) = p.communicate()
                 tokens = out.split()
                 if len(tokens) == 2:
                     chdir(out_dir)
-                    p = subprocess.Popen(["git", "diff", "--name-only", last_fix_revision, last_fix_revision+"^1"], stdout=subprocess.PIPE)
+                    p = subprocess.Popen(
+                        [
+                            "git",
+                            "diff",
+                            "--name-only",
+                            last_fix_revision,
+                            last_fix_revision + "^1",
+                        ],
+                        stdout=subprocess.PIPE,
+                    )
                     chdir(ori_dir)
-                    (out,err) = p.communicate()
+                    (out, err) = p.communicate()
                     out_lines = out.split("\n")
                     for out_line in out_lines:
                         name_str = out_line.strip()
                         idx = name_str.rfind(".")
-                        extension = name_str[idx+1:]
-                        if (extension == "c") or (extension == "h") or (extension == "cpp") or (extension == "hpp"):
+                        extension = name_str[idx + 1 :]
+                        if (
+                            (extension == "c")
+                            or (extension == "h")
+                            or (extension == "cpp")
+                            or (extension == "hpp")
+                        ):
                             ret.append((last_fix_revision, tokens[1], comment))
                             break
             last_fix_revision = ""
             comment = ""
         elif (tokens[0] == "Date:") and last_is_author:
             year = int(tokens[5])
-            if (year < 2010):
+            if year < 2010:
                 break
-        elif (tokens[0] != "Author:" and tokens[0] != "Merge:"):
+        elif tokens[0] != "Author:" and tokens[0] != "Merge:":
             comment = comment + "\n" + line
             is_fix = False
             for token in tokens:
-                if (token.lower() == "fixed") or (token.lower() == "bug") or (token.lower() == "fix"):
+                if (
+                    (token.lower() == "fixed")
+                    or (token.lower() == "bug")
+                    or (token.lower() == "fix")
+                ):
                     is_fix = True
                     break
             if is_fix:
@@ -78,6 +100,7 @@ def get_fix_revisions(out_dir):
             last_is_author = False
     return ret
 
+
 def extract_arguments(out_dir, src_file):
     ori_dir = getcwd()
     chdir(out_dir)
@@ -86,10 +109,10 @@ def extract_arguments(out_dir, src_file):
     # eliminate the path, leave only the file name for search
     idx = src_file.rfind("/")
     if idx != -1:
-        file_name = src_file[idx+1:]
+        file_name = src_file[idx + 1 :]
     else:
         file_name = src_file
-    p = subprocess.Popen(["make", "--debug=j"], stdout = subprocess.PIPE)
+    p = subprocess.Popen(["make", "--debug=j"], stdout=subprocess.PIPE)
     (out, err) = p.communicate()
     lines = out.strip().split("\n")
     directory = "."
@@ -97,7 +120,7 @@ def extract_arguments(out_dir, src_file):
     for line in lines:
         strip_line = line.strip()
         if (len(strip_line) > 0) and (strip_line[len(strip_line) - 1] == "\\"):
-            last_line = last_line + " " + strip_line[0:len(strip_line) - 1]
+            last_line = last_line + " " + strip_line[0 : len(strip_line) - 1]
         else:
             if last_line != "":
                 line = last_line + " " + line
@@ -114,9 +137,9 @@ def extract_arguments(out_dir, src_file):
                         break
                 ret = ""
                 for token in tokens[idx:]:
-                    if token[0] == '`':
+                    if token[0] == "`":
                         break
-                    if token == '&&':
+                    if token == "&&":
                         break
                     if token.find("excess-precision") != -1:
                         continue
@@ -126,7 +149,7 @@ def extract_arguments(out_dir, src_file):
                 return directory, ret
     # we try another way to get around it
     subprocess.call(["touch", src_file])
-    p = subprocess.Popen(["make", "-n"], stdout = subprocess.PIPE)
+    p = subprocess.Popen(["make", "-n"], stdout=subprocess.PIPE)
     (out, err) = p.communicate()
     print(out)
     lines = out.strip().split("\n")
@@ -138,15 +161,19 @@ def extract_arguments(out_dir, src_file):
             tokens = line.strip().split()
             idx = -1
             for i in range(0, len(tokens)):
-                if tokens[i] == "cc" or tokens[i] == "gcc" or tokens[i].find("gcc") != -1:
+                if (
+                    tokens[i] == "cc"
+                    or tokens[i] == "gcc"
+                    or tokens[i].find("gcc") != -1
+                ):
                     idx = i + 1
                     break
             if idx != -1:
                 ret = ""
                 for token in tokens[idx:]:
-                    if token[0] == '`':
+                    if token[0] == "`":
                         break
-                    if token == '&&':
+                    if token == "&&":
                         break
                     if token.find("excess-precision") != -1:
                         continue
@@ -155,4 +182,4 @@ def extract_arguments(out_dir, src_file):
                 chdir(ori_dir)
                 return directory, ret
     chdir(ori_dir)
-    return "",""
+    return "", ""

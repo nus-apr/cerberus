@@ -17,8 +17,7 @@ with open(llvm_ir_path, "r") as input_file:
 
 with open(gdb_script_path, "w") as out_file:
     for struct_name in struct_list:
-        out_file.writelines("offsets-of \"{}\"\n".format(struct_name))
-        out_file.writelines("printf \"\\n\"\n")
+        out_file.writelines('offsets-of "{}"\n'.format(struct_name))
+        out_file.writelines('printf "\\n"\n')
 
 os.system("gdb -batch -silent -x gdb_script {} > def_file".format(binary_name))
-

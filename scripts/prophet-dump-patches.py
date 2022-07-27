@@ -5,9 +5,10 @@ import sys
 import re
 import shlex
 
+
 def mute():
-    sys.stdout = open(os.devnull, 'w')
-    sys.stderr = open(os.devnull, 'w')
+    sys.stdout = open(os.devnull, "w")
+    sys.stderr = open(os.devnull, "w")
 
 
 pool = mp.Pool(mp.cpu_count(), initializer=mute)
@@ -37,20 +38,22 @@ def collect_result_one(result):
 def generate_patch(p_str, src_file, id, dir_exp, orig_file):
     os.chdir(dir_exp)
     fix_file = "/tmp/{}.fix".format(id)
-    #os.system("cp {} {}".format(src_file, fix_file))
-    #print("f1x-transform {} --apply --bl {} --bc {} --el {} --ec {} --patch {}".
+    # os.system("cp {} {}".format(src_file, fix_file))
+    # print("f1x-transform {} --apply --bl {} --bc {} --el {} --ec {} --patch {}".
     #          format(src_file, sl, sc, el, ec, p_str))
-    cmd = "KEYWORD=\"{}\";".format(p_str.replace("&", "\&"))
-    #cmd += "ESCAPED_KEYWORD=$(printf '%s\n' \"$KEYWORD\" | sed -e 's/[]\/$*.^[]/\\&/g');"
-    #cmd += "ESCAPED_KEYWORD=$(echo $KEYWORD | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g');"
-    cmd += "sed \"s/F1X_EXPRESSION_PLACEHOLDER/$KEYWORD/g\" {} > {}".format(src_file, fix_file)
-    #cmd += "sed \"s/F1X_EXPRESSION_PLACEHOLDER/$ESCAPED_KEYWORD/g\" {} > {}".format(src_file, fix_file)
+    cmd = 'KEYWORD="{}";'.format(p_str.replace("&", "\&"))
+    # cmd += "ESCAPED_KEYWORD=$(printf '%s\n' \"$KEYWORD\" | sed -e 's/[]\/$*.^[]/\\&/g');"
+    # cmd += "ESCAPED_KEYWORD=$(echo $KEYWORD | sed -e 's/\\/\\\\/g; s/\//\\\//g; s/&/\\\&/g');"
+    cmd += 'sed "s/F1X_EXPRESSION_PLACEHOLDER/$KEYWORD/g" {} > {}'.format(
+        src_file, fix_file
+    )
+    # cmd += "sed \"s/F1X_EXPRESSION_PLACEHOLDER/$ESCAPED_KEYWORD/g\" {} > {}".format(src_file, fix_file)
     os.system(cmd)
-    #os.system("sed 's/F1X_EXPRESSION_PLACEHOLDER/{}/g' {} > {}".format(p_str, src_file, fix_file))
+    # os.system("sed 's/F1X_EXPRESSION_PLACEHOLDER/{}/g' {} > {}".format(p_str, src_file, fix_file))
     # print(cmd)
     patch_file = "/output/patches/{}_f1x.patch".format(id)
     os.system("diff -U 0 {} {} > {}".format(orig_file, fix_file, patch_file))
-    #os.system("cp {} {}".format(fix_file, src_file))
+    # os.system("cp {} {}".format(fix_file, src_file))
 
 
 def generate_patches(source_file, dir_exp):
@@ -81,7 +84,11 @@ def generate_patches(source_file, dir_exp):
                 loc_list.append(patch_loc)
                 loc_id = loc_id + 1
                 transform_file = "/tmp/f1x_{}".format(loc_id)
-                os.system("f1x-transform {} --apply --bl {} --bc {} --el {} --ec {} --patch \"{}\"".format(source_file, sl, sc, el, ec, "F1X_EXPRESSION_PLACEHOLDER"))
+                os.system(
+                    'f1x-transform {} --apply --bl {} --bc {} --el {} --ec {} --patch "{}"'.format(
+                        source_file, sl, sc, el, ec, "F1X_EXPRESSION_PLACEHOLDER"
+                    )
+                )
                 # print("f1x-transform {} --apply --bl {} --bc {} --el {} --ec {} --patch \"{}\"".format(source_file, sl, sc, el, ec, "F1X_EXPRESSION_PLACEHOLDER"))
                 os.system("cp {} {}".format(source_file, transform_file))
                 os.system("cp {0}_bk {0}".format(source_file))
@@ -89,16 +96,21 @@ def generate_patches(source_file, dir_exp):
             else:
                 loc_id = loc_list.index(patch_loc) + 1
                 transform_file = "/tmp/f1x_{}".format(loc_id)
-            patch_str = patch_desc.split(" in ")[0].replace(" ".join(patch_info[:6]), "")
-            #generate_patch(patch_str, transform_file, patch_id, dir_exp, back_up)
-            pool.apply_async(generate_patch,
-                             args=(patch_str, transform_file, patch_id, dir_exp, back_up),
-                             callback=collect_result)
+            patch_str = patch_desc.split(" in ")[0].replace(
+                " ".join(patch_info[:6]), ""
+            )
+            # generate_patch(patch_str, transform_file, patch_id, dir_exp, back_up)
+            pool.apply_async(
+                generate_patch,
+                args=(patch_str, transform_file, patch_id, dir_exp, back_up),
+                callback=collect_result,
+            )
 
     pool.close()
     # print("waiting for thread completion")
     pool.join()
     return result_list
+
 
 # print(sys.argv)
 src_file = sys.argv[1]

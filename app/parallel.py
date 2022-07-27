@@ -12,8 +12,8 @@ import re
 
 
 def mute():
-    sys.stdout = open(os.devnull, 'w')
-    sys.stderr = open(os.devnull, 'w')
+    sys.stdout = open(os.devnull, "w")
+    sys.stderr = open(os.devnull, "w")
 
 
 max_process_count = mp.cpu_count()
@@ -76,14 +76,18 @@ def consume_patches(path_info, dir_info, config_info):
         len_processing = len(os.listdir(dir_process))
         len_processed = len(result_list)
         if len_gen > 0:
-            emitter.information("\t\t\t Generated:{} Consumed:{} Processed: {}"
-                                " Processing:{} Valid:{} Invalid:{} Error:{}".format(len_gen,
-                                                                                     len_consumed,
-                                                                                     len_processed,
-                                                                                     len_processing,
-                                                                                     len_valid,
-                                                                                     len_invalid,
-                                                                                     len_error))
+            emitter.information(
+                "\t\t\t Generated:{} Consumed:{} Processed: {}"
+                " Processing:{} Valid:{} Invalid:{} Error:{}".format(
+                    len_gen,
+                    len_consumed,
+                    len_processed,
+                    len_processing,
+                    len_valid,
+                    len_invalid,
+                    len_error,
+                )
+            )
         if len_consumed > 0 and len_consumed - len_processed > 1000:
             time.sleep(3)
             continue
@@ -102,12 +106,15 @@ def consume_patches(path_info, dir_info, config_info):
         for patch_file in list_selected:
             file_info = (binary_path, oracle_path, source_file, patch_file)
             if values.DEFAULT_USE_VTHREADS:
-                validator_pool.apply_async(valkyrie.validate_patch,
-                                           args=(dir_info, file_info, config_info),
-                                           callback=collect_result)
+                validator_pool.apply_async(
+                    valkyrie.validate_patch,
+                    args=(dir_info, file_info, config_info),
+                    callback=collect_result,
+                )
             else:
-                result_list.append(valkyrie.validate_patch(dir_info, file_info, config_info))
-
+                result_list.append(
+                    valkyrie.validate_patch(dir_info, file_info, config_info)
+                )
 
             consume_count += 1
         values.LIST_CONSUMED = values.LIST_CONSUMED + list_selected
@@ -130,6 +137,3 @@ def wait_validation():
         validator_pool.terminate()
         validator_pool.join()
     exit_consume = 1
-
-
-

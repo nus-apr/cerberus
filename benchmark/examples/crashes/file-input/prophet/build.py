@@ -23,7 +23,7 @@ import subprocess
 import getopt
 
 
-def compileit( out_dir, compile_only = False, config_only = False, paraj = 0):
+def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
     ori_dir = getcwd()
     chdir(out_dir)
     my_env = environ
@@ -31,28 +31,30 @@ def compileit( out_dir, compile_only = False, config_only = False, paraj = 0):
         system("make clean")
 
     if not config_only:
-        if (paraj == 0):
-            ret = subprocess.call(["make", "CFLAGS=-g -O0"], env = my_env)
+        if paraj == 0:
+            ret = subprocess.call(["make", "CFLAGS=-g -O0"], env=my_env)
         else:
-            ret = subprocess.call(["make", "CFLAGS=-g -O0","-j", str(paraj)], env = my_env)
+            ret = subprocess.call(
+                ["make", "CFLAGS=-g -O0", "-j", str(paraj)], env=my_env
+            )
         if ret != 0:
             print("Failed to make!")
             exit(1)
 
-    #ret = subprocess.call(["make", "install"], env = my_env)
-    #if ret != 0:
+    # ret = subprocess.call(["make", "install"], env = my_env)
+    # if ret != 0:
     #   print "Failed to make install!"
     #   exit(1)
 
     chdir(ori_dir)
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
 
     compile_only = False
-    opts, args = getopt.getopt(argv[1:],'cd:hlj:p:r:x')
+    opts, args = getopt.getopt(argv[1:], "cd:hlj:p:r:x")
     dryrun_src = ""
     paraj = 0
-
 
     print_fix_log = False
     print_usage = False
@@ -93,8 +95,8 @@ if __name__=="__main__":
         (builddir, buildargs) = extract_arguments(out_dir, dryrun_src)
         if len(args) > 1:
             out_file = open(args[1], "w")
-            print >> out_file,builddir
-            print >> out_file,buildargs
+            print >> out_file, builddir
+            print >> out_file, buildargs
             out_file.close()
         else:
             print(builddir)

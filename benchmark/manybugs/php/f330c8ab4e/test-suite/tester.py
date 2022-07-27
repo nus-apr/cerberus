@@ -7,10 +7,16 @@ import subprocess
 
 from subprocess import Popen, PIPE
 
-DEVNULL = open(os.devnull, 'w')
+DEVNULL = open(os.devnull, "w")
 exp_dir = os.path.abspath(os.path.dirname(os.path.realpath(__file__)))
 
-fail_list = ["ext/reflection/tests/traits005.phpt", "Zend/tests/bug55825.phpt", "Zend/tests/bug55137.phpt", "Zend/tests/traits/static_get_called_class.phpt", "Zend/tests/traits/static_002.phpt"]
+fail_list = [
+    "ext/reflection/tests/traits005.phpt",
+    "Zend/tests/bug55825.phpt",
+    "Zend/tests/bug55137.phpt",
+    "Zend/tests/traits/static_get_called_class.phpt",
+    "Zend/tests/traits/static_002.phpt",
+]
 
 # Build a list of all the test cases for the program
 def build():
@@ -31,7 +37,7 @@ def build():
             shutil.copy("src/" + t, file_php)
             start_line = 0
             end_line = 0
-            with open(file_php, "r", encoding='utf-8', errors='ignore') as test_file:
+            with open(file_php, "r", encoding="utf-8", errors="ignore") as test_file:
                 test_content = test_file.readlines()
                 test_file.seek(0)
                 for num, line in enumerate(test_file, 1):
@@ -40,12 +46,11 @@ def build():
                     if "--EXPECT" in line:
                         end_line = num
                         break
-            with open(file_php, "w+", encoding='utf-8', errors='ignore') as test_file:
+            with open(file_php, "w+", encoding="utf-8", errors="ignore") as test_file:
                 test_file.seek(0)
                 test_file.truncate()
-                test_file.writelines(test_content[start_line:end_line-1])
+                test_file.writelines(test_content[start_line : end_line - 1])
                 test_file.write("?>\n")
-
 
     # Find the sub-set of tests used by this scenario
     with open(exp_dir + "/tests.indices.txt", "r") as f:
@@ -57,11 +62,17 @@ def build():
     with open(exp_dir + "/bug-info/scenario-data.txt", "r") as f:
         lines = [l.strip() for l in f]
 
-    cut_from = \
-        next((i for (i, l) in enumerate(lines) if l.startswith("failing tests:")))
-    cut_to = \
-        next((i for (i, l) in enumerate(lines) if l.startswith("minutes between bug rev and fix rev:")))
-    failing = set(lines[cut_from + 1:cut_to - 1])
+    cut_from = next(
+        (i for (i, l) in enumerate(lines) if l.startswith("failing tests:"))
+    )
+    cut_to = next(
+        (
+            i
+            for (i, l) in enumerate(lines)
+            if l.startswith("minutes between bug rev and fix rev:")
+        )
+    )
+    failing = set(lines[cut_from + 1 : cut_to - 1])
     if "8d520d6296" in exp_dir:
         failing = set(fail_list)
 
@@ -84,7 +95,9 @@ def build():
         for t in sorted(passing):
             f.write("{}\n".format(t))
 
-    shutil.copy("src/" + list(passing)[0], "tests/" + str(len(all_tests)).zfill(5) + ".phpt")
+    shutil.copy(
+        "src/" + list(passing)[0], "tests/" + str(len(all_tests)).zfill(5) + ".phpt"
+    )
     with open(exp_dir + "/tests/testfile.log", "w") as f:
         f.write("{}\n".format(str(len(all_tests))))
         for t in all_tests:
@@ -129,8 +142,8 @@ def run(identifier, exe=None):
             except UnicodeDecodeError:
                 stdout = stdout.decode("utf-8")
             outcome = stdout.split("\n")[14]
-            _, _, outcome = outcome.partition('\r')
-            outcome, _, _ = outcome.partition(' ')
+            _, _, outcome = outcome.partition("\r")
+            outcome, _, _ = outcome.partition(" ")
             return outcome in ["PASS", "SKIP"]
 
         except subprocess.TimeoutExpired:

@@ -13,20 +13,37 @@ class Angelix(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Angelix, self).__init__(self.name)
 
-    def instrument(self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file):
+    def instrument(
+        self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file
+    ):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = dir_logs + "/" + conf_id + "-" + self.name + "-" + bug_id + "-instrument.log"
+        self.log_instrument_path = (
+            dir_logs
+            + "/"
+            + conf_id
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-instrument.log"
+        )
         command_str = "bash instrument.sh {}".format(dir_expr)
         dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-        status = self.run_command(command_str, self.log_instrument_path, dir_setup_exp, container_id)
+        status = self.run_command(
+            command_str, self.log_instrument_path, dir_setup_exp, container_id
+        )
         if not status == 0:
             error_exit("error with instrumentation of ", self.name)
         return
 
-    def repair(self, dir_info, experiment_info, config_info, container_id, instrument_only):
-        super(Angelix, self).repair(dir_info, experiment_info, config_info, container_id, instrument_only)
+    def repair(
+        self, dir_info, experiment_info, config_info, container_id, instrument_only
+    ):
+        super(Angelix, self).repair(
+            dir_info, experiment_info, config_info, container_id, instrument_only
+        )
         if not instrument_only:
             emitter.normal("\t\t\t running repair with " + self.name)
             conf_id = config_info[definitions.KEY_ID]
@@ -41,36 +58,61 @@ class Angelix(AbstractTool):
             passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
             subject_name = experiment_info[definitions.KEY_SUBJECT]
             additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            self.log_output_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+            self.log_output_path = (
+                dir_logs
+                + "/"
+                + conf_id
+                + "-"
+                + self.name.lower()
+                + "-"
+                + bug_id
+                + "-output.log"
+            )
             src_path = dir_expr + "/src"
             gold_path = dir_expr + "/src-gold"
-            angelix_dir_path = dir_expr + '/angelix'
+            angelix_dir_path = dir_expr + "/angelix"
             oracle_path = angelix_dir_path + "/oracle"
-            config_script_path = angelix_dir_path + '/config'
-            build_script_path = angelix_dir_path + '/build'
+            config_script_path = angelix_dir_path + "/config"
+            build_script_path = angelix_dir_path + "/build"
             timeout_s = int(timeout) * 3600
             syn_timeout = int(0.25 * timeout_s * 1000)
             test_id_list = ""
             for test_id in failing_test_list:
                 test_id_list += test_id + " "
             if passing_test_list:
-                filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+                filtered_list = self.filter_tests(
+                    passing_test_list, subject_name, bug_id
+                )
                 for test_id in filtered_list:
                     test_id_list += test_id + " "
 
-            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+            timestamp_command = (
+                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+            )
             execute_command(timestamp_command)
-            repair_command = "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  " \
-                              "--configure {4}  " \
-                              "--golden {5}  " \
-                              "--build {6} " \
-                              "--output patches " \
-                              "--synthesis-timeout {7} ".format(src_path, source_file, oracle_path,
-                                                                test_id_list, config_script_path, gold_path,
-                                                                build_script_path, str(syn_timeout), str(timeout))
+            repair_command = (
+                "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  "
+                "--configure {4}  "
+                "--golden {5}  "
+                "--build {6} "
+                "--output patches "
+                "--synthesis-timeout {7} ".format(
+                    src_path,
+                    source_file,
+                    oracle_path,
+                    test_id_list,
+                    config_script_path,
+                    gold_path,
+                    build_script_path,
+                    str(syn_timeout),
+                    str(timeout),
+                )
+            )
 
             if fix_location:
-                repair_command += " --lines {0}  ".format(",".join(fix_line_number_list))
+                repair_command += " --lines {0}  ".format(
+                    ",".join(fix_line_number_list)
+                )
 
             if values.DEFAULT_DUMP_PATCHES:
                 repair_command += " --dump-patches "
@@ -85,17 +127,30 @@ class Angelix(AbstractTool):
                     load_line = arg_file.readline()
                     os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
                 os.remove("/tmp/ANGELIX_KLEE_LOAD")
-            repair_command += "  --generate-all {0} " \
-                               " --timeout {1}".format(additional_tool_param, str(timeout_s))
+            repair_command += "  --generate-all {0} " " --timeout {1}".format(
+                additional_tool_param, str(timeout_s)
+            )
             if container_id:
-                repair_command = "/bin/bash -c \"source /angelix/activate;" + repair_command + "\""
-            status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+                repair_command = (
+                    '/bin/bash -c "source /angelix/activate;' + repair_command + '"'
+                )
+            status = self.run_command(
+                repair_command, self.log_output_path, dir_expr, container_id
+            )
             if status != 0:
-                emitter.warning("\t\t\t[warning] {0} exited with an error code {1}".format(self.name, status))
+                emitter.warning(
+                    "\t\t\t[warning] {0} exited with an error code {1}".format(
+                        self.name, status
+                    )
+                )
             else:
-                emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+                emitter.success(
+                    "\t\t\t[success] {0} ended successfully".format(self.name)
+                )
             emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            timestamp_command = (
+                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+            )
             execute_command(timestamp_command)
         return
 
@@ -149,8 +204,17 @@ class Angelix(AbstractTool):
         dir_results = dir_info["result"]
         dir_output = dir_info["output"]
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = dir_logs + "/" + conf_id + "-" + self.name.lower() + "-" + bug_id + "-analysis.log"
-        regex = re.compile('(.*-output.log$)')
+        self.log_analysis_path = (
+            dir_logs
+            + "/"
+            + conf_id
+            + "-"
+            + self.name.lower()
+            + "-"
+            + bug_id
+            + "-analysis.log"
+        )
+        regex = re.compile("(.*-output.log$)")
         for root, dirs, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
@@ -163,7 +227,13 @@ class Angelix(AbstractTool):
         time_duration = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+            return (
+                size_search_space,
+                count_enumerations,
+                count_plausible,
+                count_non_compilable,
+                time_duration,
+            )
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         is_timeout = True
@@ -172,8 +242,8 @@ class Angelix(AbstractTool):
         if os.path.isfile(self.log_output_path):
             with open(self.log_output_path, "r") as log_file:
                 log_lines = log_file.readlines()
-                time_start = log_lines[0].replace("\n", "")
-                time_end = log_lines[-1].replace("\n", "")
+                time_start = log_lines[0].rstrip()
+                time_end = log_lines[-1].rstrip()
                 time_duration = self.time_duration(time_start, time_end)
                 collect_neg = False
                 for line in log_lines:
@@ -199,7 +269,9 @@ class Angelix(AbstractTool):
                     elif "running negative tests" in line:
                         collect_neg = True
                     elif "excluding test" in line:
-                        removing_test_id = line.split("excluding test ")[-1].split(" ")[0]
+                        removing_test_id = line.split("excluding test ")[-1].split(" ")[
+                            0
+                        ]
                         if removing_test_id in reported_fail_list:
                             reported_fail_list.remove(removing_test_id)
                     elif "failed to build" in line and "golden" in line:
@@ -212,7 +284,11 @@ class Angelix(AbstractTool):
                         is_error = True
                         emitter.error("\t\t\t\t[error] failed to build frontend")
                     elif collect_neg and "running test" in line:
-                        t_id = line.split("running test ")[-1].split(" ")[0].replace("'", "")
+                        t_id = (
+                            line.split("running test ")[-1]
+                            .split(" ")[0]
+                            .replace("'", "")
+                        )
                         reported_fail_list.add(t_id)
                     elif collect_neg and "repair test suite" in line:
                         collect_neg = False
@@ -221,12 +297,16 @@ class Angelix(AbstractTool):
             count_enumerations = count_enumerations - 1
         dir_patch = dir_results + "/patches"
         if dir_patch and os.path.isdir(dir_patch):
-            output_patch_list = [f for f in listdir(dir_patch) if isfile(join(dir_patch, f))]
+            output_patch_list = [
+                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
+            ]
             count_plausible = len(output_patch_list)
         count_implausible = count_enumerations - count_plausible - count_non_compilable
         if list(reported_fail_list) != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
-            emitter.warning("\t\t\t\texpected fail list: {0}".format(",".join(fail_list)))
+            emitter.warning(
+                "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
+            )
             reported_list_str = ",".join(list(reported_fail_list))
             if len(reported_fail_list) > 10:
                 reported_list_str = ",".join(list(reported_fail_list)[:10]) + "..."
@@ -235,18 +315,32 @@ class Angelix(AbstractTool):
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
             emitter.warning("\t\t\t\t[warning] timeout before ending")
-        with open(self.log_analysis_path, 'w') as log_file:
+        with open(self.log_analysis_path, "w") as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
             if values.DEFAULT_DUMP_PATCHES:
                 count_enumerations = count_plausible
             else:
-                log_file.write("\t\t count plausible patches: {0}\n".format(count_plausible))
-                log_file.write("\t\t count non-compiling patches: {0}\n".format(count_non_compilable))
-                log_file.write("\t\t count implausible patches: {0}\n".format(count_implausible))
+                log_file.write(
+                    "\t\t count plausible patches: {0}\n".format(count_plausible)
+                )
+                log_file.write(
+                    "\t\t count non-compiling patches: {0}\n".format(
+                        count_non_compilable
+                    )
+                )
+                log_file.write(
+                    "\t\t count implausible patches: {0}\n".format(count_implausible)
+                )
             log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
             log_file.write("\t\t any errors: {0}\n".format(is_error))
             log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return size_search_space, count_enumerations, count_plausible, count_non_compilable, time_duration
+        return (
+            size_search_space,
+            count_enumerations,
+            count_plausible,
+            count_non_compilable,
+            time_duration,
+        )
 
     def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
         emitter.normal("\t\t\t pre-processing for {}".format(self.name))

@@ -1,5 +1,6 @@
 import os
 from os.path import dirname
+
 DIR_MAIN = dirname(dirname(os.path.realpath(__file__)))
 DIR_INFRA = DIR_MAIN + "/infra"
 DIR_APP = DIR_MAIN + "/app/"
@@ -14,7 +15,6 @@ DIR_LOGS = DIRECTORY_OUTPUT_BASE + "/logs"
 DIR_LIBS = DIR_MAIN + "/libs"
 DIR_SCRIPTS = DIR_MAIN + "/scripts"
 DIR_ARTIFACTS = DIRECTORY_OUTPUT_BASE + "/artifacts"
-
 
 
 FILE_MAIN_LOG = ""
@@ -44,6 +44,7 @@ KEY_COUNT_NEG = "count_neg"
 KEY_COUNT_POS = "count_pos"
 KEY_CRASH_CMD = "crash_input"
 KEY_EXPLOIT_LIST = "exploit_file_list"
+KEY_BUG_TYPE = "bug_type"
 
 
 ARG_DATA_PATH = "--data-dir="
@@ -81,8 +82,24 @@ FILE_OUTPUT_LOG = ""
 FILE_SETUP_LOG = ""
 FILE_INSTRUMENT_LOG = ""
 
-APR_MIN_LIMIT = {"prophet": 1000, "f1x": 100, "genprog": 1000, "cpr": 5000, "fix2fit": 5000,
-                     "angelix": 100, "senx": 100, "darjeeling": 100}
+APR_MIN_LIMIT = {
+    "prophet": 1000,
+    "f1x": 100,
+    "genprog": 1000,
+    "cpr": 5000,
+    "fix2fit": 5000,
+    "angelix": 100,
+    "senx": 100,
+    "darjeeling": 100,
+}
 
-APR_MAX_LIMIT = {"prophet": 1000, "f1x": 5000, "genprog": 1000, "cpr": 5000, "fix2fit": 5000,
-                     "angelix": 100, "senx": 100, "darjeeling": 100}
+APR_MAX_LIMIT = {
+    "prophet": 1000,
+    "f1x": 5000,
+    "genprog": 1000,
+    "cpr": 5000,
+    "fix2fit": 5000,
+    "angelix": 100,
+    "senx": 100,
+    "darjeeling": 100,
+}

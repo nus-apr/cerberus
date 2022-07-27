@@ -11,8 +11,14 @@ def create():
     log_file_name = "log-" + str(time.time())
     log_file_path = definitions.DIRECTORY_LOG_BASE + "/" + log_file_name
     definitions.FILE_MAIN_LOG = log_file_path
-    with open(definitions.FILE_MAIN_LOG, 'w+') as log_file:
-        log_file.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
+    with open(definitions.FILE_MAIN_LOG, "w+") as log_file:
+        log_file.write(
+            "[Start] "
+            + values.TOOL_NAME
+            + " started at "
+            + str(datetime.datetime.now())
+            + "\n"
+        )
     if os.path.exists(definitions.FILE_LAST_LOG):
         os.remove(definitions.FILE_LAST_LOG)
     if os.path.exists(definitions.FILE_ERROR_LOG):
@@ -21,24 +27,48 @@ def create():
         os.remove(definitions.FILE_COMMAND_LOG)
     if os.path.exists(definitions.FILE_ANALYSIS_LOG):
         os.remove(definitions.FILE_ANALYSIS_LOG)
-    with open(definitions.FILE_LAST_LOG, 'w+') as last_log:
-        last_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    with open(definitions.FILE_ERROR_LOG, 'w+') as error_log:
-        error_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    with open(definitions.FILE_COMMAND_LOG, 'w+') as command_log:
-        command_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
-    with open(definitions.FILE_ANALYSIS_LOG, 'w+') as analysis_log:
-        analysis_log.write("[Start] " + values.TOOL_NAME + " started at " + str(datetime.datetime.now()) + "\n")
+    with open(definitions.FILE_LAST_LOG, "w+") as last_log:
+        last_log.write(
+            "[Start] "
+            + values.TOOL_NAME
+            + " started at "
+            + str(datetime.datetime.now())
+            + "\n"
+        )
+    with open(definitions.FILE_ERROR_LOG, "w+") as error_log:
+        error_log.write(
+            "[Start] "
+            + values.TOOL_NAME
+            + " started at "
+            + str(datetime.datetime.now())
+            + "\n"
+        )
+    with open(definitions.FILE_COMMAND_LOG, "w+") as command_log:
+        command_log.write(
+            "[Start] "
+            + values.TOOL_NAME
+            + " started at "
+            + str(datetime.datetime.now())
+            + "\n"
+        )
+    with open(definitions.FILE_ANALYSIS_LOG, "w+") as analysis_log:
+        analysis_log.write(
+            "[Start] "
+            + values.TOOL_NAME
+            + " started at "
+            + str(datetime.datetime.now())
+            + "\n"
+        )
 
 
 def log(log_message):
     log_message = "[" + str(time.asctime()) + "]" + log_message
     if "COMMAND" in log_message:
-        with open(definitions.FILE_COMMAND_LOG, 'a') as log_file:
+        with open(definitions.FILE_COMMAND_LOG, "a") as log_file:
             log_file.write(log_message)
-    with open(definitions.FILE_MAIN_LOG, 'a') as log_file:
+    with open(definitions.FILE_MAIN_LOG, "a") as log_file:
         log_file.write(log_message)
-    with open(definitions.FILE_LAST_LOG, 'a') as log_file:
+    with open(definitions.FILE_LAST_LOG, "a") as log_file:
         log_file.write(log_message)
 
 
@@ -57,6 +87,7 @@ def command(message):
     message = str(message).strip().replace("[command]", "")
     message = "[COMMAND]: " + str(message) + "\n"
     log(message)
+
 
 def docker_command(message):
     message = str(message).strip().replace("[command]", "")
@@ -81,7 +112,7 @@ def debug(message):
 
 
 def error(message):
-    with open(definitions.FILE_ERROR_LOG, 'a') as last_log:
+    with open(definitions.FILE_ERROR_LOG, "a") as last_log:
         last_log.write(str(message) + "\n")
     message = str(message).strip().lower().replace("[error]", "")
     message = "[ERROR]: " + str(message) + "\n"
@@ -114,20 +145,40 @@ def warning(message):
 
 def analysis(exp_id):
     space_info, time_info = values.ANALYSIS_RESULTS[exp_id]
-    with open(definitions.FILE_ANALYSIS_LOG, 'a') as log_file:
+    with open(definitions.FILE_ANALYSIS_LOG, "a") as log_file:
         log_file.write("\n" + exp_id + "\n")
         log_file.write("\t\t search space size: {0}".format(space_info.size))
         log_file.write("\t\t count enumerations: {0}".format(space_info.enumerations))
         log_file.write("\t\t count plausible patches: {0}".format(space_info.plausible))
         log_file.write("\t\t count generated: {0}".format(space_info.generated))
-        log_file.write("\t\t count non-compiling patches: {0}".format(space_info.non_compilable))
-        log_file.write("\t\t count implausible patches: {0}".format(space_info.get_implausible()))
+        log_file.write(
+            "\t\t count non-compiling patches: {0}".format(space_info.non_compilable)
+        )
+        log_file.write(
+            "\t\t count implausible patches: {0}".format(space_info.get_implausible())
+        )
         log_file.write("\t\t time build: {0} seconds".format(time_info.total_build))
-        log_file.write("\t\t time validation: {0} seconds".format(time_info.total_validation))
-        log_file.write("\t\t time duration: {0} seconds".format(time_info.get_duration()))
-        log_file.write("\t\t latency compilation: {0} seconds".format(time_info.get_latency_compilation()))
-        log_file.write("\t\t latency validation: {0} seconds".format(time_info.get_latency_validation()))
-        log_file.write("\t\t latency plausible: {0} seconds".format(time_info.get_latency_plausible()))
+        log_file.write(
+            "\t\t time validation: {0} seconds".format(time_info.total_validation)
+        )
+        log_file.write(
+            "\t\t time duration: {0} seconds".format(time_info.get_duration())
+        )
+        log_file.write(
+            "\t\t latency compilation: {0} seconds".format(
+                time_info.get_latency_compilation()
+            )
+        )
+        log_file.write(
+            "\t\t latency validation: {0} seconds".format(
+                time_info.get_latency_validation()
+            )
+        )
+        log_file.write(
+            "\t\t latency plausible: {0} seconds".format(
+                time_info.get_latency_plausible()
+            )
+        )
 
 
 def end(time_duration, is_error=False):
@@ -161,6 +212,10 @@ def end(time_duration, is_error=False):
     # else:
     #     output(values.TOOL_NAME + " finished successfully after " + time_duration[
     #         definitions.KEY_DURATION_TOTAL] + " minutes")
-    log("[END] " + values.TOOL_NAME + " ended at  " + str(datetime.datetime.now()) + "\n\n")
-
-
+    log(
+        "[END] "
+        + values.TOOL_NAME
+        + " ended at  "
+        + str(datetime.datetime.now())
+        + "\n\n"
+    )

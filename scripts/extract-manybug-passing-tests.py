@@ -14,7 +14,7 @@ subject_list = list(set(subject_list))
 
 def write_as_json(data_list, output_file_path):
     content = json.dumps(data_list)
-    with open(output_file_path, 'w') as out_file:
+    with open(output_file_path, "w") as out_file:
         out_file.writelines(content)
 
 

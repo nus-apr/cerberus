@@ -1,3 +1,4 @@
+import json
 import docker
 import os
 import pathlib
@@ -25,6 +26,10 @@ def pull_image(image_name, tag_name):
     emitter.normal("pulling docker image")
     image = None
     try:
+        for line in client.api.pull(
+            repository=image_name, tag=tag_name, stream=True, decode=True
+        ):
+            emitter.normal(line["status"], False)
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
@@ -43,7 +48,16 @@ def build_image(dockerfile_path, image_name):
     if os.path.isfile(dockerfile_path):
         dockerfile_obj = open(dockerfile_path, "rb")
         try:
-            image, _ = client.images.build(path=context_dir, fileobj=dockerfile_obj, tag=image_name)
+            logs = client.api.build(
+                path=context_dir, fileobj=dockerfile_obj, tag=image_name
+            )
+            for line in logs:
+                data = json.loads(line.strip())
+                if "stream" in data:
+                    emitter.normal(data["stream"], False)
+            image, _ = client.images.build(
+                path=context_dir, fileobj=dockerfile_obj, tag=image_name
+            )
         except docker.errors.BuildError as ex:
             emitter.error(ex)
             utilities.error_exit("[error] Unable to build image: build failed")
@@ -60,8 +74,9 @@ def build_image(dockerfile_path, image_name):
 
 def build_benchmark_image(image_name):
     benchmark_name = image_name.split("-")[0]
-    dockerfile_path = "{}/{}/Dockerfile".format(definitions.DIR_BENCHMARK,
-                                                str(benchmark_name).lower())
+    dockerfile_path = "{}/{}/Dockerfile".format(
+        definitions.DIR_BENCHMARK, str(benchmark_name).lower()
+    )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id
 
@@ -117,11 +132,20 @@ def build_container(container_name, volume_list, image_name):
                 continue
             if not os.path.isdir(local_dir_path):
                 os.makedirs(local_dir_path)
-        container_id = client.containers.run(image_name, detach=True, name=container_name, volumes=volume_list,
-                                             mem_limit="30g", tty=True).id
+        container = client.containers.run(
+            image_name,
+            detach=True,
+            name=container_name,
+            volumes=volume_list,
+            mem_limit="30g",
+            tty=True,
+        )
+        container_id = container.id
     except docker.errors.ContainerError as ex:
         emitter.error(ex)
-        utilities.error_exit("[error] Unable to build container: container exited with a non-zero exit code")
+        utilities.error_exit(
+            "[error] Unable to build container: container exited with a non-zero exit code"
+        )
     except docker.errors.ImageNotFound as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: image not found")
@@ -140,13 +164,23 @@ def exec_command(container_id, command, workdir="/experiment"):
     output = ""
     try:
         container = client.containers.get(container_id)
-        command = command.encode().decode('ascii', 'ignore')
-        print_command = "[{}]".format(workdir) + " " + command
+        command = command.encode().decode("ascii", "ignore")
+        print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(command, demux=True, workdir=workdir)
+        if output is not None:
+            for stream in output:
+                if stream is None:
+                    continue
+                for line in stream.decode().split("\n"):
+                    emitter.debug(line)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
-        utilities.error_exit("[error] Unable to find container: container not found: " + str(container_id))
+        utilities.error_exit(
+            "[error] Unable to find container: container not found: {}".format(
+                container_id
+            )
+        )
     except docker.errors.APIError as exp:
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
@@ -185,17 +219,17 @@ def stop_container(container_id):
 
 
 def is_file(container_id, file_path):
-    exist_command = "test -f " + file_path
+    exist_command = "test -f {}".format(file_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
 def is_dir(container_id, dir_path):
-    exist_command = "test -d " + dir_path
+    exist_command = "test -d {}".format(dir_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
 def is_file_empty(container_id, file_path):
-    exist_command = "[ -s " + file_path + " ]"
+    exist_command = "[ -s {} ]".format(file_path)
     return exec_command(container_id, exist_command)[0] != 0
 
 
@@ -203,16 +237,27 @@ def fix_permissions(container_id, dir_path):
     permission_command = "chmod -R g+w  {}".format(dir_path)
     return exec_command(container_id, permission_command)
 
+
 def list_dir(container_id, dir_path):
-    exist_command = "ls " + dir_path
-    _, output =  exec_command(container_id, exist_command)
+    exist_command = "ls {}".format(dir_path)
+    _, output = exec_command(container_id, exist_command)
     stdout, stderr = output
     file_list = []
     if stdout:
-        dir_list = stdout.decode("utf-8").split("\n")
+        dir_list = stdout.decode("utf-8").split()
         for o in dir_list[:-1]:
             file_list.append(o.strip().replace("\n", ""))
     return file_list
+
+
+def copy_file_from_container(container_id, from_path, to_path):
+    copy_command = "docker cp {}:{} {}".format(container_id, from_path, to_path)
+    utilities.execute_command(copy_command)
+
+
+def copy_file_to_container(container_id, from_path, to_path):
+    copy_command = "docker cp {} {}:{}".format(from_path, container_id, to_path)
+    utilities.execute_command(copy_command)
 
 
 def write_file(container_id, file_path, content):
@@ -220,27 +265,27 @@ def write_file(container_id, file_path, content):
     with open(tmp_file_path, "w") as f:
         for line in content:
             f.write(line)
-    copy_command = "docker cp " + tmp_file_path + " " + container_id + ":" + file_path
+    copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
     utilities.execute_command(copy_command)
 
 
 def read_file(container_id, file_path, encoding="utf-8"):
     tmp_file_path = os.path.join("/tmp", "container-file")
-    copy_command = "docker cp " + container_id + ":" + file_path + " " + tmp_file_path
+    copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
-    with open(tmp_file_path, "r", encoding = encoding) as f:
+    with open(tmp_file_path, "r", encoding=encoding) as f:
         file_content = f.readlines()
     return file_content
 
 
 def append_file(container_id, file_path, content):
     tmp_file_path = os.path.join("/tmp", "append-file")
-    copy_command = "docker cp " + container_id + ":" + file_path + " " + tmp_file_path
+    copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "a") as f:
         for line in content:
             f.write(line)
-    copy_command = "docker cp " + tmp_file_path + " " + container_id + ":" + file_path
+    copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
     utilities.execute_command(copy_command)
     del_command = "rm -f {}".format(tmp_file_path)
     utilities.execute_command(del_command)
