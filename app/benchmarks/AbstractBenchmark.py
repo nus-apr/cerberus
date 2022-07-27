@@ -2,6 +2,7 @@ import abc
 import os
 import json
 import shutil
+from os.path import join
 from app import emitter, utilities, container, definitions, abstractions, values
 
 
@@ -28,7 +29,9 @@ class AbstractBenchmark:
     base_dir_experiment = "/experiment/"
 
     def __init__(self):
-        self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/")
+        self.bench_dir_path = os.path.abspath(
+            os.path.dirname(__file__) + "/../../benchmark/"
+        )
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
         self.image_name = "{}-benchmark".format(self.name)
         if values.DEFAULT_USE_CONTAINER:
@@ -54,33 +57,46 @@ class AbstractBenchmark:
             self.dir_setup = dir_info["container"]["setup"]
             self.dir_base_expr = "/experiment/"
 
-
     def get_list(self):
         return self.experiment_subjects
 
     def load(self):
         emitter.normal("loading experiment meta-data")
         if os.path.isfile(self.meta_file):
-            with open(self.meta_file, 'r') as in_file:
+            with open(self.meta_file, "r") as in_file:
                 json_data = json.load(in_file)
                 if json_data:
                     self.experiment_subjects = json_data
                     self.size = len(json_data)
                 else:
-                    utilities.error_exit("could not load meta-data from ", self.meta_file)
+                    utilities.error_exit(
+                        "could not load meta-data from ", self.meta_file
+                    )
         else:
             utilities.error_exit("Meta file does not exist")
         return
 
-    def run_command(self, container_id, command_str, log_file_path="/dev/null", dir_path="/experiment"):
+    def run_command(
+        self,
+        container_id,
+        command_str,
+        log_file_path="/dev/null",
+        dir_path="/experiment",
+    ):
         if container_id:
-            exit_code, output = container.exec_command(container_id, command_str, dir_path)
+            exit_code, output = container.exec_command(
+                container_id, command_str, dir_path
+            )
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
                 if stdout:
-                    self.append_file(container_id, stdout.decode("iso-8859-1"), log_file_path)
+                    self.append_file(
+                        container_id, stdout.decode("iso-8859-1"), log_file_path
+                    )
                 if stderr:
-                    self.append_file(container_id, stderr.decode("iso-8859-1"), log_file_path)
+                    self.append_file(
+                        container_id, stderr.decode("iso-8859-1"), log_file_path
+                    )
         else:
             command_str = "cd " + dir_path + ";" + command_str
             command_str += " > {0} 2>&1".format(log_file_path)
@@ -95,7 +111,6 @@ class AbstractBenchmark:
         else:
             emitter.success("\t\tpre-built benchmark environment found")
 
-
     def build_experiment_image(self, bug_index, test_all, exp_image_name):
         container_id = self.setup_container(bug_index, self.image_name)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
@@ -104,20 +119,27 @@ class AbstractBenchmark:
         container_obj = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
-
     def setup_container(self, bug_index, image_name):
         container_id = None
         emitter.normal("\t\t[benchmark] preparing experiment environment")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+        dir_exp_local = (
+            definitions.DIR_EXPERIMENT
+            + "/"
+            + self.name
+            + "/"
+            + subject_name
+            + "/"
+            + bug_id
+        )
 
         if os.path.isdir(dir_exp_local):
             shutil.rmtree(dir_exp_local)
 
         volume_list = {
-            self.__dir_info["local"]["setup"]: {'bind': '/scripts', 'mode': 'rw'}
+            self.__dir_info["local"]["setup"]: {"bind": "/scripts", "mode": "rw"}
         }
 
         container_name = self.name + "-" + subject_name + "-" + bug_id
@@ -125,15 +147,15 @@ class AbstractBenchmark:
         if container_id:
             container.stop_container(container_id)
             container.remove_container(container_id)
-        container_id = container.build_container(container_name, volume_list, image_name)
-        parent_dirs = "/".join(self.dir_setup.split("/")[:-2])
+        container_id = container.build_container(
+            container_name, volume_list, image_name
+        )
+        parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
-        copy_local_cmd = "cp -rf {} {}".format("/scripts",
-                                               self.dir_setup)
+        copy_local_cmd = "cp -rf {} {}".format("/scripts", self.dir_setup)
         self.run_command(container_id, mkdir_cmd, "/dev/null", "/")
         self.run_command(container_id, copy_local_cmd, "/dev/null", "/")
         return container_id
-
 
     def setup_experiment(self, bug_index, container_id, test_all):
         emitter.normal("\t\t[benchmark] preparing experiment subject")
@@ -141,26 +163,34 @@ class AbstractBenchmark:
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         setup_error = False
         if not container_id:
-            self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
+            self.base_dir_experiment = os.path.abspath(
+                os.path.dirname(__file__) + "/../../experiments/"
+            )
             if os.path.isdir(self.dir_expr):
                 utilities.execute_command("rm -rf {}".format(self.dir_expr))
             if not os.path.isdir(self.dir_logs):
                 utilities.execute_command("mkdir -p {}".format(self.dir_logs))
         else:
             if not container.is_dir(container_id, self.dir_logs):
-                self.run_command(container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/")
+                self.run_command(
+                    container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/"
+                )
         if self.deploy(bug_id, container_id):
             if self.config(bug_id, container_id):
                 if self.build(bug_id, container_id):
                     if test_all:
                         if self.test_all(experiment_item, container_id):
-                            emitter.success("\t\t\t[benchmark] setting up completed successfully")
+                            emitter.success(
+                                "\t\t\t[benchmark] setting up completed successfully"
+                            )
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
                             setup_error = True
                     else:
                         if self.test(bug_id, container_id):
-                            emitter.success("\t\t\t[benchmark] setting up completed successfully")
+                            emitter.success(
+                                "\t\t\t[benchmark] setting up completed successfully"
+                            )
                         else:
                             emitter.error("\t\t\t[benchmark] testing failed")
                             setup_error = True
@@ -185,9 +215,10 @@ class AbstractBenchmark:
             emitter.normal("\t\t\tpreparing/building experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name)
         else:
-            emitter.success("\t\t\t\tpre-built experiment found: {}".format(exp_image_name))
+            emitter.success(
+                "\t\t\t\tpre-built experiment found: {}".format(exp_image_name)
+            )
         return exp_image_name
-
 
     @abc.abstractmethod
     def setup(self, bug_index, config_ig, test_all, use_container, is_multi):
@@ -246,4 +277,3 @@ class AbstractBenchmark:
     def clean(self, exp_dir_path, container_id):
         """Method documentation"""
         return
-

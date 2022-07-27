@@ -1,5 +1,5 @@
 FROM yuntongzhang/vulnfix:tool
-MAINTAINER Ridwan Shariffdeen <rshariffdeen@gmail.com>
+LABEL maintainer="Ridwan Shariffdeen <rshariffdeen@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 

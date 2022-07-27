@@ -8,7 +8,9 @@ from app import definitions, values, emitter
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.bench_dir_path = os.path.abspath(os.path.dirname(__file__) + "/../../benchmark/")
+        self.bench_dir_path = os.path.abspath(
+            os.path.dirname(__file__) + "/../../benchmark/"
+        )
         self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
 
@@ -20,17 +22,46 @@ class ManyBugs(AbstractBenchmark):
         if is_multi:
             tool_name_dir = "multi"
         if not use_container:
-            self.base_dir_experiment = os.path.abspath(os.path.dirname(__file__) + "/../../experiments/")
-            dir_exp_local = definitions.DIR_EXPERIMENT + "/" + self.name + "/" + subject_name + "/" + bug_id
+            self.base_dir_experiment = os.path.abspath(
+                os.path.dirname(__file__) + "/../../experiments/"
+            )
+            dir_exp_local = (
+                definitions.DIR_EXPERIMENT
+                + "/"
+                + self.name
+                + "/"
+                + subject_name
+                + "/"
+                + bug_id
+            )
             if os.path.isdir(dir_exp_local):
                 execute_command("rm -rf {}".format(dir_exp_local))
-        self.log_dir_path = definitions.DIR_LOGS + "/" + str(config_id) + "-" + self.name + "-" + \
-                            tool_name_dir + "-" + subject_name + "-" + bug_id
-        container_id = self.setup_container(tool_name, bug_index, config_id, use_container, is_multi)
-        exp_setup_dir_path = self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
+        self.log_dir_path = (
+            definitions.DIR_LOGS
+            + "/"
+            + str(config_id)
+            + "-"
+            + self.name
+            + "-"
+            + tool_name_dir
+            + "-"
+            + subject_name
+            + "-"
+            + bug_id
+        )
+        container_id = self.setup_container(
+            tool_name, bug_index, config_id, use_container, is_multi
+        )
+        exp_setup_dir_path = (
+            self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
+        )
 
-        self.setup_experiment(exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name)
-        if self.transform(exp_setup_dir_path, bug_id, config_id, container_id, tool_name):
+        self.setup_experiment(
+            exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name
+        )
+        if self.transform(
+            exp_setup_dir_path, bug_id, config_id, container_id, tool_name
+        ):
             emitter.success("\t\t\t[benchmark] transformation successful")
         else:
             emitter.error("\t\t\t[benchmark] transformation failed")
@@ -39,36 +70,91 @@ class ManyBugs(AbstractBenchmark):
 
     def deploy(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tdownloading experiment subject")
-        self.log_deploy_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-deploy.log"
+        self.log_deploy_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-deploy.log"
+        )
         command_str = "bash setup.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_deploy_path, setup_dir_path, container_id)
+        status = self.run_command(
+            command_str, self.log_deploy_path, setup_dir_path, container_id
+        )
         return status == 0
 
     def config(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tconfiguring experiment subject")
-        self.log_config_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-config.log"
+        self.log_config_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-config.log"
+        )
         command_str = "bash config.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_config_path, setup_dir_path, container_id)
+        status = self.run_command(
+            command_str, self.log_config_path, setup_dir_path, container_id
+        )
         return status == 0
 
     def build(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\tbuilding experiment subject")
-        self.log_build_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-build.log"
+        self.log_build_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-build.log"
+        )
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_build_path, setup_dir_path, container_id)
+        status = self.run_command(
+            command_str, self.log_build_path, setup_dir_path, container_id
+        )
         return status == 0
 
     def test(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\ttesting experiment subject")
-        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-test.log"
+        self.log_test_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-test.log"
+        )
         command_str = "bash test.sh {} p1".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        status = self.run_command(
+            command_str, self.log_test_path, setup_dir_path, container_id
+        )
         return status == 0
 
-    def test_all(self, setup_dir_path, experiment_item, config_id, container_id, tool_name):
+    def test_all(
+        self, setup_dir_path, experiment_item, config_id, container_id, tool_name
+    ):
         emitter.normal("\t\t\ttesting(full) experiment subject")
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-test-all.log"
+        self.log_test_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-test-all.log"
+        )
         failing_test_cases = experiment_item[definitions.KEY_FAILING_TEST].split(",")
         passing_test_cases = experiment_item[definitions.KEY_PASSING_TEST].split(",")
         unexpected_fail_list = []
@@ -76,8 +162,12 @@ class ManyBugs(AbstractBenchmark):
         with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES\n")
             for test_id in failing_test_cases:
-                command_str = "bash test.sh {} {}".format(self.base_dir_experiment, test_id)
-                status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+                command_str = "bash test.sh {} {}".format(
+                    self.base_dir_experiment, test_id
+                )
+                status = self.run_command(
+                    command_str, self.log_test_path, setup_dir_path, container_id
+                )
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
                 else:
@@ -86,8 +176,12 @@ class ManyBugs(AbstractBenchmark):
 
             log_file.write("PASSING TEST CASES\n")
             for test_id in passing_test_cases:
-                command_str = "bash test.sh {} {}".format(self.base_dir_experiment, test_id)
-                status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+                command_str = "bash test.sh {} {}".format(
+                    self.base_dir_experiment, test_id
+                )
+                status = self.run_command(
+                    command_str, self.log_test_path, setup_dir_path, container_id
+                )
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
                     unexpected_fail_list.append(test_id)
@@ -118,9 +212,20 @@ class ManyBugs(AbstractBenchmark):
 
     def transform(self, setup_dir_path, bug_id, config_id, container_id, tool_name):
         emitter.normal("\t\t\ttransform test-suite/fix-file")
-        self.log_test_path = self.log_dir_path + "/" + tool_name + "-" + self.name + "-" + bug_id + "-transform.log"
+        self.log_test_path = (
+            self.log_dir_path
+            + "/"
+            + tool_name
+            + "-"
+            + self.name
+            + "-"
+            + bug_id
+            + "-transform.log"
+        )
         command_str = "bash transform.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(command_str, self.log_test_path, setup_dir_path, container_id)
+        status = self.run_command(
+            command_str, self.log_test_path, setup_dir_path, container_id
+        )
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
@@ -131,6 +236,8 @@ class ManyBugs(AbstractBenchmark):
 
     def save_artefacts(self, dir_info, container_id):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
-        self.list_artifact_dirs = ["/diffs"]  # path should be relative to experiment directory
-        self.list_artifact_files = [] # path should be relative to experiment directory
+        self.list_artifact_dirs = [
+            "/diffs"
+        ]  # path should be relative to experiment directory
+        self.list_artifact_files = []  # path should be relative to experiment directory
         super(ManyBugs, self).save_artefacts(dir_info, container_id)

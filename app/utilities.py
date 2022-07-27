@@ -13,7 +13,7 @@ import shutil
 
 def execute_command(command, show_output=True):
     # Print executed command and execute it in console
-    command = command.encode().decode('ascii', 'ignore')
+    command = command.encode().decode("ascii", "ignore")
     emitter.command(command)
     command = "{ " + command + " ;} 2> " + definitions.FILE_ERROR_LOG
     if not show_output:
@@ -51,13 +51,17 @@ def clean_artifacts(output_dir):
 
 def backup_file(file_path, backup_name):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
-    backup_command = "cp " + file_path + " " + definitions.DIRECTORY_BACKUP + "/" + backup_name
+    backup_command = (
+        "cp " + file_path + " " + definitions.DIRECTORY_BACKUP + "/" + backup_name
+    )
     execute_command(backup_command)
 
 
 def restore_file(file_path, backup_name):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
-    restore_command = "cp " + definitions.DIRECTORY_BACKUP + "/" + backup_name + " " + file_path
+    restore_command = (
+        "cp " + definitions.DIRECTORY_BACKUP + "/" + backup_name + " " + file_path
+    )
     execute_command(restore_command)
 
 
@@ -73,7 +77,6 @@ def build_clean(program_path):
     (output, error) = process.communicate()
     assert int(process.returncode) == 0
     return int(process.returncode)
-
 
 
 @contextmanager
@@ -94,7 +97,7 @@ def raise_timeout(signum, frame):
 
 
 def get_hash(str_value):
-    str_encoded = str(str_value).encode('utf-8')
+    str_encoded = str(str_value).encode("utf-8")
     str_hasher = hashlib.sha1(str_encoded)
     hash_value = base64.urlsafe_b64encode(str_hasher.digest()[:10])
     return hash_value
@@ -103,9 +106,9 @@ def get_hash(str_value):
 def check_space():
     emitter.normal("\t\t\t checking disk space")
     total, used, free = shutil.disk_usage("/")
-    emitter.information("\t\t\t\t Total: %d GiB" % (total // (2 ** 30)))
-    emitter.information("\t\t\t\t Used: %d GiB" % (used // (2 ** 30)))
-    emitter.information("\t\t\t\t Free: %d GiB" % (free // (2 ** 30)))
-    free_size = (free // (2 ** 30))
+    emitter.information("\t\t\t\t Total: %d GiB" % (total // (2**30)))
+    emitter.information("\t\t\t\t Used: %d GiB" % (used // (2**30)))
+    emitter.information("\t\t\t\t Free: %d GiB" % (free // (2**30)))
+    free_size = free // (2**30)
     if int(free_size) < values.DEFAULT_DISK_SPACE:
         error_exit("insufficient disk space " + str(free_size))

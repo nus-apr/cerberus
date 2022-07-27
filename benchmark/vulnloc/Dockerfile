@@ -1,5 +1,5 @@
 FROM ubuntu:18.04
-MAINTAINER Ridwan Shariffdeen <rshariffdeen@gmail.com>
+LABEL MAINTAINER="Ridwan Shariffdeen <rshariffdeen@gmail.com>"
 
 RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 
@@ -70,5 +70,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     tix-dev \
     unzip \
     wget \
+    clang \
     rsync
 

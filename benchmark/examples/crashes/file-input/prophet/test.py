@@ -21,7 +21,7 @@ import getopt
 from os import chdir, getcwd, system, path, environ
 import subprocess
 
-map = {"1": "21", "2": "11", "3": "1", "4":"101", "5": "51"}
+map = {"1": "21", "2": "11", "3": "1", "4": "101", "5": "51"}
 
 
 def num2testcase(case):
@@ -29,7 +29,7 @@ def num2testcase(case):
         return map[case]
     else:
         print("Error on case name")
-        return 'SOME'
+        return "SOME"
 
 
 if __name__ == "__main__":
@@ -43,13 +43,13 @@ if __name__ == "__main__":
     test_dir = args[1]
     work_dir = args[2]
 
-    if (len(args) > 3):
+    if len(args) > 3:
         ids = args[3:]
         cur_dir = src_dir
-        if (profile_dir != ""):
+        if profile_dir != "":
             cur_dir = profile_dir
 
-        if (not path.exists(cur_dir + "/my-test")):
+        if not path.exists(cur_dir + "/my-test"):
             system("cp -rf " + test_dir + " " + cur_dir + "/my_test")
         ori_dir = getcwd()
 
@@ -61,7 +61,11 @@ if __name__ == "__main__":
         # super hacky, because fbc itself calls *ld*, damn it fbc
         for i in ids:
             # ret = system(test_cmd)
-            ret = subprocess.call(["timeout 12s " + cur_dir + "/test " + num2testcase(i)], shell=True)
+            ret = subprocess.call(
+                ["timeout 12s " + cur_dir + "/test " + num2testcase(i)], shell=True
+            )
             if ret == 0:
-                print(i,)
+                print(
+                    i,
+                )
         chdir(ori_dir)
