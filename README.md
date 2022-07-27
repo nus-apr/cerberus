@@ -37,7 +37,7 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 8  | SenX          | C/C++    | N/A      | N/A |  
 | 9  | GenProg       | C/C++    | https://github.com/squaresLab/genprog-code      | 0b25153  |  
 | 10 | CrashRepair   | C/C++    | https://github.com/rshariffdeen/CrashRepair     | 23430d9 |  
-
+| 11 | ExtractFix    | C/C++    | N/A      | N/A |
 
 
 ## Supported Benchmarks of Bugs
@@ -46,6 +46,7 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | - | -------------- | -------- | ----------:| ------:|  
 | 1 | ManyBugs       | C/C++    |          6 |     60 |  
 | 2 | VulnLoc        | C/C++    |         11 |     43 |  
+| 3 | ExtractFix     | C/C++    |          7 |     30 |
 
 
 ## Bugs ##
@@ -63,6 +64,8 @@ Cerberus should be considered alpha-quality software. Bugs can be reported here:
 
 # Contributions 
 We welcome contributions to improve this work, see [details](doc/Contributing.md)
+
+# Developing
 
 ## Developers ##
 * Ridwan Shariffdeen
