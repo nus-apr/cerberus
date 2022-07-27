@@ -50,15 +50,28 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
         my_env["CXXFLAGS"] = "-fsanitize=address -g -O0 -Wno-error"
         my_env["LDFLAGS"] = "-fsanitize=address"
         my_env["ASAN_OPTIONS"] = "detect_leaks = 0"
-        if (paraj == 0):
+        if paraj == 0:
             ret = subprocess.call(
-                ["make", "CFLAGS=\"-fsanitize=address\"", "CXXFLAGS=\"-fsanitize=address\"", "src/pr"],
-                env=my_env)
+                [
+                    "make",
+                    'CFLAGS="-fsanitize=address"',
+                    'CXXFLAGS="-fsanitize=address"',
+                    "src/pr",
+                ],
+                env=my_env,
+            )
         else:
             ret = subprocess.call(
-                ["make", "CFLAGS=\"-fsanitize=address\"", "CXXFLAGS=\"-fsanitize=address\"", "src/pr",
-                 "-j", str(paraj)],
-                env=my_env)
+                [
+                    "make",
+                    'CFLAGS="-fsanitize=address"',
+                    'CXXFLAGS="-fsanitize=address"',
+                    "src/pr",
+                    "-j",
+                    str(paraj),
+                ],
+                env=my_env,
+            )
         if ret != 0:
             print("Failed to make!")
             exit(1)
@@ -74,7 +87,7 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
 if __name__ == "__main__":
 
     compile_only = False
-    opts, args = getopt.getopt(argv[1:], 'cd:hlj:p:r:x')
+    opts, args = getopt.getopt(argv[1:], "cd:hlj:p:r:x")
     dryrun_src = ""
 
     paraj = 0

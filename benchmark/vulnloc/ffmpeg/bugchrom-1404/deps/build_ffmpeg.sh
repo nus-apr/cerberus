@@ -10,10 +10,10 @@ git clone --depth 1 git://anongit.freedesktop.org/git/xorg/lib/libXfixes
 git clone --depth 1 https://github.com/intel/libva
 git clone --depth 1 -b libvdpau-1.2 git://people.freedesktop.org/~aplattner/libvdpau
 git clone --depth 1 https://chromium.googlesource.com/webm/libvpx
-git clone --depth 1 git://github.com/xiph/ogg.git
-git clone --depth 1 git://github.com/xiph/opus.git
-git clone --depth 1 git://github.com/xiph/theora.git
-git clone --depth 1 git://github.com/xiph/vorbis.git
+git clone --depth 1 https://github.com/xiph/ogg.git
+git clone --depth 1 https://github.com/xiph/opus.git
+git clone --depth 1 https://github.com/xiph/theora.git
+git clone --depth 1 https://github.com/xiph/vorbis.git
 git clone --depth 1 https://code.videolan.org/videolan/x264.git
 git clone https://bitbucket.org/multicoreware/x265_git.git
 git clone git://anongit.freedesktop.org/git/xorg/proto/xorgproto
@@ -29,9 +29,9 @@ export PATH="$FFMPEG_DEPS_PATH/bin:$PATH"
 export LD_LIBRARY_PATH="$FFMPEG_DEPS_PATH/lib"
 
 cd $SRC
-bzip2 -f -d alsa-lib-*
-tar xf alsa-lib-*
-cd alsa-lib-*
+bzip2 -f -d alsa-lib-1.1.0.tar.bz2
+tar xf alsa-lib-1.1.0.tar
+cd alsa-lib-1.1.0
 ./configure --prefix="$FFMPEG_DEPS_PATH" --enable-static --disable-shared
 make clean
 make -j$(nproc) all

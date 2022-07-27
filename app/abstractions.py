@@ -1,5 +1,5 @@
 import os
-from app import  container
+from app import container
 
 
 def read_file(container_id, file_path, encoding="utf-8"):
@@ -34,11 +34,11 @@ def list_dir(container_id, dir_path):
     if container_id:
         if container.is_dir(container_id, dir_path):
             list_files = container.list_dir(container_id, dir_path)
-            file_list = [ os.path.join(dir_path, t) for t in list_files]
+            file_list = [os.path.join(dir_path, t) for t in list_files]
     else:
         if os.path.isdir(dir_path):
             list_files = os.listdir(dir_path)
-            file_list = [ os.path.join(dir_path, t) for t in list_files]
+            file_list = [os.path.join(dir_path, t) for t in list_files]
     return file_list
 
 
@@ -60,4 +60,3 @@ def is_file(container_id, file_path):
         if os.path.isfile(file_path):
             return True
     return False
-

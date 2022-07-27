@@ -1,5 +1,5 @@
 FROM rshariffdeen/angelix
-MAINTAINER Ridwan Shariffdeen <rshariffdeen@gmail.com>
+LABEL maintainer="Ridwan Shariffdeen <rshariffdeen@gmail.com>"
 
 # install experiment dependencies
 RUN apt-get install -y  \

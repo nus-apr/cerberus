@@ -34,13 +34,13 @@ if __name__ == "__main__":
     test_dir = args[1]
     work_dir = args[2]
 
-    if (len(args) > 3):
+    if len(args) > 3:
         ids = args[3:]
         cur_dir = src_dir
-        if (profile_dir != ""):
+        if profile_dir != "":
             cur_dir = profile_dir
         system("mkdir " + test_dir)
-        if (not path.exists(cur_dir + "/my-test")):
+        if not path.exists(cur_dir + "/my-test"):
             system("cp -rf " + test_dir + " " + cur_dir + "/my_test")
         ori_dir = getcwd()
 
@@ -51,8 +51,25 @@ if __name__ == "__main__":
         # super hacky, because fbc itself calls *ld*, damn it fbc
         for i in ids:
             # ret = system(test_cmd)
-            ret = subprocess.call(["timeout 10s " + cur_dir + "/src/make-prime-list " + INPUT[str(i)] + " 1>" + test_dir + "/" + i + ".out  2>" + test_dir + "/" + i + ".err"],
-                                  shell=True, env=my_env)
+            ret = subprocess.call(
+                [
+                    "timeout 10s "
+                    + cur_dir
+                    + "/src/make-prime-list "
+                    + INPUT[str(i)]
+                    + " 1>"
+                    + test_dir
+                    + "/"
+                    + i
+                    + ".out  2>"
+                    + test_dir
+                    + "/"
+                    + i
+                    + ".err"
+                ],
+                shell=True,
+                env=my_env,
+            )
             # print("timeout 12s /jasper/src/appl/imginfo -f /data/" + i + ".jp2 1>/dev/null 2>/dev/null")
             # print("timeout 12s /projects/jasper/src/appl/imginfo -f /workspace/jasper/poc/" + i + ".jp2 1>/dev/null 2>/dev/null")
             # print(i, ret)

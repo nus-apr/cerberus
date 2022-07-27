@@ -23,7 +23,6 @@ def create_directories():
         os.makedirs(definitions.DIRECTORY_LOG_BASE)
 
 
-
 def timeout_handler(signum, frame):
     emitter.error("TIMEOUT Exception")
     raise Exception("end of time")
@@ -56,7 +55,10 @@ def filter_experiment_list(benchmark):
             continue
         if values.CONF_BUG_INDEX and bug_index != values.CONF_BUG_INDEX:
             continue
-        if values.CONF_BUG_INDEX_LIST and int(bug_index) not in values.CONF_BUG_INDEX_LIST:
+        if (
+            values.CONF_BUG_INDEX_LIST
+            and int(bug_index) not in values.CONF_BUG_INDEX_LIST
+        ):
             continue
         if values.CONF_SKIP_LIST and str(bug_index) in values.CONF_SKIP_LIST:
             continue
@@ -72,7 +74,9 @@ def filter_experiment_list(benchmark):
 
 def run(repair_tool_list, benchmark, setup):
     emitter.sub_title("Repairing benchmark")
-    emitter.highlight("[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list]))
+    emitter.highlight(
+        "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
+    )
     emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
     run_config_id_list = values.CONF_CONFIG_ID_LIST
     iteration = 0
@@ -86,7 +90,9 @@ def run(repair_tool_list, benchmark, setup):
             iteration = iteration + 1
             values.ITERATION_NO = iteration
             bug_index = experiment_item[definitions.KEY_ID]
-            emitter.sub_sub_title("Experiment #" + str(iteration) + " - Bug #" + str(bug_index))
+            emitter.sub_sub_title(
+                "Experiment #" + str(iteration) + " - Bug #" + str(bug_index)
+            )
             repair.run(benchmark, repair_tool_list, experiment_item, config_info)
 
 
@@ -111,6 +117,7 @@ def initialize():
 
 def main():
     import sys
+
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
@@ -124,11 +131,11 @@ def main():
         repair_tool_list, benchmark, setup = initialize()
         run(repair_tool_list, benchmark, setup)
     except SystemExit as e:
-        total_duration = format((time.time() - start_time) / 60, '.3f')
+        total_duration = format((time.time() - start_time) / 60, ".3f")
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)
     except KeyboardInterrupt as e:
-        total_duration = format((time.time() - start_time) / 60, '.3f')
+        total_duration = format((time.time() - start_time) / 60, ".3f")
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)
     except Exception as e:
@@ -139,6 +146,6 @@ def main():
     finally:
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
-        total_duration = format((time.time() - start_time) / 60, '.3f')
+        total_duration = format((time.time() - start_time) / 60, ".3f")
         emitter.end(total_duration, is_error)
         logger.end(total_duration, is_error)

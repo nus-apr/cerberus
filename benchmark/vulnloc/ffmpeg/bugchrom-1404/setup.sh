@@ -9,6 +9,8 @@ mkdir -p $dir_name
 cd $dir_name
 mkdir dev-patch
 
+apt install clang -y
+
 project_url=https://github.com/FFmpeg/FFmpeg.git
 fix_commit_id=279420b5a63b3f254e4932a4afb91759fb50186a
 bug_commit_id=1e42736

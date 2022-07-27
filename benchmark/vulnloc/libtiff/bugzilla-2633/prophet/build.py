@@ -35,14 +35,17 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
     if not compile_only:
         system("git clean -f -d")
         ret = subprocess.call(["autoreconf -fvi"], shell=True, env=my_env)
-        if (ret != 0):
+        if ret != 0:
             print("Autoreconf failed!")
             chdir(ori_dir)
             exit(1)
         my_env["CFLAGS"] = "-g -O0 -Wno-error -static -fPIC"
         my_env["CPPFLAGS"] = "-g -O0 -Wno-error -static -fPIC"
         my_env["LDFLAGS"] = "-static -fPIC"
-        ret = subprocess.call(["./configure", "--disable-fast-install", "--disable-dependency-tracking"], env=my_env)
+        ret = subprocess.call(
+            ["./configure", "--disable-fast-install", "--disable-dependency-tracking"],
+            env=my_env,
+        )
         if ret != 0:
             print("Configure Error!")
             chdir(ori_dir)
@@ -54,13 +57,28 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
         my_env["CFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
         my_env["CPPFLAGS"] = "-static -fsanitize=address -ggdb -fPIC"
         my_env["LDFLAGS"] = " -static  -fsanitize=address -fPIC"
-        if (paraj == 0):
-            ret = subprocess.call(["make", "CFLAGS=\"-fsanitize=address\"", "CPPFLAGS=\"-fsanitize=address\"", "LDFLAGS=\"-fsanitize=address\""],
-                                  env=my_env)
+        if paraj == 0:
+            ret = subprocess.call(
+                [
+                    "make",
+                    'CFLAGS="-fsanitize=address"',
+                    'CPPFLAGS="-fsanitize=address"',
+                    'LDFLAGS="-fsanitize=address"',
+                ],
+                env=my_env,
+            )
         else:
             ret = subprocess.call(
-                ["make", "CFLAGS=\"-fsanitize=address\"", "CPPFLAGS=\"-fsanitize=address\"" , "LDFLAGS=\"-fsanitize=address\"",  "-j", str(paraj)],
-                env=my_env)
+                [
+                    "make",
+                    'CFLAGS="-fsanitize=address"',
+                    'CPPFLAGS="-fsanitize=address"',
+                    'LDFLAGS="-fsanitize=address"',
+                    "-j",
+                    str(paraj),
+                ],
+                env=my_env,
+            )
         if ret != 0:
             print("Failed to make!")
             exit(1)
@@ -76,7 +94,7 @@ def compileit(out_dir, compile_only=False, config_only=False, paraj=0):
 if __name__ == "__main__":
 
     compile_only = False
-    opts, args = getopt.getopt(argv[1:], 'cd:hlj:p:r:x')
+    opts, args = getopt.getopt(argv[1:], "cd:hlj:p:r:x")
     dryrun_src = ""
 
     paraj = 0
