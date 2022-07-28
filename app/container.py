@@ -29,7 +29,7 @@ def pull_image(image_name, tag_name):
         for line in client.api.pull(
             repository=image_name, tag=tag_name, stream=True, decode=True
         ):
-            emitter.normal(line["status"], False)
+            emitter.debug("[docker-api] " + line["status"])
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
@@ -54,7 +54,7 @@ def build_image(dockerfile_path, image_name):
             for line in logs:
                 data = json.loads(line.strip())
                 if "stream" in data:
-                    emitter.normal(data["stream"], False)
+                    emitter.debug("[docker-api] " + data["stream"])
             image, _ = client.images.build(
                 path=context_dir, fileobj=dockerfile_obj, tag=image_name
             )
