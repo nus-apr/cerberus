@@ -1,4 +1,4 @@
-FROM rshariffdeen/crepair
+FROM rshariffdeen/crepair:tool
 MAINTAINER Ridwan Shariffdeen <ridwan@comp.nus.edu.sg>
 ARG DEBIAN_FRONTEND=noninteractive
 
