@@ -36,17 +36,17 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
 
 
 def title(title):
-    write("\n" + "=" * columns + "\n\n\t" + title + "\n" + "=" * columns + "\n", CYAN)
+    write("\n" + "=" * 100 + "\n\n\t" + title + "\n" + "=" * 100 + "\n", CYAN)
     logger.information(title)
 
 
 def sub_title(text):
-    write("\n\t" + text + "\n" + "_" * columns + "\n", CYAN)
+    write("\n\t" + text + "\n" + "_" * 90 + "\n", CYAN)
     logger.information(text)
 
 
 def sub_sub_title(text):
-    write("\n\t\t" + text + "\n" + "_" * columns + "\n", CYAN)
+    write("\n\t\t" + text + "\n" + "_" * 90 + "\n", CYAN)
     logger.information(text)
 
 
