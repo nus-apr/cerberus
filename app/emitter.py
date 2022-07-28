@@ -41,12 +41,12 @@ def title(title):
 
 
 def sub_title(text):
-    write("\n\t" + text + "\n" + "_" * 90 + "\n", CYAN)
+    write("\n\t" + text + "\n\t" + "_" * 90 + "\n", CYAN)
     logger.information(text)
 
 
 def sub_sub_title(text):
-    write("\n\t\t" + text + "\n" + "_" * 90 + "\n", CYAN)
+    write("\n\t\t" + text + "\n\t\t" + "_" * 90 + "\n", CYAN)
     logger.information(text)
 
 
