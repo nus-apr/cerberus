@@ -1,11 +1,21 @@
 import os
 from os import path
+from app import utilities
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import error_exit, execute_command
 from app import definitions, values, emitter, container
 
 
 class ExtractFix(AbstractTool):
+    bug_conversion_table = {
+        "Buffer Overflow": "buffer_overflow",
+        "Integer Overflow": "integer_overflow",
+        "Null Pointer Dereference": "null_pointer",
+        "Divide by Zero": "divide_by_0",
+        "API Assertion": "assertion_failure",
+        "API Specific": "api_specific",
+    }
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(ExtractFix, self).__init__(self.name)
@@ -66,8 +76,11 @@ class ExtractFix(AbstractTool):
         """
 
         # (1) source-dir
-        dir_src = self.dir_expr
-        line_source_dir = "-s " + dir_src
+        line_source_dir = "-s " + (
+            "/libtiff-3186"
+            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
+            else self.dir_expr
+        )
 
         # (2) test file
         # dir_tests = "/".join([self.dir_setup, "tests"])
@@ -85,9 +98,17 @@ class ExtractFix(AbstractTool):
 
         # (4) bug type
         bug_type = "-b " + (
-            experiment_info[definitions.KEY_BUG_TYPE]
+            ExtractFix.bug_conversion_table[experiment_info[definitions.KEY_BUG_TYPE]]
             if definitions.KEY_BUG_TYPE in experiment_info
-            else "buffer_overflow"
+            else ExtractFix.conversion_table[
+                definitions.definitions.KEY_BUG_TYPE + "_extractfix"
+            ]
+            if definitions.definitions.KEY_BUG_TYPE + "_extractfix" in experiment_info
+            else utilities.error_exit(
+                "Bug {} does not have {} field to indicate the type".format(
+                    experiment_info[definitions.KEY_BUG_ID], definitions.KEY_BUG_TYPE
+                )
+            )
         )
 
         # (5) buggy program
@@ -107,8 +128,12 @@ class ExtractFix(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        self.run_command("cp -r result0 result/",dir_path=path.join(self.dir_root, self.dir_expr))
-        self.run_command("cp -r result1 result/",dir_path=path.join(self.dir_root, self.dir_expr))
+        self.run_command(
+            "cp -r result0 result/", dir_path=path.join(self.dir_root, self.dir_expr)
+        )
+        self.run_command(
+            "cp -r result1 result/", dir_path=path.join(self.dir_root, self.dir_expr)
+        )
         super().save_artefacts(dir_info)
         return
 
