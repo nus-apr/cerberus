@@ -1,9 +1,8 @@
 import os
 from os import path
-from app import utilities
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import error_exit, execute_command
-from app import definitions, values, emitter, container
+from app import definitions, values, emitter, container, utilities
 
 
 class ExtractFix(AbstractTool):

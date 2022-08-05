@@ -5,12 +5,23 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 
-cd $dir_name/src
-CC=wllvm CXX=wllvm++ ./configure --enable-static --disable-shared
-CC=wllvm CXX=wllvm++ make -j32
 
+cat <<EOF > repair.conf
+dir_exp:$dir_name
+tag_id:$bug_id
+src_directory:$dir_name/src
+binary_path:$dir_name/src/tools/tiffmedian
+config_command:CC=crepair-cc ./configure CFLAGS="-g -O0" --enable-static --disable-shared
+build_command:make CC=crepair-cc CXX=crepair-cxx CFLAGS="-g -O0 -static" CXXFLAGS="-g -O0 -static" LDFLAGS="-static"
+test_input_list:\$POC foo
+poc_list:$script_dir/../tests/1.tif
+klee_flags:--link-llvm-lib=/CrashRepair/lib/libcrepair_proxy.bca
+EOF
+
+cd $dir_name/src
 sed -i 's/fabs/fabs_trident/g' libtiff/tif_luv.c
+git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
 git add  libtiff/tif_luv.c
 git commit -m 'replace fabs with proxy function'
 
-make CFLAGS="-ltrident_proxy -L/CrashRepair/lib" -j32
