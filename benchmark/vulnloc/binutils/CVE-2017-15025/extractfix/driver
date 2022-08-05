@@ -1,0 +1,6 @@
+binary=$1
+test=$2
+
+${binary} -A -a -l -S -s --special-syms --synthetic --with-symbol-versions -D ${test}
+
+exit 0
