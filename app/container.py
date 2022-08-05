@@ -51,13 +51,14 @@ def build_image(dockerfile_path, image_name):
             logs = client.api.build(
                 path=context_dir, fileobj=dockerfile_obj, tag=image_name
             )
+            id = None
             for line in logs:
                 data = json.loads(line.strip())
                 if "stream" in data:
-                    emitter.debug("[docker-api] " + data["stream"])
-            image, _ = client.images.build(
-                path=context_dir, fileobj=dockerfile_obj, tag=image_name
-            )
+                    emitter.normal("[docker-api] {}".format(data["stream"]), False)
+                    if "Successfully built" in data["stream"]:
+                        id = data["stream"].split(" ")[-1]
+            return id
         except docker.errors.BuildError as ex:
             emitter.error(ex)
             utilities.error_exit("[error] Unable to build image: build failed")
