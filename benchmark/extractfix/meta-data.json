@@ -180,7 +180,7 @@
         "bug_id": "CVE-2018-10372",
         "subject": "binutils",
         "source_file": "binutils/dwarf.c",
-        "line_numbers": [9294],
+        "line_numbers": [9290],
         "failing_test": "1",
         "passing_test": "",
         "count_neg": 1,
