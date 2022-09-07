@@ -25,6 +25,11 @@ chmod +x project_*.sh
 chmod +x driver
 chmod +x klee-driver
 
+cd ./project_specific_lib
+gcc -c hook.c
+ar cr libhook.a hook.o
+cd ..
+
 cd src
 make distclean
 exit 0
