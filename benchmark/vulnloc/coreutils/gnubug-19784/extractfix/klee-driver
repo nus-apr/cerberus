@@ -1,0 +1,40 @@
+#!/bin/bash
+
+message="error arg num in klee-dirver"
+
+# binary name
+if [[ $# > 0 ]]; then
+    binary="$1"
+    shift
+else
+    echo "$message"
+    exit 1
+fi
+
+# test input
+if [[ $# > 0 ]]; then
+    test="$1"
+    shift
+else
+    echo "$message"
+    exit 1
+fi
+
+# crash line
+if [[ $# > 0 ]]; then
+    crash_line="$1"
+    shift
+else
+    echo "$message"
+    exit 1
+fi
+
+
+# fix line option
+if [[ $# > 0 ]]; then
+    fix_line_op="--fix-line=$1"
+    shift
+fi
+
+
+klee --libc=uclibc --posix-runtime --crash-line=${crash_line} ${fix_line_op} ${binary} 5000

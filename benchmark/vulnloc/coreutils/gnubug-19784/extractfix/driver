@@ -1,0 +1,6 @@
+binary=$1
+test=$2
+
+${binary} 5000
+
+exit 0
