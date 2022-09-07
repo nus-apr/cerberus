@@ -78,6 +78,8 @@ class ExtractFix(AbstractTool):
         line_source_dir = "-s " + (
             "/libtiff-3186"
             if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
+            else "/coreutils-25003"
+            if experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
             else self.dir_expr
         )
 
