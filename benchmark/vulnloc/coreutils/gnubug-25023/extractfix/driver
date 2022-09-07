@@ -1,0 +1,8 @@
+binary=$1
+test=$2
+
+echo a > a; ${binary} "-S$(printf "\t\t\t")" a -m a > /dev/null
+
+
+
+exit 0
