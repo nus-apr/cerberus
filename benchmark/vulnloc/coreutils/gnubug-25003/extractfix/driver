@@ -1,0 +1,6 @@
+binary=$1
+test=$2
+
+${binary} -n2/3 /dev/null
+
+exit 0
