@@ -157,7 +157,7 @@ class Darjeeling(AbstractTool):
         start_time_str = start_time_str.split(" +")[0].strip()
         end_time_str = end_time_str.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, fmt_1)
-        tend = datetime.strptime(end_time_str, fmt_2)
+        tend = datetime.strptime(end_time_str, fmt_1)
         duration = (tend - tstart).total_seconds()
         return duration
 
