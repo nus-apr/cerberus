@@ -189,6 +189,8 @@ class AbstractTool:
         """Store all artefacts from the tool"""
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["results"]
+        dir_artefacts = dir_info["artifacts"]
+        dir_logs = dir_info["logs"]
         if self.container_id:
             container.copy_file_from_container(
                 self.container_id, self.dir_output, dir_results
@@ -196,11 +198,24 @@ class AbstractTool:
             container.copy_file_from_container(
                 self.container_id, self.dir_logs, dir_results
             )
+            container.copy_file_from_container(
+                self.container_id, self.dir_output, dir_artefacts
+            )
+            container.copy_file_from_container(
+                self.container_id, self.dir_logs, dir_logs
+            )
             pass
         else:
             save_command = "cp -rf " + self.dir_output + "/* " + dir_results + ";"
             if self.dir_logs != "":
-                save_command += "cp -rf " + self.dir_logs + "/* " + dir_results
+                save_command += "cp -rf " + self.dir_logs + "/* " + dir_results + ";"
+            if dir_artefacts != "":
+                save_command += (
+                    "cp -rf " + self.dir_output + "/* " + dir_artefacts + ";"
+                )
+            if dir_logs != "":
+                save_command += "cp -rf " + self.dir_logs + "/*" + dir_logs + ";"
+
             execute_command(save_command)
         return
 

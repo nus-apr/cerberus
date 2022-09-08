@@ -34,8 +34,8 @@ class ExtractFix(AbstractTool):
         self.dir_output = path.join(self.dir_expr, "result")
         self.dir_logs = path.join(self.dir_expr, "logs")
 
-        dir_vulnfix_exist = self.is_dir(self.dir_root)
-        if not dir_vulnfix_exist:
+        dir_extractfix_exist = self.is_dir(self.dir_root)
+        if not dir_extractfix_exist:
             emitter.error(
                 "[Exception] ExtractFix repo is not at the expected location. "
                 "Please double check whether we are in ExtractFix container."
