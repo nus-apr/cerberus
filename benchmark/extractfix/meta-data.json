@@ -219,7 +219,7 @@
         "count_pos": 0,
         "binary_path": "poc",
         "crash_input": "2 20",
-        "exploit_file_list": [],
+        "exploit_file_list": ["tests/1.xml"],
         "test_timeout": 5,
         "bug_type": "Integer Overflow"
     },

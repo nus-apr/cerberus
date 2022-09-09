@@ -64,6 +64,8 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     libsqlite3-dev \
     gcc-multilib \
     g++-multilib \
+    gcc \
+    g++ \
     tk-dev \
     mercurial \
     tcl-dev \
@@ -71,5 +73,9 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     unzip \
     wget \
     clang \
+    xxd \
+    autoconf \
+    autotools-dev \
+    fakeroot \
     rsync
 
