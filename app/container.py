@@ -138,6 +138,7 @@ def build_container(container_name, volume_list, image_name):
             detach=True,
             name=container_name,
             volumes=volume_list,
+            privileged=True,
             mem_limit="30g",
             tty=True,
         )
@@ -168,7 +169,7 @@ def exec_command(container_id, command, workdir="/experiment"):
         command = command.encode().decode("ascii", "ignore")
         print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
-        exit_code, output = container.exec_run(command, demux=True, workdir=workdir)
+        exit_code, output = container.exec_run(command, privileged= True, demux=True, workdir=workdir)
         if output is not None:
             for stream in output:
                 if stream is None:
