@@ -105,8 +105,8 @@ class AbstractBenchmark:
 
     def build_benchmark_image(self):
         if not container.is_image_exist(self.image_name):
-            emitter.warning("\tbenchmark environment not found")
-            emitter.normal("\tbuilding benchmark environment")
+            emitter.warning("\t[benchmark] benchmark environment not found")
+            emitter.normal("\t[benchmark] building benchmark environment")
             container.build_benchmark_image(self.image_name)
         else:
             emitter.success("\t\tpre-built benchmark environment found")

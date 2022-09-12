@@ -29,7 +29,8 @@ def pull_image(image_name, tag_name):
         for line in client.api.pull(
             repository=image_name, tag=tag_name, stream=True, decode=True
         ):
-            emitter.debug("[docker-api] " + line["status"])
+            for sub_line in line["status"].split("\n"):
+                emitter.debug("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
@@ -42,7 +43,7 @@ def pull_image(image_name, tag_name):
 
 def build_image(dockerfile_path, image_name):
     client = docker.from_env()
-    emitter.normal("\t\tbuilding docker image")
+    emitter.normal("\t\t[benchmark] building docker image")
     image = None
     context_dir = pathlib.Path(dockerfile_path).parent.absolute()
     if os.path.isfile(dockerfile_path):
@@ -55,7 +56,8 @@ def build_image(dockerfile_path, image_name):
             for line in logs:
                 data = json.loads(line.strip())
                 if "stream" in data:
-                    emitter.normal("[docker-api] {}".format(data["stream"]), False)
+                    for line_stream in data["stream"].split("\n"):
+                        emitter.normal("[docker-api] {}".format(line_stream), False)
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
@@ -125,7 +127,7 @@ def get_container_id(container_name):
 
 def build_container(container_name, volume_list, image_name):
     client = docker.from_env()
-    emitter.normal("\t\t\tbuilding docker container")
+    emitter.normal("\t\t\t[benchmark] building docker container")
     container_id = None
     try:
         for local_dir_path in volume_list:
