@@ -43,7 +43,7 @@ class ExtractFix(AbstractTool):
             error_exit("Unhandled exception")
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        # get ready the config file
+        # prepare the config file
         parameters = self.create_parameters(bug_info)
 
         # start running
@@ -51,7 +51,6 @@ class ExtractFix(AbstractTool):
         extractfix_command = "bash -c 'source /ExtractFix/setup.sh && timeout -k 5m {}h ./ExtractFix.py {} {} >> {}'".format(
             timeout_h, parameters, additional_tool_param, self.log_output_path
         )
-        status = 0
         status = self.run_command(
             extractfix_command,
             log_file_path=self.log_output_path,

@@ -1,10 +1,11 @@
 import os
+from pprint import pprint
 import re
 import shutil
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter, container
-from os import listdir
+from os import listdir, path
 from os.path import isfile, join
 
 
@@ -12,12 +13,66 @@ class Prophet(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Prophet, self).__init__(self.name)
+        self.image_name = "rshariffdeen/prophet"
 
-    def generate_localization(
-        self, experiment_info, localization_file, dir_setup, container_id
-    ):
-        fix_file = experiment_info[definitions.KEY_FIX_FILE]
-        fix_location = experiment_info[definitions.KEY_FIX_LOC]
+    def repair(self, bug_info, config_info):
+        super(Prophet, self).repair(bug_info, config_info)
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+        conf_id = config_info[definitions.KEY_ID]
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        revlog_file = self.dir_expr + "/prophet/prophet.revlog"
+        self.generate_revlog(bug_info, revlog_file, bug_id, self.container_id)
+        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        self.log_output_path = "{}/{}-{}-{}-output.log".format(
+            self.dir_logs, conf_id, self.name.lower(), bug_id
+        )
+        timestamp_command = (
+            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+        )
+        execute_command(timestamp_command)
+        repair_file = self.dir_expr + "/prophet/prophet.conf"
+        if not container.is_file(self.container_id, repair_file):
+            emitter.error("\t\t[error] no repair config file detected")
+            return
+        # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
+        # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
+        dir_patch = "/output/patches"
+        mkdir_command = "mkdir " + dir_patch
+        self.run_command(mkdir_command, self.log_output_path, self.dir_expr)
+        localization_file = self.dir_expr + "/workdir/profile_localization.res"
+        self.generate_localization(bug_info, localization_file, self.dir_setup)
+        # -feature-para /prophet-gpl/crawler/para-all.out
+        repair_command = "prophet  prophet/prophet.conf ".format(
+            timeout
+        )
+        repair_command += " -full-synthesis -full-explore "
+        repair_command += " -r {}".format(self.dir_expr + "/workdir")
+        repair_command += " -cond-ext -replace-ext "
+        repair_command += " -o {} ".format(dir_patch)
+        #repair_command += " >> {}".format(self.log_output_path)
+        if values.DEFAULT_DUMP_PATCHES:
+            repair_command += " -dump-all "
+        if additional_tool_param:
+            repair_command += " " + additional_tool_param
+        # repair_command += " -timeout {0} ".format(int(timeout))
+        self.timestamp_log()
+        status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
+        self.timestamp_log()
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                    self.name, status
+                )
+            )
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+
+    def generate_localization(self, bug_info, localization_file, dir_setup):
+        fix_file = bug_info[definitions.KEY_FIX_FILE]
+        fix_location = bug_info[definitions.KEY_FIX_LOC]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
             source_file, line_number = fix_location.split(":")
@@ -33,29 +88,24 @@ class Prophet(AbstractTool):
                 res_file.seek(0)
                 res_file.write(fault_loc)
                 res_file.truncate()
-            if container_id:
-                copy_command = (
-                    "docker cp "
-                    + tmp_localization_file
-                    + " "
-                    + container_id
-                    + ":"
-                    + localization_file
+            if self.container_id:
+                copy_command = "docker cp {} {}:{}".format(
+                    tmp_localization_file, self.container_id, localization_file
                 )
             else:
-                copy_command = "cp " + tmp_localization_file + " " + localization_file
+                copy_command = "cp {} {}".format(tmp_localization_file,localization_file)
             execute_command(copy_command)
         else:
             default_localization_file = dir_setup + "/prophet/profile_localization.res"
-            if container_id:
+            if self.container_id:
                 if not container.is_file(
-                    container_id, localization_file
-                ) or container.is_file_empty(container_id, localization_file):
-                    if container.is_file(container_id, default_localization_file):
+                    self.container_id, localization_file
+                ) or container.is_file_empty(self.container_id, localization_file):
+                    if container.is_file(self.container_id, default_localization_file):
                         copy_command = (
                             "cp " + default_localization_file + " " + localization_file
                         )
-                        self.run_command(copy_command, "/dev/null", "/", container_id)
+                        self.run_command(copy_command, "/dev/null", "/")
             else:
                 if (
                     not os.path.isfile(localization_file)
@@ -65,8 +115,7 @@ class Prophet(AbstractTool):
                         shutil.copy(default_localization_file, localization_file)
 
     def generate_revlog(self, experiment_info, revlog_file, bug_id, container_id):
-        test_config_str = "-\n"
-        test_config_str += "-\n"
+        test_config_str = "-\n-\n"
         subject_name = experiment_info[definitions.KEY_SUBJECT]
         failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
         test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
@@ -95,7 +144,8 @@ class Prophet(AbstractTool):
             conf_file.seek(0)
             conf_file.write(test_config_str)
             conf_file.truncate()
-        if container_id:
+        if self.container_id:
+            container.copy_file_from_container
             copy_command = (
                 "docker cp " + tmp_config_file + " " + container_id + ":" + revlog_file
             )
@@ -103,137 +153,22 @@ class Prophet(AbstractTool):
             copy_command = "cp " + tmp_config_file + " " + revlog_file
         execute_command(copy_command)
 
-    def instrument(
-        self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file
-    ):
-        """instrumentation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t instrumenting for " + self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name
-            + "-"
-            + bug_id
-            + "-instrument.log"
-        )
-        command_str = "bash instrument.sh /experiment {}".format(source_file)
-        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-        script_path = dir_setup_exp + "/instrument.sh"
-        if not container.is_file(container_id, script_path):
-            return
-        status = self.run_command(
-            command_str, self.log_instrument_path, dir_setup_exp, container_id
-        )
-        if not status == 0:
-            error_exit("error with instrumentation of ", self.name)
-        return
-
-    def repair(
-        self, dir_info, experiment_info, config_info, container_id, instrument_only
-    ):
-        super(Prophet, self).repair(
-            dir_info, experiment_info, config_info, container_id, instrument_only
-        )
-        if not instrument_only:
-            emitter.normal("\t\t\t running repair with " + self.name)
-            conf_id = config_info[definitions.KEY_ID]
-            dir_logs = dir_info["logs"]
-            dir_setup = dir_info["setup"]
-            dir_expr = dir_info["expr"]
-            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            revlog_file = dir_expr + "/prophet/prophet.revlog"
-            self.generate_revlog(experiment_info, revlog_file, bug_id, container_id)
-            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            self.log_output_path = (
-                dir_logs
-                + "/"
-                + conf_id
-                + "-"
-                + self.name.lower()
-                + "-"
-                + bug_id
-                + "-output.log"
-            )
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-            repair_file = dir_expr + "/prophet/prophet.conf"
-            if not container.is_file(container_id, repair_file):
-                emitter.error("\t\t[error] no repair config file detected")
-                return
-            # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
-            # self.run_command(instrument_command, self.log_instrument_path, dir_expr, container_id)
-            dir_patch = "/output/patches"
-            mkdir_command = "mkdir " + dir_patch
-            self.run_command(
-                mkdir_command, self.log_output_path, dir_expr, container_id
-            )
-            line_number = ""
-            localization_file = dir_expr + "/workdir/profile_localization.res"
-            self.generate_localization(
-                experiment_info, localization_file, dir_setup, container_id
-            )
-            # -feature-para /prophet-gpl/crawler/para-all.out
-            repair_command = "timeout -k 5m {0}h prophet  prophet/prophet.conf ".format(
-                timeout
-            )
-            repair_command += " -full-synthesis -full-explore "
-            repair_command += " -r {0}".format(dir_expr + "/workdir")
-            repair_command += " -cond-ext -replace-ext "
-            repair_command += " -o {}".format(dir_patch)
-            if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " -dump-all "
-            if additional_tool_param:
-                repair_command = repair_command + " " + additional_tool_param
-            # repair_command += " -timeout {0} ".format(int(timeout))
-            status = self.run_command(
-                repair_command, self.log_output_path, dir_expr, container_id
-            )
-            if status != 0:
-                emitter.warning(
-                    "\t\t\t[warning] {0} exited with an error code {1}".format(
-                        self.name, status
-                    )
-                )
-            else:
-                emitter.success(
-                    "\t\t\t[success] {0} ended successfully".format(self.name)
-                )
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-        return
-
-    def save_artefacts(self, dir_info, experiment_info, container_id):
+    def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_expr = dir_info["experiment"]
-        dir_artifact = dir_info["artifact"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
-        dir_patch = dir_expr + "/patches"
-        copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
-        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
-        fix_file = experiment_info[definitions.KEY_FIX_FILE]
-        copy_command = (
-            "docker cp "
-            + container_id
-            + ":"
-            + dir_expr
-            + "src/"
-            + fix_file
-            + " /tmp/orig.c"
+        dir_results = dir_info["results"]
+        dir_patch = self.dir_expr + "/patches"
+        copy_command = "cp -rf  " + dir_patch + " " + self.dir_output
+        self.run_command(copy_command, "/dev/null", self.dir_expr)
+        fix_file = "test" #experiment_info[definitions.KEY_FIX_FILE]
+        copy_command = "docker cp {}:{} src/{}/tmp/orig.c".format(
+            self.container_id, self.dir_expr, fix_file
         )
+        emitter.debug("EXECUTING {}".format(copy_command))
+
         execute_command(copy_command)
         patch_id = 0
-        dir_patch_local = dir_output + "/patches"
-        container.fix_permissions(container_id, "/output")
+        dir_patch_local = self.dir_output + "/patches"
+        container.fix_permissions(self.container_id, "/output")
         if os.path.isdir(dir_patch_local):
             output_patch_list = [
                 f
@@ -256,7 +191,7 @@ class Prophet(AbstractTool):
                 execute_command(del_command)
             save_command = "cp -rf " + dir_patch_local + " " + dir_results
             execute_command(save_command)
-        super(Prophet, self).save_artefacts(dir_info, experiment_info, container_id)
+        super(Prophet, self).save_artefacts(dir_info)
         return
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
@@ -5757,24 +5692,14 @@ class Prophet(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+        dir_results = path.join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-analysis.log"
+        self.log_analysis_path = "{}/{}-{}-{}-analysis.log".format(
+            self.dir_logs, conf_id, self.name.lower(), bug_id
         )
+
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
@@ -5792,15 +5717,8 @@ class Prophet(AbstractTool):
         time_latency_3 = 0
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            patch_space_info = (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                count_generated,
-            )
             time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
-            return patch_space_info, time_info
+            return self._space, self._time, self._error
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
         is_error = False
         timeline = ""
@@ -5862,7 +5780,7 @@ class Prophet(AbstractTool):
             ]
             count_generated = len(output_patch_list)
         if values.CONF_USE_VALKYRIE:
-            dir_filtered = dir_output + "/patch-valid"
+            dir_filtered = self.dir_output + "/patch-valid"
             if dir_filtered and os.path.isdir(dir_filtered):
                 output_patch_list = [
                     f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))
@@ -5913,21 +5831,21 @@ class Prophet(AbstractTool):
                 log_file.write(
                     "\t\t time duration: {0} seconds\n".format(time_duration)
                 )
-            log_file.close()
-        patch_space_info = (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            count_generated,
-        )
         time_info = (
-            time_build,
-            time_validation,
-            time_duration,
             time_latency_1,
             time_latency_2,
             time_latency_3,
-            time_stamp_start,
         )
-        return patch_space_info, time_info
+
+        self._time.total_build = time_build
+        self._time.total_validation = time_validation
+        self._time.__duration_total = time_duration
+        self._time.timestamp_start = time_stamp_start
+
+        self._space.size = size_search_space
+        self._space.plausible = count_plausible
+        self._space.enumerations = count_enumerations
+        self._space.generated = count_generated
+        self._space.non_compilable = count_non_compilable
+
+        return self._space, self._time, self._error
