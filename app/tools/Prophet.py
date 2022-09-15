@@ -44,7 +44,7 @@ class Prophet(AbstractTool):
         localization_file = self.dir_expr + "/workdir/profile_localization.res"
         self.generate_localization(bug_info, localization_file, self.dir_setup)
         # -feature-para /prophet-gpl/crawler/para-all.out
-        repair_command = "prophet  prophet/prophet.conf ".format(
+        repair_command = "timeout -k 5m {}h prophet  prophet/prophet.conf ".format(
             timeout
         )
         repair_command += " -full-synthesis -full-explore "
