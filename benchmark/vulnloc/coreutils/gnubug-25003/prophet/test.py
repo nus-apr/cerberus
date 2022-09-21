@@ -21,7 +21,7 @@ import getopt
 from os import chdir, getcwd, system, path, environ
 import subprocess
 
-INPUT = {"1": " -n7/75 /dev/null "}
+INPUT = {"1": " -n2/3 /dev/null "}
 
 if __name__ == "__main__":
     opts, args = getopt.getopt(argv[1:], "p:")
