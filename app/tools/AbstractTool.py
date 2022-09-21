@@ -100,6 +100,7 @@ class AbstractTool:
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.CONFIG_ID)
+        buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
             self.dir_logs
             + "/"
@@ -110,7 +111,7 @@ class AbstractTool:
             + bug_id
             + "-instrument.log"
         )
-        command_str = "bash instrument.sh {}".format(self.dir_base_expr)
+        command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         if status not in [0, 126]:
             error_exit(

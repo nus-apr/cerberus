@@ -14,6 +14,7 @@ class Prophet(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Prophet, self).__init__(self.name)
         self.image_name = "rshariffdeen/prophet"
+        self.file = ""
 
     def repair(self, bug_info, config_info):
         super(Prophet, self).repair(bug_info, config_info)
@@ -21,8 +22,9 @@ class Prophet(AbstractTool):
             return
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        self.file = bug_info[definitions.KEY_FIX_FILE]
         revlog_file = self.dir_expr + "/prophet/prophet.revlog"
-        self.generate_revlog(bug_info, revlog_file, bug_id, self.container_id)
+        self.generate_revlog(bug_info, revlog_file, bug_id)
         timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
@@ -38,9 +40,9 @@ class Prophet(AbstractTool):
             return
         # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
         # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
-        dir_patch = "/output/patches"
-        mkdir_command = "mkdir " + dir_patch
-        self.run_command(mkdir_command, self.log_output_path, self.dir_expr)
+        dir_patch = "output/patches"
+        mkdir_command = "mkdir -p " + dir_patch
+        self.run_command(mkdir_command, self.log_output_path, "/")
         localization_file = self.dir_expr + "/workdir/profile_localization.res"
         self.generate_localization(bug_info, localization_file, self.dir_setup)
         # -feature-para /prophet-gpl/crawler/para-all.out
@@ -50,8 +52,8 @@ class Prophet(AbstractTool):
         repair_command += " -full-synthesis -full-explore "
         repair_command += " -r {}".format(self.dir_expr + "/workdir")
         repair_command += " -cond-ext -replace-ext "
-        repair_command += " -o {} ".format(dir_patch)
-        #repair_command += " >> {}".format(self.log_output_path)
+        repair_command += " -o /{} ".format(dir_patch)
+        # repair_command += " >> {}".format(self.log_output_path)
         if values.DEFAULT_DUMP_PATCHES:
             repair_command += " -dump-all "
         if additional_tool_param:
@@ -71,7 +73,6 @@ class Prophet(AbstractTool):
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def generate_localization(self, bug_info, localization_file, dir_setup):
-        fix_file = bug_info[definitions.KEY_FIX_FILE]
         fix_location = bug_info[definitions.KEY_FIX_LOC]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
@@ -93,7 +94,9 @@ class Prophet(AbstractTool):
                     tmp_localization_file, self.container_id, localization_file
                 )
             else:
-                copy_command = "cp {} {}".format(tmp_localization_file,localization_file)
+                copy_command = "cp {} {}".format(
+                    tmp_localization_file, localization_file
+                )
             execute_command(copy_command)
         else:
             default_localization_file = dir_setup + "/prophet/profile_localization.res"
@@ -114,7 +117,7 @@ class Prophet(AbstractTool):
                     if os.path.isfile(default_localization_file):
                         shutil.copy(default_localization_file, localization_file)
 
-    def generate_revlog(self, experiment_info, revlog_file, bug_id, container_id):
+    def generate_revlog(self, experiment_info, revlog_file, bug_id):
         test_config_str = "-\n-\n"
         subject_name = experiment_info[definitions.KEY_SUBJECT]
         failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
@@ -147,7 +150,12 @@ class Prophet(AbstractTool):
         if self.container_id:
             container.copy_file_from_container
             copy_command = (
-                "docker cp " + tmp_config_file + " " + container_id + ":" + revlog_file
+                "docker cp "
+                + tmp_config_file
+                + " "
+                + self.container_id
+                + ":"
+                + revlog_file
             )
         else:
             copy_command = "cp " + tmp_config_file + " " + revlog_file
@@ -157,9 +165,9 @@ class Prophet(AbstractTool):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["results"]
         dir_patch = self.dir_expr + "/patches"
-        copy_command = "cp -rf  " + dir_patch + " " + self.dir_output
+        copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command, "/dev/null", self.dir_expr)
-        fix_file = "test" #experiment_info[definitions.KEY_FIX_FILE]
+        fix_file = self.file
         copy_command = "docker cp {}:{} src/{}/tmp/orig.c".format(
             self.container_id, self.dir_expr, fix_file
         )
@@ -192,7 +200,6 @@ class Prophet(AbstractTool):
             save_command = "cp -rf " + dir_patch_local + " " + dir_results
             execute_command(save_command)
         super(Prophet, self).save_artefacts(dir_info)
-        return
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
         filtered_list = []
@@ -5712,9 +5719,9 @@ class Prophet(AbstractTool):
         time_duration = 0
         time_build = 0
         time_validation = 0
-        time_latency_1 = 0
-        time_latency_2 = 0
-        time_latency_3 = 0
+        time_latency_1 = 0  # first time to find a candidate patch
+        time_latency_2 = 0  # first time to find a plausible patch
+        time_latency_3 = 0  # first time to find a syntactically correct patch
         if not self.log_output_path or not os.path.isfile(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
