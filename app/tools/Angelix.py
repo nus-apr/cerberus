@@ -12,160 +12,105 @@ class Angelix(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Angelix, self).__init__(self.name)
+        self.image_name = "mechtaev/angelix:1.1"
 
-    def instrument(
-        self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file
-    ):
-        """instrumentation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t instrumenting for " + self.name)
-        conf_id = str(values.CONFIG_ID)
-        self.log_instrument_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name
-            + "-"
-            + bug_id
-            + "-instrument.log"
-        )
-        command_str = "bash instrument.sh {}".format(dir_expr)
-        dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-        status = self.run_command(
-            command_str, self.log_instrument_path, dir_setup_exp, container_id
-        )
-        if not status == 0:
-            error_exit("error with instrumentation of ", self.name)
-        return
-
-    def repair(
-        self, dir_info, experiment_info, config_info, container_id, instrument_only
-    ):
+    def repair(self, bug_info, config_info):
         super(Angelix, self).repair(
-            dir_info, experiment_info, config_info, container_id, instrument_only
+            bug_info,
+            config_info,
         )
-        if not instrument_only:
-            emitter.normal("\t\t\t running repair with " + self.name)
-            conf_id = config_info[definitions.KEY_ID]
-            dir_logs = dir_info["logs"]
-            dir_expr = dir_info["expr"]
-            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-            fix_line_number_list = experiment_info[definitions.KEY_FIX_LINES]
-            fix_location = experiment_info[definitions.KEY_FIX_LOC]
-            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-            subject_name = experiment_info[definitions.KEY_SUBJECT]
-            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            self.log_output_path = (
-                dir_logs
-                + "/"
-                + conf_id
-                + "-"
-                + self.name.lower()
-                + "-"
-                + bug_id
-                + "-output.log"
-            )
-            src_path = dir_expr + "/src"
-            gold_path = dir_expr + "/src-gold"
-            angelix_dir_path = dir_expr + "/angelix"
-            oracle_path = angelix_dir_path + "/oracle"
-            config_script_path = angelix_dir_path + "/config"
-            build_script_path = angelix_dir_path + "/build"
-            timeout_s = int(timeout) * 3600
-            syn_timeout = int(0.25 * timeout_s * 1000)
-            test_id_list = ""
-            for test_id in failing_test_list:
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+        emitter.normal("\t\t\t running repair with " + self.name)
+        conf_id = config_info[definitions.KEY_ID]
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        source_file = str(bug_info[definitions.KEY_FIX_FILE])
+        fix_line_number_list = bug_info[definitions.KEY_FIX_LINES]
+        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
+        passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
+        subject_name = bug_info[definitions.KEY_SUBJECT]
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        self.log_output_path = join(
+            self.dir_logs,
+            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+        )
+        src_path = join(self.dir_expr, "src")
+        gold_path = join(self.dir_expr, "src-gold")
+        angelix_dir_path = join(self.dir_expr, "angelix")
+        oracle_path = join(angelix_dir_path, "oracle")
+        config_script_path = join(angelix_dir_path, "config")
+        build_script_path = join(angelix_dir_path + "build")
+        timeout_s = int(timeout) * 3600
+        syn_timeout = int(0.25 * timeout_s * 1000)
+        test_id_list = ""
+        for test_id in failing_test_list:
+            test_id_list += test_id + " "
+        if passing_test_list:
+            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+            for test_id in filtered_list:
                 test_id_list += test_id + " "
-            if passing_test_list:
-                filtered_list = self.filter_tests(
-                    passing_test_list, subject_name, bug_id
-                )
-                for test_id in filtered_list:
-                    test_id_list += test_id + " "
 
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
+        repair_command = (
+            "source /angelix/activate && timeout -k 5m {8}h  angelix {0} {1} {2} {3}  "
+            "--configure {4}  "
+            "--golden {5}  "
+            "--build {6} "
+            "--output patches "
+            "--synthesis-timeout {7} ".format(
+                src_path,
+                source_file,
+                oracle_path,
+                test_id_list,
+                config_script_path,
+                gold_path,
+                build_script_path,
+                str(syn_timeout),
+                str(timeout),
             )
-            execute_command(timestamp_command)
-            repair_command = (
-                "timeout -k 5m {8}h  angelix {0} {1} {2} {3}  "
-                "--configure {4}  "
-                "--golden {5}  "
-                "--build {6} "
-                "--output patches "
-                "--synthesis-timeout {7} ".format(
-                    src_path,
-                    source_file,
-                    oracle_path,
-                    test_id_list,
-                    config_script_path,
-                    gold_path,
-                    build_script_path,
-                    str(syn_timeout),
-                    str(timeout),
-                )
-            )
+        )
 
-            if fix_location:
-                repair_command += " --lines {0}  ".format(
-                    ",".join(fix_line_number_list)
-                )
+        if fix_location:
+            repair_command += " --lines {0}  ".format(",".join(fix_line_number_list))
 
-            if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " --dump-patches "
+        if values.DEFAULT_DUMP_PATCHES:
+            repair_command += " --dump-patches "
 
-            if os.path.isfile("/tmp/ANGELIX_ARGS"):
-                with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
-                    arg_line = arg_file.readline()
-                    repair_command += " " + arg_line.strip() + " "
-                os.remove("/tmp/ANGELIX_ARGS")
-            if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
-                with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
-                    load_line = arg_file.readline()
-                    os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
-                os.remove("/tmp/ANGELIX_KLEE_LOAD")
-            repair_command += "  --generate-all {0} " " --timeout {1}".format(
-                additional_tool_param, str(timeout_s)
-            )
-            if container_id:
-                repair_command = (
-                    '/bin/bash -c "source /angelix/activate;' + repair_command + '"'
+        if os.path.isfile("/tmp/ANGELIX_ARGS"):
+            with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
+                arg_line = arg_file.readline()
+                repair_command += " " + arg_line.strip() + " "
+            os.remove("/tmp/ANGELIX_ARGS")
+        if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
+            with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
+                load_line = arg_file.readline()
+                os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
+            os.remove("/tmp/ANGELIX_KLEE_LOAD")
+        repair_command += "  --generate-all {0} " " --timeout {1}".format(
+            additional_tool_param, str(timeout_s)
+        )
+
+        self.timestamp_log()
+        status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
+        self.timestamp_log()
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                    self.name, status
                 )
-            status = self.run_command(
-                repair_command, self.log_output_path, dir_expr, container_id
             )
-            if status != 0:
-                emitter.warning(
-                    "\t\t\t[warning] {0} exited with an error code {1}".format(
-                        self.name, status
-                    )
-                )
-            else:
-                emitter.success(
-                    "\t\t\t[success] {0} ended successfully".format(self.name)
-                )
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-        return
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info, experiment_info, container_id):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_results = dir_info["result"]
-        dir_expr = dir_info["experiment"]
         dir_artifact = dir_info["artifact"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
-        source_file = str(experiment_info[definitions.KEY_FIX_FILE])
         execute_command("rm /tmp/find_dir")
-        dir_patch = dir_expr + "/patches"
+        dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, dir_artifact)
-        self.run_command(copy_command, "/dev/null", dir_expr, container_id)
+        self.run_command(copy_command, "/dev/null", self.dir_expr)
         # copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + source_file + " /tmp/orig_angelix.c"
         # execute_command(copy_command)
         #

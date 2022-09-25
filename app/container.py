@@ -171,13 +171,16 @@ def exec_command(container_id, command, workdir="/experiment"):
         command = command.encode().decode("ascii", "ignore")
         print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
-        exit_code, output = container.exec_run(command, privileged= True, demux=True, workdir=workdir)
+        exit_code, output = container.exec_run(
+            command, privileged=True, demux=True, workdir=workdir
+        )
         if output is not None:
             for stream in output:
                 if stream is None:
                     continue
                 for line in stream.decode().split("\n"):
-                    emitter.debug(line)
+                    if line != "":
+                        emitter.debug(line)
     except docker.errors.NotFound as ex:
         emitter.error(ex)
         utilities.error_exit(
