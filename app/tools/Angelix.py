@@ -41,7 +41,7 @@ class Angelix(AbstractTool):
         angelix_dir_path = join(self.dir_expr, "angelix")
         oracle_path = join(angelix_dir_path, "oracle")
         config_script_path = join(angelix_dir_path, "config")
-        build_script_path = join(angelix_dir_path + "build")
+        build_script_path = join(angelix_dir_path, "build")
         timeout_s = int(timeout) * 3600
         syn_timeout = int(0.25 * timeout_s * 1000)
         test_id_list = ""
@@ -52,45 +52,43 @@ class Angelix(AbstractTool):
             for test_id in filtered_list:
                 test_id_list += test_id + " "
 
-        repair_command = (
-            "source /angelix/activate && timeout -k 5m {8}h  angelix {0} {1} {2} {3}  "
-            "--configure {4}  "
-            "--golden {5}  "
-            "--build {6} "
-            "--output patches "
-            "--synthesis-timeout {7} ".format(
-                src_path,
-                source_file,
-                oracle_path,
-                test_id_list,
-                config_script_path,
-                gold_path,
-                build_script_path,
-                str(syn_timeout),
-                str(timeout),
-            )
-        )
+        arguments = [
+            "--configure {}".format(config_script_path),
+            "--golden {}".format(gold_path),
+            "--build {}".format(build_script_path),
+            # "--output patches "
+            "--synthesis-timeout {}".format(str(syn_timeout)),
+        ]
 
         if fix_location:
-            repair_command += " --lines {0}  ".format(",".join(fix_line_number_list))
+            arguments.append(" --lines {0}  ".format(",".join(fix_line_number_list)))
 
         if values.DEFAULT_DUMP_PATCHES:
-            repair_command += " --dump-patches "
+            arguments.append(" --dump-patches ")
 
         if os.path.isfile("/tmp/ANGELIX_ARGS"):
             with open("/tmp/ANGELIX_ARGS", "r") as arg_file:
                 arg_line = arg_file.readline()
-                repair_command += " " + arg_line.strip() + " "
+                arguments.append(arg_line.strip())
             os.remove("/tmp/ANGELIX_ARGS")
         if os.path.isfile("/tmp/ANGELIX_KLEE_LOAD"):
             with open("/tmp/ANGELIX_KLEE_LOAD", "r") as arg_file:
                 load_line = arg_file.readline()
                 os.system("export ANGELIX_KLEE_LOAD={}".format(load_line.strip()))
             os.remove("/tmp/ANGELIX_KLEE_LOAD")
-        repair_command += "  --generate-all {0} " " --timeout {1}".format(
-            additional_tool_param, str(timeout_s)
+        arguments.append(
+            "  --generate-all {0} "
+            " --timeout {1}".format(additional_tool_param, str(timeout_s))
         )
 
+        repair_command = "bash -c 'source /angelix/activate && timeout -k 5m {}h  angelix {} {} {} {} {}'".format(
+            str(timeout),
+            src_path,
+            source_file,
+            oracle_path,
+            test_id_list,
+            " ".join(arguments),
+        )
         self.timestamp_log()
         status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
         self.timestamp_log()
@@ -104,18 +102,18 @@ class Angelix(AbstractTool):
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info, experiment_info, container_id):
+    def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_artifact = dir_info["artifact"]
-        execute_command("rm /tmp/find_dir")
-        dir_patch = join(self.dir_expr, "patches")
-        copy_command = "cp -rf {} {}".format(dir_patch, dir_artifact)
-        self.run_command(copy_command, "/dev/null", self.dir_expr)
+        # dir_artifact = dir_info["artifact"]
+        # execute_command("rm /tmp/find_dir")
+        # dir_patch = join(self.dir_expr, "patches")
+        # copy_command = "cp -rf {} {}".format(dir_patch, dir_artifact)
+        # self.run_command(copy_command, "/dev/null", self.dir_expr)
         # copy_command = "docker cp " + container_id + ":" + dir_expr + "src/" + source_file + " /tmp/orig_angelix.c"
         # execute_command(copy_command)
         #
         # dir_patch_local = dir_output + "/patches"
-        container.fix_permissions(container_id, "/output")
+        container.fix_permissions(self.container_id, "/output")
         # if os.path.isdir(dir_patch_local):
         #     output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".patch" in f]
         #     for f in output_patch_list:
@@ -132,35 +130,49 @@ class Angelix(AbstractTool):
         #     save_command = "cp -rf " + dir_patch_local + " " + dir_results
         #     execute_command(save_command)
 
-        super(Angelix, self).save_artefacts(dir_info, experiment_info, container_id)
-        return
+        super(Angelix, self).save_artefacts(dir_info)
 
-    def post_process(self, dir_expr, dir_results, container_id):
-        emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        clean_command = "rm -rf /tmp/* {}/.angelix/".format(dir_expr)
-        self.run_command(clean_command, "/dev/null", dir_expr, container_id)
-        super(Angelix, self).post_process(dir_expr, dir_results, container_id)
-
-    def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+    def instrument(self, bug_info):
+        """instrumentation for the experiment as needed by the tool"""
+        emitter.normal("\t\t\t instrumenting for " + self.name)
+        bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
+        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        self.log_instrument_path = (
+            self.dir_logs
             + "/"
             + conf_id
             + "-"
-            + self.name.lower()
+            + self.name
             + "-"
             + bug_id
-            + "-analysis.log"
+            + "-instrument.log"
         )
+        command_str = "bash instrument.sh {} {}".format(self.dir_expr, buggy_file)
+        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
+        if status not in [0, 126]:
+            error_exit(
+                "error with instrumentation of "
+                + self.name
+                + "; exit code "
+                + str(status)
+            )
+        return
+
+    def analyse_output(self, dir_info, bug_id, fail_list):
+        emitter.normal("\t\t\t analysing output of " + self.name)
+        is_error = False
+        count_plausible = 0
+        count_enumerations = 0
+        conf_id = str(values.CONFIG_ID)
+        self.log_analysis_path = join(
+            self.dir_logs,
+            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
+        )
+        return self._space, self._time, self._error
+        dir_results = dir_info["result"]
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
@@ -286,13 +298,6 @@ class Angelix(AbstractTool):
             count_non_compilable,
             time_duration,
         )
-
-    def pre_process(self, dir_logs, dir_expr, dir_setup, container_id):
-        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(Angelix, self).pre_process(dir_logs, dir_expr, dir_setup, container_id)
-        if not os.path.isdir("/tmp"):
-            os.mkdir("/tmp")
-        return
 
     def filter_tests(self, test_id_list, subject, bug_id):
         filtered_list = []
