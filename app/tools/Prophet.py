@@ -167,9 +167,8 @@ class Prophet(AbstractTool):
         dir_patch = self.dir_expr + "/patches"
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command, "/dev/null", self.dir_expr)
-        fix_file = self.file
         copy_command = "docker cp {}:{} src/{}/tmp/orig.c".format(
-            self.container_id, self.dir_expr, fix_file
+            self.container_id, self.dir_expr, self.file
         )
         emitter.debug("EXECUTING {}".format(copy_command))
 
@@ -5697,7 +5696,70 @@ class Prophet(AbstractTool):
 
         return filtered_list
 
+    def read_log_file(self):
+        self._time.set_log_time_fmt("%S")  #Temporary
+        timeline = ""
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self._time.timestamp_start = log_lines[0].replace("\n", "")
+        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        for line in log_lines:
+            if "[" == line[0] and "]" in line:
+                timeline = int(line.split("] ")[0].replace("[", "").strip())
+            if "number of explored templates:" in line:
+                self._space.enumerations = int(
+                    line.split("number of explored templates: ")[-1]
+                )
+            elif "Single building" in line and "failed as well!" in line:
+                self._space.non_compilable += 1
+            elif "different repair candidate" in line:
+                self._space.size = int(
+                    line.split(" different repair candidate")[0]
+                    .replace("Total ", "")
+                    .strip()
+                )
+            elif "Segmentation fault" in line:
+                self._error.is_error = True
+            elif "Verification failed!" in line or "Repair error:" in line:
+                emitter.warning(
+                    "\t\t\t\t[warning] verification error detected in test suite"
+                )
+            elif "validation time: " in line:
+                time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                self._time.total_validation += float(time)
+            elif "build time: " in line:
+                time = line.split("build time: ")[-1].strip().replace("\n", "")
+                self._time.total_build += float(time)
+                # if self._time.timestamp_compilation == 0:
+                #     self._time.timestamp_compilation = timeline
+            elif "Passed!" in line:
+                # if self._time.timestamp_validation == 0:
+                #     self._time.timestamp_validation = int(
+                #         line.replace("[", "").replace("] Passed!", " ").strip()
+                #     )
+                self._space.plausible += 1
+            elif "Testing" in line:
+                pass
+                # if self._time.timestamp_plausible == 0:
+                #     self._time.timestamp_plausible = timeline
+
     def analyse_output(self, dir_info, bug_id, fail_list):
+        """
+        inference of the output of the execution
+        output of the tool is logged at self.log_output_path
+        information required to be extracted are:
+
+             count_non_compilable
+             count_plausible
+             size_search_space
+             count_enumerations
+             count_generated
+
+             time_validation
+             time_build
+             timestamp_compilation
+             timestamp_validation
+             timestamp_plausible
+        """
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = path.join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
@@ -5706,153 +5768,31 @@ class Prophet(AbstractTool):
         )
 
         regex = re.compile("(.*-output.log$)")
+
         for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        count_non_compilable = 0
-        count_plausible = 0
-        count_generated = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        time_build = 0
-        time_validation = 0
-        time_latency_1 = 0  # first time to find a candidate patch
-        time_latency_2 = 0  # first time to find a plausible patch
-        time_latency_3 = 0  # first time to find a syntactically correct patch
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
+
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
             return self._space, self._time, self._error
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
-        timeline = ""
-        if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
-                log_lines = log_file.readlines()
-                time_stamp_start = log_lines[0].replace("\n", "")
-                time_stamp_end = log_lines[-1].replace("\n", "")
-                time_duration = self.time_duration(time_stamp_start, time_stamp_end)
-                for line in log_lines:
-                    if "[" == line[0] and "]" in line:
-                        timeline = int(line.split("] ")[0].replace("[", "").strip())
-                    if "number of explored templates:" in line:
-                        count_enumerations = int(
-                            line.split("number of explored templates: ")[-1]
-                        )
-                    elif "Single building" in line and "failed as well!" in line:
-                        count_non_compilable = count_non_compilable + 1
-                    elif "different repair candidate" in line:
-                        size_search_space = int(
-                            line.split(" different repair candidate")[0]
-                            .replace("Total ", "")
-                            .strip()
-                        )
-                    elif "Segmentation fault" in line:
-                        is_error = True
-                    elif "Verification failed!" in line or "Repair error:" in line:
-                        emitter.warning(
-                            "\t\t\t\t[warning] verification error detected in test suite"
-                        )
-                    elif "validation time: " in line:
-                        time = (
-                            line.split("validation time: ")[-1]
-                            .strip()
-                            .replace("\n", "")
-                        )
-                        time_validation += float(time)
-                    elif "build time: " in line:
-                        time = line.split("build time: ")[-1].strip().replace("\n", "")
-                        time_build += float(time)
-                        if time_latency_3 == 0:
-                            time_latency_3 = timeline
-                    elif "Passed!" in line:
-                        if time_latency_1 == 0:
-                            time_latency_1 = int(
-                                line.replace("[", "").replace("] Passed!", " ").strip()
-                            )
-                        count_plausible += 1
-                    elif "Testing" in line:
-                        if time_latency_2 == 0:
-                            time_latency_2 = timeline
-                log_file.close()
-        if is_error:
+
+        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+
+        self.read_log_file()
+
+        if self._error.is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
-        dir_patch = dir_results + "/patches"
-        if os.path.isdir(dir_patch):
-            output_patch_list = [
-                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
-            ]
-            count_generated = len(output_patch_list)
-        if values.CONF_USE_VALKYRIE:
-            dir_filtered = self.dir_output + "/patch-valid"
-            if dir_filtered and os.path.isdir(dir_filtered):
-                output_patch_list = [
-                    f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))
-                ]
-                count_generated = len(output_patch_list)
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
-        if os.path.isdir(os.path.dirname(self.log_analysis_path)):
-            with open(self.log_analysis_path, "w") as log_file:
-                log_file.write(
-                    "\t\t search space size: {0}\n".format(size_search_space)
+
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
                 )
-                if not values.DEFAULT_DUMP_PATCHES:
-                    log_file.write(
-                        "\t\t count non-compiling patches: {0}\n".format(
-                            count_non_compilable
-                        )
-                    )
-                    log_file.write(
-                        "\t\t count implausible patches: {0}\n".format(
-                            count_implausible
-                        )
-                    )
-                log_file.write(
-                    "\t\t count enumerations: {0}\n".format(count_enumerations)
-                )
-                log_file.write(
-                    "\t\t count plausible patches: {0}\n".format(count_plausible)
-                )
-                log_file.write(
-                    "\t\t count generated patches: {0}\n".format(count_generated)
-                )
-                log_file.write("\t\t any errors: {0}\n".format(is_error))
-                log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-                log_file.write(
-                    "\t\t time validation: {0} seconds\n".format(time_validation)
-                )
-                log_file.write(
-                    "\t\t time latency compilation: {0} seconds\n".format(
-                        time_latency_3
-                    )
-                )
-                log_file.write(
-                    "\t\t time latency validation: {0} seconds\n".format(time_latency_2)
-                )
-                log_file.write(
-                    "\t\t time latency plausible: {0} seconds\n".format(time_latency_1)
-                )
-                log_file.write(
-                    "\t\t time duration: {0} seconds\n".format(time_duration)
-                )
-        time_info = (
-            time_latency_1,
-            time_latency_2,
-            time_latency_3,
+            )
         )
-
-        self._time.total_build = time_build
-        self._time.total_validation = time_validation
-        self._time.__duration_total = time_duration
-        self._time.timestamp_start = time_stamp_start
-
-        self._space.size = size_search_space
-        self._space.plausible = count_plausible
-        self._space.enumerations = count_enumerations
-        self._space.generated = count_generated
-        self._space.non_compilable = count_non_compilable
 
         return self._space, self._time, self._error
