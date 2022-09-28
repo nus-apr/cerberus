@@ -12,19 +12,24 @@ from datetime import datetime
 
 
 class Darjeeling(AbstractTool):
+    """
+    """
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
-        self.timestamp_fmt = "%Y-%m-%d %H:%M:%S.%f"
+        self.image_name = "rshariffdeen/darjeeling"
 
-    def instrument(
-        self, dir_logs, dir_expr, dir_setup, bug_id, container_id, source_file
-    ):
-        """instrumentation for the experiment as needed by the tool"""
+    def instrument(self, bug_info):
+        """
+        Instrumentation for the experiment as needed by the tool 
+        - requires sudo
+        """
         emitter.normal("\t\t\t instrumenting for " + self.name)
+        bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.CONFIG_ID)
+        buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
-            dir_logs
+            self.dir_logs
             + "/"
             + conf_id
             + "-"
@@ -33,298 +38,127 @@ class Darjeeling(AbstractTool):
             + bug_id
             + "-instrument.log"
         )
-        instrumentation_script_path = "{0}/{1}/instrument.sh".format(
-            dir_setup, self.name.lower()
+        command_str = "sudo bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
+        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
+        if status not in [0, 126]:
+            error_exit(
+                "error with instrumentation of "
+                + self.name
+                + "; exit code "
+                + str(status)
+            )
+        return
+
+    def repair(self, bug_info, config_info):
+        super(Darjeeling, self).repair(bug_info, config_info)
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        emitter.normal("\t\t\t running repair with " + self.name)
+        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        self.log_output_path = join(
+            self.dir_logs,
+            "{}-{}-{}-output.log".format(
+                str(values.CONFIG_ID), self.name.lower(), bug_id
+            ),
         )
-        if container_id:
-            dir_expr_base = "/experiment"
-            instrumentation_exist = container.is_file(
-                container_id, instrumentation_script_path
+        if self.container_id:
+            dir_patch = "/output/patches"
+        else:
+            dir_patch = self.dir_output + "/patches"
+
+        mkdir_command = "sudo mkdir -p {}".format(dir_patch)
+        self.run_command(mkdir_command, self.log_output_path, self.dir_expr)
+
+        repair_command = "timeout -k 5m {1}h  ".format(
+           self.dir_expr + "/src", str(timeout)
+        )
+        if self.container_id:
+            repair_command += "sudo "
+        repair_command += "darjeeling repair --continue --patch-dir {} ".format(
+            dir_patch
+        )
+        repair_command += " --threads {} ".format(mp.cpu_count())
+        repair_command += additional_tool_param + " "
+        if values.DEFAULT_DUMP_PATCHES:
+            repair_command += " --dump-all "
+        repair_command += " repair.yml".format(self.log_output_path)
+        self.timestamp_log()
+        status = self.run_command(
+            repair_command, self.log_output_path, self.dir_expr + "/src"
+        )
+        self.timestamp_log()
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                    self.name, status
+                )
             )
         else:
-            dir_expr_base = os.path.abspath(
-                os.path.dirname(__file__) + "/../../experiments/"
-            )
-            instrumentation_exist = os.path.isfile(instrumentation_script_path)
-        if instrumentation_exist:
-            command_str = "sudo bash instrument.sh {0} {1}".format(
-                dir_expr_base, source_file
-            )
-            dir_setup_exp = dir_setup + "/{}".format(self.name.lower())
-            status = self.run_command(
-                command_str, self.log_instrument_path, dir_setup_exp, container_id
-            )
-            if not status == 0:
-                error_exit("error with instrumentation of ", self.name)
-        return
-
-    def repair(
-        self, dir_info, experiment_info, config_info, container_id, instrument_only
-    ):
-        super(Darjeeling, self).repair(
-            dir_info, experiment_info, config_info, container_id, instrument_only
-        )
-        if not instrument_only:
-            conf_id = config_info[definitions.KEY_ID]
-            dir_logs = dir_info["logs"]
-            dir_setup = dir_info["setup"]
-            dir_expr = dir_info["expr"]
-            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            emitter.normal("\t\t\t running repair with " + self.name)
-            fix_file = experiment_info[definitions.KEY_FIX_FILE]
-            fix_location = experiment_info[definitions.KEY_FIX_LOC]
-            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            self.log_output_path = (
-                dir_logs
-                + "/"
-                + conf_id
-                + "-"
-                + self.name.lower()
-                + "-"
-                + bug_id
-                + "-output.log"
-            )
-
-            dir_output = dir_info["output"]
-            if container_id:
-                dir_patch = "/output/patches"
-            else:
-                dir_patch = dir_output + "/patches"
-                mkdir_command = "mkdir " + dir_patch
-                self.run_command(
-                    mkdir_command, self.log_output_path, dir_expr, container_id
-                )
-
-            timestamp_command = (
-                "echo $(date '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-
-            repair_command = "timeout -k 5m {1}h  ".format(
-                dir_expr + "/src", str(timeout)
-            )
-            if container_id:
-                repair_command += "sudo "
-            repair_command += "darjeeling repair --continue --patch-dir {} ".format(
-                dir_patch
-            )
-            repair_command += " --threads {} ".format(mp.cpu_count())
-            repair_command += additional_tool_param + " "
-            if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " --dump-all "
-            repair_command += " repair.yml".format(self.log_output_path)
-            status = self.run_command(
-                repair_command, self.log_output_path, dir_expr + "/src", container_id
-            )
-            if status != 0:
-                emitter.warning(
-                    "\t\t\t[warning] {0} exited with an error code {1}".format(
-                        self.name, status
-                    )
-                )
-            else:
-                emitter.success(
-                    "\t\t\t[success] {0} ended successfully".format(self.name)
-                )
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-            timestamp_command = (
-                "echo $(date '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-        return
-
-    def save_artefacts(self, dir_info, experiment_info, container_id):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_expr = dir_info["experiment"]
-        dir_results = dir_info["result"]
-        dir_patch = dir_expr + "/src/patches"
-        dir_output = dir_info["output"]
-        dir_artifact = dir_info["artifact"]
-        # copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
-        # self.run_command(copy_command, "/dev/null", dir_expr, container_id)
-
-        super(Darjeeling, self).save_artefacts(dir_info, experiment_info, container_id)
-        return
-
-    def compute_latency_tool(self, start_time_str, end_time_str):
-        # Fri 08 Oct 2021 04:59:55 PM +08
-        # 2022-Apr-07 04:38:46.994352
-        fmt_1 = "%a %d %b %Y %H:%M:%S %p"
-
-        start_time_str = start_time_str.split(" +")[0].strip()
-        end_time_str = end_time_str.split(" +")[0].strip()
-        tstart = datetime.strptime(start_time_str, fmt_1)
-        tend = datetime.strptime(end_time_str, fmt_1)
-        duration = (tend - tstart).total_seconds()
-        return duration
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+        dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-analysis.log"
+        self.log_analysis_path = join(
+            self.dir_logs, "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
         )
-        count_non_compilable = 0
-        count_plausible = 0
-        count_generated = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        time_build = 0
-        time_validation = 0
-        time_latency_1 = 0
-        time_latency_2 = 0
-        time_latency_3 = 0
+
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
+        
+        if not self.log_output_path or not self.is_file(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
-            patch_space_info = (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                count_generated,
-            )
-            time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
-            return patch_space_info, time_info
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
-        is_interrupted = False
+            return self._space, self._time, self._error
+        
+        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        
         time_stamp_first_plausible = None
         time_stamp_first_validation = None
         time_stamp_first_compilation = None
-        with open(self.log_output_path, "r") as log_file:
-            log_lines = log_file.readlines()
-            time_stamp_start = log_lines[0].rstrip()
-            time_stamp_end = log_lines[-1].rstrip()
-            time_duration = self.time_duration(time_stamp_start, time_stamp_end)
+
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self._time.timestamp_start = log_lines[0].rstrip()
+            self._time.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "evaluated candidate" in line:
-                    count_enumerations += 1
+                    self._space.enumerations += 1
                     if time_stamp_first_validation is None:
                         time_stamp_first_validation = line.split(" | ")[0]
                 elif "found plausible patch" in line:
-                    count_plausible += 1
+                    self._space.plausible += 1
                     if time_stamp_first_plausible is None:
                         time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
-                    time_validation += float(time)
+                    self._time.total_validation += float(time)
                 elif "build time: " in line:
                     time = line.split("build time: ")[-1].strip().replace("\n", "")
-                    time_build += float(time)
+                    self._time.total_build += float(time)
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
                 elif "possible edits" in line:
-                    size_search_space = line.split(": ")[2].split(" ")[0]
+                    self._space.size = line.split(": ")[2].split(" ")[0]
                 elif "plausible patches" in line:
-                    count_plausible = int(
+                    self._space.plausible = int(
                         line.split("found ")[-1].replace(" plausible patches", "")
                     )
-            log_file.close()
-        if time_stamp_first_plausible:
-            time_latency_1 = self.compute_latency_tool(
-                time_stamp_start, time_stamp_first_plausible
+                    
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
+                )
             )
-        if time_stamp_first_validation:
-            time_latency_2 = self.compute_latency_tool(
-                time_stamp_start, time_stamp_first_validation
-            )
-        if time_stamp_first_compilation:
-            time_latency_3 = self.compute_latency_tool(
-                time_stamp_start, time_stamp_first_compilation
-            )
-        if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
-        if is_interrupted:
-            emitter.warning(
-                "\t\t\t\t[warning] program interrupted before starting repair"
-            )
-        dir_patch = dir_results + "/patches"
-        if os.path.isdir(dir_patch):
-            output_patch_list = [
-                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
-            ]
-            count_generated = len(output_patch_list)
-        if values.CONF_USE_VALKYRIE:
-            dir_filtered = dir_output + "/patch-valid"
-            count_generated = 0
-            if os.path.isdir(dir_filtered):
-                output_patch_list = [
-                    f for f in listdir(dir_filtered) if isfile(join(dir_filtered, f))
-                ]
-                count_generated = len(output_patch_list)
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
-        if os.path.isdir(os.path.dirname(self.log_analysis_path)):
-            with open(self.log_analysis_path, "w") as log_file:
-                log_file.write(
-                    "\t\t search space size: {0}\n".format(size_search_space)
-                )
-                log_file.write(
-                    "\t\t count plausible patches: {0}\n".format(count_plausible)
-                )
-                log_file.write(
-                    "\t\t count generated patches: {0}\n".format(count_generated)
-                )
-                log_file.write(
-                    "\t\t count non-compiling patches: {0}\n".format(
-                        count_non_compilable
-                    )
-                )
-                log_file.write(
-                    "\t\t count implausible patches: {0}\n".format(count_implausible)
-                )
-                log_file.write(
-                    "\t\t count enumerations: {0}\n".format(count_enumerations)
-                )
-                log_file.write("\t\t any errors: {0}\n".format(is_error))
-                log_file.write(
-                    "\t\t time latency validation: {0} seconds\n".format(time_latency_2)
-                )
-                log_file.write(
-                    "\t\t time latency plausible: {0} seconds\n".format(time_latency_1)
-                )
-                log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-                log_file.write(
-                    "\t\t time validation: {0} seconds\n".format(time_validation)
-                )
-                log_file.write(
-                    "\t\t time duration: {0} seconds\n".format(time_duration)
-                )
-        patch_space_info = (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            count_generated,
         )
-        time_info = (
-            time_build,
-            time_validation,
-            time_duration,
-            time_latency_1,
-            time_latency_2,
-            time_latency_3,
-            time_stamp_start,
-        )
-        return patch_space_info, time_info
+
+        return self._space, self._time, self._error
