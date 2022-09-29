@@ -1,3 +1,4 @@
+from math import perm
 import os
 import re
 import shutil
@@ -6,141 +7,110 @@ from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter
 from os import listdir
 from os.path import isfile, join
-from datetime import datetime
 
 
 class F1X(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(F1X, self).__init__(self.name)
+        self.image_name = "rshariffdeen/f1x"
 
-    def generate_test_driver(self, dir_setup, container_id):
-        test_script_path = dir_setup + "/test.sh"
-        test_driver_path = dir_setup + "/f1x-test"
-        tmp_driver_file = "/tmp/f1x-driver"
-        if not os.path.isfile(tmp_driver_file):
-            open(tmp_driver_file, "w")
-        with open(tmp_driver_file, "r+") as res_file:
-            res_file.seek(0)
-            res_file.writelines("#!/bin/bash\n")
-            res_file.writelines("bash {0} /experiment $@".format(test_script_path))
-            res_file.truncate()
-        perm_command = "chmod +x {}".format(tmp_driver_file)
-        execute_command(perm_command)
-        if container_id:
-            copy_command = (
-                "docker cp "
-                + tmp_driver_file
-                + " "
-                + container_id
-                + ":"
-                + test_driver_path
+    def generate_test_driver(self):
+        test_script_path = self.dir_setup + "/test.sh"
+        test_driver_path = self.dir_expr+ "/f1x-test"
+
+        self.write_file(
+            ["#!/bin/bash\n", "bash {0} /experiment $@".format(test_script_path)],
+            test_driver_path,
+        )
+
+        perm_command = "chmod +x {}".format(test_driver_path)
+        self.run_command(perm_command)
+
+    def repair(self, bug_info, config_info):
+        super(F1X, self).repair(bug_info, config_info)
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+        emitter.normal("\t\t\t running repair with " + self.name)
+        conf_id = config_info[definitions.KEY_ID]
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        fix_file = bug_info[definitions.KEY_FIX_FILE]
+        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
+        failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
+        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        subject_name = bug_info[definitions.KEY_SUBJECT]
+        benchmark_name = bug_info[definitions.KEY_BENCHMARK]
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        self.log_output_path = join(
+            self.dir_logs,
+            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+        )
+        self.generate_test_driver()
+        test_driver_path = join(self.dir_expr, "f1x-test")
+        build_script_path = join(self.dir_setup, "build.sh")
+        test_id_list = ""
+        for test_id in failing_test_list:
+            test_id_list += test_id + " "
+        if passing_test_list:
+            filtered_list = self.filter_tests(
+                passing_test_list, subject_name, bug_id, benchmark_name
+            )
+            for test_id in filtered_list:
+                test_id_list += test_id + " "
+
+        abs_path_buggy_file = join(
+            self.dir_expr, "src", fix_location if fix_location else fix_file
+        )
+        dir_patch = "output/patches"
+        mkdir_command = "mkdir -p " + dir_patch
+        self.run_command(mkdir_command, self.log_output_path, "/")
+
+        self.timestamp_log()
+
+        repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
+        repair_command += " -f {0} ".format(abs_path_buggy_file)
+        repair_command += " -t {0} ".format(test_id_list)
+        repair_command += " -T 15000"
+        repair_command += " --driver={0} ".format(test_driver_path)
+        repair_command += ' -b "{0} /experiment "'.format(build_script_path)
+        if values.DEFAULT_DUMP_PATCHES:
+            repair_command += " --output-space patch-space "
+        if values.CONF_DEBUG:
+            repair_command += " -v "
+
+        dry_command = repair_command + " --disable-dteq"
+        self.run_command(dry_command, self.log_output_path, self.dir_expr)
+        all_command = (
+            repair_command
+            + " --enable-assignment --disable-dteq --enable-validation  -a -o /output/patches  "
+        )
+        if additional_tool_param:
+            all_command = all_command + " " + additional_tool_param
+        status = self.run_command(all_command, self.log_output_path, self.dir_expr)
+        # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
+        # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                    self.name, status
+                )
             )
         else:
-            copy_command = "cp " + tmp_driver_file + " " + test_driver_path
-        execute_command(copy_command)
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def repair(
-        self, dir_info, experiment_info, config_info, container_id, instrument_only
-    ):
-        super(F1X, self).repair(
-            dir_info, experiment_info, config_info, container_id, instrument_only
-        )
-        if not instrument_only:
-            emitter.normal("\t\t\t running repair with " + self.name)
-            conf_id = config_info[definitions.KEY_ID]
-            dir_logs = dir_info["logs"]
-            dir_setup = dir_info["setup"]
-            dir_expr = dir_info["expr"]
-            bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-            fix_file = experiment_info[definitions.KEY_FIX_FILE]
-            fix_location = experiment_info[definitions.KEY_FIX_LOC]
-            passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-            failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-            timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-            subject_name = experiment_info[definitions.KEY_SUBJECT]
-            benchmark_name = experiment_info[definitions.KEY_BENCHMARK]
-            additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-            self.log_output_path = (
-                dir_logs
-                + "/"
-                + conf_id
-                + "-"
-                + self.name.lower()
-                + "-"
-                + bug_id
-                + "-output.log"
-            )
-            self.generate_test_driver(dir_setup, container_id)
-            test_driver_path = dir_setup + "/f1x-test"
-            build_script_path = dir_setup + "/build.sh"
-            test_id_list = ""
-            for test_id in failing_test_list:
-                test_id_list += test_id + " "
-            if passing_test_list:
-                filtered_list = self.filter_tests(
-                    passing_test_list, subject_name, bug_id, benchmark_name
-                )
-                for test_id in filtered_list:
-                    test_id_list += test_id + " "
+        if values.DEFAULT_DUMP_PATCHES:
+            self.create_patches_from_space(fix_file)
+        self.timestamp_log()
 
-            if fix_location:
-                abs_path_buggy_file = dir_expr + "/src/" + fix_location
-            else:
-                abs_path_buggy_file = dir_expr + "/src/" + fix_file
-
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-            repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
-            repair_command += " -f {0} ".format(abs_path_buggy_file)
-            repair_command += " -t {0} ".format(test_id_list)
-            repair_command += " -T 15000"
-            repair_command += " --driver={0} ".format(test_driver_path)
-            repair_command += ' -b "{0} /experiment "'.format(build_script_path)
-            if values.DEFAULT_DUMP_PATCHES:
-                repair_command += " --output-space patch-space "
-            dry_command = repair_command + " --disable-dteq"
-            self.run_command(dry_command, self.log_output_path, dir_expr, container_id)
-            all_command = (
-                repair_command
-                + " --enable-assignment --disable-dteq --enable-validation  -a -o patches -v "
-            )
-            if additional_tool_param:
-                all_command = all_command + " " + additional_tool_param
-            status = self.run_command(
-                all_command, self.log_output_path, dir_expr, container_id
-            )
-            # repair_command = repair_command + "--enable-validation --disable-dteq  -a -o patches-top --output-top 10 -v"
-            # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
-            if status != 0:
-                emitter.warning(
-                    "\t\t\t[warning] {0} exited with an error code {1}".format(
-                        self.name, status
-                    )
-                )
-            else:
-                emitter.success(
-                    "\t\t\t[success] {0} ended successfully".format(self.name)
-                )
-            emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-
-            if values.DEFAULT_DUMP_PATCHES:
-                self.create_patches_from_space(dir_expr, fix_file, container_id)
-            timestamp_command = (
-                "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-            )
-            execute_command(timestamp_command)
-        return
-
-    def create_patches_from_space(self, dir_exp, source_file, container_id):
-        script_name = "{}/{}-dump-patches.py".format(dir_exp, self.name)
-        abs_path_buggy_file = dir_exp + "/src/" + source_file
+    def create_patches_from_space(self, source_file):
+        script_name = "{}/{}-dump-patches.py".format(self.dir_expr, self.name)
+        abs_path_buggy_file = self.dir_expr + "/src/" + source_file
         dump_command = "timeout -k 5m 1h python3 {} {} {}".format(
-            script_name, abs_path_buggy_file, dir_exp
+            script_name, abs_path_buggy_file, self.dir_expr
         )
-        self.run_command(dump_command, self.log_output_path, dir_exp, container_id)
+        self.run_command(dump_command, self.log_output_path, self.dir_expr)
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
         filtered_list = []
@@ -402,212 +372,84 @@ class F1X(AbstractTool):
 
         return filtered_list
 
-    def save_artefacts(self, dir_info, experiment_info, container_id):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_expr = dir_info["experiment"]
-        dir_artifact = dir_info["artifact"]
-        dir_patch_gen = dir_expr + "/patches"
-        save_command = "cp -rf " + dir_patch_gen + " " + dir_artifact
-        self.run_command(save_command, "/dev/null", "/", container_id)
-        super(F1X, self).save_artefacts(dir_info, experiment_info, container_id)
-        return
+    def read_log_file(self):
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self._time.timestamp_start = log_lines[0].rstrip()
+            self._time.timestamp_end = log_lines[-1].rstrip()
+            for line in log_lines:
+                if "candidates evaluated: " in line:
+                    count = (
+                        line.split("candidates evaluated: ")[-1]
+                        .strip()
+                        .replace("\n", "")
+                    )
+                    if str(count).isnumeric():
+                        self._space.enumerations = int(count)
+                elif "validation time: " in line:
+                    time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                    self._time.total_validation += float(time)
+                elif "build time: " in line:
+                    time = line.split("build time: ")[-1].strip().replace("\n", "")
+                    self._time.total_build += float(time)
+                elif "validating patch " in line:
+                    self._space.enumerations += 1
+                elif "search space size: " in line:
+                    self._space.generated = int(line.split("search space size: ")[-1])
+                elif "plausible patches: " in line:
+                    self._space.plausible = int(line.split("plausible patches: ")[-1])
+                elif "failed to infer compile commands" in line:
+                    self._space.generated = -1
+                elif "explored count: 1" in line:
+                    if self._time.timestamp_validation == 0:
+                        # self._time.timestamp_validation = (
+                        #     line.split("[info]")[0].replace("[", "").replace("]", "")
+                        # )
+                        pass
 
-    def compute_latency_tool(self, start_time_str, end_time_str):
-        # Fri 08 Oct 2021 04:59:55 PM +08
-        # 2022-Apr-07 04:38:46.994352
-        fmt_1 = "%a %d %b %Y %H:%M:%S %p"
-        fmt_2 = "%Y-%b-%d %H:%M:%S.%f"
-        start_time_str = start_time_str.split(" +")[0].strip()
-        end_time_str = end_time_str.split(" +")[0].strip()
-        tstart = datetime.strptime(start_time_str, fmt_1)
-        tend = datetime.strptime(end_time_str, fmt_2)
-        duration = (tend - tstart).total_seconds()
-        return duration
+                elif "PASS" in line and "[debug]" in line:
+                    if self._time.timestamp_plausible == 0:
+                        # self._time.timestamp_plausible = (
+                        #     line.split("[debug]")[0].replace("[", "").replace("]", "")
+                        # )
+                        pass
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+        dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-analysis.log"
+        self.log_analysis_path = join(
+            self.dir_logs,
+            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
         )
-        count_non_compilable = 0
-        count_plausible = 0
-        count_generated = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        time_build = 0
-        time_validation = 0
-        time_latency_1 = 0
-        time_latency_2 = 0
-        time_latency_3 = 0
+
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            patch_space_info = (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                count_generated,
-            )
-            time_info = (time_build, time_validation, time_duration, 0, 0, 0, "")
-            return patch_space_info, time_info
+
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
+            return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
-        time_stamp_first_plausible = None
-        time_stamp_first_validated = None
 
-        if os.path.isdir(os.path.dirname(self.log_output_path)):
-            with open(self.log_output_path, "r") as log_file:
-                log_lines = log_file.readlines()
-                time_stamp_start = log_lines[0].replace("\n", "")
-                time_stamp_end = log_lines[-1].replace("\n", "")
-                time_duration = self.time_duration(time_stamp_start, time_stamp_end)
-                for line in log_lines:
-                    if "candidates evaluated: " in line:
-                        count = (
-                            line.split("candidates evaluated: ")[-1]
-                            .strip()
-                            .replace("\n", "")
-                        )
-                        if str(count).isnumeric():
-                            count_enumerations = int(count)
-                    elif "validation time: " in line:
-                        time = (
-                            line.split("validation time: ")[-1]
-                            .strip()
-                            .replace("\n", "")
-                        )
-                        time_validation += float(time)
-                    elif "build time: " in line:
-                        time = line.split("build time: ")[-1].strip().replace("\n", "")
-                        time_build += float(time)
-                    elif "validating patch " in line:
-                        count_enumerations += 1
-                    elif "search space size: " in line:
-                        size_search_space = int(line.split("search space size: ")[-1])
-                    elif "plausible patches: " in line:
-                        count_plausible = int(line.split("plausible patches: ")[-1])
-                    elif "failed to infer compile commands" in line:
-                        size_search_space = -1
-                    elif "explored count: 1" in line:
-                        if time_stamp_first_validated is None:
-                            time_stamp_first_validated = (
-                                line.split("[info]")[0]
-                                .replace("[", "")
-                                .replace("]", "")
-                            )
-                    elif "PASS" in line and "[debug]" in line:
-                        if time_stamp_first_plausible is None:
-                            time_stamp_first_plausible = (
-                                line.split("[debug]")[0]
-                                .replace("[", "")
-                                .replace("]", "")
-                            )
-
-                log_file.close()
-
-        if time_stamp_first_plausible:
-            time_latency_1 = self.compute_latency_tool(
-                time_stamp_start, time_stamp_first_plausible
-            )
-        if time_stamp_first_validated:
-            time_latency_2 = self.compute_latency_tool(
-                time_stamp_start, time_stamp_first_validated
-            )
-
-        if is_error:
+        if self._error.is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
-        dir_patch = dir_results + "/patches"
-        if dir_patch and os.path.isdir(dir_patch):
-            output_patch_list = [
-                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
-            ]
-            count_generated = len(output_patch_list)
+
+        self.read_log_file()
+
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
+                )
+            )
+        )
         if values.CONF_USE_VALKYRIE:
-            dir_valid = dir_output + "/patch-valid"
-            if dir_valid and os.path.isdir(dir_valid):
-                output_patch_list = [
-                    join(dir_valid, f)
-                    for f in listdir(dir_valid)
-                    if isfile(join(dir_valid, f))
-                ]
-                count_plausible = len(output_patch_list)
-            count_generated = count_plausible
-        count_implausible = (size_search_space - count_plausible) + (
-            count_enumerations - count_generated
-        )
-        if os.path.isdir(os.path.dirname(self.log_analysis_path)):
-            with open(self.log_analysis_path, "w") as log_file:
-                log_file.write(
-                    "\t\t search space size: {0}\n".format(size_search_space)
-                )
-                if not values.DEFAULT_DUMP_PATCHES:
-                    log_file.write(
-                        "\t\t count plausible patches: {0}\n".format(count_plausible)
-                    )
-                    log_file.write(
-                        "\t\t count non-compiling patches: {0}\n".format(
-                            count_non_compilable
-                        )
-                    )
-                    log_file.write(
-                        "\t\t count implausible patches: {0}\n".format(
-                            count_implausible
-                        )
-                    )
-                log_file.write(
-                    "\t\t count enumerations: {0}\n".format(count_enumerations)
-                )
-                log_file.write("\t\t count generated: {0}\n".format(count_generated))
-                log_file.write("\t\t any errors: {0}\n".format(is_error))
-                log_file.write("\t\t time build: {0} seconds\n".format(time_build))
-                log_file.write(
-                    "\t\t time validation: {0} seconds\n".format(time_validation)
-                )
-                log_file.write(
-                    "\t\t time duration: {0} seconds\n".format(time_duration)
-                )
-                log_file.write(
-                    "\t\t time latency 1: {0} seconds\n".format(time_latency_1)
-                )
-                log_file.write(
-                    "\t\t time latency 2: {0} seconds\n".format(time_latency_2)
-                )
-            log_file.close()
-        patch_space_info = (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            count_generated,
-        )
-        time_info = (
-            time_build,
-            time_validation,
-            time_duration,
-            time_latency_1,
-            time_latency_2,
-            time_latency_3,
-            time_stamp_start,
-        )
-        return patch_space_info, time_info
+            self._space.plausible = self._space.generated
+
+        return self._space, self._time, self._error
