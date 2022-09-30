@@ -1,7 +1,10 @@
+from cgi import test
 import os
 from pprint import pprint
 import re
 import shutil
+from threading import local
+from app.abstractions import is_file, read_file
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter, container
@@ -30,10 +33,7 @@ class Prophet(AbstractTool):
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
             self.dir_logs, conf_id, self.name.lower(), bug_id
         )
-        timestamp_command = (
-            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-        )
-        execute_command(timestamp_command)
+
         repair_file = self.dir_expr + "/prophet/prophet.conf"
         if not container.is_file(self.container_id, repair_file):
             emitter.error("\t\t[error] no repair config file detected")
@@ -83,83 +83,43 @@ class Prophet(AbstractTool):
                     file_path=source_file, line=line_number, column=3
                 )
             )
-            if not os.path.isfile(tmp_localization_file):
-                open(tmp_localization_file, "w")
-            with open(tmp_localization_file, "r+") as res_file:
-                res_file.seek(0)
-                res_file.write(fault_loc)
-                res_file.truncate()
-            if self.container_id:
-                copy_command = "docker cp {} {}:{}".format(
-                    tmp_localization_file, self.container_id, localization_file
-                )
-            else:
-                copy_command = "cp {} {}".format(
-                    tmp_localization_file, localization_file
-                )
-            execute_command(copy_command)
+
+            self.write_file([fault_loc], tmp_localization_file)
         else:
             default_localization_file = dir_setup + "/prophet/profile_localization.res"
-            if self.container_id:
-                if not container.is_file(
-                    self.container_id, localization_file
-                ) or container.is_file_empty(self.container_id, localization_file):
-                    if container.is_file(self.container_id, default_localization_file):
-                        copy_command = (
-                            "cp " + default_localization_file + " " + localization_file
-                        )
-                        self.run_command(copy_command, "/dev/null", "/")
-            else:
-                if (
-                    not os.path.isfile(localization_file)
-                    or os.path.getsize(localization_file) == 0
-                ):
-                    if os.path.isfile(default_localization_file):
-                        shutil.copy(default_localization_file, localization_file)
+            if (
+                not self.is_file(localization_file)
+                or self.read_file(localization_file) == []
+            ):
+                if self.is_file(default_localization_file):
+                    self.write_file(
+                        map(
+                            lambda line: line + "\n",
+                            self.read_file(default_localization_file),
+                        ),
+                        localization_file,
+                    )
 
     def generate_revlog(self, experiment_info, revlog_file, bug_id):
-        test_config_str = "-\n-\n"
         subject_name = experiment_info[definitions.KEY_SUBJECT]
         failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-        test_config_str += "Diff Cases: Tot {0}\n".format(len(failing_test_list))
-        for test_id in failing_test_list:
-            if test_id == failing_test_list[-1]:
-                test_config_str += test_id + "\n"
-            else:
-                test_config_str += test_id + " "
         passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-        test_config_str += "Positive Cases: Tot {0}\n".format(len(passing_test_list))
         benchmark_name = experiment_info[definitions.KEY_BENCHMARK]
+
+        test_config = ["-", "-"]
+        test_config.append("Diff Cases: Tot {0}".format(len(failing_test_list)))
+        test_config.append((" ".join(failing_test_list)))
+        test_config.append("Positive Cases: Tot {0}".format(len(passing_test_list)))
+
         if passing_test_list:
             filtered_list = self.filter_tests(
                 passing_test_list, subject_name, bug_id, benchmark_name
             )
-            for test_id in filtered_list:
-                if test_id == filtered_list[-1]:
-                    test_config_str += test_id + "\n"
-                else:
-                    test_config_str += test_id + " "
-        test_config_str += "Regression Cases: Tot 0\n"
-        tmp_config_file = "/tmp/prophet.revlog"
-        if not os.path.isfile(tmp_config_file):
-            open(tmp_config_file, "w")
-        with open(tmp_config_file, "r+") as conf_file:
-            conf_file.seek(0)
-            conf_file.write(test_config_str)
-            conf_file.truncate()
-        if self.container_id:
-            container.copy_file_from_container
-            copy_command = (
-                "docker cp "
-                + tmp_config_file
-                + " "
-                + self.container_id
-                + ":"
-                + revlog_file
-            )
-        else:
-            copy_command = "cp " + tmp_config_file + " " + revlog_file
-        execute_command(copy_command)
+            test_config.append((" ".join(filtered_list) + "\n"))
+
+        test_config.append("Regression Cases: Tot 0\n")
+
+        self.write_file(map(lambda line: line + "\n", test_config), revlog_file)
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
@@ -5697,7 +5657,7 @@ class Prophet(AbstractTool):
         return filtered_list
 
     def read_log_file(self):
-        self._time.set_log_time_fmt("%S")  #Temporary
+        self._time.set_log_time_fmt("%S")  # Temporary
         timeline = ""
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")
