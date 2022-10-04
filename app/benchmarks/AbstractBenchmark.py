@@ -125,24 +125,28 @@ class AbstractBenchmark:
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_exp_local = (
-            definitions.DIR_EXPERIMENT
-            + "/"
-            + self.name
-            + "/"
-            + subject_name
-            + "/"
-            + bug_id
+        dir_exp_local = join(
+            definitions.DIR_EXPERIMENT, self.name, subject_name, bug_id
         )
 
         if os.path.isdir(dir_exp_local):
             shutil.rmtree(dir_exp_local)
 
         volume_list = {
-            self.__dir_info["local"]["setup"]: {"bind": "/scripts", "mode": "rw"}
+            self.__dir_info["local"]["setup"]: {"bind": "/scripts", "mode": "rw"},
+            os.path.join(self.__dir_info["local"]["setup"], "..", "base"): {
+                "bind": join(
+                    "/experiments", "benchmark", self.name, subject_name, "base"
+                ),
+                "mode": "rw",
+            },
+            os.path.join(self.__dir_info["local"]["setup"], "..", ".aux"): {
+                "bind": join(self.dir_expr, ".aux"),
+                "mode": "rw",
+            },
         }
 
-        container_name = self.name + "-" + subject_name + "-" + bug_id
+        container_name = "{}-{}-{}".format(self.name, subject_name, bug_id)
         container_id = container.get_container_id(container_name)
         if container_id:
             container.stop_container(container_id)
@@ -262,14 +266,14 @@ class AbstractBenchmark:
         emitter.normal("\t\t\tsaving experiment dev-patch")
         if self.list_artifact_dirs:
             for art_dir in self.list_artifact_dirs:
-                art_dir_path = dir_exp + "/" + art_dir
-                copy_command = "cp -rf " + art_dir_path + " " + dir_artifact
+                art_dir_path = join(dir_exp, art_dir)
+                copy_command = "cp -rf {} {}".format(art_dir_path, dir_artifact)
                 self.run_command(container_id, copy_command, "/dev/null", "/")
 
         if self.list_artifact_files:
             for art_file in self.list_artifact_files:
-                art_file_path = dir_exp + "/" + art_file
-                copy_command = "cp -f" + art_file_path + " " + dir_artifact
+                art_file_path = join(dir_exp, art_file)
+                copy_command = "cp -f {} {}".format(art_file_path, dir_artifact)
                 self.run_command(container_id, copy_command, "/dev/null", "/")
         return
 
