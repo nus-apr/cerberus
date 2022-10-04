@@ -1,206 +1,121 @@
 import os
+from os.path import join
 import shutil
 import re
+from app.abstractions import is_dir
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter
+from app import container, definitions, values, emitter
 
 
 class CPR(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(CPR, self).__init__(self.name)
+        self.image_name = "rshariffdeen/cpr:18.04"
+        self.id = ""
 
-    def repair(
-        self,
-        dir_logs,
-        dir_expr,
-        dir_setup,
-        bug_id,
-        timeout,
-        passing_test_list,
-        failing_test_list,
-        fix_location,
-        subject_name,
-        binary_path,
-        additional_tool_param,
-        binary_input_arg,
-        container_id,
-    ):
+    def repair(self, bug_info, config_info):
+        super(CPR, self).repair(bug_info, config_info)
+        if values.CONF_INSTRUMENT_ONLY:
+            return
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = str(values.CONFIG_ID)
-        self.log_output_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-output.log"
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        self.id = bug_id
+        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        dir_patch = "/output/patches"
+        mkdir_command = "mkdir -p " + dir_patch
+        self.run_command(mkdir_command, self.log_output_path, "/")
+        self.log_output_path = join(
+            self.dir_logs,
+            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
-        conf_path = dir_expr + "/cpr/repair.conf"
+        conf_path = join(self.dir_expr, "cpr", "repair.conf")
         timeout_m = str(int(timeout) * 60)
-        test_id_list = ""
-        for test_id in failing_test_list:
-            test_id_list += test_id + ","
-        seed_id_list = ""
-        if passing_test_list:
-            for test_id in passing_test_list:
-                seed_id_list += test_id + ","
-        timestamp_command = (
-            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') > " + self.log_output_path
-        )
-        execute_command(timestamp_command)
-        cpr_command = "timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
+        test_id_list = ",".join(bug_info[definitions.KEY_FAILING_TEST])
+        seed_id_list = ",".join(bug_info[definitions.KEY_PASSING_TEST])
+
+        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        self.timestamp_log()
+        cpr_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
         cpr_command += " --seed-id-list=" + seed_id_list + " "
         cpr_command += " --test-id-list=" + test_id_list + " "
-        cpr_command += "{0} --time-duration={1} >> {2} 2>&1 ".format(
+        cpr_command += "{0} --time-duration={1}' >> {2} 2>&1 ".format( 
             additional_tool_param, str(timeout_m), self.log_output_path
         )
-        status = execute_command(cpr_command)
+        status = self.run_command(cpr_command, self.log_output_path)
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
+            if status == 137:
+                # Due to the container being killed, we restart it to be able to pull out the information
+                container.stop_container(self.container_id) 
+                container.start_container(self.container_id) 
+                pass
+
+            self._error.is_error = True
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        self.timestamp_log()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = (
-            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-        )
-        execute_command(timestamp_command)
-        return
 
-    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
-        super(CPR, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
-        dir_logs = "/CPR/logs/" + bug_id
-        execute_command("cp -rf" + dir_logs + " " + dir_results + "/logs")
-
-    def save_artefacts(self, dir_info, experiment_info, container_id):
+    def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-        dir_patches = "/CPR/output/" + bug_id
-        if os.path.isdir(dir_patches):
-            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
-        shutil.copy(dir_setup + "/cpr/instrument.sh", dir_results)
-        super(CPR, self).save_artefacts(dir_info, experiment_info, container_id)
+        self.run_command("cp -rf /CPR/output/{} /output/patches".format(self.id))
+        super(CPR, self).save_artefacts(dir_info)
         return
-
-    def post_process(self, dir_expr, dir_results):
-        emitter.normal("\t\t\t post-processing for {}".format(self.name))
-        super(CPR, self).post_process(dir_expr, dir_results)
-        clean_command = "rm -rf " + dir_results + "/patches/klee-out-*"
-        execute_command(clean_command)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+        dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-analysis.log"
+        self.log_analysis_path = join(
+            self.dir_logs,
+            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
         )
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        count_non_compilable = 0
-        count_plausible = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            return (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                time_duration,
-            )
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
-        is_timeout = True
-        if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r") as log_file:
-                log_lines = log_file.readlines()
-                time_start = log_lines[0].rstrip()
-                time_end = log_lines[-1].rstrip()
-                time_duration = self.time_duration(time_start, time_end)
-                for line in log_lines:
-                    if "|P|=" in line:
-                        count_plausible = int(
-                            line.split("|P|=")[-1]
-                            .strip()
-                            .replace("^[[0m", "")
-                            .split(":")[0]
-                        )
-                    elif "number of concrete patches explored" in line:
-                        count_enumerations = int(
-                            line.split("number of concrete patches explored: ")[-1]
-                            .strip()
-                            .split("\x1b")[0]
-                            .split(".0")[0]
-                        )
-                        size_search_space = count_enumerations
-                    elif "Runtime Error" in line:
-                        is_error = True
-                    elif "statistics" in line:
-                        is_timeout = False
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
+            return self._space, self._time, self._error
 
-                log_file.close()
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
-        if is_error:
+        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        is_timeout = True
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self._time.timestamp_start = log_lines[0].rstrip()
+            self._time.timestamp_end = log_lines[-1].rstrip()
+            for line in log_lines:
+                if "|P|=" in line:
+                    self._space.plausible = int(
+                        line.split("|P|=")[-1]
+                        .strip()
+                        .replace("^[[0m", "")
+                        .split(":")[0]
+                    )
+                elif "number of concrete patches explored" in line:
+                    count_enumerations = int(
+                        line.split("number of concrete patches explored: ")[-1]
+                        .strip()
+                        .split("\x1b")[0]
+                        .split(".0")[0]
+                    )
+                    self._space.enumerations = count_enumerations
+                elif "Runtime Error" in line:
+                    self._error.is_error = True
+                elif "statistics" in line:
+                    is_timeout = False
+                    
+        if self._error.is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
             emitter.warning("\t\t\t\t[warning] timeout before ending")
-        with open(self.log_analysis_path, "w") as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.DEFAULT_DUMP_PATCHES:
-                count_enumerations = count_plausible
-            else:
-                log_file.write(
-                    "\t\t count plausible patches: {0}\n".format(count_plausible)
-                )
-                log_file.write(
-                    "\t\t count non-compiling patches: {0}\n".format(
-                        count_non_compilable
-                    )
-                )
-                log_file.write(
-                    "\t\t count implausible patches: {0}\n".format(count_implausible)
-                )
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            time_duration,
-        )
-
-    def pre_process(self, dir_logs, dir_expr, dir_setup):
-        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(CPR, self).pre_process(dir_logs, dir_expr, dir_setup)
-        if not os.path.isdir("/tmp"):
-            os.mkdir("/tmp")
-        return
+        return self._space, self._time, self._error
