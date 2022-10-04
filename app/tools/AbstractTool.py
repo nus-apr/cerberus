@@ -1,5 +1,6 @@
 import abc
 import os
+from os.path import join
 import re
 from app.utilities import execute_command, error_exit
 from app import (
@@ -101,24 +102,16 @@ class AbstractTool:
         bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.CONFIG_ID)
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
-        self.log_instrument_path = (
-            self.dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name
-            + "-"
-            + bug_id
-            + "-instrument.log"
+        self.log_instrument_path = join(
+            self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
         )
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         if status not in [0, 126]:
             error_exit(
-                "error with instrumentation of "
-                + self.name
-                + "; exit code "
-                + str(status)
+                "error with instrumentation of {}; exit code {}".format(
+                    self.name, str(status)
+                )
             )
         return
 
@@ -130,7 +123,9 @@ class AbstractTool:
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        log_file_name = conf_id + "-" + self.name.lower() + "-" + bug_id + "-output.log"
+        log_file_name = "{}-{}-{}-output.log".format(
+            conf_id, self.name.lower(), bug_id, "-output.log"
+        )
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         return
 
@@ -207,15 +202,13 @@ class AbstractTool:
             )
             pass
         else:
-            save_command = "cp -rf " + self.dir_output + "/* " + dir_results + ";"
+            save_command = "cp -rf {}/* {};".format(self.dir_output, dir_results)
             if self.dir_logs != "":
-                save_command += "cp -rf " + self.dir_logs + "/* " + dir_results + ";"
+                save_command += "cp -rf {}/* {};".format(self.dir_logs, dir_results)
             if dir_artefacts != "":
-                save_command += (
-                    "cp -rf " + self.dir_output + "/* " + dir_artefacts + ";"
-                )
+                save_command += "cp -rf {}/* {};".format(self.dir_output, dir_artefacts)
             if dir_logs != "":
-                save_command += "cp -rf " + self.dir_logs + "/*" + dir_logs + ";"
+                save_command += "cp -rf {}/*".format(self.dir_logs, dir_logs)
 
             execute_command(save_command)
         return
