@@ -24,7 +24,7 @@ class CPR(AbstractTool):
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.id = bug_id
         timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        dir_patch = "/output/patches"
+        dir_patch = join(self.dir_output,"patches")
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
         self.log_output_path = join(
@@ -65,7 +65,8 @@ class CPR(AbstractTool):
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        self.run_command("cp -rf /CPR/output/{} /output/patches".format(self.id))
+        dir_patch = join(self.dir_output,"patches")
+        self.run_command("cp -rf /CPR/output/{} {}".format(self.id,dir_patch))
         super(CPR, self).save_artefacts(dir_info)
         return
 
@@ -113,7 +114,7 @@ class CPR(AbstractTool):
                     self._error.is_error = True
                 elif "statistics" in line:
                     is_timeout = False
-                    
+
         if self._error.is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:

@@ -83,7 +83,7 @@ class F1X(AbstractTool):
         self.run_command(dry_command, self.log_output_path, self.dir_expr)
         all_command = (
             repair_command
-            + " --enable-assignment --disable-dteq --enable-validation  -a -o /output/patches  "
+            + " --enable-assignment --disable-dteq --enable-validation  -a -o {}  ".format(self.dir_output)
         )
         if additional_tool_param:
             all_command = all_command + " " + additional_tool_param

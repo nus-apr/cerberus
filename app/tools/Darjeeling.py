@@ -63,10 +63,7 @@ class Darjeeling(AbstractTool):
                 str(values.CONFIG_ID), self.name.lower(), bug_id
             ),
         )
-        if self.container_id:
-            dir_patch = "/output/patches"
-        else:
-            dir_patch = self.dir_output + "/patches"
+        dir_patch = self.dir_output + "/patches"
 
         mkdir_command = "sudo mkdir -p {}".format(dir_patch)
         self.run_command(mkdir_command, self.log_output_path, self.dir_expr)

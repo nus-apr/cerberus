@@ -4,7 +4,7 @@ from pprint import pprint
 import re
 import shutil
 from threading import local
-from app.abstractions import is_file, read_file
+from app.abstractions import is_dir, is_file, read_file
 from app.tools.AbstractTool import AbstractTool
 from app.utilities import execute_command, error_exit
 from app import definitions, values, emitter, container
@@ -132,11 +132,12 @@ class Prophet(AbstractTool):
         )
         emitter.debug("EXECUTING {}".format(copy_command))
 
-        execute_command(copy_command)
+        self.run_command(copy_command)
         patch_id = 0
         dir_patch_local = self.dir_output + "/patches"
-        container.fix_permissions(self.container_id, "/output")
-        if os.path.isdir(dir_patch_local):
+        if self.container_id:
+            container.fix_permissions(self.container_id, "/output")
+        if self.is_dir(dir_patch_local):
             output_patch_list = [
                 f
                 for f in listdir(dir_patch_local)
@@ -153,11 +154,11 @@ class Prophet(AbstractTool):
                     + patched_source
                     + "> {}".format(patch_file)
                 )
-                execute_command(diff_command)
+                self.run_command(diff_command)
                 del_command = "rm -f" + patched_source
-                execute_command(del_command)
+                self.run_command(del_command)
             save_command = "cp -rf " + dir_patch_local + " " + dir_results
-            execute_command(save_command)
+            self.run_command(save_command)
         super(Prophet, self).save_artefacts(dir_info)
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
