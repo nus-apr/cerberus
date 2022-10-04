@@ -20,7 +20,7 @@ class Fix2Fit(AbstractTool):
             return
         conf_id = str(values.CONFIG_ID)
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        fix_location = bug_info[definitions.KEY_FIX_FILE]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -28,9 +28,7 @@ class Fix2Fit(AbstractTool):
         abs_path_binary = join(
             self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH]
         )
-        test_id_list = ""
-        for test_id in bug_info[definitions.KEY_FAILING_TEST]:
-            test_id_list += test_id + " "
+        test_id_list = ' '.join(bug_info[definitions.KEY_FAILING_TEST])+ " " 
         if bug_info[definitions.KEY_PASSING_TEST]:
             filtered_list = self.filter_tests(
                 bug_info[definitions.KEY_PASSING_TEST],
@@ -41,28 +39,27 @@ class Fix2Fit(AbstractTool):
                 test_id_list += test_id + " "
 
 
-
         abs_path_buggy_file = join(
             self.dir_expr,
             "src",
             fix_location
             if fix_location
-            else self.read_file(self.dir_expr + "/manifest.txt")[0],
+            else self.read_file(self.dir_expr + "/manifest.txt")[0]
         )
 
         self.timestamp_log()
-        repair_command = "export SUBJECT_DIR={0}; ".format(self.dir_setup)
-        repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
-        repair_command += 'export TESTCASE="{0}"; '.format(test_id_list)
+        repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
+        repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
+        repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
         repair_command += "export DRIVER=./test.sh; "
-        repair_command += "export BINARY={0}; ".format(abs_path_binary)
-        repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
-        repair_command += 'export BINARY_INPUT="{0}"; '.format(binary_input_arg)
-        repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(
-            self.dir_setup, timeout=str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        repair_command += "export BINARY={}; ".format(abs_path_binary)
+        repair_command += "export TIME_OUT={}; ".format(abs_path_binary)
+        repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
+        repair_command += "cd {}; timeout -k 5m {}h bash /src/scripts/run.sh' ".format(
+            self.dir_setup, str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        status = execute_command(repair_command)
+        status = self.run_command(repair_command)
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
@@ -311,11 +308,10 @@ class Fix2Fit(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        dir_logs = dir_info["log"]
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = join(
-            dir_logs, "{)-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
+            self.dir_logs, "{)-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
         )
         count_filtered = 0
 
