@@ -248,6 +248,20 @@ def emit_help():
         + "\t| "
         + "enable debug mode",
         WHITE,
+    )    
+    write(
+        "\t"
+        + definitions.ARG_INSTRUMENT_ONLY.ljust(max_length)
+        + "\t| "
+        + "only instrument the project",
+        WHITE,
+    )
+    write(
+        "\t"
+        + definitions.ARG_SETUP_ONLY.ljust(max_length)
+        + "\t| "
+        + "only setup the project",
+        WHITE,
     )
     write(
         "\t"

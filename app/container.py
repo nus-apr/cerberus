@@ -86,7 +86,9 @@ def build_benchmark_image(image_name):
 
 def build_tool_image(tool_name):
     image_name = "{}-tool".format(tool_name)
-    dockerfile_path = definitions.DIR_INFRA + "/Dockerfile." + str(tool_name).lower()
+    dockerfile_path = "{}/Dockerfile.{}".format(
+        definitions.DIR_INFRA, str(tool_name).lower()
+    )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id
 
@@ -172,7 +174,7 @@ def exec_command(container_id, command, workdir="/experiment"):
         print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(
-            command, privileged=True, demux=True, workdir=workdir
+            command, privileged=True, demux=True, workdir=workdir, tty=True
         )
         if output is not None:
             for stream in output:
@@ -209,6 +211,20 @@ def remove_container(container_id):
     except Exception as ex:
         emitter.warning(ex)
         emitter.warning("[warning] Unable to remove container: unhandled exception")
+
+
+def start_container(container_id):
+    client = docker.from_env()
+    emitter.normal("\t\t\tstarting docker container {}".format(container_id))
+    try:
+        container = client.containers.get(container_id)
+        container.start()
+    except docker.errors.APIError as exp:
+        emitter.warning(exp)
+        emitter.warning("[warning] Unable to stop container: docker daemon error")
+    except Exception as ex:
+        emitter.warning(ex)
+        emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
 def stop_container(container_id):
