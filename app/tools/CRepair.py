@@ -12,12 +12,13 @@ class CRepair(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(CRepair, self).__init__(self.name)
+        self.image_name="rshariffdeen/crepair:tool"
 
     def generate_conf_file(self, bug_info):
-        repair_conf_path = self.dir_setup + "/crepair/repair.conf"
+        repair_conf_path = join(self.dir_setup,"crepair","repair.conf")
         conf_content = []
         poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
-        poc_abs_list = ["{}/{}".format(self.dir_setup, x) for x in poc_list]
+        poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
 
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
@@ -81,7 +82,6 @@ class CRepair(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
 
-        is_error = False
         count_plausible = 0
         count_enumerations = 0
 
@@ -110,5 +110,4 @@ class CRepair(AbstractTool):
 
         self._space.plausible = count_plausible
         self._space.enumerations = count_enumerations
-        self._error.is_error = is_error
         return self._space, self._time, self._error
