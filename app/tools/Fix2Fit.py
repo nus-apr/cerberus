@@ -12,59 +12,46 @@ class Fix2Fit(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Fix2Fit, self).__init__(self.name)
+        self.image_name = "rshariffdeen/fix2fit"
 
-    def repair(
-        self,
-        dir_logs,
-        dir_expr,
-        dir_setup,
-        bug_id,
-        timeout,
-        passing_test_list,
-        failing_test_list,
-        fix_location,
-        subject_name,
-        binary_path,
-        additional_tool_param,
-        binary_input_arg,
-        container_id,
-    ):
-        emitter.normal("\t\t\t running repair with " + self.name)
+    def repair(self, bug_info, config_info):
+        super(Fix2Fit, self).repair(bug_info, config_info)
+        if values.CONF_INSTRUMENT_ONLY:
+            return
         conf_id = str(values.CONFIG_ID)
-        self.log_output_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-output.log"
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        self.log_output_path = join(
+            self.dir_logs,
+            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
-        abs_path_binary = dir_expr + "/src/" + binary_path
+        abs_path_binary = join(
+            self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH]
+        )
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in bug_info[definitions.KEY_FAILING_TEST]:
             test_id_list += test_id + " "
-        if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+        if bug_info[definitions.KEY_PASSING_TEST]:
+            filtered_list = self.filter_tests(
+                bug_info[definitions.KEY_PASSING_TEST],
+                bug_info[definitions.ARG_SUBJECT_NAME],
+                bug_id,
+            )
             for test_id in filtered_list:
                 test_id_list += test_id + " "
 
-        if fix_location:
-            abs_path_buggy_file = dir_expr + "/src/" + fix_location
-        else:
-            with open(dir_expr + "/manifest.txt", "r") as man_file:
-                abs_path_buggy_file = (
-                    dir_expr
-                    + "/src/"
-                    + man_file.readlines()[0].strip().replace("\n", "")
-                )
 
-        timestamp_command = (
-            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
+
+        abs_path_buggy_file = join(
+            self.dir_expr,
+            "src",
+            fix_location
+            if fix_location
+            else self.read_file(self.dir_expr + "/manifest.txt")[0],
         )
-        execute_command(timestamp_command)
-        repair_command = "export SUBJECT_DIR={0}; ".format(dir_setup)
+
+        self.timestamp_log()
+        repair_command = "export SUBJECT_DIR={0}; ".format(self.dir_setup)
         repair_command += "export BUGGY_FILE={0}; ".format(abs_path_buggy_file)
         repair_command += 'export TESTCASE="{0}"; '.format(test_id_list)
         repair_command += "export DRIVER=./test.sh; "
@@ -72,7 +59,7 @@ class Fix2Fit(AbstractTool):
         repair_command += "export TIME_OUT={0}; ".format(abs_path_binary)
         repair_command += 'export BINARY_INPUT="{0}"; '.format(binary_input_arg)
         repair_command += "cd {0}; timeout -k 5m {1}h bash /src/scripts/run.sh ".format(
-            dir_setup, str(timeout)
+            self.dir_setup, timeout=str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = execute_command(repair_command)
@@ -85,10 +72,7 @@ class Fix2Fit(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        timestamp_command = (
-            "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + self.log_output_path
-        )
-        execute_command(timestamp_command)
+        self.timestamp_log()
         return
 
     def save_artefacts(self, dir_info, experiment_info, container_id):
@@ -328,101 +312,78 @@ class Fix2Fit(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_logs = dir_info["log"]
-        dir_expr = dir_info["experiment"]
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_output = dir_info["output"]
+        dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
-        self.log_analysis_path = (
-            dir_logs
-            + "/"
-            + conf_id
-            + "-"
-            + self.name.lower()
-            + "-"
-            + bug_id
-            + "-analysis.log"
+        self.log_analysis_path = join(
+            dir_logs, "{)-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
         )
-        count_non_compilable = 0
-        count_plausible = 0
-        size_search_space = 0
-        count_enumerations = 0
         count_filtered = 0
-        time_duration = 0
+
         regex = re.compile("(.*-output.log$)")
-        for root, dirs, files in os.walk(dir_results):
+        for _, _, files in os.walk(dir_results):
             for file in files:
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            return (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                time_duration,
-            )
+
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
+            return self._space, self._time, self._error
+
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
+
         is_timeout = True
         reported_failing_test = []
-        if os.path.isfile(dir_results + "/original.txt"):
-            with open(
-                dir_results + "/original.txt", "r", encoding="iso-8859-1"
-            ) as log_file:
-                log_lines = log_file.readlines()
-                time_start = log_lines[0].replace("\n", "")
-                time_end = log_lines[-1].replace("\n", "")
-                time_duration = self.time_duration(time_start, time_end)
-                for line in log_lines:
-                    if "no patch found" in line:
-                        emitter.warning("\t\t\t\t[warning] no patch found by F1X")
-                    elif "negative tests: [" in line:
-                        reported_failing_test = (
-                            str(line)
-                            .split("negative tests: [")[-1]
-                            .split("]")[0]
-                            .split(", ")
-                        )
-                    elif "search space size: " in line:
-                        size_search_space = line.split("search space size: ")[
-                            -1
-                        ].strip()
-        with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
-            log_lines = log_file.readlines()
+        if self.is_file(dir_results + "/original.txt"):
+            log_lines = self.read_file(dir_results + "/original.txt")
+            self._time.timestamp_start = log_lines[0].replace("\n", "")
+            self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
-                if "candidates evaluated: " in line:
-                    count_enumerations = int(
-                        line.split("candidates evaluated: ")[-1].strip()
+                if "no patch found" in line:
+                    emitter.warning("\t\t\t\t[warning] no patch found by F1X")
+                elif "negative tests: [" in line:
+                    reported_failing_test = (
+                        str(line)
+                        .split("negative tests: [")[-1]
+                        .split("]")[0]
+                        .split(", ")
                     )
-                elif "plausible patches: " in line:
-                    count_plausible = int(line.split("plausible patches: ")[-1].strip())
-                elif "patches successfully generated" in line:
-                    is_timeout = False
-                elif "no patch found" in line:
-                    is_timeout = False
-            log_file.close()
+                elif "search space size: " in line:
+                    self._space.generated = line.split("search space size: ")[
+                        -1
+                    ].strip()
 
-        if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r", encoding="iso-8859-1") as log_file:
-                log_lines = log_file.readlines()
-                for line in log_lines:
-                    if "Fail to execute f1x" in line:
-                        is_error = True
-                    elif "tests are not specified" in line:
-                        is_error = True
-                        emitter.warning("\t\t\t\t[warning] no tests provided")
-                    elif "no negative tests" in line:
-                        emitter.warning("\t\t\t\t[warning] no negative tests")
-                    elif "failed to infer compile commands" in line:
-                        is_error = True
-                        emitter.error("\t\t\t\t[error] compilation command not found")
-                    elif "At-risk data found" in line:
-                        is_error = True
-                        emitter.error("\t\t\t\t[error] previous results have corrupted")
-        if is_error:
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self._time.timestamp_start = log_lines[0].replace("\n", "")
+        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        for line in log_lines:
+            if "candidates evaluated: " in line:
+                self._space.enumerations = int(
+                    line.split("candidates evaluated: ")[-1].strip()
+                )
+            elif "plausible patches: " in line:
+                self._space.plausible = int(
+                    line.split("plausible patches: ")[-1].strip()
+                )
+            elif "patches successfully generated" in line:
+                is_timeout = False
+            elif "no patch found" in line:
+                is_timeout = False
+            elif "Fail to execute f1x" in line:
+                self._error.is_error = True
+            elif "tests are not specified" in line:
+                self._error.is_error = True
+                emitter.warning("\t\t\t\t[warning] no tests provided")
+            elif "no negative tests" in line:
+                emitter.warning("\t\t\t\t[warning] no negative tests")
+            elif "failed to infer compile commands" in line:
+                self._error.is_error = True
+                emitter.error("\t\t\t\t[error] compilation command not found")
+            elif "At-risk data found" in line:
+                self._error.is_error = True
+                emitter.error("\t\t\t\t[error] previous results have corrupted")
+
+        if self._error.is_error:
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
             emitter.warning("\t\t\t\t[warning] timeout detected")
@@ -447,45 +408,6 @@ class Fix2Fit(AbstractTool):
                 f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
             ]
             count_filtered = len(output_patch_list)
-        count_plausible = count_filtered
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
-        with open(self.log_analysis_path, "w") as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.DEFAULT_DUMP_PATCHES:
-                count_enumerations = count_plausible
-            else:
-                log_file.write(
-                    "\t\t count plausible patches: {0}\n".format(count_plausible)
-                )
-                log_file.write(
-                    "\t\t count filtered patches: {0}\n".format(count_filtered)
-                )
-                log_file.write(
-                    "\t\t count non-compiling patches: {0}\n".format(
-                        count_non_compilable
-                    )
-                )
-                log_file.write(
-                    "\t\t count implausible patches: {0}\n".format(count_implausible)
-                )
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            time_duration,
-        )
+        self._space.plausible = count_filtered
 
-    def pre_process(self, dir_logs, dir_expr, dir_setup):
-        emitter.normal("\t\t\t pre-processing for {}".format(self.name))
-        super(Fix2Fit, self).pre_process(dir_logs, dir_expr, dir_setup)
-        if os.path.isdir(dir_setup + "/out"):
-            shutil.rmtree(dir_setup + "/out")
-        if os.path.isdir(dir_setup + "/patches"):
-            shutil.rmtree(dir_setup + "/patches")
-        if os.path.isdir(dir_setup + "/seed-dir"):
-            shutil.rmtree(dir_setup + "/seed-dir")
-        return
+        return self._space, self._time, self._error
