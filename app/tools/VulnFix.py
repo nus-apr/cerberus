@@ -41,7 +41,6 @@ class VulnFix(AbstractTool):
         status = self.run_command(
             vulnfix_command, log_file_path=self.log_output_path, dir_path=self.dir_root
         )
-        self.timestamp_log()
 
         if status != 0:
             emitter.warning(
@@ -51,9 +50,11 @@ class VulnFix(AbstractTool):
             )
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+
+        self.timestamp_log()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def populate_config_file(self, experiment_info):
+    def populate_config_file(self, bug_info):
         """
         Some fields of the VulnFix config file contains information which overlaps with what
         Cerberus already has, and also some of the fields depends on actual paths in the system. These fields are populated here into the existing config file template.
@@ -75,35 +76,35 @@ class VulnFix(AbstractTool):
         dir_src = join(self.dir_expr, "src")
         line_source_dir = "source-dir=" + dir_src + "\n"
         # (2) binary
-        rel_binary_path = experiment_info[definitions.KEY_BINARY_PATH]
+        rel_binary_path = bug_info[definitions.KEY_BINARY_PATH]
         binary_path = join(dir_src, rel_binary_path)
         line_binary = "binary=" + binary_path + "\n"
         # (3) (OPTIONAL) cmd
         line_cmd = ""
         if not cmd_already_specified:
-            cmd = experiment_info[definitions.KEY_CRASH_CMD]
+            cmd = bug_info[definitions.KEY_CRASH_CMD]
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
         # (4) exploit
-        dir_tests = join(self.dir_setup, "tests")
-        tests_list = self.list_dir(dir_tests)
-        if not tests_list:
+        if definitions.KEY_EXPLOIT_LIST not in bug_info or len(bug_info[definitions.KEY_EXPLOIT_LIST]) < 1:
             emitter.error(
                 "[Exception] there needs to be at least 1 exploit (failing) input!"
             )
             error_exit("Unhandled Exception")
-        exploit_path = sorted(tests_list)[0]
+        exploit_path =join(self.dir_setup,sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0])
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
         line_normals = ""
         dir_normal_in = join(self.dir_setup, "vulnfix", "normals")
         normals_list = self.list_dir(dir_normal_in)
-
         if normals_list:
             line_normals = "normal-in=" + ",".join(normals_list) + "\n"
+        
         # (6) runtime-dir
         line_runtime_dir = "runtime-dir=" + self.dir_output + "\n"
 
+        self.run_command("mkdir -p {}/afl-out/crashes".format(self.dir_output))
+        
         config_updates = list()
         config_updates.append(line_binary)
         if line_cmd:

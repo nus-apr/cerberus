@@ -82,7 +82,6 @@ class GenProg(AbstractTool):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["result"]
         dir_patch = self.dir_expr + "/src/repair"
-        dir_output = dir_info["output"]
         dir_artifact = dir_info["artifact"]
         copy_command = "cp -rf  " + dir_patch + " " + dir_artifact
         self.run_command(
@@ -117,8 +116,8 @@ class GenProg(AbstractTool):
         )
         execute_command(copy_command)
         patch_id = 0
-        dir_repair_local = dir_output + "/repair/" + "".join(fix_file.split("/")[:-1])
-        dir_patch_local = dir_output + "/patches"
+        dir_repair_local = self.dir_output + "/repair/" + "".join(fix_file.split("/")[:-1])
+        dir_patch_local = self.dir_output + "/patches"
         if os.path.isdir(dir_repair_local):
             output_patch_list = [
                 f

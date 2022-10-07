@@ -91,7 +91,7 @@ class ExtractFix(AbstractTool):
         #     )
         #     error_exit("Unhandled Exception")
         # Currently we assume that the test cases are copied, this can be simplified by using the tests_lsit above
-        test_case = "-t " + experiment_info[definitions.KEY_EXPLOIT_LIST][0]
+        test_case = "-t " + (experiment_info[definitions.KEY_EXPLOIT_LIST][0] if len(experiment_info[definitions.KEY_EXPLOIT_LIST]) !=0 else "dummy") 
 
         # (3) driver
         driver = "-c driver"
