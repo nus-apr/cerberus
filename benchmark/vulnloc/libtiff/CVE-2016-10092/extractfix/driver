@@ -1,0 +1,5 @@
+binary=$1
+test=$2
+${binary} -i ${test} temp
+
+exit 0
