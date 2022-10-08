@@ -23,7 +23,7 @@ class VulnLoc(AbstractBenchmark):
                 emitter.error("\t\t\t[benchmark] verification failed")
                 is_error = True
             if not values.DEFAULT_USE_VALKYRIE:
-                emitter.normal("\t\t\tskipping transformation for vulnfix")
+                emitter.normal("\t\t\tskipping transformation")
             else:
                 if self.transform(bug_id, container_id):
                     emitter.success("\t\t\t[benchmark] transformation successful")

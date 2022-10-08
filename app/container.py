@@ -57,7 +57,7 @@ def build_image(dockerfile_path, image_name):
                 data = json.loads(line.strip())
                 if "stream" in data:
                     for line_stream in data["stream"].split("\n"):
-                        emitter.normal("[docker-api] {}".format(line_stream), False)
+                        emitter.debug("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
