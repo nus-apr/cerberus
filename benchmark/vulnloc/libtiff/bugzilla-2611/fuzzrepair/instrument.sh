@@ -5,6 +5,6 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 
-ln -s /lib/x86_64-linux-gnu/libasan.so.6.0.0 /lib/x86_64-linux-gnu/libasan.so.4
-
+$script_dir/../config.sh $1
+$script_dir/../build.sh $1
 
