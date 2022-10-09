@@ -7,6 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 src_dir_name=$dir_name/src
 cd $src_dir_name/test
 
+apt update && apt install -y liblzma-dev libjpeg-dev bear
+
 # Copy Seed Files
 mkdir $dir_name/seed-dir
 find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
