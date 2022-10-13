@@ -34,7 +34,7 @@ pattern=\`expr substr "\$TEST_ID" 1 1\`
 num=\`expr substr "\$TEST_ID" 2 \${#TEST_ID}\`
 $script_dir/../test.sh /experiment \$num
 EOF
-chmod+x $dir_name/test.sh
+chmod +x $dir_name/test.sh
 
 cat <<EOF > $dir_name/src/repair.conf
 --allow-coverage-fail
