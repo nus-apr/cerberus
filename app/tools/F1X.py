@@ -48,7 +48,7 @@ class F1X(AbstractTool):
         )
         self.generate_test_driver()
         test_driver_path = join(self.dir_expr, "f1x-test")
-        build_script_path = join(self.dir_setup, "build.sh")
+        build_script_path = join(self.dir_setup, "build.sh") if not self.is_file(join(self.dir_inst,"build.sh")) else join(self.dir_inst,"build.sh")
         test_id_list = ""
         for test_id in failing_test_list:
             test_id_list += test_id + " "
