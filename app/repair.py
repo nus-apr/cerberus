@@ -15,14 +15,14 @@ from app import (
 )
 from multiprocessing import set_start_method
 from app.tools import AbstractTool
-from os.path import dirname, abspath
+from os.path import dirname, abspath,join
 
 
 def update_dir_info(dir_info, tool_name):
     dir_setup_local = dir_info["local"]["setup"]
     dir_setup_container = dir_info["container"]["setup"]
-    dir_instrumentation_local = dir_setup_local + "/" + str(tool_name).lower()
-    dir_instrumentation_container = dir_setup_container + "/" + str(tool_name).lower()
+    dir_instrumentation_local = join(dir_setup_local, str(tool_name).lower())
+    dir_instrumentation_container = join(dir_setup_container , str(tool_name).lower())
     dir_info["local"]["instrumentation"] = dir_instrumentation_local
     dir_info["container"]["instrumentation"] = dir_instrumentation_container
     return dir_info
@@ -404,9 +404,8 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write(
-                "RUN bash {}/deps.sh; return 0".format(dir_info["container"]["setup"])
+                "RUN bash {}; return 0".format(join(dir_info["container"]["setup"],"deps.sh"))
             )
-        dock_file.close()
         container.build_image(tmp_dockerfile, container_name.lower())
     # Need to copy the logs from benchmark setup before instantiating the running container
     tmp_container_id = container.build_container(
@@ -533,7 +532,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
-            dir_archive = definitions.DIR_RESULT + "/" + tool_name
+            dir_archive = join(definitions.DIR_RESULT , tool_name)
             dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)

@@ -1,15 +1,10 @@
-from cgi import test
 import os
-from pprint import pprint
 import re
-import shutil
-from threading import local
-from app.abstractions import is_dir, is_file, read_file
 from app.tools.AbstractTool import AbstractTool
-from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter, container
-from os import listdir, path
-from os.path import isfile, join
+from app.utilities import error_exit
+from app import definitions, values, emitter
+from os import path
+from os.path import join
 
 
 class Prophet(AbstractTool):
@@ -26,7 +21,7 @@ class Prophet(AbstractTool):
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.file = bug_info[definitions.KEY_FIX_FILE]
-        revlog_file = self.dir_expr + "/prophet/prophet.revlog"
+        revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
         self.generate_revlog(bug_info, revlog_file, bug_id)
         timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
@@ -35,14 +30,14 @@ class Prophet(AbstractTool):
         )
 
         repair_file = self.dir_expr + "/prophet/prophet.conf"
-        if not container.is_file(self.container_id, repair_file):
+        if not self.is_file(repair_file):
             emitter.error("\t\t[error] no repair config file detected")
             return
         # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
         # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
-        dir_patch = "output/patches"
-        mkdir_command = "mkdir -p " + dir_patch
-        self.run_command(mkdir_command, self.log_output_path, "/")
+
+        self.run_command("mkdir {}".format(self.dir_output),"dev/null","/")
+        self.run_command("mkdir patches", "/dev/null", self.dir_output)
         localization_file = self.dir_expr + "/workdir/profile_localization.res"
         self.generate_localization(bug_info, localization_file, self.dir_setup)
         # -feature-para /prophet-gpl/crawler/para-all.out
@@ -52,7 +47,7 @@ class Prophet(AbstractTool):
         repair_command += " -full-synthesis -full-explore "
         repair_command += " -r {}".format(self.dir_expr + "/workdir")
         repair_command += " -cond-ext -replace-ext "
-        repair_command += " -o /{} ".format(dir_patch)
+        repair_command += " -o {}".format(join(self.dir_output,"patches"))
         # repair_command += " >> {}".format(self.log_output_path)
         if values.DEFAULT_DUMP_PATCHES:
             repair_command += " -dump-all "
@@ -124,24 +119,17 @@ class Prophet(AbstractTool):
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_results = dir_info["results"]
-        dir_patch = self.dir_expr + "/patches"
+        dir_patch = join(self.dir_expr,"patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
-        self.run_command(copy_command, "/dev/null", self.dir_expr)
-        copy_command = "docker cp {}:{} src/{}/tmp/orig.c".format(
-            self.container_id, self.dir_expr, self.file
-        )
-        emitter.debug("EXECUTING {}".format(copy_command))
-
         self.run_command(copy_command)
+
         patch_id = 0
-        dir_patch_local = self.dir_output + "/patches"
-        if self.container_id:
-            container.fix_permissions(self.container_id, "/output")
+        dir_patch_local = join(self.dir_output, "patches")
         if self.is_dir(dir_patch_local):
             output_patch_list = [
                 f
-                for f in listdir(dir_patch_local)
-                if isfile(join(dir_patch_local, f)) and ".c" in f
+                for f in self.list_dir(dir_patch_local)
+                if self.is_file(join(dir_patch_local, f)) and ".c" in f
             ]
             for f in output_patch_list:
                 patched_source = dir_patch_local + "/" + f
@@ -5665,7 +5653,7 @@ class Prophet(AbstractTool):
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "[" == line[0] and "]" in line:
-                timeline = int(line.split("] ")[0].replace("[", "").strip())
+                timeline = int(line.split("]")[0].replace("[", "").strip())
             if "number of explored templates:" in line:
                 self._space.enumerations = int(
                     line.split("number of explored templates: ")[-1]
