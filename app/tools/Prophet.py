@@ -118,7 +118,6 @@ class Prophet(AbstractTool):
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_results = dir_info["results"]
         dir_patch = join(self.dir_expr,"patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)
@@ -145,8 +144,6 @@ class Prophet(AbstractTool):
                 self.run_command(diff_command)
                 del_command = "rm -f" + patched_source
                 self.run_command(del_command)
-            save_command = "cp -rf " + dir_patch_local + " " + dir_results
-            self.run_command(save_command)
         super(Prophet, self).save_artefacts(dir_info)
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
