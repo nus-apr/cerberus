@@ -12,14 +12,13 @@ class CPR(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(CPR, self).__init__(self.name)
-        self.image_name = "rshariffdeen/cpr:18.04"
+        self.image_name = "rshariffdeen/cpr"
         self.id = ""
 
     def repair(self, bug_info, config_info):
         super(CPR, self).repair(bug_info, config_info)
         if values.CONF_INSTRUMENT_ONLY:
             return
-        emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = str(values.CONFIG_ID)
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.id = bug_id

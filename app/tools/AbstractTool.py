@@ -63,7 +63,7 @@ class AbstractTool:
             self.dir_inst = dir_info["container"]["instrumentation"]
             self.dir_setup = dir_info["container"]["setup"]
             self.dir_output = dir_info["container"]["artifacts"]
-            self.dir_base_expr = "/experiment/"
+            self.dir_base_expr = "/experiment"
         else:
             self.dir_expr = dir_info["local"]["experiment"]
             self.dir_logs = dir_info["local"]["logs"]

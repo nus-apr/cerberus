@@ -12,7 +12,7 @@ class Fix2Fit(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Fix2Fit, self).__init__(self.name)
-        self.image_name = "rshariffdeen/fix2fit"
+        self.image_name = "gaoxiang9430/fix2fit"
 
     def repair(self, bug_info, config_info):
         super(Fix2Fit, self).repair(bug_info, config_info)
@@ -28,7 +28,7 @@ class Fix2Fit(AbstractTool):
         abs_path_binary = join(
             self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH]
         )
-        test_id_list = ' '.join(bug_info[definitions.KEY_FAILING_TEST])+ " " 
+        test_id_list = ' '.join(bug_info[definitions.KEY_FAILING_TEST]) + " "
         if bug_info[definitions.KEY_PASSING_TEST]:
             filtered_list = self.filter_tests(
                 bug_info[definitions.KEY_PASSING_TEST],
@@ -37,7 +37,6 @@ class Fix2Fit(AbstractTool):
             )
             for test_id in filtered_list:
                 test_id_list += test_id + " "
-
 
         abs_path_buggy_file = join(
             self.dir_expr,
@@ -51,15 +50,17 @@ class Fix2Fit(AbstractTool):
         repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
         repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
         repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
-        repair_command += "export DRIVER=./test.sh; "
+        repair_command += "export CONFIG={}/config.sh {}; ".format(self.dir_setup, self.dir_base_expr)
+        repair_command += "export BUILD={}/build.sh {}; ".format(self.dir_setup, self.dir_base_expr)
+        repair_command += "export DRIVER={}/test.sh {}; ".format(self.dir_setup, self.dir_base_expr)
         repair_command += "export BINARY={}; ".format(abs_path_binary)
         repair_command += "export TIME_OUT={}; ".format(abs_path_binary)
         repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
-        repair_command += "cd {}; timeout -k 5m {}h bash /src/scripts/run.sh' ".format(
-            self.dir_setup, str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        repair_command += "timeout -k 5m {}h bash /src/scripts/run.sh' ".format(
+            str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        status = self.run_command(repair_command)
+        status = self.run_command(repair_command,  self.log_output_path, self.dir_setup)
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
@@ -72,20 +73,13 @@ class Fix2Fit(AbstractTool):
         self.timestamp_log()
         return
 
-    def save_artefacts(self, dir_info, experiment_info, container_id):
+    def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_setup = dir_info["setup"]
-        dir_results = dir_info["result"]
-        dir_patches = dir_setup + "/patches"
-        if os.path.isdir(dir_patches):
-            execute_command("cp -rf " + dir_patches + " " + dir_results + "/patches")
-        super(Fix2Fit, self).save_artefacts(dir_info, experiment_info, container_id)
+        dir_patch = join(self.dir_setup, "patches")
+        self.run_command("cp -rf {} {}".format(dir_patch, self.dir_output))
+        super(Fix2Fit, self).save_artefacts(dir_info)
         return
 
-    def save_logs(self, dir_results, dir_expr, dir_setup, bug_id):
-        super(Fix2Fit, self).save_logs(dir_results, dir_expr, dir_setup, bug_id)
-        patch_gen_log = dir_setup + "/original.txt"
-        shutil.copy(patch_gen_log, dir_results)
 
     def filter_tests(self, test_id_list, subject, bug_id):
         filtered_list = []
@@ -311,7 +305,7 @@ class Fix2Fit(AbstractTool):
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.CONFIG_ID)
         self.log_analysis_path = join(
-            self.dir_logs, "{)-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
+            self.dir_logs, "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
         )
         count_filtered = 0
 
