@@ -1,0 +1,10 @@
+abc
+abd
+abe
+acd
+ace
+ade
+bcd
+bce
+bde
+cde

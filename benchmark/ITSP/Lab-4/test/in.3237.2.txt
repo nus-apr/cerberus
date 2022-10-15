@@ -1,0 +1,9 @@
+3 
+8 Business
+10 persuasion
+11 intelligent
+9 bussiness
+8 business
+10 persuation
+10 inteligent
+-1

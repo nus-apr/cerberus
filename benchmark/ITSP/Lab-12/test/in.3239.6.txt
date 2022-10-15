@@ -1,0 +1,4 @@
+7
+anagram
+6
+anagrm

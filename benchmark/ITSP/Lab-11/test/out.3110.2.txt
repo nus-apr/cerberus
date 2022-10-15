@@ -1,0 +1,6 @@
+pqr
+prq
+qpr
+qrp
+rqp
+rpq

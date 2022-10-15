@@ -1,0 +1,3 @@
+Thisproblemhasnoautomatedtestcases.
+.
+----isn'tit?

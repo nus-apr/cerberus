@@ -1,0 +1,1 @@
+Number of possible triangles is 1

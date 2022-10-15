@@ -1,0 +1,4 @@
+codingisfun
+i
+2
+true
