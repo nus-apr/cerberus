@@ -5,18 +5,22 @@ project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
 src_dir_name=$dir_name/src
-cd $src_dir_name/test
+cd $src_dir_name
 
-apt update && apt install -y liblzma-dev libjpeg-dev bear
 
+seed_dir=$script_dir/../seed-dir
 # Copy Seed Files
-mkdir $dir_name/seed-dir
-find . -type f -iname '*.tiff' -exec cp  {} $dir_name/seed-dir/ \;
-find . -type f -iname '*.bmp' -exec cp  {} $dir_name/seed-dir/ \;
-find . -type f -iname '*.gif' -exec cp  {} $dir_name/seed-dir/ \;
-find . -type f -iname '*.pgm' -exec cp  {} $dir_name/seed-dir/ \;
-find . -type f -iname '*.ppm' -exec cp  {} $dir_name/seed-dir/ \;
-find . -type f -iname '*.pbm' -exec cp  {} $dir_name/seed-dir/ \;
+mkdir $seed_dir
+cp $script_dir/../tests/*  $seed_dir
+find . -type f -iname '*.tiff' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.bmp' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.gif' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.pgm' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.ppm' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.pbm' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.j2k' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.jpg' -exec cp  {} $seed_dir \;
+find . -type f -iname '*.jp2' -exec cp  {} $seed_dir \;
 
 cd $src_dir_name
 
@@ -24,5 +28,22 @@ if [ ! -f "$src_dir_name/INSTRUMENTED_FIX2FIT" ]; then
     touch "$src_dir_name/INSTRUMENTED_FIX2FIT"
 fi
 
+
+cat <<EOF > $script_dir/config-driver
+#!/bin/bash
 CC=f1x-cc CXX=f1x-cxx $script_dir/../config.sh $1
+EOF
+
+cat <<EOF > $script_dir/build-driver
+#!/bin/bash
 CC=f1x-cc CXX=f1x-cxx $script_dir/../build.sh $1
+EOF
+
+cat <<EOF > $script_dir/test-driver
+#!/bin/bash
+$script_dir/../test.sh $1 \$@
+EOF
+
+chmod +x $script_dir/config-driver
+chmod +x $script_dir/build-driver
+chmod +x $script_dir/test-driver
