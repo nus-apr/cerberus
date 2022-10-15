@@ -76,9 +76,9 @@ class Fix2Fit(AbstractTool):
         return
 
     def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
         dir_patch = join(self.dir_setup, "patches")
-        self.run_command("cp -rf {} {}".format(dir_patch, self.dir_output))
+        self.run_command("mkdir /output")
+        self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artefacts(dir_info)
         return
 
@@ -394,12 +394,10 @@ class Fix2Fit(AbstractTool):
                 )
             )
 
-        dir_patch = dir_results + "/patches"
-        if dir_patch and os.path.isdir(dir_patch):
-            output_patch_list = [
-                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
-            ]
-            count_filtered = len(output_patch_list)
-        self._space.plausible = count_filtered
-
+        dir_patch = self.dir_setup + "/patches"
+        self._space.generated = len(
+            self.list_dir(
+                dir_patch
+            )
+        )
         return self._space, self._time, self._error
