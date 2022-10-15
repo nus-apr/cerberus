@@ -14,7 +14,7 @@ for lab in labs:
             name = bug_id.split("_")[0]
             data = """
             {{
-                "id":"{id}",
+                "id":{id},
                 "subject":"{lab}",
                 "bug_id":"{problem_id}",
                 "source_file": "{bug_id}",
