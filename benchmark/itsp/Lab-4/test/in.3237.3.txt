@@ -1,0 +1,8 @@
+3
+5 hello
+4 good
+7 morning
+4 helo
+3 gud
+6 mrnng
+-1

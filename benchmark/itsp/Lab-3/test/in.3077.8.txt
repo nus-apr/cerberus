@@ -1,0 +1,2 @@
+thisproblemhasnoautomatedtestcases
+27
