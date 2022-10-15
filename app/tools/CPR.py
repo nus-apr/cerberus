@@ -31,7 +31,7 @@ class CPR(AbstractTool):
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
         conf_path = join(self.dir_expr, "cpr", "repair.conf")
-        timeout_m = str(int(timeout) * 60)
+        timeout_m = str(float(timeout) * 60)
         test_id_list = ",".join(bug_info[definitions.KEY_FAILING_TEST])
         seed_id_list = ",".join(bug_info[definitions.KEY_PASSING_TEST])
 

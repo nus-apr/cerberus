@@ -12,7 +12,7 @@ class Fix2Fit(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Fix2Fit, self).__init__(self.name)
-        self.image_name = "gaoxiang9430/fix2fit"
+        self.image_name = "rshariffdeen/fix2fit"
 
     def repair(self, bug_info, config_info):
         super(Fix2Fit, self).repair(bug_info, config_info)
@@ -48,13 +48,15 @@ class Fix2Fit(AbstractTool):
 
         self.timestamp_log()
         repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
+        repair_command += "export AFL_NO_AFFINITY='';"
         repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
         repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
-        repair_command += "export CONFIG={}/config.sh {}; ".format(self.dir_setup, self.dir_base_expr)
-        repair_command += "export BUILD={}/build.sh {}; ".format(self.dir_setup, self.dir_base_expr)
-        repair_command += "export DRIVER={}/test.sh {}; ".format(self.dir_setup, self.dir_base_expr)
+        repair_command += "export CONFIG={}/fix2fit/config-driver; ".format(self.dir_setup)
+        repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
+        repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
         repair_command += "export BINARY={}; ".format(abs_path_binary)
-        repair_command += "export TIME_OUT={}; ".format(abs_path_binary)
+        repair_command += "export T_TIMEOUT={}000; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
+        repair_command += "export TIMEOUT={}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT])
         repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
         repair_command += "timeout -k 5m {}h bash /src/scripts/run.sh' ".format(
             str(config_info[definitions.KEY_CONFIG_TIMEOUT])
