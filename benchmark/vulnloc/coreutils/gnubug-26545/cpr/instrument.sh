@@ -35,7 +35,7 @@ depth:3
 test_output_list:cpr/t1.smt2
 spec_path:cpr/spec.smt2
 binary_path:src/shred
-custom_comp_list:components/i.smt2,components/size.smt2
+custom_comp_list:cpr/components/i.smt2,cpr/components/size.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2,division.smt2,constant_a.smt2
 test_input_list:-n 4 -s 7 \$POC
 poc_path:$script_dir/../tests/1.txt

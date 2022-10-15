@@ -9,39 +9,45 @@ cd $dir_name/src
 make clean
 
 
-CC=wllvm CXX=wllvm++ CFLAGS="-g -O0" CXXFLAGS="$CFLAGS" ./configure --disable-shared --disable-gdb --disable-libdecnumber --disable-readline --disable-sim --disable-werror
-make -j32
-sed -i '2440i __cpr_output("obs", "i32", lh.line_range);' bfd/dwarf2.c
-sed -i '2440i if(__cpr_choice("L2440", "bool", (int[]){lh.line_range, lh.maximum_ops_per_insn}, (char*[]){"x", "y"}, 2, (int*[]){}, (char*[]){}, 0)) goto line_fail;' bfd/dwarf2.c
-sed -i '38i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif\n' bfd/dwarf2.c
-git add bfd/dwarf2.c
+./autogen.sh
+CC=wllvm CXX=wllvm++ ./configure --enable-static --disable-shared
+CC=wllvm CXX=wllvm++ make -j32
+
+sed -i 's/fabs/fabs_cpr/g' libtiff/tif_luv.c
+git add  libtiff/tif_luv.c
+git commit -m 'replace fabs with proxy function'
+
+make CFLAGS="-lcpr_proxy -L/CPR/lib" -j32
+
+sed -i '816i CPR_OUTPUT("obs", "i32", sp->bytes_per_line);' libtiff/tif_ojpeg.c
+sed -i '816i if(__cpr_choice("L816", "bool", (int[]){sp->bytes_per_line, cc}, (char*[]){"x", "y"}, 2, (int*[]){}, (char*[]){}, 0)) return -1;\n' libtiff/tif_ojpeg.c
+sed -i '178i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif\n' libtiff/tif_ojpeg.c
+git add libtiff/tif_ojpeg.c
 git commit -m "instrument cpr"
-make CXX=$CPR_CXX CC=$CPR_CC LDFLAGS='-lkleeRuntest -L/klee/build/lib -lcpr_runtime -L/CPR/lib' -j32
-cd binutils
-make CXX=$CPR_CXX CC=$CPR_CC  -j32
+
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
 project_path:$dir_name
 tag_id:$bug_id
-src_directory:src/binutils
-binary_path:nm-new
+src_directory:src
 config_command:skip
-build_command:skip
-custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2
-general_comp_list:equal.smt2,less-than.smt2,not-equal.smt2,less-or-equal.smt2,constant_a.smt2
+build_command:make -j32
 depth:3
-loc_patch:$dir_name/src/bfd/dwarf2.c:2444
-loc_bug:$dir_name/src/bfd/dwarf2.c:2445
-spec_path:cpr/spec.smt2
-test_input_list:-A -a -l -S -s --special-syms --synthetic --with-symbol-versions -D \$POC
 test_output_list:cpr/t1.smt2
-poc_path:$script_dir/../tests/1.bin
-klee_flags:-check-overshift=0
+spec_path:cpr/spec.smt2
+binary_path:tools/tiffmedian
+custom_comp_list:cpr/components/x.smt2,cpr/components/y.smt2
+general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2,constant_a.smt2
+test_input_list:\$POC /tmp/foo
+poc_path:$script_dir/../tests/1.tif
+static:true
+loc_patch:$dir_name/src/libtiff/tif_ojpeg.c:820
+loc_bug:$dir_name/src/libtiff/tif_ojpeg.c:822
+gen_limit:50
+stack_size:15000
+mask_arg:0
 dist_metric:angelic
-static:false
-timeout_klee:3600
-build_flags:disable
 EOF
 
 
@@ -71,7 +77,6 @@ EOF
 cat <<EOF > $dir_name/cpr/t1.smt2
 (declare-const obs!0 (_ BitVec 32))
 (assert (= false (= obs!0 (_ bv0 32) )))
-
 EOF
 
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then

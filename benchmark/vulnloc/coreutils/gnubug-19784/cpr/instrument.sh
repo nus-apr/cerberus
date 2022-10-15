@@ -28,7 +28,7 @@ binary_path:src/make-prime-list
 config_command:skip
 build_command:skip
 spec_path:cpr/spec.smt2
-custom_comp_list:components/i.smt2,components/size.smt2
+custom_comp_list:cpr/components/i.smt2,cpr/components/size.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,addition.smt2,constant_a.smt2
 test_input_list:15
 test_output_list:cpr/t1.smt2

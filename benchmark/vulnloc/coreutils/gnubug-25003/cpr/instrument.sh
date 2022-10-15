@@ -31,7 +31,7 @@ test_output_list:cpr/t1.smt2
 spec_path:cpr/spec.smt2
 binary_path:src/split
 test_input_list:-n 7/75 /dev/null
-custom_comp_list:components/start.smt2,components/initial_read.smt2,components/bufsize.smt2
+custom_comp_list:cpr/components/start.smt2,cpr/components/initial_read.smt2,cpr/components/bufsize.smt2
 general_comp_list:equal.smt2,not-equal.smt2,less-than.smt2,less-or-equal.smt2,constant_a.smt2
 loc_patch:$dir_name/src/src/split.c:989
 loc_bug:$dir_name/src/src/split.c:991
