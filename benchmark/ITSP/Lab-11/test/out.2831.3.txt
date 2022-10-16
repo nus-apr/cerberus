@@ -1,1 +1,0 @@
-Reverse of 100 is 1
