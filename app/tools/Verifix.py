@@ -24,20 +24,20 @@ class Verifix(AbstractTool):
 
         # start running
         self.timestamp_log()
-        vulnfix_command = (
-            "timeout -k 5m {}h python3 -m main -m repair -pc {} -pi {} -tc {}".format(
-                timeout_h,
-                join(
-                    self.dir_setup,
-                    bug_info[definitions.KEY_FIX_FILE].replace("buggy", "correct"),
-                ),
-                join(self.dir_setup, bug_info[definitions.KEY_FIX_FILE]),
-                join(self.dir_expr, "base", "test"),
-            )
+        vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
+            timeout_h,
+            "true" if values.CONF_DEBUG else "false",
+            join(
+                self.dir_setup,
+                bug_info[definitions.KEY_FIX_FILE].replace("buggy", "correct"),
+            ),
+            join(self.dir_setup, bug_info[definitions.KEY_FIX_FILE]),
+            join(self.dir_expr, "base", "test"),
         )
         status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")
 
         if status != 0:
+            self._error.is_error = True
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
                     self.name, status
@@ -78,7 +78,6 @@ class Verifix(AbstractTool):
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
 
-        is_error = False
         count_plausible = 0
         count_enumerations = 0
 
@@ -100,12 +99,8 @@ class Verifix(AbstractTool):
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
 
-            for line in log_lines:
-                if "Generating patch" in line:
-                    count_plausible += 1
-                    count_enumerations += 1
+        if not self._error.is_error:
+            self._space.plausible = 1
+            self._space.enumerations = 1
 
-        self._space.plausible = count_plausible
-        self._space.enumerations = count_enumerations
-        self._error.is_error = is_error
         return self._space, self._time, self._error
