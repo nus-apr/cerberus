@@ -57,6 +57,8 @@ def read_arg(argument_list):
                 values.CONF_USE_VALKYRIE = True
             elif definitions.ARG_SETUP_ONLY in arg:
                 values.CONF_SETUP_ONLY = True
+            elif definitions.ARG_SKIP_SETUP in arg:
+                values.CONF_SKIP_SETUP = True
             elif definitions.ARG_USE_CONTAINER in arg:
                 values.CONF_USE_CONTAINER = True
             elif definitions.ARG_USE_LOCAL in arg:
@@ -195,6 +197,8 @@ def update_configuration():
         values.DEFAULT_SETUP_ONLY = True
     if values.CONF_SETUP_ONLY:
         values.DEFAULT_SETUP_ONLY = True
+    if values.CONF_SKIP_SETUP:
+        values.DEFAULT_SKIP_SETUP = True
     if values.CONF_ANALYSE_ONLY:
         values.DEFAULT_ANALYSE_ONLY = True
     if values.CONF_USE_CONTAINER:

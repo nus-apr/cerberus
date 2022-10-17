@@ -458,7 +458,8 @@ def run(benchmark, tool_list, bug_info, config_info):
     if values.DEFAULT_USE_CONTAINER:
         exp_img_id = benchmark.get_exp_image(bug_index, values.DEFAULT_RUN_TESTS_ONLY)
     else:
-        benchmark.setup_experiment(bug_index, None, values.DEFAULT_RUN_TESTS_ONLY)
+        if not values.DEFAULT_SKIP_SETUP:
+            benchmark.setup_experiment(bug_index, None, values.DEFAULT_RUN_TESTS_ONLY)
 
     for repair_tool in tool_list:
         index = index + 1
