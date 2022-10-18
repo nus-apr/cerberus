@@ -4,11 +4,20 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 4 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 dir_name=$1/$benchmark_name/$project_name/$bug_id
-echo "libtiff/tif_ojpeg.c" > $dir_name/manifest.txt
+echo "libtiff/tif_ojpeg.i" > $dir_name/manifest.txt
+
+chmod +w ~/.opam/4.12.0/lib/perl5/App/Cilly.pm
+sed -i "2215s/S+/S*/"  ~/.opam/4.12.0/lib/perl5/App/Cilly.pm
+
+apt-get update && apt-get install -y -q --no-install-recommends  libjpeg-dev liblzma-dev libz-dev
+export PATH=/root/.opam/4.12.0/bin/:$PATH
 
 cd $dir_name/src
+
+sed -i "33s/1/0/" libtiff/tif_config.h
+
 make clean
-make --ignore-errors CC="cilly --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
+make --ignore-errors CC="cilly -D _Float128=double --merge --keepmerged --save-temps -std=c99 -fno-optimize-sibling-calls -fno-strict-aliasing -fno-asm" -j`nproc`
 
 cp $script_dir/compile.pl $dir_name/src
 cp $dir_name/manifest.txt $dir_name/src/bugged-program.txt
@@ -31,7 +40,7 @@ pattern=\`expr substr "\$TEST_ID" 1 1\`
 num=\`expr substr "\$TEST_ID" 2 \${#TEST_ID}\`
 $script_dir/../test.sh /experiment \$num
 EOF
-chmod+x $dir_name/test.sh
+chmod +x $dir_name/test.sh
 
 cat <<EOF > $dir_name/src/repair.conf
 --allow-coverage-fail
@@ -39,13 +48,12 @@ cat <<EOF > $dir_name/src/repair.conf
 --no-test-cache
 --label-repair
 --sanity no
---multi-file
+--multi-file true
 --search ww
 --compiler-command perl compile.pl __EXE_NAME__ > build.log
 --test-command timeout -k 50s 50s __TEST_SCRIPT__ __TEST_NAME__  > test.log 2>&1
 --crossover subset
 --rep cilpatch
---suffix-extension .c
 --describe-machine
 --program bugged-program.txt
 --prefix preprocessed
@@ -53,7 +61,6 @@ cat <<EOF > $dir_name/src/repair.conf
 --popsize 40
 --generations 10
 --promut 1
---mutp 0
 --fitness-in-parallel 1
 --rep-cache default.cache
 --continue

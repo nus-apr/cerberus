@@ -52,7 +52,7 @@ class GenProg(AbstractTool):
             self.write_file(fix_location, target_path)
             repair_config_str += "--fault-scheme line\n" "--fault-file fault-loc\n"
 
-        self.write_file(repair_config_str, join(self.dir_expr, "src", "repair.conf"))
+        self.append_file(repair_config_str, join(self.dir_expr, "src", "repair.conf"))
 
         save_command = "mkdir {}; cp {} {}".format(
             join(self.dir_expr, "orig"),

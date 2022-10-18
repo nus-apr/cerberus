@@ -8,7 +8,6 @@ my $subdir = basename(dirname($ARGV[0])) ;
 my $project = "/experiment/vulnloc/libtiff/bugzilla-2611/src" ;
 my $project_list = "bugged-program.txt" ;
 
-
 sub say {
     my $msg = $_[0];
     print STDERR "|[$0]|: $msg \n" ;

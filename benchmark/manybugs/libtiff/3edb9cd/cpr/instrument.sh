@@ -7,7 +7,7 @@ dir_name=$1/$benchmark_name/$project_name/$fix_id
 mkdir $dir_name/cpr
 cd $dir_name/src
 make clean
-
+apt install -y shc
 if [ ! -f "$dir_name/src/INSTRUMENTED_CPR" ]; then
     touch "$dir_name/src/INSTRUMENTED_CPR"
 fi

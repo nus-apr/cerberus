@@ -11,7 +11,7 @@ download_url=https://repairbenchmarks.cs.umass.edu/ManyBugs/scenarios/${scenario
 current_dir=$PWD
 mkdir -p $dir_name
 cd $dir_name
-wget $download_url
+wget $download_url --no-check-certificate
 tar xf ${scenario_id}.tar.gz
 mv ${scenario_id} src
 rm ${scenario_id}.tar.gz

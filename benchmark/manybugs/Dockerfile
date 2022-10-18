@@ -63,4 +63,5 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-ins
     mercurial \
     tcl-dev \
     tix-dev \
-    unzip
+    unzip \
+    wget
