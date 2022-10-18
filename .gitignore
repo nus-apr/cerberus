@@ -13,3 +13,10 @@ archive
 results
 
 .vscode
+benchmark/**/patches
+benchmark/**/location.txt
+benchmark/**/original.txt
+benchmark/**/seed-dir
+benchmark/**/fix2fit/*-driver
+benchmark/**/compile_commands.json
+benchmark/**/f1x-*
