@@ -1,0 +1,6 @@
+{
+  "json_path": "./infer-out/",
+  "target_options": ["--", "javac", "ManageAccount.java","Account.java","Main.java","-d", "target"],
+  "prio_files":  [],
+  "iterations": 3
+}

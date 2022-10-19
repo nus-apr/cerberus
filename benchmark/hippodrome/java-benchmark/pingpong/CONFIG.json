@@ -1,0 +1,6 @@
+{
+  "json_path": "./infer-out/",
+  "target_options": ["--", "javac", "BuggedProgram.java","PP.java","BugThread.java","-d","target"],
+  "prio_files":  ["BuggedProgram.java"],
+  "iterations": 10
+}

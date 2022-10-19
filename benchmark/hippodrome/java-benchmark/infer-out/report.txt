@@ -1,0 +1,23 @@
+#0
+pingpong/BuggedProgram.java:87: warning: Thread Safety Violation 2
+  Read/Write race. Non-private method `BuggedProgram.pingPong()` reads without synchronization from `this.pingPongPlayer`. Potentially races with write in method `BuggedProgram.pingPong()`.
+ Reporting because the current class is annotated `@ThreadSafe`, so we assume that this method can run in parallel with other non-private methods in the class (including itself).
+  85.        	this.pingPongPlayer.getI(); 
+  86.            PP newPlayer; 
+  87. >          newPlayer = this.pingPongPlayer; 
+  88.            this.pingPongPlayer = null; 
+  89.            long time = System.currentTimeMillis(); 
+
+#1
+pingpong/BuggedProgram.java:91: warning: Thread Safety Violation 2
+  Unprotected write. Non-private method `BuggedProgram.pingPong()` writes to field `this.pingPongPlayer` outside of synchronization.
+ Reporting because the current class is annotated `@ThreadSafe`, so we assume that this method can run in parallel with other non-private methods in the class (including itself).
+  89.            long time = System.currentTimeMillis(); 
+  90.            while ((System.currentTimeMillis() - time) < 50) ; 
+  91. >          this.pingPongPlayer = newPlayer; 
+  92.        } 
+  93.     
+
+Found 2 issues
+                            Issue Type(ISSUED_TYPE_ID): #
+  Thread Safety Violation 2(THREAD_SAFETY_VIOLATION_2): 2

@@ -1,0 +1,8 @@
+'-verbose'
+'-g'
+'-d'
+'/Users/andrea/git/racerdfix/src/test/java'
+'pingpong/BugThread.java'
+'pingpong/BuggedProgram.java'
+'pingpong/PP.java'
+'pingpong/PingPong.java'
