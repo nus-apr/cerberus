@@ -24,12 +24,18 @@ class Hippodrome(AbstractTool):
 
         # start running
         self.timestamp_log()
-        hippodrome_command = 'timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json'.format(
+
+        run_dir = self.dir_expr
+        hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json".format(
             timeout_h
         )
-        status = self.run_command(
-            hippodrome_command, self.log_output_path, self.dir_expr
-        )
+        if self.is_dir(join(self.dir_expr, "src")):
+            hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c ../CONFIG.json".format(
+                timeout_h
+            )
+            run_dir = join(self.dir_expr, "src")
+
+        status = self.run_command(hippodrome_command, self.log_output_path, run_dir)
 
         if status != 0:
             self._error.is_error = True
@@ -51,6 +57,9 @@ class Hippodrome(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
+
+        self.run_command("mkdir -p /output/","/dev/null","/");
+        self.run_command("cp -rf {} /output/".format(self.dir_expr))
         super().save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -84,9 +93,11 @@ class Hippodrome(AbstractTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
-
-        if not self._error.is_error:
-            self._space.plausible = 1
-            self._space.enumerations = 1
+            for line in log_lines:
+                if "Patch ID:" in line:
+                    count = int(line.split(":")[-1])
+                    self._space.generated = self._space.enumerations = max(self._space.generated,count)
+                if "Applying Patch ID" in line:
+                    self._space.plausible += 1
 
         return self._space, self._time, self._error
