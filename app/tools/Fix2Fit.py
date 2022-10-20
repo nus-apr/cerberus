@@ -47,22 +47,35 @@ class Fix2Fit(AbstractTool):
         )
 
         self.timestamp_log()
-        repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
-        repair_command += "export AFL_NO_AFFINITY='';"
-        repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
-        repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
-        repair_command += "export CONFIG={}/fix2fit/config-driver; ".format(self.dir_setup)
-        repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
-        repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
-        repair_command += "export BINARY={}; ".format(abs_path_binary)
-        repair_command += "export T_TIMEOUT={}000; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
-        repair_command += "export TIMEOUT={}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
-        repair_command += "timeout -k 5m {}h bash /src/scripts/run.sh' ".format(
+        environment_vars = {
+            "SUBJECT_DIR": self.dir_setup,
+            "AFL_NO_AFFINITY": "",
+            "BUGGY_FILE": abs_path_buggy_file,
+            "TESTCASE": test_id_list,
+            "CONFIG": "{}/fix2fit/config-driver".format(self.dir_setup),
+            "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
+            "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
+            "BINARY": abs_path_binary,
+            "T_TIMEOUT": "{}000".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]),
+            "TIMEOUT": "{}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT]),
+            "BINARY_INPUT": bug_info[definitions.KEY_CRASH_CMD]
+        }
+        # repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
+        # repair_command += "export AFL_NO_AFFINITY='';"
+        # repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
+        # repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
+        # repair_command += "export CONFIG={}/fix2fit/config-driver; ".format(self.dir_setup)
+        # repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
+        # repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
+        # repair_command += "export BINARY={}; ".format(abs_path_binary)
+        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
+        # repair_command += "export TIMEOUT={}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        # repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
+        repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
             str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        status = self.run_command(repair_command,  self.log_output_path, self.dir_setup)
+        status = self.run_command(repair_command,  self.log_output_path, self.dir_setup, env=environment_vars)
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
