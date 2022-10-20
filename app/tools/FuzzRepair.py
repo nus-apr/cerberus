@@ -15,7 +15,7 @@ class FuzzRepair(AbstractTool):
         self.image_name="rshariffdeen/fuzzrepair:tool"
 
     def generate_conf_file(self, bug_info):
-        repair_conf_path = join(self.dir_setup,"fuzzrepair.conf")
+        repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
         conf_content = []
         poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
@@ -28,6 +28,9 @@ class FuzzRepair(AbstractTool):
 
         conf_content.append(
             "exploit_command:{}\n".format(bug_info[definitions.KEY_CRASH_CMD])
+        )
+        conf_content.append(
+            "fix_file:{}\n".format(bug_info[definitions.KEY_FIX_FILE])
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
         self.append_file(conf_content, repair_conf_path)
