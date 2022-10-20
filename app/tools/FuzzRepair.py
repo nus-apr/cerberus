@@ -30,7 +30,7 @@ class FuzzRepair(AbstractTool):
             "exploit_command:{}\n".format(bug_info[definitions.KEY_CRASH_CMD])
         )
         conf_content.append(
-            "fix_file:{}/src/{}\n".format(self.dir_expr, bug_info[definitions.KEY_FIX_FILE])
+            "fix_file:{}/src/{}\n".format(self.dir_expr, bug_info[definitions.KEY_FIX_FILE]).replace("//", "/")
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
         self.write_file(conf_content, repair_conf_path)
