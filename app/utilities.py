@@ -11,7 +11,7 @@ import time
 import shutil
 
 
-def execute_command(command, show_output=True):
+def execute_command(command, show_output=True, env=dict()):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     emitter.command(command)
@@ -19,7 +19,7 @@ def execute_command(command, show_output=True):
     if not show_output:
         command += " > /dev/null"
     # print(command)
-    process = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+    process = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True, env=env)
     (output, error) = process.communicate()
     # out is the output of the command, and err is the exit value
     return int(process.returncode)

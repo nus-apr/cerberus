@@ -77,12 +77,12 @@ class AbstractTool:
         self.run_command(timestamp_command, self.log_output_path)
 
     def run_command(
-        self, command_str, log_file_path="/dev/null", dir_path="/experiment"
+        self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=None
     ):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
             exit_code, output = container.exec_command(
-                self.container_id, command_str, dir_path
+                self.container_id, command_str, dir_path, env
             )
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
@@ -93,7 +93,7 @@ class AbstractTool:
         else:
             command_str = "cd " + dir_path + ";" + command_str
             command_str += " >> {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command_str)
+            exit_code = execute_command(command_str, env=env)
         return exit_code
 
     def instrument(self, bug_info):

@@ -164,7 +164,7 @@ def build_container(container_name, volume_list, image_name):
     return container_id[:12]
 
 
-def exec_command(container_id, command, workdir="/experiment"):
+def exec_command(container_id, command, workdir="/experiment", env=dict()):
     client = docker.from_env()
     exit_code = -1
     output = ""
@@ -174,7 +174,7 @@ def exec_command(container_id, command, workdir="/experiment"):
         print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(
-            command, privileged=True, demux=True, workdir=workdir, tty=True
+            command, privileged=True, demux=True, workdir=workdir, tty=True, environment=env
         )
         if output is not None:
             for stream in output:
