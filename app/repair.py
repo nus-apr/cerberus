@@ -395,18 +395,20 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
     if not container.is_image_exist(container_name.lower()):
-        tmp_dockerfile = "/tmp/Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(dir_info["local"]["setup"],
+                                                       repair_tool.name, bug_image_id)
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
-            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/setup"))
+            dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
             dock_file.write(
                 "COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment")
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write(
-                "RUN bash {}; return 0".format(join(dir_info["container"]["setup"],"deps.sh"))
+                "RUN bash {}; return 0".format(join(dir_info["container"]["setup"], "deps.sh"))
             )
         container.build_image(tmp_dockerfile, container_name.lower())
+        os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
     tmp_container_id = container.build_container(
         container_name, dict(), container_name.lower()
