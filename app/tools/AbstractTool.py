@@ -55,6 +55,9 @@ class AbstractTool:
         self.container_id = container_id
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
+        self._time = analysis.TimeAnalysis()
+        self._space = analysis.SpaceAnalysis()
+        self._error = analysis.ErrorAnalysis()
 
     def update_dir_info(self, dir_info):
         if self.container_id:
