@@ -285,10 +285,12 @@ def copy_file_to_container(container_id, from_path, to_path):
 
 def write_file(container_id, file_path, content):
     tmp_file_path = os.path.join("/tmp", "write-file")
+    os.remove(tmp_file_path)
     with open(tmp_file_path, "w") as f:
         for line in content:
             f.write(line)
     copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
+    os.remove(tmp_file_path)
     utilities.execute_command(copy_command)
 
 
