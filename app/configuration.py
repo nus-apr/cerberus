@@ -57,6 +57,8 @@ def read_arg(argument_list):
                 values.CONF_USE_VALKYRIE = True
             elif definitions.ARG_SETUP_ONLY in arg:
                 values.CONF_SETUP_ONLY = True
+            elif definitions.ARG_REBUILD_IMAGES in arg:
+                values.CONF_REBUILD_IMAGES = True
             elif definitions.ARG_SKIP_SETUP in arg:
                 values.CONF_SKIP_SETUP = True
             elif definitions.ARG_USE_CONTAINER in arg:
