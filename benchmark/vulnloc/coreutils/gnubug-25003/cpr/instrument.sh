@@ -44,7 +44,7 @@ EOF
 
 # Create patch components
 mkdir $dir_name/cpr/components
-declare -a arr_var=("start" "initial_read", "bufsize")
+declare -a arr_var=("start" "initial_read" "bufsize")
 # Create components for program variables
 for i in "${arr_var[@]}"
 do
