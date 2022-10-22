@@ -75,6 +75,7 @@ ARG_SKIP_SETUP = "--skip-setup"
 ARG_INSTRUMENT_ONLY = "--instrument-only"
 ARG_RUN_TESTS_ONLY = "--run-tests-only"
 ARG_ANALYSE_ONLY = "--analyse-only"
+ARG_REBUILD_IMAGES = "--rebuild"
 
 
 FILE_META_DATA = None

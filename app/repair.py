@@ -394,7 +394,7 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
-    if not container.is_image_exist(container_name.lower()):
+    if not container.is_image_exist(container_name.lower()) or values.DEFAULT_REBUILD_IMAGES:
         tmp_dockerfile = "{}/Dockerfile-{}-{}".format(dir_info["local"]["setup"],
                                                        repair_tool.name, bug_image_id)
         with open(tmp_dockerfile, "w") as dock_file:

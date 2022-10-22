@@ -212,4 +212,6 @@ def update_configuration():
         values.DEFAULT_DUMP_PATCHES = True
     if values.CONF_USE_VTHREADS:
         values.DEFAULT_USE_VTHREADS = True
+    if values.CONF_REBUILD_IMAGES:
+        values.DEFAULT_REBUILD_IMAGES = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)
