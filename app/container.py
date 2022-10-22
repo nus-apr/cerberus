@@ -45,12 +45,12 @@ def build_image(dockerfile_path, image_name):
     client = docker.from_env()
     emitter.normal("\t\t[benchmark] building docker image")
     image = None
-    context_dir = pathlib.Path(dockerfile_path).parent.absolute()
+    context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
-        dockerfile_obj = open(dockerfile_path, "rb")
+        dockerfilename = dockerfile_path.split("/")[-1]
         try:
             logs = client.api.build(
-                path=context_dir, fileobj=dockerfile_obj, tag=image_name
+                path=context_dir, tag=image_name, dockerfile=dockerfilename
             )
             id = None
             for line in logs:
