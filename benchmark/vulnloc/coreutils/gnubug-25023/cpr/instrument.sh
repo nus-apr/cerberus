@@ -17,7 +17,8 @@ sed -i '97i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#e
 sed -i '97i #include <klee/klee.h>' src/pr.c
 git add src/pr.c
 git commit -m "instrument cpr"
-
+make -j32
+make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest" CXXFLAGS=$CFLAGS src/pr -j32
 
 cat <<EOF > $dir_name/cpr/repair.conf
 project_path:$dir_name

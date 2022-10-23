@@ -8,15 +8,19 @@ mkdir $dir_name/cpr
 cd $dir_name/src
 make clean
 
-
-autoreconf -i
-CC=wllvm CXX=wllvm++ ./configure --enable-static --disable-shared CFLAGS='-g -O0 -static -ftrapv' CXXFLAGS="$CFLAGS"
-sed -i '1234i CPR_OUTPUT("obs", "i32", dec->yend - dec->tileyoff);\n' src/libjasper/jpc/jpc_dec.c
-sed -i '1229i if(__cpr_choice("L1229", "bool", (int[]){dec->yend, dec->tileyoff, INT_MAX}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) return -1;' src/libjasper/jpc/jpc_dec.c
-sed -i '90i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif\n' src/libjasper/jpc/jpc_dec.c
-git add src/libjasper/jpc/jpc_dec.c
+sed -i '987i klee_assert(initial_read > start);' src/split.c
+sed -i '987i CPR_OUTPUT("obs", "i32", initial_read - start);\n' src/split.c
+sed -i '985d' src/split.c
+sed -i '985i if(__cpr_choice("L290", "bool", (int[]){start, initial_read, bufsize}, (char*[]){"start","initial_read", "bufsize"}, 3, (int*[]){}, (char*[]){}, 0))' src/split.c
+sed -i '97i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif' src/split.c
+sed -i '97i #include <klee/klee.h>' src/split.c
+git add src/split.c
 git commit -m "instrument cpr"
-make CC=$CPR_CC CXX=$CPR_CXX  CFLAGS='-g -O0 -static -ftrapv' CXXFLAGS="$CFLAGS" -j32
+
+./bootstrap
+FORCE_UNSAFE_CONFIGURE=1 CC=$CPR_CC CXX=$CPR_CXX ./configure CFLAGS='-g -O0 -static -fPIE' CXXFLAGS="$CFLAGS"
+make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest -I/klee/source/include" CXXFLAGS=$CFLAGS -j32
+make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest -I/klee/source/include" CXXFLAGS=$CFLAGS src/split -j32
 
 
 

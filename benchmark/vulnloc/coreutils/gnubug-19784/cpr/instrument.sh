@@ -9,15 +9,15 @@ cd $dir_name/src
 make clean
 
 
-autoreconf -i
-CC=wllvm CXX=wllvm++ ./configure --enable-static --disable-shared CFLAGS='-g -O0 -static -ftrapv' CXXFLAGS="$CFLAGS"
-sed -i '1234i CPR_OUTPUT("obs", "i32", dec->yend - dec->tileyoff);\n' src/libjasper/jpc/jpc_dec.c
-sed -i '1229i if(__cpr_choice("L1229", "bool", (int[]){dec->yend, dec->tileyoff, INT_MAX}, (char*[]){"x", "y", "z"}, 3, (int*[]){}, (char*[]){}, 0)) return -1;' src/libjasper/jpc/jpc_dec.c
-sed -i '90i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif\n' src/libjasper/jpc/jpc_dec.c
-git add src/libjasper/jpc/jpc_dec.c
+sed -i '214,215d' src/make-prime-list.c
+sed -i '214i while((__cpr_choice("L290", "bool", (int[]){size, i}, (char*[]){"size","i"}, 2, (int*[]){}, (char*[]){}, 0)) && sieve[++i] == 0)' src/make-prime-list.c
+sed -i '215i CPR_OUTPUT("obs", "i32", size - i);\n' src/make-prime-list.c
+git add src/make-prime-list.c
 git commit -m "instrument cpr"
-make CC=$CPR_CC CXX=$CPR_CXX  CFLAGS='-g -O0 -static -ftrapv' CXXFLAGS="$CFLAGS" -j32
 
+./bootstrap
+FORCE_UNSAFE_CONFIGURE=1 CC=$CPR_CC CXX=$CPR_CXX ./configure CFLAGS='-g -O0 -static -fPIE' CXXFLAGS="$CFLAGS"
+make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest" CXXFLAGS=$CFLAGS src/make-prime-list -j32
 
 
 cat <<EOF > $dir_name/cpr/repair.conf
