@@ -13,10 +13,12 @@ sed -i '1238i }' src/pr.c
 sed -i '1236d' src/pr.c
 sed -i '1236i CPR_OUTPUT("obs", "i32", col_sep_length);\n' src/pr.c
 sed -i '1236i else if (!join_lines && *col_sep_string == \x27\\t\x27 && __cpr_choice("L290", "bool", (int[]){col_sep_length}, (char*[]){"col_sep_length"}, 1, (int*[]){}, (char*[]){}, 0)){' src/pr.c
-sed -i '97i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif' src/pr.c
-sed -i '97i #include <klee/klee.h>' src/pr.c
+sed -i '326i #ifndef CPR_OUTPUT\n#define CPR_OUTPUT(id, typestr, value) value\n#endif' src/pr.c
+sed -i '326i #include <klee/klee.h>' src/pr.c
 git add src/pr.c
 git commit -m "instrument cpr"
+./bootstrap
+FORCE_UNSAFE_CONFIGURE=1 CC=$CPR_CC CXX=$CPR_CXX ./configure CFLAGS='-g -O0 -static -fPIE' CXXFLAGS="$CFLAGS"
 make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest -I/klee/source/include" CXXFLAGS=$CFLAGS -j32
 make CFLAGS="-fPIC -fPIE -L/klee/build/lib  -lkleeRuntest -I/klee/source/include" CXXFLAGS=$CFLAGS src/pr -j32
 
@@ -36,8 +38,8 @@ test_input_list:["-S$(printf '\t\t\t')",a,-m,$script_dir/../tests/1.txt,>,/dev/n
 poc_path:$script_dir/../tests/1.txt
 static:false
 build_flags:disable
-loc_patch:$dir_name/src/src/pr.c:1236
-loc_bug:$dir_name/src/src/pr.c:1237
+loc_patch:$dir_name/src/src/pr.c:1240
+loc_bug:$dir_name/src/src/pr.c:1241
 build_flags:disable
 mask_arg:0,2,4,5,6
 dist_metric:control-loc
