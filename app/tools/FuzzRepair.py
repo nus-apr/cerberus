@@ -17,8 +17,18 @@ class FuzzRepair(AbstractTool):
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
         conf_content = []
-        poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+        # check if a version for fuzzrepair has been explicitly defined
+        if definitions.KEY_FUZZREPAIR_EXPLOIT_LIST in bug_info:
+            poc_list = bug_info[definitions.KEY_FUZZREPAIR_EXPLOIT_LIST]
+        else:
+            poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
+
+        if definitions.KEY_FUZZREPAIR_CRASH_CMD in bug_info:
+            crash_cmd = bug_info[definitions.KEY_FUZZREPAIR_CRASH_CMD]
+        else:
+            crash_cmd = bug_info[definitions.KEY_CRASH_CMD]
 
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
@@ -27,7 +37,7 @@ class FuzzRepair(AbstractTool):
         )
 
         conf_content.append(
-            "exploit_command:{}\n".format(bug_info[definitions.KEY_CRASH_CMD])
+            "exploit_command:{}\n".format(crash_cmd)
         )
         conf_content.append(
             "fix_file:{}/src/{}\n".format(self.dir_expr, bug_info[definitions.KEY_FIX_FILE]).replace("//", "/")

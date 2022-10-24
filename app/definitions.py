@@ -44,6 +44,8 @@ KEY_COUNT_NEG = "count_neg"
 KEY_COUNT_POS = "count_pos"
 KEY_CRASH_CMD = "crash_input"
 KEY_EXPLOIT_LIST = "exploit_file_list"
+KEY_FUZZREPAIR_CRASH_CMD = "fuzzrepair_crash_input"
+KEY_FUZZREPAIR_EXPLOIT_LIST = "fuzzrepair_exploit_file_list"
 KEY_BUG_TYPE = "bug_type"
 
 
