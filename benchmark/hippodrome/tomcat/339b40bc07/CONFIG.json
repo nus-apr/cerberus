@@ -1,0 +1,14 @@
+{
+	"options": [
+		"--racerdfix-only",
+		"--starvation"
+	],
+	"json_path": "./infer-out/",
+	"target_options": [
+		"--",
+		"/usr/bin/ant",
+		"-lib",
+		"/hippodrome/infer-annotation-0.18.0.jar"
+	],
+	"prio_files":  ["jjava/org/apache/coyote/http2/Http2UpgradeHandler.java"]
+}

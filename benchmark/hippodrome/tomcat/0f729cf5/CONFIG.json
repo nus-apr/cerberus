@@ -1,0 +1,14 @@
+{
+	"options": [
+		"--racerdfix-only",
+		"--starvation"
+	],
+	"json_path": "./infer-out/",
+	"target_options": [
+		"--",
+		"ant",
+		"-lib",
+		"/hippodrome/infer-annotation-0.18.0.jar"
+	],
+	"prio_files":  ["java/org/apache/tomcat/websocket/WsRemoteEndpointImplBase.java"]
+}
