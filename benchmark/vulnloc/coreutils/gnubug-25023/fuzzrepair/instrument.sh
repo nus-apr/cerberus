@@ -7,6 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 fix_file=$dir_name/src/$2
 
+cd $dir_name/src
+
 # for AFL argv fuzz
 sed -i "856i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/pr.c
 sed -i "860i AFL_INIT_SET0234(\"./pr\", \"${dir_name}/src/dummy\", \"-m\", \"${dir_name}/src/dummy\");" src/pr.c

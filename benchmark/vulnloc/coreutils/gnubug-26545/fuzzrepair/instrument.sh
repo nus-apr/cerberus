@@ -7,6 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 fix_file=$dir_name/src/$2
 
+cd $dir_name/src
+
 # for AFL argv fuzz
 sed -i "1215i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/shred.c
 sed -i "1220i AFL_INIT_SET03(\"./shred\", \"${dir_name}/src/dummy\");" src/shred.c
@@ -28,6 +30,3 @@ bear $script_dir/../build.sh $1
 cd $LIBPATCH_DIR/rewriter
 ./rewritecond $fix_file -o $fix_file
 $script_dir/../build.sh $1
-
-
-
