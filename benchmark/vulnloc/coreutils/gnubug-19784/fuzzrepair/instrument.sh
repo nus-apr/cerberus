@@ -7,6 +7,8 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 fix_file=$dir_name/src/$2
 
+cd $dir_name/src
+
 # for AFL argv fuzz
 sed -i "29i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/make-prime-list.c
 sed -i '175i AFL_INIT_SET0("./make-prime-list");' src/make-prime-list.c
