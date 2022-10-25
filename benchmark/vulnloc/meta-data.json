@@ -75,8 +75,6 @@
         "binary_path": "src/make-prime-list",
         "crash_input": "5",
         "exploit_file_list": [],
-        "fuzzrepair_crash_input": "",
-        "fuzzrepair_exploit_file_list": ["tests/exploit"],
         "test_timeout": 5,
         "bug_type": "Buffer Overflow"
     },
@@ -93,8 +91,6 @@
         "binary_path": "src/split",
         "crash_input": "-n7/75 7",
         "exploit_file_list": [],
-        "fuzzrepair_crash_input": "",
-        "fuzzrepair_exploit_file_list": ["tests/exploit"],
         "test_timeout": 5,
         "bug_type": "Integer Overflow"
     },
@@ -111,8 +107,6 @@
         "binary_path": "src/pr",
         "crash_input": "\"-S$(printf \"\\t\\t\\t\")\" a -m a",
         "exploit_file_list": [],
-        "fuzzrepair_crash_input": "",
-        "fuzzrepair_exploit_file_list": ["tests/exploit"],
         "test_timeout": 5,
         "bug_type": "Buffer Overflow"
     },
@@ -129,8 +123,6 @@
         "binary_path": "src/shred",
         "crash_input": "-n4 -s7 abc",
         "exploit_file_list": [],
-        "fuzzrepair_crash_input": "",
-        "fuzzrepair_exploit_file_list": ["tests/exploit"],
         "test_timeout": 5,
         "bug_type": "Integer Overflow"
     },

@@ -17,19 +17,18 @@ class FuzzRepair(AbstractTool):
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
         conf_content = []
-        # check if a version for fuzzrepair has been explicitly defined
-        if definitions.KEY_FUZZREPAIR_EXPLOIT_LIST in bug_info:
-            poc_list = bug_info[definitions.KEY_FUZZREPAIR_EXPLOIT_LIST]
-        else:
+        # check there is a file-input defined, if not use default exploit command
+        # for example coreutils in vulnloc/extractfix benchmarks have stdarg which are not file inputs
+        # instrumentation should convert such to a file argument
+        exploit_file_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+        if exploit_file_list:
             poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+            crash_cmd = bug_info[definitions.KEY_CRASH_CMD]
+        else:
+            poc_list = ["tests/exploit"]
+            crash_cmd = ""
 
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
-
-        if definitions.KEY_FUZZREPAIR_CRASH_CMD in bug_info:
-            crash_cmd = bug_info[definitions.KEY_FUZZREPAIR_CRASH_CMD]
-        else:
-            crash_cmd = bug_info[definitions.KEY_CRASH_CMD]
-
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
         conf_content.append(
