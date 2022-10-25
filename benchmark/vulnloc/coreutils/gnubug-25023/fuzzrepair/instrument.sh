@@ -28,6 +28,7 @@ sed -i "s|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|//#include \"${LI
 cd $LIBPATCH_DIR/rewriter
 ./rewritecond $fix_file -o $fix_file
 # change back
+cd $dir_name/src
 sed -i "s|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/pr.c
 
 $script_dir/../build.sh $1
