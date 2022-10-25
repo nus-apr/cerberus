@@ -27,6 +27,12 @@ touch dummy
 # do make
 make clean
 bear $script_dir/../build.sh $1
+# comment out this for rewriter to work
+sed -i "s|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/shred.c
+
 cd $LIBPATCH_DIR/rewriter
 ./rewritecond $fix_file -o $fix_file
+# change back
+sed -i "s|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/shred.c
+
 $script_dir/../build.sh $1

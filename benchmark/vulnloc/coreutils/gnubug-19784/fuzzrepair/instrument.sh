@@ -17,6 +17,12 @@ $script_dir/../config.sh $1
 cd $dir_name/src
 make clean
 bear $script_dir/../build.sh $1
+# comment out this for rewriter to work
+sed -i "s|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/make-prime-list.c
+
 cd $LIBPATCH_DIR/rewriter
 ./rewritecond $fix_file -o $fix_file
+# change back
+sed -i "s|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/make-prime-list.c
+
 $script_dir/../build.sh $1
