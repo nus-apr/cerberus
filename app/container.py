@@ -290,6 +290,7 @@ def write_file(container_id, file_path, content):
             f.write(line)
     copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
     utilities.execute_command(copy_command)
+    os.remove(tmp_file_path)
 
 
 def read_file(container_id, file_path, encoding="utf-8"):
@@ -298,6 +299,7 @@ def read_file(container_id, file_path, encoding="utf-8"):
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "r", encoding=encoding) as f:
         file_content = f.readlines()
+    os.remove(tmp_file_path)
     return file_content
 
 
@@ -310,5 +312,4 @@ def append_file(container_id, file_path, content):
             f.write(line)
     copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
     utilities.execute_command(copy_command)
-    del_command = "rm -f {}".format(tmp_file_path)
-    utilities.execute_command(del_command)
+    os.remove(tmp_file_path)
