@@ -17,6 +17,11 @@ class Defects4J(AbstractBenchmark):
         )
         experiment_item = self.experiment_subjects[int(bug_index) - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        command_str = "defects4j checkout -p {} -v {}b -w {}".format(experiment_item[definitions.KEY_SUBJECT],bug_id,join(self.dir_expr,"src"))
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path
+        )
+        is_error = status != 0 
         if not is_error:
             if self.verify(bug_id, container_id):
                 emitter.success("\t\t\t[benchmark] verified successfully")
@@ -35,16 +40,7 @@ class Defects4J(AbstractBenchmark):
 
     def deploy(self, bug_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
-        self.log_deploy_path = (
-            self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
-        )
-        experiment_item = self.experiment_subjects[int(bug_id) - 1]
-        command_str = "defects4j checkout -p {} -v {}b -w {}".format(experiment_item[definitions.KEY_SUBJECT],experiment_item[definitions.KEY_BUG_ID],join(self.dir_expr,"src"))
-        status = self.run_command(
-            container_id, command_str, self.log_deploy_path
-        )
-        return status == 0
-
+        return True
     def config(self, bug_id, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True

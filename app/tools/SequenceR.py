@@ -135,7 +135,7 @@ class SequenceR(AbstractTool):
         if not self._error.is_error:
             patch_space = self.list_dir("/output/patches")
             self._space.generated = len(patch_space)
-            self._space.enumerations = len(list(filter(lambda x: "_" in x, patch_space)))
+            self._space.enumerations = len(patch_space)
             self._space.plausible = len(list(filter(lambda x: "passed" in x, patch_space)))
             self._space.non_compilable= self._space.generated - self._space.enumerations
 
