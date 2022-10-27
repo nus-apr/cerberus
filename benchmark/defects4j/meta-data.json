@@ -273,7 +273,7 @@
     {
     "id":18,
     "subject":"Closure",
-    "bug_id":63,
+    "bug_id":62,
     "source_file":"src/com/google/javascript/jscomp/LightweightMessageFormatter.java",
     "line_numbers":[98],
     "failing_test": "",
