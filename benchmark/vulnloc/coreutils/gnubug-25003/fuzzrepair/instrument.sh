@@ -10,7 +10,7 @@ fix_file=$dir_name/src/$2
 cd $dir_name/src
 
 # for AFL argv fuzz
-sed -i "1283i #include \"${LIBPATCH_DIR}/argv-fuzz-inl.h\"" src/split.c
+sed -i "1283i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/split.c
 # dummy is just an empty file
 sed -i "1288i AFL_INIT_SET02(\"./split\", \"${dir_name}/src/dummy\");" src/split.c
 # avoid writing out a lot of files during fuzzing
