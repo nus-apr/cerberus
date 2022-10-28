@@ -377,8 +377,8 @@ class Fix2Fit(AbstractTool):
                 self._space.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
-            elif "partition size " in line:
-                self._space.plausible = int(line.split("partition size ")[-1].strip()) + self._space.plausible
+            elif "partition size: " in line:
+                self._space.plausible = int(line.split("partition size: ")[-1].strip()) + self._space.plausible
             elif "patches successfully generated" in line:
                 is_timeout = False
             elif "no patch found" in line:
