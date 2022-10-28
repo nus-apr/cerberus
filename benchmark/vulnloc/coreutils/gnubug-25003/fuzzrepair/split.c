@@ -1381,7 +1381,7 @@ lines_rr (uintmax_t k, uintmax_t n, char *buf, size_t bufsize)
         }
     }
 
-no_filters:
+no_filters: ;
   /* Ensure all files created, so that any existing files are truncated,
      and to signal any waiting fifo consumers.
      Also, close any open file descriptors.
