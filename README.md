@@ -2,8 +2,8 @@
 Cerberus is a program repair framework that provides the interface to multiple
 state-of-the art program repair tools such as Prophet, Darjeeling, Angelix, F1X etc.
 Encapsulating the difficulties to setup the infrastructure for repair technology, this platform provides
-the necessary framework to configure a program for repair. We have integrated two popular repair
-benchmarks: ManyBugs and VulnLoc. This platform also provides the necessary means for researchers to
+the necessary framework to configure a program for repair. We have integrated three popular repair
+benchmarks: ManyBugs, VulnLoc and Defects4J. This platform also provides the necessary means for researchers to
 run experiments more efficiently and effectively.
 
 
@@ -49,9 +49,9 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 1 | ManyBugs          | C/C++    |          6 |     60 |  
 | 2 | VulnLoc           | C/C++    |         11 |     43 |  
 | 3 | ExtractFix        | C/C++    |          7 |     30 |
-| 4 | ITSP              | Java     |         10 |    661 |
-| 5 | Hippodrome Test   | Java     |         15 |     15 |
-| 6 | Defects4J(partial)| Java     |          6 |     75 |
+| 4 | ITSP              | C/C++    |         10 |    661 |
+| 5 | Hippodrome        | Java     |         15 |     15 |
+| 6 | Defects4J         | Java     |          6 |     75 |
 
 ## Bugs ##
 Cerberus should be considered alpha-quality software. Bugs can be reported here:
@@ -79,8 +79,6 @@ We welcome contributions to improve this work, see [details](doc/Contributing.md
 ## Contributors ##
 * Gao Xiang
 * Yannic Noller
-
-
 
 # License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
