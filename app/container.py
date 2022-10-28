@@ -180,7 +180,7 @@ def exec_command(container_id, command, workdir="/experiment", env=dict()):
             for stream in output:
                 if stream is None:
                     continue
-                for line in stream.decode().split("\n"):
+                for line in stream.decode("ascii", "ignore").split("\n"):
                     if line != "":
                         emitter.debug(line)
     except docker.errors.NotFound as ex:
