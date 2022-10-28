@@ -146,7 +146,7 @@ class Darjeeling(AbstractTool):
                     self._space.size = line.split(": ")[2].split(" ")[0]
                 elif "plausible patches" in line:
                     self._space.plausible = int(
-                        line.split("found ")[-1].replace(" plausible patches", "")
+                        line.split("found ")[-1].replace(" plausible patches", "").split("\x1b")[0].split(".0")[0]
                     )
                     
         self._space.generated = len(
