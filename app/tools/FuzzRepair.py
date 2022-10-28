@@ -48,6 +48,7 @@ class FuzzRepair(AbstractTool):
     def repair(self, bug_info, config_info):
         super(FuzzRepair, self).repair(bug_info, config_info)
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_m = str(float(timeout) * 60)
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         repair_conf_path = self.generate_conf_file(bug_info)
         # repair_conf_path = self.dir_setup + "/crepair/repair.conf"
