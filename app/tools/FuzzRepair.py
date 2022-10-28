@@ -56,7 +56,7 @@ class FuzzRepair(AbstractTool):
         repair_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h ".format(
             str(timeout_h)
         )
-        repair_command = "fuzzrepair --conf={0} --time-duration={1} {2}'".format(
+        repair_command += " fuzzrepair --conf={0} --time-duration={1} {2}'".format(
             repair_conf_path, str(timeout_m), additional_tool_param
         )
 
