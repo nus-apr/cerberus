@@ -135,10 +135,10 @@ class Darjeeling(AbstractTool):
                     if time_stamp_first_plausible is None:
                         time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
-                    time = line.split("validation time: ")[-1].strip().replace("\n", "")
+                    time = line.split("validation time: ")[-1].strip().split("\x1b")[0].split(".0")[0]
                     self._time.total_validation += float(time)
                 elif "build time: " in line:
-                    time = line.split("build time: ")[-1].strip().replace("\n", "")
+                    time = line.split("build time: ")[-1].strip().split("\x1b")[0].split(".0")[0]
                     self._time.total_build += float(time)
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
