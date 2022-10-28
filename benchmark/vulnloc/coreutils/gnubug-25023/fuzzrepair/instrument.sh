@@ -7,11 +7,14 @@ dir_name=$1/$benchmark_name/$project_name/$bug_id
 
 fix_file=$dir_name/src/$2
 
+# first copy over a pre-instrumented version of fix file
+cp $script_dir/pr.c $fix_file
+
 cd $dir_name/src
 
 # for AFL argv fuzz
-sed -i "856i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/pr.c
-sed -i "860i AFL_INIT_SET0234(\"./pr\", \"${dir_name}/src/dummy\", \"-m\", \"${dir_name}/src/dummy\");" src/pr.c
+sed -i "864i #include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"" src/pr.c
+sed -i "869i AFL_INIT_SET0234(\"./pr\", \"${dir_name}/src/dummy\", \"-m\", \"${dir_name}/src/dummy\");" src/pr.c
 # not bulding man pages
 sed -i '229d' Makefile.am
 
@@ -21,19 +24,4 @@ cd $dir_name/src
 echo a > dummy
 # do make
 make clean
-bear $script_dir/../build.sh $1
-# comment out this for rewriter to work
-sed -i "s|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/pr.c
-
-cd $LIBPATCH_DIR/rewriter
-./rewritecond $fix_file -o $fix_file
-ret=$?
-if [[ ret -eq 1 ]]
-then
-   exit 128
-fi
-# change back
-cd $dir_name/src
-sed -i "s|//#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|#include \"${LIBPATCH_DIR}/helpers/argv-fuzz-inl.h\"|g" src/pr.c
-
 $script_dir/../build.sh $1
