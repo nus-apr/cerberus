@@ -354,7 +354,7 @@ class Fix2Fit(AbstractTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self._space.generated = line.split("search space size: ")[
+                    self._space.size = line.split("search space size: ")[
                         -1
                     ].strip()
 
@@ -362,14 +362,23 @@ class Fix2Fit(AbstractTool):
         self._time.timestamp_start = log_lines[0].replace("\n", "")
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
-            if "candidates evaluated: " in line:
+            if "search space size: " in line:
+                self._space.size = int(
+                    line.split("search space size: ")[-1].strip()
+                )
+            elif "candidates evaluated: " in line:
                 self._space.enumerations = int(
                     line.split("candidates evaluated: ")[-1].strip()
                 )
+            elif "exploration progress: " in line:
+                self._space.enumerations = int(line.split("exploration progress: ")[-1].strip().replace("%", ""))/100 \
+                                           * self._space.size
             elif "plausible patches: " in line:
                 self._space.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
+            elif "partition size " in line:
+                self._space.plausible = int(line.split("partition size ")[-1].strip()) + self._space.plausible
             elif "patches successfully generated" in line:
                 is_timeout = False
             elif "no patch found" in line:
