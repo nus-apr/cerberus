@@ -44,8 +44,7 @@
         "crash_input": "$POC foo.tif",
         "exploit_file_list": ["tests/1.gif"],
         "test_timeout": 5,
-        "bug_type": "API Specific",
-        "bug_type_extractfix": "API Specific"
+        "bug_type": "API Specific"
     },
     {
         "id": 4,

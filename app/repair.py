@@ -405,7 +405,7 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write(
-                "RUN bash {}; return 0".format(join(dir_info["container"]["setup"], "deps.sh"))
+                "RUN bash {0} || sudo bash {0}; return 0".format(join(dir_info["container"]["setup"], "deps.sh"))
             )
         container.build_image(tmp_dockerfile, container_name.lower())
         os.remove(tmp_dockerfile)

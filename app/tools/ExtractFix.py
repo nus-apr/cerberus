@@ -91,25 +91,32 @@ class ExtractFix(AbstractTool):
         #     )
         #     error_exit("Unhandled Exception")
         # Currently we assume that the test cases are copied, this can be simplified by using the tests_lsit above
-        test_case = "-t " + (experiment_info[definitions.KEY_EXPLOIT_LIST][0] if len(experiment_info[definitions.KEY_EXPLOIT_LIST]) !=0 else "dummy") 
+        test_case = "-t " + (
+            experiment_info[definitions.KEY_EXPLOIT_LIST][0]
+            if len(experiment_info[definitions.KEY_EXPLOIT_LIST]) != 0
+            else "dummy"
+        )
 
         # (3) driver
         driver = "-c driver"
 
         # (4) bug type
-        bug_type = "-b " + (
-            ExtractFix.bug_conversion_table[experiment_info[definitions.KEY_BUG_TYPE]]
-            if definitions.KEY_BUG_TYPE in experiment_info
-            else ExtractFix.conversion_table[
-                definitions.definitions.KEY_BUG_TYPE + "_extractfix"
+        bug_type = "-b "
+
+        if definitions.KEY_BUG_TYPE + "_extractfix" in experiment_info:
+            bug_type += ExtractFix.bug_conversion_table[
+                experiment_info[definitions.KEY_BUG_TYPE + "_extractfix"]
             ]
-            if definitions.definitions.KEY_BUG_TYPE + "_extractfix" in experiment_info
-            else utilities.error_exit(
+        elif definitions.KEY_BUG_TYPE in experiment_info:
+            bug_type += ExtractFix.bug_conversion_table[
+                experiment_info[definitions.KEY_BUG_TYPE]
+            ]
+        else:
+            utilities.error_exit(
                 "Bug {} does not have {} field to indicate the type".format(
                     experiment_info[definitions.KEY_BUG_ID], definitions.KEY_BUG_TYPE
                 )
             )
-        )
 
         # (5) buggy program
         program = "-n " + experiment_info[definitions.KEY_BINARY_PATH].split("/")[-1]

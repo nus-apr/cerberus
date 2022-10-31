@@ -401,7 +401,7 @@
     {
     "id":26,
     "subject":"Closure",
-    "bug_id":93,
+    "bug_id":92,
     "source_file":"src/com/google/javascript/jscomp/ProcessClosurePrimitives.java",
     "line_numbers":[789],
     "failing_test": "",
