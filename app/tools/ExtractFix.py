@@ -101,17 +101,16 @@ class ExtractFix(AbstractTool):
         driver = "-c driver"
 
         # (4) bug type
-        bug_type = "-b "
-
-        if definitions.KEY_BUG_TYPE + "_extractfix" in experiment_info:
-            bug_type += ExtractFix.bug_conversion_table[
-                experiment_info[definitions.KEY_BUG_TYPE + "_extractfix"]
-            ]
-        elif definitions.KEY_BUG_TYPE in experiment_info:
-            bug_type += ExtractFix.bug_conversion_table[
+        bug_type = "-b " + (
+            "api_specific"
+            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
+            or experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
+            else ExtractFix.bug_conversion_table[
                 experiment_info[definitions.KEY_BUG_TYPE]
             ]
-        else:
+        )
+
+        if bug_type == "-b ":
             utilities.error_exit(
                 "Bug {} does not have {} field to indicate the type".format(
                     experiment_info[definitions.KEY_BUG_ID], definitions.KEY_BUG_TYPE

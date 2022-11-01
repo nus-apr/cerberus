@@ -92,8 +92,7 @@
         "crash_input": "-n7/75 7",
         "exploit_file_list": [],
         "test_timeout": 5,
-        "bug_type": "Integer Overflow",
-        "bug_type_extractfix": "API Specific"
+        "bug_type": "Integer Overflow"
     },
     {
         "id": 7,
@@ -414,7 +413,6 @@
         "exploit_file_list": ["tests/1.gif"],
         "test_timeout": 5,
         "bug_type": "Buffer Overflow",
-        "bug_type_extractfix": "API Specific"
     },
     {
         "id": 27,
