@@ -130,6 +130,7 @@ class AbstractTool:
             conf_id, self.name.lower(), bug_id, "-output.log"
         )
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
+        self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
     def pre_process(self):
