@@ -13,6 +13,7 @@ class FuzzRepair(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(FuzzRepair, self).__init__(self.name)
         self.image_name="rshariffdeen/fuzzrepair:tool"
+        self.bug_id = ""
 
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
@@ -29,6 +30,7 @@ class FuzzRepair(AbstractTool):
             crash_cmd = ""
 
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
+        self.bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
         conf_content.append(
@@ -91,7 +93,7 @@ class FuzzRepair(AbstractTool):
         for a_file in tool_artifact_files:
             copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
-        self.run_command("cp -rf /FuzzRepair/output/{} {}".format(self.id, self.dir_output))
+        self.run_command("cp -rf /FuzzRepair/output/{} {}".format(self.bug_id, self.dir_output))
         super(FuzzRepair, self).save_artefacts(dir_info)
         return
 
