@@ -91,6 +91,7 @@ class FuzzRepair(AbstractTool):
         for a_file in tool_artifact_files:
             copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
+        self.run_command("cp -rf /FuzzRepair/output/{} {}".format(self.id, self.dir_output))
         super(FuzzRepair, self).save_artefacts(dir_info)
         return
 
@@ -122,6 +123,10 @@ class FuzzRepair(AbstractTool):
                 if "Generating patch" in line:
                     count_plausible += 1
                     count_enumerations += 1
+                elif "Runtime Error" in line:
+                    self._error.is_error = True
+                elif "statistics" in line:
+                    is_timeout = False
 
         self._space.plausible = count_plausible
         self._space.enumerations = count_enumerations
