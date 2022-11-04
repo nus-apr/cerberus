@@ -9,6 +9,24 @@ import base64
 import hashlib
 import time
 import shutil
+import re
+
+
+def escape_ansi(text):
+    # 7-bit C1 ANSI sequences
+    ansi_escape = re.compile(r'''
+        \x1B  # ESC
+        (?:   # 7-bit C1 Fe (except CSI)
+            [@-Z\\-_]
+        |     # or [ for CSI, followed by a control sequence
+            \[
+            [0-?]*  # Parameter bytes
+            [ -/]*  # Intermediate bytes
+            [@-~]   # Final byte
+        )
+    ''', re.VERBOSE)
+    result = ansi_escape.sub('', text)
+    return result
 
 
 def execute_command(command, show_output=True, env=dict()):

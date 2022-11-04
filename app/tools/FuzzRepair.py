@@ -2,7 +2,7 @@ import os
 import shutil
 import re
 from app.tools.AbstractTool import AbstractTool
-from app.utilities import execute_command, error_exit
+from app.utilities import execute_command, error_exit, escape_ansi
 from app import definitions, values, emitter, container
 from os import listdir
 from os.path import isfile, join
@@ -115,8 +115,8 @@ class FuzzRepair(AbstractTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self._time.timestamp_start = escape_ansi(log_lines[0].rstrip())
+            self._time.timestamp_end = escape_ansi(log_lines[-1].rstrip())
 
             for line in log_lines:
                 if "Generating patch" in line:
