@@ -81,7 +81,7 @@ class FuzzRepair(AbstractTool):
             if ".log" in f
         ]
         for log_file in tool_log_files:
-            copy_command = "cp {} {}".format(log_file, self.dir_output)
+            copy_command = "cp -rf {} {}".format(log_file, self.dir_output)
             self.run_command(copy_command)
         tool_artifact_dir = "/FuzzRepair/output/"
         tool_artifact_files = [
@@ -89,7 +89,7 @@ class FuzzRepair(AbstractTool):
             for f in self.list_dir(tool_artifact_dir)
         ]
         for a_file in tool_artifact_files:
-            copy_command = "cp {} {}".format(a_file, self.dir_output)
+            copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
         super(FuzzRepair, self).save_artefacts(dir_info)
         return
