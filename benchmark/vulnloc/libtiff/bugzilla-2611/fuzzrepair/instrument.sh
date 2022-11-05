@@ -9,7 +9,7 @@ fix_file=$dir_name/src/$2
 
 $script_dir/../config.sh $1
 cd $dir_name/src
-sed -i '816i if(0) return -1;\n' libtiff/tif_ojpeg.c
+sed -i '816i if(0) return 0;\n' libtiff/tif_ojpeg.c
 make clean
 bear $script_dir/../build.sh $1
 cd $LIBPATCH_DIR/rewriter
