@@ -3,7 +3,7 @@ import docker
 import os
 import pathlib
 from app import definitions, utilities, emitter
-
+import random
 
 def is_image_exist(image_name, tag_name="latest"):
     client = docker.from_env()
@@ -284,7 +284,7 @@ def copy_file_to_container(container_id, from_path, to_path):
 
 
 def write_file(container_id, file_path, content):
-    tmp_file_path = os.path.join("/tmp", "write-file")
+    tmp_file_path = os.path.join("/tmp", "write-file-{}".format(random.randint(0,1000000)))
     with open(tmp_file_path, "w") as f:
         for line in content:
             f.write(line)
@@ -294,7 +294,7 @@ def write_file(container_id, file_path, content):
 
 
 def read_file(container_id, file_path, encoding="utf-8"):
-    tmp_file_path = os.path.join("/tmp", "container-file")
+    tmp_file_path = os.path.join("/tmp", "container-file-{}".format(random.randint(0,1000000)))
     copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "r", encoding=encoding) as f:
@@ -304,7 +304,7 @@ def read_file(container_id, file_path, encoding="utf-8"):
 
 
 def append_file(container_id, file_path, content):
-    tmp_file_path = os.path.join("/tmp", "append-file")
+    tmp_file_path = os.path.join("/tmp", "append-file-{}".format(random.randint(0,1000000)))
     copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "a") as f:
