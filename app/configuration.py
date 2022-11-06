@@ -57,8 +57,10 @@ def read_arg(argument_list):
                 values.CONF_USE_VALKYRIE = True
             elif definitions.ARG_SETUP_ONLY in arg:
                 values.CONF_SETUP_ONLY = True
-            elif definitions.ARG_REBUILD_IMAGES in arg:
-                values.CONF_REBUILD_IMAGES = True
+            elif definitions.ARG_REBUILD_ALL_IMAGES in arg:
+                values.CONF_REBUILD_ALL_IMAGES = True
+            elif definitions.ARG_REBUILD_EXPERIMENT_IMAGE in arg:
+                values.CONF_REBUILD_EXPERIMENT_IMAGE = True
             elif definitions.ARG_SKIP_SETUP in arg:
                 values.CONF_SKIP_SETUP = True
             elif definitions.ARG_USE_CONTAINER in arg:
@@ -214,6 +216,9 @@ def update_configuration():
         values.DEFAULT_DUMP_PATCHES = True
     if values.CONF_USE_VTHREADS:
         values.DEFAULT_USE_VTHREADS = True
-    if values.CONF_REBUILD_IMAGES:
-        values.DEFAULT_REBUILD_IMAGES = True
+    if values.CONF_REBUILD_ALL_IMAGES:
+        values.DEFAULT_REBUILD_ALL_IMAGES = True
+        values.DEFAULT_REBUILD_EXPERIMENT_IMAGE = True
+    if values.CONF_REBUILD_EXPERIMENT_IMAGE:
+        values.DEFAULT_REBUILD_EXPERIMENT_IMAGE = True
     sys.setrecursionlimit(values.DEFAULT_STACK_SIZE)

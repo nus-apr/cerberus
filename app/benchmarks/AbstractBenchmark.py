@@ -214,7 +214,7 @@ class AbstractBenchmark:
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
-        if not container.is_image_exist(exp_image_name):
+        if not container.is_image_exist(exp_image_name) or values.DEFAULT_REBUILD_ALL_IMAGES:
             emitter.warning("\t\t[warning] experiment not built")
             emitter.normal("\t\t\tpreparing/building experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name)
