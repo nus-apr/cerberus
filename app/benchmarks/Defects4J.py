@@ -17,11 +17,11 @@ class Defects4J(AbstractBenchmark):
         )
         experiment_item = self.experiment_subjects[int(bug_index) - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        command_str = "defects4j checkout -p {} -v {}b -w {}".format(experiment_item[definitions.KEY_SUBJECT],bug_id,join(self.dir_expr,"src"))
-        status = self.run_command(
-            container_id, command_str, self.log_deploy_path
+        command_str = "defects4j checkout -p {} -v {}b -w {}".format(
+            experiment_item[definitions.KEY_SUBJECT], bug_id, join(self.dir_expr, "src")
         )
-        is_error = status != 0 
+        status = self.run_command(container_id, command_str, self.log_deploy_path)
+        is_error = status != 0
         if not is_error:
             if self.verify(bug_id, container_id):
                 emitter.success("\t\t\t[benchmark] verified successfully")
@@ -41,17 +41,26 @@ class Defects4J(AbstractBenchmark):
     def deploy(self, bug_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
         return True
+
     def config(self, bug_id, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True
 
     def build(self, bug_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
-        return True 
+        command_str = "defects4j compile"
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
+        )
+        return status == 0 
 
     def test(self, bug_id, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
-        return True
+        command_str = "defects4j test"
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
+        )
+        return status == 0
 
     def verify(self, bug_id, container_id):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
