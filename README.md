@@ -50,7 +50,7 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 2 | VulnLoc           | C/C++    |         11 |     43 |  
 | 3 | ExtractFix        | C/C++    |          7 |     30 |
 | 4 | ITSP              | C/C++    |         10 |    661 |
-| 5 | Hippodrome        | Java     |         15 |     15 |
+| 5 | Hippodrome        | Java     |         16 |     25 |
 | 6 | Defects4J         | Java     |          6 |     75 |
 
 ## Bugs ##
