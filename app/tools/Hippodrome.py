@@ -58,7 +58,7 @@ class Hippodrome(AbstractTool):
         The parent method should be invoked at last to archive the results
         """
 
-        self.run_command("mkdir -p /output/","/dev/null","/");
+        self.run_command("mkdir -p /output/", "/dev/null", "/")
         self.run_command("cp -rf {} /output/".format(self.dir_expr))
         super().save_artefacts(dir_info)
 
@@ -96,8 +96,10 @@ class Hippodrome(AbstractTool):
             for line in log_lines:
                 if "Patch ID:" in line:
                     count = int(line.split(":")[-1])
-                    self._space.generated = self._space.enumerations = max(self._space.generated,count)
+                    self._space.plausible = self._space.enumerations = max(
+                        self._space.generated, count
+                    )
                 if "Applying Patch ID" in line:
-                    self._space.plausible += 1
+                    self._space.generated += 1
 
         return self._space, self._time, self._error
