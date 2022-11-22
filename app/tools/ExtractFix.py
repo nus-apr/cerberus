@@ -30,6 +30,10 @@ class ExtractFix(AbstractTool):
             self.dir_output - directory to store artifacts/output 
         """
 
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+
+
         # modify the output directory as it depends on the experiment
         self.dir_output = path.join(self.dir_expr, "result")
         self.dir_logs = path.join(self.dir_expr, "logs")

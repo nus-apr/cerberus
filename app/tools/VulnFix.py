@@ -20,6 +20,9 @@ class VulnFix(AbstractTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output 
         """
+        if values.CONF_INSTRUMENT_ONLY:
+            return
+
 
         dir_vulnfix_exist = self.is_dir(self.dir_root)
         if not dir_vulnfix_exist:

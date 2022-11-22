@@ -1,4 +1,5 @@
 import abc
+from datetime import datetime
 import os
 from os.path import join
 import re
@@ -108,8 +109,14 @@ class AbstractTool:
         self.log_instrument_path = join(
             self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
         )
+        time = datetime.now()
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
+        emitter.normal(
+            "\t\t\t Instrumentation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
         if status not in [0, 126]:
             error_exit(
                 "error with instrumentation of {}; exit code {}".format(
