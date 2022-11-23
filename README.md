@@ -36,11 +36,10 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 7  | Fix2Fit       | C/C++    | https://github.com/gaoxiang9430/Fix2Fit         | 349e4ba   |  
 | 8  | SenX          | C/C++    | N/A                                             | N/A       |  
 | 9  | GenProg       | C/C++    | https://github.com/squaresLab/genprog-code      | 0b25153   |  
-| 10 | CrashRepair   | C/C++    | https://github.com/rshariffdeen/CrashRepair     | 23430d9   |  
-| 11 | ExtractFix    | C/C++    | N/A                                             | N/A       |
-| 12 | Verifix       | C/C++    | https://github.com/zhiyufan/Verifix             | 6d5bda0   |
-| 13 | Hippodrome    | Java     | https://github.com/verse-lab/hippodrome         | 012f291   |
-| 14 | SequenceR     | Java     | https://github.com/KTH/sequencer                | 3bd0cd4   |
+| 10 | ExtractFix    | C/C++    | N/A                                             | N/A       |
+| 11 | Verifix       | C/C++    | https://github.com/zhiyufan/Verifix             | 6d5bda0   |
+| 12 | Hippodrome    | Java     | https://github.com/verse-lab/hippodrome         | 012f291   |
+| 13 | SequenceR     | Java     | https://github.com/KTH/sequencer                | 3bd0cd4   |
 
 ## Supported Benchmarks of Bugs
 
