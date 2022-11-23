@@ -2,9 +2,9 @@
 
 In order to add a new repair tool to the framework, the following requirements should be met
 
-* Repair Driver: python driver than extends AbstractTool to facilitate standardization of interfaces
-* Repair Tool (optional): to enable container virtualization a Dockerfile is required or the tool should be invokable from the CLI
-* Instrumentation (optional): for each bug in a benchmark an instrumentation script can be placed 
+* Repair Driver: python class than extends AbstractTool to facilitate standardization of interfaces
+* Repair Tool image (optional): to enable container virtualization, a Dockerfile is required or the tool should be invokable from the CLI
+* Instrumentation (optional): for each bug in a benchmark an instrumentation script can be placed in a folder with the name of the tool and the script should be named `instrument.sh`
 
 ## Adding a Driver
 Create a new file in `app/tools` with the Tool name (i.e. NewTool.py) that contains the following code:
@@ -24,6 +24,8 @@ class NewTool(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewTool, self).__init__(self.name)
+        self.image_name = "mechtaev/angelix:1.1"
+
 
      def repair(self, bug_info, config_info):
         super(NewTool, self).repair(bug_info, config_info)
@@ -36,7 +38,7 @@ class NewTool(AbstractTool):
         # execute repair tool
         self.timestamp_log()
         repair_command = ""
-        status = self.run_command(vulnfix_command,
+        status = self.run_command(repair_command,
                                   log_file_path=self.log_output_path)
         self.timestamp_log()
         
