@@ -63,6 +63,7 @@ Cerberus should be considered alpha-quality software. Bugs can be reported here:
 * [Example Usage](doc/Examples.md)
 * [Manual](doc/Manual.md)
 * [Extending](doc/Extending.md)
+* [Project Architecture](doc/ProjectArchitecture.md)
 
 
 # Contributions 
