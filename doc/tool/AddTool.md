@@ -75,3 +75,7 @@ class NewTool(AbstractTool):
 
 
 ```
+
+
+## Instrumenting an experiment for a tool ##
+Certain tools require instrumentation in order to work properly on a given vulnerability. This instrumentation script (`instrument.sh`) has to be placed in a folder with a lowercase name of the tool in the root directory of the experiment and additional files have to be generated or constructed mantually and placed in the same folder.
