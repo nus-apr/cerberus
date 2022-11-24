@@ -112,6 +112,9 @@ class AbstractBenchmark:
             emitter.success("\t\tpre-built benchmark environment found")
 
     def build_experiment_image(self, bug_index, test_all, exp_image_name):
+        """
+        Builds an image for an experiment
+        """
         container_id = self.setup_container(bug_index, self.image_name)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if is_error:
@@ -120,6 +123,10 @@ class AbstractBenchmark:
         container_obj.commit(exp_image_name)
 
     def setup_container(self, bug_index, image_name):
+        """
+        Setup the container for the experiment by constructing volumes,
+        which point to certain folders in the project
+        """
         container_id = None
         emitter.normal("\t\t[benchmark] preparing experiment environment")
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -214,7 +221,10 @@ class AbstractBenchmark:
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
-        if not container.is_image_exist(exp_image_name) or values.DEFAULT_REBUILD_ALL_IMAGES:
+        if (
+            not container.is_image_exist(exp_image_name)
+            or values.DEFAULT_REBUILD_ALL_IMAGES
+        ):
             emitter.warning("\t\t[warning] experiment not built")
             emitter.normal("\t\t\tpreparing/building experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name)
@@ -226,32 +236,32 @@ class AbstractBenchmark:
 
     @abc.abstractmethod
     def setup(self, bug_index, config_ig, test_all, use_container, is_multi):
-        """Method documentation"""
+        """Setup the bug from the benchmark, e.g. download it from the web, unpack an archive, copy the project"""
         return
 
     @abc.abstractmethod
     def deploy(self, bug_id, container_id):
-        """Method documentation"""
+        """Prepares the experiment, e.g. synthesize an image for the bug from the benchmark"""
         return
 
     @abc.abstractmethod
     def config(self, bug_id, container_id):
-        """Method documentation"""
+        """Configure the bug from the benchmark, e.g. running the ./configure script"""
         return
 
     @abc.abstractmethod
     def build(self, bug_id, container_id):
-        """Method documentation"""
+        """Builds the bug from the benchmark"""
         return
 
     @abc.abstractmethod
     def test(self, bug_id, container_id):
-        """Method documentation"""
+        """Runs a single test for a bug from the benchmark"""
         return
 
     @abc.abstractmethod
     def test_all(self, bug_id, container_id):
-        """Method documentation"""
+        """Runs all tests in the benchmark for a specific tool"""
         return
 
     @abc.abstractmethod

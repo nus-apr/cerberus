@@ -41,7 +41,23 @@ class AbstractTool:
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
-        """analyse tool output and collect information"""
+        """
+        analyse tool output and collect information
+        output of the tool is logged at self.log_output_path
+        information required to be extracted are:
+
+            self._space.non_compilable
+            self._space.plausible
+            self._space.size
+            self._space.enumerations
+            self._space.generated
+
+            self._time.total_validation
+            self._time.total_build
+            self._time.timestamp_compilation
+            self._time.timestamp_validation
+            self._time.timestamp_plausible
+        """
         return self._space, self._time, self._error
 
     def clean_up(self):

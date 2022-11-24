@@ -36,7 +36,7 @@ class Prophet(AbstractTool):
         # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
         # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
 
-        self.run_command("mkdir {}".format(self.dir_output),"dev/null","/")
+        self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         self.run_command("mkdir patches", "/dev/null", self.dir_output)
         localization_file = self.dir_expr + "/workdir/profile_localization.res"
         self.generate_localization(bug_info, localization_file, self.dir_setup)
@@ -47,7 +47,7 @@ class Prophet(AbstractTool):
         repair_command += " -full-synthesis -full-explore "
         repair_command += " -r {}".format(self.dir_expr + "/workdir")
         repair_command += " -cond-ext -replace-ext "
-        repair_command += " -o {}".format(join(self.dir_output,"patches"))
+        repair_command += " -o {}".format(join(self.dir_output, "patches"))
         # repair_command += " >> {}".format(self.log_output_path)
         if values.DEFAULT_DUMP_PATCHES:
             repair_command += " -dump-all "
@@ -118,7 +118,7 @@ class Prophet(AbstractTool):
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_patch = join(self.dir_expr,"patches")
+        dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)
 
@@ -5690,21 +5690,21 @@ class Prophet(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
-        inference of the output of the execution
+        analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-             count_non_compilable
-             count_plausible
-             size_search_space
-             count_enumerations
-             count_generated
+            self._space.non_compilable
+            self._space.plausible
+            self._space.size
+            self._space.enumerations
+            self._space.generated
 
-             time_validation
-             time_build
-             timestamp_compilation
-             timestamp_validation
-             timestamp_plausible
+            self._time.total_validation
+            self._time.total_build
+            self._time.timestamp_compilation
+            self._time.timestamp_validation
+            self._time.timestamp_plausible
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = path.join(self.dir_expr, "result")

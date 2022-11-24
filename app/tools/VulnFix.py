@@ -23,7 +23,6 @@ class VulnFix(AbstractTool):
         if values.CONF_INSTRUMENT_ONLY:
             return
 
-
         dir_vulnfix_exist = self.is_dir(self.dir_root)
         if not dir_vulnfix_exist:
             emitter.error(
@@ -89,12 +88,17 @@ class VulnFix(AbstractTool):
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
         # (4) exploit
-        if definitions.KEY_EXPLOIT_LIST not in bug_info or len(bug_info[definitions.KEY_EXPLOIT_LIST]) < 1:
+        if (
+            definitions.KEY_EXPLOIT_LIST not in bug_info
+            or len(bug_info[definitions.KEY_EXPLOIT_LIST]) < 1
+        ):
             emitter.error(
                 "[Exception] there needs to be at least 1 exploit (failing) input!"
             )
             error_exit("Unhandled Exception")
-        exploit_path =join(self.dir_setup,sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0])
+        exploit_path = join(
+            self.dir_setup, sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0]
+        )
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
         line_normals = ""
@@ -102,12 +106,12 @@ class VulnFix(AbstractTool):
         normals_list = self.list_dir(dir_normal_in)
         if normals_list:
             line_normals = "normal-in=" + ",".join(normals_list) + "\n"
-        
+
         # (6) runtime-dir
         line_runtime_dir = "runtime-dir=" + self.dir_output + "\n"
 
         self.run_command("mkdir -p {}/afl-out/crashes".format(self.dir_output))
-        
+
         config_updates = list()
         config_updates.append(line_binary)
         if line_cmd:
@@ -132,21 +136,21 @@ class VulnFix(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
-        inference of the output of the execution
+        analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-             count_non_compilable
-             count_plausible
-             size_search_space
-             count_enumerations
-             count_generated
+            self._space.non_compilable
+            self._space.plausible
+            self._space.size
+            self._space.enumerations
+            self._space.generated
 
-             time_validation
-             time_build
-             timestamp_compilation
-             timestamp_validation
-             timestamp_plausible
+            self._time.total_validation
+            self._time.total_build
+            self._time.timestamp_compilation
+            self._time.timestamp_validation
+            self._time.timestamp_plausible
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
 

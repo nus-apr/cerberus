@@ -93,21 +93,21 @@ class SequenceR(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
-        inference of the output of the execution
+        analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-             count_non_compilable
-             count_plausible
-             size_search_space
-             count_enumerations
-             count_generated
+            self._space.non_compilable
+            self._space.plausible
+            self._space.size
+            self._space.enumerations
+            self._space.generated
 
-             time_validation
-             time_build
-             timestamp_compilation
-             timestamp_validation
-             timestamp_plausible
+            self._time.total_validation
+            self._time.total_build
+            self._time.timestamp_compilation
+            self._time.timestamp_validation
+            self._time.timestamp_plausible
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
 
@@ -136,7 +136,11 @@ class SequenceR(AbstractTool):
             patch_space = self.list_dir("/output/patches")
             self._space.generated = len(patch_space)
             self._space.enumerations = len(patch_space)
-            self._space.plausible = len(list(filter(lambda x: "passed" in x, patch_space)))
-            self._space.non_compilable= self._space.generated - self._space.enumerations
+            self._space.plausible = len(
+                list(filter(lambda x: "passed" in x, patch_space))
+            )
+            self._space.non_compilable = (
+                self._space.generated - self._space.enumerations
+            )
 
         return self._space, self._time, self._error
