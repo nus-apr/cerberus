@@ -15,48 +15,50 @@ from app import (
 )
 from multiprocessing import set_start_method
 from app.tools import AbstractTool
-from os.path import dirname, abspath,join
+from os.path import dirname, abspath, join
 
 
 def update_dir_info(dir_info, tool_name):
     dir_setup_local = dir_info["local"]["setup"]
     dir_setup_container = dir_info["container"]["setup"]
     dir_instrumentation_local = join(dir_setup_local, str(tool_name).lower())
-    dir_instrumentation_container = join(dir_setup_container , str(tool_name).lower())
+    dir_instrumentation_container = join(dir_setup_container, str(tool_name).lower())
     dir_info["local"]["instrumentation"] = dir_instrumentation_local
     dir_info["container"]["instrumentation"] = dir_instrumentation_container
     return dir_info
 
 
 def generate_dir_info(benchmark_name, subject_name, bug_name):
-    dir_path = benchmark_name + "/" + subject_name + "/" + bug_name + "/"
+    dir_path = join(benchmark_name, subject_name, bug_name) + "/"
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
     dir_name = hash.hexdigest()
-    dir_setup_container = "/setup/" + dir_path
-    dir_exp_container = "/experiment/" + dir_path
+    dir_setup_container = join("/setup", dir_path)
+    dir_exp_container = join("/experiment", dir_path)
     dir_logs_container = "/logs"
     dir_artifact_container = "/output"
-    dir_setup_local = definitions.DIR_MAIN + "/benchmark/" + dir_path
-    dir_exp_local = definitions.DIR_EXPERIMENT + "/" + dir_path
-    dir_result_local = definitions.DIR_RESULT + "/" + dir_name
-    dir_log_local = definitions.DIR_LOGS + "/" + dir_name
-    dir_artifact_local = definitions.DIR_ARTIFACTS + "/" + dir_name
-    if not os.path.isdir(dir_log_local):
-        os.makedirs(dir_log_local)
-    if not os.path.isdir(dir_result_local):
-        os.makedirs(dir_result_local)
-    if not os.path.isdir(dir_exp_local):
-        os.makedirs(dir_exp_local)
+    dir_setup_local = join(definitions.DIR_MAIN, "benchmark", dir_path)
+    dir_exp_local = join(definitions.DIR_EXPERIMENT, dir_path)
+    dir_result_local = join(definitions.DIR_RESULT, dir_name)
+    dir_log_local = join(definitions.DIR_LOGS, dir_name)
+    dir_artifact_local = join(definitions.DIR_ARTIFACTS, dir_name)
 
-    dir_aux_local = (
-        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
+    for dir in [dir_log_local, dir_result_local, dir_exp_local]:
+        if not os.path.isdir(dir):
+            os.makedirs(dir)
+
+    dir_aux_local = join(
+        definitions.DIR_BENCHMARK, benchmark_name, subject_name, ".aux"
     )
-    dir_aux_container = dir_exp_container + "/.aux"
-    dir_base_local = (
-        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
+
+    dir_aux_container = join(dir_exp_container, ".aux")
+
+    dir_base_local = join(
+        definitions.DIR_BENCHMARK, benchmark_name, subject_name, "base"
     )
-    dir_base_container = dir_exp_container + "/base"
+
+    dir_base_container = join(dir_exp_container + "base")
+
     dir_info_local = {
         "logs": dir_log_local,
         "artifacts": dir_artifact_local,
@@ -81,20 +83,16 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
 
 
 def archive_results(dir_results, dir_archive):
-    if not os.path.isdir(dir_results):
-        os.makedirs(dir_results)
+    for output_dir in [dir_results, dir_archive]:
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+
     experiment_id = dir_results.split("/")[-1]
-    if not os.path.isdir(dir_archive):
-        os.makedirs(dir_archive)
-    archive_command = (
-        "cd "
-        + dirname(abspath(dir_results))
-        + "; tar cvzf "
-        + experiment_id
-        + ".tar.gz "
-        + experiment_id
+
+    archive_command = "cd {res};tar cvzf {id}.tar.gz {id}; mv {id}.tar.gz {arc}".format(
+        res=dirname(abspath(dir_results)), id=experiment_id, arc=dir_archive
     )
-    archive_command += "; mv {} {}".format(experiment_id + ".tar.gz", dir_archive)
+
     utilities.execute_command(archive_command)
 
 
@@ -140,14 +138,14 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     else:
         dir_expr = dir_info["local"]["experiment"]
     binary_path_rel = bug_info[definitions.KEY_BINARY_PATH]
-    valkyrie_binary_path = dir_output_local + "/binary"
-    binary_path = dir_expr + "/src/" + binary_path_rel
+    valkyrie_binary_path = join(dir_output_local + "binary")
+    binary_path = join(dir_expr, "src", binary_path_rel)
     if container_id:
-        copy_command = "docker cp {}:{} {}".format(
+        copy_command = "docker cp {}:{} {};".format(
             container_id, binary_path, valkyrie_binary_path
         )
     else:
-        copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
+        copy_command = "cp {} {};".format(binary_path, valkyrie_binary_path)
 
     utilities.execute_command(copy_command)
     values.LIST_PROCESSED = []
@@ -179,10 +177,10 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
             oracle_file.writelines("$script_dir/test.sh /dev/null $@\n")
         os.system("chmod +x {}".format(valkyrie_oracle_path))
         copy_command = "cp {} {};".format(test_driver_path, dir_output_local)
-        copy_command += "cp -rf {} {}".format(test_dir_path, dir_output_local)
-        copy_command += "cp -rf {} {}".format(oracle_path, dir_output_local)
+        copy_command += "cp -rf {} {};".format(test_dir_path, dir_output_local)
+        copy_command += "cp -rf {} {};".format(oracle_path, dir_output_local)
     else:
-        copy_command = "cp -rf {} {}".format(test_suite_path, dir_output_local)
+        copy_command = "cp -rf {} {};".format(test_suite_path, dir_output_local)
         file_list = list()
         for (dir_path, dir_names, file_names) in os.walk(test_suite_path):
             file_list += [os.path.join(dir_path, file) for file in file_names]
@@ -342,13 +340,12 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
 
 def retrieve_results(archive_name, tool: AbstractTool):
     emitter.normal("\t\tretrieving results for analysis")
-    archive_path = (
-        values.DIR_MAIN + "/results/" + tool.name.lower() + "/" + archive_name
-    )
+    archive_path = join(values.DIR_MAIN, "results", tool.name.lower(), archive_name)
+
     if os.path.isfile(archive_path):
-        extract_command = "cp " + archive_path + " " + definitions.DIR_RESULT + ";"
-        extract_command += "cd " + definitions.DIR_RESULT + ";"
-        extract_command += "tar -xf " + archive_name
+        extract_command = "cp {} {};".format(archive_path, definitions.DIR_RESULT)
+        extract_command += "cd {};".format(definitions.DIR_RESULT)
+        extract_command += "tar -xf {};".format(archive_name)
         utilities.execute_command(extract_command)
         return True
     else:
@@ -370,8 +367,8 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
             os.system("mkdir -p {}".format(dir_results))
         tool.save_artefacts(dir_info)
         tool.post_process()
-        save_command = "cp -f " + definitions.FILE_MAIN_LOG + " " + dir_results + ";"
-        save_command += "cp -f " + definitions.FILE_ERROR_LOG + "/* " + dir_results
+        save_command = "cp -f {} {};".format(definitions.FILE_MAIN_LOG, dir_results)
+        save_command += "cp -f {}/* {}".format(definitions.FILE_ERROR_LOG, dir_results)
         utilities.execute_command(save_command)
 
 
@@ -394,9 +391,13 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
-    if not container.is_image_exist(container_name.lower()) or values.DEFAULT_REBUILD_EXPERIMENT_IMAGE:
-        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(dir_info["local"]["setup"],
-                                                       repair_tool.name, bug_image_id)
+    if (
+        not container.is_image_exist(container_name.lower())
+        or values.DEFAULT_REBUILD_EXPERIMENT_IMAGE
+    ):
+        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(
+            dir_info["local"]["setup"], repair_tool.name, bug_image_id
+        )
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
@@ -405,7 +406,9 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write(
-                "RUN bash {0} || sudo bash {0}; return 0".format(join(dir_info["container"]["setup"], "deps.sh"))
+                "RUN bash {0} || sudo bash {0}; return 0".format(
+                    join(dir_info["container"]["setup"], "deps.sh")
+                )
             )
         container.build_image(tmp_dockerfile, container_name.lower())
         os.remove(tmp_dockerfile)
@@ -535,7 +538,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
-            dir_archive = join(definitions.DIR_RESULT , tool_name)
+            dir_archive = join(definitions.DIR_RESULT, tool_name)
             dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)
