@@ -28,7 +28,7 @@ def update_dir_info(dir_info, tool_name):
     return dir_info
 
 
-def generate_dir_info(benchmark_name, subject_name, bug_name):
+def generate_dir_info(benchmark_name, subject_name, bug_name, link_name):
     dir_path = join(benchmark_name, subject_name, bug_name) + "/"
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
@@ -46,6 +46,9 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
     for dir in [dir_log_local, dir_result_local, dir_exp_local]:
         if not os.path.isdir(dir):
             os.makedirs(dir)
+
+    os.symlink(dir_log_local, join(definitions.DIR_LOGS, link_name))
+    os.symlink(dir_artifact_local, join(definitions.DIR_ARTIFACTS, link_name))
 
     dir_aux_local = join(
         definitions.DIR_BENCHMARK, benchmark_name, subject_name, ".aux"
@@ -89,8 +92,10 @@ def archive_results(dir_results, dir_archive):
 
     experiment_id = dir_results.split("/")[-1]
 
-    archive_command = "cd {res};tar cvzf {id}.tar.gz {id}; mv {id}.tar.gz {arc}".format(
-        res=dirname(abspath(dir_results)), id=experiment_id, arc=dir_archive
+    archive_command = (
+        "cd {res} ; tar cvzf {id}.tar.gz {id} ; mv {id}.tar.gz {arc}".format(
+            res=dirname(abspath(dir_results)), id=experiment_id, arc=dir_archive
+        )
     )
 
     utilities.execute_command(archive_command)
@@ -141,11 +146,11 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     valkyrie_binary_path = join(dir_output_local + "binary")
     binary_path = join(dir_expr, "src", binary_path_rel)
     if container_id:
-        copy_command = "docker cp {}:{} {};".format(
+        copy_command = "docker cp {}:{} {}".format(
             container_id, binary_path, valkyrie_binary_path
         )
     else:
-        copy_command = "cp {} {};".format(binary_path, valkyrie_binary_path)
+        copy_command = "cp {} {} ;".format(binary_path, valkyrie_binary_path)
 
     utilities.execute_command(copy_command)
     values.LIST_PROCESSED = []
@@ -176,11 +181,11 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
             oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs\n")
             oracle_file.writelines("$script_dir/test.sh /dev/null $@\n")
         os.system("chmod +x {}".format(valkyrie_oracle_path))
-        copy_command = "cp {} {};".format(test_driver_path, dir_output_local)
-        copy_command += "cp -rf {} {};".format(test_dir_path, dir_output_local)
-        copy_command += "cp -rf {} {};".format(oracle_path, dir_output_local)
+        copy_command = "cp {} {} ; ".format(test_driver_path, dir_output_local)
+        copy_command += "cp -rf {} {} ; ".format(test_dir_path, dir_output_local)
+        copy_command += "cp -rf {} {}".format(oracle_path, dir_output_local)
     else:
-        copy_command = "cp -rf {} {};".format(test_suite_path, dir_output_local)
+        copy_command = "cp -rf {} {}".format(test_suite_path, dir_output_local)
         file_list = list()
         for (dir_path, dir_names, file_names) in os.walk(test_suite_path):
             file_list += [os.path.join(dir_path, file) for file in file_names]
@@ -343,9 +348,9 @@ def retrieve_results(archive_name, tool: AbstractTool):
     archive_path = join(values.DIR_MAIN, "results", tool.name.lower(), archive_name)
 
     if os.path.isfile(archive_path):
-        extract_command = "cp {} {};".format(archive_path, definitions.DIR_RESULT)
-        extract_command += "cd {};".format(definitions.DIR_RESULT)
-        extract_command += "tar -xf {};".format(archive_name)
+        extract_command = "cp {} {} ;".format(archive_path, definitions.DIR_RESULT)
+        extract_command += "cd {} ;".format(definitions.DIR_RESULT)
+        extract_command += "tar -xf {} ;".format(archive_name)
         utilities.execute_command(extract_command)
         return True
     else:
@@ -367,7 +372,7 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
             os.system("mkdir -p {}".format(dir_results))
         tool.save_artefacts(dir_info)
         tool.post_process()
-        save_command = "cp -f {} {};".format(definitions.FILE_MAIN_LOG, dir_results)
+        save_command = "cp -f {} {} ;".format(definitions.FILE_MAIN_LOG, dir_results)
         save_command += "cp -f {}/* {}".format(definitions.FILE_ERROR_LOG, dir_results)
         utilities.execute_command(save_command)
 
@@ -406,7 +411,7 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
             dock_file.write(
-                "RUN bash {0} || sudo bash {0}; return 0".format(
+                "RUN bash {0} || sudo bash {0} ; return 0".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
@@ -439,7 +444,14 @@ def run(benchmark, tool_list, bug_info, config_info):
         definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    dir_info = generate_dir_info(benchmark.name, subject_name, bug_name)
+    dir_info = generate_dir_info(
+        benchmark.name,
+        subject_name,
+        bug_name,
+        "-".join(
+            list(map(str, tool_list)) + [benchmark.name, subject_name, bug_name, "last"]
+        ),
+    )
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
         "\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
