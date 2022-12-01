@@ -350,7 +350,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
     if os.path.isfile(archive_path):
         extract_command = "cp {} {} ;".format(archive_path, definitions.DIR_RESULT)
         extract_command += "cd {} ;".format(definitions.DIR_RESULT)
-        extract_command += "tar -xf {} ;".format(archive_name)
+        extract_command += "tar -xf {} ".format(archive_name)
         utilities.execute_command(extract_command)
         return True
     else:
