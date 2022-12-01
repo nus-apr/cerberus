@@ -449,7 +449,8 @@ def run(benchmark, tool_list, bug_info, config_info):
         subject_name,
         bug_name,
         "-".join(
-            list(map(str, tool_list)) + [benchmark.name, subject_name, bug_name, "last"]
+            list(map(lambda x: x.name, tool_list))
+            + [benchmark.name, subject_name, bug_name, "last"]
         ),
     )
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
