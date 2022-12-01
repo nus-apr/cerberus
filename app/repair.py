@@ -47,8 +47,15 @@ def generate_dir_info(benchmark_name, subject_name, bug_name, link_name):
         if not os.path.isdir(dir):
             os.makedirs(dir)
 
-    os.symlink(dir_log_local, join(definitions.DIR_LOGS, link_name))
-    os.symlink(dir_artifact_local, join(definitions.DIR_ARTIFACTS, link_name))
+    link_logs = join(definitions.DIR_LOGS, link_name)
+    link_artifacts = join(definitions.DIR_ARTIFACTS, link_name)
+
+    for link in [link_logs, link_artifacts]:
+        if os.path.exists(link):
+            os.unlink(link)
+
+    os.symlink(dir_log_local, link_logs)
+    os.symlink(dir_artifact_local, link_artifacts)
 
     dir_aux_local = join(
         definitions.DIR_BENCHMARK, benchmark_name, subject_name, ".aux"
