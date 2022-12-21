@@ -447,9 +447,10 @@ def run(benchmark, tool_list, bug_info, config_info):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     config_id = config_info[definitions.KEY_ID]
-    config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
-        definitions.KEY_CONFIG_TIMEOUT_TESTCASE
-    ]
+    if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
+        config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
+            definitions.KEY_CONFIG_TIMEOUT_TESTCASE
+        ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     dir_info = generate_dir_info(
         benchmark.name,
