@@ -1,2 +1,0 @@
-gcd =  (s*op1 + t*op2)
-op1:0	op2:0	gcd:0	s:0	t:0

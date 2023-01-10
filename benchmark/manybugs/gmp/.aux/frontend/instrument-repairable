@@ -1,8 +1,0 @@
-#!/bin/bash
-
-file="$1"
-
-sed -i 's/tn \* 2 - 1/({ angelix_trace(170, 9, 170, 19); tn * 2 - 1; });/' "$file"
-sed -i 's/b2p = tp + 2\*n;/b2p = ({ angelix_trace(212, 8, 212, 16); tp + 2*n; });/' "$file"
-sed -i 's/ebi < windowsize/({ angelix_trace(247, 6, 247, 22); ebi < windowsize; })/g' "$file"
-sed -i 's/REDC_1_TO_REDC_2_THRESHOLD < MUL_TOOM22_THRESHOLD/({ angelix_trace(303, 6, 303, 55); REDC_1_TO_REDC_2_THRESHOLD < MUL_TOOM22_THRESHOLD; })/g' "$file"

@@ -4,3 +4,6 @@
 [submodule "benchmark/extractfix"]
 	path = benchmark/extractfix
 	url = git@github.com:nus-apr/extractfix-benchmark.git
+[submodule "benchmark/manybugs"]
+	path = benchmark/manybugs
+	url = git@github.com:nus-apr/manybugs.git
