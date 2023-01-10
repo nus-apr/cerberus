@@ -1,10 +1,7 @@
 import os
 from os.path import join
-import shutil
 import re
-from app.abstractions import is_dir
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import execute_command, error_exit
+from drivers.tools.AbstractTool import AbstractTool
 from app import container, definitions, values, emitter
 
 

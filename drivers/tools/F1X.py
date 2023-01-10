@@ -1,12 +1,8 @@
-from math import perm
 import os
 import re
-import shutil
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import execute_command, error_exit
+from drivers.tools.AbstractTool import AbstractTool
 from app import definitions, values, emitter
-from os import listdir
-from os.path import isfile, join
+from os.path import join
 
 
 class F1X(AbstractTool):

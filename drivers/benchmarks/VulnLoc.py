@@ -1,16 +1,16 @@
-import shutil
 import os
-from app.benchmarks.AbstractBenchmark import AbstractBenchmark
+from drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app import definitions, values, emitter
+from datetime import datetime
 
 
-class ExtractFix(AbstractBenchmark):
+class VulnLoc(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(ExtractFix, self).__init__()
+        super(VulnLoc, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(ExtractFix, self).setup_experiment(
+        is_error = super(VulnLoc, self).setup_experiment(
             bug_index, container_id, test_all
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -36,9 +36,15 @@ class ExtractFix(AbstractBenchmark):
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
+        time = datetime.now()
         command_str = "bash setup.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
+        )
+        emitter.normal(
+            "\t\t\t Setup took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status == 0
 
@@ -47,9 +53,15 @@ class ExtractFix(AbstractBenchmark):
         self.log_config_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
+        time = datetime.now()
         command_str = "bash config.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
+        )
+        emitter.normal(
+            "\t\t\t Config took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status == 0
 
@@ -58,9 +70,16 @@ class ExtractFix(AbstractBenchmark):
         self.log_build_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
+        time = datetime.now()
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
+        
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
+        )
+        emitter.normal(
+            "\t\t\t Setup took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status == 0
 
@@ -69,9 +88,15 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
+        time = datetime.now()
         command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        emitter.normal(
+            "\t\t\t Test took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status != 0
 
@@ -80,9 +105,16 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
+        time = datetime.now()
         command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
+        )
+
+        emitter.normal(
+            "\t\t\t Verify took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status == 0
 
@@ -91,9 +123,15 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
+        time = datetime.now()
         command_str = "bash transform.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        emitter.normal(
+            "\t\t\t Transform took {} second(s)".format(
+                (time - datetime.now()).total_seconds()
+            )
         )
         return status == 0
 
@@ -107,4 +145,4 @@ class ExtractFix(AbstractBenchmark):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(ExtractFix, self).save_artefacts(dir_info, container_id)
+        super(VulnLoc, self).save_artefacts(dir_info, container_id)

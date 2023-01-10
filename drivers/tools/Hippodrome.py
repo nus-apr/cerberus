@@ -1,18 +1,17 @@
 import os
 from os.path import join
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import error_exit
-from app import definitions, values, emitter, container
+from drivers.tools.AbstractTool import AbstractTool
+from app import definitions, emitter
 
 
-class Verifix(AbstractTool):
+class Hippodrome(AbstractTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Verifix, self).__init__(self.name)
-        self.image_name = "mirchevmp/verifix:latest"
+        super(Hippodrome, self).__init__(self.name)
+        self.image_name = "mirchevmp/hippodrome:latest"
 
     def repair(self, bug_info, config_info):
-        super(Verifix, self).repair(bug_info, config_info)
+        super(Hippodrome, self).repair(bug_info, config_info)
         """ 
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -24,17 +23,18 @@ class Verifix(AbstractTool):
 
         # start running
         self.timestamp_log()
-        vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
-            timeout_h,
-            "true" if values.CONF_DEBUG else "false",
-            join(
-                self.dir_setup,
-                bug_info[definitions.KEY_FIX_FILE].replace("buggy", "correct"),
-            ),
-            join(self.dir_setup, bug_info[definitions.KEY_FIX_FILE]),
-            join(self.dir_expr, "base", "test"),
+
+        run_dir = self.dir_expr
+        hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json".format(
+            timeout_h
         )
-        status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")
+        if self.is_dir(join(self.dir_expr, "src")):
+            hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c ../CONFIG.json".format(
+                timeout_h
+            )
+            run_dir = join(self.dir_expr, "src")
+
+        status = self.run_command(hippodrome_command, self.log_output_path, run_dir)
 
         if status != 0:
             self._error.is_error = True
@@ -56,6 +56,9 @@ class Verifix(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
+
+        self.run_command("mkdir -p /output/", "/dev/null", "/")
+        self.run_command("cp -rf {} /output/".format(self.dir_expr))
         super().save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -78,15 +81,6 @@ class Verifix(AbstractTool):
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
 
-        count_plausible = 0
-        count_enumerations = 0
-
-        # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self._space.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             emitter.warning("\t\t\t[warning] no output log file found")
@@ -98,9 +92,13 @@ class Verifix(AbstractTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
-
-        if not self._error.is_error:
-            self._space.plausible = 1
-            self._space.enumerations = 1
+            for line in log_lines:
+                if "Patch ID:" in line:
+                    count = int(line.split(":")[-1])
+                    self._space.plausible = self._space.enumerations = max(
+                        self._space.generated, count
+                    )
+                if "Applying Patch ID" in line:
+                    self._space.generated += 1
 
         return self._space, self._time, self._error

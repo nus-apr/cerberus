@@ -199,7 +199,7 @@ def end(time_total, is_error=False):
 
 def emit_help():
     benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))
-    tools = os.listdir("./tools/")
+    tools = os.listdir("../drivers/tools/")
     max_length = len(definitions.ARG_BUG_INDEX_LIST)  # hardcoded
 
     write(

@@ -1,14 +1,10 @@
 import os
 import re
 import multiprocessing as mp
-import shutil
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import execute_command, error_exit
-from app import definitions, values, emitter, container
-import mmap
-from os import listdir
-from os.path import isfile, join
-from datetime import datetime
+from drivers.tools.AbstractTool import AbstractTool
+from app.utilities import error_exit
+from app import definitions, values, emitter
+from os.path import join
 
 
 class Darjeeling(AbstractTool):

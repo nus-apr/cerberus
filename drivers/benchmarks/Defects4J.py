@@ -1,8 +1,6 @@
-import shutil
 import os
 from os.path import join
-from app.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.utilities import execute_command
+from drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app import definitions, values, emitter
 
 

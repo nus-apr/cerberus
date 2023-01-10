@@ -1,32 +1,22 @@
-import shutil
 import os
-from os.path import join
-from app.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.utilities import execute_command
-from app import abstractions, container, definitions, values, emitter
+from drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app import emitter
 
 
-class Hippodrome(AbstractBenchmark):
+class ITSP(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Hippodrome, self).__init__()
+        super(ITSP, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(Hippodrome, self).setup_experiment(
+        is_error = super(ITSP, self).setup_experiment(
             bug_index, container_id, test_all
         )
         return is_error
 
     def deploy(self, bug_id, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
-        self.log_deploy_path = (
-            self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
-        )
-        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(
-            container_id, command_str, self.log_deploy_path, self.dir_setup
-        )
-        return status == 0
+        return True
 
     def config(self, bug_id, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
@@ -58,4 +48,4 @@ class Hippodrome(AbstractBenchmark):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(Hippodrome, self).save_artefacts(dir_info, container_id)
+        super(ITSP, self).save_artefacts(dir_info, container_id)
