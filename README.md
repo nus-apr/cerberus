@@ -47,14 +47,14 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 
 ## Supported Benchmarks of Bugs
 
-| # | Benchmark         | Language | # Projects | # Bugs |  
-| - | ----------------- | -------- | ----------:| ------:|  
-| 1 | ManyBugs          | C/C++    |          6 |     60 |  
-| 2 | VulnLoc           | C/C++    |         11 |     43 |  
-| 3 | ExtractFix        | C/C++    |          7 |     30 |
-| 4 | ITSP              | C/C++    |         10 |    661 |
-| 5 | Hippodrome        | Java     |         16 |     25 |
-| 6 | Defects4J         | Java     |          6 |     75 |
+| # | Benchmark         | Language | Repository                                        | # Projects | # Bugs |  
+| - | ----------------- | -------- | ------------------------------------------------- | ----------:| ------:|  
+| 1 | ManyBugs          | C/C++    | <https://github.com/nus-apr/manybugs>             |          6 |     60 |  
+| 2 | VulnLoc           | C/C++    | <https://github.com/nus-apr/vulnloc-benchmark>    |         11 |     43 |  
+| 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark> |          7 |     30 |
+| 4 | ITSP              | C/C++    | N/A                                               |         10 |    661 |
+| 5 | Hippodrome        | Java     | N/A                                               |         16 |     25 |
+| 6 | Defects4J         | Java     | N/A                                               |          6 |     75 |
 
 ## Bugs
 
