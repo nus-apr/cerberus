@@ -1,3 +1,6 @@
 [submodule "benchmark/vulnloc"]
 	path = benchmark/vulnloc
 	url = git@github.com:nus-apr/vulnloc-benchmark.git
+[submodule "benchmark/extractfix"]
+	path = benchmark/extractfix
+	url = git@github.com:nus-apr/extractfix-benchmark.git

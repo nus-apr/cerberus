@@ -1,5 +1,0 @@
-binary=$1
-test=$2
-${binary} -c jpeg  -r 0  -h 2  -v 0 ${test} temp
-
-exit 0
