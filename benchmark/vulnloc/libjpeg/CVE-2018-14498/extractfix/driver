@@ -1,5 +1,0 @@
-binary=$1
-test=$2
-${binary} -outfile /dev/null ${test}
-
-exit 0

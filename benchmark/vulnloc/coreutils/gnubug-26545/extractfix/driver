@@ -1,5 +1,0 @@
-binary=$1
-test=$2
-${binary} -n4 -s7 ${test}
-
-exit 0

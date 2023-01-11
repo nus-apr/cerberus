@@ -1,0 +1,3 @@
+[submodule "vulnloc"]
+	path = benchmark/vulnloc
+	url = https://github.com/nus-apr/vulnloc-benchmark
