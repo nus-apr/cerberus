@@ -38,7 +38,7 @@ class VulnFix(AbstractTool):
 
         # start running
         self.timestamp_log()
-        vulnfix_command = "timeout -k 5m {0}h vulnfix {1} {2}".format(
+        vulnfix_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h vulnfix {1} {2}'".format(
             timeout_h, additional_tool_param, config_path
         )
         status = self.run_command(
