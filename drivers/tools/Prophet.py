@@ -1,7 +1,6 @@
 import os
 import re
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import error_exit
+from drivers.tools.AbstractTool import AbstractTool
 from app import definitions, values, emitter
 from os import path
 from os.path import join

@@ -2,7 +2,6 @@ import threading
 import os
 import hashlib
 import time
-import time
 from app import (
     emitter,
     logger,
@@ -13,9 +12,10 @@ from app import (
     parallel,
     valkyrie,
 )
-from multiprocessing import set_start_method
-from app.tools import AbstractTool
-from os.path import dirname, abspath, join
+
+from drivers.tools import AbstractTool
+from os.path import dirname, abspath,join
+
 
 
 def update_dir_info(dir_info, tool_name):

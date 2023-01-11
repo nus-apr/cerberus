@@ -141,13 +141,13 @@ class AbstractBenchmark:
 
         volume_list = {
             self.__dir_info["local"]["setup"]: {"bind": "/scripts", "mode": "rw"},
-            os.path.join(self.__dir_info["local"]["setup"], "..", "base"): {
+            os.path.join(self.__dir_info["local"]["setup"], "../../app", "base"): {
                 "bind": join(
                     "/experiments", "benchmark", self.name, subject_name, "base"
                 ),
                 "mode": "rw",
             },
-            os.path.join(self.__dir_info["local"]["setup"], "..", ".aux"): {
+            os.path.join(self.__dir_info["local"]["setup"], "../../app", ".aux"): {
                 "bind": join(self.dir_expr, ".aux"),
                 "mode": "rw",
             },

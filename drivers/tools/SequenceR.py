@@ -1,9 +1,8 @@
 import os
 from os.path import join
 from app import utilities
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import error_exit
-from app import definitions, values, emitter, container
+from drivers.tools.AbstractTool import AbstractTool
+from app import definitions, emitter
 
 
 class SequenceR(AbstractTool):

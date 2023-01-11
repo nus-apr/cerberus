@@ -1,21 +1,15 @@
-import shutil
 import os
-from app.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.utilities import execute_command
+from drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app import definitions, values, emitter
 
 
-class Examples(AbstractBenchmark):
+class ExtractFix(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.bench_dir_path = os.path.abspath(
-            os.path.dirname(__file__) + "/../../benchmark/"
-        )
-        self.setup_dir_path = self.bench_dir_path
-        super(Examples, self).__init__()
+        super(ExtractFix, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(Examples, self).setup_experiment(
+        is_error = super(ExtractFix, self).setup_experiment(
             bug_index, container_id, test_all
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -48,7 +42,15 @@ class Examples(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_id, container_id):
-        return True
+        emitter.normal("\t\t\tconfiguring experiment subject")
+        self.log_config_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
+        )
+        command_str = "bash config.sh {}".format(self.base_dir_experiment)
+        status = self.run_command(
+            container_id, command_str, self.log_config_path, self.dir_setup
+        )
+        return status == 0
 
     def build(self, bug_id, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
@@ -62,22 +64,46 @@ class Examples(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_id, container_id):
-        return True
-
-    def test_all(self, bug_id, container_id):
-        return True
+        emitter.normal("\t\t\ttesting experiment subject")
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
+        )
+        command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
+        status = self.run_command(
+            container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        return status != 0
 
     def verify(self, bug_id, container_id):
-        return True
+        emitter.normal("\t\t\tverify dev patch and test-oracle")
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
+        )
+        command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
+        status = self.run_command(
+            container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        return status == 0
+
+    def transform(self, bug_id, container_id):
+        emitter.normal("\t\t\ttransform fix-file")
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
+        )
+        command_str = "bash transform.sh {}".format(self.base_dir_experiment)
+        status = self.run_command(
+            container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        return status == 0
 
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path
-        self.run_command(command_str, "/dev/null", "/", container_id)
+        self.run_command(container_id, command_str)
         return
 
     def save_artefacts(self, dir_info, container_id):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(Examples, self).save_artefacts(dir_info, container_id)
+        super(ExtractFix, self).save_artefacts(dir_info, container_id)

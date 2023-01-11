@@ -1,13 +1,9 @@
-import threading
 import os
-import re
 import traceback
 import signal
 import time
 from app import emitter, logger, definitions, values, utilities, configuration, repair
 from multiprocessing import set_start_method
-from app.tools import AbstractTool
-from os.path import dirname, abspath
 
 
 def create_directories():
