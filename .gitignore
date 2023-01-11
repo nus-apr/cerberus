@@ -11,7 +11,7 @@ venv
 *.pyc
 archive
 results
-
+benchmark
 .vscode
 benchmark/**/patches
 benchmark/**/location.txt
