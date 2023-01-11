@@ -46,9 +46,11 @@ class CRepair(AbstractTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         # repair_conf_path = self.generate_conf_file(bug_info)
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
+        bug_json_path = self.dir_expr + "/bug.json"
         self.timestamp_log()
-        CRepair_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h crepair --conf={1} {2}'".format(
-            str(timeout_h), repair_conf_path, additional_tool_param
+        CRepair_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h " \
+                          "crashrepair repair --no-fuzz {1} {2}'".format(
+            str(timeout_h), bug_json_path, additional_tool_param
         )
         status = self.run_command(CRepair_command, log_file_path=self.log_output_path)
         if status != 0:
