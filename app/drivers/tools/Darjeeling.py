@@ -1,10 +1,11 @@
+import multiprocessing as mp
 import os
 import re
-import multiprocessing as mp
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core.utilities import error_exit
-from app.core import definitions, values, emitter
 from os.path import join
+
+from app.core import definitions, values, emitter
+from app.core.utilities import error_exit
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Darjeeling(AbstractTool):
@@ -22,7 +23,7 @@ class Darjeeling(AbstractTool):
         """
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
             self.dir_logs
@@ -47,7 +48,7 @@ class Darjeeling(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(Darjeeling, self).repair(bug_info, config_info)
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         emitter.normal("\t\t\t running repair with " + self.name)
@@ -56,7 +57,7 @@ class Darjeeling(AbstractTool):
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(
-                str(values.CONFIG_ID), self.name.lower(), bug_id
+                str(values.config_id), self.name.lower(), bug_id
             ),
         )
         dir_patch = self.dir_output + "/patches"
@@ -74,7 +75,7 @@ class Darjeeling(AbstractTool):
         )
         repair_command += " --threads {} ".format(mp.cpu_count())
         repair_command += additional_tool_param + " "
-        if values.DEFAULT_DUMP_PATCHES:
+        if values.dump_patches:
             repair_command += " --dump-all "
         repair_command += " repair.yml".format(self.log_output_path)
         self.timestamp_log()
@@ -95,7 +96,7 @@ class Darjeeling(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = join(
             self.dir_logs, "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
         )
@@ -149,7 +150,7 @@ class Darjeeling(AbstractTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
+                    "patch-valid" if values.use_valkyrie else "patches",
                 )
             )
         )

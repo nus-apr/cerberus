@@ -1,6 +1,7 @@
 import os
+
+from app.core import definitions, emitter, values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.core import definitions, emitter
 
 
 class Examples(AbstractBenchmark):
@@ -20,7 +21,7 @@ class Examples(AbstractBenchmark):
         if is_multi:
             tool_name_dir = "multi"
         self.log_dir_path = (
-            definitions.DIR_LOGS
+            values.dir_logs
             + "/"
             + str(config_id)
             + "-"
@@ -43,7 +44,7 @@ class Examples(AbstractBenchmark):
                 os.path.dirname(__file__) + "/../../experiments/"
             )
             dir_exp_local = (
-                definitions.DIR_EXPERIMENT
+                values.dir_experiments
                 + "/"
                 + self.name
                 + "/"

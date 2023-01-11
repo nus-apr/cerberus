@@ -1,10 +1,11 @@
 import os
 import re
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core.utilities import execute_command, error_exit
-from app.core import definitions, values, emitter
 from os import listdir
 from os.path import isfile, join
+
+from app.core import definitions, values, emitter
+from app.core.utilities import execute_command, error_exit
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class SenX(AbstractTool):
@@ -15,7 +16,7 @@ class SenX(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(SenX, self).repair(bug_info, config_info)
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
@@ -34,7 +35,7 @@ class SenX(AbstractTool):
 
         test_dir = self.dir_setup + "/tests"
         test_file_list = []
-        if values.CONF_USE_CONTAINER:
+        if values.use_container:
             emitter.error(
                 "[Exception] unimplemented functionality: SenX docker support not implemented"
             )
@@ -92,7 +93,7 @@ class SenX(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),

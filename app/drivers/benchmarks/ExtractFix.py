@@ -1,6 +1,7 @@
 import os
-from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+
 from app.core import definitions, values, emitter
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class ExtractFix(AbstractBenchmark):
@@ -20,7 +21,7 @@ class ExtractFix(AbstractBenchmark):
             else:
                 emitter.error("\t\t\t[benchmark] verification failed")
                 is_error = True
-            if not values.DEFAULT_USE_VALKYRIE:
+            if not values.use_valkyrie:
                 emitter.normal("\t\t\tskipping transformation")
             else:
                 if self.transform(bug_id, container_id):

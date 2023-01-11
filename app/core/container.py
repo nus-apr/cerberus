@@ -1,10 +1,11 @@
 import json
-import docker
 import os
-import pathlib
-from app.core import definitions, emitter
-from app.core import utilities
 import random
+
+import docker
+
+from app.core import values, emitter, utilities
+
 
 def is_image_exist(image_name, tag_name="latest"):
     client = docker.from_env()
@@ -31,7 +32,7 @@ def pull_image(image_name, tag_name):
             repository=image_name, tag=tag_name, stream=True, decode=True
         ):
             for sub_line in line["status"].split("\n"):
-                emitter.debug("[docker-api] {}".format(sub_line))
+                emitter.build("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:
         emitter.warning(exp)
@@ -58,7 +59,7 @@ def build_image(dockerfile_path, image_name):
                 data = json.loads(line.strip())
                 if "stream" in data:
                     for line_stream in data["stream"].split("\n"):
-                        emitter.debug("\t\t[docker-api] {}".format(line_stream))
+                        emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
@@ -79,7 +80,7 @@ def build_image(dockerfile_path, image_name):
 def build_benchmark_image(image_name):
     benchmark_name = image_name.split("-")[0]
     dockerfile_path = "{}/{}/Dockerfile".format(
-        definitions.DIR_BENCHMARK, str(benchmark_name).lower()
+        values.dir_benchmark, str(benchmark_name).lower()
     )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id
@@ -88,7 +89,7 @@ def build_benchmark_image(image_name):
 def build_tool_image(tool_name):
     image_name = "{}-tool".format(tool_name)
     dockerfile_path = "{}/Dockerfile.{}".format(
-        definitions.DIR_INFRA, str(tool_name).lower()
+        values.dir_infra, str(tool_name).lower()
     )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id

@@ -1,7 +1,9 @@
-import threading
-import os
 import hashlib
+import os
+import threading
 import time
+from os.path import dirname, abspath, join
+
 from app.core import (
     emitter,
     logger,
@@ -11,9 +13,8 @@ from app.core import (
     parallel,
     utilities
 )
-from app.plugins import valkyrie
 from app.drivers.tools import AbstractTool
-from os.path import dirname, abspath,join
+from app.plugins import valkyrie
 
 
 def update_dir_info(dir_info, tool_name):
@@ -35,11 +36,11 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
     dir_exp_container = "/experiment/" + dir_path
     dir_logs_container = "/logs"
     dir_artifact_container = "/output"
-    dir_setup_local = definitions.DIR_MAIN + "/benchmark/" + dir_path
-    dir_exp_local = definitions.DIR_EXPERIMENT + "/" + dir_path
-    dir_result_local = definitions.DIR_RESULT + "/" + dir_name
-    dir_log_local = definitions.DIR_LOGS + "/" + dir_name
-    dir_artifact_local = definitions.DIR_ARTIFACTS + "/" + dir_name
+    dir_setup_local = values.dir_main + "/benchmark/" + dir_path
+    dir_exp_local = values.dir_experiments + "/" + dir_path
+    dir_result_local = values.dir_results + "/" + dir_name
+    dir_log_local = values.dir_logs + "/" + dir_name
+    dir_artifact_local = values.dir_artifacts + "/" + dir_name
     if not os.path.isdir(dir_log_local):
         os.makedirs(dir_log_local)
     if not os.path.isdir(dir_result_local):
@@ -48,11 +49,11 @@ def generate_dir_info(benchmark_name, subject_name, bug_name):
         os.makedirs(dir_exp_local)
 
     dir_aux_local = (
-        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/.aux"
+        values.dir_benchmark + "/" + benchmark_name + "/" + subject_name + "/.aux"
     )
     dir_aux_container = dir_exp_container + "/.aux"
     dir_base_local = (
-        definitions.DIR_BENCHMARK + "/" + benchmark_name + "/" + subject_name + "/base"
+        values.dir_benchmark + "/" + benchmark_name + "/" + subject_name + "/base"
     )
     dir_base_container = dir_exp_container + "/base"
     dir_info_local = {
@@ -126,8 +127,8 @@ def repair(
         failing_test_list = failing_test_list.split(",")
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    config_info[definitions.KEY_TOOL_PARAMS] = values.CONF_TOOL_PARAMS
-    tool.update_info(container_id, values.CONF_INSTRUMENT_ONLY, dir_info)
+    config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
+    tool.update_info(container_id, values.only_instrument, dir_info)
     tool.repair(experiment_info, config_info)
 
 
@@ -152,16 +153,16 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
     subject_name = bug_info[definitions.KEY_SUBJECT]
     bug_id = str(bug_info[definitions.KEY_BUG_ID])
 
-    test_driver_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test.sh".format(
+    test_driver_path = values.dir_main + "/benchmark/{}/{}/{}/test.sh".format(
         benchmark_name, subject_name, bug_id
     )
-    test_dir_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/tests".format(
+    test_dir_path = values.dir_main + "/benchmark/{}/{}/{}/tests".format(
         benchmark_name, subject_name, bug_id
     )
-    test_suite_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/test-suite".format(
+    test_suite_path = values.dir_main + "/benchmark/{}/{}/{}/test-suite".format(
         benchmark_name, subject_name, bug_id
     )
-    oracle_path = definitions.DIR_MAIN + "/benchmark/{}/{}/{}/oracle*".format(
+    oracle_path = values.dir_main + "/benchmark/{}/{}/{}/oracle*".format(
         benchmark_name, subject_name, bug_id
     )
     valkyrie_oracle_path = dir_output_local + "/oracle"
@@ -241,7 +242,7 @@ def repair_all(
                 + passing_test_list[: int(len(passing_test_list) * test_ratio)]
             )
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-            if values.DEFAULT_USE_VALKYRIE:
+            if values.use_valkyrie:
                 v_path_info = (binary_path, oracle_path, fix_source_file)
                 v_dir_info = (patch_dir, dir_process)
                 v_config_info = (
@@ -256,8 +257,8 @@ def repair_all(
                 )
                 consume_thread.start()
 
-        if values.DEFAULT_USE_VALKYRIE:
-            values.APR_TOOL_RUNNING = True
+        if values.use_valkyrie:
+            values.running_tool = True
         t_thread = threading.Thread(
             target=repair,
             args=(
@@ -301,8 +302,8 @@ def repair_all(
         #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         #     utilities.execute_command(timestamp_command)
 
-    values.APR_TOOL_RUNNING = False
-    if values.DEFAULT_USE_VALKYRIE:
+    values.running_tool = False
+    if values.use_valkyrie:
         emitter.normal("\t\t\twaiting for validation pool")
         parallel.wait_validation()
         emitter.normal("\t\t\twaiting for consumer pool")
@@ -325,15 +326,15 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         exp_id = conf_id + "-" + bug_id
-        values.ANALYSIS_RESULTS[exp_id] = [space_info, time_info]
+        values.analysis_results[exp_id] = [space_info, time_info]
         tool.print_analysis(space_info, time_info)
         tool.log_output_path = None
         logger.analysis(exp_id)
         dir_output = dir_info["local"]["artifacts"]
         patch_dir = dir_output + "/patches"
-        if values.DEFAULT_USE_VALKYRIE:
+        if values.use_valkyrie:
             valkyrie.analyse_output(patch_dir, time_info)
             break
 
@@ -341,11 +342,11 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
 def retrieve_results(archive_name, tool: AbstractTool):
     emitter.normal("\t\tretrieving results for analysis")
     archive_path = (
-        values.DIR_MAIN + "/results/" + tool.name.lower() + "/" + archive_name
+        values.dir_main + "/results/" + tool.name.lower() + "/" + archive_name
     )
     if os.path.isfile(archive_path):
-        extract_command = "cp " + archive_path + " " + definitions.DIR_RESULT + ";"
-        extract_command += "cd " + definitions.DIR_RESULT + ";"
+        extract_command = "cp " + archive_path + " " + values.dir_results + ";"
+        extract_command += "cd " + values.dir_results + ";"
         extract_command += "tar -xf " + archive_name
         utilities.execute_command(extract_command)
         return True
@@ -368,8 +369,8 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
             os.system("mkdir -p {}".format(dir_results))
         tool.save_artefacts(dir_info)
         tool.post_process()
-        save_command = "cp -f " + definitions.FILE_MAIN_LOG + " " + dir_results + ";"
-        save_command += "cp -f " + definitions.FILE_ERROR_LOG + "/* " + dir_results
+        save_command = "cp -f " + values.file_main_log + " " + dir_results + ";"
+        save_command += "cp -f " + values.file_error_log + "/* " + dir_results
         utilities.execute_command(save_command)
 
 
@@ -392,7 +393,7 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
-    if not container.is_image_exist(container_name.lower()) or values.DEFAULT_REBUILD_EXPERIMENT_IMAGE:
+    if not container.is_image_exist(container_name.lower()) or values.rebuild_base:
         tmp_dockerfile = "{}/Dockerfile-{}-{}".format(dir_info["local"]["setup"],
                                                        repair_tool.name, bug_image_id)
         with open(tmp_dockerfile, "w") as dock_file:
@@ -455,11 +456,11 @@ def run(benchmark, tool_list, bug_info, config_info):
     exp_img_id = None
 
     benchmark.update_dir_info(dir_info)
-    if values.DEFAULT_USE_CONTAINER:
-        exp_img_id = benchmark.get_exp_image(bug_index, values.DEFAULT_RUN_TESTS_ONLY)
+    if values.use_container:
+        exp_img_id = benchmark.get_exp_image(bug_index, values.only_test)
     else:
-        if not values.DEFAULT_SKIP_SETUP:
-            benchmark.setup_experiment(bug_index, None, values.DEFAULT_RUN_TESTS_ONLY)
+        if not values.use_valkyrie:
+            benchmark.setup_experiment(bug_index, None, values.only_test)
 
     for repair_tool in tool_list:
         index = index + 1
@@ -475,7 +476,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             emitter.warning(
                 "\t\t[warning] there is no instrumentation for " + repair_tool.name
             )
-        if values.DEFAULT_ANALYSE_ONLY:
+        if values.only_analyse:
             if (
                 not os.path.isdir(dir_result_local)
                 or len(os.listdir(dir_result_local)) == 0
@@ -502,7 +503,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             utilities.clean_artifacts(dir_output_local)
             utilities.clean_artifacts(dir_logs_local)
         benchmark.update_dir_info(dir_info)
-        if values.DEFAULT_USE_CONTAINER:
+        if values.use_container:
             container_name = "{}-{}-{}-{}".format(
                 tool_name, benchmark.name, subject_name, bug_name
             )
@@ -518,7 +519,7 @@ def run(benchmark, tool_list, bug_info, config_info):
         container_id_list.append(container_id)
         dir_info_list.append(dir_info)
 
-    if not values.DEFAULT_SETUP_ONLY:
+    if not values.only_setup:
         repair_all(
             dir_info_list,
             bug_info,
@@ -527,13 +528,13 @@ def run(benchmark, tool_list, bug_info, config_info):
             container_id_list,
             benchmark.name,
         )
-        if not values.CONF_INSTRUMENT_ONLY:
+        if not values.only_instrument:
             analyse_result(dir_info_list, bug_info, tool_list)
             save_artifacts(dir_info_list, bug_info, tool_list, container_id_list)
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
-            dir_archive = join(definitions.DIR_RESULT , tool_name)
+            dir_archive = join(values.dir_results , tool_name)
             dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)

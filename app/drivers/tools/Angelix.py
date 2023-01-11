@@ -1,10 +1,11 @@
 import os
 import re
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core.utilities import error_exit
-from app.core import definitions, values, emitter, container
 from os import listdir
 from os.path import isfile, join
+
+from app.core import definitions, values, emitter, container
+from app.core.utilities import error_exit
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Angelix(AbstractTool):
@@ -18,7 +19,7 @@ class Angelix(AbstractTool):
             bug_info,
             config_info,
         )
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
@@ -62,7 +63,7 @@ class Angelix(AbstractTool):
         if fix_location:
             arguments.append(" --lines {0}  ".format(",".join(fix_line_number_list)))
 
-        if values.DEFAULT_DUMP_PATCHES:
+        if values.dump_patches:
             arguments.append(" --dump-patches ")
 
         if os.path.isfile("/tmp/ANGELIX_ARGS"):
@@ -135,7 +136,7 @@ class Angelix(AbstractTool):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
             self.dir_logs
@@ -163,7 +164,7 @@ class Angelix(AbstractTool):
         is_error = False
         count_plausible = 0
         count_enumerations = 0
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
@@ -273,7 +274,7 @@ class Angelix(AbstractTool):
             emitter.warning("\t\t\t\t[warning] timeout before ending")
         with open(self.log_analysis_path, "w") as log_file:
             log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.DEFAULT_DUMP_PATCHES:
+            if values.dump_patches:
                 count_enumerations = count_plausible
             else:
                 log_file.write(

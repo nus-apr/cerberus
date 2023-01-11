@@ -1,6 +1,7 @@
 import os
-from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+
 from app.core import emitter
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class ITSP(AbstractBenchmark):

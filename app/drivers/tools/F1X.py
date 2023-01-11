@@ -1,8 +1,9 @@
 import os
 import re
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core import definitions, values, emitter
 from os.path import join
+
+from app.core import definitions, values, emitter
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class F1X(AbstractTool):
@@ -25,7 +26,7 @@ class F1X(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(F1X, self).repair(bug_info, config_info)
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
@@ -70,9 +71,9 @@ class F1X(AbstractTool):
         repair_command += " -T 15000"
         repair_command += " --driver={0} ".format(test_driver_path)
         repair_command += ' -b "{0} /experiment "'.format(build_script_path)
-        if values.DEFAULT_DUMP_PATCHES:
+        if values.dump_patches:
             repair_command += " --output-space patch-space "
-        if values.CONF_DEBUG:
+        if values.debug:
             repair_command += " -v "
 
         dry_command = repair_command + " --disable-dteq"
@@ -96,7 +97,7 @@ class F1X(AbstractTool):
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-        if values.DEFAULT_DUMP_PATCHES:
+        if values.dump_patches:
             self.create_patches_from_space(fix_file)
         self.timestamp_log()
 
@@ -413,7 +414,7 @@ class F1X(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
@@ -441,11 +442,11 @@ class F1X(AbstractTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
+                    "patch-valid" if values.use_valkyrie else "patches",
                 )
             )
         )
-        if values.CONF_USE_VALKYRIE:
+        if values.use_valkyrie:
             self._space.plausible = self._space.generated
 
         return self._space, self._time, self._error

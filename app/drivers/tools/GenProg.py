@@ -1,8 +1,9 @@
 import os
 import re
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core import definitions, values, emitter
 from os.path import join
+
+from app.core import definitions, values, emitter
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class GenProg(AbstractTool):
@@ -14,7 +15,7 @@ class GenProg(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(GenProg, self).repair(bug_info, config_info)
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         conf_id = config_info[definitions.KEY_ID]
         passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
@@ -127,7 +128,7 @@ class GenProg(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),

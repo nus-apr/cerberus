@@ -1,10 +1,10 @@
 import abc
-import os
 import json
+import os
 import shutil
 from os.path import join
-from app.core import emitter, container, definitions, abstractions, values
-from app.core import utilities
+
+from app.core import emitter, container, definitions, abstractions, values, utilities
 
 
 class AbstractBenchmark:
@@ -31,11 +31,11 @@ class AbstractBenchmark:
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(
-            os.path.dirname(__file__) + "/../../benchmark/"
+            values.dir_benchmark
         )
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
         self.image_name = "{}-benchmark".format(self.name)
-        if values.DEFAULT_USE_CONTAINER:
+        if values.use_container:
             self.build_benchmark_image()
         self.load()
 
@@ -47,11 +47,11 @@ class AbstractBenchmark:
 
     def update_dir_info(self, dir_info):
         self.__dir_info = dir_info
-        if not values.DEFAULT_USE_CONTAINER:
+        if not values.use_container:
             self.dir_expr = dir_info["local"]["experiment"]
             self.dir_logs = dir_info["local"]["logs"]
             self.dir_setup = dir_info["local"]["setup"]
-            self.dir_base_expr = definitions.DIR_EXPERIMENT
+            self.dir_base_expr = values.dir_experiments
         else:
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
@@ -127,7 +127,7 @@ class AbstractBenchmark:
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         dir_exp_local = join(
-            definitions.DIR_EXPERIMENT, self.name, subject_name, bug_id
+            values.dir_experiments, self.name, subject_name, bug_id
         )
 
         if os.path.isdir(dir_exp_local):
@@ -169,7 +169,7 @@ class AbstractBenchmark:
         setup_error = False
         if not container_id:
             self.base_dir_experiment = os.path.abspath(
-                os.path.dirname(__file__) + "/../../experiments/"
+                values.dir_experiments
             )
             if os.path.isdir(self.dir_expr):
                 utilities.execute_command("rm -rf {}".format(self.dir_expr))
@@ -215,7 +215,7 @@ class AbstractBenchmark:
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
-        if not container.is_image_exist(exp_image_name) or values.DEFAULT_REBUILD_ALL_IMAGES:
+        if not container.is_image_exist(exp_image_name) or values.rebuild_all:
             emitter.warning("\t\t[warning] experiment not built")
             emitter.normal("\t\t\tpreparing/building experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name)

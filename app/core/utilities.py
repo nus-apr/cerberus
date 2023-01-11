@@ -1,15 +1,14 @@
-import subprocess
-import os
-import sys
-import signal
-import random
-from contextlib import contextmanager
-from app.core import logger, emitter, values, definitions
 import base64
 import hashlib
-import time
-import shutil
+import os
 import re
+import shutil
+import signal
+import subprocess
+import sys
+from contextlib import contextmanager
+
+from app.core import logger, emitter, values, definitions
 
 
 def escape_ansi(text):
@@ -33,7 +32,7 @@ def execute_command(command, show_output=True, env=dict()):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     emitter.command(command)
-    command = "{ " + command + " ;} 2> " + definitions.FILE_ERROR_LOG
+    command = "{ " + command + " ;} 2> " + values.file_error_log
     if not show_output:
         command += " > /dev/null"
     # print(command)
@@ -55,7 +54,7 @@ def clean_files():
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     emitter.information("Removing other residual files...")
     if os.path.isdir("output"):
-        clean_command = "rm -rf " + definitions.DIRECTORY_OUTPUT
+        clean_command = "rm -rf " + values.DIRECTORY_OUTPUT
         execute_command(clean_command)
 
 
@@ -128,5 +127,5 @@ def check_space():
     emitter.information("\t\t\t\t Used: %d GiB" % (used // (2**30)))
     emitter.information("\t\t\t\t Free: %d GiB" % (free // (2**30)))
     free_size = free // (2**30)
-    if int(free_size) < values.DEFAULT_DISK_SPACE:
+    if int(free_size) < values.default_disk_space:
         error_exit("insufficient disk space " + str(free_size))

@@ -1,9 +1,10 @@
 import os
 from os import path
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core.utilities import error_exit
+
 from app.core import definitions, values, emitter
 from app.core import utilities
+from app.core.utilities import error_exit
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class ExtractFix(AbstractTool):
@@ -31,7 +32,7 @@ class ExtractFix(AbstractTool):
             self.dir_output - directory to store artifacts/output 
         """
 
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
 
 

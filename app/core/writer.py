@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
-import pickle
 import json
+import pickle
 
 
 def write_as_json(data, output_file_path):

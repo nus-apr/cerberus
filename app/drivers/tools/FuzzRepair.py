@@ -1,8 +1,9 @@
 import os
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core.utilities import escape_ansi
-from app.core import definitions, emitter
 from os.path import join
+
+from app.core import definitions, emitter
+from app.core.utilities import escape_ansi
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class FuzzRepair(AbstractTool):

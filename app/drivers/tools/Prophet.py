@@ -1,9 +1,10 @@
 import os
 import re
-from app.drivers.tools.AbstractTool import AbstractTool
-from app.core import definitions, values, emitter
 from os import path
 from os.path import join
+
+from app.core import definitions, values, emitter
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Prophet(AbstractTool):
@@ -15,7 +16,7 @@ class Prophet(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(Prophet, self).repair(bug_info, config_info)
-        if values.CONF_INSTRUMENT_ONLY:
+        if values.only_instrument:
             return
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
@@ -48,7 +49,7 @@ class Prophet(AbstractTool):
         repair_command += " -cond-ext -replace-ext "
         repair_command += " -o {}".format(join(self.dir_output,"patches"))
         # repair_command += " >> {}".format(self.log_output_path)
-        if values.DEFAULT_DUMP_PATCHES:
+        if values.dump_patches:
             repair_command += " -dump-all "
         if additional_tool_param:
             repair_command += " " + additional_tool_param
@@ -5707,7 +5708,7 @@ class Prophet(AbstractTool):
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = path.join(self.dir_expr, "result")
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         self.log_analysis_path = "{}/{}-{}-{}-analysis.log".format(
             self.dir_logs, conf_id, self.name.lower(), bug_id
         )
@@ -5735,7 +5736,7 @@ class Prophet(AbstractTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.CONF_USE_VALKYRIE else "patches",
+                    "patch-valid" if values.use_valkyrie else "patches",
                 )
             )
         )

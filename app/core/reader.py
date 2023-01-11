@@ -1,6 +1,6 @@
 import json
-import pickle
 import os
+import pickle
 
 
 def read_json(file_path):

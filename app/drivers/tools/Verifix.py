@@ -1,7 +1,8 @@
 import os
 from os.path import join
-from app.drivers.tools.AbstractTool import AbstractTool
+
 from app.core import definitions, values, emitter
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Verifix(AbstractTool):
@@ -25,7 +26,7 @@ class Verifix(AbstractTool):
         self.timestamp_log()
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
             timeout_h,
-            "true" if values.CONF_DEBUG else "false",
+            "true" if values.debug else "false",
             join(
                 self.dir_setup,
                 bug_info[definitions.KEY_FIX_FILE].replace("buggy", "correct"),

@@ -1,15 +1,9 @@
-import multiprocessing as mp
-from multiprocessing import TimeoutError
-from functools import partial
 from app.core import definitions, values, emitter, analysis
-from multiprocessing.dummy import Pool as ThreadPool
-import threading
-import time
 import os
-from os.path import isfile, join
 from os import listdir
-from datetime import datetime
+from os.path import isfile, join
 
+from app.core import definitions, values, emitter, analysis
 
 processed_count = 0
 
@@ -20,7 +14,7 @@ def validate_patch(dir_info, file_info, config_info):
     binary_path, oracle_path, source_file, patch_file = file_info
     test_id_list, is_rank, _, single_test_timeout = config_info
     test_id_str = ",".join(test_id_list)
-    lib_dir_path = definitions.DIR_LIBS
+    lib_dir_path = values.dir_libs
     link_file = dir_process + "/" + patch_file
     patch_file = dir_patch + "/" + patch_file
     validate_command = "ln -sf {} {};".format(patch_file, link_file)

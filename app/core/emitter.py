@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 
-import sys
 import os
+import sys
 import textwrap
+
 from app.core import definitions, values, logger
 
 rows, columns = tuple(map(int, os.popen("stty size", "r").read().split()))
@@ -51,28 +52,33 @@ def sub_sub_title(text):
 
 
 def command(message):
-    if values.CONF_DEBUG:
+    if values.debug:
         prefix = "\t\t[command] "
         write(message, ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
 def docker_command(message):
-    if values.CONF_DEBUG:
+    if values.debug:
         prefix = "\t\t[docker-command] "
         write(message, ROSE, prefix=prefix, indent_level=2)
     logger.docker_command(message)
 
 
 def debug(message):
-    if values.CONF_DEBUG:
+    if values.debug:
         prefix = "\t\t[debug] "
         write(message, GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
+def build(message):
+    if values.debug:
+        prefix = "\t\t[build] "
+        write(message, GREY, prefix=prefix, indent_level=2)
+    logger.build(message)
 
 def data(message, info=None):
-    if values.CONF_DEBUG:
+    if values.debug:
         prefix = "\t\t[data] "
         write(message, GREY, prefix=prefix, indent_level=2)
         if info:
@@ -152,37 +158,13 @@ def configuration(setting, value):
 
 
 def end(time_total, is_error=False):
-    if values.CONF_ARG_PASS:
+    if values.arg_pass:
         statistics("\nRun time statistics:\n-----------------------\n")
-        statistics("Iteration Count: " + str(values.ITERATION_NO))
-        # statistics("Patch Gen Count: " + str(values.COUNT_PATCH_GEN))
-        # statistics("Patch Explored Count: " + str(values.COUNT_PATCHES_EXPLORED))
-        # statistics("Patch Start Count: " + str(values.COUNT_PATCH_START))
-        # statistics("Patch End Seed Count: " + str(values.COUNT_PATCH_END_SEED))
-        # statistics("Patch End Count: " + str(values.COUNT_PATCH_END))
-        # if values.DEFAULT_PATCH_TYPE == values.OPTIONS_PATCH_TYPE[1]:
-        #     statistics("Template Explored Count: " + str(values.COUNT_TEMPLATES_EXPLORED))
-        #     # statistics("Template Gen Count: " + str(values.COUNT_TEMPLATE_GEN))
-        #     statistics("Template Start Count: " + str(values.COUNT_TEMPLATE_START))
-        #     statistics("Template End Seed Count: " + str(values.COUNT_TEMPLATE_END_SEED))
-        #     statistics("Template End Count: " + str(values.COUNT_TEMPLATE_END))
-        #
-        # statistics("Paths Detected: " + str(values.COUNT_PATHS_DETECTED))
-        # statistics("Paths Explored: " + str(values.COUNT_PATHS_EXPLORED))
-        # statistics("Paths Explored via Generation: " + str(values.COUNT_PATHS_EXPLORED_GEN))
-        # statistics("Paths Skipped: " + str(values.COUNT_PATHS_SKIPPED))
-        # statistics("Paths Hit Patch Loc: " + str(values.COUNT_HIT_PATCH_LOC))
-        # statistics("Paths Hit Observation Loc: " + str(values.COUNT_HIT_BUG_LOG))
-        # statistics("Paths Hit Crash Loc: " + str(values.COUNT_HIT_CRASH_LOC))
-        # statistics("Paths Crashed: " + str(values.COUNT_HIT_CRASH))
-        # statistics("Component Count: " + str(values.COUNT_COMPONENTS))
-        # statistics("Component Count Gen: " + str(values.COUNT_COMPONENTS_GEN))
-        # statistics("Component Count Cus: " + str(values.COUNT_COMPONENTS_CUS))
-        # statistics("Gen Limit: " + str(values.DEFAULT_GEN_SEARCH_LIMIT))
+        statistics("Experiment Count: " + str(values.iteration_no))
         if is_error:
             error(
                 "\n"
-                + values.TOOL_NAME
+                + values.tool_name
                 + " exited with an error after "
                 + time_total
                 + " minutes \n"
@@ -190,7 +172,7 @@ def end(time_total, is_error=False):
         else:
             success(
                 "\n"
-                + values.TOOL_NAME
+                + values.tool_name
                 + " finished successfully after "
                 + time_total
                 + " minutes \n"
@@ -198,8 +180,9 @@ def end(time_total, is_error=False):
 
 
 def emit_help():
-    benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))
-    tools = os.listdir("../drivers/tools/")
+    benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))[:3]
+    tools = [x.replace(".py", "") for x in os.listdir(values.dir_tool_drivers)
+             if ".py" in x and "__" not in x][:3]
     max_length = len(definitions.ARG_BUG_INDEX_LIST)  # hardcoded
 
     write(

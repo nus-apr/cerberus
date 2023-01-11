@@ -1,9 +1,9 @@
 import abc
-from datetime import datetime
 import os
-from os.path import join
 import re
-from app.core.utilities import execute_command, error_exit
+from datetime import datetime
+from os.path import join
+
 from app.core import (
     emitter,
     values,
@@ -11,8 +11,9 @@ from app.core import (
     definitions,
     abstractions,
     analysis,
+    utilities
 )
-from app.core import utilities
+from app.core.utilities import execute_command, error_exit
 
 
 class AbstractTool:
@@ -74,7 +75,7 @@ class AbstractTool:
             self.dir_inst = dir_info["local"]["instrumentation"]
             self.dir_setup = dir_info["local"]["setup"]
             self.dir_output = dir_info["local"]["artifacts"]
-            self.dir_base_expr = definitions.DIR_EXPERIMENT
+            self.dir_base_expr = values.dir_experiments
 
     def timestamp_log(self):
         timestamp_command = "date -u '+%a %d %b %Y %H:%M:%S %p'"
@@ -104,7 +105,7 @@ class AbstractTool:
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.CONFIG_ID)
+        conf_id = str(values.config_id)
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = join(
             self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
@@ -112,7 +113,7 @@ class AbstractTool:
         time = datetime.now()
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
@@ -146,7 +147,7 @@ class AbstractTool:
         if self.container_id:
             clean_command = "rm -rf /output/patch* /logs/*"
             self.run_command(clean_command, "/dev/null", "/")
-            script_path = definitions.DIR_SCRIPTS + "/{}-dump-patches.py".format(
+            script_path = values.dir_scripts + "/{}-dump-patches.py".format(
                 self.name
             )
             cp_script_command = "docker cp {} {}:{} ".format(
@@ -157,7 +158,7 @@ class AbstractTool:
 
     def check_tool_exists(self):
         """Any pre-processing required for the repair"""
-        if values.DEFAULT_USE_CONTAINER:
+        if values.use_container:
             if self.image_name is None:
                 utilities.error_exit(
                     "{} does not provide a Docker Image".format(self.name)
@@ -188,7 +189,7 @@ class AbstractTool:
         """Any post-processing required for the repair"""
         if self.container_id:
             container.stop_container(self.container_id)
-        if values.CONF_PURGE:
+        if values.is_purge:
             self.clean_up()
         return
 

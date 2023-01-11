@@ -1,8 +1,9 @@
 import os
 from os.path import join
-from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+
+from app.core import definitions, emitter, values
 from app.core.utilities import execute_command
-from app.core import definitions, emitter
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class ManyBugs(AbstractBenchmark):
@@ -26,7 +27,7 @@ class ManyBugs(AbstractBenchmark):
                 os.path.dirname(__file__) + "/../../experiments/"
             )
             dir_exp_local = (
-                definitions.DIR_EXPERIMENT
+                values.dir_experiments
                 + "/"
                 + self.name
                 + "/"
@@ -37,7 +38,7 @@ class ManyBugs(AbstractBenchmark):
             if os.path.isdir(dir_exp_local):
                 execute_command("rm -rf {}".format(dir_exp_local))
         self.log_dir_path = join(
-            definitions.DIR_LOGS,
+            values.dir_logs,
             "{}-{}-{}-{}-{}".format(
                 str(config_id), self.name, tool_name_dir, subject_name, bug_id
             ),

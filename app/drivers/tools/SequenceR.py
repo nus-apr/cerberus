@@ -1,8 +1,9 @@
 import os
 from os.path import join
+
+from app.core import definitions, emitter
 from app.core import utilities
 from app.drivers.tools.AbstractTool import AbstractTool
-from app.core import definitions, emitter
 
 
 class SequenceR(AbstractTool):

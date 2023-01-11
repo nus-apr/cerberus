@@ -1,7 +1,8 @@
 import os
-from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.core import definitions, values, emitter
 from datetime import datetime
+
+from app.core import definitions, values, emitter
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class VulnLoc(AbstractBenchmark):
@@ -21,7 +22,7 @@ class VulnLoc(AbstractBenchmark):
             else:
                 emitter.error("\t\t\t[benchmark] verification failed")
                 is_error = True
-            if not values.DEFAULT_USE_VALKYRIE:
+            if not values.use_valkyrie:
                 emitter.normal("\t\t\tskipping transformation")
             else:
                 if self.transform(bug_id, container_id):
@@ -41,9 +42,9 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Setup took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -58,9 +59,9 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
         )
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Config took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -76,9 +77,9 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
         )
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Setup took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -93,9 +94,9 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Test took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status != 0
@@ -111,9 +112,9 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
 
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Verify took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -128,9 +129,9 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
-        emitter.normal(
+        emitter.debug(
             "\t\t\t Transform took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                ( datetime.now() - time).total_seconds()
             )
         )
         return status == 0

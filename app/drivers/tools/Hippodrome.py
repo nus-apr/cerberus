@@ -1,7 +1,8 @@
 import os
 from os.path import join
-from app.drivers.tools.AbstractTool import AbstractTool
+
 from app.core import definitions, emitter
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Hippodrome(AbstractTool):
