@@ -15,8 +15,8 @@ import os
 import re
 import shutil
 
-from app.tools.AbstractTool import AbstractTool
-from app.utilities import error_exit
+from app.drivers.tools import AbstractTool
+from app.core.utilities import error_exit
 from app import definitions, values, emitter, container
 
 
@@ -26,8 +26,7 @@ class NewTool(AbstractTool):
         super(NewTool, self).__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
 
-
-     def repair(self, bug_info, config_info):
+    def repair(self, bug_info, config_info):
         super(NewTool, self).repair(bug_info, config_info)
         ''' 
             self.dir_logs - directory to store logs
@@ -41,7 +40,7 @@ class NewTool(AbstractTool):
         status = self.run_command(repair_command,
                                   log_file_path=self.log_output_path)
         self.timestamp_log()
-        
+
     def save_artefacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
