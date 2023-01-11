@@ -7,12 +7,13 @@ In order to add a new benchmark to the framework, the following requirements sho
 
 ## Adding a Driver
 Create a new file in `app/benchmarks` with the Benchmark name (i.e. NewBenchmark.py) that contains the following code:
+
 ```py
 import shutil
 import os
 from os.path import join
-from app.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.utilities import execute_command
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.core.utilities import execute_command
 from app import definitions, values, emitter
 
 
