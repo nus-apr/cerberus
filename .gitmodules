@@ -13,3 +13,6 @@
 [submodule "benchmark/hippodrome"]
 	path = benchmark/hippodrome
 	url = git@github.com:nus-apr/hippodrome-benchmark.git
+[submodule "benchmark/defects4j"]
+	path = benchmark/defects4j
+	url = https://github.com/nus-apr/defects4j
