@@ -10,3 +10,6 @@
 [submodule "benchmark/itsp"]
 	path = benchmark/itsp
 	url = https://github.com/nus-apr/itsp-benchmark
+[submodule "benchmark/hippodrome"]
+	path = benchmark/hippodrome
+	url = git@github.com:nus-apr/hippodrome-benchmark.git
