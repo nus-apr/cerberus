@@ -1,12 +1,12 @@
 [submodule "benchmark/vulnloc"]
 	path = benchmark/vulnloc
-	url = https://github.com/nus-apr/vulnloc-benchmark
+	url = git@github.com:nus-apr/vulnloc-benchmark.git
 [submodule "benchmark/manybugs"]
 	path = benchmark/manybugs
-	url = https://github.com/nus-apr/manybugs
+	url = git@github.com:nus-apr/manybugs.git
 [submodule "benchmark/extractfix"]
 	path = benchmark/extractfix
-	url = https://github.com/nus-apr/extractfix-benchmark
+	url = git@github.com:nus-apr/extractfix-benchmark.git
 [submodule "benchmark/itsp"]
 	path = benchmark/itsp
 	url = https://github.com/nus-apr/itsp-benchmark
