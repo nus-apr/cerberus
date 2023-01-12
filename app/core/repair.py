@@ -233,17 +233,18 @@ def repair_all(
         )
 
         if index == 0:
-            valkyrie_setup_info = setup_for_valkyrie(
-                dir_info, container_id, experiment_info, benchmark_name
-            )
-            patch_dir, dir_process, binary_path, oracle_path = valkyrie_setup_info
             is_rank = len(tool_list) > 1
             validation_test_list = (
-                failing_test_list
-                + passing_test_list[: int(len(passing_test_list) * test_ratio)]
+                    failing_test_list
+                    + passing_test_list[: int(len(passing_test_list) * test_ratio)]
             )
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
+
             if values.use_valkyrie:
+                valkyrie_setup_info = setup_for_valkyrie(
+                    dir_info, container_id, experiment_info, benchmark_name
+                )
+                patch_dir, dir_process, binary_path, oracle_path = valkyrie_setup_info
                 v_path_info = (binary_path, oracle_path, fix_source_file)
                 v_dir_info = (patch_dir, dir_process)
                 v_config_info = (
