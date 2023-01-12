@@ -66,14 +66,19 @@ class CRepair(AbstractTool):
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        tool_log_dir = "/CRepair/logs/"
+        tool_log_dir = "/CrashRepair/logs/"
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
             for f in self.list_dir(tool_log_dir)
             if ".log" in f
         ]
-        for log_file in tool_log_files:
-            copy_command = "cp {} {}".format(log_file, self.dir_output)
+        list_artifact_dirs = [self.dir_expr + "/" + x for x in ["analysis", "patches"]]
+        list_artifact_files = [self.dir_expr + "/" + x for x in ["candidates.json", "bug.json"]]
+        for f in tool_log_files + list_artifact_files:
+            copy_command = f"cp {f} {self.dir_output}"
+            self.run_command(copy_command)
+        for d in list_artifact_dirs:
+            copy_command = f"cp -rf {d} {self.dir_output}"
             self.run_command(copy_command)
         super(CRepair, self).save_artefacts(dir_info)
         return
