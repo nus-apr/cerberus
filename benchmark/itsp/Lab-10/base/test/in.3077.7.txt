@@ -1,2 +1,0 @@
-thisproblemhasnoautomatedtestcases
-26

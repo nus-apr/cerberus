@@ -1,1 +1,0 @@
-Point is on the Circle.
