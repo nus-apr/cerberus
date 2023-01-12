@@ -49,7 +49,7 @@ class Defects4J(AbstractBenchmark):
         emitter.normal("\t\t\tbuilding experiment subject")
         command_str = "defects4j compile"
         status = self.run_command(
-            container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
+            container_id, command_str, self.log_build_path, join(self.dir_expr, "src")
         )
         return status == 0 
 
