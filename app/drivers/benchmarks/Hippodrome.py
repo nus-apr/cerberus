@@ -1,6 +1,6 @@
 import os
 
-from app.core import emitter
+from app.core import emitter, definitions
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -15,8 +15,10 @@ class Hippodrome(AbstractBenchmark):
         )
         return is_error
 
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
@@ -26,7 +28,7 @@ class Hippodrome(AbstractBenchmark):
         )
         return status == 0
 
-    def config(self, bug_id, container_id):
+    def config(self, bug_index, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True
 
@@ -34,15 +36,15 @@ class Hippodrome(AbstractBenchmark):
         emitter.normal("\t\t\tbuilding experiment subject")
         return True
 
-    def test(self, bug_id, container_id):
+    def test(self, bug_index, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
         return True
 
-    def verify(self, bug_id, container_id):
+    def verify(self, bug_index, container_id):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
         return True
 
-    def transform(self, bug_id, container_id):
+    def transform(self, bug_index, container_id):
         emitter.normal("\t\t\ttransform fix-file")
         return True
 

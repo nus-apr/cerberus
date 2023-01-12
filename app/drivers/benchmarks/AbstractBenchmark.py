@@ -171,8 +171,6 @@ class AbstractBenchmark:
 
     def setup_experiment(self, bug_index, container_id, test_all):
         emitter.normal("\t\t[benchmark] preparing experiment subject")
-        experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         setup_error = False
         if not container_id:
             self.base_dir_experiment = os.path.abspath(
@@ -187,11 +185,11 @@ class AbstractBenchmark:
                 self.run_command(
                     container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/"
                 )
-        if self.deploy(bug_id, container_id):
-            if self.config(bug_id, container_id):
-                if self.build(bug_id, container_id):
+        if self.deploy(bug_index, container_id):
+            if self.config(bug_index, container_id):
+                if self.build(bug_index, container_id):
                     if test_all:
-                        if self.test_all(experiment_item, container_id):
+                        if self.test_all(bug_index, container_id):
                             emitter.success(
                                 "\t\t\t[benchmark] setting up completed successfully"
                             )
@@ -199,7 +197,7 @@ class AbstractBenchmark:
                             emitter.error("\t\t\t[benchmark] testing failed")
                             setup_error = True
                     else:
-                        if self.test(bug_id, container_id):
+                        if self.test(bug_index, container_id):
                             emitter.success(
                                 "\t\t\t[benchmark] setting up completed successfully"
                             )
@@ -238,27 +236,27 @@ class AbstractBenchmark:
         return
 
     @abc.abstractmethod
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index, container_id):
         """Prepares the experiment, e.g. synthesize an image for the bug from the benchmark"""
         return
 
     @abc.abstractmethod
-    def config(self, bug_id, container_id):
+    def config(self, bug_index, container_id):
         """Configure the bug from the benchmark, e.g. running the ./configure script"""
         return
 
     @abc.abstractmethod
-    def build(self, bug_id, container_id):
+    def build(self, bug_index, container_id):
         """Builds the bug from the benchmark"""
         return
 
     @abc.abstractmethod
-    def test(self, bug_id, container_id):
+    def test(self, bug_index, container_id):
         """Runs a single test for a bug from the benchmark"""
         return
 
     @abc.abstractmethod
-    def test_all(self, bug_id, container_id):
+    def test_all(self, bug_index, container_id):
         """Runs all tests in the benchmark for a specific tool"""
         return
 

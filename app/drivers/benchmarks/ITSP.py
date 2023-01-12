@@ -15,27 +15,27 @@ class ITSP(AbstractBenchmark):
         )
         return is_error
 
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
         return True
 
-    def config(self, bug_id, container_id):
+    def config(self, bug_index, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True
 
-    def build(self, bug_id, container_id):
+    def build(self, bug_index, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
         return True
 
-    def test(self, bug_id, container_id):
+    def test(self, bug_index, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
         return True
 
-    def verify(self, bug_id, container_id):
+    def verify(self, bug_index, container_id):
         emitter.normal("\t\t\tverify dev patch and test-oracle")
         return True
 
-    def transform(self, bug_id, container_id):
+    def transform(self, bug_index, container_id):
         emitter.normal("\t\t\ttransform fix-file")
         return True
 
