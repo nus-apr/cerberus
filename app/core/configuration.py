@@ -82,6 +82,7 @@ class Configurations:
         "end-index": None,
         "bug-id-list": [],
         "bug-index-list": [],
+        "skip-index-list": [],
         "tool-list": [],
         "directories": {
             "data": "/data"
