@@ -186,6 +186,7 @@ class Configurations:
         values.start_index = self.__runtime_config_values["start-index"]
         values.end_index = self.__runtime_config_values["end-index"]
         values.bug_index_list = self.__runtime_config_values["bug-index-list"]
+        values.skip_index_list = self.__runtime_config_values["skip-index-list"]
         values.bug_id_list = self.__runtime_config_values["bug-id-list"]
 
         if (
