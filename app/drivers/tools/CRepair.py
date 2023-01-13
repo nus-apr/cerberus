@@ -96,15 +96,10 @@ class CRepair(AbstractTool):
         search_space = 0
 
         # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self._space.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
         self._space.generated = len(
             self.list_dir(
                 join(
-                    self.dir_output,
+                    self.dir_expr,
                     "patch-valid" if values.use_valkyrie else "patches",
                 )
             )
