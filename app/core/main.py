@@ -87,8 +87,7 @@ def parse_args():
 
     optional.add_argument('--bug-index', help='index of the bug in the benchmark',
                           type=int)
-    optional.add_argument('--bug-index-list', help='list of bug indexes in the benchmark',
-                          type=list)
+    optional.add_argument('--bug-index-list', help='list of bug indexes in the benchmark')
 
     optional.add_argument('-t', '--tool', help='name of the repair tool',
                           choices= values.get_list_tools()

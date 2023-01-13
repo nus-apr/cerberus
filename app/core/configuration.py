@@ -148,10 +148,10 @@ class Configurations:
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
         if arg_list.bug_index_list:
-            self.__runtime_config_values["bug-index-list"] = flat_map(
+            self.__runtime_config_values["bug-index-list"] = list(flat_map(
                             self.convert_range,
                             str(arg_list.bug_index_list).split(","),
-                        )
+                        ))
 
         if arg_list.bug_id:
             self.__runtime_config_values["bug-id-list"] = [arg_list.bug_id]
