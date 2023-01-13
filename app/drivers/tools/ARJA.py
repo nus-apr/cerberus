@@ -23,11 +23,11 @@ class ARJA(AbstractTool):
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
 
-        dir_java_src = bug_info["dir-java-src"]
-        dir_test_src = bug_info["dir-test-src"]
-        dir_java_bin = bug_info["dir-java-bin"]
-        dir_test_bin = bug_info["dir-test-bin"]
-        list_deps = bug_info["dependency-list"]
+        dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
+        dir_test_src = self.dir_expr + "/src/" + bug_info["test_directory"]
+        dir_java_bin = self.dir_expr + "/src/" +  bug_info["class_directory"]
+        dir_test_bin = self.dir_expr + "/src/" + bug_info["test_class_directory"]
+        list_deps = ":".join(bug_info["dependencies"])
 
 
         # generate patches
