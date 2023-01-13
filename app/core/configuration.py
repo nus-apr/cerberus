@@ -192,6 +192,7 @@ class Configurations:
 
         if (
                 values.start_index is None
+                and values.end_index is None
                 and not values.bug_id_list is None
                 and not values.bug_index_list
                 and values.subject_name is None
