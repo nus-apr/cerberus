@@ -1,7 +1,8 @@
 import os
+import re
 from os.path import join
 
-from app.core import definitions, emitter
+from app.core import definitions, emitter, values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -88,11 +89,21 @@ class CRepair(AbstractTool):
 
         count_plausible = 0
         count_enumerations = 0
+        search_space = 0
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
         self._space.generated = len(
             [name for name in list_output_dir if ".patch" in name]
+        )
+
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.use_valkyrie else "patches",
+                )
+            )
         )
 
         # extract information from output log
@@ -108,10 +119,14 @@ class CRepair(AbstractTool):
             self._time.timestamp_end = log_lines[-1].rstrip()
 
             for line in log_lines:
-                if "Generating patch" in line:
-                    count_plausible += 1
+                if "evaluating candidate patch" in line:
                     count_enumerations += 1
+                if "writing" in line and "mutations" in line:
+                    search_space = re.search(r'writing (.*) mutations', line).group(1)
+                if "saving successful patch" in line:
+                    count_plausible += 1
 
         self._space.plausible = count_plausible
         self._space.enumerations = count_enumerations
+        self._space.size = search_space
         return self._space, self._time, self._error
