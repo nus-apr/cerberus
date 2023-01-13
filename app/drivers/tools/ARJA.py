@@ -1,7 +1,7 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter
+from app.core import definitions, emitter, values
 from app.core import utilities
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -117,16 +117,21 @@ class ARJA(AbstractTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
+            for line in log_lines:
+                if "One fitness evaluation is finished" in line:
+                    count_enumerations += 1
+                elif "failed tests: 0" in line:
+                    count_plausible += 1
 
-        if not self._error.is_error:
-            patch_space = self.list_dir("/output/patches")
-            self._space.generated = len(patch_space)
-            self._space.enumerations = len(patch_space)
-            self._space.plausible = len(
-                list(filter(lambda x: "passed" in x, patch_space))
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.use_valkyrie else "patches",
+                )
             )
-            self._space.non_compilable = (
-                self._space.generated - self._space.enumerations
-            )
+        )
+        self._space.enumerations = count_enumerations
+        self._space.plausible = count_plausible
 
         return self._space, self._time, self._error
