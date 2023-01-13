@@ -7,6 +7,8 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class ARJA(AbstractTool):
+
+    arja_home = "/opt/arja"
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(ARJA, self).__init__(self.name)
@@ -44,7 +46,7 @@ class ARJA(AbstractTool):
             list_deps
         )
         status = self.run_command(
-            arja_command, self.log_output_path, self.dir_expr + "/src"
+            arja_command, self.log_output_path, self.arja_home
         )
 
 
