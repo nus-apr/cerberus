@@ -258,30 +258,33 @@ class AbstractTool:
         emitter.highlight(
             "\t\t\t count implausible patches: {0}".format(space_info.get_implausible())
         )
+
+        emitter.highlight(
+            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
+        )
         emitter.highlight(
             "\t\t\t time build: {0} seconds".format(time_info.total_build)
         )
         emitter.highlight(
             "\t\t\t time validation: {0} seconds".format(time_info.total_validation)
         )
-        emitter.highlight(
-            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
-        )
-        emitter.highlight(
-            "\t\t\t time latency compilation: {0} seconds".format(
-                time_info.get_latency_compilation()
+
+        if values.use_valkyrie:
+            emitter.highlight(
+                "\t\t\t time latency compilation: {0} seconds".format(
+                    time_info.get_latency_compilation()
+                )
             )
-        )
-        emitter.highlight(
-            "\t\t\t time latency validation: {0} seconds".format(
-                time_info.get_latency_validation()
+            emitter.highlight(
+                "\t\t\t time latency validation: {0} seconds".format(
+                    time_info.get_latency_validation()
+                )
             )
-        )
-        emitter.highlight(
-            "\t\t\t time latency plausible: {0} seconds".format(
-                time_info.get_latency_plausible()
+            emitter.highlight(
+                "\t\t\t time latency plausible: {0} seconds".format(
+                    time_info.get_latency_plausible()
+                )
             )
-        )
 
     def read_file(self, file_path, encoding="utf-8"):
         return abstractions.read_file(self.container_id, file_path, encoding)
