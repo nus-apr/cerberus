@@ -20,7 +20,9 @@ KEY_EXPLOIT_LIST = "exploit_file_list"
 KEY_FUZZREPAIR_CRASH_CMD = "fuzzrepair_crash_input"
 KEY_FUZZREPAIR_EXPLOIT_LIST = "fuzzrepair_exploit_file_list"
 KEY_BUG_TYPE = "bug_type"
-
+KEY_SOURCE_DIRECTORY = "source_directory"
+KEY_TEST_DIRECTORY= "test_directory"
+KEY_DEPENDENCIES = "dependencies"
 
 ARG_DATA_PATH = "--data-dir"
 ARG_TOOL_PATH = "--tool-path"

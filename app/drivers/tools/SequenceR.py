@@ -41,9 +41,16 @@ class SequenceR(AbstractTool):
 
         # generate patches
         self.timestamp_log()
+        file = (
+            join(
+                bug_info[definitions.KEY_SOURCE_DIRECTORY],
+                bug_info[definitions.KEY_FIX_FILE].replace(".", "/"),
+            )
+            + ".java"
+        )  # construct the file's path
         sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
-            join(self.dir_expr, "src", bug_info[definitions.KEY_FIX_FILE]),
+            join(self.dir_expr, "src", file),
             bug_info[definitions.KEY_FIX_LINES][0],
             join(self.dir_output, "patches"),
         )
@@ -58,7 +65,7 @@ class SequenceR(AbstractTool):
                     self.dir_expr,
                     "src",
                 ),
-                join(self.dir_expr, "src", bug_info[definitions.KEY_FIX_FILE]),
+                join(self.dir_expr, "src", file),
                 timeout_h,
             )
         )
