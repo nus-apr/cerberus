@@ -29,22 +29,27 @@ class ARJA(AbstractTool):
         dir_test_src = self.dir_expr + "/src/" + bug_info["test_directory"]
         dir_java_bin = self.dir_expr + "/src/" +  bug_info["class_directory"]
         dir_test_bin = self.dir_expr + "/src/" + bug_info["test_class_directory"]
-        list_deps = ":".join(bug_info["dependencies"])
+        list_deps = bug_info["dependencies"]
+        list_deps.append(f"{self.arja_home}/external/lib/hamcrest-core-1.3.jar")
+        list_deps.append(f"{self.arja_home}/external/lib/junit-4.11.jar")
+        list_deps_str = ":".join(list_deps)
 
 
+        max_generations = 2000000
+        test_timeout = 30000
         # generate patches
         self.timestamp_log()
-        arja_command = "timeout -k 5m {}h java -cp lib/*:bin us.msu.cse.repair.Main Arja " \
-                       "-DsrcJavaDir {} " \
-                       "-DbinJavaDir {} " \
-                       "-DbinTestDir {} " \
-                       "-Ddependences {}".format(
-            timeout_h,
-            dir_java_src,
-            dir_java_bin,
-            dir_test_bin,
-            list_deps
-        )
+        arja_command = f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main Arja " \
+                       f"-DsrcJavaDir {dir_java_src} " \
+                       f"-DbinJavaDir {dir_java_bin} " \
+                       f"-DbinTestDir {dir_test_bin} " \
+                       "-DdiffFormat true " \
+                       f"-DexternalProjRoot {self.arja_home}/external " \
+                       f" -DwaitTime {test_timeout} " \
+                       f" -DmaxGenerations {max_generations} " \
+                       f"-DpatchOutputRoot {self.dir_output}/patches " \
+                       f"-Ddependences {list_deps_str}"
+
         status = self.run_command(
             arja_command, self.log_output_path, self.arja_home
         )
