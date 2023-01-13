@@ -20,7 +20,7 @@ class Examples(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        tool_name_dir = tool_name
+        tool_name_dir = self.tool_name
         if is_multi:
             tool_name_dir = "multi"
         self.log_dir_path = (
@@ -37,12 +37,12 @@ class Examples(AbstractBenchmark):
             + bug_id
         )
         container_id = self.setup_container(
-            tool_name, bug_index, config_id, use_container, is_multi
+            self.tool_name, bug_index, config_id, self.use_container, self.is_multi
         )
         exp_setup_dir_path = (
             self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
         )
-        if not use_container:
+        if not self.use_container:
             self.base_dir_experiment = os.path.abspath(
                 os.path.dirname(__file__) + "/../../experiments/"
             )

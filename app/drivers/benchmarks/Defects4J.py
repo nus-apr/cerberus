@@ -24,6 +24,31 @@ class Defects4J(AbstractBenchmark):
             experiment_item[definitions.KEY_SUBJECT], bug_id, join(self.dir_expr, "src")
         )
         status = self.run_command(container_id, command_str, self.log_deploy_path)
+        self.run_command(
+            container_id,
+            "defects4j export -p cp.test -o classpath_data",
+            self.log_deploy_path,
+            join(self.dir_expr, "src"),
+        )
+        for dependency in self.read_file(
+            container_id, join(self.dir_expr, "src", "classpath_data")
+        )[0].split(":"):
+            if dependency.startswith("/defects4j"):
+                source = dependency
+                destination = "{}/deps/{}".format(
+                    self.dir_expr, dependency.split("/defects4j/framework/projects/")[1]
+                )
+                self.run_command(
+                    container_id,
+                    "mkdir -p {}".format(os.path.dirname(destination)),
+                    log_file_path=self.log_deploy_path,
+                )
+                self.run_command(
+                    container_id,
+                    "cp {} {}".format(source, destination),
+                    log_file_path=self.log_deploy_path,
+                )
+
         return status == 0
 
     def config(self, bug_index, container_id):
@@ -36,7 +61,7 @@ class Defects4J(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_build_path, join(self.dir_expr, "src")
         )
-        return status == 0 
+        return status == 0
 
     def test(self, bug_index, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
@@ -45,7 +70,6 @@ class Defects4J(AbstractBenchmark):
             container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
         )
         return status == 0
-
 
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
