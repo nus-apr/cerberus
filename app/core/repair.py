@@ -139,7 +139,7 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
         dir_expr = dir_info["container"]["experiment"]
     else:
         dir_expr = dir_info["local"]["experiment"]
-    binary_path_rel = bug_info[definitions.KEY_BINARY_PATH]
+    binary_path_rel = bug_info.get(definitions.KEY_BINARY_PATH,"")
     valkyrie_binary_path = join(dir_output_local, "binary")
     binary_path = join(dir_expr, "src", binary_path_rel)
     if container_id:
