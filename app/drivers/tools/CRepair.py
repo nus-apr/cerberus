@@ -7,6 +7,10 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class CRepair(AbstractTool):
+
+    error_messages = [
+        "aborted", "core dumped", "runtime error", "segmentation fault"
+    ]
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(CRepair, self).__init__(self.name)
@@ -123,8 +127,11 @@ class CRepair(AbstractTool):
                     count_enumerations += 1
                 if "writing" in line and "mutations" in line:
                     search_space = re.search(r'writing (.*) mutations', line).group(1)
-                if "saving successful patch" in line:
+                elif "saving successful patch" in line:
                     count_plausible += 1
+
+                if  any(err in line.lower() for err in self.error_messages):
+                    self._error.is_error = True
 
         self._space.plausible = count_plausible
         self._space.enumerations = count_enumerations
