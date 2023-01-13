@@ -123,14 +123,15 @@ class ARJA(AbstractTool):
                 elif "failed tests: 0" in line:
                     count_plausible += 1
 
-        self._space.generated = len(
+        self._space.generated = len([ x for x in
             self.list_dir(
                 join(
                     self.dir_output,
                     "patch-valid" if values.use_valkyrie else "patches",
                 )
             )
-        )
+            if ".txt" in x
+        ])
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
 
