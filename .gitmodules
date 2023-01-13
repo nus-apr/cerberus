@@ -9,10 +9,10 @@
 	url = git@github.com:nus-apr/extractfix-benchmark.git
 [submodule "benchmark/itsp"]
 	path = benchmark/itsp
-	url = https://github.com/nus-apr/itsp-benchmark
+	url = git@github.com:nus-apr/itsp-benchmark.git
 [submodule "benchmark/hippodrome"]
 	path = benchmark/hippodrome
 	url = git@github.com:nus-apr/hippodrome-benchmark.git
 [submodule "benchmark/defects4j"]
 	path = benchmark/defects4j
-	url = https://github.com/nus-apr/defects4j
+	url = git@github.com:nus-apr/defects4j.git
