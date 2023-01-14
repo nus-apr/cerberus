@@ -77,7 +77,7 @@ class DeepRepair(AbstractTool):
         for d in list_artifact_dirs:
             copy_command = f"cp -rf {d} {self.dir_output}"
             self.run_command(copy_command)
-        super(jMutRepair, self).save_artefacts(dir_info)
+        super(DeepRepair, self).save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
