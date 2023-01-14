@@ -44,6 +44,13 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 11 | Verifix       | C/C++    | <https://github.com/zhiyufan/Verifix>             | 6d5bda0   |
 | 12 | Hippodrome    | Java     | <https://github.com/verse-lab/hippodrome>         | 012f291   |
 | 13 | SequenceR     | Java     | <https://github.com/KTH/sequencer>                | 3bd0cd4   |
+| 14 | ARJA          | Java     | <https://github.com/yyxhdy/arja>                  | e795032   |
+| 15 | Cardumen      | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
+| 16 | jMutRepair    | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
+| 17 | jKali         | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
+| 18 | jGenProg      | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
+
+
 
 ## Supported Benchmarks of Bugs
 
