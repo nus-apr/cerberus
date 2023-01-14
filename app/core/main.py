@@ -90,11 +90,11 @@ def parse_args():
     optional.add_argument('--bug-index-list', help='list of bug indexes in the benchmark')
 
     optional.add_argument('-t', '--tool', help='name of the repair tool',
-                          choices= values.get_list_tools()
+                          choices=values.get_list_tools()
                           )
     optional.add_argument('-s', '--subject', help='filter the bugs using the subject name')
     optional.add_argument('-p', '--tool-param', help='filter the bugs using the subject name')
-    optional.add_argument('--tool-list', help='list of repair tool names', type=list)
+    optional.add_argument('--tool-list', help='list of repair tool names', nargs='+', default=[])
     optional.add_argument('--rebuild-all', help='rebuild all images',
                           action='store_true', default=False)
     optional.add_argument('--rebuild-base', help='rebuild the base images',
@@ -116,13 +116,13 @@ def parse_args():
                           action='store_true', default=False)
 
     optional.add_argument('--config-list', help='multiple list of configurations', dest="config_id_list",
-                          type=list, default=False)
+                          nargs='+', default=[])
 
     optional.add_argument('--bug-id', help='identifier of the bug')
-    optional.add_argument('--bug-id-list', type=list, help='list of identifiers for the bugs')
+    optional.add_argument('--bug-id-list', type=list, help='list of identifiers for the bugs', nargs='+', default=[])
     optional.add_argument('--start-index', help='starting index for the list of bugs', type=int)
     optional.add_argument('--end-index', help='ending index for the list of bugs', type=int)
-    optional.add_argument('--skip-index-list', help='list of bug index to skip', type=list)
+    optional.add_argument('--skip-index-list', help='list of bug index to skip', type=list, nargs='+', default=[])
     optional.add_argument('--config', help='configuration profile')
 
     args = parser.parse_args()

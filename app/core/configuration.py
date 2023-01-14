@@ -156,7 +156,7 @@ class Configurations:
         if arg_list.bug_id:
             self.__runtime_config_values["bug-id-list"] = [arg_list.bug_id]
         if arg_list.bug_id_list:
-            self.__runtime_config_values["bug-id-list"] = arg_list.bug_id_list.split(",")
+            self.__runtime_config_values["bug-id-list"] = arg_list.bug_id_list
 
         if arg_list.start_index:
             self.__runtime_config_values["start-index"] = int(arg_list.start_index)
@@ -164,7 +164,7 @@ class Configurations:
             self.__runtime_config_values["end-index"] = int(arg_list.end_index)
 
         if arg_list.skip_index_list:
-            self.__runtime_config_values["skip-index-list"] = str(arg_list.skip_index_list).split(",")
+            self.__runtime_config_values["skip-index-list"] = arg_list.skip_index_list
 
 
     def update_configuration(self):
