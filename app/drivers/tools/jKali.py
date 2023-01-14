@@ -8,7 +8,9 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 class jKali(AbstractTool):
 
-    arja_home = "/opt/astor"
+    astor_home = "/opt/astor"
+    astor_version = "2.0.0"
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(jKali, self).__init__(self.name)
@@ -30,14 +32,15 @@ class jKali(AbstractTool):
         dir_java_bin = bug_info["class_directory"]
         dir_test_bin = bug_info["test_class_directory"]
         list_deps = bug_info["dependencies"]
-        list_deps.append(f"{self.arja_home}/external/lib/hamcrest-core-1.3.jar")
-        list_deps.append(f"{self.arja_home}/external/lib/junit-4.11.jar")
+        list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
+        list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
         list_deps_str = ":".join(list_deps)
 
         # generate patches
         self.timestamp_log()
         repair_command = f"timeout -k 5m {timeout_h}h " \
-                         f"java -cp target/astor-*-jar-with-dependencies.jar fr.inria.main.evolution.AstorMain " \
+                         f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar " \
+                         f"fr.inria.main.evolution.AstorMain " \
                          f"-mode jkali " \
                          f"-srcjavafolder {dir_java_src} " \
                          f"-srctestfolder {dir_test_src}  " \
@@ -47,7 +50,7 @@ class jKali(AbstractTool):
                          f"-dependencies {list_deps_str}"
 
         status = self.run_command(
-            repair_command, self.log_output_path, self.arja_home
+            repair_command, self.log_output_path, self.astor_home
         )
 
 
