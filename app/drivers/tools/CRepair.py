@@ -11,13 +11,14 @@ class CRepair(AbstractTool):
     error_messages = [
         "aborted", "core dumped", "runtime error", "segmentation fault"
     ]
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(CRepair, self).__init__(self.name)
-        self.image_name="rshariffdeen/crepair:tool"
+        self.image_name = "rshariffdeen/crepair:tool"
 
     def generate_conf_file(self, bug_info):
-        repair_conf_path = join(self.dir_setup,"crepair","repair.conf")
+        repair_conf_path = join(self.dir_setup, "crepair", "repair.conf")
         conf_content = []
         poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
@@ -53,11 +54,10 @@ class CRepair(AbstractTool):
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"
         self.timestamp_log()
-        CRepair_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h " \
-                          "crashrepair repair --no-fuzz {1} {2}'".format(
-            str(timeout_h), bug_json_path, additional_tool_param
-        )
-        status = self.run_command(CRepair_command, log_file_path=self.log_output_path)
+        repair_command = f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h " \
+                         f"crashrepair repair --no-fuzz {bug_json_path} {additional_tool_param}'"
+
+        status = self.run_command(repair_command, log_file_path=self.log_output_path)
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
@@ -93,6 +93,7 @@ class CRepair(AbstractTool):
 
         count_plausible = 0
         count_enumerations = 0
+        count_compile_errors = 0
         search_space = 0
 
         # count number of patch files
@@ -124,10 +125,13 @@ class CRepair(AbstractTool):
                     search_space = re.search(r'writing (.*) mutations', line).group(1)
                 elif "saving successful patch" in line:
                     count_plausible += 1
+                elif "failed to compile" in line:
+                    count_compile_errors += 1
 
-                if  any(err in line.lower() for err in self.error_messages):
+                if any(err in line.lower() for err in self.error_messages):
                     self._error.is_error = True
 
+        self._space.non_compilable = count_compile_errors
         self._space.plausible = count_plausible
         self._space.enumerations = count_enumerations
         self._space.size = search_space
