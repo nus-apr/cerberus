@@ -101,24 +101,17 @@ class EvoRepair(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        tool_log_dir = f"{self.evorepair_home}/logs/"
-        tool_log_files = [
-            "{}/{}".format(tool_log_dir, f)
-            for f in self.list_dir(tool_log_dir)
-            if ".log" in f
-        ]
+        tool_log_dir = f"{self.evorepair_home}/logs/{self.bug_id}"
+        tool_log_files = [f for f in self.list_dir(tool_log_dir)]
         for log_file in tool_log_files:
             copy_command = "cp -rf {} {}".format(log_file, self.dir_output)
             self.run_command(copy_command)
+
         tool_artifact_dir = f"{self.evorepair_home}/output/"
-        tool_artifact_files = [
-            "{}/{}".format(tool_artifact_dir, f)
-            for f in self.list_dir(tool_artifact_dir)
-        ]
+        tool_artifact_files = [f  for f in self.list_dir(tool_artifact_dir)]
         for a_file in tool_artifact_files:
             copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
-        self.run_command(f"cp -rf {self.evorepair_home}/output/{self.bug_id} {self.dir_output}")
         super(EvoRepair, self).save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
