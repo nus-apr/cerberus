@@ -134,7 +134,7 @@ class Defects4J(AbstractBenchmark):
                 )
             )
             if status == 0:
-                if self.build(bug_index, container_id):
+                if not self.build(bug_index, container_id):
                     status = 1
         return status == 0
 
