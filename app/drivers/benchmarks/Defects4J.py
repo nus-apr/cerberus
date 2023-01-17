@@ -98,9 +98,10 @@ class Defects4J(AbstractBenchmark):
 
     def build(self, bug_index, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
+        custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j compile"
         status = self.run_command(
-            container_id, command_str, self.log_build_path, join(self.dir_expr, "src")
+            container_id, command_str, self.log_build_path, join(self.dir_expr, "src"), custom_env
         )
         return status == 0
 

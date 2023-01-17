@@ -83,10 +83,11 @@ class AbstractBenchmark:
         command_str,
         log_file_path="/dev/null",
         dir_path="/experiment",
+        env = dict()
     ):
         if container_id:
             exit_code, output = container.exec_command(
-                container_id, command_str, dir_path
+                container_id, command_str, dir_path, env
             )
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
