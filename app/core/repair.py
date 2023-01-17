@@ -28,11 +28,11 @@ def update_dir_info(dir_info, tool_name):
     return dir_info
 
 
-def generate_dir_info(benchmark_name, subject_name, bug_name, link_name):
+def generate_dir_info(benchmark_name, subject_name, bug_name, tag_name):
     dir_path = join(benchmark_name, subject_name, bug_name) + "/"
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
-    dir_name = hash.hexdigest()
+    dir_name = f"{tag_name}-{hash.hexdigest()[:8]}"
     dir_setup_container = join("/setup", dir_path)
     dir_exp_container = join("/experiment", dir_path)
     dir_logs_container = "/logs"
@@ -441,14 +441,15 @@ def run(benchmark, tool_list, bug_info, config_info):
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
+    tag_name =  "-".join([config_id] +
+            list(map(lambda x: x.name, tool_list))
+            + [benchmark.name, subject_name, bug_name]
+        )
     dir_info = generate_dir_info(
         benchmark.name,
         subject_name,
         bug_name,
-        "-".join(
-            list(map(lambda x: x.name, tool_list))
-            + [benchmark.name, subject_name, bug_name, "last"]
-        ),
+        tag_name
     )
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
