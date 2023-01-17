@@ -31,7 +31,7 @@ class EvoRepair(AbstractTool):
         dir_java_bin = self.dir_expr + "/src/" + bug_info["class_directory"]
         dir_test_bin = self.dir_expr + "/src/" + bug_info["test_class_directory"]
         list_deps = bug_info["dependencies"]
-        dir_java_deps = ""
+        dir_java_deps = f"{self.dir_expr}/deps"
         for dep in list_deps:
             if "src" == dep[:3]:
                 dir_java_deps = dep[4:].split("/")[0]
