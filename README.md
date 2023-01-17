@@ -49,6 +49,7 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 16 | jMutRepair    | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
 | 17 | jKali         | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
 | 18 | jGenProg      | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
+| 19 | Nopol         | Java     | <https://github.com/SpoonLabs/nopol>              | 8cb3676   |
 
 
 
