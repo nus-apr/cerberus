@@ -75,7 +75,7 @@ class ARJA(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        super().save_artefacts(dir_info)
+        super(ARJA, self).save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
