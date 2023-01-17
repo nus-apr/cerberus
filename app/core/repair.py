@@ -486,9 +486,9 @@ def run(benchmark, tool_list, bug_info, config_info):
         dir_instr_local = dir_info["local"]["instrumentation"]
         dir_result_local = dir_info["local"]["results"]
         # emitter.information("directory is {}".format(dir_instr_local))
-        if not os.path.isdir(dir_instr_local):
+        if os.path.isdir(dir_instr_local):
             emitter.warning(
-                "\t\t[warning] there is no instrumentation for " + repair_tool.name
+                "\t\t[note] there is custom instrumentation for " + repair_tool.name
             )
         if values.only_analyse:
             if (
