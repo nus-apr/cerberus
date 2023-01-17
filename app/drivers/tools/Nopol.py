@@ -32,12 +32,17 @@ class Nopol(AbstractTool):
 
         dir_java_bin = self.dir_expr + "/src/" +  bug_info["class_directory"]
         dir_test_bin = self.dir_expr + "/src/" + bug_info["test_class_directory"]
-        list_deps = bug_info["dependencies"]
+
+        list_deps = list()
+        for dep in bug_info["dependencies"]:
+            dep = f"{self.dir_expr}/{dep}"
+            list_deps.append(dep)
         list_deps.append(f"{self.nopol_home}/nopol/lib/hamcrest-core-1.3.jar")
         list_deps.append(f"{self.nopol_home}/nopol/lib/junit-4.11.jar")
         list_deps.append(dir_java_bin)
         list_deps.append(dir_test_bin)
         list_deps_str = ":".join(list_deps)
+
         test_classes_str = " ".join(failing_test_list)
         nopol_jar_path = f"{self.nopol_home}/nopol/nopol-{self.nopol_version}" \
                          f"-SNAPSHOT-jar-with-dependencies.jar"
