@@ -26,7 +26,8 @@ class jGenProg(AbstractTool):
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-
+        timeout_m = str(float(timeout_h) * 60)
+        max_gen = 1000000
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         dir_test_src = self.dir_expr + "/src/" + bug_info["test_directory"]
         dir_java_bin = bug_info["class_directory"]
@@ -47,7 +48,10 @@ class jGenProg(AbstractTool):
                          f"-binjavafolder {dir_java_bin} " \
                          f"-bintestfolder  {dir_test_bin} " \
                          f"-location {self.dir_expr}/src " \
-                         f"-dependencies {list_deps_str}"
+                         f"-dependencies {list_deps_str}" \
+                         f"-maxgen {max_gen}" \
+                         f"-maxtime {timeout_m}" \
+                         f"stopfirst false"
 
         status = self.run_command(
             repair_command, self.log_output_path, self.astor_home
