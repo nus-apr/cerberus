@@ -32,7 +32,7 @@ class jGenProg(AbstractTool):
         dir_test_src = self.dir_expr + "/src/" + bug_info["test_directory"]
         dir_java_bin = bug_info["class_directory"]
         dir_test_bin = bug_info["test_class_directory"]
-        list_deps = bug_info["dependencies"]
+        list_deps = [f"{self.dir_expr}/{x}" for x in bug_info["dependencies"]]
         list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
         list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
         list_deps_str = ":".join(list_deps)
