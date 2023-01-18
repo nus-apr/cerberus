@@ -61,8 +61,9 @@ class Defects4J(AbstractBenchmark):
         emitter.normal("\t\t\tdownloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j checkout -p {} -v {}b -w {}".format(
-            experiment_item[definitions.KEY_SUBJECT], bug_id, join(self.dir_expr, "src")
+            experiment_item[definitions.KEY_SUBJECT], bug_id, join(self.dir_expr, "src"), custom_env
         )
         status = self.run_command(container_id, command_str, self.log_deploy_path)
         self.run_command(
@@ -70,6 +71,7 @@ class Defects4J(AbstractBenchmark):
             "defects4j export -p cp.test -o classpath_data",
             self.log_deploy_path,
             join(self.dir_expr, "src"),
+            custom_env
         )
         for dependency in self.read_file(
             container_id, join(self.dir_expr, "src", "classpath_data")
