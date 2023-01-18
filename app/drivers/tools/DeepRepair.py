@@ -126,7 +126,7 @@ class DeepRepair(AbstractTool):
                     child_id = int(str(re.search(r'id (.*)', line).group(1)).strip())
                     if child_id > count_enumerations:
                         count_enumerations = child_id
-                elif "found solution" in line.lower():
+                elif "found solution," in line.lower():
                     count_plausible += 1
 
         self._space.generated = len([x for x in
