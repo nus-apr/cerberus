@@ -149,7 +149,7 @@ class EvoRepair(AbstractTool):
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
-                if "there are enough patches" in line.lower():
+                if "got" in line.lower():
                     new_count = int(str(re.search(r'got (.*) patches', line).group(1)).strip())
                     self._space.plausible += new_count
                     self._space.enumerations += new_count
