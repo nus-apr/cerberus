@@ -151,10 +151,12 @@ class EvoRepair(AbstractTool):
             for line in log_lines:
                 if "got" in line.lower():
                     new_count = int(str(re.search(r'got (.*) patches', line).group(1)).strip())
-                    self._space.plausible += new_count
-                    self._space.enumerations += new_count
+                    count_plausible += new_count
+                    count_enumerations += new_count
 
-        patch_out_dir = self.evorepair_home + "/output"
+        tool_out_dir = self.evorepair_home + "/output"
+        exp_out_dir = f"{tool_out_dir}/{self.list_dir(tool_out_dir)[0]}"
+        patch_out_dir = f"{exp_out_dir}/perfect-patches"
         self._space.generated = len([ x for x in
             self.list_dir(patch_out_dir) if ".diff" in x
         ])
