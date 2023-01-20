@@ -63,7 +63,6 @@ def filter_experiment_list(benchmark):
             continue
         if values.bug_index_list and bug_index not in values.bug_index_list:
             continue
-
         if values.skip_index_list and str(bug_index) in values.skip_index_list:
             continue
         if values.start_index and bug_index < values.start_index:
@@ -79,7 +78,7 @@ def filter_experiment_list(benchmark):
 def parse_args():
     parser = argparse.ArgumentParser(prog=values.tool_name, usage="%(prog)s [options]")
     parser._action_groups.pop()
-    required = parser.add_argument_group("required arguments")
+    required = parser.add_argument_group("Required arguments")
     required.add_argument(
         "-b",
         definitions.ARG_BENCHMARK,
@@ -88,7 +87,7 @@ def parse_args():
         choices=values.get_list_benchmarks(),
     )
 
-    optional = parser.add_argument_group("optional arguments")
+    optional = parser.add_argument_group("Optional arguments")
     optional.add_argument(
         "-d",
         definitions.ARG_DEBUG_MODE,
@@ -138,7 +137,7 @@ def parse_args():
         default=False,
     )
     optional.add_argument(
-        "--rebuild-base",
+        definitions.ARG_REBUILD_BASE_IMAGE,
         help="rebuild the base images",
         action="store_true",
         default=False,
@@ -179,7 +178,7 @@ def parse_args():
     )
 
     optional.add_argument(
-        "--dir-data",
+        definitions.ARG_DATA_PATH,
         help="directory path for data",
         dest="data_dir",
         action="store_true",
@@ -188,7 +187,7 @@ def parse_args():
 
     optional.add_argument(
         "--config-list",
-        help="multiple list of configurations",
+        help="multiple list of configuration profiles",
         dest="config_id_list",
         nargs="+",
         default=[],
@@ -218,7 +217,7 @@ def parse_args():
         definitions.ARG_END_INDEX, help="ending index for the list of bugs", type=int
     )
     optional.add_argument(
-        "--skip-index-list",
+        definitions.ARG_SKIP_LIST,
         help="list of bug index to skip",
         type=list,
         nargs="+",
