@@ -56,6 +56,7 @@ show_dev_patch = False
 use_container = True
 dump_patches = False
 use_valkyrie = False
+use_gpu = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
@@ -104,10 +105,22 @@ apr_max_limit = {
     "darjeeling": 100,
 }
 
+
 def get_list_tools():
-    return list(l.replace(".py", "").lower() for l
-                in filter(lambda x: "__" not in x and "abstract" not in x.lower(), os.listdir(dir_tool_drivers)))
+    return list(
+        l.replace(".py", "").lower()
+        for l in filter(
+            lambda x: "__" not in x and "abstract" not in x.lower(),
+            os.listdir(dir_tool_drivers),
+        )
+    )
+
 
 def get_list_benchmarks():
-    return list(l.replace(".py", "").lower() for l
-                in filter(lambda x: "__" not in x and "abstract" not in x.lower(), os.listdir(dir_benchmark_drivers)))
+    return list(
+        l.replace(".py", "").lower()
+        for l in filter(
+            lambda x: "__" not in x and "abstract" not in x.lower(),
+            os.listdir(dir_benchmark_drivers),
+        )
+    )

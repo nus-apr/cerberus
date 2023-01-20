@@ -46,7 +46,6 @@ def pull_image(image_name, tag_name):
 def build_image(dockerfile_path, image_name):
     client = docker.from_env()
     emitter.normal("\t\t[benchmark] building docker image")
-    image = None
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
         dockerfilename = dockerfile_path.split("/")[-1]
@@ -74,7 +73,6 @@ def build_image(dockerfile_path, image_name):
             utilities.error_exit("[error] Unable to build image: unhandled exception")
     else:
         utilities.error_exit("[error] Unable to build image: Dockerfile not found")
-    return image
 
 
 def build_benchmark_image(image_name):
@@ -147,6 +145,7 @@ def build_container(container_name, volume_list, image_name):
             privileged=True,
             mem_limit="30g",
             tty=True,
+            runtime="nvidia" if values.use_gpu else "runc",
         )
         container_id = container.id
     except docker.errors.ContainerError as ex:
@@ -176,7 +175,12 @@ def exec_command(container_id, command, workdir="/experiment", env=dict()):
         print_command = "[{}] {}".format(workdir, command)
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(
-            command, privileged=True, demux=True, workdir=workdir, tty=True, environment=env
+            command,
+            privileged=True,
+            demux=True,
+            workdir=workdir,
+            tty=True,
+            environment=env,
         )
         if output is not None:
             for stream in output:
@@ -286,7 +290,9 @@ def copy_file_to_container(container_id, from_path, to_path):
 
 
 def write_file(container_id, file_path, content):
-    tmp_file_path = os.path.join("/tmp", "write-file-{}".format(random.randint(0,1000000)))
+    tmp_file_path = os.path.join(
+        "/tmp", "write-file-{}".format(random.randint(0, 1000000))
+    )
     with open(tmp_file_path, "w") as f:
         for line in content:
             f.write(line)
@@ -296,7 +302,9 @@ def write_file(container_id, file_path, content):
 
 
 def read_file(container_id, file_path, encoding="utf-8"):
-    tmp_file_path = os.path.join("/tmp", "container-file-{}".format(random.randint(0,1000000)))
+    tmp_file_path = os.path.join(
+        "/tmp", "container-file-{}".format(random.randint(0, 1000000))
+    )
     copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "r", encoding=encoding) as f:
@@ -306,7 +314,9 @@ def read_file(container_id, file_path, encoding="utf-8"):
 
 
 def append_file(container_id, file_path, content):
-    tmp_file_path = os.path.join("/tmp", "append-file-{}".format(random.randint(0,1000000)))
+    tmp_file_path = os.path.join(
+        "/tmp", "append-file-{}".format(random.randint(0, 1000000))
+    )
     copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "a") as f:

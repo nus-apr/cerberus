@@ -21,9 +21,11 @@ KEY_FUZZREPAIR_CRASH_CMD = "fuzzrepair_crash_input"
 KEY_FUZZREPAIR_EXPLOIT_LIST = "fuzzrepair_exploit_file_list"
 KEY_BUG_TYPE = "bug_type"
 KEY_SOURCE_DIRECTORY = "source_directory"
-KEY_TEST_DIRECTORY= "test_directory"
+KEY_TEST_DIRECTORY = "test_directory"
 KEY_DEPENDENCIES = "dependencies"
 
+ARG_USE_GPU = "--use-gpu"
+ARG_CACHE = "--cache"
 ARG_DATA_PATH = "--data-dir"
 ARG_TOOL_PATH = "--tool-path"
 ARG_TOOL_NAME = "--tool"
@@ -54,6 +56,3 @@ ARG_RUN_TESTS_ONLY = "--run-tests-only"
 ARG_ANALYSE_ONLY = "--analyse-only"
 ARG_REBUILD_ALL_IMAGES = "--rebuild-all"
 ARG_REBUILD_EXPERIMENT_IMAGE = "--rebuild-exp"
-
-
-

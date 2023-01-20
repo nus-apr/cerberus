@@ -58,7 +58,6 @@ def load_benchmark(benchmark_name):
     return initializer()
 
 
-
 class Configurations:
     __config_file = None
     __default_config_values = {
@@ -68,6 +67,7 @@ class Configurations:
         "stack-size": 15000,
         "time-duration": 60,  # minutes
         "use-cache": False,
+        "use-gpu": False,
         "use-container": True,
         "is-debug": False,
         "use-purge": False,
@@ -84,9 +84,7 @@ class Configurations:
         "bug-index-list": [],
         "skip-index-list": [],
         "tool-list": [],
-        "directories": {
-            "data": "/data"
-        }
+        "directories": {"data": "/data"},
     }
     __runtime_config_values = __default_config_values
 
@@ -148,10 +146,12 @@ class Configurations:
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
         if arg_list.bug_index_list:
-            self.__runtime_config_values["bug-index-list"] = list(flat_map(
-                            self.convert_range,
-                            str(arg_list.bug_index_list).split(","),
-                        ))
+            self.__runtime_config_values["bug-index-list"] = list(
+                flat_map(
+                    self.convert_range,
+                    str(arg_list.bug_index_list).split(","),
+                )
+            )
 
         if arg_list.bug_id:
             self.__runtime_config_values["bug-id-list"] = [arg_list.bug_id]
@@ -166,6 +166,8 @@ class Configurations:
         if arg_list.skip_index_list:
             self.__runtime_config_values["skip-index-list"] = arg_list.skip_index_list
 
+        if arg_list.use_gpu:
+            self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
     def update_configuration(self):
         emitter.normal("updating configuration values")
@@ -186,16 +188,16 @@ class Configurations:
         )
         values.start_index = self.__runtime_config_values["start-index"]
         values.end_index = self.__runtime_config_values["end-index"]
-        values.bug_index_list = self.__runtime_config_values.get("bug-index-list",[])
-        values.skip_index_list = self.__runtime_config_values.get("skip-index-list",[])
-        values.bug_id_list = self.__runtime_config_values.get("bug-id-list",[])
+        values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
+        values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
+        values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
 
         if (
-                values.start_index is None
-                and values.end_index is None
-                and not values.bug_id_list is None
-                and not values.bug_index_list
-                and values.subject_name is None
+            values.start_index is None
+            and values.end_index is None
+            and not values.bug_id_list is None
+            and not values.bug_index_list
+            and values.subject_name is None
         ):
             emitter.warning(
                 "[warning] experiment id is not specified, running all experiments"
@@ -206,6 +208,7 @@ class Configurations:
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
+        values.use_gpu = self.__runtime_config_values["use-gpu"]
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]

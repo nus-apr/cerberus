@@ -5,7 +5,15 @@ import time
 import traceback
 from multiprocessing import set_start_method
 
-from app.core import emitter, logger, definitions, values, configuration, repair, utilities
+from app.core import (
+    emitter,
+    logger,
+    definitions,
+    values,
+    configuration,
+    repair,
+    utilities,
+)
 from app.core.configuration import Configurations
 
 
@@ -16,7 +24,7 @@ def create_directories():
         values.dir_log_base,
         values.dir_artifacts,
         values.dir_results,
-        values.dir_experiments
+        values.dir_experiments,
     ]
 
     for dir_i in dir_list:
@@ -68,62 +76,155 @@ def filter_experiment_list(benchmark):
     return filtered_list
 
 
-
 def parse_args():
-    parser = argparse.ArgumentParser(prog=values.tool_name, usage='%(prog)s [options]')
+    parser = argparse.ArgumentParser(prog=values.tool_name, usage="%(prog)s [options]")
     parser._action_groups.pop()
-    required = parser.add_argument_group('required arguments')
-    required.add_argument('-b', '--benchmark', help='repair benchmark', required=True,
-                          choices = values.get_list_benchmarks()
-                          )
+    required = parser.add_argument_group("required arguments")
+    required.add_argument(
+        "-b",
+        definitions.ARG_BENCHMARK,
+        help="repair benchmark",
+        required=True,
+        choices=values.get_list_benchmarks(),
+    )
 
-    optional = parser.add_argument_group('optional arguments')
-    optional.add_argument('-d', '--debug', help='print debugging information',
-                          action='store_true',
-                          default=False)
-    optional.add_argument('-c', '--cache', help='use cached information for the process',
-                          action='store_true',
-                          default=False)
+    optional = parser.add_argument_group("optional arguments")
+    optional.add_argument(
+        "-d",
+        definitions.ARG_DEBUG_MODE,
+        help="print debugging information",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
+        "-c",
+        definitions.ARG_CACHE,
+        help="use cached information for the process",
+        action="store_true",
+        default=False,
+    )
 
-    optional.add_argument('--bug-index', help='index of the bug in the benchmark',
-                          type=int)
-    optional.add_argument('--bug-index-list', help='list of bug indexes in the benchmark')
+    optional.add_argument(
+        definitions.ARG_BUG_INDEX, help="index of the bug in the benchmark", type=int
+    )
+    optional.add_argument(
+        definitions.ARG_BUG_INDEX_LIST, help="list of bug indexes in the benchmark"
+    )
 
-    optional.add_argument('-t', '--tool', help='name of the repair tool',
-                          choices=values.get_list_tools()
-                          )
-    optional.add_argument('-s', '--subject', help='filter the bugs using the subject name')
-    optional.add_argument('-p', '--tool-param', help='filter the bugs using the subject name')
-    optional.add_argument('--tool-list', help='list of repair tool names', nargs='+', default=[])
-    optional.add_argument('--rebuild-all', help='rebuild all images',
-                          action='store_true', default=False)
-    optional.add_argument('--rebuild-base', help='rebuild the base images',
-                          action='store_true', default=False)
-    optional.add_argument('--purge', help='clean everything after the experiment',
-                          action='store_true', default=False)
+    optional.add_argument(
+        "-t",
+        definitions.ARG_TOOL_NAME,
+        help="name of the repair tool",
+        choices=values.get_list_tools(),
+    )
+    optional.add_argument(
+        "-s",
+        definitions.ARG_SUBJECT_NAME,
+        help="filter the bugs using the subject name",
+    )
+    optional.add_argument(
+        "-p", definitions.ARG_TOOL_PARAMS, help="pass parameters to the tool"
+    )
+    optional.add_argument(
+        definitions.ARG_TOOL_LIST,
+        help="list of repair tool names",
+        nargs="+",
+        default=[],
+    )
+    optional.add_argument(
+        definitions.ARG_REBUILD_ALL_IMAGES,
+        help="rebuild all images",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
+        "--rebuild-base",
+        help="rebuild the base images",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
+        definitions.ARG_PURGE,
+        help="clean everything after the experiment",
+        action="store_true",
+        default=False,
+    )
 
-    optional.add_argument('--only-analyse', help='analyse the previous run',
-                          action='store_true', default=False)
-    optional.add_argument('--only-setup', help='analyse the previous run',
-                          action='store_true', default=False)
-    optional.add_argument('--container', help='use containers for experiments', dest="use_container",
-                          action='store_true', default=True)
+    optional.add_argument(
+        definitions.ARG_ANALYSE_ONLY,
+        help="analyse the experiment",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
+        definitions.ARG_SETUP_ONLY,
+        help="only setup the experiment",
+        action="store_true",
+        default=False,
+    )
 
-    optional.add_argument('--local', help='use local machine for experiments', dest="use_local",
-                          action='store_true', default=False)
+    optional.add_argument(
+        definitions.ARG_USE_CONTAINER,
+        help="use containers for experiments",
+        dest="use_container",
+        action="store_true",
+        default=True,
+    )
+    optional.add_argument(
+        definitions.ARG_USE_LOCAL,
+        help="use local machine for experiments",
+        dest="use_local",
+        action="store_true",
+        default=False,
+    )
 
-    optional.add_argument('--dir-data', help='directory path for data', dest="data_dir",
-                          action='store_true', default=False)
+    optional.add_argument(
+        "--dir-data",
+        help="directory path for data",
+        dest="data_dir",
+        action="store_true",
+        default=False,
+    )
 
-    optional.add_argument('--config-list', help='multiple list of configurations', dest="config_id_list",
-                          nargs='+', default=[])
+    optional.add_argument(
+        "--config-list",
+        help="multiple list of configurations",
+        dest="config_id_list",
+        nargs="+",
+        default=[],
+    )
 
-    optional.add_argument('--bug-id', help='identifier of the bug')
-    optional.add_argument('--bug-id-list', type=list, help='list of identifiers for the bugs', nargs='+', default=[])
-    optional.add_argument('--start-index', help='starting index for the list of bugs', type=int)
-    optional.add_argument('--end-index', help='ending index for the list of bugs', type=int)
-    optional.add_argument('--skip-index-list', help='list of bug index to skip', type=list, nargs='+', default=[])
-    optional.add_argument('--config', help='configuration profile')
+    optional.add_argument(
+        definitions.ARG_USE_GPU,
+        help="allow gpu usage",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")
+    optional.add_argument(
+        definitions.ARG_BUG_ID_LIST,
+        type=list,
+        help="list of identifiers for the bugs",
+        nargs="+",
+        default=[],
+    )
+    optional.add_argument(
+        definitions.ARG_START_INDEX,
+        help="starting index for the list of bugs",
+        type=int,
+    )
+    optional.add_argument(
+        definitions.ARG_END_INDEX, help="ending index for the list of bugs", type=int
+    )
+    optional.add_argument(
+        "--skip-index-list",
+        help="list of bug index to skip",
+        type=list,
+        nargs="+",
+        default=[],
+    )
+    optional.add_argument("--config", help="configuration profile")
 
     args = parser.parse_args()
     return args
