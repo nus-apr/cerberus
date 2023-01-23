@@ -9,8 +9,8 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class Darjeeling(AbstractTool):
-    """
-    """
+    """ """
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
@@ -18,7 +18,7 @@ class Darjeeling(AbstractTool):
 
     def instrument(self, bug_info):
         """
-        Instrumentation for the experiment as needed by the tool 
+        Instrumentation for the experiment as needed by the tool
         - requires sudo
         """
         emitter.normal("\t\t\t instrumenting for " + self.name)
@@ -35,7 +35,9 @@ class Darjeeling(AbstractTool):
             + bug_id
             + "-instrument.log"
         )
-        command_str = "sudo bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
+        command_str = "sudo bash instrument.sh {} {}".format(
+            self.dir_base_expr, buggy_file
+        )
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         if status not in [0, 126]:
             error_exit(
@@ -66,7 +68,7 @@ class Darjeeling(AbstractTool):
         self.run_command(mkdir_command, self.log_output_path, self.dir_expr)
 
         repair_command = "timeout -k 5m {1}h  ".format(
-           self.dir_expr + "/src", str(timeout)
+            self.dir_expr + "/src", str(timeout)
         )
         if self.container_id:
             repair_command += "sudo "
@@ -98,7 +100,8 @@ class Darjeeling(AbstractTool):
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.config_id)
         self.log_analysis_path = join(
-            self.dir_logs, "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
+            self.dir_logs,
+            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")
@@ -107,13 +110,13 @@ class Darjeeling(AbstractTool):
                 if regex.match(file) and self.name in file:
                     self.log_output_path = dir_results + "/" + file
                     break
-        
+
         if not self.log_output_path or not self.is_file(self.log_output_path):
             emitter.warning("\t\t\t[warning] no log file found")
             return self._space, self._time, self._error
-        
+
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
-        
+
         time_stamp_first_plausible = None
         time_stamp_first_validation = None
         time_stamp_first_compilation = None
@@ -132,10 +135,20 @@ class Darjeeling(AbstractTool):
                     if time_stamp_first_plausible is None:
                         time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
-                    time = line.split("validation time: ")[-1].strip().split("\x1b")[0].split(".0")[0]
+                    time = (
+                        line.split("validation time: ")[-1]
+                        .strip()
+                        .split("\x1b")[0]
+                        .split(".0")[0]
+                    )
                     self._time.total_validation += float(time)
                 elif "build time: " in line:
-                    time = line.split("build time: ")[-1].strip().split("\x1b")[0].split(".0")[0]
+                    time = (
+                        line.split("build time: ")[-1]
+                        .strip()
+                        .split("\x1b")[0]
+                        .split(".0")[0]
+                    )
                     self._time.total_build += float(time)
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
@@ -143,9 +156,12 @@ class Darjeeling(AbstractTool):
                     self._space.size = line.split(": ")[2].split(" ")[0]
                 elif "plausible patches" in line:
                     self._space.plausible = int(
-                        line.split("found ")[-1].replace(" plausible patches", "").split("\x1b")[0].split(".0")[0]
+                        line.split("found ")[-1]
+                        .replace(" plausible patches", "")
+                        .split("\x1b")[0]
+                        .split(".0")[0]
                     )
-                    
+
         self._space.generated = len(
             self.list_dir(
                 join(

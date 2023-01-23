@@ -71,11 +71,13 @@ def debug(message):
         write(message, GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
+
 def build(message):
     if values.debug:
         prefix = "\t\t[build] "
         write(message, GREY, prefix=prefix, indent_level=2)
     logger.build(message)
+
 
 def data(message, info=None):
     if values.debug:
@@ -181,8 +183,11 @@ def end(time_total, is_error=False):
 
 def emit_help():
     benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))[:3]
-    tools = [x.replace(".py", "") for x in os.listdir(values.dir_tool_drivers)
-             if ".py" in x and "__" not in x][:3]
+    tools = [
+        x.replace(".py", "")
+        for x in os.listdir(values.dir_tool_drivers)
+        if ".py" in x and "__" not in x
+    ][:3]
     max_length = len(definitions.ARG_BUG_INDEX_LIST)  # hardcoded
 
     write(
@@ -231,7 +236,7 @@ def emit_help():
         + "\t| "
         + "enable debug mode",
         WHITE,
-    )    
+    )
     write(
         "\t"
         + definitions.ARG_INSTRUMENT_ONLY.ljust(max_length)

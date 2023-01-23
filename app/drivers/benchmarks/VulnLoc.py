@@ -78,7 +78,7 @@ class VulnLoc(AbstractBenchmark):
         )
         time = datetime.now()
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
-        
+
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
         )
@@ -142,7 +142,7 @@ class VulnLoc(AbstractBenchmark):
         )
         emitter.debug(
             "\t\t\t Transform took {} second(s)".format(
-                ( datetime.now() - time).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0

@@ -13,7 +13,8 @@ from app.core import logger, emitter, values, definitions
 
 def escape_ansi(text):
     # 7-bit C1 ANSI sequences
-    ansi_escape = re.compile(r'''
+    ansi_escape = re.compile(
+        r"""
         \x1B  # ESC
         (?:   # 7-bit C1 Fe (except CSI)
             [@-Z\\-_]
@@ -23,8 +24,10 @@ def escape_ansi(text):
             [ -/]*  # Intermediate bytes
             [@-~]   # Final byte
         )
-    ''', re.VERBOSE)
-    result = ansi_escape.sub('', text)
+    """,
+        re.VERBOSE,
+    )
+    result = ansi_escape.sub("", text)
     return result
 
 

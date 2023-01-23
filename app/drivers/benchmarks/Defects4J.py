@@ -37,10 +37,9 @@ class Defects4J(AbstractBenchmark):
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
 
         bug_name = f"{subject_name.lower()}_{bug_id}"
-        instrumented_diff_dir = os.path.join(values.dir_benchmark,
-                                             self.name,
-                                             "instrumentation",
-                                             "instrumented-diffs")
+        instrumented_diff_dir = os.path.join(
+            values.dir_benchmark, self.name, "instrumentation", "instrumented-diffs"
+        )
 
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
@@ -50,12 +49,8 @@ class Defects4J(AbstractBenchmark):
             if diff_file_name in os.listdir(instrumented_diff_dir):
                 target_path = os.path.join(self.dir_setup, "instrument.diff")
                 source_path = os.path.join(instrumented_diff_dir, diff_file_name)
-                container.copy_file_to_container(container_id,
-                                                 source_path,
-                                                 target_path
-                                                 )
+                container.copy_file_to_container(container_id, source_path, target_path)
         return container_id
-
 
     def deploy(self, bug_index, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
@@ -63,7 +58,10 @@ class Defects4J(AbstractBenchmark):
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j checkout -p {} -v {}b -w {}".format(
-            experiment_item[definitions.KEY_SUBJECT], bug_id, join(self.dir_expr, "src"), custom_env
+            experiment_item[definitions.KEY_SUBJECT],
+            bug_id,
+            join(self.dir_expr, "src"),
+            custom_env,
         )
         status = self.run_command(container_id, command_str, self.log_deploy_path)
         self.run_command(
@@ -71,7 +69,7 @@ class Defects4J(AbstractBenchmark):
             "defects4j export -p cp.test -o classpath_data",
             self.log_deploy_path,
             join(self.dir_expr, "src"),
-            custom_env
+            custom_env,
         )
         for dependency in self.read_file(
             container_id, join(self.dir_expr, "src", "classpath_data")
@@ -103,7 +101,11 @@ class Defects4J(AbstractBenchmark):
         custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j compile"
         status = self.run_command(
-            container_id, command_str, self.log_build_path, join(self.dir_expr, "src"), custom_env
+            container_id,
+            command_str,
+            self.log_build_path,
+            join(self.dir_expr, "src"),
+            custom_env,
         )
         return status == 0
 
@@ -120,19 +122,22 @@ class Defects4J(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_instrument_path = (
-                self.dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
         )
         diff_file_path = os.path.join(self.dir_setup, "instrument.diff")
         status = 0
         if container.is_file(container_id, diff_file_path):
             time = datetime.now()
-            patch_command = f"bash -c \"patch -f -p 1 < {diff_file_path}\""
+            patch_command = f'bash -c "patch -f -p 1 < {diff_file_path}"'
             status = self.run_command(
-                container_id, patch_command, self.log_instrument_path, self.dir_expr + "/src"
+                container_id,
+                patch_command,
+                self.log_instrument_path,
+                self.dir_expr + "/src",
             )
             emitter.debug(
                 "\t\t\t Instrumentation took {} second(s)".format(
-                    ( datetime.now() - time).total_seconds()
+                    (datetime.now() - time).total_seconds()
                 )
             )
             if status == 0:

@@ -14,7 +14,7 @@ class F1X(AbstractTool):
 
     def generate_test_driver(self):
         test_script_path = self.dir_setup + "/test.sh"
-        test_driver_path = self.dir_expr+ "/f1x-test"
+        test_driver_path = self.dir_expr + "/f1x-test"
 
         self.write_file(
             ["#!/bin/bash\n", "bash {0} /experiment $@".format(test_script_path)],
@@ -45,7 +45,11 @@ class F1X(AbstractTool):
         )
         self.generate_test_driver()
         test_driver_path = join(self.dir_expr, "f1x-test")
-        build_script_path = join(self.dir_setup, "build.sh") if not self.is_file(join(self.dir_inst,"build.sh")) else join(self.dir_inst,"build.sh")
+        build_script_path = (
+            join(self.dir_setup, "build.sh")
+            if not self.is_file(join(self.dir_inst, "build.sh"))
+            else join(self.dir_inst, "build.sh")
+        )
         test_id_list = ""
         for test_id in failing_test_list:
             test_id_list += test_id + " "
@@ -80,7 +84,9 @@ class F1X(AbstractTool):
         self.run_command(dry_command, self.log_output_path, self.dir_expr)
         all_command = (
             repair_command
-            + " --enable-assignment --disable-dteq --enable-validation  -a -o {}  ".format(self.dir_output)
+            + " --enable-assignment --disable-dteq --enable-validation  -a -o {}  ".format(
+                self.dir_output
+            )
         )
         if additional_tool_param:
             all_command = all_command + " " + additional_tool_param

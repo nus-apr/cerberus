@@ -9,6 +9,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 class EvoRepair(AbstractTool):
 
     evorepair_home = "/opt/EvoRepair"
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(EvoRepair, self).__init__(self.name)
@@ -26,10 +27,10 @@ class EvoRepair(AbstractTool):
         config_object["project"]["name"] = bug_name
         config_object["project"]["tag"] = bug_name
 
-        dir_java_src = join(self.dir_expr , "src",bug_info["source_directory"])
-        dir_test_src = join(self.dir_expr , "src", bug_info["test_directory"])
-        dir_java_bin = join(self.dir_expr , "src",  bug_info["class_directory"])
-        dir_test_bin = join(self.dir_expr , "src", bug_info["test_class_directory"])
+        dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
+        dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
+        dir_java_bin = join(self.dir_expr, "src", bug_info["class_directory"])
+        dir_test_bin = join(self.dir_expr, "src", bug_info["test_class_directory"])
         list_deps = bug_info["dependencies"]
         dir_java_deps = f"{self.dir_expr}/deps"
         for dep in list_deps:
@@ -72,14 +73,15 @@ class EvoRepair(AbstractTool):
         test_timeout = 30000
         # generate patches
         self.timestamp_log()
-        repair_command = f"timeout -k 5m {timeout_h}h evorepair " \
-                         f"--num-iterations {max_iterations} " \
-                         f"--config {repair_config_path}"
+        repair_command = (
+            f"timeout -k 5m {timeout_h}h evorepair "
+            f"--num-iterations {max_iterations} "
+            f"--config {repair_config_path}"
+        )
 
         status = self.run_command(
             repair_command, self.log_output_path, self.evorepair_home
         )
-
 
         if status != 0:
             self._error.is_error = True
@@ -108,7 +110,7 @@ class EvoRepair(AbstractTool):
             self.run_command(copy_command)
 
         tool_artifact_dir = f"{self.evorepair_home}/output/"
-        tool_artifact_files = [f  for f in self.list_dir(tool_artifact_dir)]
+        tool_artifact_files = [f for f in self.list_dir(tool_artifact_dir)]
         for a_file in tool_artifact_files:
             copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
@@ -150,18 +152,19 @@ class EvoRepair(AbstractTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
                 if "got" in line.lower():
-                    new_count = int(str(re.search(r'got (.*) patches', line).group(1)).strip())
+                    new_count = int(
+                        str(re.search(r"got (.*) patches", line).group(1)).strip()
+                    )
                     count_plausible += new_count
                     count_enumerations += new_count
 
         tool_out_dir = self.evorepair_home + "/output"
         exp_out_dir = f"{tool_out_dir}/{self.list_dir(tool_out_dir)[0]}"
         patch_out_dir = f"{exp_out_dir}/perfect-patches"
-        self._space.generated = len([ x for x in
-            self.list_dir(patch_out_dir) if ".diff" in x
-        ])
+        self._space.generated = len(
+            [x for x in self.list_dir(patch_out_dir) if ".diff" in x]
+        )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
 
         return self._space, self._time, self._error
-

@@ -8,9 +8,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 class CRepair(AbstractTool):
 
-    error_messages = [
-        "aborted", "core dumped", "runtime error", "segmentation fault"
-    ]
+    error_messages = ["aborted", "core dumped", "runtime error", "segmentation fault"]
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
@@ -54,8 +52,10 @@ class CRepair(AbstractTool):
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"
         self.timestamp_log()
-        repair_command = f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h " \
-                         f"crashrepair repair --no-fuzz {bug_json_path} {additional_tool_param}'"
+        repair_command = (
+            f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h "
+            f"crashrepair repair --no-fuzz {bug_json_path} {additional_tool_param}'"
+        )
 
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
         if status != 0:
@@ -78,7 +78,9 @@ class CRepair(AbstractTool):
             if ".log" in f
         ]
         list_artifact_dirs = [self.dir_expr + "/" + x for x in ["analysis", "patches"]]
-        list_artifact_files = [self.dir_expr + "/" + x for x in ["candidates.json", "bug.json"]]
+        list_artifact_files = [
+            self.dir_expr + "/" + x for x in ["candidates.json", "bug.json"]
+        ]
         for f in tool_log_files + list_artifact_files:
             copy_command = f"cp {f} {self.dir_output}"
             self.run_command(copy_command)
@@ -122,7 +124,7 @@ class CRepair(AbstractTool):
                 if "evaluating candidate patch" in line:
                     count_enumerations += 1
                 if "writing" in line and "mutations" in line:
-                    search_space = re.search(r'writing (.*) mutations', line).group(1)
+                    search_space = re.search(r"writing (.*) mutations", line).group(1)
                 elif "saving successful patch" in line:
                     count_plausible += 1
                 elif "failed to compile" in line:

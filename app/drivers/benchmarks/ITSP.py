@@ -10,9 +10,7 @@ class ITSP(AbstractBenchmark):
         super(ITSP, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(ITSP, self).setup_experiment(
-            bug_index, container_id, test_all
-        )
+        is_error = super(ITSP, self).setup_experiment(bug_index, container_id, test_all)
         return is_error
 
     def deploy(self, bug_index, container_id):

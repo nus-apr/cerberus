@@ -11,7 +11,7 @@ from app.core import (
     definitions,
     abstractions,
     analysis,
-    utilities
+    utilities,
 )
 from app.core.utilities import execute_command, error_exit
 
@@ -163,9 +163,7 @@ class AbstractTool:
         if self.container_id:
             clean_command = "rm -rf /output/patch* /logs/*"
             self.run_command(clean_command, "/dev/null", "/")
-            script_path = values.dir_scripts + "/{}-dump-patches.py".format(
-                self.name
-            )
+            script_path = values.dir_scripts + "/{}-dump-patches.py".format(self.name)
             cp_script_command = "docker cp {} {}:{} ".format(
                 script_path, self.container_id, self.dir_expr
             )

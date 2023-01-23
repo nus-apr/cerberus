@@ -21,7 +21,7 @@ class CPR(AbstractTool):
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.id = bug_id
         timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        dir_patch = join(self.dir_output,"patches")
+        dir_patch = join(self.dir_output, "patches")
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
         self.log_output_path = join(
@@ -35,10 +35,16 @@ class CPR(AbstractTool):
 
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
         self.timestamp_log()
-        cpr_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(timeout) + conf_path + " "
+        cpr_command = (
+            "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(
+                timeout
+            )
+            + conf_path
+            + " "
+        )
         cpr_command += " --seed-id-list=" + seed_id_list + " "
         cpr_command += " --test-id-list=" + test_id_list + " "
-        cpr_command += "{0} --time-duration={1}' >> {2} 2>&1 ".format( 
+        cpr_command += "{0} --time-duration={1}' >> {2} 2>&1 ".format(
             additional_tool_param, str(timeout_m), self.log_output_path
         )
         status = self.run_command(cpr_command, self.log_output_path)
@@ -50,8 +56,8 @@ class CPR(AbstractTool):
             )
             if status == 137:
                 # Due to the container being killed, we restart it to be able to pull out the information
-                container.stop_container(self.container_id) 
-                container.start_container(self.container_id) 
+                container.stop_container(self.container_id)
+                container.start_container(self.container_id)
                 pass
 
             self._error.is_error = True
@@ -62,8 +68,8 @@ class CPR(AbstractTool):
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)
-        dir_patch = join(self.dir_output,"patches")
-        self.run_command("cp -rf /CPR/output/{} {}".format(self.id,dir_patch))
+        dir_patch = join(self.dir_output, "patches")
+        self.run_command("cp -rf /CPR/output/{} {}".format(self.id, dir_patch))
         super(CPR, self).save_artefacts(dir_info)
         return
 

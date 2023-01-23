@@ -11,11 +11,10 @@ from app.core import (
     values,
     container,
     parallel,
-    utilities
+    utilities,
 )
 from app.drivers.tools import AbstractTool
 from app.plugins import valkyrie
-
 
 
 def update_dir_info(dir_info, tool_name):
@@ -139,7 +138,7 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
         dir_expr = dir_info["container"]["experiment"]
     else:
         dir_expr = dir_info["local"]["experiment"]
-    binary_path_rel = bug_info.get(definitions.KEY_BINARY_PATH,"")
+    binary_path_rel = bug_info.get(definitions.KEY_BINARY_PATH, "")
     valkyrie_binary_path = join(dir_output_local, "binary")
     binary_path = join(dir_expr, "src", binary_path_rel)
     if container_id:
@@ -235,8 +234,8 @@ def repair_all(
         if index == 0:
             is_rank = len(tool_list) > 1
             validation_test_list = (
-                    failing_test_list
-                    + passing_test_list[: int(len(passing_test_list) * test_ratio)]
+                failing_test_list
+                + passing_test_list[: int(len(passing_test_list) * test_ratio)]
             )
             fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
 
@@ -395,10 +394,14 @@ def create_running_container(bug_image_id, repair_tool, dir_info, container_name
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
-    if not container.is_image_exist(container_name.lower()) or\
-            values.rebuild_base or values.rebuild_all:
-        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(dir_info["local"]["setup"],
-                                                       repair_tool.name, bug_image_id)
+    if (
+        not container.is_image_exist(container_name.lower())
+        or values.rebuild_base
+        or values.rebuild_all
+    ):
+        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(
+            dir_info["local"]["setup"], repair_tool.name, bug_image_id
+        )
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
@@ -441,16 +444,12 @@ def run(benchmark, tool_list, bug_info, config_info):
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    tag_name =  "-".join([config_id] +
-            list(map(lambda x: x.name, tool_list))
-            + [benchmark.name, subject_name, bug_name]
-        )
-    dir_info = generate_dir_info(
-        benchmark.name,
-        subject_name,
-        bug_name,
-        tag_name
+    tag_name = "-".join(
+        [config_id]
+        + list(map(lambda x: x.name, tool_list))
+        + [benchmark.name, subject_name, bug_name]
     )
+    dir_info = generate_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
         "\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -549,7 +548,7 @@ def run(benchmark, tool_list, bug_info, config_info):
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
-            dir_archive = join(values.dir_results , tool_name)
+            dir_archive = join(values.dir_results, tool_name)
             dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)

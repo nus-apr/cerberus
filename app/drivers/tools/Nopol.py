@@ -30,38 +30,39 @@ class Nopol(AbstractTool):
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         self.dir_source = dir_java_src
 
-        dir_java_bin = join(self.dir_expr , "src" ,  bug_info["class_directory"])
-        dir_test_bin = join(self.dir_expr , "src" , bug_info["test_class_directory"])
+        dir_java_bin = join(self.dir_expr, "src", bug_info["class_directory"])
+        dir_test_bin = join(self.dir_expr, "src", bug_info["test_class_directory"])
 
-        list_deps = [join(self.dir_expr,dep) for dep in bug_info["dependencies"]]
-        list_deps.append(join(self.nopol_home,"nopol/lib/hamcrest-core-1.3.jar"))
-        list_deps.append(join(self.nopol_home,"nopol/lib/junit-4.11.jar"))
+        list_deps = [join(self.dir_expr, dep) for dep in bug_info["dependencies"]]
+        list_deps.append(join(self.nopol_home, "nopol/lib/hamcrest-core-1.3.jar"))
+        list_deps.append(join(self.nopol_home, "nopol/lib/junit-4.11.jar"))
         list_deps.append(dir_java_bin)
         list_deps.append(dir_test_bin)
-        
+
         list_deps_str = ":".join(list_deps)
 
         test_classes_str = " ".join(failing_test_list)
-        nopol_jar_path = f"{self.nopol_home}/nopol/nopol-{self.nopol_version}" \
-                         f"-SNAPSHOT-jar-with-dependencies.jar"
+        nopol_jar_path = (
+            f"{self.nopol_home}/nopol/nopol-{self.nopol_version}"
+            f"-SNAPSHOT-jar-with-dependencies.jar"
+        )
 
-        solver_name = "z3" # z3 or cvc4
+        solver_name = "z3"  # z3 or cvc4
         solver_path = f"{self.nopol_home}/nopol/lib/z3/z3_for_linux"
         max_generations = 2000000
         test_timeout = 30000
         # generate patches
         self.timestamp_log()
-        repair_command = f"timeout -k 5m {timeout_h}h java -jar {nopol_jar_path} nopol " \
-                         f"{dir_java_src} " \
-                         f"{list_deps_str} " \
-                         f"{solver_name} " \
-                         f"{solver_path} " \
-                         f"{test_classes_str} "
-
-        status = self.run_command(
-            repair_command, self.log_output_path, self.dir_output
+        repair_command = (
+            f"timeout -k 5m {timeout_h}h java -jar {nopol_jar_path} nopol "
+            f"{dir_java_src} "
+            f"{list_deps_str} "
+            f"{solver_name} "
+            f"{solver_path} "
+            f"{test_classes_str} "
         )
 
+        status = self.run_command(repair_command, self.log_output_path, self.dir_output)
 
         if status != 0:
             self._error.is_error = True
@@ -135,15 +136,9 @@ class Nopol(AbstractTool):
                 elif "PATCH FOUND" in line:
                     count_plausible += 1
 
-        self._space.generated = len([ x for x in
-            self.list_dir(
-                join(
-                    self.dir_source,
-                    "spooned"
-                )
-            )
-            if ".java" in x
-        ])
+        self._space.generated = len(
+            [x for x in self.list_dir(join(self.dir_source, "spooned")) if ".java" in x]
+        )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
 

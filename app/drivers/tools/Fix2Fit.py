@@ -26,7 +26,7 @@ class Fix2Fit(AbstractTool):
         abs_path_binary = join(
             self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH]
         )
-        test_id_list = ' '.join(bug_info[definitions.KEY_FAILING_TEST]) + " "
+        test_id_list = " ".join(bug_info[definitions.KEY_FAILING_TEST]) + " "
         if bug_info[definitions.KEY_PASSING_TEST]:
             filtered_list = self.filter_tests(
                 bug_info[definitions.KEY_PASSING_TEST],
@@ -41,7 +41,7 @@ class Fix2Fit(AbstractTool):
             "src",
             fix_location
             if fix_location
-            else self.read_file(self.dir_expr + "/manifest.txt")[0]
+            else self.read_file(self.dir_expr + "/manifest.txt")[0],
         )
 
         self.timestamp_log()
@@ -54,9 +54,11 @@ class Fix2Fit(AbstractTool):
             "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
             "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]),
+            "T_TIMEOUT": "{}000".format(
+                config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
+            ),
             "TIMEOUT": "{}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT]),
-            "BINARY_INPUT": bug_info[definitions.KEY_CRASH_CMD]
+            "BINARY_INPUT": bug_info[definitions.KEY_CRASH_CMD],
         }
         # repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
         # repair_command += "export AFL_NO_AFFINITY='';"
@@ -73,7 +75,9 @@ class Fix2Fit(AbstractTool):
             str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
-        status = self.run_command(repair_command,  self.log_output_path, self.dir_setup, env=environment_vars)
+        status = self.run_command(
+            repair_command, self.log_output_path, self.dir_setup, env=environment_vars
+        )
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
@@ -92,7 +96,6 @@ class Fix2Fit(AbstractTool):
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artefacts(dir_info)
         return
-
 
     def filter_tests(self, test_id_list, subject, bug_id):
         filtered_list = []
@@ -318,7 +321,8 @@ class Fix2Fit(AbstractTool):
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.config_id)
         self.log_analysis_path = join(
-            self.dir_logs, "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id)
+            self.dir_logs,
+            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
         )
         count_filtered = 0
 
@@ -352,31 +356,37 @@ class Fix2Fit(AbstractTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self._space.size = line.split("search space size: ")[
-                        -1
-                    ].strip()
+                    self._space.size = line.split("search space size: ")[-1].strip()
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "search space size: " in line:
-                self._space.size = int(
-                    line.split("search space size: ")[-1].strip()
-                )
+                self._space.size = int(line.split("search space size: ")[-1].strip())
             elif "candidates evaluated: " in line:
                 self._space.enumerations = int(
                     line.split("candidates evaluated: ")[-1].strip()
                 )
             elif "exploration progress: " in line:
-                self._space.enumerations = int(line.split("exploration progress: ")[-1].strip().replace("%", ""))/100 \
-                                           * self._space.size
+                self._space.enumerations = (
+                    int(
+                        line.split("exploration progress: ")[-1]
+                        .strip()
+                        .replace("%", "")
+                    )
+                    / 100
+                    * self._space.size
+                )
             elif "plausible patches: " in line:
                 self._space.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
             elif "partition size: " in line:
-                self._space.plausible = int(line.split("partition size: ")[-1].strip()) + self._space.plausible
+                self._space.plausible = (
+                    int(line.split("partition size: ")[-1].strip())
+                    + self._space.plausible
+                )
             elif "patches successfully generated" in line:
                 is_timeout = False
             elif "no patch found" in line:
@@ -415,9 +425,5 @@ class Fix2Fit(AbstractTool):
             )
 
         dir_patch = self.dir_setup + "/patches"
-        self._space.generated = len(
-            self.list_dir(
-                dir_patch
-            )
-        )
+        self._space.generated = len(self.list_dir(dir_patch))
         return self._space, self._time, self._error

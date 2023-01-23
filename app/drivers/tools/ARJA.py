@@ -9,6 +9,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 class ARJA(AbstractTool):
 
     arja_home = "/opt/arja"
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(ARJA, self).__init__(self.name)
@@ -25,35 +26,35 @@ class ARJA(AbstractTool):
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
 
-        dir_java_src = join(self.dir_expr , "src",bug_info["source_directory"])
-        dir_test_src = join(self.dir_expr , "src", bug_info["test_directory"])
-        dir_java_bin = join(self.dir_expr , "src",  bug_info["class_directory"])
-        dir_test_bin = join(self.dir_expr , "src", bug_info["test_class_directory"])
-        list_deps = [ join(self.dir_expr,dep) for dep in bug_info["dependencies"]]
-        list_deps.append(join(self.arja_home,"external","lib","hamcrest-core-1.3.jar"))
-        list_deps.append(join(self.arja_home,"external","lib","junit-4.12.jar"))
+        dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
+        dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
+        dir_java_bin = join(self.dir_expr, "src", bug_info["class_directory"])
+        dir_test_bin = join(self.dir_expr, "src", bug_info["test_class_directory"])
+        list_deps = [join(self.dir_expr, dep) for dep in bug_info["dependencies"]]
+        list_deps.append(
+            join(self.arja_home, "external", "lib", "hamcrest-core-1.3.jar")
+        )
+        list_deps.append(join(self.arja_home, "external", "lib", "junit-4.12.jar"))
         list_deps_str = ":".join(list_deps)
-
 
         max_generations = 2000000
         test_timeout = 30000
         # generate patches
         self.timestamp_log()
-        arja_command = f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main Arja " \
-                       f"-DsrcJavaDir {dir_java_src} " \
-                       f"-DbinJavaDir {dir_java_bin} " \
-                       f"-DbinTestDir {dir_test_bin} " \
-                       "-DdiffFormat true " \
-                       f"-DexternalProjRoot {self.arja_home}/external " \
-                       f"-DwaitTime {test_timeout} " \
-                       f"-DmaxGenerations {max_generations} " \
-                       f"-DpatchOutputRoot {self.dir_output}/patches " \
-                       f"-Ddependences {list_deps_str}"
-
-        status = self.run_command(
-            arja_command, self.log_output_path, self.arja_home
+        arja_command = (
+            f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main Arja "
+            f"-DsrcJavaDir {dir_java_src} "
+            f"-DbinJavaDir {dir_java_bin} "
+            f"-DbinTestDir {dir_test_bin} "
+            "-DdiffFormat true "
+            f"-DexternalProjRoot {self.arja_home}/external "
+            f"-DwaitTime {test_timeout} "
+            f"-DmaxGenerations {max_generations} "
+            f"-DpatchOutputRoot {self.dir_output}/patches "
+            f"-Ddependences {list_deps_str}"
         )
 
+        status = self.run_command(arja_command, self.log_output_path, self.arja_home)
 
         if status != 0:
             self._error.is_error = True
@@ -123,15 +124,18 @@ class ARJA(AbstractTool):
                 elif "failed tests: 0" in line:
                     count_plausible += 1
 
-        self._space.generated = len([ x for x in
-            self.list_dir(
-                join(
-                    self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
+        self._space.generated = len(
+            [
+                x
+                for x in self.list_dir(
+                    join(
+                        self.dir_output,
+                        "patch-valid" if values.use_valkyrie else "patches",
+                    )
                 )
-            )
-            if ".txt" in x
-        ])
+                if ".txt" in x
+            ]
+        )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
 

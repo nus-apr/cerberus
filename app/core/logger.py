@@ -7,15 +7,16 @@ from shutil import copyfile
 
 from app.core import values
 
-_logger_error:logging
-_logger_command:logging
-_logger_main:logging
-_logger_build:logging
+_logger_error: logging
+_logger_command: logging
+_logger_main: logging
+_logger_build: logging
+
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):
     """To setup as many loggers as you want"""
     if formatter is None:
-        formatter = logging.Formatter('%(asctime)s %(levelname)s %(message)s')
+        formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name)
@@ -25,7 +26,7 @@ def setup_logger(name, log_file, level=logging.INFO, formatter=None):
 
 
 def create_log_files():
-    global  _logger_main, _logger_build, _logger_command, _logger_error
+    global _logger_main, _logger_build, _logger_command, _logger_error
     log_file_name = "log-" + str(time.time())
     log_file_path = values.dir_log_base + "/" + log_file_name
     values.file_main_log = log_file_path
@@ -35,10 +36,10 @@ def create_log_files():
     _logger_build = setup_logger("build", values.file_build_log)
 
 
-
 def store_log_file(log_file_path):
     if os.path.isfile(log_file_path):
         copyfile(log_file_path, values.dir_logs + "/" + log_file_path.split("/")[-1])
+
 
 def store_logs():
     if os.path.isfile(values.file_main_log):
@@ -48,13 +49,15 @@ def store_logs():
         values.file_build_log,
         values.file_main_log,
         values.file_analysis_log,
-        values.file_error_log
+        values.file_error_log,
     ]
     for log_f in log_file_list:
         store_log_file(log_f)
 
+
 def build(message):
     _logger_build.info(message)
+
 
 def information(message):
     _logger_main.info(message)
@@ -86,7 +89,6 @@ def debug(message):
 def error(message):
     _logger_main.error(message)
     _logger_error.error(message)
-
 
 
 def note(message):
@@ -146,4 +148,3 @@ def analysis(exp_id):
                 time_info.get_latency_plausible()
             )
         )
-

@@ -38,20 +38,20 @@ class DeepRepair(AbstractTool):
 
         # generate patches
         self.timestamp_log()
-        repair_command = f"timeout -k 5m {timeout_h}h " \
-                         f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar " \
-                         f"fr.inria.main.evolution.AstorMain " \
-                         f"-mode deeprepair " \
-                         f"-srcjavafolder {dir_java_src} " \
-                         f"-srctestfolder {dir_test_src}  " \
-                         f"-binjavafolder {dir_java_bin} " \
-                         f"-bintestfolder  {dir_test_bin} " \
-                         f"-location {self.dir_expr}/src " \
-                         f"-dependencies {list_deps_str}"
-
-        status = self.run_command(
-            repair_command, self.log_output_path, self.astor_home
+        repair_command = (
+            f"timeout -k 5m {timeout_h}h "
+            f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar "
+            f"fr.inria.main.evolution.AstorMain "
+            f"-mode deeprepair "
+            f"-srcjavafolder {dir_java_src} "
+            f"-srctestfolder {dir_test_src}  "
+            f"-binjavafolder {dir_java_bin} "
+            f"-bintestfolder  {dir_test_bin} "
+            f"-location {self.dir_expr}/src "
+            f"-dependencies {list_deps_str}"
         )
+
+        status = self.run_command(repair_command, self.log_output_path, self.astor_home)
 
         if status != 0:
             self._error.is_error = True
@@ -73,7 +73,9 @@ class DeepRepair(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        list_artifact_dirs = [self.astor_home + "/" + x for x in ["diffSolutions", "output_astor"]]
+        list_artifact_dirs = [
+            self.astor_home + "/" + x for x in ["diffSolutions", "output_astor"]
+        ]
         for d in list_artifact_dirs:
             copy_command = f"cp -rf {d} {self.dir_output}"
             self.run_command(copy_command)
@@ -123,21 +125,19 @@ class DeepRepair(AbstractTool):
             for line in log_lines:
                 if "child compiles" in line.lower():
                     count_compilable += 1
-                    child_id = int(str(re.search(r'id (.*)', line).group(1)).strip())
+                    child_id = int(str(re.search(r"id (.*)", line).group(1)).strip())
                     if child_id > count_enumerations:
                         count_enumerations = child_id
                 elif "found solution," in line.lower():
                     count_plausible += 1
 
-        self._space.generated = len([x for x in
-                                     self.list_dir(
-                                         join(
-                                             self.astor_home,
-                                             "diffSolutions"
-                                         )
-                                     )
-                                     if ".diff" in x
-                                     ])
+        self._space.generated = len(
+            [
+                x
+                for x in self.list_dir(join(self.astor_home, "diffSolutions"))
+                if ".diff" in x
+            ]
+        )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
         self._space.non_compilable = count_enumerations - count_compilable

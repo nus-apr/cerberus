@@ -30,9 +30,7 @@ class AbstractBenchmark:
     base_dir_experiment = "/experiment/"
 
     def __init__(self):
-        self.bench_dir_path = os.path.abspath(
-            values.dir_benchmark
-        )
+        self.bench_dir_path = os.path.abspath(values.dir_benchmark)
         self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
         self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
@@ -83,7 +81,7 @@ class AbstractBenchmark:
         command_str,
         log_file_path="/dev/null",
         dir_path="/experiment",
-        env = dict()
+        env=dict(),
     ):
         if container_id:
             exit_code, output = container.exec_command(
@@ -134,9 +132,7 @@ class AbstractBenchmark:
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_exp_local = join(
-            values.dir_experiments, self.name, subject_name, bug_id
-        )
+        dir_exp_local = join(values.dir_experiments, self.name, subject_name, bug_id)
 
         if os.path.isdir(dir_exp_local):
             shutil.rmtree(dir_exp_local)
@@ -172,9 +168,7 @@ class AbstractBenchmark:
         emitter.normal("\t\t[benchmark] preparing experiment subject")
         setup_error = False
         if not container_id:
-            self.base_dir_experiment = os.path.abspath(
-                values.dir_experiments
-            )
+            self.base_dir_experiment = os.path.abspath(values.dir_experiments)
             if os.path.isdir(self.dir_expr):
                 utilities.execute_command("rm -rf {}".format(self.dir_expr))
             if not os.path.isdir(self.dir_logs):

@@ -41,7 +41,9 @@ class GenProg(AbstractTool):
                 p_size=count_pass,
                 n_size=count_neg,
                 dir_exp=self.dir_expr,
-                program="{}.cil.i".format(join(self.dir_expr,"src",bug_info[definitions.KEY_BINARY_PATH]))
+                program="{}.cil.i".format(
+                    join(self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH])
+                ),
             )
         )
         if fix_location:
