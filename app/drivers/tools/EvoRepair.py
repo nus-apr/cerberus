@@ -26,10 +26,10 @@ class EvoRepair(AbstractTool):
         config_object["project"]["name"] = bug_name
         config_object["project"]["tag"] = bug_name
 
-        dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
-        dir_test_src = self.dir_expr + "/src/" + bug_info["test_directory"]
-        dir_java_bin = self.dir_expr + "/src/" + bug_info["class_directory"]
-        dir_test_bin = self.dir_expr + "/src/" + bug_info["test_class_directory"]
+        dir_java_src = join(self.dir_expr , "src",bug_info["source_directory"])
+        dir_test_src = join(self.dir_expr , "src", bug_info["test_directory"])
+        dir_java_bin = join(self.dir_expr , "src",  bug_info["class_directory"])
+        dir_test_bin = join(self.dir_expr , "src", bug_info["test_class_directory"])
         list_deps = bug_info["dependencies"]
         dir_java_deps = f"{self.dir_expr}/deps"
         for dep in list_deps:

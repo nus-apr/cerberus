@@ -1,21 +1,23 @@
 import os
 from os.path import join
-
+import re
 from app.core import definitions, emitter, values
 from app.core import utilities
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-class ARJA(AbstractTool):
+class AstorTool(AbstractTool):
 
-    arja_home = "/opt/arja"
+    astor_home = "/opt/astor"
+    astor_version = "2.0.0"
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(ARJA, self).__init__(self.name)
-        self.image_name = "rshariffdeen/arja"
+        super(AstorTool, self).__init__(self.name)
+        self.image_name = "rshariffdeen/astor"
 
     def repair(self, bug_info, config_info):
-        super(ARJA, self).repair(bug_info, config_info)
+        super(AstorTool, self).repair(bug_info, config_info)
         """ 
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -24,36 +26,37 @@ class ARJA(AbstractTool):
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-
-        dir_java_src = join(self.dir_expr , "src",bug_info["source_directory"])
-        dir_test_src = join(self.dir_expr , "src", bug_info["test_directory"])
-        dir_java_bin = join(self.dir_expr , "src",  bug_info["class_directory"])
-        dir_test_bin = join(self.dir_expr , "src", bug_info["test_class_directory"])
-        list_deps = [ join(self.dir_expr,dep) for dep in bug_info["dependencies"]]
-        list_deps.append(join(self.arja_home,"external","lib","hamcrest-core-1.3.jar"))
-        list_deps.append(join(self.arja_home,"external","lib","junit-4.12.jar"))
+        timeout_m = str(float(timeout_h) * 60)
+        max_gen = 1000000
+        
+        dir_java_src = join(self.dir_expr,"src", bug_info["source_directory"])
+        dir_test_src = join(self.dir_expr, "src" , bug_info["test_directory"])
+        dir_java_bin = bug_info["class_directory"]
+        dir_test_bin = bug_info["test_class_directory"]
+        list_deps = [f"{self.dir_expr}/{x}" for x in bug_info["dependencies"]]
+        list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
+        list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
         list_deps_str = ":".join(list_deps)
 
-
-        max_generations = 2000000
-        test_timeout = 30000
         # generate patches
         self.timestamp_log()
-        arja_command = f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main Arja " \
-                       f"-DsrcJavaDir {dir_java_src} " \
-                       f"-DbinJavaDir {dir_java_bin} " \
-                       f"-DbinTestDir {dir_test_bin} " \
-                       "-DdiffFormat true " \
-                       f"-DexternalProjRoot {self.arja_home}/external " \
-                       f"-DwaitTime {test_timeout} " \
-                       f"-DmaxGenerations {max_generations} " \
-                       f"-DpatchOutputRoot {self.dir_output}/patches " \
-                       f"-Ddependences {list_deps_str}"
+        repair_command = f"timeout -k 5m {timeout_h}h " \
+                         f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar " \
+                         f"fr.inria.main.evolution.AstorMain " \
+                         f"-mode {self.mode} " \
+                         f"-srcjavafolder {dir_java_src} " \
+                         f"-srctestfolder {dir_test_src}  " \
+                         f"-binjavafolder {dir_java_bin} " \
+                         f"-bintestfolder  {dir_test_bin} " \
+                         f"-location {self.dir_expr}/src " \
+                         f"-dependencies {list_deps_str}" \
+                         f"-maxgen {max_gen}" \
+                         f"-maxtime {timeout_m}" \
+                         f"stopfirst false"
 
         status = self.run_command(
-            arja_command, self.log_output_path, self.arja_home
+            repair_command, self.log_output_path, self.astor_home
         )
-
 
         if status != 0:
             self._error.is_error = True
@@ -75,7 +78,11 @@ class ARJA(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        super(ARJA, self).save_artefacts(dir_info)
+        list_artifact_dirs = [self.astor_home + "/" + x for x in ["diffSolutions", "output_astor"]]
+        for d in list_artifact_dirs:
+            copy_command = f"cp -rf {d} {self.dir_output}"
+            self.run_command(copy_command)
+        super(AstorTool, self).save_artefacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
@@ -99,11 +106,12 @@ class ARJA(AbstractTool):
 
         count_plausible = 0
         count_enumerations = 0
+        count_compilable = 0
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
         self._space.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
+            name for name in list_output_dir if ".patch" in name
         )
 
         # extract information from output log
@@ -118,21 +126,25 @@ class ARJA(AbstractTool):
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
-                if "One fitness evaluation is finished" in line:
-                    count_enumerations += 1
-                elif "failed tests: 0" in line:
+                if "child compiles" in line.lower():
+                    count_compilable += 1
+                    child_id = int(str(re.search(r'id (.*)', line).group(1)).strip())
+                    if child_id > count_enumerations:
+                        count_enumerations = child_id
+                elif "found solution," in line.lower():
                     count_plausible += 1
 
-        self._space.generated = len([ x for x in
-            self.list_dir(
-                join(
-                    self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
-                )
-            )
-            if ".txt" in x
-        ])
+        self._space.generated = len(x for x in
+                                     self.list_dir(
+                                         join(
+                                             self.astor_home,
+                                             "diffSolutions"
+                                         )
+                                     )
+                                     if ".diff" in x
+                                     )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
+        self._space.non_compilable = count_enumerations - count_compilable
 
         return self._space, self._time, self._error
