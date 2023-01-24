@@ -44,7 +44,8 @@ class AstorTool(AbstractTool):
             f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar "
             f"fr.inria.main.evolution.AstorMain "
             f"-mode {self.mode} "
-            f"-srcjavafolder {dir_java_src} "
+            + (f"-loglevel DEBUG " if values.debug else "-loglevel INFO ")
+            + f"-srcjavafolder {dir_java_src} "
             f"-srctestfolder {dir_test_src}  "
             f"-binjavafolder {dir_java_bin} "
             f"-bintestfolder  {dir_test_bin} "
