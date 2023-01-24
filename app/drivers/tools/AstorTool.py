@@ -12,7 +12,6 @@ class AstorTool(AbstractTool):
     astor_version = "2.0.0"
 
     def __init__(self):
-        self.name = os.path.basename(__file__)[:-3].lower()
         super(AstorTool, self).__init__(self.name)
         self.image_name = "rshariffdeen/astor"
 
@@ -113,7 +112,7 @@ class AstorTool(AbstractTool):
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
         self._space.generated = len(
-            name for name in list_output_dir if ".patch" in name
+            [name for name in list_output_dir if ".patch" in name]
         )
 
         # extract information from output log
@@ -137,9 +136,11 @@ class AstorTool(AbstractTool):
                     count_plausible += 1
 
         self._space.generated = len(
-            x
-            for x in self.list_dir(join(self.astor_home, "diffSolutions"))
-            if ".diff" in x
+            [
+                x
+                for x in self.list_dir(join(self.astor_home, "diffSolutions"))
+                if ".diff" in x
+            ]
         )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
