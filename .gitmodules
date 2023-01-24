@@ -16,3 +16,6 @@
 [submodule "benchmark/defects4j"]
 	path = benchmark/defects4j
 	url = git@github.com:nus-apr/defects4j.git
+[submodule "benchmark/quixbugsjava"]
+	path = benchmark/quixbugsjava
+	url = git@github.com:nus-apr/quixbugs-java-benchmark.git
