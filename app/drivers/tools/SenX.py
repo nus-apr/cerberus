@@ -93,7 +93,7 @@ class SenX(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.config_id)
+        conf_id = str(values.current_profile_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),

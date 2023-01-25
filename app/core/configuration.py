@@ -85,6 +85,7 @@ class Configurations:
         "skip-index-list": [],
         "tool-list": [],
         "directories": {"data": "/data"},
+        "profile-id-list": ["C1"]
     }
     __runtime_config_values = __default_config_values
 
@@ -140,8 +141,8 @@ class Configurations:
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
 
-        if arg_list.config_id_list:
-            self.__runtime_config_values["config-id-list"] = arg_list.config_id_list
+        if arg_list.profile_id_list:
+            self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
 
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
@@ -169,6 +170,9 @@ class Configurations:
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
+        if arg_list.profile_id_list:
+            self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+
     def update_configuration(self):
         emitter.normal("updating configuration values")
         if not self.__runtime_config_values["only-setup"]:
@@ -191,6 +195,7 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
+        values.profile_id_list =  self.__runtime_config_values["profile-id-list"]
 
         if (
             values.start_index is None

@@ -136,7 +136,7 @@ class Angelix(AbstractTool):
         """instrumentation for the experiment as needed by the tool"""
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.config_id)
+        conf_id = str(values.current_profile_id)
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
             self.dir_logs
@@ -164,7 +164,7 @@ class Angelix(AbstractTool):
         is_error = False
         count_plausible = 0
         count_enumerations = 0
-        conf_id = str(values.config_id)
+        conf_id = str(values.current_profile_id)
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),

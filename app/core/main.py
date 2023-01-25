@@ -235,13 +235,13 @@ def run(repair_tool_list, benchmark, setup):
         "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
     )
     emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
-    run_config_id_list = values.config_id_list
+    run_profile_id_list = values.profile_id_list
     iteration = 0
-    for config_id in run_config_id_list:
-        if config_id not in setup:
-            utilities.error_exit("invalid profile id " + config_id)
-        config_info = setup[config_id]
-        values.config_id = config_info[definitions.KEY_ID]
+    for profile_id in run_profile_id_list:
+        if profile_id not in setup:
+            utilities.error_exit("invalid profile id " + profile_id)
+        config_info = setup[profile_id]
+        values.current_profile_id = config_info[definitions.KEY_ID]
         experiment_list = filter_experiment_list(benchmark)
         for experiment_item in experiment_list:
             iteration = iteration + 1

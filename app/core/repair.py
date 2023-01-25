@@ -327,7 +327,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
-        conf_id = str(values.config_id)
+        conf_id = str(values.current_profile_id)
         exp_id = conf_id + "-" + bug_id
         values.analysis_results[exp_id] = [space_info, time_info]
         tool.print_analysis(space_info, time_info)

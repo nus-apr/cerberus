@@ -46,7 +46,7 @@ bug_index_list = None
 bug_id_list = None
 skip_index_list = None
 benchmark_name = None
-config_id_list = ["C1"]
+profile_id_list = None
 subject_name = None
 is_purge = False
 only_analyse = False
@@ -71,7 +71,7 @@ dump_patches = False
 arg_pass = False
 iteration_no = -1
 analysis_results = dict()
-config_id = None
+current_profile_id = None
 
 
 running_tool = False
