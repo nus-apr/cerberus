@@ -1,4 +1,4 @@
-import os
+import math
 from os.path import join
 import re
 from app.core import definitions, emitter, values
@@ -10,6 +10,7 @@ class AstorTool(AbstractTool):
 
     astor_home = "/opt/astor"
     astor_version = "2.0.0"
+    mode = None
 
     def __init__(self):
         super(AstorTool, self).__init__(self.name)
@@ -25,7 +26,7 @@ class AstorTool(AbstractTool):
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        timeout_m = str(int(timeout_h) * 60)
+        timeout_m = str(float(timeout_h) * 60)
         max_gen = 1000000
 
         dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
@@ -52,7 +53,7 @@ class AstorTool(AbstractTool):
             f"-location {self.dir_expr}/src "
             f"-dependencies {list_deps_str} "
             f"-maxgen {max_gen} "
-            f"-maxtime {timeout_m} "
+            f"-maxtime {int(math.ceil(float(timeout_m)))} "
             f"-stopfirst false "
         )
 
