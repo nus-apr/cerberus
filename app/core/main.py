@@ -186,9 +186,9 @@ def parse_args():
     )
 
     optional.add_argument(
-        "--config-list",
+        "--profile-list",
         help="multiple list of configuration profiles",
-        dest="config_id_list",
+        dest="profile_id_list",
         nargs="+",
         default=[],
     )
