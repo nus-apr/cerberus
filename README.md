@@ -60,7 +60,7 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark> |          7 |     30 |
 | 4 | ITSP              | C/C++    | <https://github.com/nus-apr/itsp-benchmark>       |         10 |    661 |
 | 5 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark> |         16 |     25 |
-| 6 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>            |         18 |    835 |
+| 6 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>            |         17 |    835 |
 | 7 | QuixBugs          | Java     | <https://github.com/jkoppel/QuixBugs>             |         40 |     40 |
 
 ## Bugs
