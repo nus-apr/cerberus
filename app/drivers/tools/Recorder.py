@@ -2,7 +2,7 @@ import os
 from os.path import join
 
 from app.core import definitions, emitter
-from app.core import utilities
+from app.core import utilities, values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -16,6 +16,7 @@ class Recorder(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Recorder, self).__init__(self.name)
         self.image_name = "zqh111/recoder:interface"
+        self.bug_name = ""
 
     def repair(self, bug_info, config_info):
         super(Recorder, self).repair(bug_info, config_info)
@@ -31,18 +32,22 @@ class Recorder(AbstractTool):
         if not values.use_gpu:
             utilities.error_exit("Cannot run Recorder without a GPU")
 
+        self.bug_name = "{}-{}".format(
+            bug_info[definitions.KEY_SUBJECT],
+            bug_info[definitions.KEY_BUG_ID],
+        )
         # generate patches
         self.timestamp_log()
-        recorder_command = "timeout -k 5m {}h python3 testDefect4j.py {}-{}".format(
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv2.py {}-{}'".format(  # currently supporting only defects4j
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],
         )
         status = self.run_command(
-            recorder_command, self.log_output_path, "/root/Repair"
+            recorder_command, self.log_output_path, "/root/Repair/"
         )
 
-        recorder_command = "timeout -k 5m {}h python3 repair.py {}-{}".format(
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}-{}'".format(
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],
@@ -51,7 +56,7 @@ class Recorder(AbstractTool):
         status = self.run_command(
             recorder_command,
             self.log_output_path,
-            "/root/Repair/patches",
+            "/root/Repair/",
         )
 
         if status != 0:
@@ -100,7 +105,7 @@ class Recorder(AbstractTool):
         count_enumerations = 0
 
         # count number of patch files
-        self._space.generated = 0
+        self._space.generated = 1
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -115,9 +120,11 @@ class Recorder(AbstractTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
 
         if not self._error.is_error:
-            patch_space = self.list_dir("/root/Repair/patches/")
-            self._space.generated = 0
-            self._space.enumerations = 0
+            self.run_command(
+                "cp /root/Repair/patches/{}patch.txt /output/".format(self.bug_name)
+            )
+            self._space.generated = 1
+            self._space.enumerations = 1
             self._space.plausible = 1
             self._space.non_compilable = 0
 
