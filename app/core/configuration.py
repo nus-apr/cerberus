@@ -85,7 +85,7 @@ class Configurations:
         "skip-index-list": [],
         "tool-list": [],
         "directories": {"data": "/data"},
-        "profile-id-list": ["C1"]
+        "profile-id-list": ["C1"],
     }
     __runtime_config_values = __default_config_values
 
@@ -195,7 +195,7 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.profile_id_list =  self.__runtime_config_values["profile-id-list"]
+        values.profile_id_list = self.__runtime_config_values["profile-id-list"]
 
         if (
             values.start_index is None

@@ -6,14 +6,19 @@ from app.core import utilities
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-class SequenceR(AbstractTool):
+class Recorder(AbstractTool):
+    """
+    Requirements for this tool:
+    15 GB of VRAM, at most 7.0 CUDA (e.g. Nvidia V100) compute and 20 GB of RAM
+    """
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(SequenceR, self).__init__(self.name)
+        super(Recorder, self).__init__(self.name)
         self.image_name = "zqh111/recoder:interface"
 
     def repair(self, bug_info, config_info):
-        super(SequenceR, self).repair(bug_info, config_info)
+        super(Recorder, self).repair(bug_info, config_info)
         """ 
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -28,7 +33,7 @@ class SequenceR(AbstractTool):
 
         # generate patches
         self.timestamp_log()
-        recorder_command = "timeout -k 5m {}h python 3 testDefect4j.py {}-{}".format(
+        recorder_command = "timeout -k 5m {}h python3 testDefect4j.py {}-{}".format(
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],
@@ -37,7 +42,7 @@ class SequenceR(AbstractTool):
             recorder_command, self.log_output_path, "/root/Repair"
         )
 
-        recorder_command = "timeout -k 5m {0}h python3 repair.py {}-{}".format(
+        recorder_command = "timeout -k 5m {}h python3 repair.py {}-{}".format(
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],
@@ -95,10 +100,7 @@ class SequenceR(AbstractTool):
         count_enumerations = 0
 
         # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self._space.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
+        self._space.generated = 0
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -114,13 +116,9 @@ class SequenceR(AbstractTool):
 
         if not self._error.is_error:
             patch_space = self.list_dir("/root/Repair/patches/")
-            self._space.generated = len(patch_space)
-            self._space.enumerations = len(patch_space)
-            self._space.plausible = len(
-                list(filter(lambda x: "passed" in x, patch_space))
-            )
-            self._space.non_compilable = (
-                self._space.generated - self._space.enumerations
-            )
+            self._space.generated = 0
+            self._space.enumerations = 0
+            self._space.plausible = 1
+            self._space.non_compilable = 0
 
         return self._space, self._time, self._error
