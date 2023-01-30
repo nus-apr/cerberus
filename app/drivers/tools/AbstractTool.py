@@ -107,6 +107,7 @@ class AbstractTool:
             )
             stdout, stderr = output
             if "/dev/null" not in log_file_path:
+                self.append_file("\n", log_file_path)
                 if stdout:
                     self.append_file(stdout.decode("iso-8859-1"), log_file_path)
                 if stderr:
