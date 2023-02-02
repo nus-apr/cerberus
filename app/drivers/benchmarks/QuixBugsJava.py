@@ -128,8 +128,6 @@ class QuixBugsJava(AbstractBenchmark):
         """
         container_id = super(QuixBugsJava, self).setup_container(bug_index, image_name)
 
-        emitter.information("Making stuff")
-
         root = join(self.dir_expr, "src")
 
         self.run_command(
