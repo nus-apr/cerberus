@@ -47,7 +47,6 @@ class Defects4JI(Defects4J):
                 container.copy_file_to_container(container_id, source_path, target_path)
         return container_id
 
-
     def instrument(self, bug_index, container_id):
         emitter.normal("\t\t\tinstrumenting assertions")
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -75,4 +74,3 @@ class Defects4JI(Defects4J):
                 if not self.build(bug_index, container_id):
                     status = 1
         return status == 0
-

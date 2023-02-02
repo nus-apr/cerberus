@@ -14,8 +14,6 @@ class Defects4J(AbstractBenchmark):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Defects4J, self).__init__()
 
-
-
     def setup_container(self, bug_index, image_name):
         """
         Setup the container for the experiment by constructing volumes,
