@@ -19,3 +19,6 @@
 [submodule "benchmark/quixbugsjava"]
 	path = benchmark/quixbugsjava
 	url = git@github.com:nus-apr/quixbugs-java-benchmark.git
+[submodule "benchmark/bears"]
+	path = benchmark/bears
+	url = git@github.com:nus-apr/bears-benchmark.git
