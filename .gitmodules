@@ -22,3 +22,6 @@
 [submodule "benchmark/bears"]
 	path = benchmark/bears
 	url = git@github.com:nus-apr/bears-benchmark.git
+[submodule "benchmark/bugsdotjar"]
+	path = benchmark/bugsdotjar
+	url = git@github.com:nus-apr/bugs-dot-jar-benchmark.git
