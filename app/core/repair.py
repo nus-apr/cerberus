@@ -557,5 +557,6 @@ def run(benchmark, tool_list, bug_info, config_info):
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
     json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
-    writer.write_as_json(values.analysis_results, json_f_name)
+    summary_f_path = f"{values.dir_summaries}/{json_f_name}"
+    writer.write_as_json(values.analysis_results, summary_f_path)
 

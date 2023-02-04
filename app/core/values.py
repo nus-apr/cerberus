@@ -18,6 +18,8 @@ dir_libs = dir_main + "/libs"
 dir_scripts = dir_main + "/scripts"
 dir_artifacts = dir_output_base + "/artifacts"
 dir_output = ""
+dir_summaries = dir_main + "/summaries"
+
 
 
 file_main_log = ""

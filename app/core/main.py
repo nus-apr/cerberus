@@ -25,6 +25,7 @@ def create_directories():
         values.dir_artifacts,
         values.dir_results,
         values.dir_experiments,
+        values.dir_summaries
     ]
 
     for dir_i in dir_list:
