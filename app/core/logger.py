@@ -114,37 +114,38 @@ def warning(message):
 
 def analysis(exp_id):
     space_info, time_info = values.analysis_results[exp_id]
+
     with open(values.file_analysis_log, "a") as log_file:
         log_file.write("\n" + exp_id + "\n")
-        log_file.write("\t\t search space size: {0}".format(space_info.size))
-        log_file.write("\t\t count enumerations: {0}".format(space_info.enumerations))
-        log_file.write("\t\t count plausible patches: {0}".format(space_info.plausible))
-        log_file.write("\t\t count generated: {0}".format(space_info.generated))
+        log_file.write("\t\t search space size: {0}\n".format(space_info.size))
+        log_file.write("\t\t count enumerations: {0}\n".format(space_info.enumerations))
+        log_file.write("\t\t count plausible patches: {0}\n".format(space_info.plausible))
+        log_file.write("\t\t count generated: {0}\n".format(space_info.generated))
         log_file.write(
-            "\t\t count non-compiling patches: {0}".format(space_info.non_compilable)
+            "\t\t count non-compiling patches: {0}\n".format(space_info.non_compilable)
         )
         log_file.write(
-            "\t\t count implausible patches: {0}".format(space_info.get_implausible())
+            "\t\t count implausible patches: {0}\n".format(space_info.get_implausible())
         )
-        log_file.write("\t\t time build: {0} seconds".format(time_info.total_build))
+        log_file.write("\t\t time build: {0} seconds\n".format(time_info.total_build))
         log_file.write(
-            "\t\t time validation: {0} seconds".format(time_info.total_validation)
-        )
-        log_file.write(
-            "\t\t time duration: {0} seconds".format(time_info.get_duration())
+            "\t\t time validation: {0} seconds\n".format(time_info.total_validation)
         )
         log_file.write(
-            "\t\t latency compilation: {0} seconds".format(
+            "\t\t time duration: {0} seconds\n".format(time_info.get_duration())
+        )
+        log_file.write(
+            "\t\t latency compilation: {0} seconds\n".format(
                 time_info.get_latency_compilation()
             )
         )
         log_file.write(
-            "\t\t latency validation: {0} seconds".format(
+            "\t\t latency validation: {0} seconds\n".format(
                 time_info.get_latency_validation()
             )
         )
         log_file.write(
-            "\t\t latency plausible: {0} seconds".format(
+            "\t\t latency plausible: {0} seconds\n".format(
                 time_info.get_latency_plausible()
             )
         )
