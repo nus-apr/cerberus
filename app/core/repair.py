@@ -12,6 +12,7 @@ from app.core import (
     container,
     parallel,
     utilities,
+    writer
 )
 from app.drivers.tools import AbstractTool
 from app.plugins import valkyrie
@@ -552,3 +553,9 @@ def run(benchmark, tool_list, bug_info, config_info):
             dir_result = dir_info_list[0]["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)
+
+    hash = hashlib.sha1()
+    hash.update(str(time.time()).encode("utf-8"))
+    json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
+    writer.write_as_json(values.analysis_results, json_f_name)
+
