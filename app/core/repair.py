@@ -12,7 +12,7 @@ from app.core import (
     container,
     parallel,
     utilities,
-    writer
+    writer,
 )
 from app.drivers.tools import AbstractTool
 from app.plugins import valkyrie
@@ -559,4 +559,3 @@ def run(benchmark, tool_list, bug_info, config_info):
     json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
     summary_f_path = f"{values.dir_summaries}/{json_f_name}"
     writer.write_as_json(values.analysis_results, summary_f_path)
-

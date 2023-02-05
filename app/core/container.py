@@ -137,6 +137,9 @@ def build_container(container_name, volume_list, image_name):
                 continue
             if not os.path.isdir(local_dir_path):
                 os.makedirs(local_dir_path)
+        emitter.debug(
+            "Container runtime is {}".format("nvidia" if values.use_gpu else "runc")
+        )
         container = client.containers.run(
             image_name,
             detach=True,

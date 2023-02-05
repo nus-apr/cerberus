@@ -25,3 +25,6 @@
 [submodule "benchmark/bugsdotjar"]
 	path = benchmark/bugsdotjar
 	url = git@github.com:nus-apr/bugs-dot-jar-benchmark.git
+[submodule "benchmark/introclassjava"]
+	path = benchmark/introclassjava
+	url = git@github.com:nus-apr/introclassjava-benchmark.git

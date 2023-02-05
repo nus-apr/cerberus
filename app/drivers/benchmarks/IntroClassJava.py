@@ -6,18 +6,21 @@ from app.core import definitions, values, emitter, container
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
-class Bears(AbstractBenchmark):
+class IntroClassJava(AbstractBenchmark):
 
     log_instrument_path = None
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Bears, self).__init__()
+        super(IntroClassJava, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(Bears, self).setup_experiment(
+        is_error = super(IntroClassJava, self).setup_experiment(
             bug_index, container_id, test_all
         )
+
+        self.run_command(container_id, "ls -rf /setup")
+
         if not is_error:
             if self.instrument(bug_index, container_id):
                 emitter.success("\t\t\t[benchmark] instrumentation successful")
@@ -31,26 +34,16 @@ class Bears(AbstractBenchmark):
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(Bears, self).setup_container(bug_index, image_name)
+        container_id = super(IntroClassJava, self).setup_container(
+            bug_index, image_name
+        )
 
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        subject = str(experiment_item[definitions.KEY_SUBJECT])
 
         self.run_command(
-            container_id,
-            "git clone https://github.com/bears-bugs/bears-benchmark {}".format(
-                join(self.dir_expr, "src")
-            ),
-        )
-
-        self.run_command(
-            container_id,
-            "git checkout {}".format(bug_id),
-            dir_path=join(self.dir_expr, "src"),
-        )
-
-        self.run_command(
-            container_id, "git checkout HEAD~2", dir_path=join(self.dir_expr, "src")
+            container_id, "cp -rf {} {}/src".format(self.dir_setup, self.dir_expr)
         )
 
         return container_id
@@ -91,4 +84,4 @@ class Bears(AbstractBenchmark):
         emitter.normal("\t\t[benchmark] saving experiment artefacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(Bears, self).save_artefacts(dir_info, container_id)
+        super(IntroClassJava, self).save_artefacts(dir_info, container_id)

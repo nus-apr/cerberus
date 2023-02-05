@@ -119,7 +119,9 @@ def analysis(exp_id):
         log_file.write("\n" + exp_id + "\n")
         log_file.write("\t\t search space size: {0}\n".format(space_info.size))
         log_file.write("\t\t count enumerations: {0}\n".format(space_info.enumerations))
-        log_file.write("\t\t count plausible patches: {0}\n".format(space_info.plausible))
+        log_file.write(
+            "\t\t count plausible patches: {0}\n".format(space_info.plausible)
+        )
         log_file.write("\t\t count generated: {0}\n".format(space_info.generated))
         log_file.write(
             "\t\t count non-compiling patches: {0}\n".format(space_info.non_compilable)

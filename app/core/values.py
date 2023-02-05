@@ -21,7 +21,6 @@ dir_output = ""
 dir_summaries = dir_main + "/summaries"
 
 
-
 file_main_log = ""
 file_error_log = dir_log_base + "/log-error"
 file_last_log = dir_log_base + "/log-latest"
