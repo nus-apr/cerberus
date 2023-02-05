@@ -72,7 +72,7 @@ class EvoRepair(AbstractTool):
         max_iterations = 2000000
         test_timeout = 30000
         # generate patches
-        self.timestamp_log()
+        self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h evorepair "
             f"--num-iterations {max_iterations} "
@@ -93,7 +93,7 @@ class EvoRepair(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):
@@ -138,7 +138,7 @@ class EvoRepair(AbstractTool):
 
         count_plausible = 0
         count_enumerations = 0
-
+        count_non_compilable = 0
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             emitter.warning("\t\t\t[warning] no output log file found")
@@ -151,12 +151,15 @@ class EvoRepair(AbstractTool):
             self._time.timestamp_start = log_lines[0].replace("\n", "")
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
-                if "got" in line.lower():
-                    new_count = int(
-                        str(re.search(r"got (.*) patches", line).group(1)).strip()
-                    )
-                    count_plausible += new_count
-                    count_enumerations += new_count
+                if "total patches that pass all user tests" in line.lower():
+                    # new_count = int(
+                    #     str(re.search(r"got (.*) patches", line).group(1)).strip()
+                    # )
+                    count_plausible = int(line.split(":")[-1])
+                elif "total patches that pass failing user tests" in line.lower():
+                    count_enumerations = int(line.split(":")[-1])
+                elif "because compilation failed" in line:
+                    count_non_compilable += 1
 
         tool_out_dir = self.evorepair_home + "/output"
         exp_out_dir = f"{tool_out_dir}/{self.list_dir(tool_out_dir)[0]}"
@@ -166,5 +169,6 @@ class EvoRepair(AbstractTool):
         )
         self._space.enumerations = count_enumerations
         self._space.plausible = count_plausible
+        self._space.non_compilable = count_non_compilable
 
         return self._space, self._time, self._error
