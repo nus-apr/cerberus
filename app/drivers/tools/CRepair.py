@@ -51,7 +51,7 @@ class CRepair(AbstractTool):
         # repair_conf_path = self.generate_conf_file(bug_info)
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"
-        self.timestamp_log()
+        self.timestamp_log_start()
         repair_command = (
             f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h "
             f"crashrepair repair --no-fuzz {bug_json_path} {additional_tool_param}'"
@@ -67,7 +67,7 @@ class CRepair(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        self.timestamp_log()
+        self.timestamp_log_end()
 
     def save_artefacts(self, dir_info):
         emitter.normal("\t\t\t saving artefacts of " + self.name)

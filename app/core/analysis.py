@@ -71,6 +71,14 @@ class TimeAnalysis:
                 )
         return self.__latency_plausible
 
+    def get_array(self):
+        summary = {
+            "total duration": self.get_duration(),
+            "build time": self.total_build,
+            "validation time": self.total_validation
+        }
+        return summary
+
 
 class SpaceAnalysis:
     non_compilable = 0
@@ -89,6 +97,17 @@ class SpaceAnalysis:
 
     def get_exploration_ratio(self):
         return (self.enumerations / self.size) * 100
+
+    def get_array(self):
+        summary = {
+            "search space": self.size,
+            "enumerations": self.enumerations,
+            "non-compilable": self.non_compilable,
+            "plausible": self.plausible,
+            "implausible": self.get_implausible(),
+            "generated": self.generated
+        }
+        return summary
 
 
 class ErrorAnalysis:

@@ -251,6 +251,7 @@ def run(repair_tool_list, benchmark, setup):
             emitter.sub_sub_title(
                 "Experiment #" + str(iteration) + " - Bug #" + str(bug_index)
             )
+            utilities.check_space()
             repair.run(benchmark, repair_tool_list, experiment_item, config_info)
 
 
