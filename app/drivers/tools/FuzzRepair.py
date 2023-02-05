@@ -42,6 +42,11 @@ class FuzzRepair(AbstractTool):
             )
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
+
+        # TODO: temp way of only using crash oracle on some bugs
+        if "libtiff" in self.dir_expr:
+            conf_content.append("only_crash_oracle:1"\n")
+
         self.write_file(conf_content, repair_conf_path)
         return repair_conf_path
 
