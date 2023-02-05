@@ -23,7 +23,7 @@ class Verifix(AbstractTool):
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
 
         # start running
-        self.timestamp_log()
+        self.timestamp_log_start()
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
             timeout_h,
             "true" if values.debug else "false",
@@ -46,7 +46,7 @@ class Verifix(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

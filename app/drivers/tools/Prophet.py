@@ -54,9 +54,9 @@ class Prophet(AbstractTool):
         if additional_tool_param:
             repair_command += " " + additional_tool_param
         # repair_command += " -timeout {0} ".format(int(timeout))
-        self.timestamp_log()
+        self.timestamp_log_start()
         status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
-        self.timestamp_log()
+        self.timestamp_log_end()
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(

@@ -40,7 +40,7 @@ class SequenceR(AbstractTool):
             )
 
         # generate patches
-        self.timestamp_log()
+        self.timestamp_log_start()
         file = (
             join(
                 bug_info[definitions.KEY_SOURCE_DIRECTORY],
@@ -86,7 +86,7 @@ class SequenceR(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

@@ -80,11 +80,11 @@ class Darjeeling(AbstractTool):
         if values.dump_patches:
             repair_command += " --dump-all "
         repair_command += " repair.yml".format(self.log_output_path)
-        self.timestamp_log()
+        self.timestamp_log_start()
         status = self.run_command(
             repair_command, self.log_output_path, self.dir_expr + "/src"
         )
-        self.timestamp_log()
+        self.timestamp_log_end()
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(

@@ -37,7 +37,7 @@ class VulnFix(AbstractTool):
         config_path = self.populate_config_file(bug_info)
 
         # start running
-        self.timestamp_log()
+        self.timestamp_log_start()
         vulnfix_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h vulnfix {1} {2}'".format(
             timeout_h, additional_tool_param, config_path
         )
@@ -54,7 +54,7 @@ class VulnFix(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def populate_config_file(self, bug_info):

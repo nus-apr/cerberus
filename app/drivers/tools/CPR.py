@@ -34,7 +34,7 @@ class CPR(AbstractTool):
         seed_id_list = ",".join(bug_info[definitions.KEY_PASSING_TEST])
 
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        self.timestamp_log()
+        self.timestamp_log_start()
         cpr_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(
                 timeout
@@ -63,7 +63,7 @@ class CPR(AbstractTool):
             self._error.is_error = True
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

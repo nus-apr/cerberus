@@ -52,7 +52,7 @@ class Nopol(AbstractTool):
         max_generations = 2000000
         test_timeout = 30000
         # generate patches
-        self.timestamp_log()
+        self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h java -jar {nopol_jar_path} nopol "
             f"{dir_java_src} "
@@ -74,7 +74,7 @@ class Nopol(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

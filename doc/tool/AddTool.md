@@ -35,11 +35,11 @@ class NewTool(AbstractTool):
             self.dir_output - directory to store artifacts/output 
         '''
         # execute repair tool
-        self.timestamp_log()
+        self.timestamp_log_start()
         repair_command = ""
         status = self.run_command(repair_command,
                                   log_file_path=self.log_output_path)
-        self.timestamp_log()
+        self.timestamp_log_end()
 
     def save_artefacts(self, dir_info):
         """

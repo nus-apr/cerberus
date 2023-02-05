@@ -67,7 +67,7 @@ class F1X(AbstractTool):
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
 
-        self.timestamp_log()
+        self.timestamp_log_start()
 
         repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
         repair_command += " -f {0} ".format(abs_path_buggy_file)
@@ -105,7 +105,7 @@ class F1X(AbstractTool):
 
         if values.dump_patches:
             self.create_patches_from_space(fix_file)
-        self.timestamp_log()
+        self.timestamp_log_end()
 
     def create_patches_from_space(self, source_file):
         script_name = "{}/{}-dump-patches.py".format(self.dir_expr, self.name)

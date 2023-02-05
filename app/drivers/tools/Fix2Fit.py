@@ -44,7 +44,7 @@ class Fix2Fit(AbstractTool):
             else self.read_file(self.dir_expr + "/manifest.txt")[0],
         )
 
-        self.timestamp_log()
+        self.timestamp_log_start()
         environment_vars = {
             "SUBJECT_DIR": self.dir_setup,
             "AFL_NO_AFFINITY": "",
@@ -87,7 +87,7 @@ class Fix2Fit(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
-        self.timestamp_log()
+        self.timestamp_log_end()
         return
 
     def save_artefacts(self, dir_info):

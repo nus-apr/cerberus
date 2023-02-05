@@ -40,7 +40,7 @@ class ARJA(AbstractTool):
         max_generations = 2000000
         test_timeout = 30000
         # generate patches
-        self.timestamp_log()
+        self.timestamp_log_start()
         arja_command = (
             f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main Arja "
             f"-DsrcJavaDir {dir_java_src} "
@@ -66,7 +66,7 @@ class ARJA(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_lo_endg()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

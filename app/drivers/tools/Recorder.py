@@ -37,7 +37,7 @@ class Recorder(AbstractTool):
             bug_info[definitions.KEY_BUG_ID],
         )
         # generate patches
-        self.timestamp_log()
+        self.timestamp_log_start()
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
@@ -69,7 +69,7 @@ class Recorder(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_log()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

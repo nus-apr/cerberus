@@ -52,7 +52,7 @@ class ExtractFix(AbstractTool):
         parameters = self.create_parameters(bug_info)
 
         # start running
-        self.timestamp_log()
+        self.timestamp_log_start()
         extractfix_command = "bash -c 'source /ExtractFix/setup.sh && timeout -k 5m {}h ./ExtractFix.py {} {} >> {}'".format(
             timeout_h, parameters, additional_tool_param, self.log_output_path
         )
@@ -61,7 +61,7 @@ class ExtractFix(AbstractTool):
             log_file_path=self.log_output_path,
             dir_path=path.join(self.dir_root, "build"),
         )
-        self.timestamp_log()
+        self.timestamp_log_end()
 
         if status != 0:
             emitter.warning(
