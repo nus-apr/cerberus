@@ -3,11 +3,15 @@ from os.path import join
 from datetime import datetime
 import shutil
 from app.core import definitions, values, emitter, container
-from app.drivers.benchmarks import Defects4J, AbstractBenchmark
+from app.drivers.benchmarks.Defects4J import Defects4J
 
 
 class Defects4JI(Defects4J):
     log_instrument_path = None
+
+    def __init__(self):
+        self.name = os.path.basename(__file__)[:-3].lower()
+        super(Defects4JI, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
         is_error = super(Defects4JI, self).setup_experiment(
