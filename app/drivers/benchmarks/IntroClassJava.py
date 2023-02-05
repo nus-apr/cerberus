@@ -68,7 +68,9 @@ class IntroClassJava(AbstractBenchmark):
         status = self.run_command(
             container_id, "mvn test", dir_path=join(self.dir_expr, "src")
         )
-        return status != 0
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        return status != 0 if bug_id != "reference" else status == 0
 
     def instrument(self, bug_index, container_id):
         emitter.normal("\t\t\tinstrumenting assertions")

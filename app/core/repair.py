@@ -558,4 +558,11 @@ def run(benchmark, tool_list, bug_info, config_info):
     hash.update(str(time.time()).encode("utf-8"))
     json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
     summary_f_path = f"{values.dir_summaries}/{json_f_name}"
-    writer.write_as_json(values.analysis_results, summary_f_path)
+    results_summary = dict()
+    for exp_id in values.analysis_results:
+        space_info, time_info = values.analysis_results[exp_id]
+        results_summary[exp_id] = {
+            "space": space_info.get_array(),
+            "time": time_info.get_array(),
+        }
+    writer.write_as_json(results_summary, summary_f_path)
