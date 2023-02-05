@@ -1,6 +1,7 @@
 import abc
 import os
 import re
+import time
 from datetime import datetime
 from os.path import join
 
@@ -94,8 +95,20 @@ class AbstractTool:
             self.dir_base_expr = values.dir_experiments
 
     def timestamp_log(self):
-        timestamp_command = "date -u '+%a %d %b %Y %H:%M:%S %p'"
-        self.run_command(timestamp_command, self.log_output_path)
+        time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
+        timestamp_txt = f"{time_now}"
+        self.append_file(timestamp_txt, self.log_output_path)
+
+    def timestamp_log_start(self):
+        time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
+        timestamp_txt = f"{time_now}\n"
+        self.append_file(timestamp_txt, self.log_output_path)
+
+    def timestamp_log_end(self):
+        time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
+        timestamp_txt = f"\n{time_now}"
+        self.append_file(timestamp_txt, self.log_output_path)
+
 
     def run_command(
         self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=None
