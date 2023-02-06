@@ -11,7 +11,7 @@ venv
 *.pyc
 archive
 results
-.vscode
+.scode
 benchmark/**/patches
 benchmark/**/location.txt
 benchmark/**/original.txt
@@ -19,4 +19,4 @@ benchmark/**/seed-dir
 benchmark/**/fix2fit/*-driver
 benchmark/**/compile_commands.json
 benchmark/**/f1x-*
-summaries/experiment-summary-b9814400.json
+summaries/**
