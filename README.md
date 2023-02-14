@@ -16,7 +16,11 @@ run experiments more efficiently and effectively.
 
 ## Installation Procedure
 
-To ensure that Cerberus has all dependencies one has to run `pip install -r requirements.txt` before trying to use Cerberus
+When cloning the repository ensure that the submodules containing the benchmarks are initialized. There are two ways to do this:
+* `git clone --recurse-submodules https://github.com/nus-apr/cerberus` to init when cloning the project 
+* or running `git submodule init && git submodule update` to initialize them post cloning (update can take in a specific path if one wants to initialize only one benchmark)
+
+To ensure that Cerberus has all dependencies one has to run `pip install -r requirements.txt` before trying to use Cerberus.
 
 ## Using Cerberus
 
