@@ -50,18 +50,20 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 17 | jKali         | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
 | 18 | jGenProg      | Java     | <https://github.com/SpoonLabs/Astor>              | f11f0b8   |
 | 19 | Nopol         | Java     | <https://github.com/SpoonLabs/nopol>              | 8cb3676   |
-
+| 20 | Recorder      | Java     | <https://github.com/pkuzqh/Recoder>               | 6f463f9   |
 ## Supported Benchmarks of Bugs
 
-| # | Benchmark         | Language | Repository                                        | # Projects | # Bugs |  
-| - | ----------------- | -------- | ------------------------------------------------- | ----------:| ------:|  
-| 1 | ManyBugs          | C/C++    | <https://github.com/nus-apr/manybugs>             |          6 |     60 |  
-| 2 | VulnLoc           | C/C++    | <https://github.com/nus-apr/vulnloc-benchmark>    |         11 |     43 |  
-| 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark> |          7 |     30 |
-| 4 | ITSP              | C/C++    | <https://github.com/nus-apr/itsp-benchmark>       |         10 |    661 |
-| 5 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark> |         16 |     25 |
-| 6 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>            |         17 |    835 |
-| 7 | QuixBugs          | Java     | <https://github.com/jkoppel/QuixBugs>             |         40 |     40 |
+| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |  
+| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|  
+| 1 | ManyBugs          | C/C++    | <https://github.com/nus-apr/manybugs>                 |          6 |     60 |  
+| 2 | VulnLoc           | C/C++    | <https://github.com/nus-apr/vulnloc-benchmark>        |         11 |     43 |  
+| 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark>     |          7 |     30 |
+| 4 | ITSP              | C/C++    | <https://github.com/nus-apr/itsp-benchmark>           |         10 |    661 |
+| 5 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
+| 6 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
+| 7 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
+| 8 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |
+| 9 | IntroClassJava    | Java     | <https://github.com/nus-apr/introclassjava-benchmark> |          6 |    297 |
 
 ## Bugs
 
