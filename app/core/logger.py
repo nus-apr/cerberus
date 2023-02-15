@@ -4,13 +4,14 @@ import logging
 import os
 import time
 from shutil import copyfile
-
+import logging
+from logging import Logger
 from app.core import values
 
-_logger_error: logging
-_logger_command: logging
-_logger_main: logging
-_logger_build: logging
+_logger_error: Logger
+_logger_command: Logger
+_logger_main: Logger
+_logger_build: Logger
 
 
 def setup_logger(name, log_file, level=logging.INFO, formatter=None):
@@ -77,8 +78,8 @@ def docker_command(message):
     _logger_command.info(message)
 
 
-def data(message):
-    _logger_main.info(message)
+def data(message, info):
+    _logger_main.info(message, info)
 
 
 def debug(message):

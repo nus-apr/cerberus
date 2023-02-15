@@ -156,7 +156,7 @@ class GenProg(AbstractTool):
             if "variant " in line:
                 self._space.enumerations = int(line.split("/")[0].split(" ")[-1])
             elif "possible edits" in line:
-                self._space.generated = line.split(": ")[2].split(" ")[0]
+                self._space.generated = int(line.split(": ")[2].split(" ")[0])
             elif "fails to compile" in line:
                 self._space.non_compilable += 1
             elif "Repair Found" in line:

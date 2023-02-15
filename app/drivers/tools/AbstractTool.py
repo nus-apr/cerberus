@@ -18,11 +18,11 @@ from app.core.utilities import execute_command, error_exit
 
 
 class AbstractTool:
-    log_instrument_path = None
-    log_output_path = None
-    image_name = None
-    invoke_command = None
-    name = None
+    log_instrument_path = ""
+    log_output_path = ""
+    image_name = ""
+    invoke_command = ""
+    name = ""
     dir_logs = ""
     dir_output = ""
     dir_expr = ""
@@ -108,7 +108,6 @@ class AbstractTool:
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"\n{time_now}"
         self.append_file(timestamp_txt, self.log_output_path)
-
 
     def run_command(
         self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=None

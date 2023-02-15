@@ -33,7 +33,9 @@ class TimeAnalysis:
         start_time_str = str(self.timestamp_start).split(" +")[0].strip()
         end_time_str = str(time_str).split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, self.__default_time_fmt)
-        tend = datetime.strptime(end_time_str, self.__log_time_fmt)
+        tend = datetime.strptime(
+            end_time_str, self.__default_time_fmt
+        )  # was log_time_fmt
         duration = (tend - tstart).total_seconds()
         return duration
 
@@ -75,7 +77,7 @@ class TimeAnalysis:
         summary = {
             "total duration": self.get_duration(),
             "build time": self.total_build,
-            "validation time": self.total_validation
+            "validation time": self.total_validation,
         }
         return summary
 
@@ -105,7 +107,7 @@ class SpaceAnalysis:
             "non-compilable": self.non_compilable,
             "plausible": self.plausible,
             "implausible": self.get_implausible(),
-            "generated": self.generated
+            "generated": self.generated,
         }
         return summary
 

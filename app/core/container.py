@@ -75,10 +75,10 @@ def build_image(dockerfile_path, image_name):
         utilities.error_exit("[error] Unable to build image: Dockerfile not found")
 
 
-def build_benchmark_image(image_name):
+def build_benchmark_image(image_name: str):
     benchmark_name = image_name.split("-")[0]
     dockerfile_path = "{}/{}/Dockerfile".format(
-        values.dir_benchmark, str(benchmark_name).lower()
+        values.dir_benchmark, benchmark_name.lower()
     )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id

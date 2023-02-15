@@ -39,9 +39,9 @@ def timeout_handler(signum, frame):
 
 
 def shutdown(signum, frame):
-    global stop_event
+    # global stop_event
     emitter.warning("Exiting due to Terminate Signal")
-    stop_event.set()
+    # stop_event.set()
     raise SystemExit
 
 
@@ -60,7 +60,7 @@ def filter_experiment_list(benchmark):
         experiment_item = experiment_list[bug_index - 1]
         subject_name = experiment_item[definitions.KEY_SUBJECT]
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-        if values.bug_id_list and str(bug_name) not in values.bug_id_list:
+        if values.bug_id_list and bug_name not in values.bug_id_list:
             continue
         if values.bug_index_list and bug_index not in values.bug_index_list:
             continue
@@ -246,7 +246,7 @@ def run(repair_tool_list, benchmark, setup):
         experiment_list = filter_experiment_list(benchmark)
         for experiment_item in experiment_list:
             iteration = iteration + 1
-            values.ITERATION_NO = iteration
+            values.iteration_no = iteration
             bug_index = experiment_item[definitions.KEY_ID]
             emitter.sub_sub_title(
                 "Experiment #" + str(iteration) + " - Bug #" + str(bug_index)
