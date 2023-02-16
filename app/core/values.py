@@ -26,6 +26,7 @@ dir_scripts = dir_main + "/scripts"
 dir_artifacts = dir_output_base + "/artifacts"
 dir_output = ""
 dir_summaries = dir_main + "/summaries"
+dir_backup = dir_main + "/backup"
 
 
 file_main_log = ""
@@ -116,7 +117,7 @@ apr_max_limit = {
 
 def get_list_tools():
     return list(
-        l.replace(".py", "").lower()
+        l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
             os.listdir(dir_tool_drivers),
@@ -126,7 +127,7 @@ def get_list_tools():
 
 def get_list_benchmarks():
     return list(
-        l.replace(".py", "").lower()
+        l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
             os.listdir(dir_benchmark_drivers),

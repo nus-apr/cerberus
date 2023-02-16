@@ -2,7 +2,9 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -356,7 +358,9 @@ class Fix2Fit(AbstractTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self._space.size = line.split("search space size: ")[-1].strip()
+                    self._space.size = int(
+                        line.split("search space size: ")[-1].strip()
+                    )
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")

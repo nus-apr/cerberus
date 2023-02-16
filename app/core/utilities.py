@@ -7,8 +7,12 @@ import signal
 import subprocess
 import sys
 from contextlib import contextmanager
+from os.path import join
 
-from app.core import logger, emitter, values, definitions
+from app.core import definitions
+from app.core import emitter
+from app.core import logger
+from app.core import values
 
 
 def escape_ansi(text):
@@ -57,7 +61,7 @@ def clean_files():
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     emitter.information("Removing other residual files...")
     if os.path.isdir("output"):
-        clean_command = "rm -rf " + values.DIRECTORY_OUTPUT
+        clean_command = "rm -rf " + values.dir_output
         execute_command(clean_command)
 
 
@@ -71,17 +75,13 @@ def clean_artifacts(output_dir):
 
 def backup_file(file_path, backup_name):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
-    backup_command = (
-        "cp " + file_path + " " + definitions.DIRECTORY_BACKUP + "/" + backup_name
-    )
+    backup_command = "cp {} {}".format(file_path, join(values.dir_backup, backup_name))
     execute_command(backup_command)
 
 
 def restore_file(file_path, backup_name):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
-    restore_command = (
-        "cp " + definitions.DIRECTORY_BACKUP + "/" + backup_name + " " + file_path
-    )
+    restore_command = "cp " + values.dir_backup + "/" + backup_name + " " + file_path
     execute_command(restore_command)
 
 

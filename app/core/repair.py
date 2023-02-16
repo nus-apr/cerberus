@@ -8,8 +8,6 @@ from os.path import join
 from typing import Any
 from typing import List
 
-from drivers.tools.AbstractTool import AbstractTool
-
 from app.core import container
 from app.core import definitions
 from app.core import emitter
@@ -20,7 +18,7 @@ from app.core import values
 from app.core import writer
 from app.core.analysis import SpaceAnalysis
 from app.core.analysis import TimeAnalysis
-from app.drivers.tools import AbstractTool
+from app.drivers.tools.AbstractTool import AbstractTool
 from app.plugins import valkyrie
 
 
@@ -342,7 +340,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
         exp_id = conf_id + "-" + bug_id
         values.analysis_results[exp_id] = (space_info, time_info)
         tool.print_analysis(space_info, time_info)
-        tool.log_output_path = None
+        tool.log_output_path = ""
         logger.analysis(exp_id)
         dir_output = dir_info["local"]["artifacts"]
         patch_dir = dir_output + "/patches"

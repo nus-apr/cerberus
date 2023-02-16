@@ -2,7 +2,9 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions, emitter, values
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -124,7 +126,9 @@ class CRepair(AbstractTool):
                 if "evaluating candidate patch" in line:
                     count_enumerations += 1
                 if "writing" in line and "mutations" in line:
-                    search_space = re.search(r"writing (.*) mutations", line).group(1)
+                    search_space = int(
+                        re.search(r"writing (.*) mutations", line).group(1)
+                    )
                 elif "saving successful patch" in line:
                     count_plausible += 1
                 elif "failed to compile" in line:

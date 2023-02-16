@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-
 import logging
 import os
 import time
-from shutil import copyfile
-import logging
 from logging import Logger
+from shutil import copyfile
+
 from app.core import values
 
 _logger_error: Logger
@@ -62,6 +61,10 @@ def build(message):
 
 def information(message):
     _logger_main.info(message)
+
+
+def trace(message, info):
+    pass
 
 
 def command(message):

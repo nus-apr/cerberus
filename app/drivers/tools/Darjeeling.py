@@ -3,7 +3,9 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -67,9 +69,7 @@ class Darjeeling(AbstractTool):
         mkdir_command = "sudo mkdir -p {}".format(dir_patch)
         self.run_command(mkdir_command, self.log_output_path, self.dir_expr)
 
-        repair_command = "timeout -k 5m {1}h  ".format(
-            self.dir_expr + "/src", str(timeout)
-        )
+        repair_command = "timeout -k 5m {}h  ".format(str(timeout))
         if self.container_id:
             repair_command += "sudo "
         repair_command += "darjeeling repair --continue --patch-dir {} ".format(
@@ -79,7 +79,7 @@ class Darjeeling(AbstractTool):
         repair_command += additional_tool_param + " "
         if values.dump_patches:
             repair_command += " --dump-all "
-        repair_command += " repair.yml".format(self.log_output_path)
+        repair_command += " repair.yml"
         self.timestamp_log_start()
         status = self.run_command(
             repair_command, self.log_output_path, self.dir_expr + "/src"
@@ -153,7 +153,7 @@ class Darjeeling(AbstractTool):
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
                 elif "possible edits" in line:
-                    self._space.size = line.split(": ")[2].split(" ")[0]
+                    self._space.size = int(line.split(": ")[2].split(" ")[0])
                 elif "plausible patches" in line:
                     self._space.plausible = int(
                         line.split("found ")[-1]

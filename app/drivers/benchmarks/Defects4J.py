@@ -1,8 +1,12 @@
 import os
-from os.path import join
-from datetime import datetime
 import shutil
-from app.core import definitions, values, emitter, container
+from datetime import datetime
+from os.path import join
+
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -34,9 +38,10 @@ class Defects4J(AbstractBenchmark):
             experiment_item[definitions.KEY_SUBJECT],
             bug_id,
             join(self.dir_expr, "src"),
-            custom_env,
         )
-        status = self.run_command(container_id, command_str, self.log_deploy_path)
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path, env=custom_env
+        )
         self.run_command(
             container_id,
             "defects4j export -p cp.test -o classpath_data",

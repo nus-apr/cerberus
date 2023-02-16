@@ -1,8 +1,10 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter, values
+from app.core import definitions
+from app.core import emitter
 from app.core import utilities
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -17,11 +19,11 @@ class ARJA(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(ARJA, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -66,7 +68,7 @@ class ARJA(AbstractTool):
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
 
-        self.timestamp_lo_endg()
+        self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artefacts(self, dir_info):

@@ -2,7 +2,9 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -37,7 +39,6 @@ class GenProg(AbstractTool):
             "--pos-tests {p_size}\n"
             "--neg-tests {n_size}\n"
             "--test-script bash {dir_exp}/test.sh\n".format(
-                bug_id=bug_id,
                 p_size=count_pass,
                 n_size=count_neg,
                 dir_exp=self.dir_expr,
@@ -62,11 +63,11 @@ class GenProg(AbstractTool):
 
         self.timestamp_log_start()
 
-        repair_command = 'bash -c \'export PATH="/root/.opam/4.12.0/bin/:$PATH"; timeout -k 5m {1}h  '.format(
-            join(self.dir_expr, "src"), str(timeout)
+        repair_command = 'bash -c \'export PATH="/root/.opam/4.12.0/bin/:$PATH"; timeout -k 5m {}h  '.format(
+            str(timeout)
         )
         repair_command += "genprog --label-repair --continue "
-        repair_command += " repair.conf'".format(self.log_output_path)
+        repair_command += " repair.conf'"
         status = self.run_command(
             repair_command, self.log_output_path, self.dir_expr + "/src"
         )

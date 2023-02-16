@@ -3,17 +3,25 @@ import json
 import os
 import shutil
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
-from app.core import emitter, container, definitions, abstractions, values, utilities
+from app.core import abstractions
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import utilities
+from app.core import values
 
 
 class AbstractBenchmark:
-    experiment_subjects = []
-    meta_file = None
+    experiment_subjects: List[Any] = []
+    meta_file: str | None = None
     bench_dir_path = None
-    name = None
-    image_name = None
-    __dir_info = None
+    name: str = ""
+    image_name: str = ""
+    __dir_info: Dict[str, Any] = dict()
     dir_logs = ""
     dir_expr = ""
     dir_base_expr = ""
@@ -25,13 +33,17 @@ class AbstractBenchmark:
     log_build_path = "None"
     log_test_path = "None"
     size = 0
-    list_artifact_dirs = []
-    list_artifact_files = []
+    list_artifact_dirs: List[str] = []
+    list_artifact_files: List[str] = []
     base_dir_experiment = "/experiment/"
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
-        self.meta_file = self.bench_dir_path + "/" + self.name + "/meta-data.json"
+        if not self.name:
+            utilities.error_exit(
+                "Concrete benchmark has not instantiated the name field. Aborting..."
+            )
+        self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
         self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
             self.build_benchmark_image()
@@ -61,18 +73,15 @@ class AbstractBenchmark:
 
     def load(self):
         emitter.normal("loading experiment meta-data")
-        if os.path.isfile(self.meta_file):
-            with open(self.meta_file, "r") as in_file:
-                json_data = json.load(in_file)
-                if json_data:
-                    self.experiment_subjects = json_data
-                    self.size = len(json_data)
-                else:
-                    utilities.error_exit(
-                        "could not load meta-data from ", self.meta_file
-                    )
-        else:
+        if not (self.meta_file and os.path.isfile(self.meta_file)):
             utilities.error_exit("Meta file does not exist")
+        with open(self.meta_file, "r") as in_file:
+            json_data = json.load(in_file)
+            if json_data:
+                self.experiment_subjects = json_data
+                self.size = len(json_data)
+            else:
+                utilities.error_exit("could not load meta-data from ", self.meta_file)
         return
 
     def run_command(
@@ -119,7 +128,7 @@ class AbstractBenchmark:
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if is_error:
             utilities.error_exit("setting up experiment failed")
-        container_obj = container.get_container(container_id)
+        container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
     def setup_container(self, bug_index, image_name):
