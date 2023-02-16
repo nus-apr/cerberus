@@ -1,10 +1,13 @@
-import datetime
-from app.core import definitions, values, emitter, analysis
 import os
+from datetime import datetime
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile
+from os.path import join
 
-from app.core import definitions, values, emitter, analysis
+from app.core import analysis
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 
 processed_count = 0
 
@@ -72,7 +75,7 @@ def compute_latency_valkyrie(start_time_str, tend):
 def analyse_output(patch_dir, time_info: analysis.TimeAnalysis):
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
-    consumed_count = len(values.LIST_CONSUMED)
+    consumed_count = len(values.list_consumed)
     parent_dir = os.path.dirname(patch_dir)
     dir_valid = parent_dir + "/patch-valid"
     dir_invalid = parent_dir + "/patch-invalid"

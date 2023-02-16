@@ -2,18 +2,24 @@ import hashlib
 import os
 import threading
 import time
-from os.path import dirname, abspath, join
+from os.path import abspath
+from os.path import dirname
+from os.path import join
+from typing import Any
+from typing import List
 
-from app.core import (
-    emitter,
-    logger,
-    definitions,
-    values,
-    container,
-    parallel,
-    utilities,
-    writer,
-)
+from drivers.tools.AbstractTool import AbstractTool
+
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import logger
+from app.core import parallel
+from app.core import utilities
+from app.core import values
+from app.core import writer
+from app.core.analysis import SpaceAnalysis
+from app.core.analysis import TimeAnalysis
 from app.drivers.tools import AbstractTool
 from app.plugins import valkyrie
 
@@ -150,7 +156,7 @@ def setup_for_valkyrie(dir_info, container_id, bug_info, benchmark_name):
         copy_command = "cp {} {} ;".format(binary_path, valkyrie_binary_path)
 
     utilities.execute_command(copy_command)
-    values.LIST_PROCESSED = []
+    values.list_processed = []
     subject_name = bug_info[definitions.KEY_SUBJECT]
     bug_id = str(bug_info[definitions.KEY_BUG_ID])
 
@@ -309,13 +315,14 @@ def repair_all(
         emitter.normal("\t\t\twaiting for validation pool")
         parallel.wait_validation()
         emitter.normal("\t\t\twaiting for consumer pool")
-        consume_thread.join()
+        if consume_thread:
+            consume_thread.join()
     # for t in tool_list:
     #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
     #     utilities.execute_command(timestamp_command)
 
 
-def analyse_result(dir_info_list, experiment_info, tool_list):
+def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]):
     emitter.normal("\t\t[framework] analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
@@ -325,12 +332,15 @@ def analyse_result(dir_info_list, experiment_info, tool_list):
     for tool in tool_list:
         index = index + 1
         dir_info = dir_info_list[index]
+        space_info: SpaceAnalysis
+        time_info: TimeAnalysis
+        error_info: Any
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
         conf_id = str(values.current_profile_id)
         exp_id = conf_id + "-" + bug_id
-        values.analysis_results[exp_id] = [space_info, time_info]
+        values.analysis_results[exp_id] = (space_info, time_info)
         tool.print_analysis(space_info, time_info)
         tool.log_output_path = None
         logger.analysis(exp_id)

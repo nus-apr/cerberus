@@ -1,8 +1,12 @@
 import json
 import os
 import sys
+from typing import Any
+from typing import Dict
 
-from app.core import values, emitter, utilities
+from app.core import emitter
+from app.core import utilities
+from app.core import values
 
 
 def load_configuration_details(config_file_path):
@@ -26,7 +30,7 @@ def load_class(class_name):
 
 def load_tool(tool_name):
     emitter.normal("loading repair tool")
-    class_file_path = values.dir_tool_drivers + tool_name + ".py"
+    # class_file_path = values.dir_tool_drivers + tool_name + ".py"
     existing_tool_list = os.listdir(values.dir_tool_drivers)
     tool_class_name = None
     for tool in existing_tool_list:
@@ -35,14 +39,14 @@ def load_tool(tool_name):
     if not tool_class_name:
         utilities.error_exit("Unknown tool name", tool_name)
     mod = __import__("app.drivers.tools", fromlist=[tool_class_name])
-    tool_class = getattr(mod, str(tool_class_name))
-    initializer = getattr(tool_class, str(tool_class_name))
+    tool_class = getattr(mod, tool_class_name)
+    initializer = getattr(tool_class, tool_class_name)
     return initializer()
 
 
 def load_benchmark(benchmark_name):
     emitter.normal("loading benchmark")
-    class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
+    # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
     existing_benchmark_list = os.listdir(values.dir_benchmark_drivers)
     benchmark_class_name = None
     for benchmark in existing_benchmark_list:
@@ -60,7 +64,7 @@ def load_benchmark(benchmark_name):
 
 class Configurations:
     __config_file = None
-    __default_config_values = {
+    __default_config_values: Dict[str, Any] = {
         "depth": 3,
         "iteration-limit": 1,
         "patch-rank-limit": 5,

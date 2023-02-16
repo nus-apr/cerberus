@@ -1,5 +1,12 @@
 import os
 from os.path import dirname
+from typing import Any
+from typing import Dict
+from typing import List
+
+from app.core.analysis import SpaceAnalysis
+from app.core.analysis import TimeAnalysis
+from app.drivers.tools.AbstractTool import AbstractTool
 
 tool_name = "Cerberus"
 
@@ -37,17 +44,17 @@ file_instrument_log = ""
 data_path = "/data"
 tool_path = ""
 tool_params = ""
-tool_list = []
+tool_list: List[AbstractTool] = []
 debug = False
 start_index = None
 end_index = None
 only_setup = False
 skip_setup = False
-bug_index_list = []
-bug_id_list = []
-skip_index_list = []
+bug_index_list: List[int] = []
+bug_id_list: List[str] = []
+skip_index_list: List[int] = []
 benchmark_name = ""
-profile_id_list = []
+profile_id_list: List[str] = []
 subject_name = None
 is_purge = False
 only_analyse = False
@@ -71,17 +78,17 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-analysis_results = dict()
+analysis_results: Dict[str, tuple[SpaceAnalysis, TimeAnalysis]] = dict()
 current_profile_id = None
 
 
 running_tool = False
-list_consumed = []
-list_processing = []
-list_processed = []
-list_valid = []
-list_invalid = []
-list_error = []
+list_consumed: List[Any] = []
+list_processing: List[Any] = []
+list_processed: List[Any] = []
+list_valid: List[Any] = []
+list_invalid: List[Any] = []
+list_error: List[Any] = []
 
 
 apr_min_limit = {

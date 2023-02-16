@@ -5,16 +5,15 @@ import time
 from datetime import datetime
 from os.path import join
 
-from app.core import (
-    emitter,
-    values,
-    container,
-    definitions,
-    abstractions,
-    analysis,
-    utilities,
-)
-from app.core.utilities import execute_command, error_exit
+from app.core import abstractions
+from app.core import analysis
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import utilities
+from app.core import values
+from app.core.utilities import error_exit
+from app.core.utilities import execute_command
 
 
 class AbstractTool:
@@ -162,9 +161,7 @@ class AbstractTool:
         emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        log_file_name = "{}-{}-{}-output.log".format(
-            conf_id, self.name.lower(), bug_id, "-output.log"
-        )
+        log_file_name = "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id)
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
@@ -246,7 +243,7 @@ class AbstractTool:
             if dir_artefacts != "":
                 save_command += "cp -rf {}/* {};".format(self.dir_output, dir_artefacts)
             if dir_logs != "":
-                save_command += "cp -rf {}/*".format(self.dir_logs, dir_logs)
+                save_command += "cp -rf {}/* {}".format(self.dir_logs, dir_logs)
 
             execute_command(save_command)
         return

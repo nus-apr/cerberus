@@ -2,8 +2,10 @@ import multiprocessing as mp
 import os
 import sys
 import time
+from os.path import join
 
-from app.core import values, emitter
+from app.core import emitter
+from app.core import values
 from app.plugins import valkyrie
 
 
@@ -32,7 +34,7 @@ def initialize():
     len_gen = 0
     len_processed = 0
     total_timeout = 0
-    values.LIST_CONSUMED = []
+    values.list_consumed = []
 
 
 def collect_result(result):
@@ -51,14 +53,14 @@ def consume_patches(path_info, dir_info, config_info):
     len_gen = len(list_dir)
     len_consumed = -1
     dir_base = os.path.dirname(dir_process)
-    dir_valid = dir_base + "/patch-valid"
-    dir_invalid = dir_base + "/patch-invalid"
-    dir_error = dir_base + "/patch-error"
+    dir_valid = join(dir_base, "patch-valid")
+    dir_invalid = join(dir_base, "patch-invalid")
+    dir_error = join(dir_base + "patch-error")
     len_valid = 0
     len_invalid = 0
     len_error = 0
     time.sleep(5)
-    while len_gen != len_consumed or values.APR_TOOL_RUNNING or not exit_consume:
+    while len_gen != len_consumed or values.running_tool or not exit_consume:
         list_dir = os.listdir(dir_patch)
         len_gen = len(list_dir)
         if time.time() > total_timeout:
@@ -101,7 +103,7 @@ def consume_patches(path_info, dir_info, config_info):
             list_selected = list(set(list_dir) - set(values.list_consumed))[:100]
         for patch_file in list_selected:
             file_info = (binary_path, oracle_path, source_file, patch_file)
-            if values.use_vthreads:
+            if values.use_vthreads and validator_pool:
                 validator_pool.apply_async(
                     valkyrie.validate_patch,
                     args=(dir_info, file_info, config_info),
@@ -113,7 +115,7 @@ def consume_patches(path_info, dir_info, config_info):
                 )
 
             consume_count += 1
-        values.LIST_CONSUMED = values.list_consumed + list_selected
+        values.list_consumed = values.list_consumed + list_selected
         len_consumed = len(values.list_consumed)
 
 
@@ -123,13 +125,13 @@ def wait_validation():
     time.sleep(5)
     while len_gen != consume_count and time.time() <= total_timeout:
         pass
-    if values.use_vthreads:
+    if values.use_vthreads and validator_pool:
         validator_pool.close()
     emitter.normal("\t\t\twaiting for validator completion")
     while len_gen != len_processed and time.time() <= total_timeout:
         pass
     emitter.normal("\t\t\tterminating validator")
-    if values.use_vthreads:
+    if values.use_vthreads and validator_pool:
         validator_pool.terminate()
         validator_pool.join()
     exit_consume = 1
