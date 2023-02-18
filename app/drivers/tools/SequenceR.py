@@ -1,7 +1,8 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter
+from app.core import definitions
+from app.core import emitter
 from app.core import utilities
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -14,11 +15,11 @@ class SequenceR(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(SequenceR, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -26,7 +27,7 @@ class SequenceR(AbstractTool):
         # The zimin/sequencer container has a bug which can only be found after be found after a removal
         # of a /dev/null pipe in sequencer-predict
         self.run_command(
-            "sed -i '183s/1\s*-\s*/~/' ./onmt/modules/global_attention.py",
+            "sed -i '183s/1\\s*-\\s*/~/' ./onmt/modules/global_attention.py",
             "/dev/null",
             "/SequenceR/src/lib/OpenNMT-py",
         )
