@@ -1,7 +1,9 @@
 import os
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -15,11 +17,11 @@ class VulnFix(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(VulnFix, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
         if values.only_instrument:
             return
@@ -125,14 +127,14 @@ class VulnFix(AbstractTool):
         self.append_file(config_updates, config_path)
         return config_path
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        super().save_artefacts(dir_info)
+        super().save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

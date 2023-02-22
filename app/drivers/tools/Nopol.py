@@ -1,8 +1,10 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter, values
+from app.core import definitions
+from app.core import emitter
 from app.core import utilities
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -18,11 +20,11 @@ class Nopol(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(Nopol, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -77,7 +79,7 @@ class Nopol(AbstractTool):
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -88,7 +90,7 @@ class Nopol(AbstractTool):
         patch_dir = f"{self.dir_source}/spoon"
         copy_command = "cp -rf {} {}".format(patch_dir, self.dir_output)
         self.run_command(copy_command)
-        super(Nopol, self).save_artefacts(dir_info)
+        super(Nopol, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """

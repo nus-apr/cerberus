@@ -1,9 +1,13 @@
 import os
 import re
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile
+from os.path import join
 
-from app.core import definitions, values, emitter, container
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -102,8 +106,8 @@ class Angelix(AbstractTool):
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         # dir_artifact = dir_info["artifact"]
         # execute_command("rm /tmp/find_dir")
         # dir_patch = join(self.dir_expr, "patches")
@@ -113,7 +117,8 @@ class Angelix(AbstractTool):
         # execute_command(copy_command)
         #
         # dir_patch_local = dir_output + "/patches"
-        container.fix_permissions(self.container_id, "/output")
+        if self.container_id:
+            container.fix_permissions(self.container_id, "/output")
         # if os.path.isdir(dir_patch_local):
         #     output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".patch" in f]
         #     for f in output_patch_list:
@@ -130,7 +135,7 @@ class Angelix(AbstractTool):
         #     save_command = "cp -rf " + dir_patch_local + " " + dir_results
         #     execute_command(save_command)
 
-        super(Angelix, self).save_artefacts(dir_info)
+        super(Angelix, self).save_artifacts(dir_info)
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""

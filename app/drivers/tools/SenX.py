@@ -1,10 +1,14 @@
 import os
 import re
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile
+from os.path import join
 
-from app.core import definitions, values, emitter
-from app.core.utilities import execute_command, error_exit
+from app.core import definitions
+from app.core import emitter
+from app.core import values
+from app.core.utilities import error_exit
+from app.core.utilities import execute_command
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -79,15 +83,15 @@ class SenX(AbstractTool):
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
         patch_path = abs_binary_path + ".bc.patch"
         copy_command = "cp -rf {} {}/patches".format(patch_path, self.dir_output)
         self.run_command(copy_command)
-        super(SenX, self).save_artefacts(dir_info)
+        super(SenX, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

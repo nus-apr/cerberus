@@ -1,7 +1,8 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter
+from app.core import definitions
+from app.core import emitter
 from app.core.utilities import escape_ansi
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -74,8 +75,8 @@ class FuzzRepair(AbstractTool):
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         tool_log_dir = "/FuzzRepair/logs/"
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
@@ -96,7 +97,7 @@ class FuzzRepair(AbstractTool):
         self.run_command(
             "cp -rf /FuzzRepair/output/{} {}".format(self.bug_id, self.dir_output)
         )
-        super(FuzzRepair, self).save_artefacts(dir_info)
+        super(FuzzRepair, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

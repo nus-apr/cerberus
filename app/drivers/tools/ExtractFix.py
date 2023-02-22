@@ -1,8 +1,10 @@
 import os
 from os import path
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
 from app.core import utilities
+from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -25,11 +27,11 @@ class ExtractFix(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(ExtractFix, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         if values.only_instrument:
@@ -132,7 +134,7 @@ class ExtractFix(AbstractTool):
             [line_source_dir, test_case, driver, bug_type, program, verbose]
         )
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -145,7 +147,7 @@ class ExtractFix(AbstractTool):
         self.run_command(
             "cp -r result1 result/", dir_path=path.join(self.dir_root, self.dir_expr)
         )
-        super().save_artefacts(dir_info)
+        super().save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

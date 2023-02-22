@@ -82,8 +82,8 @@ class GenProg(AbstractTool):
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_results = dir_info["result"]
         dir_patch = join(self.dir_expr, "src", "repair")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
@@ -126,7 +126,7 @@ class GenProg(AbstractTool):
                 self.run_command(del_command)
             save_command = "cp -rf " + dir_patch_local + " " + dir_results
             self.run_command(save_command)
-        super(GenProg, self).save_artefacts(dir_info)
+        super(GenProg, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)

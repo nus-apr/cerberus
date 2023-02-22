@@ -109,19 +109,20 @@ class AbstractTool:
         self.append_file(timestamp_txt, self.log_output_path)
 
     def run_command(
-        self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=None
+        self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=dict()
     ):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
             exit_code, output = container.exec_command(
                 self.container_id, command_str, dir_path, env
             )
-            stdout, stderr = output
-            if "/dev/null" not in log_file_path:
-                if stdout:
-                    self.append_file(stdout.decode("iso-8859-1"), log_file_path)
-                if stderr:
-                    self.append_file(stderr.decode("iso-8859-1"), log_file_path)
+            if output:
+                stdout, stderr = output
+                if "/dev/null" not in log_file_path:
+                    if stdout:
+                        self.append_file(stdout.decode("iso-8859-1"), log_file_path)
+                    if stderr:
+                        self.append_file(stderr.decode("iso-8859-1"), log_file_path)
         else:
             command_str = "cd " + dir_path + ";" + command_str
             command_str += " >> {0} 2>&1".format(log_file_path)
@@ -191,7 +192,7 @@ class AbstractTool:
             else:
                 repo_name = self.image_name
                 tag_name = "latest"
-            if not container.is_image_exist(repo_name, tag_name):
+            if not container.image_exists(repo_name, tag_name):
                 emitter.warning("[warning] docker image not found in Docker registry")
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
@@ -216,11 +217,11 @@ class AbstractTool:
             self.clean_up()
         return
 
-    def save_artefacts(self, dir_info):
-        """Store all artefacts from the tool"""
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        """Store all artifacts from the tool"""
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_results = dir_info["results"]
-        dir_artefacts = dir_info["artifacts"]
+        dir_artifacts = dir_info["artifacts"]
         dir_logs = dir_info["logs"]
         if self.container_id:
             container.copy_file_from_container(
@@ -230,7 +231,7 @@ class AbstractTool:
                 self.container_id, self.dir_logs, dir_results
             )
             container.copy_file_from_container(
-                self.container_id, self.dir_output, dir_artefacts
+                self.container_id, self.dir_output, dir_artifacts
             )
             container.copy_file_from_container(
                 self.container_id, self.dir_logs, dir_logs
@@ -240,8 +241,8 @@ class AbstractTool:
             save_command = "cp -rf {}/* {};".format(self.dir_output, dir_results)
             if self.dir_logs != "":
                 save_command += "cp -rf {}/* {};".format(self.dir_logs, dir_results)
-            if dir_artefacts != "":
-                save_command += "cp -rf {}/* {};".format(self.dir_output, dir_artefacts)
+            if dir_artifacts != "":
+                save_command += "cp -rf {}/* {};".format(self.dir_output, dir_artifacts)
             if dir_logs != "":
                 save_command += "cp -rf {}/* {}".format(self.dir_logs, dir_logs)
 

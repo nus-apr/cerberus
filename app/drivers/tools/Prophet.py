@@ -3,7 +3,9 @@ import re
 from os import path
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -116,8 +118,8 @@ class Prophet(AbstractTool):
 
         self.write_file(map(lambda line: line + "\n", test_config), revlog_file)
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)
@@ -144,7 +146,7 @@ class Prophet(AbstractTool):
                 self.run_command(diff_command)
                 del_command = "rm -f" + patched_source
                 self.run_command(del_command)
-        super(Prophet, self).save_artefacts(dir_info)
+        super(Prophet, self).save_artifacts(dir_info)
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
         filtered_list = []

@@ -1,8 +1,13 @@
 import os
-from os.path import join
-from datetime import datetime
 import shutil
-from app.core import abstractions, definitions, values, emitter, container
+from datetime import datetime
+from os.path import join
+
+from app.core import abstractions
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -141,7 +146,7 @@ class QuixBugsJava(AbstractBenchmark):
         )
 
         abstractions.write_file(
-            container_id, QuixBugsJava.__MAVEN_TEMPLATE, join(root, "pom.xml")
+            container_id, [QuixBugsJava.__MAVEN_TEMPLATE], join(root, "pom.xml")
         )
 
         self.run_command(
@@ -187,11 +192,11 @@ class QuixBugsJava(AbstractBenchmark):
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path
-        self.run_command(container_id, command_str)
+        status = self.run_command(container_id, command_str)
         return status == 0
 
-    def save_artefacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artefacts")
+    def save_artifacts(self, dir_info, container_id):
+        emitter.normal("\t\t[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(QuixBugsJava, self).save_artefacts(dir_info, container_id)
+        super(QuixBugsJava, self).save_artifacts(dir_info, container_id)

@@ -92,11 +92,11 @@ class Fix2Fit(AbstractTool):
         self.timestamp_log_end()
         return
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         dir_patch = join(self.dir_setup, "patches")
         self.run_command("mkdir /output")
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
-        super(Fix2Fit, self).save_artefacts(dir_info)
+        super(Fix2Fit, self).save_artifacts(dir_info)
         return
 
     def filter_tests(self, test_id_list, subject, bug_id):

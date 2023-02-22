@@ -6,7 +6,6 @@ from typing import List
 
 from app.core.analysis import SpaceAnalysis
 from app.core.analysis import TimeAnalysis
-from app.drivers.tools.AbstractTool import AbstractTool
 
 tool_name = "Cerberus"
 
@@ -45,7 +44,7 @@ file_instrument_log = ""
 data_path = "/data"
 tool_path = ""
 tool_params = ""
-tool_list: List[AbstractTool] = []
+tool_list: List[str] = []
 debug = False
 start_index = None
 end_index = None

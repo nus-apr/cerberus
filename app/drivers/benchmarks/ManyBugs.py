@@ -1,7 +1,9 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter, values
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.core.utilities import execute_command
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -14,53 +16,6 @@ class ManyBugs(AbstractBenchmark):
         )
         self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
-
-    def setup(self, tool_name, bug_index, config_id, test_all, use_container, is_multi):
-        experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        tool_name_dir = tool_name
-        if is_multi:
-            tool_name_dir = "multi"
-        if not use_container:
-            self.base_dir_experiment = os.path.abspath(
-                os.path.dirname(__file__) + "/../../experiments/"
-            )
-            dir_exp_local = (
-                values.dir_experiments
-                + "/"
-                + self.name
-                + "/"
-                + subject_name
-                + "/"
-                + bug_id
-            )
-            if os.path.isdir(dir_exp_local):
-                execute_command("rm -rf {}".format(dir_exp_local))
-        self.log_dir_path = join(
-            values.dir_logs,
-            "{}-{}-{}-{}-{}".format(
-                str(config_id), self.name, tool_name_dir, subject_name, bug_id
-            ),
-        )
-        container_id = self.setup_container(
-            tool_name, bug_index, config_id, use_container, is_multi
-        )
-        exp_setup_dir_path = (
-            self.setup_dir_path + "/" + self.name + "/" + subject_name + "/" + bug_id
-        )
-
-        self.setup_experiment(
-            exp_setup_dir_path, bug_index, config_id, container_id, test_all, tool_name
-        )
-        if self.transform(
-            exp_setup_dir_path, bug_id, config_id, container_id, tool_name
-        ):
-            emitter.success("\t\t\t[benchmark] transformation successful")
-        else:
-            emitter.error("\t\t\t[benchmark] transformation failed")
-
-        return container_id
 
     def deploy(self, bug_index, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
@@ -132,7 +87,7 @@ class ManyBugs(AbstractBenchmark):
                     self.base_dir_experiment, test_id
                 )
                 status = self.run_command(
-                    command_str, self.log_test_path, self.dir_setup, container_id
+                    container_id, command_str, self.log_test_path, self.dir_setup
                 )
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
@@ -146,7 +101,7 @@ class ManyBugs(AbstractBenchmark):
                     self.base_dir_experiment, test_id
                 )
                 status = self.run_command(
-                    command_str, self.log_test_path, self.dir_setup, container_id
+                    container_id, command_str, self.log_test_path, self.dir_setup
                 )
                 if status != 0:
                     log_file.write("{}: FAIL\n".format(test_id))
@@ -195,10 +150,10 @@ class ManyBugs(AbstractBenchmark):
         self.run_command(container_id, command_str)
         return
 
-    def save_artefacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artefacts")
+    def save_artifacts(self, dir_info, container_id):
+        emitter.normal("\t\t[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = [
             "/diffs"
         ]  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(ManyBugs, self).save_artefacts(dir_info, container_id)
+        super(ManyBugs, self).save_artifacts(dir_info, container_id)

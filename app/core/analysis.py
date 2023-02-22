@@ -16,22 +16,22 @@ class TimeAnalysis:
     __log_time_fmt = None
     __duration_total = -1
 
-    def compute_duration(self, start_time_str, end_time_str):
+    def compute_duration(self, start_time: str, end_time: str):
         # Fri 08 Oct 2021 04:59:55 PM +08
-        start_time_str = start_time_str.split(" +")[0].strip()
-        end_time_str = end_time_str.split(" +")[0].strip()
-        tstart = datetime.strptime(start_time_str, self.__default_time_fmt)
-        tend = datetime.strptime(end_time_str, self.__default_time_fmt)
+        start_time = start_time.split(" +")[0].strip()
+        end_time = end_time.split(" +")[0].strip()
+        tstart = datetime.strptime(start_time, self.__default_time_fmt)
+        tend = datetime.strptime(end_time, self.__default_time_fmt)
         duration = (tend - tstart).total_seconds()
         return duration
 
-    def compute_latency(self, time_str):
+    def compute_latency(self, time: str):
         # Fri 08 Oct 2021 04:59:55 PM +08
         # 2022-Apr-07 04:38:46.994352
         # fmt_1 = '%a %d %b %Y %H:%M:%S %p'
         # fmt_2 = '%Y-%m-%d %H:%M:%S.%f'
-        start_time_str = str(self.timestamp_start).split(" +")[0].strip()
-        end_time_str = str(time_str).split(" +")[0].strip()
+        start_time_str = self.timestamp_start.split(" +")[0].strip()
+        end_time_str = time.split(" +")[0].strip()
         tstart = datetime.strptime(start_time_str, self.__default_time_fmt)
         tend = datetime.strptime(
             end_time_str, self.__default_time_fmt
@@ -39,7 +39,7 @@ class TimeAnalysis:
         duration = (tend - tstart).total_seconds()
         return duration
 
-    def set_log_time_fmt(self, time_fmt):
+    def set_log_time_fmt(self, time_fmt: str):
         self.__log_time_fmt = time_fmt
 
     def get_duration(self):
@@ -53,7 +53,7 @@ class TimeAnalysis:
         if self.__latency_compilation < 0:
             if self.timestamp_compilation:
                 self.__latency_compilation = self.compute_latency(
-                    self.timestamp_compilation
+                    str(self.timestamp_compilation)
                 )
         return self.__latency_compilation
 
@@ -61,7 +61,7 @@ class TimeAnalysis:
         if self.__latency_validation < 0:
             if self.timestamp_validation:
                 self.__latency_validation = self.compute_latency(
-                    self.timestamp_validation
+                    str(self.timestamp_validation)
                 )
         return self.__latency_validation
 
@@ -69,7 +69,7 @@ class TimeAnalysis:
         if self.__latency_plausible < 0:
             if self.timestamp_plausible:
                 self.__latency_plausible = self.compute_latency(
-                    self.timestamp_plausible
+                    str(self.timestamp_plausible)
                 )
         return self.__latency_plausible
 

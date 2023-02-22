@@ -1,8 +1,11 @@
-import os
-from os.path import join
 import json
-from app.core import definitions, emitter, values
+import os
 import re
+from os.path import join
+
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -60,11 +63,11 @@ class EvoRepair(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(EvoRepair, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         repair_config_path = self.generate_config_file(bug_info)
@@ -96,7 +99,7 @@ class EvoRepair(AbstractTool):
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -114,7 +117,7 @@ class EvoRepair(AbstractTool):
         for a_file in tool_artifact_files:
             copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
             self.run_command(copy_command)
-        super(EvoRepair, self).save_artefacts(dir_info)
+        super(EvoRepair, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """

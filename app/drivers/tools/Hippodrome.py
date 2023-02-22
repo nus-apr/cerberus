@@ -1,7 +1,8 @@
 import os
 from os.path import join
 
-from app.core import definitions, emitter
+from app.core import definitions
+from app.core import emitter
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -13,11 +14,11 @@ class Hippodrome(AbstractTool):
 
     def repair(self, bug_info, config_info):
         super(Hippodrome, self).repair(bug_info, config_info)
-        """ 
+        """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output 
+            self.dir_output - directory to store artifacts/output
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -50,7 +51,7 @@ class Hippodrome(AbstractTool):
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info):
+    def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -60,7 +61,7 @@ class Hippodrome(AbstractTool):
 
         self.run_command("mkdir -p /output/", "/dev/null", "/")
         self.run_command("cp -rf {} /output/".format(self.dir_expr))
-        super().save_artefacts(dir_info)
+        super().save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """

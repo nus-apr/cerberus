@@ -1,13 +1,19 @@
 import json
 import os
 import random
+from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
 
-import docker
+import docker  # type: ignore
 
-from app.core import values, emitter, utilities
+from app.core import emitter
+from app.core import utilities
+from app.core import values
 
 
-def is_image_exist(image_name, tag_name="latest"):
+def image_exists(image_name: str, tag_name="latest"):
     client = docker.from_env()
     image_list = client.images.list()
     for image in image_list:
@@ -23,7 +29,7 @@ def is_image_exist(image_name, tag_name="latest"):
     return False
 
 
-def pull_image(image_name, tag_name):
+def pull_image(image_name: str, tag_name: str):
     client = docker.from_env()
     emitter.normal("pulling docker image")
     image = None
@@ -43,7 +49,7 @@ def pull_image(image_name, tag_name):
     return image
 
 
-def build_image(dockerfile_path, image_name):
+def build_image(dockerfile_path: str, image_name: str):
     client = docker.from_env()
     emitter.normal("\t\t[benchmark] building docker image")
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
@@ -75,7 +81,7 @@ def build_image(dockerfile_path, image_name):
         utilities.error_exit("[error] Unable to build image: Dockerfile not found")
 
 
-def build_benchmark_image(image_name: str):
+def build_benchmark_image(image_name: str) -> Optional[str]:
     benchmark_name = image_name.split("-")[0]
     dockerfile_path = "{}/{}/Dockerfile".format(
         values.dir_benchmark, benchmark_name.lower()
@@ -84,7 +90,7 @@ def build_benchmark_image(image_name: str):
     return tool_image_id
 
 
-def build_tool_image(tool_name):
+def build_tool_image(tool_name: str) -> Optional[str]:
     image_name = "{}-tool".format(tool_name)
     dockerfile_path = "{}/Dockerfile.{}".format(
         values.dir_infra, str(tool_name).lower()
@@ -93,7 +99,7 @@ def build_tool_image(tool_name):
     return tool_image_id
 
 
-def get_container(container_id):
+def get_container(container_id: str):
     client = docker.from_env()
     container = None
     try:
@@ -110,7 +116,7 @@ def get_container(container_id):
     return container
 
 
-def get_container_id(container_name):
+def get_container_id(container_name: str) -> Optional[str]:
     client = docker.from_env()
     container_id = None
     try:
@@ -127,10 +133,9 @@ def get_container_id(container_name):
     return container_id
 
 
-def build_container(container_name, volume_list, image_name):
+def build_container(container_name: str, volume_list, image_name: str) -> Optional[str]:
     client = docker.from_env()
     emitter.normal("\t\t\t[benchmark] building docker container")
-    container_id = None
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
@@ -151,6 +156,7 @@ def build_container(container_name, volume_list, image_name):
             runtime="nvidia" if values.use_gpu else "runc",
         )
         container_id = container.id
+        return container_id[:12]
     except docker.errors.ContainerError as ex:
         emitter.error(ex)
         utilities.error_exit(
@@ -165,13 +171,17 @@ def build_container(container_name, volume_list, image_name):
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: unhandled exception")
-    return container_id[:12]
+    return None
 
 
-def exec_command(container_id, command, workdir="/experiment", env=dict()):
+def exec_command(
+    container_id: str, command: str, workdir="/experiment", env: Dict[str, str] = dict()
+) -> Tuple[int, None | Tuple[None | bytes, None | bytes]]:
     client = docker.from_env()
+    exit_code: int
+    output: None | Tuple[None | bytes, None | bytes]
     exit_code = -1
-    output = ""
+    output = None
     try:
         container = client.containers.get(container_id)
         command = command.encode().decode("ascii", "ignore")
@@ -208,7 +218,7 @@ def exec_command(container_id, command, workdir="/experiment", env=dict()):
     return exit_code, output
 
 
-def remove_container(container_id):
+def remove_container(container_id: str):
     client = docker.from_env()
     emitter.normal("\t\t\tremoving docker container")
     try:
@@ -222,7 +232,7 @@ def remove_container(container_id):
         emitter.warning("[warning] Unable to remove container: unhandled exception")
 
 
-def start_container(container_id):
+def start_container(container_id: str):
     client = docker.from_env()
     emitter.normal("\t\t\tstarting docker container {}".format(container_id))
     try:
@@ -236,7 +246,7 @@ def start_container(container_id):
         emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
-def stop_container(container_id):
+def stop_container(container_id: str):
     client = docker.from_env()
     emitter.normal("\t\t\tstopping docker container")
     try:
@@ -250,49 +260,50 @@ def stop_container(container_id):
         emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
-def is_file(container_id, file_path):
+def is_file(container_id: str, file_path: str):
     exist_command = "test -f {}".format(file_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
-def is_dir(container_id, dir_path):
+def is_dir(container_id: str, dir_path: str):
     exist_command = "test -d {}".format(dir_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
-def is_file_empty(container_id, file_path):
+def is_file_empty(container_id: str, file_path: str):
     exist_command = "[ -s {} ]".format(file_path)
     return exec_command(container_id, exist_command)[0] != 0
 
 
-def fix_permissions(container_id, dir_path):
+def fix_permissions(container_id: str, dir_path: str):
     permission_command = "chmod -R g+w  {}".format(dir_path)
     return exec_command(container_id, permission_command)
 
 
-def list_dir(container_id, dir_path):
+def list_dir(container_id: str, dir_path: str):
     exist_command = "ls {}".format(dir_path)
     _, output = exec_command(container_id, exist_command)
-    stdout, stderr = output
     file_list = []
-    if stdout:
-        dir_list = stdout.decode("utf-8").split()
-        for o in dir_list:
-            file_list.append(o.strip().replace("\n", ""))
+    if output:
+        stdout, stderr = output
+        if stdout:
+            dir_list = stdout.decode("utf-8").split()
+            for o in dir_list:
+                file_list.append(o.strip().replace("\n", ""))
     return file_list
 
 
-def copy_file_from_container(container_id, from_path, to_path):
+def copy_file_from_container(container_id: str, from_path: str, to_path: str):
     copy_command = "docker cp {}:{} {}".format(container_id, from_path, to_path)
     utilities.execute_command(copy_command)
 
 
-def copy_file_to_container(container_id, from_path, to_path):
+def copy_file_to_container(container_id: str, from_path: str, to_path: str):
     copy_command = "docker cp {} {}:{}".format(from_path, container_id, to_path)
     utilities.execute_command(copy_command)
 
 
-def write_file(container_id, file_path, content):
+def write_file(container_id: str, file_path: str, content: List[str]):
     tmp_file_path = os.path.join(
         "/tmp", "write-file-{}".format(random.randint(0, 1000000))
     )
@@ -304,7 +315,7 @@ def write_file(container_id, file_path, content):
     os.remove(tmp_file_path)
 
 
-def read_file(container_id, file_path, encoding="utf-8"):
+def read_file(container_id: str, file_path: str, encoding="utf-8"):
     tmp_file_path = os.path.join(
         "/tmp", "container-file-{}".format(random.randint(0, 1000000))
     )
@@ -316,7 +327,7 @@ def read_file(container_id, file_path, encoding="utf-8"):
     return file_content
 
 
-def append_file(container_id, file_path, content):
+def append_file(container_id: str, file_path: str, content: List[str]):
     tmp_file_path = os.path.join(
         "/tmp", "append-file-{}".format(random.randint(0, 1000000))
     )

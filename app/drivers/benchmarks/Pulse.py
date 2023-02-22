@@ -1,9 +1,12 @@
-import shutil
 import os
-from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.core.utilities import execute_command
-from app.core import definitions, values, emitter
+import shutil
 from datetime import datetime
+
+from app.core import definitions
+from app.core import emitter
+from app.core import values
+from app.core.utilities import execute_command
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class Pulse(AbstractBenchmark):
@@ -75,8 +78,8 @@ class Pulse(AbstractBenchmark):
         self.run_command(container_id, command_str)
         return
 
-    def save_artefacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artefacts")
+    def save_artifacts(self, dir_info, container_id):
+        emitter.normal("\t\t[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(Pulse, self).save_artefacts(dir_info, container_id)
+        super(Pulse, self).save_artifacts(dir_info, container_id)

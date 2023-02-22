@@ -1,9 +1,11 @@
 import os
+from typing import List
+from typing import Optional
 
 from app.core import container
 
 
-def read_file(container_id, file_path, encoding="utf-8"):
+def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
     if container_id:
         file_content = container.read_file(container_id, file_path, encoding)
     else:
@@ -12,7 +14,7 @@ def read_file(container_id, file_path, encoding="utf-8"):
     return file_content
 
 
-def append_file(container_id, content, file_path):
+def append_file(container_id: Optional[str], content: List[str], file_path: str):
     if container_id:
         container.append_file(container_id, file_path, content)
     else:
@@ -21,7 +23,7 @@ def append_file(container_id, content, file_path):
                 f.write(line)
 
 
-def write_file(container_id, content, file_path):
+def write_file(container_id: Optional[str], content: List[str], file_path: str):
     if container_id:
         container.write_file(container_id, file_path, content)
     else:
@@ -30,7 +32,7 @@ def write_file(container_id, content, file_path):
                 f.write(line)
 
 
-def list_dir(container_id, dir_path):
+def list_dir(container_id: Optional[str], dir_path: str):
     file_list = []
     if container_id:
         if container.is_dir(container_id, dir_path):
@@ -43,7 +45,7 @@ def list_dir(container_id, dir_path):
     return file_list
 
 
-def is_dir(container_id, dir_path):
+def is_dir(container_id: Optional[str], dir_path: str):
     if container_id:
         if container.is_dir(container_id, dir_path):
             return True
@@ -53,7 +55,7 @@ def is_dir(container_id, dir_path):
     return False
 
 
-def is_file(container_id, file_path):
+def is_file(container_id: Optional[str], file_path: str):
     if container_id:
         if container.is_file(container_id, file_path):
             return True

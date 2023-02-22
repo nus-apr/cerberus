@@ -43,8 +43,8 @@ class ITSP(AbstractBenchmark):
         self.run_command(container_id, command_str)
         return
 
-    def save_artefacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artefacts")
+    def save_artifacts(self, dir_info, container_id):
+        emitter.normal("\t\t[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(ITSP, self).save_artefacts(dir_info, container_id)
+        super(ITSP, self).save_artifacts(dir_info, container_id)

@@ -1,7 +1,9 @@
 import os
 from datetime import datetime
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -153,8 +155,8 @@ class VulnLoc(AbstractBenchmark):
         self.run_command(container_id, command_str)
         return
 
-    def save_artefacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artefacts")
+    def save_artifacts(self, dir_info, container_id):
+        emitter.normal("\t\t[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(VulnLoc, self).save_artefacts(dir_info, container_id)
+        super(VulnLoc, self).save_artifacts(dir_info, container_id)

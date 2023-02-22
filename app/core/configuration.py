@@ -9,7 +9,7 @@ from app.core import utilities
 from app.core import values
 
 
-def load_configuration_details(config_file_path):
+def load_configuration_details(config_file_path: str):
     emitter.normal("loading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
@@ -20,7 +20,7 @@ def load_configuration_details(config_file_path):
     return json_data
 
 
-def load_class(class_name):
+def load_class(class_name: str):
     components = class_name.split(".")
     mod = __import__(components[0])
     for comp in components[1:]:
@@ -28,7 +28,7 @@ def load_class(class_name):
     return mod
 
 
-def load_tool(tool_name):
+def load_tool(tool_name: str):
     emitter.normal("loading repair tool")
     # class_file_path = values.dir_tool_drivers + tool_name + ".py"
     existing_tool_list = os.listdir(values.dir_tool_drivers)
@@ -38,13 +38,14 @@ def load_tool(tool_name):
             tool_class_name = tool.replace(".py", "")
     if not tool_class_name:
         utilities.error_exit("Unknown tool name", tool_name)
-    mod = __import__("app.drivers.tools", fromlist=[tool_class_name])
-    tool_class = getattr(mod, tool_class_name)
-    initializer = getattr(tool_class, tool_class_name)
-    return initializer()
+    else:
+        mod = __import__("app.drivers.tools", fromlist=[tool_class_name])
+        tool_class = getattr(mod, tool_class_name)
+        initializer = getattr(tool_class, tool_class_name)
+        return initializer()
 
 
-def load_benchmark(benchmark_name):
+def load_benchmark(benchmark_name: str):
     emitter.normal("loading benchmark")
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
     existing_benchmark_list = os.listdir(values.dir_benchmark_drivers)
@@ -56,10 +57,11 @@ def load_benchmark(benchmark_name):
             benchmark_class_name = benchmark.replace(".py", "")
     if not benchmark_class_name:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
-    mod = __import__("app.drivers.benchmarks", fromlist=[benchmark_class_name])
-    benchmark_class = getattr(mod, str(benchmark_class_name))
-    initializer = getattr(benchmark_class, str(benchmark_class_name))
-    return initializer()
+    else:
+        mod = __import__("app.drivers.benchmarks", fromlist=[benchmark_class_name])
+        benchmark_class = getattr(mod, str(benchmark_class_name))
+        initializer = getattr(benchmark_class, str(benchmark_class_name))
+        return initializer()
 
 
 class Configurations:
@@ -99,9 +101,9 @@ class Configurations:
             return [int(parts[0])]
         if len(parts) == 0:
             return []
-        parts[0] = 1 if parts[0] == "" else int(parts[0])
-        parts[1] = 999 if parts[1] == "" else int(parts[1])
-        return range(parts[0], parts[1] + 1)
+        start = 1 if parts[0] == "" else int(parts[0])
+        end = 9999 if parts[1] == "" else int(parts[1])
+        return range(start, end + 1)
 
     def read_arg_list(self, arg_list):
         emitter.normal("reading profile values")

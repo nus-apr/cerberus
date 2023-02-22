@@ -2,7 +2,10 @@ import os
 import re
 from os.path import join
 
-from app.core import container, definitions, values, emitter
+from app.core import container
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -54,11 +57,10 @@ class CPR(AbstractTool):
                     self.name, status
                 )
             )
-            if status == 137:
+            if status == 137 and self.container_id:
                 # Due to the container being killed, we restart it to be able to pull out the information
                 container.stop_container(self.container_id)
                 container.start_container(self.container_id)
-                pass
 
             self._error.is_error = True
         else:
@@ -66,11 +68,11 @@ class CPR(AbstractTool):
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artefacts(self, dir_info):
-        emitter.normal("\t\t\t saving artefacts of " + self.name)
+    def save_artifacts(self, dir_info):
+        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_patch = join(self.dir_output, "patches")
         self.run_command("cp -rf /CPR/output/{} {}".format(self.id, dir_patch))
-        super(CPR, self).save_artefacts(dir_info)
+        super(CPR, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

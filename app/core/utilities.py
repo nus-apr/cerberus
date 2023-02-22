@@ -8,6 +8,7 @@ import subprocess
 import sys
 from contextlib import contextmanager
 from os.path import join
+from typing import Any
 
 from app.core import definitions
 from app.core import emitter
@@ -15,7 +16,7 @@ from app.core import logger
 from app.core import values
 
 
-def escape_ansi(text):
+def escape_ansi(text: str):
     # 7-bit C1 ANSI sequences
     ansi_escape = re.compile(
         r"""
@@ -35,11 +36,11 @@ def escape_ansi(text):
     return result
 
 
-def execute_command(command, show_output=True, env=dict()):
+def execute_command(command: str, show_output=True, env=dict()):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     emitter.command(command)
-    command = "{ " + command + " ;} 2> " + values.file_error_log
+    command = "{{ {} ;}} 2> {}".format(command, values.file_error_log)
     if not show_output:
         command += " > /dev/null"
     # print(command)
@@ -49,7 +50,7 @@ def execute_command(command, show_output=True, env=dict()):
     return int(process.returncode)
 
 
-def error_exit(*arg_list):
+def error_exit(*arg_list: Any):
     emitter.error("Repair Failed")
     for arg in arg_list:
         emitter.error(str(arg))
@@ -65,33 +66,31 @@ def clean_files():
         execute_command(clean_command)
 
 
-def clean_artifacts(output_dir):
+def clean_artifacts(output_dir: str):
     if os.path.isdir(output_dir):
-        rm_command = "rm -rf " + output_dir
-        execute_command(rm_command)
-    mk_command = "mkdir " + output_dir
-    execute_command(mk_command)
+        execute_command("rm -rf {}".format(output_dir))
+    execute_command("mkdir {}".format(output_dir))
 
 
-def backup_file(file_path, backup_name):
+def backup_file(file_path: str, backup_name: str):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     backup_command = "cp {} {}".format(file_path, join(values.dir_backup, backup_name))
     execute_command(backup_command)
 
 
-def restore_file(file_path, backup_name):
+def restore_file(file_path: str, backup_name: str):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     restore_command = "cp " + values.dir_backup + "/" + backup_name + " " + file_path
     execute_command(restore_command)
 
 
-def reset_git(source_directory):
+def reset_git(source_directory: str):
     logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
     reset_command = "cd " + source_directory + ";git reset --hard HEAD"
     execute_command(reset_command)
 
 
-def build_clean(program_path):
+def build_clean(program_path: str):
     clean_command = "cd " + program_path + "; make clean; rm -rf klee-*"
     process = subprocess.Popen([clean_command], stderr=subprocess.PIPE, shell=True)
     (output, error) = process.communicate()
@@ -100,7 +99,7 @@ def build_clean(program_path):
 
 
 @contextmanager
-def timeout(time):
+def timeout(time: int):
     signal.signal(signal.SIGALRM, raise_timeout)
     signal.alarm(time)
 
@@ -116,8 +115,8 @@ def raise_timeout(signum, frame):
     raise TimeoutError
 
 
-def get_hash(str_value):
-    str_encoded = str(str_value).encode("utf-8")
+def get_hash(str_value: str):
+    str_encoded = str_value.encode("utf-8")
     str_hasher = hashlib.sha1(str_encoded)
     hash_value = base64.urlsafe_b64encode(str_hasher.digest()[:10])
     return hash_value

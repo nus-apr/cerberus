@@ -4,17 +4,20 @@ import signal
 import time
 import traceback
 from multiprocessing import set_start_method
+from typing import Any
+from typing import List
+from typing import Tuple
 
-from app.core import (
-    emitter,
-    logger,
-    definitions,
-    values,
-    configuration,
-    repair,
-    utilities,
-)
+from app.core import configuration
+from app.core import definitions
+from app.core import emitter
+from app.core import logger
+from app.core import repair
+from app.core import utilities
+from app.core import values
 from app.core.configuration import Configurations
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def create_directories():
@@ -53,7 +56,7 @@ def bootstrap(arg_list):
     config.update_configuration()
 
 
-def filter_experiment_list(benchmark):
+def filter_experiment_list(benchmark: AbstractBenchmark):
     filtered_list = []
     experiment_list = benchmark.get_list()
     for bug_index in range(1, benchmark.size + 1):
@@ -230,7 +233,7 @@ def parse_args():
     return args
 
 
-def run(repair_tool_list, benchmark, setup):
+def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
     emitter.sub_title("Repairing benchmark")
     emitter.highlight(
         "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
@@ -255,7 +258,7 @@ def run(repair_tool_list, benchmark, setup):
             repair.run(benchmark, repair_tool_list, experiment_item, config_info)
 
 
-def initialize():
+def initialize() -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
     emitter.sub_title("Initializing setup")
     tool_list = []
     if values.tool_list:
