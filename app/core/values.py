@@ -3,6 +3,7 @@ from os.path import dirname
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 from app.core.analysis import SpaceAnalysis
 from app.core.analysis import TimeAnalysis
@@ -78,7 +79,7 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-analysis_results = dict()
+analysis_results: Dict[str, Tuple[SpaceAnalysis, TimeAnalysis]] = dict()
 current_profile_id = None
 
 
