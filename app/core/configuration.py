@@ -204,8 +204,8 @@ class Configurations:
                 )
             )
 
-        optional_keys = ["subject-name", "tool-params", "rebuild-all", "rebuild-base", "is-debug", "use-cache",
-                         "use-purge", "only-analyse", "use-container", "dir-data", "only-setup", "config-id-list",
+        optional_keys = ["subject-name", "tool-params",
+                         "use-purge", "use-container", "dir-data",
                          "bug-id-list", "start-index", "end-index", "skip-index-list", "use-gpu",
                          "profile-id-list"]
         for key in optional_keys:
