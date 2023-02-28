@@ -78,7 +78,7 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-analysis_results: Dict[str, tuple[SpaceAnalysis, TimeAnalysis]] = dict()
+analysis_results = dict()
 current_profile_id = None
 
 

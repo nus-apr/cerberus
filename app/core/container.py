@@ -176,7 +176,7 @@ def build_container(container_name: str, volume_list, image_name: str) -> Option
 
 def exec_command(
     container_id: str, command: str, workdir="/experiment", env: Dict[str, str] = dict()
-) -> Tuple[int, None | Tuple[None | bytes, None | bytes]]:
+):
     client = docker.from_env()
     exit_code: int
     output: None | Tuple[None | bytes, None | bytes]

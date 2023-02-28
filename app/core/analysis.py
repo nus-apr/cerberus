@@ -7,8 +7,8 @@ class TimeAnalysis:
     timestamp_compilation = 0
     timestamp_validation = 0
     timestamp_plausible = 0
-    total_validation: int | float = 0
-    total_build: int | float = 0
+    total_validation: float = 0.0
+    total_build: float = 0.0
     __latency_compilation = -1
     __latency_validation = -1
     __latency_plausible = -1
@@ -83,11 +83,11 @@ class TimeAnalysis:
 
 
 class SpaceAnalysis:
-    non_compilable: int | float = 0
-    plausible: int | float = 0
-    generated: int | float = 0
-    size: int | float = 0
-    enumerations: int | float = 0
+    non_compilable: int = 0
+    plausible: int = 0
+    generated: int = 0
+    size: int = 0
+    enumerations: int = 0
     __implausible = None
 
     def get_implausible(self):
