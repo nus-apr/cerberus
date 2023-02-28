@@ -82,16 +82,23 @@ def filter_experiment_list(benchmark: AbstractBenchmark):
 def parse_args():
     parser = argparse.ArgumentParser(prog=values.tool_name, usage="%(prog)s [options]")
     parser._action_groups.pop()
-    required = parser.add_argument_group("Required arguments")
-    required.add_argument(
+    # required = parser.add_argument_group("Required arguments")
+
+
+    optional = parser.add_argument_group("Optional arguments")
+    optional.add_argument(
+        "-c",
+        definitions.ARG_CONFIG_FILE,
+        help="configuration file",
+        type=argparse.FileType('r')
+    )
+
+    optional.add_argument(
         "-b",
         definitions.ARG_BENCHMARK,
         help="repair benchmark",
-        required=True,
         choices=values.get_list_benchmarks(),
     )
-
-    optional = parser.add_argument_group("Optional arguments")
     optional.add_argument(
         "-d",
         definitions.ARG_DEBUG_MODE,
@@ -100,7 +107,6 @@ def parse_args():
         default=False,
     )
     optional.add_argument(
-        "-c",
         definitions.ARG_CACHE,
         help="use cached information for the process",
         action="store_true",
@@ -190,7 +196,7 @@ def parse_args():
     )
 
     optional.add_argument(
-        "--profile-list",
+        definitions.ARG_PROFILE_ID_LIST,
         help="multiple list of configuration profiles",
         dest="profile_id_list",
         nargs="+",
@@ -227,8 +233,6 @@ def parse_args():
         nargs="+",
         default=[],
     )
-    optional.add_argument("--config", help="configuration profile")
-
     args = parser.parse_args()
     return args
 

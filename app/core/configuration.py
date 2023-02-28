@@ -109,7 +109,13 @@ class Configurations:
         emitter.normal("reading profile values")
         emitter.normal("reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
-        self.__runtime_config_values["benchmark-name"] = arg_list.benchmark
+
+        if arg_list.config:
+            self.__config_file = arg_list.config
+            self.read_config_file()
+
+        if arg_list.benchmark:
+            self.__runtime_config_values["benchmark-name"] = arg_list.benchmark
 
         if arg_list.tool:
             self.__runtime_config_values["tool-list"] = [arg_list.tool]
@@ -130,8 +136,7 @@ class Configurations:
 
         if arg_list.debug:
             self.__runtime_config_values["is-debug"] = True
-        if arg_list.config:
-            self.__config_file = str(arg_list.config)
+
         if arg_list.cache:
             self.__runtime_config_values["use-cache"] = True
         if arg_list.purge:
@@ -178,6 +183,37 @@ class Configurations:
 
         if arg_list.profile_id_list:
             self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+
+    def read_config_file(self):
+        file_path = self.__config_file
+        flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
+        config_info = json.load(file_path)
+        print(config_info)
+
+        try:
+            self.__runtime_config_values["benchmark-name"] = config_info["benchmark-name"]
+            self.__runtime_config_values["tool-list"] = config_info["tool-list"]
+
+        except KeyError as exc:
+            raise ValueError(f"missing field in configuration file: {exc}")
+
+        if "bug-index-list" in config_info:
+            self.__runtime_config_values["bug-index-list"] = list(
+                flat_map(
+                    self.convert_range,
+                    str(config_info["bug-index-list"]).split(","),
+                )
+            )
+
+        optional_keys = ["subject-name", "tool-params", "rebuild-all", "rebuild-base", "is-debug", "use-cache",
+                         "use-purge", "only-analyse", "use-container", "dir-data", "only-setup", "config-id-list",
+                         "bug-id-list", "start-index", "end-index", "skip-index-list", "use-gpu",
+                         "profile-id-list"]
+        for key in optional_keys:
+            if key in config_info:
+                self.__runtime_config_values[key] = config_info[key]
+
+
 
     def update_configuration(self):
         emitter.normal("updating configuration values")
