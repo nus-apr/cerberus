@@ -188,7 +188,6 @@ class Configurations:
         file_path = self.__config_file
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         config_info = json.load(file_path)
-        print(config_info)
 
         try:
             self.__runtime_config_values["benchmark-name"] = config_info["benchmark-name"]
@@ -213,7 +212,9 @@ class Configurations:
             if key in config_info:
                 self.__runtime_config_values[key] = config_info[key]
 
-
+    def print_configuration(self):
+        for config_key, config_value in self.__runtime_config_values.items():
+            emitter.configuration(config_key, config_value)
 
     def update_configuration(self):
         emitter.normal("updating configuration values")
@@ -260,3 +261,4 @@ class Configurations:
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]
         sys.setrecursionlimit(values.default_stack_size)
+

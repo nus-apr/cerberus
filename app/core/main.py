@@ -54,6 +54,7 @@ def bootstrap(arg_list):
     config.read_arg_list(arg_list)
     values.arg_pass = True
     config.update_configuration()
+    config.print_configuration()
 
 
 def filter_experiment_list(benchmark: AbstractBenchmark):
