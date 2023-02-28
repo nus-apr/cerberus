@@ -281,7 +281,7 @@ def emit_help():
     )
     write(
         "\t"
-        + definitions.ARG_CONFIG_ID_LIST.ljust(max_length)
+        + definitions.ARG_PROFILE_ID_LIST.ljust(max_length)
         + "\t| "
         + "specify a different profile using config ID",
         WHITE,
