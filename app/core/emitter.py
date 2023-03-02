@@ -1,10 +1,13 @@
 # -*- coding: utf-8 -*-
-
 import os
+import random
 import sys
 import textwrap
 
-from app.core import definitions, values, logger
+from app.core import definitions
+from app.core import logger
+from app.core import values
+
 
 rows, columns = tuple(map(int, os.popen("stty size", "r").read().split()))
 GREY = "\t\x1b[1;30m"
@@ -179,19 +182,19 @@ def end(time_total, is_error=False):
                 + time_total
                 + " minutes \n"
             )
+    else:
+        error("Could not process configuration arguments\n")
 
 
 def emit_help():
-    benchmarks = list(filter(lambda x: x != "examples", os.listdir("./benchmark/")))[:3]
-    tools = [
-        x.replace(".py", "")
-        for x in os.listdir(values.dir_tool_drivers)
-        if ".py" in x and "__" not in x
-    ][:3]
+    benchmarks = random.sample(
+        list(filter(lambda x: x != "examples", values.get_list_benchmarks())), 3
+    )
+    tools = random.sample(values.get_list_tools(), 3)
     max_length = len(definitions.ARG_BUG_INDEX_LIST)  # hardcoded
 
     write(
-        f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks[0:3])}... --tool={'/'.join(tools[0:3])}... ",
+        f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks)}... --tool={'/'.join(tools)}... ",
         WHITE,
     )
     write("Options are:", WHITE)

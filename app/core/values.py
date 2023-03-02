@@ -1,5 +1,6 @@
 import os
 from os.path import dirname
+from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
@@ -11,22 +12,22 @@ from app.core.analysis import TimeAnalysis
 tool_name = "Cerberus"
 
 dir_main = dirname(dirname(dirname(os.path.realpath(__file__))))
-dir_infra = dir_main + "/infra"
-dir_app = dir_main + "/app/"
-dir_tool_drivers = dir_app + "/drivers/tools/"
-dir_benchmark_drivers = dir_app + "/drivers/benchmarks/"
-dir_benchmark = dir_main + "/benchmark/"
-dir_log_base = dir_main + "/logs"
-dir_output_base = dir_main + "/output"
-dir_results = dir_main + "/results"
-dir_experiments = dir_main + "/experiments"
-dir_logs = dir_output_base + "/logs"
-dir_libs = dir_main + "/libs"
-dir_scripts = dir_main + "/scripts"
-dir_artifacts = dir_output_base + "/artifacts"
+dir_infra = join(dir_main, "infra")
+dir_app = join(dir_main, "app", "")
+dir_tool_drivers = join(dir_app, "drivers", "tools", "")
+dir_benchmark_drivers = join(dir_app, "drivers", "benchmarks", "")
+dir_benchmark = join(dir_main, "benchmark", "")
+dir_log_base = join(dir_main, "logs")
+dir_output_base = join(dir_main, "output")
+dir_results = join(dir_main, "results")
+dir_experiments = join(dir_main, "experiments")
+dir_logs = join(dir_output_base, "logs")
+dir_libs = join(dir_main, "libs")
+dir_scripts = join(dir_main, "scripts")
+dir_artifacts = join(dir_output_base, "artifacts")
 dir_output = ""
-dir_summaries = dir_main + "/summaries"
-dir_backup = dir_main + "/backup"
+dir_summaries = join(dir_main, "summaries")
+dir_backup = join(dir_main, "backup")
 
 
 file_main_log = ""
@@ -66,6 +67,7 @@ use_container = True
 dump_patches = False
 use_valkyrie = False
 use_gpu = False
+email_setup = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
@@ -81,6 +83,15 @@ arg_pass = False
 iteration_no = -1
 analysis_results: Dict[str, Tuple[SpaceAnalysis, TimeAnalysis]] = dict()
 current_profile_id = None
+
+email_configuration = {
+    "ssl_from_start": True,
+    "port": 465,
+    "host": "",
+    "username": "",
+    "password": "",
+    "to": "",
+}
 
 
 running_tool = False

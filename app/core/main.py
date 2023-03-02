@@ -3,6 +3,7 @@ import os
 import signal
 import time
 import traceback
+from argparse import Namespace
 from multiprocessing import set_start_method
 from typing import Any
 from typing import List
@@ -48,7 +49,7 @@ def shutdown(signum, frame):
     raise SystemExit
 
 
-def bootstrap(arg_list):
+def bootstrap(arg_list: Namespace):
     emitter.sub_title("Bootstrapping framework")
     config = Configurations()
     config.read_arg_list(arg_list)
@@ -85,13 +86,19 @@ def parse_args():
     parser._action_groups.pop()
     # required = parser.add_argument_group("Required arguments")
 
-
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument(
         "-c",
         definitions.ARG_CONFIG_FILE,
         help="configuration file",
-        type=argparse.FileType('r')
+        type=argparse.FileType("r"),
+    )
+
+    optional.add_argument(
+        "-e",
+        definitions.ARG_EMAIL_CONFIG,
+        help="email client configuration file",
+        type=argparse.FileType("r"),
     )
 
     optional.add_argument(
@@ -257,7 +264,7 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
             values.iteration_no = iteration
             bug_index = experiment_item[definitions.KEY_ID]
             emitter.sub_sub_title(
-                "Experiment #" + str(iteration) + " - Bug #" + str(bug_index)
+                "Experiment #{} - Bug #{}".format(iteration, bug_index)
             )
             utilities.check_space()
             repair.run(benchmark, repair_tool_list, experiment_item, config_info)
@@ -291,12 +298,8 @@ def main():
         bootstrap(parsed_args)
         repair_tool_list, benchmark, setup = initialize()
         run(repair_tool_list, benchmark, setup)
-    except SystemExit as e:
-        total_duration = format((time.time() - start_time) / 60, ".3f")
-        emitter.end(total_duration, is_error)
-    except KeyboardInterrupt as e:
-        total_duration = format((time.time() - start_time) / 60, ".3f")
-        emitter.end(total_duration, is_error)
+    except (SystemExit, KeyboardInterrupt) as e:
+        pass
     except Exception as e:
         is_error = True
         emitter.error("Runtime Error")

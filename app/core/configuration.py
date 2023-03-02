@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+from argparse import Namespace
 from typing import Any
 from typing import Dict
 
@@ -66,6 +67,7 @@ def load_benchmark(benchmark_name: str):
 
 class Configurations:
     __config_file = None
+    __email_config_file = None
     __default_config_values: Dict[str, Any] = {
         "depth": 3,
         "iteration-limit": 1,
@@ -75,6 +77,7 @@ class Configurations:
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
+        "email-setup": False,
         "is-debug": False,
         "use-purge": False,
         "only-analyse": False,
@@ -105,7 +108,7 @@ class Configurations:
         end = 9999 if parts[1] == "" else int(parts[1])
         return range(start, end + 1)
 
-    def read_arg_list(self, arg_list):
+    def read_arg_list(self, arg_list: Namespace):
         emitter.normal("reading profile values")
         emitter.normal("reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
@@ -113,6 +116,11 @@ class Configurations:
         if arg_list.config:
             self.__config_file = arg_list.config
             self.read_config_file()
+
+        if arg_list.email_config:
+            self.__runtime_config_values["email-setup"] = True
+            self.__email_config_file = arg_list.email_config
+            self.read_email_config_file()
 
         if arg_list.benchmark:
             self.__runtime_config_values["benchmark-name"] = arg_list.benchmark
@@ -185,12 +193,15 @@ class Configurations:
             self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
 
     def read_config_file(self):
-        file_path = self.__config_file
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
-        config_info = json.load(file_path)
+        config_info = {}
+        if self.__config_file:
+            config_info = json.load(self.__config_file)
 
         try:
-            self.__runtime_config_values["benchmark-name"] = config_info["benchmark-name"]
+            self.__runtime_config_values["benchmark-name"] = config_info[
+                "benchmark-name"
+            ]
             self.__runtime_config_values["tool-list"] = config_info["tool-list"]
 
         except KeyError as exc:
@@ -204,13 +215,37 @@ class Configurations:
                 )
             )
 
-        optional_keys = ["subject-name", "tool-params",
-                         "use-purge", "use-container", "dir-data",
-                         "bug-id-list", "start-index", "end-index", "skip-index-list", "use-gpu",
-                         "profile-id-list"]
+        optional_keys = [
+            "subject-name",
+            "tool-params",
+            "use-purge",
+            "use-container",
+            "dir-data",
+            "bug-id-list",
+            "start-index",
+            "end-index",
+            "skip-index-list",
+            "use-gpu",
+            "profile-id-list",
+            # "docker-server",
+        ]
         for key in optional_keys:
             if key in config_info:
                 self.__runtime_config_values[key] = config_info[key]
+
+    def read_email_config_file(self):
+        email_config_info = {}
+        if self.__email_config_file:
+            email_config_info = json.load(self.__email_config_file)
+        for key, value in email_config_info.items():
+            if key in values.email_configuration and type(value) == type(
+                values.email_configuration[key]
+            ):
+                values.email_configuration[key] = value
+            else:
+                utilities.error_exit(
+                    "[error] unknown key {} or invalid type of value".format(key)
+                )
 
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():
@@ -257,8 +292,8 @@ class Configurations:
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
+        values.email_setup = self.__runtime_config_values["email-setup"]
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]
         sys.setrecursionlimit(values.default_stack_size)
-

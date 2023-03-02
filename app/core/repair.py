@@ -38,7 +38,7 @@ def update_dir_info(dir_info: Dict[str, Dict[str, str]], tool_name: str):
 def generate_dir_info(
     benchmark_name: str, subject_name: str, bug_name: str, tag_name: str
 ):
-    dir_path = join(benchmark_name, subject_name, bug_name) + "/"
+    dir_path = join(benchmark_name, subject_name, bug_name, "")
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
     dir_name = f"{tag_name}-{hash.hexdigest()[:8]}"
@@ -46,27 +46,21 @@ def generate_dir_info(
     dir_exp_container = join("/experiment", dir_path)
     dir_logs_container = "/logs"
     dir_artifact_container = "/output"
-    dir_setup_local = values.dir_main + "/benchmark/" + dir_path
-    dir_exp_local = values.dir_experiments + "/" + dir_path
-    dir_result_local = values.dir_results + "/" + dir_name
-    dir_log_local = values.dir_logs + "/" + dir_name
-    dir_artifact_local = values.dir_artifacts + "/" + dir_name
-    if not os.path.isdir(dir_log_local):
-        os.makedirs(dir_log_local)
-    if not os.path.isdir(dir_result_local):
-        os.makedirs(dir_result_local)
-    if not os.path.isdir(dir_exp_local):
-        os.makedirs(dir_exp_local)
+    dir_setup_local = join(values.dir_main, "benchmark", dir_path)
+    dir_exp_local = join(values.dir_experiments, dir_path)
+    dir_result_local = join(values.dir_results, dir_name)
+    dir_log_local = join(values.dir_logs, dir_name)
+    dir_artifact_local = join(values.dir_artifacts, dir_name)
 
-    dir_aux_local = (
-        values.dir_benchmark + "/" + benchmark_name + "/" + subject_name + "/.aux"
-    )
-    dir_aux_container = dir_exp_container + "/.aux"
-    dir_base_local = (
-        values.dir_benchmark + "/" + benchmark_name + "/" + subject_name + "/base"
-    )
+    for directory in [dir_log_local, dir_result_local, dir_exp_local]:
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
 
-    dir_base_container = join(dir_exp_container + "base")
+    dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
+    dir_aux_container = join(dir_exp_container, ".aux")
+    dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
+
+    dir_base_container = join(dir_exp_container, "base")
 
     dir_info_local = {
         "logs": dir_log_local,
@@ -121,7 +115,7 @@ def repair(
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
-        fix_location = fix_source_file + ":" + ",".join(fix_line_numbers)
+        fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
@@ -358,9 +352,9 @@ def retrieve_results(archive_name, tool: AbstractTool):
         values.dir_main + "/results/" + tool.name.lower() + "/" + archive_name
     )
     if os.path.isfile(archive_path):
-        extract_command = "cp " + archive_path + " " + values.dir_results + ";"
-        extract_command += "cd " + values.dir_results + ";"
-        extract_command += "tar -xf " + archive_name
+        extract_command = "cp {} {};".format(archive_path, values.dir_results)
+        extract_command += "cd {};".format(values.dir_results)
+        extract_command += "tar -xf {}" + archive_name
         utilities.execute_command(extract_command)
         return True
     else:
@@ -374,8 +368,8 @@ def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list)
         dir_info_list, container_id_list, tool_list
     ):
         dir_info = dir_info_entry["local"]
-        dir_expr = dir_info["experiment"]
-        dir_artifacts = dir_info["artifacts"]
+        # dir_expr = dir_info["experiment"]
+        # dir_artifacts = dir_info["artifacts"]
         dir_results = dir_info["results"]
         if not os.path.isdir(dir_results):
             os.system("mkdir -p {}".format(dir_results))
@@ -484,9 +478,9 @@ def run(
         "\t[profile] test-suite ratio: "
         + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
-    emitter.highlight("\t[meta-data] project: " + subject_name)
-    emitter.highlight("\t[meta-data] bug ID: " + bug_name)
-    emitter.highlight("\t[meta-data] logs directory: " + dir_info["local"]["logs"])
+    emitter.highlight("\t[meta-data] project: {}".format(subject_name))
+    emitter.highlight("\t[meta-data] bug ID: {}".format(bug_name))
+    emitter.highlight("\t[meta-data] logs directory: {}" + dir_info["local"]["logs"])
     emitter.highlight(
         "\t[meta-data] output directory: " + dir_info["local"]["artifacts"]
     )

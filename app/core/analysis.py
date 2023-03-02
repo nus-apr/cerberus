@@ -50,27 +50,24 @@ class TimeAnalysis:
         return self.__duration_total
 
     def get_latency_compilation(self):
-        if self.__latency_compilation < 0:
-            if self.timestamp_compilation:
-                self.__latency_compilation = self.compute_latency(
-                    str(self.timestamp_compilation)
-                )
+        if self.__latency_compilation < 0 and self.timestamp_compilation:
+            self.__latency_compilation = self.compute_latency(
+                str(self.timestamp_compilation)
+            )
         return self.__latency_compilation
 
     def get_latency_validation(self):
-        if self.__latency_validation < 0:
-            if self.timestamp_validation:
-                self.__latency_validation = self.compute_latency(
-                    str(self.timestamp_validation)
-                )
+        if self.__latency_validation < 0 and self.timestamp_validation:
+            self.__latency_validation = self.compute_latency(
+                str(self.timestamp_validation)
+            )
         return self.__latency_validation
 
     def get_latency_plausible(self):
-        if self.__latency_plausible < 0:
-            if self.timestamp_plausible:
-                self.__latency_plausible = self.compute_latency(
-                    str(self.timestamp_plausible)
-                )
+        if self.__latency_plausible < 0 and self.timestamp_plausible:
+            self.__latency_plausible = self.compute_latency(
+                str(self.timestamp_plausible)
+            )
         return self.__latency_plausible
 
     def get_array(self):

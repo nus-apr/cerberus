@@ -6,6 +6,7 @@ from app.core import container
 
 
 def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
+    file_content = []
     if container_id:
         file_content = container.read_file(container_id, file_path, encoding)
     else:
@@ -47,19 +48,13 @@ def list_dir(container_id: Optional[str], dir_path: str):
 
 def is_dir(container_id: Optional[str], dir_path: str):
     if container_id:
-        if container.is_dir(container_id, dir_path):
-            return True
+        return container.is_dir(container_id, dir_path)
     else:
-        if os.path.isdir(dir_path):
-            return True
-    return False
+        return os.path.isdir(dir_path)
 
 
 def is_file(container_id: Optional[str], file_path: str):
     if container_id:
-        if container.is_file(container_id, file_path):
-            return True
+        return container.is_file(container_id, file_path)
     else:
-        if os.path.isfile(file_path):
-            return True
-    return False
+        return os.path.isfile(file_path)

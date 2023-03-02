@@ -1,0 +1,8 @@
+{
+    "username": "some",
+    "password": "test",
+    "host": "localhost",
+    "port": 465,
+    "ssl_from_start": true,
+    "to": "bar"
+}

@@ -11,6 +11,7 @@ from os.path import join
 from typing import Any
 
 from app.core import definitions
+from app.core import email
 from app.core import emitter
 from app.core import logger
 from app.core import values
@@ -52,6 +53,8 @@ def execute_command(command: str, show_output=True, env=dict()):
 
 def error_exit(*arg_list: Any):
     emitter.error("Repair Failed")
+    if values.email_setup:
+        email.send_message("\n".join(map(str, arg_list)), "Cerberus Repair Failed")
     for arg in arg_list:
         emitter.error(str(arg))
     raise Exception("Error. Exiting...")
@@ -59,7 +62,7 @@ def error_exit(*arg_list: Any):
 
 def clean_files():
     # Remove other residual files stored in ./output/
-    logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
+    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
     emitter.information("Removing other residual files...")
     if os.path.isdir("output"):
         clean_command = "rm -rf " + values.dir_output
@@ -73,19 +76,19 @@ def clean_artifacts(output_dir: str):
 
 
 def backup_file(file_path: str, backup_name: str):
-    logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
+    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
     backup_command = "cp {} {}".format(file_path, join(values.dir_backup, backup_name))
     execute_command(backup_command)
 
 
 def restore_file(file_path: str, backup_name: str):
-    logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
-    restore_command = "cp " + values.dir_backup + "/" + backup_name + " " + file_path
+    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
+    restore_command = "cp {} {}".format(join(values.dir_backup, backup_name), file_path)
     execute_command(restore_command)
 
 
 def reset_git(source_directory: str):
-    logger.trace(__name__ + ":" + sys._getframe().f_code.co_name, locals())
+    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
     reset_command = "cd " + source_directory + ";git reset --hard HEAD"
     execute_command(reset_command)
 
@@ -102,7 +105,6 @@ def build_clean(program_path: str):
 def timeout(time: int):
     signal.signal(signal.SIGALRM, raise_timeout)
     signal.alarm(time)
-
     try:
         yield
     except TimeoutError:
