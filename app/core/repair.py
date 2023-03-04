@@ -480,7 +480,7 @@ def run(
     )
     emitter.highlight("\t[meta-data] project: {}".format(subject_name))
     emitter.highlight("\t[meta-data] bug ID: {}".format(bug_name))
-    emitter.highlight("\t[meta-data] logs directory: {}" + dir_info["local"]["logs"])
+    emitter.highlight("\t[meta-data] logs directory: {}".format(dir_info["local"]["logs"]))
     emitter.highlight(
         "\t[meta-data] output directory: " + dir_info["local"]["artifacts"]
     )
