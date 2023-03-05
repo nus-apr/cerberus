@@ -25,7 +25,6 @@ class Angelix(AbstractTool):
         )
         if values.only_instrument:
             return
-        emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         source_file = str(bug_info[definitions.KEY_FIX_FILE])
@@ -165,105 +164,110 @@ class Angelix(AbstractTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
+        """
+               analyse tool output and collect information
+               output of the tool is logged at self.log_output_path
+               information required to be extracted are:
+
+                   self._space.non_compilable
+                   self._space.plausible
+                   self._space.size
+                   self._space.enumerations
+                   self._space.generated
+
+                   self._time.total_validation
+                   self._time.total_build
+                   self._time.timestamp_compilation
+                   self._time.timestamp_validation
+                   self._time.timestamp_plausible
+               """
         emitter.normal("\t\t\t analysing output of " + self.name)
+
         is_error = False
+        is_timeout = False
         count_plausible = 0
         count_enumerations = 0
-        conf_id = str(values.current_profile_id)
-        self.log_analysis_path = join(
-            self.dir_logs,
-            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
-        )
-        return self._space, self._time, self._error
-        dir_results = dir_info["result"]
-        regex = re.compile("(.*-output.log$)")
-        for _, _, files in os.walk(dir_results):
-            for file in files:
-                if regex.match(file) and self.name in file:
-                    self.log_output_path = dir_results + "/" + file
-                    break
-        count_non_compilable = 0
-        count_plausible = 0
-        size_search_space = 0
-        count_enumerations = 0
-        time_duration = 0
-        if not self.log_output_path or not os.path.isfile(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no log file found")
-            return (
-                size_search_space,
-                count_enumerations,
-                count_plausible,
-                count_non_compilable,
-                time_duration,
-            )
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
-        is_error = False
-        is_timeout = True
+        search_space = 0
         reported_fail_list = set()
-        time_duration = 0
-        if os.path.isfile(self.log_output_path):
-            with open(self.log_output_path, "r") as log_file:
-                log_lines = log_file.readlines()
-                time_start = log_lines[0].rstrip()
-                time_end = log_lines[-1].rstrip()
-                time_duration = self.time_duration(time_start, time_end)
-                collect_neg = False
-                for line in log_lines:
-                    if "selected expressions" in line:
-                        size_search_space = size_search_space + 1
-                    elif "considering suspicious expressions" in line:
-                        count_enumerations = count_enumerations + 1
-                    elif "repair test suite: []" in line:
-                        is_error = True
-                        emitter.warning("\t\t\t\t[warning] repair test suite: []")
-                    elif "validation test suite: []" in line:
-                        is_error = True
-                        emitter.warning("\t\t\t\t[warning] validation test suite: []")
-                    elif "No negative test exists" in line:
-                        is_error = True
-                        is_timeout = False
-                        emitter.warning("\t\t\t\t[warning] No negative test exists")
-                    elif "no patch generated" in line:
-                        is_timeout = False
-                        count_plausible = 0
-                    elif "patches successfully generated" in line:
-                        is_timeout = False
-                    elif "running negative tests" in line:
-                        collect_neg = True
-                    elif "excluding test" in line:
-                        removing_test_id = line.split("excluding test ")[-1].split(" ")[
-                            0
-                        ]
-                        if removing_test_id in reported_fail_list:
-                            reported_fail_list.remove(removing_test_id)
-                    elif "failed to build" in line and "golden" in line:
-                        is_error = True
-                        emitter.error("\t\t\t\t[error] failed to build golden")
-                    elif "failed to build" in line and "validation" in line:
-                        is_error = True
-                        emitter.error("\t\t\t\t[error] failed to build validation")
-                    elif "failed to build" in line and "frontend" in line:
-                        is_error = True
-                        emitter.error("\t\t\t\t[error] failed to build frontend")
-                    elif collect_neg and "running test" in line:
-                        t_id = (
-                            line.split("running test ")[-1]
-                            .split(" ")[0]
-                            .replace("'", "")
-                        )
-                        reported_fail_list.add(t_id)
-                    elif collect_neg and "repair test suite" in line:
-                        collect_neg = False
-                log_file.close()
+        collect_neg = False
+
+        # count number of patch files
+        list_output_dir = self.list_dir(self.dir_output)
+        self._space.generated = len(
+            [name for name in list_output_dir if "patch" in name]
+        )
+
+        # extract information from output log
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            emitter.warning("\t\t\t[warning] no output log file found")
+            return self._space, self._time, self._error
+
+        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self._time.timestamp_start = log_lines[0].rstrip()
+            self._time.timestamp_end = log_lines[-1].rstrip()
+
+            for line in log_lines:
+                if "selected expressions" in line:
+                    search_space = search_space + 1
+                elif "considering suspicious expressions" in line:
+                    count_enumerations = count_enumerations + 1
+                elif "repair test suite: []" in line:
+                    is_error = True
+                    emitter.warning("\t\t\t\t[warning] repair test suite: []")
+                elif "validation test suite: []" in line:
+                    is_error = True
+                    emitter.warning("\t\t\t\t[warning] validation test suite: []")
+                elif "No negative test exists" in line:
+                    is_error = True
+                    is_timeout = False
+                    emitter.warning("\t\t\t\t[warning] No negative test exists")
+                elif "no patch generated" in line:
+                    is_timeout = False
+                    count_plausible = 0
+                elif "patches successfully generated" in line:
+                    is_timeout = False
+                elif "running negative tests" in line:
+                    collect_neg = True
+                elif "excluding test" in line:
+                    removing_test_id = line.split("excluding test ")[-1].split(" ")[
+                        0
+                    ]
+                    if removing_test_id in reported_fail_list:
+                        reported_fail_list.remove(removing_test_id)
+                elif "failed to build" in line and "golden" in line:
+                    is_error = True
+                    emitter.error("\t\t\t\t[error] failed to build golden")
+                elif "failed to build" in line and "validation" in line:
+                    is_error = True
+                    emitter.error("\t\t\t\t[error] failed to build validation")
+                elif "failed to build" in line and "frontend" in line:
+                    is_error = True
+                    emitter.error("\t\t\t\t[error] failed to build frontend")
+                elif collect_neg and "running test" in line:
+                    t_id = (
+                        line.split("running test ")[-1]
+                        .split(" ")[0]
+                        .replace("'", "")
+                    )
+                    reported_fail_list.add(t_id)
+                elif collect_neg and "repair test suite" in line:
+                    collect_neg = False
+
         if is_timeout:
             count_enumerations = count_enumerations - 1
-        dir_patch = dir_results + "/patches"
-        if dir_patch and os.path.isdir(dir_patch):
-            output_patch_list = [
-                f for f in listdir(dir_patch) if isfile(join(dir_patch, f))
-            ]
-            count_plausible = len(output_patch_list)
-        count_implausible = count_enumerations - count_plausible - count_non_compilable
+
+        self._space.generated = len(
+            self.list_dir(
+                join(
+                    self.dir_output,
+                    "patch-valid" if values.use_valkyrie else "patches",
+                )
+            )
+        )
+
         if list(reported_fail_list) != fail_list:
             emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning(
@@ -277,32 +281,12 @@ class Angelix(AbstractTool):
             emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
             emitter.warning("\t\t\t\t[warning] timeout before ending")
-        with open(self.log_analysis_path, "w") as log_file:
-            log_file.write("\t\t search space size: {0}\n".format(size_search_space))
-            if values.dump_patches:
-                count_enumerations = count_plausible
-            else:
-                log_file.write(
-                    "\t\t count plausible patches: {0}\n".format(count_plausible)
-                )
-                log_file.write(
-                    "\t\t count non-compiling patches: {0}\n".format(
-                        count_non_compilable
-                    )
-                )
-                log_file.write(
-                    "\t\t count implausible patches: {0}\n".format(count_implausible)
-                )
-            log_file.write("\t\t count enumerations: {0}\n".format(count_enumerations))
-            log_file.write("\t\t any errors: {0}\n".format(is_error))
-            log_file.write("\t\t time duration: {0} seconds\n".format(time_duration))
-        return (
-            size_search_space,
-            count_enumerations,
-            count_plausible,
-            count_non_compilable,
-            time_duration,
-        )
+
+        self._space.plausible = count_plausible
+        self._space.size = search_space
+        self._space.enumerations = count_enumerations
+        self._error.is_error = is_error
+        return self._space, self._time, self._error
 
     def filter_tests(self, test_id_list, subject, bug_id):
         filtered_list = []
@@ -311,13 +295,6 @@ class Angelix(AbstractTool):
             filter_list = []
             if bug_id == "884ef6d16c":
                 filter_list.extend([4, 11])
-
-        # elif str(subject).lower() == "php":
-        #     filter_list = []
-        #     if bug_id == "5bb0a44e06":
-        #         filter_list.extend([5553, 6548, 9563, 280, 3471])
-        #     elif bug_id == "0927309852":
-        #         filter_list.extend([7384, 7440, 7551, 7511, 7527, 7639, 9563, 7780])
 
         for t_id in test_id_list:
             if int(t_id) not in filter_list:
