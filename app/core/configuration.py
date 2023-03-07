@@ -122,6 +122,9 @@ class Configurations:
             self.__email_config_file = arg_list.email_config
             self.read_email_config_file()
 
+        if arg_list.docker_host:
+            self.__runtime_config_values["docker-host"] = arg_list.docker_host
+
         if arg_list.benchmark:
             self.__runtime_config_values["benchmark-name"] = arg_list.benchmark
 
@@ -227,7 +230,7 @@ class Configurations:
             "skip-index-list",
             "use-gpu",
             "profile-id-list",
-            # "docker-server",
+            "docker-host",
         ]
         for key in optional_keys:
             if key in config_info:
@@ -293,6 +296,10 @@ class Configurations:
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
         values.email_setup = self.__runtime_config_values["email-setup"]
+
+        values.docker_host = self.__runtime_config_values.get(
+            "docker-host", values.docker_host
+        )
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]

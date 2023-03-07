@@ -129,6 +129,11 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_DOCKER_HOST,
+        help="custom URL for the docker server which will host the containers",
+    )
+
+    optional.add_argument(
         "-t",
         definitions.ARG_TOOL_NAME,
         help="name of the repair tool",

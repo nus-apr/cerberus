@@ -12,9 +12,23 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 
+cached_client = None
+
+
+def get_client():
+    # lobal cached_client
+    # if not cached_client:
+    cached_client = docker.DockerClient(
+        base_url=values.docker_host,
+        version="1.41",
+        # user_agent="Cerberus Agent",
+        use_ssh_client=True,
+    )
+    return cached_client
+
 
 def image_exists(image_name: str, tag_name="latest"):
-    client = docker.from_env()
+    client = get_client()
     image_list = client.images.list()
     for image in image_list:
         tag_list = image.tags
@@ -30,7 +44,7 @@ def image_exists(image_name: str, tag_name="latest"):
 
 
 def pull_image(image_name: str, tag_name: str):
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("pulling docker image")
     image = None
     try:
@@ -50,7 +64,7 @@ def pull_image(image_name: str, tag_name: str):
 
 
 def build_image(dockerfile_path: str, image_name: str):
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("\t\t[benchmark] building docker image")
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
@@ -100,7 +114,7 @@ def build_tool_image(tool_name: str) -> Optional[str]:
 
 
 def get_container(container_id: str):
-    client = docker.from_env()
+    client = get_client()
     container = None
     try:
         container = client.containers.get(container_id)
@@ -117,7 +131,7 @@ def get_container(container_id: str):
 
 
 def get_container_id(container_name: str) -> Optional[str]:
-    client = docker.from_env()
+    client = get_client()
     container_id = None
     try:
         container_id = client.containers.get(container_name).id[:12]
@@ -134,7 +148,7 @@ def get_container_id(container_name: str) -> Optional[str]:
 
 
 def build_container(container_name: str, volume_list, image_name: str) -> Optional[str]:
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("\t\t\t[benchmark] building docker container")
     try:
         for local_dir_path in volume_list:
@@ -177,7 +191,7 @@ def build_container(container_name: str, volume_list, image_name: str) -> Option
 def exec_command(
     container_id: str, command: str, workdir="/experiment", env: Dict[str, str] = dict()
 ) -> Tuple[int, Optional[Tuple[Optional[bytes], Optional[bytes]]]]:
-    client = docker.from_env()
+    client = get_client()
     exit_code: int
     output: Optional[Tuple[Optional[bytes], Optional[bytes]]]
     exit_code = -1
@@ -219,7 +233,7 @@ def exec_command(
 
 
 def remove_container(container_id: str):
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("\t\t\tremoving docker container")
     try:
         container = client.containers.get(container_id)
@@ -233,7 +247,7 @@ def remove_container(container_id: str):
 
 
 def start_container(container_id: str):
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("\t\t\tstarting docker container {}".format(container_id))
     try:
         container = client.containers.get(container_id)
@@ -247,7 +261,7 @@ def start_container(container_id: str):
 
 
 def stop_container(container_id: str):
-    client = docker.from_env()
+    client = get_client()
     emitter.normal("\t\t\tstopping docker container")
     try:
         container = client.containers.get(container_id)
@@ -294,12 +308,16 @@ def list_dir(container_id: str, dir_path: str):
 
 
 def copy_file_from_container(container_id: str, from_path: str, to_path: str):
-    copy_command = "docker cp {}:{} {}".format(container_id, from_path, to_path)
+    copy_command = "docker -H {} cp {}:{} {}".format(
+        values.docker_host, container_id, from_path, to_path
+    )
     utilities.execute_command(copy_command)
 
 
 def copy_file_to_container(container_id: str, from_path: str, to_path: str):
-    copy_command = "docker cp {} {}:{}".format(from_path, container_id, to_path)
+    copy_command = "docker -H {} cp {} {}:{}".format(
+        values.docker_host, from_path, container_id, to_path
+    )
     utilities.execute_command(copy_command)
 
 
@@ -310,7 +328,9 @@ def write_file(container_id: str, file_path: str, content: List[str]):
     with open(tmp_file_path, "w") as f:
         for line in content:
             f.write(line)
-    copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
+    copy_command = "docker -H {} cp {} {}:{}".format(
+        values.docker_host, tmp_file_path, container_id, file_path
+    )
     utilities.execute_command(copy_command)
     os.remove(tmp_file_path)
 
@@ -319,7 +339,9 @@ def read_file(container_id: str, file_path: str, encoding="utf-8"):
     tmp_file_path = os.path.join(
         "/tmp", "container-file-{}".format(random.randint(0, 1000000))
     )
-    copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
+    copy_command = "docker -H {} cp {}:{} {}".format(
+        values.docker_host, container_id, file_path, tmp_file_path
+    )
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "r", encoding=encoding) as f:
         file_content = f.readlines()
@@ -331,11 +353,15 @@ def append_file(container_id: str, file_path: str, content: List[str]):
     tmp_file_path = os.path.join(
         "/tmp", "append-file-{}".format(random.randint(0, 1000000))
     )
-    copy_command = "docker cp {}:{} {}".format(container_id, file_path, tmp_file_path)
+    copy_command = "docker -H {} cp {}:{} {}".format(
+        values.docker_host, container_id, file_path, tmp_file_path
+    )
     utilities.execute_command(copy_command)
     with open(tmp_file_path, "a") as f:
         for line in content:
             f.write(line)
-    copy_command = "docker cp {} {}:{}".format(tmp_file_path, container_id, file_path)
+    copy_command = "docker -H {} cp {} {}:{}".format(
+        values.docker_host, tmp_file_path, container_id, file_path
+    )
     utilities.execute_command(copy_command)
     os.remove(tmp_file_path)

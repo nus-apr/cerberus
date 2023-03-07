@@ -10,6 +10,7 @@ from app.core.analysis import SpaceAnalysis
 from app.core.analysis import TimeAnalysis
 
 tool_name = "Cerberus"
+docker_host = "unix:///var/run/docker.sock"
 
 dir_main = dirname(dirname(dirname(os.path.realpath(__file__))))
 dir_infra = join(dir_main, "infra")

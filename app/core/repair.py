@@ -18,6 +18,7 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core import writer
+from app.core.analysis import ErrorAnalysis
 from app.core.analysis import SpaceAnalysis
 from app.core.analysis import TimeAnalysis
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -147,8 +148,8 @@ def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmar
     valkyrie_binary_path = join(dir_output_local, "binary")
     binary_path = join(dir_expr, "src", binary_path_rel)
     if container_id:
-        copy_command = "docker cp {}:{} {}".format(
-            container_id, binary_path, valkyrie_binary_path
+        copy_command = "docker -H {} cp {}:{} {}".format(
+            values.docker_host, container_id, binary_path, valkyrie_binary_path
         )
     else:
         copy_command = "cp {} {} ;".format(binary_path, valkyrie_binary_path)
@@ -329,7 +330,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
     for dir_info, tool in zip(dir_info_list, tool_list):
         space_info: SpaceAnalysis
         time_info: TimeAnalysis
-        error_info: Any
+        error_info: ErrorAnalysis
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
@@ -348,9 +349,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
 
 def retrieve_results(archive_name, tool: AbstractTool):
     emitter.normal("\t\tretrieving results for analysis")
-    archive_path = (
-        values.dir_main + "/results/" + tool.name.lower() + "/" + archive_name
-    )
+    archive_path = join(values.dir_main, "results", tool.name.lower(), archive_name)
     if os.path.isfile(archive_path):
         extract_command = "cp {} {};".format(archive_path, values.dir_results)
         extract_command += "cd {};".format(values.dir_results)
@@ -480,9 +479,11 @@ def run(
     )
     emitter.highlight("\t[meta-data] project: {}".format(subject_name))
     emitter.highlight("\t[meta-data] bug ID: {}".format(bug_name))
-    emitter.highlight("\t[meta-data] logs directory: {}".format(dir_info["local"]["logs"]))
     emitter.highlight(
-        "\t[meta-data] output directory: " + dir_info["local"]["artifacts"]
+        "\t[meta-data] logs directory: {}".format(dir_info["local"]["logs"])
+    )
+    emitter.highlight(
+        "\t[meta-data] output directory: {}".format(dir_info["local"]["artifacts"])
     )
     exp_img_id = None
 

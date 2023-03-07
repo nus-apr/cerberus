@@ -174,8 +174,8 @@ class AbstractTool:
             clean_command = "rm -rf /output/patch* /logs/*"
             self.run_command(clean_command, "/dev/null", "/")
             script_path = values.dir_scripts + "/{}-dump-patches.py".format(self.name)
-            cp_script_command = "docker cp {} {}:{} ".format(
-                script_path, self.container_id, self.dir_expr
+            cp_script_command = "docker -H {} cp {} {}:{} ".format(
+                values.docker_host, script_path, self.container_id, self.dir_expr
             )
             execute_command(cp_script_command)
         return
