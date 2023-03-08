@@ -91,17 +91,17 @@ class VulnFix(AbstractTool):
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
         # (4) exploit
+
         if (
             definitions.KEY_EXPLOIT_LIST not in bug_info
             or len(bug_info[definitions.KEY_EXPLOIT_LIST]) < 1
         ):
-            emitter.error(
-                "[Exception] there needs to be at least 1 exploit (failing) input!"
+            # assumes instrumentation converted stdarg as a file handling command
+            exploit_path = join(self.dir_setup, "tests/exploit")
+        else:
+            exploit_path = join(
+                self.dir_setup, sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0]
             )
-            error_exit("Unhandled Exception")
-        exploit_path = join(
-            self.dir_setup, sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0]
-        )
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
         line_normals = ""
