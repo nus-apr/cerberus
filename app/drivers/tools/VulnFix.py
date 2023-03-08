@@ -72,10 +72,14 @@ class VulnFix(AbstractTool):
         # changes the command for invoking the program
         orig_config_lines = self.read_file(config_path)
         cmd_already_specified = False
+        binary_already_specified = False
         for config_line in orig_config_lines:
             config_type = config_line.split("=")[0]
             if config_type == "cmd":
                 cmd_already_specified = True
+            if config_type == "binary":
+                binary_already_specified = True
+
 
         # (1) source-dir
         dir_src = join(self.dir_expr, "src")
@@ -116,7 +120,8 @@ class VulnFix(AbstractTool):
         self.run_command("mkdir -p {}/afl-out/crashes".format(self.dir_output))
 
         config_updates = list()
-        config_updates.append(line_binary)
+        if not binary_already_specified:
+            config_updates.append(line_binary)
         if line_cmd:
             config_updates.append(line_cmd)
         config_updates.append(line_exploit)
