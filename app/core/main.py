@@ -242,9 +242,8 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_SKIP_LIST,
         help="list of bug index to skip",
-        type=list,
-        nargs="+",
-        default=[],
+        type=str,
+        default="",
     )
     args = parser.parse_args()
     return args

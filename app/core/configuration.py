@@ -187,7 +187,7 @@ class Configurations:
             self.__runtime_config_values["end-index"] = int(arg_list.end_index)
 
         if arg_list.skip_index_list:
-            self.__runtime_config_values["skip-index-list"] = arg_list.skip_index_list
+            self.__runtime_config_values["skip-index-list"] = str(arg_list.skip_index_list).split(",")
 
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
