@@ -2,6 +2,7 @@ import abc
 import os
 import re
 import time
+import shutil
 from datetime import datetime
 from os.path import join
 
@@ -202,10 +203,8 @@ class AbstractTool:
                     )
                     # container.build_tool_image(repo_name, tag_name)
         else:
-            check_command = "which {}".format(self.name.lower())
-            emitter.information(check_command)
-            ret_code = execute_command(check_command)
-            if int(ret_code) != 0:
+            local_path = shutil.which(self.name.lower())
+            if not local_path:
                 error_exit("{} not Found".format(self.name))
         return
 
