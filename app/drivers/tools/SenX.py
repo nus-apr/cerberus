@@ -3,7 +3,7 @@ import re
 from os import listdir
 from os.path import isfile
 from os.path import join
-
+from datetime import datetime
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -13,10 +13,35 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class SenX(AbstractTool):
+    relative_binary_path = None
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(SenX, self).__init__(self.name)
-        self.relative_binary_path
+
+    def instrument(self, bug_info):
+        """instrumentation for the experiment as needed by the tool"""
+        emitter.normal("\t\t\t instrumenting for " + self.name)
+        bug_id = bug_info[definitions.KEY_BUG_ID]
+        conf_id = str(values.current_profile_id)
+        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        self.log_instrument_path = join(
+            self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
+        )
+        time = datetime.now()
+        command_str = "bash instrument.sh {}".format(self.dir_expr)
+        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
+        emitter.debug(
+            "\t\t\t Instrumentation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        if status not in [0, 126]:
+            error_exit(
+                "error with instrumentation of {}; exit code {}".format(
+                    self.name, str(status)
+                )
+            )
+        return
 
     def repair(self, bug_info, config_info):
         super(SenX, self).repair(bug_info, config_info)
