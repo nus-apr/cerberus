@@ -59,7 +59,7 @@ class SenX(AbstractTool):
 
         self.relative_binary_path = bug_info[definitions.KEY_BINARY_PATH]
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
-        binary_dir_path = join(*abs_binary_path.split("/")[:-1])
+        binary_dir_path = os.path.dirname(abs_binary_path)
         struct_def_file_path = "def_file"
 
         test_dir = self.dir_setup + "/tests"

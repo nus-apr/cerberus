@@ -125,9 +125,8 @@ class AbstractTool:
                     if stderr:
                         self.append_file(stderr.decode("iso-8859-1"), log_file_path)
         else:
-            command_str = "cd " + dir_path + ";" + command_str
             command_str += " >> {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command_str, env=env)
+            exit_code = execute_command(command_str, env=env, directory=dir_path)
         return exit_code
 
     def instrument(self, bug_info):

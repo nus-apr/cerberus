@@ -111,9 +111,8 @@ class AbstractBenchmark:
                             container_id, [stderr.decode("iso-8859-1")], log_file_path
                         )
         else:
-            command_str = "cd " + dir_path + ";" + command_str
             command_str += " > {0} 2>&1".format(log_file_path)
-            exit_code = utilities.execute_command(command_str)
+            exit_code = utilities.execute_command(command_str, directory=dir_path)
         return exit_code
 
     def build_benchmark_image(self):
