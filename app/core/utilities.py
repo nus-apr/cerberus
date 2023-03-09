@@ -45,7 +45,11 @@ def execute_command(command: str, show_output=True, env=dict()):
     if not show_output:
         command += " > /dev/null"
     # print(command)
-    process = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True, env=env)
+    new_env = os.environ.copy()
+    new_env.update(env)
+    process = subprocess.Popen(
+        [command], stdout=subprocess.PIPE, shell=True, env=new_env
+    )
     (output, error) = process.communicate()
     # out is the output of the command, and err is the exit value
     return int(process.returncode)
