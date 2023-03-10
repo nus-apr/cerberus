@@ -10,7 +10,7 @@ def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
     if container_id:
         file_content = container.read_file(container_id, file_path, encoding)
     else:
-        with open(file_path, "r") as f:
+        with open(file_path, "r", encoding=encoding) as f:
             file_content = f.readlines()
     return file_content
 
