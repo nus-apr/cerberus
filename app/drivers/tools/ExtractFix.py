@@ -12,7 +12,9 @@ from app.drivers.tools.AbstractTool import AbstractTool
 class ExtractFix(AbstractTool):
     bug_conversion_table = {
         "Buffer Overflow": "buffer_overflow",
+        "Use after Free": "buffer_overflow",
         "Integer Overflow": "integer_overflow",
+        "Data Type Overflow": "integer_overflow",
         "Null Pointer Dereference": "null_pointer",
         "Divide by Zero": "divide_by_0",
         "API Assertion": "assertion_failure",
