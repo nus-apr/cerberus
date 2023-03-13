@@ -73,12 +73,12 @@ class GenProg(AbstractTool):
         )
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
@@ -145,7 +145,7 @@ class GenProg(AbstractTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
@@ -169,14 +169,14 @@ class GenProg(AbstractTool):
             if self.is_file(dir_results + "/coverage.path"):
                 # TODO
                 if os.path.getsize(dir_results + "/coverage.path"):
-                    emitter.error("\t\t\t\t[error] error detected in coverage")
+                    emitter.error("\t\t\t\t(error) error detected in coverage")
             else:
-                emitter.error("\t\t\t\t[error] error detected in coverage")
+                emitter.error("\t\t\t\t(error) error detected in coverage")
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t(error) error detected in logs")
         if is_interrupted:
             emitter.warning(
-                "\t\t\t\t[warning] program interrupted before starting repair"
+                "\t\t\t\t(warning) program interrupted before starting repair"
             )
 
         return self._space, self._time, self._error

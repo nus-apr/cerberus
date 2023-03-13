@@ -1,3 +1,4 @@
 docker
 more_itertools
 pre-commit
+textual

@@ -18,17 +18,17 @@ class ExtractFix(AbstractBenchmark):
 
         if not is_error:
             if self.verify(bug_index, container_id):
-                emitter.success("\t\t\t[benchmark] verified successfully")
+                emitter.success("\t\t\t(benchmark) verified successfully")
             else:
-                emitter.error("\t\t\t[benchmark] verification failed")
+                emitter.error("\t\t\t(benchmark) verification failed")
                 is_error = True
             if not values.use_valkyrie:
                 emitter.normal("\t\t\tskipping transformation")
             else:
                 if self.transform(bug_index, container_id):
-                    emitter.success("\t\t\t[benchmark] transformation successful")
+                    emitter.success("\t\t\t(benchmark) transformation successful")
                 else:
-                    emitter.error("\t\t\t[benchmark] transformation failed")
+                    emitter.error("\t\t\t(benchmark) transformation failed")
                     is_error = True
         return is_error
 
@@ -117,7 +117,7 @@ class ExtractFix(AbstractBenchmark):
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artifacts")
+        emitter.normal("\t\t(benchmark) saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(ExtractFix, self).save_artifacts(dir_info, container_id)

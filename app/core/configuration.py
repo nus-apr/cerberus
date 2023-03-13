@@ -186,7 +186,9 @@ class Configurations:
             self.__runtime_config_values["end-index"] = int(arg_list.end_index)
 
         if arg_list.skip_index_list:
-            self.__runtime_config_values["skip-index-list"] = str(arg_list.skip_index_list).split(",")
+            self.__runtime_config_values["skip-index-list"] = str(
+                arg_list.skip_index_list
+            ).split(",")
 
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
@@ -257,7 +259,7 @@ class Configurations:
         emitter.normal("updating configuration values")
         if not self.__runtime_config_values["only-setup"]:
             if not self.__runtime_config_values["tool-list"]:
-                emitter.error("[invalid] --tool/-tool-list is missing")
+                emitter.error("(invalid) --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
 

@@ -24,9 +24,9 @@ class Bears(AbstractBenchmark):
         )
         if not is_error:
             if self.instrument(bug_index, container_id):
-                emitter.success("\t\t\t[benchmark] instrumentation successful")
+                emitter.success("\t\t\t(benchmark) instrumentation successful")
             else:
-                emitter.error("\t\t\t[benchmark] instrumentation failed")
+                emitter.error("\t\t\t(benchmark) instrumentation failed")
                 is_error = True
         return is_error
 
@@ -92,7 +92,7 @@ class Bears(AbstractBenchmark):
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artifacts")
+        emitter.normal("\t\t(benchmark) saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Bears, self).save_artifacts(dir_info, container_id)

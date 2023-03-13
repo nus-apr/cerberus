@@ -14,6 +14,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import logger
 from app.core import repair
+from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core.configuration import Configurations
@@ -21,7 +22,7 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-def create_directories():
+def create_output_directories():
     dir_list = [
         values.dir_logs,
         values.dir_output_base,
@@ -56,29 +57,6 @@ def bootstrap(arg_list: Namespace):
     values.arg_pass = True
     config.update_configuration()
     config.print_configuration()
-
-
-def filter_experiment_list(benchmark: AbstractBenchmark):
-    filtered_list = []
-    experiment_list = benchmark.get_list()
-    for bug_index in range(1, benchmark.size + 1):
-        experiment_item = experiment_list[bug_index - 1]
-        subject_name = experiment_item[definitions.KEY_SUBJECT]
-        bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-        if values.bug_id_list and bug_name not in values.bug_id_list:
-            continue
-        if values.bug_index_list and bug_index not in values.bug_index_list:
-            continue
-        if values.skip_index_list and str(bug_index) in values.skip_index_list:
-            continue
-        if values.start_index and bug_index < values.start_index:
-            continue
-        if values.subject_name and values.subject_name != subject_name:
-            continue
-        if values.end_index and bug_index > values.end_index:
-            break
-        filtered_list.append(experiment_item)
-    return filtered_list
 
 
 def parse_args():
@@ -249,43 +227,27 @@ def parse_args():
     return args
 
 
-def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
-    emitter.sub_title("Repairing benchmark")
-    emitter.highlight(
-        "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
-    )
-    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
-    run_profile_id_list = values.profile_id_list
-    iteration = 0
-    for profile_id in run_profile_id_list:
-        if profile_id not in setup:
-            utilities.error_exit("invalid profile id " + profile_id)
-        config_info = setup[profile_id]
-        values.current_profile_id = config_info[definitions.KEY_ID]
-        experiment_list = filter_experiment_list(benchmark)
-        for experiment_item in experiment_list:
-            iteration = iteration + 1
-            values.iteration_no = iteration
-            bug_index = experiment_item[definitions.KEY_ID]
-            emitter.sub_sub_title(
-                "Experiment #{} - Bug #{}".format(iteration, bug_index)
-            )
-            utilities.check_space()
-            repair.run(benchmark, repair_tool_list, experiment_item, config_info)
-
-
-def initialize() -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
-    emitter.sub_title("Initializing setup")
-    tool_list = []
-    if values.tool_list:
-        for tool_name in values.tool_list:
-            tool = configuration.load_tool(tool_name)
-            if not values.only_analyse:
-                tool.check_tool_exists()
-            tool_list.append(tool)
-    benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    setup = configuration.load_configuration_details(values.file_configuration)
-    return tool_list, benchmark, setup
+def filter_experiment_list(benchmark: AbstractBenchmark):
+    filtered_list = []
+    experiment_list = benchmark.get_list()
+    for bug_index in range(1, benchmark.size + 1):
+        experiment_item = experiment_list[bug_index - 1]
+        subject_name = experiment_item[definitions.KEY_SUBJECT]
+        bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+        if values.bug_id_list and bug_name not in values.bug_id_list:
+            continue
+        if values.bug_index_list and bug_index not in values.bug_index_list:
+            continue
+        if values.skip_index_list and str(bug_index) in values.skip_index_list:
+            continue
+        if values.start_index and bug_index < values.start_index:
+            continue
+        if values.subject_name and values.subject_name != subject_name:
+            continue
+        if values.end_index and bug_index > values.end_index:
+            break
+        filtered_list.append(experiment_item)
+    return filtered_list
 
 
 def main():
@@ -295,21 +257,22 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
     set_start_method("spawn")
     start_time = time.time()
-    create_directories()
+    create_output_directories()
     logger.create_log_files()
     try:
         emitter.title("Starting " + values.tool_name + " (Program Repair Framework) ")
         bootstrap(parsed_args)
-        repair_tool_list, benchmark, setup = initialize()
-        run(repair_tool_list, benchmark, setup)
+        ui.setup_ui()
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
         is_error = True
+        values.ui_active = False
         emitter.error("Runtime Error")
         emitter.error(str(e))
         logger.error(traceback.format_exc())
     finally:
+        values.ui_active = False
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")

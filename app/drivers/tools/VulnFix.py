@@ -49,12 +49,12 @@ class VulnFix(AbstractTool):
 
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
 
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
@@ -79,7 +79,6 @@ class VulnFix(AbstractTool):
                 cmd_already_specified = True
             if config_type == "binary":
                 binary_already_specified = True
-
 
         # (1) source-dir
         dir_src = join(self.dir_expr, "src")
@@ -174,7 +173,7 @@ class VulnFix(AbstractTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)

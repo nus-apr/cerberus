@@ -1,8 +1,8 @@
 import abc
 import os
 import re
-import time
 import shutil
+import time
 from datetime import datetime
 from os.path import join
 
@@ -161,7 +161,7 @@ class AbstractTool:
         return
 
     def repair(self, bug_info, config_info):
-        emitter.normal("\t\t[repair-tool] repairing experiment subject")
+        emitter.normal("\t\t(repair-tool) repairing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.instrument(bug_info)
@@ -199,7 +199,7 @@ class AbstractTool:
                 repo_name = self.image_name
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
-                emitter.warning("[warning] docker image not found in Docker registry")
+                emitter.warning("(warning) docker image not found in Docker registry")
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
                         "{} does not provide a Docker image in Dockerhub".format(
