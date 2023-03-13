@@ -319,7 +319,7 @@ def repair_all(
 
 
 def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]):
-    emitter.normal("\t\t[framework] analysing experiment results")
+    emitter.normal("\t\t(framework) analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
     first_start = None
@@ -354,12 +354,12 @@ def retrieve_results(archive_name, tool: AbstractTool):
         utilities.execute_command(extract_command)
         return True
     else:
-        emitter.error("\t\t[error] result archive not found at " + archive_path)
+        emitter.error("\t\t(error) result archive not found at " + archive_path)
         return False
 
 
 def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list):
-    emitter.normal("\t\t[framework] saving artifacts and cleaning up")
+    emitter.normal("\t\t(framework) saving artifacts and cleaning up")
     for dir_info_entry, container_id, tool in zip(
         dir_info_list, container_id_list, tool_list
     ):
@@ -463,7 +463,7 @@ def run(
         + [benchmark.name, subject_name, bug_name]
     )
     dir_info = generate_dir_info(benchmark.name, subject_name, bug_name, tag_name)
-    emitter.highlight("\t[profile] identifier: " + str(config_info[definitions.KEY_ID]))
+    emitter.highlight("\t(profile) identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
         "\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
@@ -474,8 +474,8 @@ def run(
         "\t[profile] test-suite ratio: "
         + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
-    emitter.highlight("\t[meta-data] project: {}".format(subject_name))
-    emitter.highlight("\t[meta-data] bug ID: {}".format(bug_name))
+    emitter.highlight("\t(meta-data) project: {}".format(subject_name))
+    emitter.highlight("\t(meta-data) bug ID: {}".format(bug_name))
     emitter.highlight(
         "\t[meta-data] logs directory: {}".format(dir_info["local"]["logs"])
     )

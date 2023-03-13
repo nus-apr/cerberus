@@ -3,96 +3,140 @@ import os
 import random
 import sys
 import textwrap
+from enum import Enum
+
+from textual.widgets import TextLog
 
 from app.core import definitions
 from app.core import logger
+from app.core import ui
 from app.core import values
 
-
 rows, columns = tuple(map(int, os.popen("stty size", "r").read().split()))
-GREY = "\t\x1b[1;30m"
-RED = "\t\x1b[1;31m"
-GREEN = "\x1b[1;32m"
-YELLOW = "\t\x1b[1;33m"
-BLUE = "\t\x1b[1;34m"
-ROSE = "\t\x1b[1;35m"
-CYAN = "\x1b[1;36m"
-WHITE = "\t\x1b[1;37m"
 
-PROG_OUTPUT_COLOR = "\t\x1b[0;30;47m"
-STAT_COLOR = "\t\x1b[0;32;47m"
+
+class COLOR(Enum):
+    GREY = 1
+    RED = 2
+    GREEN = 3
+    YELLOW = 4
+    BLUE = 4
+    ROSE = 5
+    CYAN = 6
+    WHITE = 7
+    PROG_OUTPUT_COLOR = 8
+    STAT_COLOR = 9
+
+
+TERMINAL_COLOR_MAP = {
+    COLOR.GREY: "\t\x1b[1;30m",
+    COLOR.RED: "\t\x1b[1;31m",
+    COLOR.GREEN: "\x1b[1;32m",
+    COLOR.YELLOW: "\t\x1b[1;33m",
+    COLOR.BLUE: "\t\x1b[1;34m",
+    COLOR.ROSE: "\t\x1b[1;35m",
+    COLOR.CYAN: "\x1b[1;36m",
+    COLOR.WHITE: "\t\x1b[1;37m",
+    COLOR.PROG_OUTPUT_COLOR: "\t\x1b[0;30;47m",
+    COLOR.STAT_COLOR: "\t\x1b[0;32;47m",
+}
+
+TEXTUALIZE_COLOR_MAP = {
+    COLOR.GREY: "grey",
+    COLOR.RED: "red",
+    COLOR.GREEN: "green",
+    COLOR.YELLOW: "yellow",
+    COLOR.BLUE: "blue",
+    COLOR.ROSE: "pink",
+    COLOR.CYAN: "cyan",
+    COLOR.WHITE: "white",
+    COLOR.PROG_OUTPUT_COLOR: "green",
+    COLOR.STAT_COLOR: "green",
+}
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "\033[K{}{}\x1b[0m".format(print_color, print_message)
-    if prefix:
-        prefix = "\033[K{}{}\x1b[0m".format(print_color, prefix)
-        len_prefix = ((indent_level + 1) * 4) + len(prefix)
-        wrapper = textwrap.TextWrapper(
-            initial_indent=prefix,
-            subsequent_indent=" " * len_prefix,
-            width=int(columns),
+    message = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], print_message)
+    if not values.ui_active:
+        if prefix:
+            prefix = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], prefix)
+            len_prefix = ((indent_level + 1) * 4) + len(prefix)
+            wrapper = textwrap.TextWrapper(
+                initial_indent=prefix,
+                subsequent_indent=" " * len_prefix,
+                width=int(columns),
+            )
+            message = wrapper.fill(message)
+        sys.stdout.write(message)
+        sys.stdout.write("\n" if new_line else "\033[K\r")
+        sys.stdout.flush()
+    else:
+        if prefix:
+            print_message = prefix + print_message
+        ui.get_ui().post_message_no_wait(
+            ui.Write(
+                sender=ui.get_ui(),
+                text="[bold {}]{}".format(
+                    TEXTUALIZE_COLOR_MAP[print_color], print_message
+                ),
+            )
         )
-        message = wrapper.fill(message)
-    sys.stdout.write(message)
-    sys.stdout.write("\n" if new_line else "\033[K\r")
-    sys.stdout.flush()
 
 
 def title(title):
-    write("\n" + "=" * 100 + "\n\n\t" + title + "\n" + "=" * 100 + "\n", CYAN)
+    write("\n" + "=" * 100 + "\n\n\t" + title + "\n" + "=" * 100 + "\n", COLOR.CYAN)
     logger.information(title)
 
 
 def sub_title(text):
-    write("\n\t" + text + "\n\t" + "_" * 90 + "\n", CYAN)
+    write("\n\t" + text + "\n\t" + "_" * 90 + "\n", COLOR.CYAN)
     logger.information(text)
 
 
 def sub_sub_title(text):
-    write("\n\t\t" + text + "\n\t\t" + "_" * 90 + "\n", CYAN)
+    write("\n\t\t" + text + "\n\t\t" + "_" * 90 + "\n", COLOR.CYAN)
     logger.information(text)
 
 
 def command(message):
     if values.debug:
-        prefix = "\t\t[command] "
-        write(message, ROSE, prefix=prefix, indent_level=2)
+        prefix = "\t\t(command) "
+        write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
 def docker_command(message):
     if values.debug:
-        prefix = "\t\t[docker-command] "
-        write(message, ROSE, prefix=prefix, indent_level=2)
+        prefix = "\t\t(docker-command) "
+        write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.docker_command(message)
 
 
 def debug(message):
     if values.debug:
-        prefix = "\t\t[debug] "
-        write(message, GREY, prefix=prefix, indent_level=2)
+        prefix = "\t\t(debug) "
+        write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
 
 def build(message):
     if values.debug:
-        prefix = "\t\t[build] "
-        write(message, GREY, prefix=prefix, indent_level=2)
+        prefix = "\t\t(build) "
+        write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.build(message)
 
 
 def data(message, info=None):
     if values.debug:
-        prefix = "\t\t[data] "
-        write(message, GREY, prefix=prefix, indent_level=2)
+        prefix = "\t\t(data) "
+        write(message, COLOR.GREY, prefix=prefix, indent_level=2)
         if info:
-            write(info, GREY, prefix=prefix, indent_level=2)
+            write(info, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.data(message, info)
 
 
 def normal(message, jump_line=True):
-    write(message, BLUE, jump_line)
+    write(message, COLOR.BLUE, jump_line)
     logger.output(message)
 
 
@@ -100,42 +144,42 @@ def highlight(message, jump_line=True):
     indent_length = message.count("\t")
     prefix = "\t" * indent_length
     message = message.replace("\t", "")
-    write(message, WHITE, jump_line, indent_level=indent_length, prefix=prefix)
+    write(message, COLOR.WHITE, jump_line, indent_level=indent_length, prefix=prefix)
     logger.note(message)
 
 
 def information(message, jump_line=True):
-    write(message, GREY, jump_line)
+    write(message, COLOR.GREY, jump_line)
     logger.information(message)
 
 
 def statistics(message):
-    write(message, WHITE)
+    write(message, COLOR.WHITE)
     logger.output(message)
 
 
 def error(message):
-    write(message, RED)
+    write(message, COLOR.RED)
     logger.error(message)
 
 
 def success(message):
-    write(message, GREEN)
+    write(message, COLOR.GREEN)
     logger.output(message)
 
 
 def special(message):
-    write(message, ROSE)
+    write(message, COLOR.ROSE)
     logger.note(message)
 
 
 def program_output(output_message):
-    write("\t\tProgram Output:", WHITE)
+    write("\t\tProgram Output:", COLOR.WHITE)
     if type(output_message) == list:
         for line in output_message:
-            write("\t\t\t" + line.strip(), PROG_OUTPUT_COLOR)
+            write("\t\t\t" + line.strip(), COLOR.PROG_OUTPUT_COLOR)
     else:
-        write("\t\t\t" + output_message, PROG_OUTPUT_COLOR)
+        write("\t\t\t" + output_message, COLOR.PROG_OUTPUT_COLOR)
 
 
 def emit_patch(patch_lines, jump_line=True, message=""):
@@ -143,22 +187,22 @@ def emit_patch(patch_lines, jump_line=True, message=""):
     indent_length = 2
     prefix = "\t\t" * indent_length
     for line in patch_lines:
-        write(line, ROSE, jump_line, indent_level=indent_length, prefix=prefix)
+        write(line, COLOR.ROSE, jump_line, indent_level=indent_length, prefix=prefix)
 
 
 def warning(message):
-    write(message, YELLOW)
+    write(message, COLOR.YELLOW)
     logger.warning(message)
 
 
 def note(message):
-    write(message, WHITE)
+    write(message, COLOR.WHITE)
     logger.note(message)
 
 
 def configuration(setting, value):
-    message = "\t[config] " + setting + ": " + str(value)
-    write(message, WHITE, True)
+    message = "\t(config) " + setting + ": " + str(value)
+    write(message, COLOR.WHITE, True)
     logger.configuration(setting + ":" + str(value))
 
 
@@ -195,97 +239,97 @@ def emit_help():
 
     write(
         f"Usage: cerberus [OPTIONS] --benchmark={'/'.join(benchmarks)}... --tool={'/'.join(tools)}... ",
-        WHITE,
+        COLOR.WHITE,
     )
-    write("Options are:", WHITE)
+    write("Options are:", COLOR.WHITE)
     write(
         "\t"
         + definitions.ARG_DATA_PATH.ljust(max_length)
         + "\t| "
         + "directory for experiments",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_TOOL_NAME.ljust(max_length)
         + "\t| "
         + "name of the tool ({})".format(",".join(tools)),
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_BENCHMARK.ljust(max_length)
         + "\t| "
         + "name of the benchmark ({})".format(",".join(benchmarks)),
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_TOOL_PATH.ljust(max_length)
         + "\t| "
         + "path of the tool",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_TOOL_PARAMS.ljust(max_length)
         + "\t| "
         + "parameters for the tool",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_DEBUG_MODE.ljust(max_length)
         + "\t| "
         + "enable debug mode",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_INSTRUMENT_ONLY.ljust(max_length)
         + "\t| "
         + "only instrument the project",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_SETUP_ONLY.ljust(max_length)
         + "\t| "
         + "only setup the project",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_BUG_INDEX.ljust(max_length)
         + "\t| "
         + "run only the specified experiment",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_BUG_INDEX_LIST.ljust(max_length)
         + "\t| "
         + "runs a list of experiments",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_START_INDEX.ljust(max_length)
         + "\t| "
         + "specify a range of experiments starting from ID",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_END_INDEX.ljust(max_length)
         + "\t| "
         + "specify a range of experiments that ends at ID",
-        WHITE,
+        COLOR.WHITE,
     )
     write(
         "\t"
         + definitions.ARG_PROFILE_ID_LIST.ljust(max_length)
         + "\t| "
         + "specify a different profile using config ID",
-        WHITE,
+        COLOR.WHITE,
     )

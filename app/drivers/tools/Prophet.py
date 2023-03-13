@@ -33,7 +33,7 @@ class Prophet(AbstractTool):
 
         repair_file = self.dir_expr + "/prophet/prophet.conf"
         if not self.is_file(repair_file):
-            emitter.error("\t\t[error] no repair config file detected")
+            emitter.error("\t\t(error) no repair config file detected")
             return
         # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
         # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
@@ -61,12 +61,12 @@ class Prophet(AbstractTool):
         self.timestamp_log_end()
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def generate_localization(self, bug_info, localization_file, dir_setup):
@@ -5669,7 +5669,7 @@ class Prophet(AbstractTool):
                 self._error.is_error = True
             elif "Verification failed!" in line or "Repair error:" in line:
                 emitter.warning(
-                    "\t\t\t\t[warning] verification error detected in test suite"
+                    "\t\t\t\t(warning) verification error detected in test suite"
                 )
             elif "validation time: " in line:
                 time = line.split("validation time: ")[-1].strip().replace("\n", "")
@@ -5724,7 +5724,7 @@ class Prophet(AbstractTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
@@ -5732,7 +5732,7 @@ class Prophet(AbstractTool):
         self.read_log_file()
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t(error) error detected in logs")
 
         self._space.generated = len(
             self.list_dir(

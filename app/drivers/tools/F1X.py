@@ -2,7 +2,9 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions, values, emitter
+from app.core import definitions
+from app.core import emitter
+from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -95,12 +97,12 @@ class F1X(AbstractTool):
         # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
         if values.dump_patches:
@@ -434,13 +436,13 @@ class F1X(AbstractTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t(error) error detected in logs")
 
         self.read_log_file()
 

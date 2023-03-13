@@ -72,6 +72,7 @@ email_setup = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
+ui_active = False
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000

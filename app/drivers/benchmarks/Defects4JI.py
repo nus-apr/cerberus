@@ -23,9 +23,9 @@ class Defects4JI(Defects4J):
         )
         if not is_error:
             if container_id and self.instrument(bug_index, container_id):
-                emitter.success("\t\t\t[benchmark] instrumentation successful")
+                emitter.success("\t\t\t(benchmark) instrumentation successful")
             else:
-                emitter.error("\t\t\t[benchmark] instrumentation failed")
+                emitter.error("\t\t\t(benchmark) instrumentation failed")
                 is_error = True
         return is_error
 

@@ -1,9 +1,11 @@
 import os
 import re
+from datetime import datetime
 from os import listdir
 from os.path import isfile
 from os.path import join
-from datetime import datetime
+from typing import Optional
+
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -13,7 +15,8 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class SenX(AbstractTool):
-    relative_binary_path = None
+    relative_binary_path: Optional[str] = None
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(SenX, self).__init__(self.name)
@@ -79,7 +82,7 @@ class SenX(AbstractTool):
 
         if len(test_file_list) > 1:
             emitter.warning(
-                "\t\t[warning] unimplemented functionality: SenX only supports one failing test-case"
+                "\t\t(warning) unimplemented functionality: SenX only supports one failing test-case"
             )
 
         binary_input_arg = bug_info[definitions.KEY_CRASH_CMD]
@@ -99,12 +102,12 @@ class SenX(AbstractTool):
         status = execute_command(senx_command)
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
@@ -112,6 +115,8 @@ class SenX(AbstractTool):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
+        if not (self.dir_expr and self.relative_binary_path):
+            error_exit("Unset paths in setup for SenX")
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
         patch_path = abs_binary_path + ".bc.patch"
         copy_command = "cp -rf {} {}/patches".format(patch_path, self.dir_output)
@@ -136,7 +141,7 @@ class SenX(AbstractTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
@@ -152,6 +157,6 @@ class SenX(AbstractTool):
             elif "Runtime Error" in line:
                 self._error.is_error = True
         if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t(error) error detected in logs")
 
         return self._space, self._time, self._error

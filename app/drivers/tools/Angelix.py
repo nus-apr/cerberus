@@ -97,12 +97,12 @@ class Angelix(AbstractTool):
         self.timestamp_log_end()
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
@@ -165,22 +165,22 @@ class Angelix(AbstractTool):
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
-               analyse tool output and collect information
-               output of the tool is logged at self.log_output_path
-               information required to be extracted are:
+        analyse tool output and collect information
+        output of the tool is logged at self.log_output_path
+        information required to be extracted are:
 
-                   self._space.non_compilable
-                   self._space.plausible
-                   self._space.size
-                   self._space.enumerations
-                   self._space.generated
+            self._space.non_compilable
+            self._space.plausible
+            self._space.size
+            self._space.enumerations
+            self._space.generated
 
-                   self._time.total_validation
-                   self._time.total_build
-                   self._time.timestamp_compilation
-                   self._time.timestamp_validation
-                   self._time.timestamp_plausible
-               """
+            self._time.total_validation
+            self._time.total_build
+            self._time.timestamp_compilation
+            self._time.timestamp_validation
+            self._time.timestamp_plausible
+        """
         emitter.normal("\t\t\t analysing output of " + self.name)
 
         is_error = False
@@ -199,7 +199,7 @@ class Angelix(AbstractTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            emitter.warning("\t\t\t(warning) no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
@@ -216,14 +216,14 @@ class Angelix(AbstractTool):
                     count_enumerations = count_enumerations + 1
                 elif "repair test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t[warning] repair test suite: []")
+                    emitter.warning("\t\t\t\t(warning) repair test suite: []")
                 elif "validation test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t[warning] validation test suite: []")
+                    emitter.warning("\t\t\t\t(warning) validation test suite: []")
                 elif "No negative test exists" in line:
                     is_error = True
                     is_timeout = False
-                    emitter.warning("\t\t\t\t[warning] No negative test exists")
+                    emitter.warning("\t\t\t\t(warning) No negative test exists")
                 elif "no patch generated" in line:
                     is_timeout = False
                     count_plausible = 0
@@ -232,25 +232,21 @@ class Angelix(AbstractTool):
                 elif "running negative tests" in line:
                     collect_neg = True
                 elif "excluding test" in line:
-                    removing_test_id = line.split("excluding test ")[-1].split(" ")[
-                        0
-                    ]
+                    removing_test_id = line.split("excluding test ")[-1].split(" ")[0]
                     if removing_test_id in reported_fail_list:
                         reported_fail_list.remove(removing_test_id)
                 elif "failed to build" in line and "golden" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build golden")
+                    emitter.error("\t\t\t\t(error) failed to build golden")
                 elif "failed to build" in line and "validation" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build validation")
+                    emitter.error("\t\t\t\t(error) failed to build validation")
                 elif "failed to build" in line and "frontend" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build frontend")
+                    emitter.error("\t\t\t\t(error) failed to build frontend")
                 elif collect_neg and "running test" in line:
                     t_id = (
-                        line.split("running test ")[-1]
-                        .split(" ")[0]
-                        .replace("'", "")
+                        line.split("running test ")[-1].split(" ")[0].replace("'", "")
                     )
                     reported_fail_list.add(t_id)
                 elif collect_neg and "repair test suite" in line:
@@ -269,7 +265,7 @@ class Angelix(AbstractTool):
         )
 
         if list(reported_fail_list) != fail_list:
-            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
+            emitter.warning("\t\t\t\t(warning) unexpected failing test-cases reported")
             emitter.warning(
                 "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
             )
@@ -278,9 +274,9 @@ class Angelix(AbstractTool):
                 reported_list_str = ",".join(list(reported_fail_list)[:10]) + "..."
             emitter.warning("\t\t\t\treported fail list: {0}".format(reported_list_str))
         if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            emitter.error("\t\t\t\t(error) error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t[warning] timeout before ending")
+            emitter.warning("\t\t\t\t(warning) timeout before ending")
 
         self._space.plausible = count_plausible
         self._space.size = search_space
