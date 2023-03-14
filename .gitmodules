@@ -28,3 +28,6 @@
 [submodule "benchmark/introclassjava"]
 	path = benchmark/introclassjava
 	url = git@github.com:nus-apr/introclassjava-benchmark.git
+[submodule "benchmark/pulse"]
+	path = benchmark/pulse
+	url = git@github.com:nus-apr/pulse-benchmark.git
