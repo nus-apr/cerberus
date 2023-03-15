@@ -23,6 +23,8 @@ KEY_BUG_TYPE = "bug_type"
 KEY_SOURCE_DIRECTORY = "source_directory"
 KEY_TEST_DIRECTORY = "test_directory"
 KEY_DEPENDENCIES = "dependencies"
+KEY_SOURCE = "source"
+KEY_SINK = "sink"
 
 ARG_USE_GPU = "--use-gpu"
 ARG_CACHE = "--cache"
