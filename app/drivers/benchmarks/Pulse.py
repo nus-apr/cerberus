@@ -20,8 +20,10 @@ class Pulse(AbstractBenchmark):
         )
         return is_error
 
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index, container_id):
         emitter.normal("\t\t\tdownloading experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
@@ -37,8 +39,10 @@ class Pulse(AbstractBenchmark):
         )
         return status == 0
 
-    def config(self, bug_id, container_id):
+    def config(self, bug_index, container_id):
         emitter.normal("\t\t\tconfiguring experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_config_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
@@ -54,8 +58,10 @@ class Pulse(AbstractBenchmark):
         )
         return status == 0
 
-    def build(self, bug_id, container_id):
+    def build(self, bug_index, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         self.log_build_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
