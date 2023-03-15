@@ -111,7 +111,9 @@ def repair(
     benchmark_name: str,
 ):
     fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = [str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])]
+    fix_line_numbers = [
+        str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
+    ]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
@@ -219,7 +221,7 @@ def repair_all(
 ):
     consume_thread = None
     tool_thread_list = []
-    parallel.initialize()
+    # parallel.initialize()
     time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
@@ -232,7 +234,9 @@ def repair_all(
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
-        failing_test_list = str(experiment_info.get(definitions.KEY_FAILING_TEST, "")).split(",")
+        failing_test_list = str(
+            experiment_info.get(definitions.KEY_FAILING_TEST, "")
+        ).split(",")
 
         if index == 0:
             is_rank = len(tool_list) > 1
@@ -263,56 +267,66 @@ def repair_all(
 
         if values.use_valkyrie:
             values.running_tool = True
-        t_thread = threading.Thread(
-            target=repair,
-            args=(
-                dir_info,
-                experiment_info,
-                repair_tool,
-                config_info,
-                container_id,
-                benchmark_name,
-            ),
+
+        repair(
+            dir_info,
+            experiment_info,
+            repair_tool,
+            config_info,
+            container_id,
+            benchmark_name,
         )
-        t_thread.start()
-        tool_thread_list.append((t_thread, repair_tool))
 
-    for thread, tool in tool_thread_list:
-        wait_time = 5
-        if time.time() <= total_timeout:
-            wait_time = total_timeout - time.time()
-        thread.join(wait_time)
-        if thread.is_alive():
-            emitter.highlight(
-                "\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(
-                    tool.name
-                )
-            )
-            event = threading.Event()
-            event.set()
-            # The thread can still be running at this point. For example, if the
-            # thread's call to isSet() returns right before this call to set(), then
-            # the thread will still perform the full 1 second sleep and the rest of
-            # the loop before finally stopping.
-        else:
-            emitter.highlight(
-                "\t\t\t[info] {}: thread has already finished.".format(tool.name)
-            )
+        # t_thread = threading.Thread(
+        #    target=repair,
+        #    args=(
+        #        dir_info,
+        #        experiment_info,
+        #        repair_tool,
+        #        config_info,
+        #        container_id,
+        #        benchmark_name,
+        #    ),
+        # )
+        # t_thread.start()
+        # tool_thread_list.append((t_thread, repair_tool))
 
-        # Thread can still be alive at this point. Do another join without a timeout
-        # to verify thread shutdown.
-        thread.join()
-        # if tool.log_output_path:
-        #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
-        #     utilities.execute_command(timestamp_command)
+    # for thread, tool in tool_thread_list:
+    #     wait_time = 5
+    #     if time.time() <= total_timeout:
+    #         wait_time = total_timeout - time.time()
+    #     thread.join(wait_time)
+    #     if thread.is_alive():
+    #         emitter.highlight(
+    #             "\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(
+    #                 tool.name
+    #             )
+    #         )
+    #         event = threading.Event()
+    #         event.set()
+    #         # The thread can still be running at this point. For example, if the
+    #         # thread's call to isSet() returns right before this call to set(), then
+    #         # the thread will still perform the full 1 second sleep and the rest of
+    #         # the loop before finally stopping.
+    #     else:
+    #         emitter.highlight(
+    #             "\t\t\t[info] {}: thread has already finished.".format(tool.name)
+    #         )
 
-    values.running_tool = False
-    if values.use_valkyrie:
-        emitter.normal("\t\t\twaiting for validation pool")
-        parallel.wait_validation()
-        emitter.normal("\t\t\twaiting for consumer pool")
-        if consume_thread:
-            consume_thread.join()
+    #     # Thread can still be alive at this point. Do another join without a timeout
+    #     # to verify thread shutdown.
+    #     thread.join()
+    #     # if tool.log_output_path:
+    #     #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+    #     #     utilities.execute_command(timestamp_command)
+
+    # values.running_tool = False
+    # if values.use_valkyrie:
+    #     emitter.normal("\t\t\twaiting for validation pool")
+    #     parallel.wait_validation()
+    #     emitter.normal("\t\t\twaiting for consumer pool")
+    #     if consume_thread:
+    #         consume_thread.join()
     # for t in tool_list:
     #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
     #     utilities.execute_command(timestamp_command)
