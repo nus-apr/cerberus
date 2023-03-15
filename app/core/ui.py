@@ -1,6 +1,7 @@
 import asyncio
-import concurrent.futures
+import contextvars
 from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -10,10 +11,13 @@ from textual.app import ComposeResult
 from textual.message import Message
 from textual.message import MessageTarget
 from textual.messages import *
+from textual.reactive import Reactive
 from textual.reactive import reactive
+from textual.screen import Screen
 from textual.widgets import DataTable
 from textual.widgets import Footer
 from textual.widgets import Header
+from textual.widgets import Static
 from textual.widgets import TextLog
 
 from app.core import configuration
@@ -26,6 +30,23 @@ from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
+job_identifier: contextvars.ContextVar[str] = contextvars.ContextVar("job_id")
+
+log_map: Dict[int, TextLog] = {}
+
+
+class LogScreen(Screen):
+    def __init__(self, job_id) -> None:
+        self.job_id = job_id
+        super().__init__()
+
+    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
+
+    def compose(self) -> ComposeResult:
+        yield Static(" JOB {}".format(self.job_id), id="title")
+        yield log_map[self.job_id]
+        yield Static("Press any key to exit [blink]_[/]", id="any-key")
+
 
 class Job(Message):
     """Job allocation message."""
@@ -34,14 +55,19 @@ class Job(Message):
     namespace = "cerberus"
 
     def __init__(
-        self, sender, benchmark, repair_tool_list, experiment_item, config_info
+        self,
+        benchmark,
+        repair_tool_list,
+        experiment_item,
+        config_info,
+        identifier,
     ) -> None:
         self.benchmark = benchmark
         self.repair_tool_list = repair_tool_list
         self.experiment_item = experiment_item
         self.config_info = config_info
-        self._sender = sender
-        super().__init__(sender=sender)
+        self.identifier = identifier
+        super().__init__()
 
 
 class Write(Message):
@@ -49,15 +75,23 @@ class Write(Message):
 
     namespace = "cerberus"
 
-    def __init__(self, sender, text):
+    def __init__(self, text, identifier):
         self.text = text
-        super().__init__(sender=sender)
+        self.identifier = identifier
+        super().__init__()
 
 
 class Cerberus(App):
     """The main window"""
 
-    COLUMNS = ("ID", "Benchmark", "Subject", "Bug ID", "Configuration Profile")
+    COLUMNS = (
+        "ID",
+        "Benchmark",
+        "Subject",
+        "Bug ID",
+        "Configuration Profile",
+        "Status",
+    )
     SUB_TITLE = "Program Repair Framework"
 
     BINDINGS = [
@@ -87,8 +121,11 @@ class Cerberus(App):
     def on_mount(self):
         values.ui_active = True
         table = self.query_one(DataTable)
+        table.cursor_type = "row"
         table.add_columns(*Cerberus.COLUMNS)
-        self.run_repair(*self.initialize())
+        asyncio.get_running_loop().run_in_executor(
+            None, lambda: self.run_repair(*self.initialize())
+        )
 
     def run_repair(
         self,
@@ -96,6 +133,7 @@ class Cerberus(App):
         benchmark: AbstractBenchmark,
         setup: Any,
     ):
+        job_identifier.set("ROOT")
         emitter.sub_title("Repairing benchmark")
         emitter.highlight(
             "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
@@ -120,36 +158,55 @@ class Cerberus(App):
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
                     values.current_profile_id,
+                    "Allocated",
                 )  # type: ignore
+                key = iteration - 1  # "{}-{}-{}-{}".format(
+                #    benchmark.name,
+                #    "-".join(map(lambda x: x.name, repair_tool_list)),
+                #    experiment_item[definitions.KEY_SUBJECT],
+                #    experiment_item[definitions.KEY_BUG_ID],
+                #    values.current_profile_id,
+                # )
                 job = Job(
-                    self, benchmark, repair_tool_list, experiment_item, config_info
+                    benchmark,
+                    repair_tool_list,
+                    experiment_item,
+                    config_info,
+                    key,
                 )
-                self.post_message_no_wait(job)
+                log_map[key] = TextLog(highlight=True, markup=True)
+                self.post_message(job)
 
     async def on_cerberus_job(self, message: Job):
-        asyncio.get_running_loop().run_in_executor(
-            None,
-            lambda: repair.run(
+        def job():
+            job_identifier.set(message.identifier)
+            repair.run(
                 message.benchmark,
                 message.repair_tool_list,
                 message.experiment_item,
                 message.config_info,
-            ),
-        )
+            )
+
+        asyncio.get_running_loop().run_in_executor(None, job)
 
     async def on_cerberus_write(self, message: Write):
-        self.query_one(TextLog).write(message.text)
+        if message.identifier in log_map:
+            log_map[message.identifier].write(message.text)
+            log_map[message.identifier].scroll_end()
+        pass
+
+    async def on_data_table_row_highlighted(self, message):
+        self.push_screen(LogScreen(message.cursor_row))
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
-        yield TextLog(highlight=True, markup=True)
         yield DataTable()
         yield Footer()
 
     def action_toggle_dark(self) -> None:
         """An action to toggle dark mode."""
-        self.dark: bool
+        self.dark: Reactive[bool]
         self.dark = not self.dark
 
 
@@ -158,10 +215,6 @@ app: Cerberus
 
 def get_ui() -> Cerberus:
     return app
-
-
-def boom():
-    utilities.error_exit("WTFFF")
 
 
 def setup_ui():
