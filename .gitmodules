@@ -31,3 +31,6 @@
 [submodule "benchmark/pulse"]
 	path = benchmark/pulse
 	url = git@github.com:nus-apr/pulse-benchmark.git
+[submodule "benchmark/lmdefects"]
+	path = benchmark/lmdefects
+	url = https://github.com/nus-apr/lm-defects-benchmark
