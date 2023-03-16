@@ -24,10 +24,8 @@ class SAVER(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(SAVER, self).__init__(self.name)
 
-    def populate_config_file(self, bug_info):
-        config_path = join(self.dir_expr, self.name, "bug.json")
+    def populate_config_file(self, bug_info, config_path):
         config_info = dict()
-
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         if bug_type not in self.bug_conversion_table:
             error_exit(f"Unsupported bug type: {bug_type}")
@@ -39,10 +37,33 @@ class SAVER(AbstractTool):
         if definitions.KEY_SINK not in bug_info:
             error_exit(f"Missing memory sink information in benchmark, required for {self.name}")
 
-        config_info["source"] = {"node": bug_info[definitions.KEY_SOURCE], "exp": None}
-        config_info["sink"] = {"node": bug_info[definitions.KEY_SINK], "exp": None}
+        saver_source_info = dict()
+        bench_source_info = bug_info[definitions.KEY_SOURCE]
+        saver_source_info["filename"] = bench_source_info["src-file"]
+        saver_source_info["procedure"] = bench_source_info["procedure"]
+        saver_source_info["line"] = bench_source_info["line"]
+        config_info["source"] = {"node": saver_source_info, "exp": None}
+
+        saver_sink_info = dict()
+        bench_sink_info = bug_info[definitions.KEY_SINK]
+        saver_sink_info["filename"] = bench_sink_info["src-file"]
+        saver_sink_info["procedure"] = bench_sink_info["procedure"]
+        saver_sink_info["line"] = bench_sink_info["line"]
+        config_info["sink"] = {"node": saver_sink_info, "exp": None}
         config_info["err_type"] = bug_type_code
-        self.write_file(config_info, config_path)
+        self.write_json(config_info, config_path)
+        return saver_source_info["filename"], saver_sink_info["filename"]
+
+    def prepare(self, bug_info):
+        tool_dir = join(self.dir_expr, self.name)
+        if not self.is_dir(tool_dir):
+            self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
+        config_path = join(self.dir_expr, self.name, "bug.json")
+        source_file_path, sink_file_path = self.populate_config_file(bug_info, config_path)
+        dir_src = join(self.dir_expr, "src")
+        for fp in [source_file_path, sink_file_path]:
+            analysis_command = "infer -g run  -- make {}".format(fp)
+            self.run_command(analysis_command,  dir_path=dir_src)
         return config_path
 
     def repair(self, bug_info, config_info):
@@ -54,7 +75,7 @@ class SAVER(AbstractTool):
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        config_path = self.populate_config_file(bug_info)
+        config_path = self.prepare(bug_info)
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -67,7 +88,7 @@ class SAVER(AbstractTool):
             error_exit("Unhandled Exception")
 
         self.timestamp_log_start()
-        saver_command = "cd {};".format(binary_dir_path)
+        saver_command = "cd {};".format(join(self.dir_expr, "src"))
         saver_command += "timeout -k 5m {0}h saver --error-report {1} ".format(
             str(timeout_h),
             config_path
@@ -91,9 +112,8 @@ class SAVER(AbstractTool):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/saver {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
-        abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
-        patch_path = abs_binary_path + ".bc.patch"
-        copy_command = "cp -rf {} {}/patches".format(patch_path, self.dir_output)
+        infer_output = join(self.dir_expr, "src", "infer-out")
+        copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
         self.run_command(copy_command)
         super(SAVER, self).save_artifacts(dir_info)
         return
