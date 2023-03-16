@@ -295,11 +295,17 @@ class AbstractTool:
     def read_file(self, file_path, encoding="utf-8"):
         return abstractions.read_file(self.container_id, file_path, encoding)
 
+    def read_json(self, file_path, encoding="utf-8"):
+        return abstractions.read_json(self.container_id, file_path, encoding)
+
     def append_file(self, content, file_path):
         return abstractions.append_file(self.container_id, content, file_path)
 
     def write_file(self, content, file_path):
         return abstractions.write_file(self.container_id, content, file_path)
+
+    def write_json(self, data, file_path):
+        return abstractions.write_json(self.container_id, data, file_path)
 
     def list_dir(self, dir_path):
         return abstractions.list_dir(self.container_id, dir_path)
