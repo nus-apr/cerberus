@@ -110,10 +110,12 @@ class AbstractTool:
         self.append_file(timestamp_txt, self.log_output_path)
 
     def run_command(
-        self, command_str, log_file_path="/dev/null", dir_path="/experiment", env=dict()
+        self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
     ):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
+            if not dir_path:
+                dir_path = "/experiment"
             exit_code, output = container.exec_command(
                 self.container_id, command_str, dir_path, env
             )
@@ -125,6 +127,8 @@ class AbstractTool:
                     if stderr:
                         self.append_file(stderr.decode("iso-8859-1"), log_file_path)
         else:
+            if not dir_path:
+                dir_path = self.dir_expr
             command_str += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command_str, env=env, directory=dir_path)
         return exit_code
