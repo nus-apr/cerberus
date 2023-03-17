@@ -120,9 +120,9 @@ class SAVER(AbstractTool):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/saver {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
-        infer_output = join(self.dir_expr, "src", "infer-out")
-        copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
-        self.run_command(copy_command)
+        # infer_output = join(self.dir_expr, "src", "infer-out")
+        # copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
+        # self.run_command(copy_command)
         super(SAVER, self).save_artifacts(dir_info)
         return
 
