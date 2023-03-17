@@ -34,7 +34,7 @@ class SAVER(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Setup took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -53,7 +53,7 @@ class SAVER(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Config took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -73,10 +73,14 @@ class SAVER(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Setup took {} second(s)".format(
-                (time - datetime.now()).total_seconds()
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
+
+    def test(self, bug_index, container_id):
+        emitter.normal("\t\t\ttesting experiment subject")
+        return True
 
     def clean(self, exp_dir_path, container_id):
         emitter.normal("\t\t\tremoving experiment subject")
