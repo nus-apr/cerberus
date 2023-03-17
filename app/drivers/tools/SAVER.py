@@ -58,12 +58,20 @@ class SAVER(AbstractTool):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
+
+        dir_src = join(self.dir_expr, "src")
+        clean_command = "make clean"
+        self.run_command(clean_command, dir_path=dir_src)
         config_path = join(self.dir_expr, self.name, "bug.json")
         source_file_path, sink_file_path = self.populate_config_file(bug_info, config_path)
-        dir_src = join(self.dir_expr, "src")
-        for fp in [source_file_path, sink_file_path]:
-            analysis_command = "infer -g run  -- make {}".format(fp)
-            self.run_command(analysis_command,  dir_path=dir_src)
+
+        analysis_command = "infer -g run  -- make"
+        self.run_command(analysis_command,  dir_path=dir_src)
+        # for c_path in set([source_file_path, sink_file_path]):
+        #     o_path = c_path.replace(".c", ".o")
+        #     analysis_command = "infer -g run  -- make {}".format(o_path)
+        #     self.run_command(analysis_command,  dir_path=dir_src)
+
         return config_path
 
     def repair(self, bug_info, config_info):
