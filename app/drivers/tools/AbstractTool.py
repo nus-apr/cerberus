@@ -135,10 +135,12 @@ class AbstractTool:
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
+        if not self.is_file(join(self.dir_inst, "instrument.sh")):
+            return
         emitter.normal("\t\t\t instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.current_profile_id)
-        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        buggy_file = bug_info.get(definitions.KEY_FIX_FILE, "")
         self.log_instrument_path = join(
             self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
         )
