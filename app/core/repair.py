@@ -119,7 +119,7 @@ def repair(
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    test_timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
+    test_timeout = int(config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
@@ -220,8 +220,8 @@ def repair_all(
     consume_thread = None
     tool_thread_list = []
     parallel.initialize()
-    time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 10))
-    test_timeout = int(experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
+    time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
 
     for index, (dir_info, repair_tool, container_id) in enumerate(
