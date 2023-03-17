@@ -110,8 +110,8 @@ def repair(
     container_id: Optional[str],
     benchmark_name: str,
 ):
-    fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
-    fix_line_numbers = [str(x) for x in experiment_info[definitions.KEY_FIX_LINES]]
+    fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+    fix_line_numbers = [str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])]
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
@@ -120,16 +120,15 @@ def repair(
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
-    passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
+    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
         passing_test_list = passing_id_list_str.split(",")
-    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[
-        : int(len(passing_test_list) * test_ratio)
-    ]
+    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
+    pass_test_count = int(len(passing_test_list) * test_ratio)
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
@@ -221,21 +220,19 @@ def repair_all(
     consume_thread = None
     tool_thread_list = []
     parallel.initialize()
-    time_duration = float(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 10))
     test_timeout = int(experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
     total_timeout = time.time() + 60 * 60 * time_duration
 
     for index, (dir_info, repair_tool, container_id) in enumerate(
         zip(dir_info_list, tool_list, container_id_list)
     ):
-        passing_id_list_str = experiment_info[definitions.KEY_PASSING_TEST]
+        passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
         passing_test_list = []
         test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
         if str(passing_id_list_str).replace(",", "").isnumeric():
             passing_test_list = passing_id_list_str.split(",")
-        failing_test_list = str(experiment_info[definitions.KEY_FAILING_TEST]).split(
-            ","
-        )
+        failing_test_list = str(experiment_info.get(definitions.KEY_FAILING_TEST, "")).split(",")
 
         if index == 0:
             is_rank = len(tool_list) > 1
@@ -243,7 +240,7 @@ def repair_all(
                 failing_test_list
                 + passing_test_list[: int(len(passing_test_list) * test_ratio)]
             )
-            fix_source_file = str(experiment_info[definitions.KEY_FIX_FILE])
+            fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
 
             if values.use_valkyrie:
                 valkyrie_setup_info = setup_for_valkyrie(
