@@ -65,7 +65,7 @@ class SAVER(AbstractTool):
         config_path = join(self.dir_expr, self.name, "bug.json")
         source_file_path, sink_file_path = self.populate_config_file(bug_info, config_path)
 
-        analysis_command = "infer -g run  -- make"
+        analysis_command = "infer -g run  -- make -j 6"
         self.run_command(analysis_command,  dir_path=dir_src)
         # for c_path in set([source_file_path, sink_file_path]):
         #     o_path = c_path.replace(".c", ".o")
