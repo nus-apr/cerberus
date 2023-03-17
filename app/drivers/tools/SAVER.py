@@ -39,14 +39,16 @@ class SAVER(AbstractTool):
 
         saver_source_info = dict()
         bench_source_info = bug_info[definitions.KEY_SOURCE]
-        saver_source_info["filename"] = bench_source_info["src-file"]
+        if bench_source_info["src-file"]:
+            saver_source_info["filename"] = bench_source_info["src-file"]
         saver_source_info["procedure"] = bench_source_info["procedure"]
         saver_source_info["line"] = bench_source_info["line"]
         config_info["source"] = {"node": saver_source_info, "exp": None}
 
         saver_sink_info = dict()
         bench_sink_info = bug_info[definitions.KEY_SINK]
-        saver_sink_info["filename"] = bench_sink_info["src-file"]
+        if bench_sink_info["src-file"]:
+            saver_sink_info["filename"] = bench_sink_info["src-file"]
         saver_sink_info["procedure"] = bench_sink_info["procedure"]
         saver_sink_info["line"] = bench_sink_info["line"]
         config_info["sink"] = {"node": saver_sink_info, "exp": None}
