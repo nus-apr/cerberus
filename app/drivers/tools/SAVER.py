@@ -54,7 +54,7 @@ class SAVER(AbstractTool):
         config_info["sink"] = {"node": saver_sink_info, "exp": None}
         config_info["err_type"] = bug_type_code
         self.write_json(config_info, config_path)
-        return saver_source_info["filename"], saver_sink_info["filename"]
+
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
@@ -65,14 +65,11 @@ class SAVER(AbstractTool):
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
         config_path = join(self.dir_expr, self.name, "bug.json")
-        source_file_path, sink_file_path = self.populate_config_file(bug_info, config_path)
+        self.populate_config_file(bug_info, config_path)
 
         analysis_command = "infer -g run  -- make -j 6"
         self.run_command(analysis_command,  dir_path=dir_src)
-        # for c_path in set([source_file_path, sink_file_path]):
-        #     o_path = c_path.replace(".c", ".o")
-        #     analysis_command = "infer -g run  -- make {}".format(o_path)
-        #     self.run_command(analysis_command,  dir_path=dir_src)
+
 
         return config_path
 
