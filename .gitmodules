@@ -34,3 +34,6 @@
 [submodule "benchmark/lmdefects"]
 	path = benchmark/lmdefects
 	url = git@github.com:nus-apr/lm-defects-benchmark.git
+[submodule "benchmark/saver"]
+	path = benchmark/saver
+	url = https://github.com/nus-apr/saver-benchmark
