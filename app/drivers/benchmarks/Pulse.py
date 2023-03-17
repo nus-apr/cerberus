@@ -34,7 +34,7 @@ class Pulse(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Setup took {} second(s)".format(
-                (datetime.now()).total_seconds() - time
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -53,7 +53,7 @@ class Pulse(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Config took {} second(s)".format(
-                (datetime.now()).total_seconds() - time
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
@@ -73,7 +73,7 @@ class Pulse(AbstractBenchmark):
         )
         emitter.normal(
             "\t\t\t Setup took {} second(s)".format(
-                (datetime.now()).total_seconds() - time
+                (datetime.now() - time).total_seconds()
             )
         )
         return status == 0
