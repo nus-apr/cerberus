@@ -154,6 +154,8 @@ class SAVER(AbstractTool):
         for line in log_lines:
             if "of the total solutions found" in line:
                 self._space.plausible = int(line.split(": ")[-1])
+            elif "opeartion space" in line:
+                self._space.size += int(line.split(": ")[-1])
             elif "ERROR:" in line:
                 self._error.is_error = True
         if is_error:
