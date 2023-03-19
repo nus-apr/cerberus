@@ -1,7 +1,5 @@
 import os
 import re
-from os import listdir
-from os.path import isfile
 from os.path import join
 from datetime import datetime
 from app.core import definitions
@@ -66,14 +64,19 @@ class SAVER(AbstractTool):
         self.run_command(clean_command, dir_path=dir_src)
         config_path = join(self.dir_expr, self.name, "bug.json")
         self.populate_config_file(bug_info, config_path)
-
+        time = datetime.now()
         analysis_command = "infer -g run  -- make -j 6"
         self.run_command(analysis_command,  dir_path=dir_src)
-
+        emitter.normal(
+            "\t\t\t preparation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
 
         return config_path
 
     def repair(self, bug_info, config_info):
+        config_path = self.prepare(bug_info)
         super(SAVER, self).repair(bug_info, config_info)
         if values.only_instrument:
             return
@@ -82,7 +85,6 @@ class SAVER(AbstractTool):
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-        config_path = self.prepare(bug_info)
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -153,11 +155,15 @@ class SAVER(AbstractTool):
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "of the total solutions found" in line:
-                self._space.plausible = int(line.split(": ")[-1])
+                count = int(line.split(": ")[-1])
+                self._space.plausible = count
+                self._space.enumerations = count
             elif "opeartion space" in line:
                 space_size = line.split(": ")[-1]
                 if str(space_size).isnumeric():
-                    self._space.size += int(line.split(": ")[-1])
+                    self._space.size += int(space_size)
+            elif "CONVERTING FAILS" in line:
+                self._space.plausible = 0
             elif "ERROR:" in line:
                 self._error.is_error = True
         if is_error:
