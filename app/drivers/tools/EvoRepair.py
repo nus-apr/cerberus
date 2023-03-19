@@ -74,11 +74,13 @@ class EvoRepair(AbstractTool):
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         max_iterations = 2000000
         test_timeout = 30000
+        test_partitions = 1
         # generate patches
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h evorepair "
             f"--num-iterations {max_iterations} "
+            f"--passing-tests-partitions {test_partitions} "
             f"--config {repair_config_path}"
         )
 
