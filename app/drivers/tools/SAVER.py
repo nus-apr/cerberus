@@ -70,11 +70,19 @@ class SAVER(AbstractTool):
             compile_command = "infer -j 20 -g --headers --check-nullable-only -- make -j20"
         else:
             compile_command = "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
+        emitter.normal("\t\t\t\t compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)
+        emitter.normal(
+            "\t\t\t\t compilation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        time = datetime.now()
+        emitter.normal("\t\t\t\t analysing subject with " + self.name)
         analysis_command = "infer saver --pre-analysis-only "
         self.run_command(analysis_command,  dir_path=dir_src)
         emitter.normal(
-            "\t\t\t preparation took {} second(s)".format(
+            "\t\t\t\t analysis took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
