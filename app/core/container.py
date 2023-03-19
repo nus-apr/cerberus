@@ -294,8 +294,10 @@ def fix_permissions(container_id: str, dir_path: str):
     return exec_command(container_id, permission_command)
 
 
-def list_dir(container_id: str, dir_path: str):
-    exist_command = "ls {}".format(dir_path)
+def list_dir(container_id: str, dir_path: str, regex=None):
+    if not regex:
+        regex = "*"
+    exist_command = "find {} -name \"{}\"".format(dir_path, regex)
     _, output = exec_command(container_id, exist_command)
     file_list = []
     if output:

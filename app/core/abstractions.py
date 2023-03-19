@@ -1,9 +1,11 @@
 import os
 import json
+import pathlib
 from typing import Dict
 from typing import List
 from typing import Optional
 from app.core import container
+
 
 
 def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
@@ -47,15 +49,17 @@ def write_json(container_id: Optional[str], data: Dict, file_path: str):
     write_file(container_id, content, file_path)
 
 
-def list_dir(container_id: Optional[str], dir_path: str):
+def list_dir(container_id: Optional[str], dir_path: str, regex=None):
     file_list = []
+    if not regex:
+        regex = "*"
     if container_id:
         if container.is_dir(container_id, dir_path):
             list_files = container.list_dir(container_id, dir_path)
             file_list = [os.path.join(dir_path, t) for t in list_files]
     else:
         if os.path.isdir(dir_path):
-            list_files = os.listdir(dir_path)
+            list_files = list(pathlib.Path(dir_path).rglob(regex))
             file_list = [os.path.join(dir_path, t) for t in list_files]
     return file_list
 

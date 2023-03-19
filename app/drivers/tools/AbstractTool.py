@@ -313,8 +313,8 @@ class AbstractTool:
     def write_json(self, data, file_path):
         return abstractions.write_json(self.container_id, data, file_path)
 
-    def list_dir(self, dir_path):
-        return abstractions.list_dir(self.container_id, dir_path)
+    def list_dir(self, dir_path, regex):
+        return abstractions.list_dir(self.container_id, dir_path, regex)
 
     def is_dir(self, dir_path):
         return abstractions.is_dir(self.container_id, dir_path)
