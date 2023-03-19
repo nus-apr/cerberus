@@ -58,7 +58,7 @@ class SAVER(AbstractTool):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-
+        emitter.normal("\t\t\t preparing subject for repair with " + self.name)
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
