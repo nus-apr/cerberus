@@ -65,7 +65,13 @@ class SAVER(AbstractTool):
         config_path = join(self.dir_expr, self.name, "bug.json")
         self.populate_config_file(bug_info, config_path)
         time = datetime.now()
-        analysis_command = "infer -g run  -- make -j 6"
+        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        if bug_type == "Memory Leak":
+            compile_command = "infer -j 20 -g --headers --check-nullable-only -- make -j20"
+        else:
+            compile_command = "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
+        self.run_command(compile_command, dir_path=dir_src)
+        analysis_command = "infer saver --pre-analysis-only "
         self.run_command(analysis_command,  dir_path=dir_src)
         emitter.normal(
             "\t\t\t preparation took {} second(s)".format(
@@ -80,7 +86,6 @@ class SAVER(AbstractTool):
         super(SAVER, self).repair(bug_info, config_info)
         if values.only_instrument:
             return
-        emitter.normal("\t\t\t running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
