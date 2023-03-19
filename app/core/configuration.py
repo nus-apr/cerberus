@@ -73,7 +73,6 @@ class Configurations:
         "iteration-limit": 1,
         "patch-rank-limit": 5,
         "stack-size": 15000,
-        "time-duration": 60,  # minutes
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
