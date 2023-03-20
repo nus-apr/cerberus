@@ -1,11 +1,12 @@
-import os
 import json
+import os
 import pathlib
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
-from app.core import container
 
+from app.core import container
 
 
 def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
@@ -22,7 +23,7 @@ def read_json(container_id: Optional[str], file_path: str, encoding="utf-8"):
     json_data = None
     file_content = read_file(container_id, file_path, encoding)
     if file_content:
-        json_data = json.loads(content)
+        json_data = json.loads("\n".join(file_content))
     return json_data
 
 
@@ -44,9 +45,9 @@ def write_file(container_id: Optional[str], content: List[str], file_path: str):
                 f.write(line)
 
 
-def write_json(container_id: Optional[str], data: Dict, file_path: str):
+def write_json(container_id: Optional[str], data: Any, file_path: str):
     content = json.dumps(data)
-    write_file(container_id, content, file_path)
+    write_file(container_id, [content], file_path)
 
 
 def list_dir(container_id: Optional[str], dir_path: str, regex=None):
