@@ -115,6 +115,9 @@ class SAVER(AbstractTool):
             str(timeout_h),
             config_path
         )
+        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        if bug_type in ["Double Free", "Use After Free"]:
+            saver_command += " --analysis-with-fimem "
         saver_command += "{0} >> {1} 2>&1 ".format(
             additional_tool_param, self.log_output_path
         )
