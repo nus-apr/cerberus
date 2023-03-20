@@ -128,15 +128,16 @@ class FootPatch(AbstractTool):
         self._time.timestamp_start = log_lines[0].replace("\n", "")
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         footpatch_log_path = join(self.dir_expr, "src", "infer-out", "footpatch", "log.txt")
-        log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
-        for line in log_lines:
-            if "Patch routine" in line:
-                self._space.enumerations += 1
-            elif "Writing patches" in line:
-                self._space.plausible += 1
-            elif "Filtered candidates:" in line:
-                self._space.size +=  int(line.split(": ")[-1])
-        if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+        if self.is_file(footpatch_log_path):
+            log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
+            for line in log_lines:
+                if "Patch routine" in line:
+                    self._space.enumerations += 1
+                elif "Writing patches" in line:
+                    self._space.plausible += 1
+                elif "Filtered candidates:" in line:
+                    self._space.size +=  int(line.split(": ")[-1])
+            if is_error:
+                emitter.error("\t\t\t\t[error] error detected in logs")
 
         return self._space, self._time, self._error
