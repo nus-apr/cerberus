@@ -33,6 +33,10 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 
 ## Supported Repair Tools
 
+<details>
+<summary>C/C++</summary>
+<br>
+
 | #  | Tool       | Language | Repository                                         | Commit id |
 |----|------------| -------- |----------------------------------------------------| --------  |
 | 1  | Angelix    | C/C++    | <https://github.com/mechtaev/angelix>              | 01396ac   |
@@ -46,21 +50,35 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 9  | GenProg    | C/C++    | <https://github.com/squaresLab/genprog-code>       | 0b25153   |
 | 10 | ExtractFix | C/C++    | N/A                                                | N/A       |
 | 11 | Verifix    | C/C++    | <https://github.com/zhiyufan/Verifix>              | 6d5bda0   |
-| 12 | Hippodrome | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
-| 13 | SequenceR  | Java     | <https://github.com/KTH/sequencer>                 | 3bd0cd4   |
-| 14 | ARJA       | Java     | <https://github.com/yyxhdy/arja>                   | e795032   |
-| 15 | Cardumen   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 16 | jMutRepair | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 17 | jKali      | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 18 | jGenProg   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 19 | Nopol      | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
-| 20 | Recorder   | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
-| 21 | TBar       | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
-| 22 | SAVER      | C/C++    | <https://github.com/kupl/SAVER_public>             | e7eca63   |
-| 23 | FootPatch  | C/C++    | <https://github.com/squaresLab/footpatch>          | 8b79c19   |
+| 12 | SAVER      | C/C++    | <https://github.com/kupl/SAVER_public>             | e7eca63   |
+| 13 | FootPatch  | C/C++    | <https://github.com/squaresLab/footpatch>          | 8b79c19   |
 
+</details>
+
+<details>
+<summary>Java</summary>
+<br>
+
+| #  | Tool       | Language | Repository                                         | Commit id |
+|----|------------| -------- |----------------------------------------------------| --------  |
+| 1  | Hippodrome | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
+| 2  | SequenceR  | Java     | <https://github.com/KTH/sequencer>                 | 3bd0cd4   |
+| 3  | ARJA       | Java     | <https://github.com/yyxhdy/arja>                   | e795032   |
+| 4  | Cardumen   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 5  | jMutRepair | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 6  | jKali      | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 7  | jGenProg   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 8  | Nopol      | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
+| 9  | Recorder   | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
+| 10 | TBar       | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
+
+
+</details>
 
 ## Supported Benchmarks of Bugs
+<details>
+<summary>C/C++</summary>
+<br>
 
 | # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
 | - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
@@ -68,11 +86,25 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 2 | VulnLoc           | C/C++    | <https://github.com/nus-apr/vulnloc-benchmark>        |         11 |     43 |
 | 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark>     |          7 |     30 |
 | 4 | ITSP              | C/C++    | <https://github.com/nus-apr/itsp-benchmark>           |         10 |    661 |
-| 5 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
-| 6 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
-| 7 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
-| 8 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |
-| 9 | IntroClassJava    | Java     | <https://github.com/nus-apr/introclassjava-benchmark> |          6 |    297 |
+
+
+</details>
+
+<details>
+<summary>Java</summary>
+<br>
+
+| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
+| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
+| 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
+| 2 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
+| 3 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
+| 4 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |
+| 5 | IntroClassJava    | Java     | <https://github.com/nus-apr/introclassjava-benchmark> |          6 |    297 |
+
+</details>
+
+
 
 ## Bugs
 
