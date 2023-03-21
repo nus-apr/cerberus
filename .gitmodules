@@ -1,0 +1,39 @@
+[submodule "benchmark/vulnloc"]
+	path = benchmark/vulnloc
+	url = git@github.com:nus-apr/vulnloc-benchmark.git
+[submodule "benchmark/manybugs"]
+	path = benchmark/manybugs
+	url = git@github.com:nus-apr/manybugs.git
+[submodule "benchmark/extractfix"]
+	path = benchmark/extractfix
+	url = git@github.com:nus-apr/extractfix-benchmark.git
+[submodule "benchmark/itsp"]
+	path = benchmark/itsp
+	url = git@github.com:nus-apr/itsp-benchmark.git
+[submodule "benchmark/hippodrome"]
+	path = benchmark/hippodrome
+	url = git@github.com:nus-apr/hippodrome-benchmark.git
+[submodule "benchmark/defects4j"]
+	path = benchmark/defects4j
+	url = git@github.com:nus-apr/defects4j.git
+[submodule "benchmark/quixbugsjava"]
+	path = benchmark/quixbugsjava
+	url = git@github.com:nus-apr/quixbugs-java-benchmark.git
+[submodule "benchmark/bears"]
+	path = benchmark/bears
+	url = git@github.com:nus-apr/bears-benchmark.git
+[submodule "benchmark/bugsdotjar"]
+	path = benchmark/bugsdotjar
+	url = git@github.com:nus-apr/bugs-dot-jar-benchmark.git
+[submodule "benchmark/introclassjava"]
+	path = benchmark/introclassjava
+	url = git@github.com:nus-apr/introclassjava-benchmark.git
+[submodule "benchmark/pulse"]
+	path = benchmark/pulse
+	url = git@github.com:nus-apr/pulse-benchmark.git
+[submodule "benchmark/lmdefects"]
+	path = benchmark/lmdefects
+	url = git@github.com:nus-apr/lm-defects-benchmark.git
+[submodule "benchmark/saver"]
+	path = benchmark/saver
+	url = https://github.com/nus-apr/saver-benchmark
