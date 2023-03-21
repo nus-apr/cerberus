@@ -9,10 +9,8 @@ from typing import Tuple
 from textual.app import App
 from textual.app import ComposeResult
 from textual.message import Message
-from textual.message import MessageTarget
 from textual.messages import *
 from textual.reactive import Reactive
-from textual.reactive import reactive
 from textual.screen import Screen
 from textual.widgets import DataTable
 from textual.widgets import Footer
@@ -30,22 +28,11 @@ from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
-job_identifier: contextvars.ContextVar[str] = contextvars.ContextVar("job_id")
+job_identifier: contextvars.ContextVar[str] = contextvars.ContextVar(
+    "job_id", default="root"
+)
 
-log_map: Dict[int, TextLog] = {}
-
-
-class LogScreen(Screen):
-    def __init__(self, job_id) -> None:
-        self.job_id = job_id
-        super().__init__()
-
-    BINDINGS = [("escape", "app.pop_screen", "Pop screen")]
-
-    def compose(self) -> ComposeResult:
-        yield Static(" JOB {}".format(self.job_id), id="title")
-        yield log_map[self.job_id]
-        yield Static("Press any key to exit [blink]_[/]", id="any-key")
+log_map: Dict[str, TextLog] = {}
 
 
 class Job(Message):
@@ -78,6 +65,8 @@ class Write(Message):
     def __init__(self, text, identifier):
         self.text = text
         self.identifier = identifier
+        self.selected: Optional[TextLog]
+        self.selected = None
         super().__init__()
 
 
@@ -133,7 +122,6 @@ class Cerberus(App):
         benchmark: AbstractBenchmark,
         setup: Any,
     ):
-        job_identifier.set("ROOT")
         emitter.sub_title("Repairing benchmark")
         emitter.highlight(
             "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
@@ -152,7 +140,7 @@ class Cerberus(App):
                 )
                 utilities.check_space()
                 table = self.query_one(DataTable)
-                table.add_row(
+                key = table.add_row(
                     str(iteration),
                     benchmark.name,
                     experiment_item[definitions.KEY_SUBJECT],
@@ -160,7 +148,7 @@ class Cerberus(App):
                     values.current_profile_id,
                     "Allocated",
                 )  # type: ignore
-                key = iteration - 1  # "{}-{}-{}-{}".format(
+                # "{}-{}-{}-{}".format(
                 #    benchmark.name,
                 #    "-".join(map(lambda x: x.name, repair_tool_list)),
                 #    experiment_item[definitions.KEY_SUBJECT],
@@ -175,6 +163,7 @@ class Cerberus(App):
                     key,
                 )
                 log_map[key] = TextLog(highlight=True, markup=True)
+                self.mount(log_map[key], after=0)
                 self.post_message(job)
 
     async def on_cerberus_job(self, message: Job):
@@ -192,15 +181,20 @@ class Cerberus(App):
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
             log_map[message.identifier].write(message.text)
-            log_map[message.identifier].scroll_end()
         pass
 
-    async def on_data_table_row_highlighted(self, message):
-        self.push_screen(LogScreen(message.cursor_row))
+    async def on_data_table_row_highlighted(self, message: DataTable.RowHighlighted):
+        self.selected: Optional[TextLog]
+        if self.selected != None:
+            log_map[self.selected].visible = False
+        self.selected = message.row_key
+        log_map[message.row_key].visible = True
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
+        log_map["root"] = TextLog(highlight=True, markup=True)
+        yield log_map["root"]
         yield DataTable()
         yield Footer()
 
