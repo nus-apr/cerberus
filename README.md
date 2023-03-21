@@ -56,6 +56,10 @@ cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prop
 | 19 | Nopol      | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
 | 20 | Recorder   | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
 | 21 | TBar       | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
+| 22 | SAVER      | C/C++    | <https://github.com/kupl/SAVER_public>             | e7eca63   |
+| 23 | FootPatch  | C/C++    | <https://github.com/squaresLab/footpatch>          | 8b79c19   |
+
+
 ## Supported Benchmarks of Bugs
 
 | # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
