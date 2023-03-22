@@ -15,6 +15,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import logger
 from app.core import parallel
+from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core import writer
@@ -460,6 +461,7 @@ def run(
     tool_list: List[AbstractTool],
     bug_info: Dict[str, Any],
     config_info,
+    finish_key,
 ):
     dir_info_list = []
     container_id_list = []
@@ -581,6 +583,8 @@ def run(
             utilities.clean_artifacts(dir_result)
 
     construct_summary()
+    if values.ui_active:
+        ui.get_ui().post_message(ui.JobFinish(finish_key))
 
 
 def construct_summary():
