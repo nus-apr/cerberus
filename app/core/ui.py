@@ -1,5 +1,7 @@
 import asyncio
 import contextvars
+from copy import copy
+from enum import Enum
 from typing import Any
 from typing import Dict
 from typing import List
@@ -61,8 +63,13 @@ class JobFinish(Message):
     bubble = True
     namespace = "cerberus"
 
-    def __init__(self, key):
+    class Status(Enum):
+        SUCCESS = 0
+        FAIL = 1
+
+    def __init__(self, key, status: Status):
         self.key = key
+        self.status = status
         super().__init__()
 
 
@@ -118,10 +125,9 @@ class Cerberus(App):
                 tool_list.append(tool)
         benchmark = configuration.load_benchmark(values.benchmark_name.lower())
         setup = configuration.load_configuration_details(values.file_configuration)
-        run_profile_id_list = values.profile_id_list
-        for profile_id in run_profile_id_list:
+        for profile_id in values.profile_id_list:
             if profile_id not in setup:
-                utilities.error_exit("invalid profile id {}".format(profile_id))
+                utilities.error_exit("Invalid profile id {}".format(profile_id))
         return tool_list, benchmark, setup
 
     def on_mount(self):
@@ -139,9 +145,18 @@ class Cerberus(App):
             None, lambda: self.run_repair(*self.initialize())
         )
 
+    async def show_finished(self):
+        table = self.query_one(DataTable)
+        pass
+
+    async def show_running(self):
+        pass
+
+    async def show_all_subjects(self):
+        pass
+
     def handle(self, a, b):
-        if values.debug:
-            log_map["root"].write("GOT EXCEPTION!")
+        self.debug_print("GOT EXCEPTION!")
         pass
 
     def run_repair(
@@ -188,7 +203,7 @@ class Cerberus(App):
 
                 job = JobAllocate(
                     benchmark,
-                    repair_tool_list,
+                    [copy(x) for x in repair_tool_list],
                     experiment_item,
                     config_info,
                     key,
@@ -201,15 +216,7 @@ class Cerberus(App):
         self.jobs = iteration
 
     async def on_key(self, message: Key):
-        if values.debug:
-            log_map["root"].write("I am seeing? {}".format(message))
-        if values.debug:
-            log_map["root"].write(
-                "HEIGHT IS {}, auto= {}".format(
-                    self.query_one(DataTable).styles.height,
-                    self.query_one(DataTable).auto_height,
-                )
-            )
+        self.debug_print("I am seeing? {}".format(message))
         if message.key == "escape":
             if self.selected:
                 self.hide(log_map[self.selected])
@@ -230,8 +237,7 @@ class Cerberus(App):
         asyncio.get_running_loop().run_in_executor(None, job)
 
     async def on_cerberus_job_mount(self, message: JobMount):
-        if values.debug:
-            log_map["root"].write("Mounting {}".format(message.key))
+        self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
         await self.mount(text_log, before=self.query_one(DataTable))
         self.hide(text_log)
@@ -240,28 +246,27 @@ class Cerberus(App):
     async def on_cerberus_job_finish(self, message: JobFinish):
         if Cerberus.COLUMNS["Status"]:
             self.query_one(DataTable).update_cell(
-                message.key, Cerberus.COLUMNS["Status"], "DONE"
+                message.key, Cerberus.COLUMNS["Status"], str(message.status)
             )
+        self.jobs -= 1
+        if self.jobs == 0:
+            await self.action_quit()
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
             log_map[message.identifier].write(message.text)
-        if values.debug:
-            log_map["root"].write(message.text)
+        self.debug_print(message.text)
 
     def show(self, x: Widget):
         x.visible = True
-        x.auto_height = True
         x.styles.height = "100%"
 
     def hide(self, x: Widget):
         x.visible = False
-        x.auto_height = False
         x.styles.height = "0%"
 
     async def on_data_table_row_highlighted(self, message: DataTable.RowHighlighted):
-        if values.debug:
-            log_map["root"].write("I am highlighting {}".format(message.row_key.value))
+        self.debug_print("I am highlighting {}".format(message.row_key.value))
         # self.selected: Optional[str]
         if self.selected is not None:
             log_map["root"].write("Selected is not none but {}".format(self.selected))
@@ -275,7 +280,6 @@ class Cerberus(App):
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
-
         table: DataTable[Any] = DataTable()
         table.styles.border = ("heavy", "white")
         yield table
@@ -288,9 +292,13 @@ class Cerberus(App):
         yield Footer()
 
     def action_toggle_dark(self) -> None:
-        """An action to toggle dark mode."""
+        """Toggle dark mode."""
         self.dark: Reactive[bool]
-        self.dark = not self.dark
+        self.dark = not self.dark  # type: ignore
+
+    def debug_print(self, text: Any):
+        if values.debug:
+            log_map["root"].write(text)
 
 
 app: Cerberus
