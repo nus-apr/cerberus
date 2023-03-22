@@ -76,6 +76,8 @@ def parse_args():
         "-g",
         definitions.ARG_TUI,
         help="Activate Textual UI",
+        action="store_true",
+        default=False,
     )
 
     optional.add_argument(
