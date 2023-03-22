@@ -31,7 +31,7 @@ def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
     image_list = client.images.list()
     for image in image_list:
-        tag_list = image.tags
+        tag_list = image.tags  # type: ignore
         if not tag_list:
             continue
         if image_name != tag_list[0].split(":")[0]:
@@ -54,7 +54,7 @@ def pull_image(image_name: str, tag_name: str):
             for sub_line in line["status"].split("\n"):
                 emitter.build("(docker-api) {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
-    except docker.errors.APIError as exp:
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("(error) Unable to pull image: docker daemon error")
     except Exception as ex:
@@ -82,10 +82,10 @@ def build_image(dockerfile_path: str, image_name: str):
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
-        except docker.errors.BuildError as ex:
+        except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
             utilities.error_exit("[error] Unable to build image: build failed")
-        except docker.errors.APIError as exp:
+        except docker.errors.APIError as exp:  # type: ignore
             emitter.error(exp)
             utilities.error_exit("[error] Unable to build image: docker daemon error")
         except Exception as ex:
@@ -118,10 +118,10 @@ def get_container(container_id: str):
     container = None
     try:
         container = client.containers.get(container_id)
-    except docker.errors.NotFound as ex:
+    except docker.errors.NotFound as ex:  # type: ignore
         # emitter.error(ex)
         emitter.warning("\t\t(warning) Unable to find container")
-    except docker.errors.APIError as exp:
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
     except Exception as ex:
@@ -134,11 +134,11 @@ def get_container_id(container_name: str) -> Optional[str]:
     client = get_client()
     container_id = None
     try:
-        container_id = client.containers.get(container_name).id[:12]
-    except docker.errors.NotFound as ex:
+        container_id = client.containers.get(container_name).id[:12]  # type: ignore
+    except docker.errors.NotFound as ex:  # type: ignore
         # emitter.error(ex)
         emitter.warning("\t\t(warning) Unable to find container")
-    except docker.errors.APIError as exp:
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
     except Exception as ex:
@@ -169,17 +169,17 @@ def build_container(container_name: str, volume_list, image_name: str) -> Option
             tty=True,
             runtime="nvidia" if values.use_gpu else "runc",
         )
-        container_id = container.id
-        return container_id[:12]
-    except docker.errors.ContainerError as ex:
+        container_id = container.id  # type: ignore
+        return container_id[:12]  # type: ignore
+    except docker.errors.ContainerError as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
             "[error] Unable to build container: container exited with a non-zero exit code"
         )
-    except docker.errors.ImageNotFound as ex:
+    except docker.errors.ImageNotFound as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit("[error] Unable to build container: image not found")
-    except docker.errors.APIError as exp:
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to build container: docker daemon error")
     except Exception as ex:
@@ -201,7 +201,7 @@ def exec_command(
         command = command.encode().decode("ascii", "ignore")
         print_command = "({}) {}".format(workdir, command)
         emitter.docker_command(print_command)
-        exit_code, output = container.exec_run(
+        exit_code, output = container.exec_run(  # type: ignore
             command,
             privileged=True,
             demux=True,
@@ -216,14 +216,14 @@ def exec_command(
                 for line in stream.decode("ascii", "ignore").split("\n"):
                     if line != "":
                         emitter.debug(line)
-    except docker.errors.NotFound as ex:
+    except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
             "(error) Unable to find container: container not found: {}".format(
                 container_id
             )
         )
-    except docker.errors.APIError as exp:
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("(error) Unable to find container: docker daemon error")
     except Exception as ex:
@@ -237,8 +237,8 @@ def remove_container(container_id: str):
     emitter.normal("\t\t\tremoving docker container")
     try:
         container = client.containers.get(container_id)
-        container.remove(force=True)
-    except docker.errors.APIError as exp:
+        container.remove(force=True)  # type: ignore
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("(warning) Unable to remove container: docker daemon error")
     except Exception as ex:
@@ -251,8 +251,8 @@ def start_container(container_id: str):
     emitter.normal("\t\t\tstarting docker container {}".format(container_id))
     try:
         container = client.containers.get(container_id)
-        container.start()
-    except docker.errors.APIError as exp:
+        container.start()  # type: ignore
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("(warning) Unable to stop container: docker daemon error")
     except Exception as ex:
@@ -265,8 +265,8 @@ def stop_container(container_id: str):
     emitter.normal("\t\t\tstopping docker container")
     try:
         container = client.containers.get(container_id)
-        container.stop(timeout=20)
-    except docker.errors.APIError as exp:
+        container.stop(timeout=20)  # type: ignore
+    except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("(warning) Unable to stop container: docker daemon error")
     except Exception as ex:
