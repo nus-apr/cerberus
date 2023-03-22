@@ -88,6 +88,7 @@ class Configurations:
         "dump-patches": False,
         "start-index": None,
         "end-index": None,
+        "use-tui": False,
         "bug-id-list": [],
         "bug-index-list": [],
         "skip-index-list": [],
@@ -161,6 +162,9 @@ class Configurations:
 
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
+
+        if arg_list.use_tui:
+            self.__runtime_config_values["use-tui"] = True
 
         if arg_list.profile_id_list:
             self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
@@ -278,6 +282,7 @@ class Configurations:
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
         values.profile_id_list = self.__runtime_config_values["profile-id-list"]
+        values.use_tui = self.__runtime_config_values["use-tui"]
 
         if (
             values.start_index is None

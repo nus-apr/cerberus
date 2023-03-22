@@ -73,6 +73,12 @@ def parse_args():
     )
 
     optional.add_argument(
+        "-g",
+        definitions.ARG_TUI,
+        help="Activate Textual UI",
+    )
+
+    optional.add_argument(
         "-e",
         definitions.ARG_EMAIL_CONFIG,
         help="email client configuration file",
@@ -227,6 +233,45 @@ def parse_args():
     return args
 
 
+def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
+    emitter.sub_title("Repairing benchmark")
+    emitter.highlight(
+        "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
+    )
+    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
+    run_profile_id_list = values.profile_id_list
+    iteration = 0
+    for profile_id in run_profile_id_list:
+        if profile_id not in setup:
+            utilities.error_exit("invalid profile id " + profile_id)
+        config_info = setup[profile_id]
+        values.current_profile_id = config_info[definitions.KEY_ID]
+        experiment_list = filter_experiment_list(benchmark)
+        for experiment_item in experiment_list:
+            iteration = iteration + 1
+            values.iteration_no = iteration
+            bug_index = experiment_item[definitions.KEY_ID]
+            emitter.sub_sub_title(
+                "Experiment #{} - Bug #{}".format(iteration, bug_index)
+            )
+            utilities.check_space()
+            repair.run(benchmark, repair_tool_list, experiment_item, config_info)
+
+
+def initialize() -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
+    emitter.sub_title("Initializing setup")
+    tool_list = []
+    if values.tool_list:
+        for tool_name in values.tool_list:
+            tool = configuration.load_tool(tool_name)
+            if not values.only_analyse:
+                tool.check_tool_exists()
+            tool_list.append(tool)
+    benchmark = configuration.load_benchmark(values.benchmark_name.lower())
+    setup = configuration.load_configuration_details(values.file_configuration)
+    return tool_list, benchmark, setup
+
+
 def filter_experiment_list(benchmark: AbstractBenchmark):
     filtered_list = []
     experiment_list = benchmark.get_list()
@@ -262,7 +307,11 @@ def main():
     try:
         emitter.title("Starting " + values.tool_name + " (Program Repair Framework) ")
         bootstrap(parsed_args)
-        ui.setup_ui()
+        if parsed_args.use_tui:
+            ui.setup_ui()
+        else:
+            repair_tool_list, benchmark, setup = initialize()
+            run(repair_tool_list, benchmark, setup)
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
