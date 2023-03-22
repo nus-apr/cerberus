@@ -73,7 +73,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
     else:
         if prefix:
             print_message = prefix + print_message
-        ui.get_ui().post_message_no_wait(
+        ui.get_ui().post_message(
             ui.Write(
                 text="[bold {}](({})) {}".format(
                     TEXTUALIZE_COLOR_MAP[print_color],
