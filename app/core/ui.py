@@ -145,23 +145,20 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         values.ui_active = False
 
     def on_mount(self):
-        self.selected = None
-        self.jobs = 0
-        self._return_value = []
+        self.selected_subject = None
+        self.jobs_remaining = 0
+        self.finished_subjects = []
         asyncio.get_running_loop().set_exception_handler(self.handle)
         values.ui_active = True
-        table = self.query_one(DataTable)
-        table.cursor_type = "row"
 
-        vals = table.add_columns(*Cerberus.COLUMNS.keys())
-        for (k, v) in zip(Cerberus.COLUMNS.keys(), vals):
+        column_keys = self.query_one(DataTable).add_columns(*Cerberus.COLUMNS.keys())
+        for (k, v) in zip(Cerberus.COLUMNS.keys(), column_keys):
             Cerberus.COLUMNS[k] = v
         asyncio.get_running_loop().run_in_executor(
             None, lambda: self.run_repair(*self.initialize())
         )
 
     async def show_finished(self):
-        table = self.query_one(DataTable)
         pass
 
     async def show_running(self):
@@ -228,14 +225,14 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 log_map[key].auto_height = True
                 self.post_message(JobMount(key))
                 self.post_message(job)
-        self.jobs = iteration
+        self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
         self.debug_print("I am seeing? {}".format(message))
         if message.key == "escape":
-            if self.selected:
-                self.hide(log_map[self.selected])
-            self.selected = None
+            if self.selected_subject:
+                self.hide(log_map[self.selected_subject])
+            self.selected_subject = None
             # self.set_focus(self.query_one(DataTable))
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
@@ -263,11 +260,10 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             self.query_one(DataTable).update_cell(
                 message.key, Cerberus.COLUMNS["Status"], str(message.status)
             )
-        self.jobs -= 1
-        if self._return_value:
-            self._return_value.append((message.key, message.status))
-        if self.jobs == 0:
-            self.exit(self._return_value)
+        self.jobs_remaining -= 1
+        self.finished_subjects.append((message.key, message.status))
+        if self.jobs_remaining == 0:
+            self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
@@ -285,19 +281,22 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     async def on_data_table_row_highlighted(self, message: DataTable.RowHighlighted):
         self.debug_print("I am highlighting {}".format(message.row_key.value))
         # self.selected: Optional[str]
-        if self.selected is not None:
-            log_map["root"].write("Selected is not none but {}".format(self.selected))
-            self.hide(log_map[self.selected])
+        if self.selected_subject is not None:
+            log_map["root"].write(
+                "Selected is not none but {}".format(self.selected_subject)
+            )
+            self.hide(log_map[self.selected_subject])
 
         if message.row_key.value:
-            self.selected = message.row_key.value
-            self.show(log_map[self.selected])
-            self.set_focus(log_map[self.selected])
+            self.selected_subject = message.row_key.value
+            self.show(log_map[self.selected_subject])
+            self.set_focus(log_map[self.selected_subject])
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
         table: DataTable[Any] = DataTable()
+        table.cursor_type = "row"
         table.styles.border = ("heavy", "white")
         yield table
 
