@@ -22,6 +22,7 @@ from textual.widgets._data_table import ColumnKey
 
 from app.core import configuration
 from app.core import definitions
+from app.core import email
 from app.core import emitter
 from app.core import main
 from app.core import repair
@@ -103,7 +104,7 @@ class Write(Message):
         super().__init__()
 
 
-class Cerberus(App):
+class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     """The main window"""
 
     COLUMNS: Dict[str, Optional[ColumnKey]] = {
@@ -140,9 +141,13 @@ class Cerberus(App):
                 utilities.error_exit("Invalid profile id {}".format(profile_id))
         return tool_list, benchmark, setup
 
+    def on_exit(self):
+        values.ui_active = False
+
     def on_mount(self):
         self.selected = None
         self.jobs = 0
+        self._return_value = []
         asyncio.get_running_loop().set_exception_handler(self.handle)
         values.ui_active = True
         table = self.query_one(DataTable)
@@ -259,8 +264,10 @@ class Cerberus(App):
                 message.key, Cerberus.COLUMNS["Status"], str(message.status)
             )
         self.jobs -= 1
+        if self._return_value:
+            self._return_value.append((message.key, message.status))
         if self.jobs == 0:
-            await self.action_quit()
+            self.exit(self._return_value)
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
@@ -321,4 +328,13 @@ def get_ui() -> Cerberus:
 def setup_ui():
     global app
     app = Cerberus()
-    app.run()
+    experiment_results = app.run()
+    if experiment_results:
+        email.send_message(
+            "Cerberus has finished running! These are the following results:\n"
+            + "\n".join(map(lambda t: "{} -> {}".format(*t), experiment_results))
+        )
+        for (experiment, status) in experiment_results:
+            emitter.information(
+                "Experiment {} has final status {}".format(experiment, status)
+            )
