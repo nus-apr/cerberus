@@ -1,7 +1,8 @@
 import os
 import re
-from os.path import join
 from datetime import datetime
+from os.path import join
+
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -16,7 +17,6 @@ class FootPatch(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(FootPatch, self).__init__(self.name)
 
-  
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
         emitter.normal("\t\t\t preparing subject for repair with " + self.name)
@@ -30,11 +30,13 @@ class FootPatch(AbstractTool):
         new_env = os.environ.copy()
         if "GLOBAL_REPAIR" in new_env:
             del new_env["GLOBAL_REPAIR"]
-        new_env["DUMP_CANDS"] = '1'
+        new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
-        analysis_command = "~/footpatch/infer-linux64-v0.9.3/infer/bin/infer  " \
-                           "-j 20 --headers --no-filtering -- make -j20"
-        self.run_command(analysis_command,  dir_path=dir_src, env=new_env)
+        analysis_command = (
+            "~/footpatch/infer-linux64-v0.9.3/infer/bin/infer  "
+            "-j 20 --headers --no-filtering -- make -j20"
+        )
+        self.run_command(analysis_command, dir_path=dir_src, env=new_env)
         emitter.normal(
             "\t\t\t preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -68,15 +70,21 @@ class FootPatch(AbstractTool):
         new_env = os.environ.copy()
         if "DUMP_CANDS" in new_env:
             del new_env["DUMP_CANDS"]
-        new_env["GLOBAL_REPAIR"] = '1'
+        new_env["GLOBAL_REPAIR"] = "1"
 
         self.timestamp_log_start()
-        footpatch_command = "timeout -k 5m {0}h ~/footpatch/infer-linux64-v0.9.3/infer/bin/infer " \
-                            "-j 20 --headers --no-filtering {1} " \
-                            "-- make -j20".format(timeout_h, additional_tool_param)
+        footpatch_command = (
+            "timeout -k 5m {0}h ~/footpatch/infer-linux64-v0.9.3/infer/bin/infer "
+            "-j 20 --headers --no-filtering {1} "
+            "-- make -j20".format(timeout_h, additional_tool_param)
+        )
 
-        status = self.run_command(footpatch_command, dir_path=dir_src,
-                                  env=new_env, log_file_path=self.log_output_path)
+        status = self.run_command(
+            footpatch_command,
+            dir_path=dir_src,
+            env=new_env,
+            log_file_path=self.log_output_path,
+        )
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
@@ -90,7 +98,9 @@ class FootPatch(AbstractTool):
 
     def save_artifacts(self, dir_info):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
-        copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(self.dir_expr, self.dir_output)
+        copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
+            self.dir_expr, self.dir_output
+        )
         self.run_command(copy_command)
         super(FootPatch, self).save_artifacts(dir_info)
         return
@@ -119,7 +129,7 @@ class FootPatch(AbstractTool):
         is_error = False
 
         # count number of patch files
-        dir_footpatch = join(self.dir_expr, "src", "infer-out","footpatch")
+        dir_footpatch = join(self.dir_expr, "src", "infer-out", "footpatch")
         list_patches = self.list_dir(dir_footpatch, regex="*.patch")
         self._space.generated = len(list_patches)
 
@@ -127,7 +137,9 @@ class FootPatch(AbstractTool):
         log_lines = self.read_file(footpatch_std_out, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
-        footpatch_log_path = join(self.dir_expr, "src", "infer-out", "footpatch", "log.txt")
+        footpatch_log_path = join(
+            self.dir_expr, "src", "infer-out", "footpatch", "log.txt"
+        )
         if self.is_file(footpatch_log_path):
             log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
             for line in log_lines:
@@ -136,7 +148,7 @@ class FootPatch(AbstractTool):
                 elif "Writing patches" in line:
                     self._space.plausible += 1
                 elif "Filtered candidates:" in line:
-                    self._space.size +=  int(line.split(": ")[-1])
+                    self._space.size += int(line.split(": ")[-1])
             if is_error:
                 emitter.error("\t\t\t\t[error] error detected in logs")
 
