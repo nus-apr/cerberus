@@ -22,7 +22,7 @@ def get_client():
         base_url=values.docker_host,
         version="1.41",
         # user_agent="Cerberus Agent",
-        use_ssh_client=True,
+        # use_ssh_client=True,
     )
     return cached_client
 
