@@ -68,9 +68,9 @@ class JobFinish(Message):
         FAIL = 1
 
         def __str__(self) -> str:
-            if self.value == self.SUCCESS:
+            if self is self.SUCCESS:
                 return "Success"
-            elif self.value == self.FAIL:
+            elif self is self.FAIL:
                 return "Failure"
             else:
                 raise NotImplementedError(
