@@ -1,7 +1,8 @@
 import os
 import re
-from os.path import join
 from datetime import datetime
+from os.path import join
+
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -15,7 +16,7 @@ class SAVER(AbstractTool):
     bug_conversion_table = {
         "Memory Leak": "MEMORY_LEAK",
         "Use After Free": "USE_AFTER_FREE",
-        "Double Free": "DOUBLE_FREE"
+        "Double Free": "DOUBLE_FREE",
     }
 
     def __init__(self):
@@ -31,9 +32,13 @@ class SAVER(AbstractTool):
         bug_type_code = self.bug_conversion_table[bug_type]
 
         if definitions.KEY_SOURCE not in bug_info:
-            error_exit(f"Missing memory source information in benchmark, required for {self.name}")
+            error_exit(
+                f"Missing memory source information in benchmark, required for {self.name}"
+            )
         if definitions.KEY_SINK not in bug_info:
-            error_exit(f"Missing memory sink information in benchmark, required for {self.name}")
+            error_exit(
+                f"Missing memory sink information in benchmark, required for {self.name}"
+            )
 
         saver_source_info = dict()
         bench_source_info = bug_info[definitions.KEY_SOURCE]
@@ -53,7 +58,6 @@ class SAVER(AbstractTool):
         config_info["err_type"] = bug_type_code
         self.write_json(config_info, config_path)
 
-
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
@@ -67,9 +71,13 @@ class SAVER(AbstractTool):
         time = datetime.now()
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         if bug_type == "Memory Leak":
-            compile_command = "infer -j 20 -g --headers --check-nullable-only -- make -j20"
+            compile_command = (
+                "infer -j 20 -g --headers --check-nullable-only -- make -j20"
+            )
         else:
-            compile_command = "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
+            compile_command = (
+                "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
+            )
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)
         emitter.normal(
@@ -80,7 +88,7 @@ class SAVER(AbstractTool):
         time = datetime.now()
         emitter.normal("\t\t\t\t analysing subject with " + self.name)
         analysis_command = "infer saver --pre-analysis-only "
-        self.run_command(analysis_command,  dir_path=dir_src)
+        self.run_command(analysis_command, dir_path=dir_src)
         emitter.normal(
             "\t\t\t\t analysis took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -112,8 +120,7 @@ class SAVER(AbstractTool):
         self.timestamp_log_start()
         saver_command = "cd {};".format(join(self.dir_expr, "src"))
         saver_command += "timeout -k 5m {0}h saver --error-report {1} ".format(
-            str(timeout_h),
-            config_path
+            str(timeout_h), config_path
         )
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         if bug_type in ["Double Free", "Use After Free"]:
