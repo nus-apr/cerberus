@@ -67,6 +67,16 @@ class JobFinish(Message):
         SUCCESS = 0
         FAIL = 1
 
+        def __str__(self) -> str:
+            if self.value == self.SUCCESS:
+                return "Success"
+            elif self.value == self.FAIL:
+                return "Failure"
+            else:
+                raise NotImplementedError(
+                    "New status defined but not implemented in repr"
+                )
+
     def __init__(self, key, status: Status):
         self.key = key
         self.status = status
