@@ -5,14 +5,14 @@ import sys
 import textwrap
 from enum import Enum
 
-from textual.widgets import TextLog
-
 from app.core import definitions
 from app.core import logger
 from app.core import ui
 from app.core import values
 
-rows, columns = tuple(map(int, os.popen("stty size", "r").read().split()))
+stty_info = os.popen("stty size", "r")
+rows, columns = tuple(map(int, stty_info.read().split()))
+stty_info.close()
 
 
 class COLOR(Enum):
