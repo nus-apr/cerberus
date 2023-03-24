@@ -1,4 +1,5 @@
 import os
+from contextvars import ContextVar
 from os.path import dirname
 from os.path import join
 from typing import Any
@@ -85,7 +86,7 @@ dump_patches = False
 arg_pass = False
 iteration_no = -1
 analysis_results: Dict[str, Tuple[SpaceAnalysis, TimeAnalysis]] = dict()
-current_profile_id = None
+current_profile_id = ContextVar("current_profile_id", default=None)
 
 email_configuration = {
     "ssl_from_start": True,

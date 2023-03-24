@@ -261,9 +261,21 @@ def repair_all(
                     total_timeout,
                     test_timeout,
                 )
+
+                def consume_patches_wrapped(
+                    v_path_info, v_dir_info, v_config_info, profile_id
+                ):
+                    values.current_profile_id.set(profile_id)
+                    parallel.consume_patches(v_path_info, v_dir_info, v_config_info)
+
                 consume_thread = threading.Thread(
-                    target=parallel.consume_patches,
-                    args=(v_path_info, v_dir_info, v_config_info),
+                    target=consume_patches_wrapped,
+                    args=(
+                        v_path_info,
+                        v_dir_info,
+                        v_config_info,
+                        values.current_profile_id.get("NA"),
+                    ),
                 )
                 consume_thread.start()
 
@@ -280,8 +292,28 @@ def repair_all(
                 benchmark_name,
             )
         else:
+
+            def repair_wrapped(
+                dir_info,
+                experiment_info,
+                repair_tool,
+                config_info,
+                container_id,
+                benchmark_name,
+                profile_id,
+            ):
+                values.current_profile_id.set(profile_id)
+                repair(
+                    dir_info,
+                    experiment_info,
+                    repair_tool,
+                    config_info,
+                    container_id,
+                    benchmark_name,
+                )
+
             t_thread = threading.Thread(
-                target=repair,
+                target=repair_wrapped,
                 args=(
                     dir_info,
                     experiment_info,
@@ -289,6 +321,7 @@ def repair_all(
                     config_info,
                     container_id,
                     benchmark_name,
+                    values.current_profile_id.get("NA"),
                 ),
             )
             t_thread.start()
@@ -349,7 +382,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
-        conf_id = str(values.current_profile_id)
+        conf_id = str(values.current_profile_id.get("NA"))
         exp_id = conf_id + "-" + bug_id
         values.analysis_results[exp_id] = (space_info, time_info)
         tool.print_analysis(space_info, time_info)

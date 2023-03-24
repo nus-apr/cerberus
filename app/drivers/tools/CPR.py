@@ -20,7 +20,7 @@ class CPR(AbstractTool):
         super(CPR, self).repair(bug_info, config_info)
         if values.only_instrument:
             return
-        conf_id = str(values.current_profile_id)
+        conf_id = str(values.current_profile_id.get("NA"))
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.id = bug_id
         timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
@@ -78,7 +78,7 @@ class CPR(AbstractTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id)
+        conf_id = str(values.current_profile_id.get("NA"))
         self.log_analysis_path = join(
             self.dir_logs,
             "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),

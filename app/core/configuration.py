@@ -8,6 +8,7 @@ from typing import Dict
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 def load_configuration_details(config_file_path: str):
@@ -46,7 +47,7 @@ def load_tool(tool_name: str):
         return initializer()
 
 
-def load_benchmark(benchmark_name: str):
+def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
     emitter.normal("loading benchmark")
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
     existing_benchmark_list = os.listdir(values.dir_benchmark_drivers)
@@ -63,6 +64,7 @@ def load_benchmark(benchmark_name: str):
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return initializer()
+    raise Exception("Should not be reachable")
 
 
 class Configurations:

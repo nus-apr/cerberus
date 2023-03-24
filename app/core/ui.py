@@ -125,22 +125,6 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         ("a", "show_all_subjects", "Show All Subjects"),
     ]
 
-    def initialize(self) -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
-        emitter.sub_title("Initializing setup")
-        tool_list = []
-        if values.tool_list:
-            for tool_name in values.tool_list:
-                tool = configuration.load_tool(tool_name)
-                if not values.only_analyse:
-                    tool.check_tool_exists()
-                tool_list.append(tool)
-        benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-        setup = configuration.load_configuration_details(values.file_configuration)
-        for profile_id in values.profile_id_list:
-            if profile_id not in setup:
-                utilities.error_exit("Invalid profile id {}".format(profile_id))
-        return tool_list, benchmark, setup
-
     def on_exit(self):
         values.ui_active = False
 
@@ -155,7 +139,10 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         for (k, v) in zip(Cerberus.COLUMNS.keys(), column_keys):
             Cerberus.COLUMNS[k] = v
         asyncio.get_running_loop().run_in_executor(
-            None, lambda: self.run_repair(*self.initialize())
+            None,
+            lambda: self.run_repair(
+                main.get_tools(), main.get_benchmark(), main.get_setup()
+            ),
         )
 
     async def show_finished(self):
@@ -183,48 +170,46 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         )
         emitter.highlight("(profile) repair-benchmark: " + benchmark.name)
         iteration = 0
-        for profile_id in values.profile_id_list:
-            config_info = setup[profile_id]
-            values.current_profile_id = config_info[definitions.KEY_ID]
+        for config_info in map(lambda x: setup[x], values.profile_id_list):
             for experiment_item in main.filter_experiment_list(benchmark):
                 iteration = iteration + 1
-                values.iteration_no = iteration
                 bug_index = experiment_item[definitions.KEY_ID]
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
                 )
                 utilities.check_space()
-                table = self.query_one(DataTable)
                 key = "{}-{}-{}-{}-{}".format(
                     benchmark.name,
                     "-".join(map(lambda x: x.name, repair_tool_list)),
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
-                    values.current_profile_id,
+                    config_info[definitions.KEY_ID],
                 )
 
-                _ = table.add_row(
+                _ = self.query_one(DataTable).add_row(
                     str(iteration),
                     benchmark.name,
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
-                    values.current_profile_id,
+                    config_info[definitions.KEY_ID],
                     "Allocated",
                     key=key,
                 )
 
-                job = JobAllocate(
-                    benchmark,
-                    [copy(x) for x in repair_tool_list],
-                    experiment_item,
-                    config_info,
-                    key,
-                )
                 log_map[key] = TextLog(highlight=True, markup=True)
                 log_map[key].visible = False
                 log_map[key].auto_height = True
+
                 self.post_message(JobMount(key))
-                self.post_message(job)
+                self.post_message(
+                    JobAllocate(
+                        benchmark,
+                        [copy(x) for x in repair_tool_list],
+                        experiment_item,
+                        config_info,
+                        key,
+                    )
+                )
         self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
@@ -238,6 +223,11 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         def job():
             job_identifier.set(message.identifier)
+            values.current_profile_id.set(message.config_info[definitions.KEY_ID])
+            if Cerberus.COLUMNS["Status"]:
+                self.query_one(DataTable).update_cell(
+                    message.identifier, Cerberus.COLUMNS["Status"], "Running"
+                )
             repair.run(
                 message.benchmark,
                 message.repair_tool_list,
@@ -329,6 +319,7 @@ def setup_ui():
     app = Cerberus()
     experiment_results = app.run()
     if experiment_results:
+        values.iteration_no = len(experiment_results)
         email.send_message(
             "Cerberus has finished running! These are the following results:\n"
             + "\n".join(map(lambda t: "{} -> {}".format(*t), experiment_results))
