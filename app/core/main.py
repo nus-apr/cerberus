@@ -237,19 +237,12 @@ def parse_args():
 
 def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
     emitter.sub_title("Repairing benchmark")
-    emitter.highlight(
-        "[profile] repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
-    )
-    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
-    run_profile_id_list = values.profile_id_list
     iteration = 0
-    for profile_id in run_profile_id_list:
-        if profile_id not in setup:
-            utilities.error_exit("invalid profile id " + profile_id)
-        config_info = setup[profile_id]
-        values.current_profile_id = config_info[definitions.KEY_ID]
-        experiment_list = filter_experiment_list(benchmark)
-        for experiment_item in experiment_list:
+    for config_info in map(
+        lambda profile_id: setup[profile_id], values.profile_id_list
+    ):
+        values.current_profile_id.set(config_info[definitions.KEY_ID])
+        for experiment_item in filter_experiment_list(benchmark):
             iteration = iteration + 1
             values.iteration_no = iteration
             bug_index = experiment_item[definitions.KEY_ID]
@@ -260,8 +253,16 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
             repair.run(benchmark, repair_tool_list, experiment_item, config_info)
 
 
-def initialize() -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
+def get_setup() -> Any:
     emitter.sub_title("Initializing setup")
+    setup = configuration.load_configuration_details(values.file_configuration)
+    for profile_id in values.profile_id_list:
+        if profile_id not in setup:
+            utilities.error_exit("invalid profile id " + profile_id)
+    return setup
+
+
+def get_tools() -> List[AbstractTool]:
     tool_list = []
     if values.tool_list:
         for tool_name in values.tool_list:
@@ -269,9 +270,16 @@ def initialize() -> Tuple[List[AbstractTool], AbstractBenchmark, Any]:
             if not values.only_analyse:
                 tool.check_tool_exists()
             tool_list.append(tool)
+    emitter.highlight(
+        "[profile] repair-tool(s): " + " ".join([x.name for x in tool_list])
+    )
+    return tool_list
+
+
+def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    setup = configuration.load_configuration_details(values.file_configuration)
-    return tool_list, benchmark, setup
+    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
+    return benchmark
 
 
 def filter_experiment_list(benchmark: AbstractBenchmark):
@@ -312,8 +320,7 @@ def main():
         if parsed_args.use_tui:
             ui.setup_ui()
         else:
-            repair_tool_list, benchmark, setup = initialize()
-            run(repair_tool_list, benchmark, setup)
+            run(get_tools(), get_benchmark(), get_setup())
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
