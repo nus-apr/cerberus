@@ -1,4 +1,5 @@
 import argparse
+import multiprocessing
 import os
 import signal
 import time
@@ -238,6 +239,7 @@ def parse_args():
 def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
     emitter.sub_title("Repairing benchmark")
     iteration = 0
+    max_jobs = multiprocessing.cpu_count()
     for config_info in map(
         lambda profile_id: setup[profile_id], values.profile_id_list
     ):
@@ -250,7 +252,14 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
                 "Experiment #{} - Bug #{}".format(iteration, bug_index)
             )
             utilities.check_space()
-            repair.run(benchmark, repair_tool_list, experiment_item, config_info)
+            repair.run(
+                benchmark,
+                repair_tool_list,
+                experiment_item,
+                config_info,
+                str(bug_index),
+                iteration % max_jobs,
+            )
 
 
 def get_setup() -> Any:
