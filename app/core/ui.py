@@ -135,9 +135,9 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.jobs_remaining = 0
         self.finished_subjects = []
         self.max_jobs = values.cpus
-        self.job_queue = queue.Queue(self.max_jobs + 1)
+        self.cpu_queue = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
-            self.job_queue.put(cpu)
+            self.cpu_queue.put(cpu)
         asyncio.get_running_loop().set_exception_handler(self.handle)
         values.ui_active = True
 
@@ -235,20 +235,29 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         def job():
             self.update_status(message.identifier, "Waiting for CPU")
-            cpu = self.job_queue.get(block=True, timeout=None)
+            cpus = []
+            for _ in range(max([x.cpu_usage for x in message.repair_tool_list])):
+                cpus.append(self.cpu_queue.get(block=True, timeout=None))
             job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
 
             self.update_status(message.identifier, "Running")
-            repair.run(
-                message.benchmark,
-                message.repair_tool_list,
-                message.experiment_item,
-                message.config_info,
-                message.identifier,
-                cpu,
-            )
-            self.job_queue.put(cpu)
+            try:
+                repair.run(
+                    message.benchmark,
+                    message.repair_tool_list,
+                    message.experiment_item,
+                    message.config_info,
+                    message.identifier,
+                    ",".join(map(str, cpus)),
+                )
+            except Exception as e:
+                self.post_message(Write("Error {}".format(e), message.identifier))
+                self.post_message(JobFinish(message.identifier, JobFinish.Status.FAIL))
+            finally:
+                self.post_message(Write("Finished", message.identifier))
+            for cpu in cpus:
+                self.cpu_queue.put(cpu)
 
         asyncio.get_running_loop().run_in_executor(None, job)
 

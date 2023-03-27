@@ -432,7 +432,7 @@ def create_running_container(
     repair_tool: AbstractTool,
     dir_info: Dict[str, Dict[str, str]],
     container_name: str,
-    cpu: int,
+    cpu: str,
 ):
     container_id = container.get_container_id(container_name)
     if container_id:
@@ -499,7 +499,7 @@ def run(
     bug_info: Dict[str, Any],
     config_info: Dict[str, Any],
     run_identifier: str,
-    cpu: int,
+    cpu: str,
 ):
     dir_info_list = []
     container_id_list: List[str] = []
