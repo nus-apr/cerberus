@@ -213,12 +213,12 @@ def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmar
 
 
 def repair_all(
-    dir_info_list,
-    experiment_info,
-    tool_list,
+    dir_info_list: List[Any],
+    experiment_info: Dict[str, Any],
+    tool_list: List[AbstractTool],
     config_info,
-    container_id_list,
-    benchmark_name,
+    container_id_list: List[str],
+    benchmark_name: str,
 ):
     consume_thread = None
     tool_thread_list = []
@@ -329,7 +329,7 @@ def repair_all(
 
     if not values.ui_active:
         for thread, tool in tool_thread_list:
-            wait_time = 5
+            wait_time = 5.0
             if time.time() <= total_timeout:
                 wait_time = total_timeout - time.time()
             thread.join(wait_time)
@@ -432,6 +432,7 @@ def create_running_container(
     repair_tool: AbstractTool,
     dir_info: Dict[str, Dict[str, str]],
     container_name: str,
+    cpu: int,
 ):
     container_id = container.get_container_id(container_name)
     if container_id:
@@ -475,7 +476,7 @@ def create_running_container(
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
     tmp_container_id = container.build_container(
-        container_name, dict(), container_name.lower()
+        container_name, dict(), container_name.lower(), cpu
     )
     if not tmp_container_id:
         utilities.error_exit("Could not create temporary container")
@@ -487,7 +488,7 @@ def create_running_container(
         container.stop_container(tmp_container_id)
         container.remove_container(tmp_container_id)
     container_id = container.build_container(
-        container_name, volume_list, container_name.lower()
+        container_name, volume_list, container_name.lower(), cpu
     )
     return container_id
 
@@ -496,11 +497,12 @@ def run(
     benchmark: AbstractBenchmark,
     tool_list: List[AbstractTool],
     bug_info: Dict[str, Any],
-    config_info,
-    finish_key=None,
+    config_info: Dict[str, Any],
+    run_identifier: str,
+    cpu: int,
 ):
     dir_info_list = []
-    container_id_list = []
+    container_id_list: List[str] = []
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     config_id = config_info[definitions.KEY_ID]
@@ -538,7 +540,7 @@ def run(
 
     benchmark.update_dir_info(dir_info)
     if values.use_container:
-        exp_img_id = benchmark.get_exp_image(bug_index, values.only_test)
+        exp_img_id = benchmark.get_exp_image(bug_index, values.only_test, cpu)
     else:
         if not values.use_valkyrie:
             benchmark.setup_experiment(bug_index, None, values.only_test)
@@ -593,9 +595,12 @@ def run(
                 )
 
             container_id = create_running_container(
-                exp_img_id, repair_tool, dir_info, container_name
+                exp_img_id, repair_tool, dir_info, container_name, cpu
             )
-        container_id_list.append(container_id)
+        if container_id:
+            container_id_list.append(container_id)
+        else:
+            utilities.error_exit("Could not get container id!")
         dir_info_list.append(dir_info)
 
     if not values.only_setup:
@@ -620,7 +625,9 @@ def run(
 
     construct_summary()
     if values.ui_active:
-        ui.get_ui().post_message(ui.JobFinish(finish_key, ui.JobFinish.Status.SUCCESS))
+        ui.get_ui().post_message(
+            ui.JobFinish(run_identifier, ui.JobFinish.Status.SUCCESS)
+        )
 
 
 def construct_summary():

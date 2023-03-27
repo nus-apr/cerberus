@@ -124,12 +124,12 @@ class AbstractBenchmark:
             emitter.success("\t\tpre-built benchmark environment found")
 
     def build_experiment_image(
-        self, bug_index: int, test_all: bool, exp_image_name: str
+        self, bug_index: int, test_all: bool, exp_image_name: str, cpu: int
     ):
         """
         Builds an image for an experiment
         """
-        container_id = self.setup_container(bug_index, self.image_name)
+        container_id = self.setup_container(bug_index, self.image_name, cpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if not container_id:
             utilities.error_exit("Could not setup container")
@@ -138,7 +138,7 @@ class AbstractBenchmark:
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
-    def setup_container(self, bug_index: int, image_name: str):
+    def setup_container(self, bug_index: int, image_name: str, cpu: int):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -171,7 +171,7 @@ class AbstractBenchmark:
             container.stop_container(container_id)
             container.remove_container(container_id)
         container_id = container.build_container(
-            container_name, volume_list, image_name
+            container_name, volume_list, image_name, cpu
         )
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
@@ -211,7 +211,7 @@ class AbstractBenchmark:
         emitter.success("\t\t\t(benchmark) setting up completed successfully")
         return False
 
-    def get_exp_image(self, bug_index: int, test_all: bool):
+    def get_exp_image(self, bug_index: int, test_all: bool, cpu: int):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -219,7 +219,7 @@ class AbstractBenchmark:
         if not container.image_exists(exp_image_name) or values.rebuild_all:
             emitter.warning("\t\t(warning) experiment not built")
             emitter.normal("\t\t\tpreparing/building experiment")
-            self.build_experiment_image(bug_index, test_all, exp_image_name)
+            self.build_experiment_image(bug_index, test_all, exp_image_name, cpu)
         else:
             emitter.success(
                 "\t\t\t\tpre-built experiment found: {}".format(exp_image_name)

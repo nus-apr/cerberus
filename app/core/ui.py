@@ -1,5 +1,7 @@
 import asyncio
 import contextvars
+import multiprocessing
+import queue
 from copy import copy
 from enum import Enum
 from typing import Any
@@ -17,6 +19,7 @@ from textual.widget import Widget
 from textual.widgets import DataTable
 from textual.widgets import Footer
 from textual.widgets import Header
+from textual.widgets import Static
 from textual.widgets import TextLog
 from textual.widgets._data_table import ColumnKey
 
@@ -132,6 +135,10 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.selected_subject = None
         self.jobs_remaining = 0
         self.finished_subjects = []
+        self.max_jobs = multiprocessing.cpu_count()
+        self.job_queue = queue.Queue(self.max_jobs + 1)
+        for cpu in range(self.max_jobs):
+            self.job_queue.put(cpu)
         asyncio.get_running_loop().set_exception_handler(self.handle)
         values.ui_active = True
 
@@ -140,10 +147,21 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             Cerberus.COLUMNS[k] = v
         asyncio.get_running_loop().run_in_executor(
             None,
-            lambda: self.run_repair(
-                main.get_tools(), main.get_benchmark(), main.get_setup()
-            ),
+            self.pre_repair,
         )
+
+    def pre_repair(self):
+        self.query_one(DataTable).visible = False
+        self.query_one(Static).update("Cerberus is getting tools")
+        tools = main.get_tools()
+        self.query_one(Static).update("Cerberus is getting the benchmark")
+        benchmark = main.get_benchmark()
+        self.query_one(Static).update("Cerberus is getting the setup data")
+        setup = main.get_setup()
+        self.query_one(Static).visible = False
+        self.query_one(Static).styles.height = "0"
+        self.query_one(DataTable).visible = True
+        self.run_repair(tools, benchmark, setup)
 
     async def show_finished(self):
         pass
@@ -164,11 +182,6 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         benchmark: AbstractBenchmark,
         setup: Any,
     ):
-        emitter.sub_title("Repairing benchmark")
-        emitter.highlight(
-            "(profile) repair-tool(s): " + " ".join([x.name for x in repair_tool_list])
-        )
-        emitter.highlight("(profile) repair-benchmark: " + benchmark.name)
         iteration = 0
         for config_info in map(lambda x: setup[x], values.profile_id_list):
             for experiment_item in main.filter_experiment_list(benchmark):
@@ -222,6 +235,10 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         def job():
+            self.query_one(DataTable).update_cell(
+                message.identifier, Cerberus.COLUMNS["Status"], "Waiting for CPU"
+            )
+            cpu = self.job_queue.get(block=True, timeout=None)
             job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
             if Cerberus.COLUMNS["Status"]:
@@ -234,7 +251,9 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 message.experiment_item,
                 message.config_info,
                 message.identifier,
+                cpu,
             )
+            self.job_queue.put(cpu)
 
         asyncio.get_running_loop().run_in_executor(None, job)
 
@@ -242,6 +261,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
         await self.mount(text_log, before=self.query_one(DataTable))
+        text_log.write("This is the textual log for {}".format(message.key))
         self.hide(text_log)
         text_log.styles.border = ("heavy", "white")
 
@@ -253,7 +273,8 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.jobs_remaining -= 1
         self.finished_subjects.append((message.key, message.status))
         if self.jobs_remaining == 0:
-            self.exit(self.finished_subjects)
+            self.debug_print("DONE!")
+            # self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
@@ -285,6 +306,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
+        yield Static("Cerberus is starting")
         table: DataTable[Any] = DataTable()
         table.cursor_type = "row"
         table.styles.border = ("heavy", "white")
@@ -318,6 +340,7 @@ def setup_ui():
     global app
     app = Cerberus()
     experiment_results = app.run()
+    emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:
         values.iteration_no = len(experiment_results)
         email.send_message(
