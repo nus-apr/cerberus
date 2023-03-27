@@ -1,7 +1,7 @@
 import asyncio
 import contextvars
 import queue
-from copy import copy
+from copy import deepcopy
 from enum import Enum
 from typing import Any
 from typing import Dict
@@ -215,8 +215,8 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 self.post_message(JobMount(key))
                 self.post_message(
                     JobAllocate(
-                        benchmark,
-                        [copy(x) for x in repair_tool_list],
+                        deepcopy(benchmark),
+                        [deepcopy(x) for x in repair_tool_list],
                         experiment_item,
                         config_info,
                         key,
