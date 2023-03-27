@@ -225,7 +225,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
-        self.debug_print("I am seeing? {}".format(message))
+        # self.debug_print("I am seeing? {}".format(message))
         if message.key == "escape":
             if self.selected_subject:
                 self.hide(log_map[self.selected_subject])
@@ -234,29 +234,21 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         def job():
-
             self.update_status(message.identifier, "Waiting for CPU")
-
             cpu = self.job_queue.get(block=True, timeout=None)
             job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
 
             self.update_status(message.identifier, "Running")
-            try:
-                repair.run(
-                    message.benchmark,
-                    message.repair_tool_list,
-                    message.experiment_item,
-                    message.config_info,
-                    message.identifier,
-                    cpu,
-                )
-            except Exception as e:
-                self.debug_print("OOPS. {}".format(e))
-                self.debug_print(e)
-            finally:
-                self.debug_print("Job done")
-                self.job_queue.put(cpu)
+            repair.run(
+                message.benchmark,
+                message.repair_tool_list,
+                message.experiment_item,
+                message.config_info,
+                message.identifier,
+                cpu,
+            )
+            self.job_queue.put(cpu)
 
         asyncio.get_running_loop().run_in_executor(None, job)
 
@@ -296,12 +288,9 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         x.styles.height = "0%"
 
     async def on_data_table_row_highlighted(self, message: DataTable.RowHighlighted):
-        self.debug_print("I am highlighting {}".format(message.row_key.value))
+        # self.debug_print("I am highlighting {}".format(message.row_key.value))
         # self.selected: Optional[str]
         if self.selected_subject is not None:
-            log_map["root"].write(
-                "Selected is not none but {}".format(self.selected_subject)
-            )
             self.hide(log_map[self.selected_subject])
 
         if message.row_key.value:
