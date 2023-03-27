@@ -14,7 +14,7 @@ class VulnFix(AbstractTool):
         super(VulnFix, self).__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
         self.image_name = "yuntongzhang/vulnfix:latest"
-        self.cpu_usage = 2
+        self.cpu_usage = 1
 
     def repair(self, bug_info, config_info):
         super(VulnFix, self).repair(bug_info, config_info)
@@ -44,8 +44,14 @@ class VulnFix(AbstractTool):
         vulnfix_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h vulnfix {1} {2}'".format(
             timeout_h, additional_tool_param, config_path
         )
+        env = dict()
+        if values.ui_active:
+            env["AFL_NO_AFFINITY"] = 1
         status = self.run_command(
-            vulnfix_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+            vulnfix_command,
+            log_file_path=self.log_output_path,
+            dir_path=self.dir_root,
+            env=env,
         )
 
         if status != 0:
