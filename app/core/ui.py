@@ -234,27 +234,37 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         def job():
-            self.query_one(DataTable).update_cell(
-                message.identifier, Cerberus.COLUMNS["Status"], "Waiting for CPU"
-            )
+
+            self.update_status(message.identifier, "Waiting for CPU")
+
             cpu = self.job_queue.get(block=True, timeout=None)
             job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
-            if Cerberus.COLUMNS["Status"]:
-                self.query_one(DataTable).update_cell(
-                    message.identifier, Cerberus.COLUMNS["Status"], "Running"
+
+            self.update_status(message.identifier, "Running")
+            try:
+                repair.run(
+                    message.benchmark,
+                    message.repair_tool_list,
+                    message.experiment_item,
+                    message.config_info,
+                    message.identifier,
+                    cpu,
                 )
-            repair.run(
-                message.benchmark,
-                message.repair_tool_list,
-                message.experiment_item,
-                message.config_info,
-                message.identifier,
-                cpu,
-            )
-            self.job_queue.put(cpu)
+            except Exception as e:
+                self.debug_print("OOPS. {}".format(e))
+                self.debug_print(e)
+            finally:
+                self.debug_print("Job done")
+                self.job_queue.put(cpu)
 
         asyncio.get_running_loop().run_in_executor(None, job)
+
+    def update_status(self, key, status):
+        if Cerberus.COLUMNS["Status"]:
+            self.query_one(DataTable).update_cell(
+                key, Cerberus.COLUMNS["Status"], status
+            )
 
     async def on_cerberus_job_mount(self, message: JobMount):
         self.debug_print("Mounting {}".format(message.key))
@@ -265,10 +275,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         text_log.styles.border = ("heavy", "white")
 
     async def on_cerberus_job_finish(self, message: JobFinish):
-        if Cerberus.COLUMNS["Status"]:
-            self.query_one(DataTable).update_cell(
-                message.key, Cerberus.COLUMNS["Status"], str(message.status)
-            )
+        self.update_status(message.key, str(message.status))
         self.jobs_remaining -= 1
         self.finished_subjects.append((message.key, message.status))
         if self.jobs_remaining == 0:
