@@ -1,6 +1,5 @@
 import asyncio
 import contextvars
-import multiprocessing
 import queue
 from copy import copy
 from enum import Enum
@@ -135,7 +134,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.selected_subject = None
         self.jobs_remaining = 0
         self.finished_subjects = []
-        self.max_jobs = multiprocessing.cpu_count()
+        self.max_jobs = values.cpus
         self.job_queue = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
             self.job_queue.put(cpu)

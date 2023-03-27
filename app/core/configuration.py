@@ -1,4 +1,5 @@
 import json
+import multiprocessing
 import os
 import sys
 from argparse import Namespace
@@ -91,6 +92,7 @@ class Configurations:
         "start-index": None,
         "end-index": None,
         "use-tui": False,
+        "cpu-count": 1,
         "bug-id-list": [],
         "bug-index-list": [],
         "skip-index-list": [],
@@ -180,6 +182,8 @@ class Configurations:
                     str(arg_list.bug_index_list).split(","),
                 )
             )
+        if arg_list.cpu_count:
+            self.__runtime_config_values["cpu-count"] = arg_list.cpu_count
 
         if arg_list.bug_id:
             self.__runtime_config_values["bug-id-list"] = [arg_list.bug_id]
@@ -304,6 +308,9 @@ class Configurations:
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
         values.email_setup = self.__runtime_config_values["email-setup"]
+        values.cpus = min(
+            multiprocessing.cpu_count(), self.__runtime_config_values["cpu-count"]
+        )
 
         values.docker_host = self.__runtime_config_values.get(
             "docker-host", values.docker_host

@@ -26,6 +26,7 @@ KEY_DEPENDENCIES = "dependencies"
 KEY_SOURCE = "source"
 KEY_SINK = "sink"
 
+ARG_CPU_COUNT = "--cpu-count"
 ARG_USE_GPU = "--use-gpu"
 ARG_CACHE = "--cache"
 ARG_DATA_PATH = "--dir-data"

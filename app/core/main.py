@@ -204,6 +204,13 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_CPU_COUNT,
+        help="max amount of CPU cores which can be used by Cerberus",
+        type=int,
+        default=multiprocessing.cpu_count(),
+    )
+
+    optional.add_argument(
         definitions.ARG_USE_GPU,
         help="allow gpu usage",
         action="store_true",
@@ -239,7 +246,6 @@ def parse_args():
 def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
     emitter.sub_title("Repairing benchmark")
     iteration = 0
-    max_jobs = multiprocessing.cpu_count()
     for config_info in map(
         lambda profile_id: setup[profile_id], values.profile_id_list
     ):
@@ -258,7 +264,7 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
                 experiment_item,
                 config_info,
                 str(bug_index),
-                iteration % max_jobs,
+                iteration % values.cpus,
             )
 
 
