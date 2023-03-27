@@ -264,7 +264,7 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
                 experiment_item,
                 config_info,
                 str(bug_index),
-                iteration % values.cpus,
+                ",".join(map(str, range(values.cpus))),
             )
 
 

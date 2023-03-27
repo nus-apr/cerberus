@@ -14,6 +14,7 @@ class VulnFix(AbstractTool):
         super(VulnFix, self).__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
         self.image_name = "yuntongzhang/vulnfix:latest"
+        self.cpu_usage = 2
 
     def repair(self, bug_info, config_info):
         super(VulnFix, self).repair(bug_info, config_info)

@@ -149,7 +149,7 @@ def get_container_id(container_name: str) -> Optional[str]:
 
 
 def build_container(
-    container_name: str, volume_list, image_name: str, cpu: int
+    container_name: str, volume_list, image_name: str, cpu: str
 ) -> Optional[str]:
     client = get_client()
     emitter.normal("\t\t\t(benchmark) building docker container")
@@ -169,7 +169,7 @@ def build_container(
             volumes=volume_list,
             privileged=True,
             mem_limit="30g",
-            cpuset_cpus=str(cpu),
+            cpuset_cpus=cpu,
             tty=True,
             runtime="nvidia" if values.use_gpu else "runc",
         )

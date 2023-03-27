@@ -124,7 +124,7 @@ class AbstractBenchmark:
             emitter.success("\t\tpre-built benchmark environment found")
 
     def build_experiment_image(
-        self, bug_index: int, test_all: bool, exp_image_name: str, cpu: int
+        self, bug_index: int, test_all: bool, exp_image_name: str, cpu: str
     ):
         """
         Builds an image for an experiment
@@ -138,7 +138,7 @@ class AbstractBenchmark:
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
-    def setup_container(self, bug_index: int, image_name: str, cpu: int):
+    def setup_container(self, bug_index: int, image_name: str, cpu: str):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -211,7 +211,7 @@ class AbstractBenchmark:
         emitter.success("\t\t\t(benchmark) setting up completed successfully")
         return False
 
-    def get_exp_image(self, bug_index: int, test_all: bool, cpu: int):
+    def get_exp_image(self, bug_index: int, test_all: bool, cpu: str):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])

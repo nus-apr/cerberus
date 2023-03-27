@@ -27,6 +27,7 @@ class AbstractTool:
     dir_output = ""
     dir_expr = ""
     dir_base_expr = ""
+    cpu_usage = 1
     dir_inst = ""
     dir_setup = ""
     container_id = None
