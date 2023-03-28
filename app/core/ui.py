@@ -150,17 +150,22 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         )
 
     def pre_repair(self):
-        self.query_one(DataTable).visible = False
-        self.query_one(Static).update("Cerberus is getting tools")
-        tools = main.get_tools()
-        self.query_one(Static).update("Cerberus is getting the benchmark")
-        benchmark = main.get_benchmark()
-        self.query_one(Static).update("Cerberus is getting the setup data")
-        setup = main.get_setup()
-        self.query_one(Static).visible = False
-        self.query_one(Static).styles.height = "0"
-        self.query_one(DataTable).visible = True
-        self.run_repair(tools, benchmark, setup)
+        try:
+            self.query_one(DataTable).visible = False
+            self.query_one(Static).update("Cerberus is getting tools")
+            tools = main.get_tools()
+            self.query_one(Static).update("Cerberus is getting the benchmark")
+            benchmark = main.get_benchmark()
+            self.query_one(Static).update("Cerberus is getting the setup data")
+            setup = main.get_setup()
+            self.query_one(Static).visible = False
+            self.query_one(Static).styles.height = "0"
+            self.query_one(DataTable).visible = True
+            self.run_repair(tools, benchmark, setup)
+        except Exception as e:
+            if self.query_one(Static).visible:
+                self.query_one(Static).update(str(e))
+            self.debug_print("I got exception {}".format(e))
 
     async def show_finished(self):
         pass
