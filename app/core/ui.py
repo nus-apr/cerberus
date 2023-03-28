@@ -113,6 +113,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     COLUMNS: Dict[str, Optional[ColumnKey]] = {
         "ID": None,
         "Benchmark": None,
+        "Tool list": None,
         "Subject": None,
         "Bug ID": None,
         "Configuration Profile": None,
@@ -213,6 +214,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 _ = self.query_one(DataTable).add_row(
                     str(iteration),
                     benchmark.name,
+                    ",".join(map(lambda t: t.name, repair_tool_list)),
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
                     config_info[definitions.KEY_ID],
