@@ -2,6 +2,7 @@ import argparse
 import multiprocessing
 import os
 import signal
+import sys
 import time
 import traceback
 from argparse import Namespace
@@ -333,6 +334,11 @@ def main():
         emitter.title("Starting " + values.tool_name + " (Program Repair Framework) ")
         bootstrap(parsed_args)
         if parsed_args.use_tui:
+            info = sys.version_info
+            if info.major < 3 or info.micro < 10:
+                utilities.error_exit(
+                    "GUI is not currently working properly on versions older than 3.10"
+                )
             ui.setup_ui()
         else:
             run(get_tools(), get_benchmark(), get_setup())
