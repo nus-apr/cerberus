@@ -1,6 +1,7 @@
 import asyncio
 import contextvars
 import queue
+import traceback
 from copy import deepcopy
 from enum import Enum
 from typing import Any
@@ -152,19 +153,25 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
     def pre_repair(self):
         try:
             self.query_one(DataTable).visible = False
+
             self.query_one(Static).update("Cerberus is getting tools")
             tools = main.get_tools()
+
             self.query_one(Static).update("Cerberus is getting the benchmark")
             benchmark = main.get_benchmark()
+
             self.query_one(Static).update("Cerberus is getting the setup data")
             setup = main.get_setup()
-            self.query_one(Static).visible = False
-            self.query_one(Static).styles.height = "0"
+
+            self.hide(self.query_one(Static))
+
             self.query_one(DataTable).visible = True
             self.run_repair(tools, benchmark, setup)
         except Exception as e:
-            if self.query_one(Static).visible:
-                self.query_one(Static).update(str(e))
+            self.show(self.query_one(Static))
+            self.query_one(Static).update(
+                "{}\n{}".format(str(e), traceback.format_exc())
+            )
             self.debug_print("I got exception {}".format(e))
 
     async def show_finished(self):
@@ -257,7 +264,12 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                     ",".join(map(str, cpus)),
                 )
             except Exception as e:
-                self.post_message(Write("Error {}".format(e), message.identifier))
+                self.post_message(
+                    Write(
+                        "Error {}\n{}".format(e, traceback.format_exc()),
+                        message.identifier,
+                    )
+                )
                 self.post_message(JobFinish(message.identifier, JobFinish.Status.FAIL))
             finally:
                 self.post_message(Write("Finished", message.identifier))
