@@ -335,7 +335,7 @@ def main():
         bootstrap(parsed_args)
         if parsed_args.use_tui:
             info = sys.version_info
-            if info.major < 3 or info.micro < 10:
+            if info.major < 3 or info.minor < 10:
                 utilities.error_exit(
                     "GUI is not currently working properly on versions older than 3.10"
                 )
