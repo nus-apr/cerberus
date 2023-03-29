@@ -18,12 +18,14 @@ class Defects4J(AbstractBenchmark):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Defects4J, self).__init__()
 
-    def setup_container(self, bug_index, image_name):
+    def setup_container(self, bug_index, image_name, cpu: str):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(Defects4J, self).setup_container(bug_index, image_name)
+        container_id = super(Defects4J, self).setup_container(
+            bug_index, image_name, cpu
+        )
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
         self.run_command(container_id, mkdir_cmd, "/dev/null", "/")
