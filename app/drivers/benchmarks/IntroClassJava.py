@@ -33,13 +33,13 @@ class IntroClassJava(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name):
+    def setup_container(self, bug_index, image_name, cpu):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(IntroClassJava, self).setup_container(
-            bug_index, image_name
+            bug_index, image_name, cpu
         )
 
         experiment_item = self.experiment_subjects[bug_index - 1]

@@ -19,12 +19,14 @@ class LMDefects(AbstractBenchmark):
         )
         return is_error
 
-    def setup_container(self, bug_index, image_name):
+    def setup_container(self, bug_index, image_name, cpu: str):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(LMDefects, self).setup_container(bug_index, image_name)
+        container_id = super(LMDefects, self).setup_container(
+            bug_index, image_name, cpu
+        )
 
         self.run_command(
             container_id, "cp -rf {} {}/src".format(self.dir_setup, self.dir_expr)

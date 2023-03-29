@@ -30,12 +30,12 @@ class Bears(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name):
+    def setup_container(self, bug_index, image_name, cpu: str):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(Bears, self).setup_container(bug_index, image_name)
+        container_id = super(Bears, self).setup_container(bug_index, image_name, cpu)
 
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
