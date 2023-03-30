@@ -322,6 +322,10 @@ def filter_experiment_list(benchmark: AbstractBenchmark):
 
 
 def main():
+    if not sys.warnoptions:
+        import warnings
+
+        warnings.simplefilter("ignore")
     parsed_args = parse_args()
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
