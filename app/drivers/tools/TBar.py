@@ -15,7 +15,7 @@ class TBar(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(TBar, self).__init__(self.name)
         self.tbar_root_dir = "/TBar"
-        self.image_name = "tbar-cerberus:latest"
+        self.image_name = "mirchevmp/tbar-cerberus:latest"
 
     def repair(self, bug_info, config_info):
         super(TBar, self).repair(bug_info, config_info)
