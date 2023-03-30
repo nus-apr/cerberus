@@ -4,6 +4,7 @@ from os.path import join
 
 from app.core import definitions
 from app.core import emitter
+from app.core import utilities
 from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -14,7 +15,7 @@ class TBar(AbstractTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(TBar, self).__init__(self.name)
         self.tbar_root_dir = "/TBar"
-        self.image_name = "kuiliu/tbar:latest"
+        self.image_name = "tbar-cerberus:latest"
 
     def repair(self, bug_info, config_info):
         super(TBar, self).repair(bug_info, config_info)
@@ -38,13 +39,24 @@ class TBar(AbstractTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
         # prepare the required parameters
-        tbar_scr_path = join(self.tbar_root_dir, "PerfectFLTBarRunner.sh")
         parameters = self.create_parameters(bug_info)
+
+        command = (
+            'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
+        )
+        args = (
+            "CLASS_DIRECTORY={} ".format(bug_info["class_directory"])
+            + "TEST_CLASS_DIRECTORY={} ".format(bug_info["test_class_directory"])
+            + "SOURCE_DIRECTORY={} ".format(bug_info["source_directory"])
+            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info["test_directory"])
+        )
 
         # start running
         self.timestamp_log_start()
-        tbar_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h {1} {2} {3}'".format(
-            timeout_h, tbar_scr_path, parameters, additional_tool_param
+        tbar_command = (
+            "bash -c '{4} timeout -k 5m {0}h {1} -Dexec.args=\"{2} {3}\"'".format(
+                timeout_h, command, parameters, additional_tool_param, args
+            )
         )
 
         status = self.run_command(
@@ -77,7 +89,6 @@ class TBar(AbstractTool):
         """
 
         defects4j_home = "/defects4j/"
-        generate_all_possible_patches = "true"
         bug_id_str = "{0}_{1}".format(
             experiment_info[definitions.KEY_SUBJECT],
             experiment_info[definitions.KEY_BUG_ID],
@@ -94,9 +105,43 @@ class TBar(AbstractTool):
             bug_data_path_real, bug_data_path_symlink
         )
         self.run_command(symlink_command)
+        fl_data = join(
+            self.tbar_root_dir, "SuspiciousCodePositions", bug_id_str, "Ochiai.txt"
+        )
+
+        if not self.is_file(fl_data):
+            utilities.error_exit(
+                "There is no fault localization data. This is currently unsupported"
+            )
+            # emitter.debug("Making 'weak' fault Localization")
+            # self.run_command(
+            #     "mkdir -p {}".format(
+            #         join(self.tbar_root_dir, "SuspiciousCodePositions", bug_id_str)
+            #     )
+            # )
+            # f = self.read_file(
+            #     join(
+            #         self.dir_expr,
+            #         "src",
+            #         experiment_info[definitions.KEY_SOURCE_DIRECTORY],
+            #         experiment_info["source_file"].replace(".", "/") + ".java",
+            #     )
+            # )
+            # faulty_lines = [
+            #     "{}@{}\n".format(experiment_info["source_file"], l)
+            #     for l in range(len(f))
+            # ]
+
+            # self.write_file(faulty_lines, fl_data)
 
         return " ".join(
-            [self.dir_expr, bug_id_str, defects4j_home, generate_all_possible_patches]
+            [
+                self.dir_expr,
+                bug_id_str,
+                defects4j_home,
+                join(self.tbar_root_dir, "SuspiciousCodePositions"),
+                self.dir_output,
+            ]
         )
 
     def save_artifacts(self, dir_info):
