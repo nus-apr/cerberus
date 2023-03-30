@@ -78,7 +78,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
                 text="[bold {}]{}{}".format(
                     TEXTUALIZE_COLOR_MAP[print_color],
                     ui.job_identifier.get("((DEFAULT))"),
-                    print_message,
+                    print_message.replace("[", "((").replace("]", "))"),
                 ),
                 identifier=ui.job_identifier.get("((DEFAULT))"),
             )
