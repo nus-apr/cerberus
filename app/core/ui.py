@@ -136,6 +136,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.selected_subject = None
         self.jobs_remaining = 0
         self.finished_subjects = []
+        self.jobs: List[asyncio.Future] = []
         self.max_jobs = values.cpus
         self.cpu_queue = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
@@ -167,6 +168,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             self.hide(self.query_one(Static))
 
             self.query_one(DataTable).visible = True
+            self.query_one(DataTable).styles.height = "100%"
             self.run_repair(tools, benchmark, setup)
         except Exception as e:
             self.show(self.query_one(Static))
@@ -278,7 +280,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             for cpu in cpus:
                 self.cpu_queue.put(cpu)
 
-        asyncio.get_running_loop().run_in_executor(None, job)
+        self.jobs.append(asyncio.get_running_loop().run_in_executor(None, job))
 
     def update_status(self, key, status):
         if Cerberus.COLUMNS["Status"]:
@@ -304,7 +306,12 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
-            log_map[message.identifier].write(message.text)
+            log_map[message.identifier].write(
+                message.text,
+                shrink=False,
+                scroll_end=False,
+                expand=log_map[message.identifier].visible,
+            )
         self.debug_print(message.text)
 
     def show(self, x: Widget):
@@ -325,6 +332,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             self.selected_subject = message.row_key.value
             self.show(log_map[self.selected_subject])
             self.set_focus(log_map[self.selected_subject])
+            log_map[self.selected_subject].scroll_end(animate=False)
 
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
