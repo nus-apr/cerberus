@@ -78,11 +78,8 @@ def build_image(dockerfile_path: str, image_name: str):
             for line in logs:
                 data = json.loads(line.strip())
                 if "stream" in data:
-                    if values.ui_active:
-                        emitter.build("\t\t(docker-api) {}".format(data["stream"]))
-                    else:
-                        for line_stream in data["stream"].split("\n"):
-                            emitter.build("\t\t(docker-api) {}".format(line_stream))
+                    for line_stream in data["stream"].split("\n"):
+                        emitter.build("\t\t(docker-api) {}".format(line_stream))
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
@@ -220,12 +217,9 @@ def exec_command(
             for stream in output:
                 if stream is None:
                     continue
-                if values.ui_active:
-                    emitter.debug(stream.decode("ascii", "ignore"))
-                else:
-                    for line in stream.decode("ascii", "ignore").split("\n"):
-                        if line != "":
-                            emitter.debug(line)
+                for line in stream.decode("ascii", "ignore").split("\n"):
+                    if line != "":
+                        emitter.debug(line)
     except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
