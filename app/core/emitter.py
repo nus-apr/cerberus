@@ -73,14 +73,16 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
     else:
         if prefix:
             print_message = prefix + print_message
-        ui.get_ui().post_message(
-            ui.Write(
-                text="[bold {}]{}{}".format(
-                    TEXTUALIZE_COLOR_MAP[print_color],
-                    ui.job_identifier.get("((DEFAULT))"),
-                    str(print_message).replace("[", "((").replace("]", "))"),
-                ),
-                identifier=ui.job_identifier.get("((DEFAULT))"),
+        ui.get_ui().call_from_thread(
+            lambda: ui.get_ui().post_message(
+                ui.Write(
+                    text="[bold {}]{}{}".format(
+                        TEXTUALIZE_COLOR_MAP[print_color],
+                        ui.job_identifier.get("((DEFAULT))"),
+                        str(print_message).replace("[", "((").replace("]", "))"),
+                    ),
+                    identifier=ui.job_identifier.get("((DEFAULT))"),
+                )
             )
         )
 
