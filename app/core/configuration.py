@@ -41,8 +41,7 @@ def load_tool(tool_name: str):
     for x in pathlib.Path(tool_directory).rglob("*.py")]
     tool_class_name = None
     tool_language = None
-    print(tool_directory)
-    print(existing_tool_list)
+
     for tool, language in existing_tool_list:
         if tool.lower().replace(".py", "") == tool_name.lower():
             tool_class_name = tool.replace(".py", "")
