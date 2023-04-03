@@ -39,7 +39,9 @@ class Vul4J(AbstractBenchmark):
             github_repo_url,
             join(self.dir_expr, "src"),
         )
-        status = self.run_command(container_id, command_str, self.log_deploy_path)
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path
+        )
 
         return status == 0
 
@@ -63,17 +65,6 @@ class Vul4J(AbstractBenchmark):
             self.log_build_path,
             join(self.dir_expr, "src")
         )
-
-        if status != 0:
-            timeout_h = 1
-            command_str = "bash -c 'timeout -k 5m {0}h {1}'".format(timeout_h, experiment_item[definitions.KEY_COMPILE_CMD])
-            # command_str = "bash -c '{0} {1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_COMPILE_CMD])
-            status = self.run_command(
-                container_id,
-                command_str,
-                self.log_build_path,
-                join(self.dir_expr, "src")
-            )
 
         # compress all dependencies
         build_system = experiment_item[definitions.KEY_BUILD_SYSTEM]
@@ -105,7 +96,6 @@ class Vul4J(AbstractBenchmark):
             status = self.run_command(
                 container_id,
                 command_str,
-                self.log_build_path
             )
 
             if status != 0:
@@ -123,27 +113,14 @@ class Vul4J(AbstractBenchmark):
         status = self.run_command(
             container_id,
             command_str,
-            self.log_test_path,
+            self.log_deploy_path,
             # failing_module_dir_path,
             join(self.dir_expr, "src")
         )
 
-        if status != 0:
-            command_str = "bash -c '{1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_TEST_ALL_CMD])
-            status = self.run_command(
-                container_id,
-                command_str,
-                self.log_test_path,
-                # failing_module_dir_path,
-                join(self.dir_expr, "src")
-            )
-
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-
-
-
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
