@@ -24,7 +24,6 @@ class Vul4J(AbstractBenchmark):
         which point to certain folders in the project
         """
 
-        image_name = "bqcuongas/vul4j"
         container_id = super(Vul4J, self).setup_container(bug_index, image_name)
         return container_id
 
@@ -33,8 +32,11 @@ class Vul4J(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
 
-        command_str = "vul4j checkout --id {0} -d {1}".format(
+        # get project from the branch
+        github_repo_url = "https://github.com/nus-apr/vul4j.git"
+        command_str = "git clone --single-branch --branch {0} {1} {2}".format(
             bug_id,
+            github_repo_url,
             join(self.dir_expr, "src"),
         )
         status = self.run_command(
@@ -49,36 +51,40 @@ class Vul4J(AbstractBenchmark):
 
     def build(self, bug_index, container_id):
         emitter.normal("\t\t\tbuilding experiment subject")
-        # custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
-        command_str = "vul4j compile -d {0}".format(join(self.dir_expr, "src"))
+        experiment_item = self.experiment_subjects[bug_index - 1]
+
+        set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(experiment_item[definitions.KEY_JAVA_VERSION])
+
+        failing_module_dir_path = join(self.dir_expr, "src", experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY])
+        command_str = "bash -c '{0} {1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_COMPILE_CMD])
         status = self.run_command(
             container_id,
             command_str,
             self.log_build_path,
+            # failing_module_dir_path,
+            join(self.dir_expr, "src")
         )
 
         if status != 0:
             return False
 
-        experiment_item = self.experiment_subjects[bug_index - 1]
+        # compress all dependencies
         build_system = experiment_item[definitions.KEY_BUILD_SYSTEM]
-        failing_module_dir_name = experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY]
-        failing_module_dir_path = join(self.dir_expr, "src", failing_module_dir_name)
-
         if build_system == 'maven':
 
-            command_str = "mvn dependency:copy-dependencies"
+            command_str = "bash -c '{0} mvn dependency:copy-dependencies'".format(set_java_home_cmd)
             status = self.run_command(
                 container_id,
                 command_str,
                 self.log_build_path,
-                dir_path=failing_module_dir_path
+                # failing_module_dir_path,
+                join(self.dir_expr, "src")
             )
 
             if status != 0:
-                return False
+                return True
 
-            command_str = "bash {0} {1}".format(
+            command_str = "bash -c '{0} {1}'".format(
                 join(self.dir_expr, "base", "init_dependencies.sh"),
                 join(failing_module_dir_path, "target")
             )
@@ -91,10 +97,19 @@ class Vul4J(AbstractBenchmark):
 
     def test(self, bug_index, container_id):
         emitter.normal("\t\t\ttesting experiment subject")
-        command_str = "vul4j test -d {0}".format(join(self.dir_expr, "src"))
+        experiment_item = self.experiment_subjects[bug_index - 1]
+
+        failing_module_dir_path = join(self.dir_expr, "src", experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY])
+        set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(experiment_item[definitions.KEY_JAVA_VERSION])
+        command_str = "bash -c '{0} {1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_TEST_ALL_CMD])
         status = self.run_command(
-            container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
+            container_id,
+            command_str,
+            self.log_deploy_path,
+            # failing_module_dir_path,
+            join(self.dir_expr, "src")
         )
+
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
