@@ -27,6 +27,8 @@ KEY_TEST_DIRECTORY = "test_directory"
 KEY_DEPENDENCIES = "dependencies"
 KEY_SOURCE = "source"
 KEY_SINK = "sink"
+KEY_BUILD_SYSTEM = "build_system"
+KEY_FAILING_MODULE_DIRECTORY = "failing_module"
 
 ARG_CPU_COUNT = "--cpu-count"
 ARG_USE_GPU = "--use-gpu"
