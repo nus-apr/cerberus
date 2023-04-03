@@ -38,7 +38,6 @@ class Nopol(AbstractRepairTool):
         list_deps = [join(self.dir_expr, dep) for dep in bug_info["dependencies"]]
         list_deps.append(join(self.nopol_home, "nopol/lib/hamcrest-core-1.3.jar"))
         list_deps.append(join(self.nopol_home, "nopol/lib/junit-4.11.jar"))
-        list_deps.append("/root/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar")
         list_deps.append(dir_java_bin)
         list_deps.append(dir_test_bin)
 
