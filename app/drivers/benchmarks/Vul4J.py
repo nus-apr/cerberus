@@ -18,7 +18,7 @@ class Vul4J(AbstractBenchmark):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Vul4J, self).__init__()
 
-    def setup_container(self, bug_index, image_name, cpu):
+    def setup_container(self, bug_index, image_name, cpu: str):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
