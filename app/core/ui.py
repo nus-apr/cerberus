@@ -309,7 +309,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             log_map[message.identifier].write(
                 message.text,
                 shrink=False,
-                scroll_end=False,
+                scroll_end=(self.selected_subject == message.identifier),
                 expand=log_map[message.identifier].visible,
             )
         self.debug_print(message.text)
