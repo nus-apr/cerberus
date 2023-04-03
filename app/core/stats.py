@@ -1,7 +1,7 @@
 from datetime import datetime
 
 
-class TimeAnalysis:
+class TimeStats:
     timestamp_start = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_end = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_compilation = 0
@@ -79,7 +79,7 @@ class TimeAnalysis:
         return summary
 
 
-class SpaceAnalysis:
+class SpaceStats:
     non_compilable: int = 0
     plausible: int = 0
     generated: int = 0
@@ -109,5 +109,5 @@ class SpaceAnalysis:
         return summary
 
 
-class ErrorAnalysis:
+class ErrorStats:
     is_error = False

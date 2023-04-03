@@ -6,10 +6,10 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.core.utilities import error_exit
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class ExtractFix(AbstractTool):
+class ExtractFix(AbstractRepairTool):
     bug_conversion_table = {
         "Buffer Overflow": "buffer_overflow",
         "Use after Free": "buffer_overflow",

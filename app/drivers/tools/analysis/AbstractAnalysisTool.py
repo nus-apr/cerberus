@@ -17,33 +17,11 @@ from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.AbstractTool import AbstractTool
 
-class AbstractRepairTool(AbstractTool):
-
+class AbstractAnalysisTool(AbstractTool):
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
-
-    @abc.abstractmethod
-    def analyse_output(self, dir_info, bug_id, fail_list):
-        """
-        analyse tool output and collect information
-        output of the tool is logged at self.log_output_path
-        information required to be extracted are:
-
-            self._space.non_compilable
-            self._space.plausible
-            self._space.size
-            self._space.enumerations
-            self._space.generated
-
-            self._time.total_validation
-            self._time.total_build
-            self._time.timestamp_compilation
-            self._time.timestamp_validation
-            self._time.timestamp_plausible
-        """
-        return self._space, self._time, self._error
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
@@ -72,7 +50,7 @@ class AbstractRepairTool(AbstractTool):
             )
         return
 
-    def repair(self, bug_info, config_info):
+    def analyze(self, bug_info, config_info):
         emitter.normal("\t\t(repair-tool) repairing experiment subject")
         utilities.check_space()
         self.pre_process()
@@ -129,3 +107,4 @@ class AbstractRepairTool(AbstractTool):
                     time_info.get_latency_plausible()
                 )
             )
+

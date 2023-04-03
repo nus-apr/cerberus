@@ -6,10 +6,10 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class EvoRepair(AbstractTool):
+class EvoRepair(AbstractRepairTool):
 
     evorepair_home = "/opt/EvoRepair"
 

@@ -5,10 +5,10 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class Recorder(AbstractTool):
+class Recorder(AbstractRepairTool):
     """
     Requirements for this tool:
     15 GB of VRAM, at most 7.0 CUDA (e.g. Nvidia V100) compute and 20 GB of RAM

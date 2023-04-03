@@ -2,6 +2,7 @@ import json
 import multiprocessing
 import os
 import sys
+import pathlib
 from argparse import Namespace
 from typing import Any
 from typing import Dict
@@ -34,15 +35,18 @@ def load_class(class_name: str):
 def load_tool(tool_name: str):
     emitter.normal("loading repair tool")
     # class_file_path = values.dir_tool_drivers + tool_name + ".py"
-    existing_tool_list = os.listdir(values.dir_tool_drivers)
+    tool_type = values.tool_type
+    tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
+    existing_tool_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
+    for x in pathlib.Path(tool_directory).rglob("*.py")]
     tool_class_name = None
-    for tool in existing_tool_list:
+    for tool, language in existing_tool_list:
         if tool.lower().replace(".py", "") == tool_name.lower():
             tool_class_name = tool.replace(".py", "")
     if not tool_class_name:
-        utilities.error_exit("Unknown tool name", tool_name)
+        utilities.error_exit(f"Unknown tool name {tool_name} for type {tool_type}")
     else:
-        mod = __import__("app.drivers.tools", fromlist=[tool_class_name])
+        mod = __import__(f"app.drivers.tools.{tool_type}.{language}", fromlist=[tool_class_name])
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()
@@ -51,17 +55,23 @@ def load_tool(tool_name: str):
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
     emitter.normal("loading benchmark")
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
-    existing_benchmark_list = os.listdir(values.dir_benchmark_drivers)
+
+    existing_benchmark_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
+     for x in pathlib.Path(values.dir_benchmark_drivers).rglob("*.py")]
+
     benchmark_class_name = None
-    for benchmark in existing_benchmark_list:
+    benchmark_language = None
+    for benchmark, language in existing_benchmark_list:
         if "Abstract" in benchmark or "init" in benchmark:
             continue
         if benchmark.lower().replace(".py", "") == benchmark_name.lower():
             benchmark_class_name = benchmark.replace(".py", "")
+            benchmark_language = language
+
     if not benchmark_class_name:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
     else:
-        mod = __import__("app.drivers.benchmarks", fromlist=[benchmark_class_name])
+        mod = __import__(f"app.drivers.benchmarks.{benchmark_language}", fromlist=[benchmark_class_name])
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return initializer()
@@ -116,7 +126,7 @@ class Configurations:
         emitter.normal("reading profile values")
         emitter.normal("reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
-
+        self.__runtime_config_values["tool-type"] = arg_list.tool_type
         if arg_list.config:
             self.__config_file = arg_list.config
             self.read_config_file()
@@ -272,7 +282,7 @@ class Configurations:
                 emitter.error("(invalid) --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
-
+        values.tool_type = self.__runtime_config_values["tool-type"]
         values.benchmark_name = self.__runtime_config_values["benchmark-name"]
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:

@@ -5,10 +5,10 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class GenProg(AbstractTool):
+class GenProg(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(GenProg, self).__init__(self.name)
@@ -85,7 +85,7 @@ class GenProg(AbstractTool):
     def save_artifacts(self, dir_info):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_results = dir_info["result"]
-        dir_patch = join(self.dir_expr, "src", "repair")
+        dir_patch = join(self.dir_expr, "src", "..")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command, "/dev/null", self.dir_expr)
 
@@ -101,7 +101,7 @@ class GenProg(AbstractTool):
 
         patch_id = 0
         dir_repair_local = join(
-            self.dir_output, "repair", "".join(self.fix_file.split("/")[:-1])
+            self.dir_output, "..", "".join(self.fix_file.split("/")[:-1])
         )
         dir_patch_local = self.dir_output + "/patches"
         if self.is_dir(dir_repair_local):

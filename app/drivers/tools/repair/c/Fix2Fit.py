@@ -5,10 +5,10 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class Fix2Fit(AbstractTool):
+class Fix2Fit(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Fix2Fit, self).__init__(self.name)

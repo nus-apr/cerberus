@@ -4,10 +4,10 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import utilities
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class SequenceR(AbstractTool):
+class SequenceR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(SequenceR, self).__init__(self.name)
