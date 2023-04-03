@@ -9,7 +9,7 @@ from app.core import values
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
-class Pulse(AbstractAnalysisTool):
+class Pulse(AbstractAnalyzeTool):
     relative_binary_path = None
 
     def __init__(self):
