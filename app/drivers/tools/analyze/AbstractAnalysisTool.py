@@ -58,3 +58,10 @@ class AbstractAnalysisTool(AbstractTool):
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
+
+ def print_stats(
+        self, space_info: stats.SpaceStats, time_info: stats.TimeStats
+    ):
+        emitter.highlight(
+            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
+        )
