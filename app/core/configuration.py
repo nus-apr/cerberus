@@ -40,13 +40,17 @@ def load_tool(tool_name: str):
     existing_tool_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
     for x in pathlib.Path(tool_directory).rglob("*.py")]
     tool_class_name = None
+    tool_language = None
+    print(tool_directory)
+    print(existing_tool_list)
     for tool, language in existing_tool_list:
         if tool.lower().replace(".py", "") == tool_name.lower():
             tool_class_name = tool.replace(".py", "")
+            tool_language = language
     if not tool_class_name:
         utilities.error_exit(f"Unknown tool name {tool_name} for type {tool_type}")
     else:
-        mod = __import__(f"app.drivers.tools.{tool_type}.{language}", fromlist=[tool_class_name])
+        mod = __import__(f"app.drivers.tools.{tool_type}.{tool_language}", fromlist=[tool_class_name])
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()

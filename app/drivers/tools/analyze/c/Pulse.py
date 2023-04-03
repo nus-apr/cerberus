@@ -6,22 +6,17 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.core.utilities import error_exit
-from app.core.utilities import execute_command
-from app.drivers.tools.analysis.AbstractAnalysisTool import AbstractAnalysisTool
+from app.drivers.tools.analyze.AbstractAnalysisTool import AbstractAnalysisTool
 
 
-class Infer(AbstractAnalysisTool):
+class Pulse(AbstractAnalysisTool):
     relative_binary_path = None
-    bug_conversion_table = {
-        "Memory Leak": "MEMORY_LEAK",
-        "Use After Free": "USE_AFTER_FREE",
-        "Double Free": "DOUBLE_FREE",
-    }
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Infer, self).__init__(self.name)
+        super(Pulse, self).__init__(self.name)
+        self.image_name = "yuntongzhang/infer:latest"
+
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
@@ -33,10 +28,10 @@ class Infer(AbstractAnalysisTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
+        bug_type = bug_info[definitions.KEY_BUG_TYPE]
         compile_command = (
-            "infer -j 20 -g compile -- make -j20"
-        )
-
+                "infer -j 20 capture -- make -j20"
+            )
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)
         emitter.normal(
@@ -46,20 +41,20 @@ class Infer(AbstractAnalysisTool):
         )
 
 
-
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
-        super(Infer, self).run_analysis(bug_info, config_info)
+        super(Pulse, self).run_analysis(bug_info, config_info)
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
         self.timestamp_log_start()
-        dir_src = join(self.dir_expr, "src")
-        saver_command = "timeout -k 5m {0}h infer analyze {1} -- make -j20 ".format(
+        analysis_command = "timeout -k 5m {0}h infer" \
+                           "--scheduler callgraph {1} ".format(
             str(timeout_h), additional_tool_param
         )
-
-        status = self.run_command(saver_command, dir_path=dir_src,
+        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        dir_src = join(self.dir_expr, "src")
+        status = self.run_command(analysis_command, dir_path=dir_src,
                                   log_file_path=self.log_output_path)
         if status != 0:
             emitter.warning(
@@ -69,6 +64,7 @@ class Infer(AbstractAnalysisTool):
             )
         else:
             emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
@@ -77,7 +73,7 @@ class Infer(AbstractAnalysisTool):
         infer_output = join(self.dir_expr, "src", "infer-out")
         copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
         self.run_command(copy_command)
-        super(Infer, self).save_artifacts(dir_info)
+        super(Pulse, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
