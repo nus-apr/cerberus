@@ -35,7 +35,7 @@ def load_class(class_name: str):
 def load_tool(tool_name: str):
     emitter.normal("loading repair tool")
     # class_file_path = values.dir_tool_drivers + tool_name + ".py"
-    tool_type = values.tool_type
+    tool_type = values.task_type
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
     for x in pathlib.Path(tool_directory).rglob("*.py")]
@@ -129,7 +129,7 @@ class Configurations:
         emitter.normal("reading profile values")
         emitter.normal("reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
-        self.__runtime_config_values["tool-type"] = arg_list.tool_type
+        self.__runtime_config_values["task-type"] = arg_list.task_type
         if arg_list.config:
             self.__config_file = arg_list.config
             self.read_config_file()
@@ -285,7 +285,7 @@ class Configurations:
                 emitter.error("(invalid) --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
-        values.tool_type = self.__runtime_config_values["tool-type"]
+        values.task_type = self.__runtime_config_values["task-type"]
         values.benchmark_name = self.__runtime_config_values["benchmark-name"]
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:

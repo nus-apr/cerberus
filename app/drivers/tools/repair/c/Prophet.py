@@ -16,8 +16,8 @@ class Prophet(AbstractRepairTool):
         self.image_name = "rshariffdeen/prophet"
         self.file = ""
 
-    def repair(self, bug_info, config_info):
-        super(Prophet, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Prophet, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         conf_id = config_info[definitions.KEY_ID]

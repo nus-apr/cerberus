@@ -15,8 +15,8 @@ class GenProg(AbstractRepairTool):
         self.image_name = "rshariffdeen/genprog"
         self.fix_file = ""
 
-    def repair(self, bug_info, config_info):
-        super(GenProg, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(GenProg, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         conf_id = config_info[definitions.KEY_ID]

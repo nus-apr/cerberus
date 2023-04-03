@@ -72,7 +72,7 @@ class AbstractRepairTool(AbstractTool):
             )
         return
 
-    def repair(self, bug_info, config_info):
+    def run_repair(self, bug_info, config_info):
         emitter.normal("\t\t(repair-tool) repairing experiment subject")
         utilities.check_space()
         self.pre_process()

@@ -13,8 +13,8 @@ class Verifix(AbstractRepairTool):
         super(Verifix, self).__init__(self.name)
         self.image_name = "mirchevmp/verifix:latest"
 
-    def repair(self, bug_info, config_info):
-        super(Verifix, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Verifix, self).run_repair(bug_info, config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts

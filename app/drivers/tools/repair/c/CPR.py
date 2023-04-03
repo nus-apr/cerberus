@@ -16,8 +16,8 @@ class CPR(AbstractRepairTool):
         self.image_name = "rshariffdeen/cpr"
         self.id = ""
 
-    def repair(self, bug_info, config_info):
-        super(CPR, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(CPR, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         conf_id = str(values.current_profile_id.get("NA"))

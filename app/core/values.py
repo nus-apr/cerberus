@@ -77,7 +77,7 @@ rebuild_base = False
 ui_active = False
 use_tui = False
 cpus = 1
-tool_type = None
+task_type = None
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000
