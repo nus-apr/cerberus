@@ -45,7 +45,7 @@ class AbstractAnalysisTool(AbstractTool):
         return self._space, self._time, self._error
 
     def run_analysis(self, bug_info, config_info):
-        emitter.normal("\t\t(repair-tool) repairing experiment subject")
+        emitter.normal("\t\t(analysis-tool) analysing experiment subject")
         utilities.check_space()
         self.pre_process()
         emitter.normal("\t\t\t running analysis with " + self.name)
