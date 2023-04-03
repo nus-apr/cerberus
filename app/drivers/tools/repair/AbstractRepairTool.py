@@ -7,19 +7,18 @@ from datetime import datetime
 from os.path import join
 
 from app.core import abstractions
-from app.core import stats
 from app.core import container
 from app.core import definitions
 from app.core import emitter
+from app.core import stats
 from app.core import utilities
 from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.AbstractTool import AbstractTool
 
+
 class AbstractRepairTool(AbstractTool):
-
-
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
@@ -85,9 +84,7 @@ class AbstractRepairTool(AbstractTool):
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
-    def print_stats(
-        self, space_info: stats.SpaceStats, time_info: stats.TimeStats
-    ):
+    def print_stats(self, space_info: stats.SpaceStats, time_info: stats.TimeStats):
         emitter.highlight("\t\t\t search space size: {0}".format(space_info.size))
         emitter.highlight(
             "\t\t\t count enumerations: {0}".format(space_info.enumerations)

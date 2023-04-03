@@ -23,7 +23,6 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
 
-
 def run_repair(
     dir_info: Dict[str, Dict[str, str]],
     experiment_info,
@@ -136,7 +135,7 @@ def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmar
 def repair_all(
     dir_info_list: List[Any],
     experiment_info: Dict[str, Any],
-    tool_list: List[AbstractTool],
+    tool_list: List[AbstractRepairTool],
     config_info,
     container_id_list: List[str],
     benchmark_name: str,
@@ -288,4 +287,3 @@ def repair_all(
     # for t in tool_list:
     #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
     #     utilities.execute_command(timestamp_command)
-

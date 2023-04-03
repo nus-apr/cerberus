@@ -6,15 +6,16 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
 
+from app.core import analyze
 from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import analyze
 from app.core import repair
 from app.core import ui
 from app.core import utilities
@@ -25,6 +26,8 @@ from app.core.stats import SpaceStats
 from app.core.stats import TimeStats
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
 
@@ -102,7 +105,6 @@ def archive_results(dir_results: str, dir_archive: str):
     )
 
     utilities.execute_command(archive_command)
-
 
 
 def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]):
@@ -360,7 +362,7 @@ def run(
             repair.repair_all(
                 dir_info_list,
                 bug_info,
-                tool_list,
+                cast(List[AbstractRepairTool], tool_list),
                 config_info,
                 container_id_list,
                 benchmark.name,
@@ -369,7 +371,7 @@ def run(
             analyze.analyze_all(
                 dir_info_list,
                 bug_info,
-                tool_list,
+                cast(List[AbstractAnalyzeTool], tool_list),
                 config_info,
                 container_id_list,
                 benchmark.name,

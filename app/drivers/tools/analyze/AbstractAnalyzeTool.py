@@ -7,18 +7,18 @@ from datetime import datetime
 from os.path import join
 
 from app.core import abstractions
-from app.core import stats
 from app.core import container
 from app.core import definitions
 from app.core import emitter
+from app.core import stats
 from app.core import utilities
 from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.AbstractTool import AbstractTool
 
-class AbstractAnalyzeTool(AbstractTool):
 
+class AbstractAnalyzeTool(AbstractTool):
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         emitter.debug("using tool: " + tool_name)
@@ -57,10 +57,7 @@ class AbstractAnalyzeTool(AbstractTool):
         )
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
 
-
-    def print_stats(
-            self, space_info: stats.SpaceStats, time_info: stats.TimeStats
-        ):
-            emitter.highlight(
-                "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
-            )
+    def print_stats(self, space_info: stats.SpaceStats, time_info: stats.TimeStats):
+        emitter.highlight(
+            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
+        )

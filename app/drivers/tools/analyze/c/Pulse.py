@@ -17,7 +17,6 @@ class Pulse(AbstractAnalyzeTool):
         super(Pulse, self).__init__(self.name)
         self.image_name = "yuntongzhang/infer:latest"
 
-
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
@@ -34,18 +33,16 @@ class Pulse(AbstractAnalyzeTool):
             self.dir_logs,
             "{}-{}-prepare.log".format(self.name.lower(), bug_id),
         )
-        compile_command = (
-                "infer -j 20 capture -- make -j20"
-            )
+        compile_command = "infer -j 20 capture -- make -j20"
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
-        self.run_command(compile_command, dir_path=dir_src,
-                         log_file_path=self.log_prepare_path)
+        self.run_command(
+            compile_command, dir_path=dir_src, log_file_path=self.log_prepare_path
+        )
         emitter.normal(
             "\t\t\t\t compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
-
 
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
@@ -54,14 +51,15 @@ class Pulse(AbstractAnalyzeTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
         self.timestamp_log_start()
-        analysis_command = "timeout -k 5m {0}h infer " \
-                           " --scheduler callgraph {1} ".format(
-            str(timeout_h), additional_tool_param
+        analysis_command = (
+            "timeout -k 5m {0}h infer "
+            " --scheduler callgraph {1} ".format(str(timeout_h), additional_tool_param)
         )
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         dir_src = join(self.dir_expr, "src")
-        status = self.run_command(analysis_command, dir_path=dir_src,
-                                  log_file_path=self.log_output_path)
+        status = self.run_command(
+            analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
+        )
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
