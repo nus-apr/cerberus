@@ -6,10 +6,10 @@ from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.core.utilities import error_exit
-from app.drivers.tools.analyze.AbstractAnalysisTool import AbstractAnalysisTool
+from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
-class SAVER(AbstractAnalysisTool):
+class SAVER(AbstractAnalyzeTool):
     relative_binary_path = None
 
     def __init__(self):

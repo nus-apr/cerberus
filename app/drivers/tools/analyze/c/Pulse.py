@@ -6,7 +6,7 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.tools.analyze.AbstractAnalysisTool import AbstractAnalysisTool
+from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 class Pulse(AbstractAnalysisTool):
