@@ -82,7 +82,17 @@ class Vul4J(AbstractBenchmark):
             )
 
             if status != 0:
-                return True
+                command_str = "bash -c 'mvn dependency:copy-dependencies'"
+                status = self.run_command(
+                    container_id,
+                    command_str,
+                    self.log_build_path,
+                    # failing_module_dir_path,
+                    join(self.dir_expr, "src")
+                )
+
+                if status != 0:
+                    return False
 
             command_str = "bash -c '{0} {1}'".format(
                 join(self.dir_expr, "base", "init_dependencies.sh"),
