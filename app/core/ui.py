@@ -28,7 +28,7 @@ from app.core import definitions
 from app.core import email
 from app.core import emitter
 from app.core import main
-from app.core import repair
+from app.core import task
 from app.core import utilities
 from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -149,10 +149,10 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
             Cerberus.COLUMNS[k] = v
         asyncio.get_running_loop().run_in_executor(
             None,
-            self.pre_repair,
+            self.pre_run,
         )
 
-    def pre_repair(self):
+    def pre_run(self):
         try:
             self.query_one(DataTable).visible = False
 
@@ -169,7 +169,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
             self.query_one(DataTable).visible = True
             self.query_one(DataTable).styles.height = "100%"
-            self.run_repair(tools, benchmark, setup)
+            self.run_tasks(tools, benchmark, setup)
         except Exception as e:
             self.show(self.query_one(Static))
             self.query_one(Static).update(
@@ -190,9 +190,9 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
         self.debug_print("GOT EXCEPTION!")
         pass
 
-    def run_repair(
+    def run_tasks(
         self,
-        repair_tool_list: List[AbstractTool],
+        tool_list: List[AbstractTool],
         benchmark: AbstractBenchmark,
         setup: Any,
     ):
@@ -207,7 +207,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 utilities.check_space()
                 key = "{}-{}-{}-{}-{}".format(
                     benchmark.name,
-                    "-".join(map(lambda x: x.name, repair_tool_list)),
+                    "-".join(map(lambda x: x.name, tool_list)),
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
                     config_info[definitions.KEY_ID],
@@ -216,7 +216,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 _ = self.query_one(DataTable).add_row(
                     str(iteration),
                     benchmark.name,
-                    ",".join(map(lambda t: t.name, repair_tool_list)),
+                    ",".join(map(lambda t: t.name, tool_list)),
                     experiment_item[definitions.KEY_SUBJECT],
                     experiment_item[definitions.KEY_BUG_ID],
                     config_info[definitions.KEY_ID],
@@ -232,7 +232,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
                 self.post_message(
                     JobAllocate(
                         deepcopy(benchmark),
-                        [deepcopy(x) for x in repair_tool_list],
+                        [deepcopy(x) for x in tool_list],
                         experiment_item,
                         config_info,
                         key,
@@ -259,7 +259,7 @@ class Cerberus(App[List[Tuple[str, JobFinish.Status]]]):
 
             self.update_status(message.identifier, "Running")
             try:
-                repair.run(
+                task.run(
                     message.benchmark,
                     message.repair_tool_list,
                     message.experiment_item,
