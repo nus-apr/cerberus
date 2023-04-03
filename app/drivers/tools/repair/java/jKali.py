@@ -1,5 +1,5 @@
 import os
-from app.drivers.tools.AstorTool import AstorTool
+from app.drivers.tools.repair.java.AstorTool import AstorTool
 
 
 class jKali(AstorTool):
