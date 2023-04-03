@@ -308,8 +308,9 @@ def get_tools() -> List[AbstractTool]:
             if not values.only_analyse:
                 tool.check_tool_exists()
             tool_list.append(tool)
+    tool_type = values.tool_type
     emitter.highlight(
-        "[profile] repair-tool(s): " + " ".join([x.name for x in tool_list])
+        f"[profile] {tool_type}-tool(s): " + " ".join([x.name for x in tool_list])
     )
     return tool_list
 
