@@ -19,13 +19,13 @@ from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.drivers.tools.AbstractTool import AbstractTool
-from app.drivers.tools.analyze.AbstractAnalysisTool import AbstractAnalysisTool
+from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 def run_analysis(
     dir_info: Dict[str, Dict[str, str]],
     experiment_info,
-    tool: AbstractAnalysisTool,
+    tool: AbstractAnalyzeTool,
     config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
