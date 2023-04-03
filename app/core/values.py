@@ -6,6 +6,7 @@ from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 from app.core.stats import SpaceStats
@@ -60,7 +61,7 @@ bug_id_list: List[str] = []
 skip_index_list: List[int] = []
 benchmark_name = ""
 profile_id_list: List[str] = []
-subject_name = None
+subject_name: Optional[str] = None
 is_purge = False
 only_analyse = False
 only_test = False
@@ -77,7 +78,7 @@ rebuild_base = False
 ui_active = False
 use_tui = False
 cpus = 1
-task_type = None
+task_type: Optional[str] = None
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000
@@ -139,8 +140,7 @@ def get_list_tools(tool_type=""):
         l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
-            [str(x).split("/")[-1]
-             for x in pathlib.Path(tool_dir).rglob("*.py")],
+            [str(x).split("/")[-1] for x in pathlib.Path(tool_dir).rglob("*.py")],
         )
     )
 
@@ -150,7 +150,9 @@ def get_list_benchmarks():
         l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
-            [str(x).split("/")[-1]
-             for x in pathlib.Path(dir_benchmark_drivers).rglob("*.py")],
+            [
+                str(x).split("/")[-1]
+                for x in pathlib.Path(dir_benchmark_drivers).rglob("*.py")
+            ],
         )
     )

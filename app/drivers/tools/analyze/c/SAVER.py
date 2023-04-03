@@ -2,6 +2,7 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -43,7 +44,6 @@ class SAVER(AbstractAnalyzeTool):
             )
         )
 
-
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
         super(SAVER, self).run_analysis(bug_info, config_info)
@@ -65,8 +65,9 @@ class SAVER(AbstractAnalyzeTool):
             str(timeout_h), additional_tool_param
         )
 
-        status = self.run_command(saver_command, dir_path=dir_src,
-                                  log_file_path=self.log_output_path)
+        status = self.run_command(
+            saver_command, dir_path=dir_src, log_file_path=self.log_output_path
+        )
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(

@@ -7,10 +7,10 @@ from datetime import datetime
 from os.path import join
 
 from app.core import abstractions
-from app.core import stats
 from app.core import container
 from app.core import definitions
 from app.core import emitter
+from app.core import stats
 from app.core import utilities
 from app.core import values
 from app.core.utilities import error_exit
@@ -174,6 +174,10 @@ class AbstractTool:
             self.clean_up()
         return
 
+    def print_stats(self, space_info: stats.SpaceStats, time_info: stats.TimeStats):
+        """Print the statistics of the tool."""
+        pass
+
     def save_artifacts(self, dir_info):
         """Store all artifacts from the tool"""
         emitter.normal("\t\t\t saving artifacts of " + self.name)
@@ -205,7 +209,6 @@ class AbstractTool:
 
             execute_command(save_command)
         return
-
 
     def read_file(self, file_path, encoding="utf-8"):
         return abstractions.read_file(self.container_id, file_path, encoding)

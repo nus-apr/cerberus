@@ -1,8 +1,8 @@
 import json
 import multiprocessing
 import os
-import sys
 import pathlib
+import sys
 from argparse import Namespace
 from typing import Any
 from typing import Dict
@@ -38,8 +38,10 @@ def load_tool(tool_name: str):
     # class_file_path = values.dir_tool_drivers + tool_name + ".py"
     tool_type = values.task_type
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
-    existing_tool_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
-    for x in pathlib.Path(tool_directory).rglob("*.py")]
+    existing_tool_list = [
+        (str(x).split("/")[-1], str(x).split("/")[-2])
+        for x in pathlib.Path(tool_directory).rglob("*.py")
+    ]
     tool_class_name = None
     tool_language = None
 
@@ -50,7 +52,9 @@ def load_tool(tool_name: str):
     if not tool_class_name:
         utilities.error_exit(f"Unknown tool name {tool_name} for type {tool_type}")
     else:
-        mod = __import__(f"app.drivers.tools.{tool_type}.{tool_language}", fromlist=[tool_class_name])
+        mod = __import__(
+            f"app.drivers.tools.{tool_type}.{tool_language}", fromlist=[tool_class_name]
+        )
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()
@@ -60,8 +64,10 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
     emitter.normal("loading benchmark")
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
 
-    existing_benchmark_list = [(str(x).split("/")[-1], str(x).split("/")[-2])
-     for x in pathlib.Path(values.dir_benchmark_drivers).rglob("*.py")]
+    existing_benchmark_list = [
+        (str(x).split("/")[-1], str(x).split("/")[-2])
+        for x in pathlib.Path(values.dir_benchmark_drivers).rglob("*.py")
+    ]
 
     benchmark_class_name = None
     benchmark_language = None
@@ -75,7 +81,10 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
     if not benchmark_class_name:
         utilities.error_exit("Unknown benchmark name", benchmark_name)
     else:
-        mod = __import__(f"app.drivers.benchmarks.{benchmark_language}", fromlist=[benchmark_class_name])
+        mod = __import__(
+            f"app.drivers.benchmarks.{benchmark_language}",
+            fromlist=[benchmark_class_name],
+        )
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return initializer()

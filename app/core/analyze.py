@@ -58,11 +58,10 @@ def run_analysis(
     tool.run_analysis(experiment_info, config_info)
 
 
-
 def analyze_all(
     dir_info_list: List[Any],
     experiment_info: Dict[str, Any],
-    tool_list: List[AbstractTool],
+    tool_list: List[AbstractAnalyzeTool],
     config_info,
     container_id_list: List[str],
     benchmark_name: str,
@@ -75,7 +74,7 @@ def analyze_all(
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
 
-    for index, (dir_info, repair_tool, container_id) in enumerate(
+    for index, (dir_info, analyze_tool, container_id) in enumerate(
         zip(dir_info_list, tool_list, container_id_list)
     ):
         passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
@@ -102,14 +101,14 @@ def analyze_all(
             run_analysis(
                 dir_info,
                 experiment_info,
-                repair_tool,
+                analyze_tool,
                 config_info,
                 container_id,
                 benchmark_name,
             )
         else:
 
-            def repair_wrapped(
+            def analyze_wrapped(
                 dir_info,
                 experiment_info,
                 repair_tool,
@@ -129,11 +128,11 @@ def analyze_all(
                 )
 
             t_thread = threading.Thread(
-                target=repair_wrapped,
+                target=analyze_wrapped,
                 args=(
                     dir_info,
                     experiment_info,
-                    repair_tool,
+                    analyze_tool,
                     config_info,
                     container_id,
                     benchmark_name,
@@ -141,7 +140,7 @@ def analyze_all(
                 ),
             )
             t_thread.start()
-            tool_thread_list.append((t_thread, repair_tool))
+            tool_thread_list.append((t_thread, analyze_tool))
 
     if not values.ui_active:
         for thread, tool in tool_thread_list:
@@ -183,4 +182,3 @@ def analyze_all(
     # for t in tool_list:
     #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
     #     utilities.execute_command(timestamp_command)
-

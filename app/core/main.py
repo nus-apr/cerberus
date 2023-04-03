@@ -130,7 +130,7 @@ def parse_args():
         definitions.ARG_TOOL_NAME,
         help="name of the repair/analysis tool",
         choices=values.get_list_tools(),
-        metavar='TOOL',
+        metavar="TOOL",
     )
 
     # TODO: Group list of tools based on type
@@ -147,7 +147,6 @@ def parse_args():
     # group.add_argument('spam', help="Glorious SPAM", action='none')
     # group.add_argument('tomato', help="Sliced and diced", action='none')
 
-
     optional.add_argument(
         "-s",
         definitions.ARG_SUBJECT_NAME,
@@ -161,7 +160,6 @@ def parse_args():
         nargs="+",
         help="list of the repair/analysis tool",
         choices=values.get_list_tools(),
-
     )
     optional.add_argument(
         definitions.ARG_REBUILD_ALL_IMAGES,

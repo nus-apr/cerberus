@@ -33,9 +33,7 @@ class Infer(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        compile_command = (
-            "infer -j 20 -g compile -- make -j20"
-        )
+        compile_command = "infer -j 20 -g compile -- make -j20"
 
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)
@@ -44,8 +42,6 @@ class Infer(AbstractAnalyzeTool):
                 (datetime.now() - time).total_seconds()
             )
         )
-
-
 
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
@@ -59,8 +55,9 @@ class Infer(AbstractAnalyzeTool):
             str(timeout_h), additional_tool_param
         )
 
-        status = self.run_command(saver_command, dir_path=dir_src,
-                                  log_file_path=self.log_output_path)
+        status = self.run_command(
+            saver_command, dir_path=dir_src, log_file_path=self.log_output_path
+        )
         if status != 0:
             emitter.warning(
                 "\t\t\t[warning] {0} exited with an error code {1}".format(
