@@ -29,11 +29,17 @@ class Pulse(AbstractAnalyzeTool):
 
         time = datetime.now()
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        self.log_prepare_path = join(
+            self.dir_logs,
+            "{}-{}-prepare.log".format(self.name.lower(), bug_id),
+        )
         compile_command = (
                 "infer -j 20 capture -- make -j20"
             )
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
-        self.run_command(compile_command, dir_path=dir_src)
+        self.run_command(compile_command, dir_path=dir_src,
+                         log_file_path=self.log_prepare_path)
         emitter.normal(
             "\t\t\t\t compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -48,8 +54,8 @@ class Pulse(AbstractAnalyzeTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
         self.timestamp_log_start()
-        analysis_command = "timeout -k 5m {0}h infer" \
-                           "--scheduler callgraph {1} ".format(
+        analysis_command = "timeout -k 5m {0}h infer " \
+                           " --scheduler callgraph {1} ".format(
             str(timeout_h), additional_tool_param
         )
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
