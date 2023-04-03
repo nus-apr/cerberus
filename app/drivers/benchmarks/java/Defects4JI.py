@@ -6,7 +6,7 @@ from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.benchmarks.Java.Defects4J import Defects4J
+from app.drivers.benchmarks.java.Defects4J import Defects4J
 
 
 class Defects4JI(Defects4J):
