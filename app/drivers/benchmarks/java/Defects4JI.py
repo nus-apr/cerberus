@@ -1,5 +1,4 @@
 import os
-import shutil
 from datetime import datetime
 from os.path import join
 
@@ -7,7 +6,7 @@ from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.drivers.benchmarks.Defects4J import Defects4J
+from app.drivers.benchmarks.Java.Defects4J import Defects4J
 
 
 class Defects4JI(Defects4J):
