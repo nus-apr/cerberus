@@ -33,7 +33,8 @@ def load_class(class_name: str):
 
 
 def load_tool(tool_name: str):
-    emitter.normal("loading repair tool")
+    task_type = values.task_type
+    emitter.normal(f"loading {task_type} tool")
     # class_file_path = values.dir_tool_drivers + tool_name + ".py"
     tool_type = values.task_type
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
