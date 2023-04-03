@@ -322,9 +322,9 @@ class Fix2Fit(AbstractRepairTool):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.current_profile_id.get("NA"))
-        self.log_analysis_path = join(
+        self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-analysis.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
         )
         count_filtered = 0
 

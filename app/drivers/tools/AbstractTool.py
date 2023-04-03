@@ -231,7 +231,7 @@ class AbstractTool:
     def is_file(self, file_path):
         return abstractions.is_file(self.container_id, file_path)
 
-    def get_time_analysis(self):
+    def get_time_stats(self):
         return self._time
 
     def get_output_log_path(self):

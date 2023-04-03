@@ -38,7 +38,7 @@ file_error_log = dir_log_base + "/log-error"
 file_last_log = dir_log_base + "/log-latest"
 file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
-file_analysis_log = dir_log_base + "/log-analysis"
+file_stats_log = dir_log_base + "/log-stats"
 file_meta_data = None
 file_configuration = dir_main + "/profiles/default.json"
 file_output_log = ""
@@ -88,7 +88,7 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-analysis_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
+stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 current_profile_id = ContextVar("current_profile_id", default=None)
 
 email_configuration = {
