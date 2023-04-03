@@ -18,8 +18,8 @@ class Angelix(AbstractRepairTool):
         super(Angelix, self).__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
 
-    def repair(self, bug_info, config_info):
-        super(Angelix, self).repair(
+    def run_repair(self, bug_info, config_info):
+        super(Angelix, self).run_repair(
             bug_info,
             config_info,
         )

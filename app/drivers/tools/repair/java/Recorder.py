@@ -20,8 +20,8 @@ class Recorder(AbstractRepairTool):
         self.image_name = "zqh111/recoder:interface"
         self.bug_name = ""
 
-    def repair(self, bug_info, config_info):
-        super(Recorder, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Recorder, self).run_repair(bug_info, config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts

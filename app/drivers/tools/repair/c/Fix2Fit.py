@@ -14,8 +14,8 @@ class Fix2Fit(AbstractRepairTool):
         super(Fix2Fit, self).__init__(self.name)
         self.image_name = "rshariffdeen/fix2fit"
 
-    def repair(self, bug_info, config_info):
-        super(Fix2Fit, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Fix2Fit, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         conf_id = str(values.current_profile_id.get("NA"))

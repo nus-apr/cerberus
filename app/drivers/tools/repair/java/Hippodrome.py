@@ -12,8 +12,8 @@ class Hippodrome(AbstractRepairTool):
         super(Hippodrome, self).__init__(self.name)
         self.image_name = "mirchevmp/hippodrome:latest"
 
-    def repair(self, bug_info, config_info):
-        super(Hippodrome, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Hippodrome, self).run_repair(bug_info, config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts

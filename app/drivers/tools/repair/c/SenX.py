@@ -46,8 +46,8 @@ class SenX(AbstractRepairTool):
             )
         return
 
-    def repair(self, bug_info, config_info):
-        super(SenX, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(SenX, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         emitter.normal("\t\t\t running repair with " + self.name)

@@ -26,8 +26,8 @@ class F1X(AbstractRepairTool):
         perm_command = "chmod +x {}".format(test_driver_path)
         self.run_command(perm_command)
 
-    def repair(self, bug_info, config_info):
-        super(F1X, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(F1X, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         emitter.normal("\t\t\t running repair with " + self.name)

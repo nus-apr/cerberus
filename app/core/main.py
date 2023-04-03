@@ -15,7 +15,7 @@ from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import repair
+from app.core import task
 from app.core import ui
 from app.core import utilities
 from app.core import values
@@ -66,8 +66,8 @@ def parse_args():
     parser._action_groups.pop()
     required = parser.add_argument_group("Required arguments")
     required.add_argument(
-        "tool_type",
-        help="type of tool to run",
+        "task_type",
+        help="type of task to run",
         choices=["analyze", "repair"],
     )
 
@@ -281,7 +281,7 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
                 "Experiment #{} - Bug #{}".format(iteration, bug_index)
             )
             utilities.check_space()
-            repair.run(
+            task.run(
                 benchmark,
                 repair_tool_list,
                 experiment_item,
@@ -308,9 +308,9 @@ def get_tools() -> List[AbstractTool]:
             if not values.only_analyse:
                 tool.check_tool_exists()
             tool_list.append(tool)
-    tool_type = values.tool_type
+    task_type = values.task_type
     emitter.highlight(
-        f"[profile] {tool_type}-tool(s): " + " ".join([x.name for x in tool_list])
+        f"[profile] {task_type}-tool(s): " + " ".join([x.name for x in tool_list])
     )
     return tool_list
 

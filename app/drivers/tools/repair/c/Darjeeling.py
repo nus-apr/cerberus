@@ -50,8 +50,8 @@ class Darjeeling(AbstractRepairTool):
             )
         return
 
-    def repair(self, bug_info, config_info):
-        super(Darjeeling, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(Darjeeling, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         bug_id = str(bug_info[definitions.KEY_BUG_ID])

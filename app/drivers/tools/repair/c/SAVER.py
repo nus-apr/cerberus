@@ -97,9 +97,9 @@ class SAVER(AbstractRepairTool):
 
         return config_path
 
-    def repair(self, bug_info, config_info):
+    def run_repair(self, bug_info, config_info):
         config_path = self.prepare(bug_info)
-        super(SAVER, self).repair(bug_info, config_info)
+        super(SAVER, self).run_repair(bug_info, config_info)
         if values.only_instrument:
             return
         conf_id = config_info[definitions.KEY_ID]

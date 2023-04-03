@@ -17,8 +17,8 @@ class TBar(AbstractRepairTool):
         self.tbar_root_dir = "/TBar"
         self.image_name = "mirchevmp/tbar-cerberus:latest"
 
-    def repair(self, bug_info, config_info):
-        super(TBar, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(TBar, self).run_repair(bug_info, config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts

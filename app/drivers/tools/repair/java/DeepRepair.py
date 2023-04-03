@@ -19,8 +19,8 @@ class DeepRepair(AbstractRepairTool):
         super(DeepRepair, self).__init__(self.name)
         self.image_name = "rshariffdeen/astor"
 
-    def repair(self, bug_info, config_info):
-        super(DeepRepair, self).repair(bug_info, config_info)
+    def run_repair(self, bug_info, config_info):
+        super(DeepRepair, self).run_repair(bug_info, config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
