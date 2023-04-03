@@ -56,13 +56,24 @@ class Vul4J(AbstractBenchmark):
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(experiment_item[definitions.KEY_JAVA_VERSION])
         failing_module_dir_path = join(self.dir_expr, "src", experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY])
 
-        exec_dir_path = join(self.dir_expr, "src")
-
-        # compress all dependencies
         build_system = experiment_item[definitions.KEY_BUILD_SYSTEM]
         if build_system == 'maven':
             exec_dir_path = join(self.dir_expr, "src", experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY])
+        else:
+            exec_dir_path = join(self.dir_expr, "src")
 
+        timeout_h = 1
+        command_str = "bash -c '{0} timeout -k 5m {1}h {2}'".format(set_java_home_cmd, timeout_h, experiment_item[definitions.KEY_COMPILE_CMD])
+        # command_str = "bash -c '{0} {1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_COMPILE_CMD])
+        status = self.run_command(
+            container_id,
+            command_str,
+            self.log_build_path,
+            exec_dir_path
+        )
+
+        # compress all dependencies
+        if build_system == 'maven':
             command_str = "bash -c '{0} mvn dependency:copy-dependencies'".format(set_java_home_cmd)
             status = self.run_command(
                 container_id,
@@ -94,16 +105,6 @@ class Vul4J(AbstractBenchmark):
 
             if status != 0:
                 return False
-
-        timeout_h = 1
-        command_str = "bash -c '{0} timeout -k 5m {1}h {2}'".format(set_java_home_cmd, timeout_h, experiment_item[definitions.KEY_COMPILE_CMD])
-        # command_str = "bash -c '{0} {1}'".format(set_java_home_cmd, experiment_item[definitions.KEY_COMPILE_CMD])
-        status = self.run_command(
-            container_id,
-            command_str,
-            self.log_build_path,
-            exec_dir_path
-        )
 
         return status == 0
 
