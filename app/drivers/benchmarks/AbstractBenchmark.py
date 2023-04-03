@@ -134,7 +134,8 @@ class AbstractBenchmark:
         if not container_id:
             utilities.error_exit("Could not setup container")
         if is_error:
-            utilities.error_exit("Setting up experiment failed")
+            emitter.error("Setting up experiment failed")
+            # utilities.error_exit("Setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
