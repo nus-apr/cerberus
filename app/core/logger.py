@@ -49,7 +49,7 @@ def store_logs():
         values.file_command_log,
         values.file_build_log,
         values.file_main_log,
-        values.file_analysis_log,
+        values.file_stats_log,
         values.file_error_log,
     ]
     for log_f in log_file_list:
@@ -117,10 +117,10 @@ def warning(message):
     _logger_main.warning(message)
 
 
-def analysis(exp_id):
-    space_info, time_info = values.analysis_results[exp_id]
+def log_stats(exp_id):
+    space_info, time_info = values.stats_results[exp_id]
 
-    with open(values.file_analysis_log, "a") as log_file:
+    with open(values.file_stats_log, "a") as log_file:
         log_file.write("\n" + exp_id + "\n")
         log_file.write("\t\t search space size: {0}\n".format(space_info.size))
         log_file.write("\t\t count enumerations: {0}\n".format(space_info.enumerations))

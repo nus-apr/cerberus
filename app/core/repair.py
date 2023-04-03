@@ -384,10 +384,10 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
         )
         conf_id = str(values.current_profile_id.get("NA"))
         exp_id = conf_id + "-" + bug_id
-        values.analysis_results[exp_id] = (space_info, time_info)
-        tool.print_analysis(space_info, time_info)
+        values.stats_results[exp_id] = (space_info, time_info)
+        tool.print_stats(space_info, time_info)
         tool.log_output_path = ""
-        logger.analysis(exp_id)
+        logger.log_stats(exp_id)
         dir_output = dir_info["local"]["artifacts"]
         patch_dir = dir_output + "/patches"
         if values.use_valkyrie:
@@ -396,7 +396,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
-    emitter.normal("\t\tretrieving results for analysis")
+    emitter.normal("\t\tretrieving results")
     archive_path = join(values.dir_main, "results", tool.name.lower(), archive_name)
     if os.path.isfile(archive_path):
         extract_command = "cp {} {};".format(archive_path, values.dir_results)
@@ -636,8 +636,8 @@ def construct_summary():
     json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
     summary_f_path = f"{values.dir_summaries}/{json_f_name}"
     results_summary = dict()
-    for exp_id in values.analysis_results:
-        space_info, time_info = values.analysis_results[exp_id]
+    for exp_id in values.stats_results:
+        space_info, time_info = values.stats_results[exp_id]
         results_summary[exp_id] = {
             "space": space_info.get_array(),
             "time": time_info.get_array(),

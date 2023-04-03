@@ -85,7 +85,7 @@ class AbstractRepairTool(AbstractTool):
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
-    def print_analysis(
+    def print_stats(
         self, space_info: stats.SpaceStats, time_info: stats.TimeStats
     ):
         emitter.highlight("\t\t\t search space size: {0}".format(space_info.size))

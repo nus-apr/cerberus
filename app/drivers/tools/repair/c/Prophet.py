@@ -5711,7 +5711,7 @@ class Prophet(AbstractRepairTool):
         emitter.normal("\t\t\t analysing output of " + self.name)
         dir_results = path.join(self.dir_expr, "result")
         conf_id = str(values.current_profile_id.get("NA"))
-        self.log_analysis_path = "{}/{}-{}-{}-analysis.log".format(
+        self.log_stats_path = "{}/{}-{}-{}-stats.log".format(
             self.dir_logs, conf_id, self.name.lower(), bug_id
         )
 
