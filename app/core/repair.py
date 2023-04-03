@@ -19,9 +19,9 @@ from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core import writer
-from app.core.analysis import ErrorAnalysis
-from app.core.analysis import SpaceAnalysis
-from app.core.analysis import TimeAnalysis
+from app.core.stats import ErrorStats
+from app.core.stats import SpaceStats
+from app.core.stats import TimeStats
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.plugins import valkyrie
@@ -376,9 +376,9 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
     first_start = None
     patch_dir = None
     for dir_info, tool in zip(dir_info_list, tool_list):
-        space_info: SpaceAnalysis
-        time_info: TimeAnalysis
-        error_info: ErrorAnalysis
+        space_info: SpaceStats
+        time_info: TimeStats
+        error_info: ErrorStats
         space_info, time_info, error_info = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )

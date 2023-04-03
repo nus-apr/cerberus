@@ -4,10 +4,10 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core.utilities import escape_ansi
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class FuzzRepair(AbstractTool):
+class FuzzRepair(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(FuzzRepair, self).__init__(self.name)

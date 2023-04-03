@@ -1,4 +1,5 @@
 import os
+import pathlib
 from contextvars import ContextVar
 from os.path import dirname
 from os.path import join
@@ -7,8 +8,8 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 
-from app.core.analysis import SpaceAnalysis
-from app.core.analysis import TimeAnalysis
+from app.core.stats import SpaceStats
+from app.core.stats import TimeStats
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
@@ -76,6 +77,7 @@ rebuild_base = False
 ui_active = False
 use_tui = False
 cpus = 1
+tool_type = None
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000
@@ -86,7 +88,7 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-analysis_results: Dict[str, Tuple[SpaceAnalysis, TimeAnalysis]] = dict()
+analysis_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 current_profile_id = ContextVar("current_profile_id", default=None)
 
 email_configuration = {
@@ -131,12 +133,14 @@ apr_max_limit = {
 }
 
 
-def get_list_tools():
+def get_list_tools(tool_type=""):
+    tool_dir = f"{dir_tool_drivers}/{tool_type}"
     return list(
         l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
-            os.listdir(dir_tool_drivers),
+            [str(x).split("/")[-1]
+             for x in pathlib.Path(tool_dir).rglob("*.py")],
         )
     )
 
@@ -146,6 +150,7 @@ def get_list_benchmarks():
         l[:-3].lower()
         for l in filter(
             lambda x: "__" not in x and "abstract" not in x.lower(),
-            os.listdir(dir_benchmark_drivers),
+            [str(x).split("/")[-1]
+             for x in pathlib.Path(dir_benchmark_drivers).rglob("*.py")],
         )
     )

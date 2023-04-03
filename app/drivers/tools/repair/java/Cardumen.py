@@ -1,9 +1,5 @@
 import os
-from os.path import join
-import re
-from app.core import definitions, emitter, values
-from app.core import utilities
-from app.drivers.tools.AstorTool import AstorTool
+from app.drivers.tools.repair.java.AstorTool import AstorTool
 
 
 class Cardumen(AstorTool):

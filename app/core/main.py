@@ -64,7 +64,12 @@ def bootstrap(arg_list: Namespace):
 def parse_args():
     parser = argparse.ArgumentParser(prog=values.tool_name, usage="%(prog)s [options]")
     parser._action_groups.pop()
-    # required = parser.add_argument_group("Required arguments")
+    required = parser.add_argument_group("Required arguments")
+    required.add_argument(
+        "tool_type",
+        help="type of tool to run",
+        choices=["analyze", "repair"],
+    )
 
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument(
@@ -120,13 +125,29 @@ def parse_args():
         definitions.ARG_DOCKER_HOST,
         help="custom URL for the docker server which will host the containers",
     )
-
     optional.add_argument(
         "-t",
         definitions.ARG_TOOL_NAME,
-        help="name of the repair tool",
+        help="name of the repair/analysis tool",
         choices=values.get_list_tools(),
+        metavar='TOOL',
     )
+
+    # TODO: Group list of tools based on type
+    # group_tool = parser.add_argument_group(title='choice of tools')
+    # repair_tools = parser.add_argument_group(title='repair tools')
+    # analysis_tools = parser.add_argument_group(title='analysis tools')
+    #
+    # group_tool.add_argument(repair_tools)
+    # group_tool.add_argument(analysis_tools)
+    #
+    # group.add_argument('bacon', help="Lovely bacon", action='none')
+    # group.add_argument('egg', help="The runny kind", action='none')
+    # group.add_argument('sausage', help="Just a roll", action='none')
+    # group.add_argument('spam', help="Glorious SPAM", action='none')
+    # group.add_argument('tomato', help="Sliced and diced", action='none')
+
+
     optional.add_argument(
         "-s",
         definitions.ARG_SUBJECT_NAME,
@@ -137,9 +158,10 @@ def parse_args():
     )
     optional.add_argument(
         definitions.ARG_TOOL_LIST,
-        help="list of repair tool names",
         nargs="+",
-        default=[],
+        help="list of the repair/analysis tool",
+        choices=values.get_list_tools(),
+
     )
     optional.add_argument(
         definitions.ARG_REBUILD_ALL_IMAGES,

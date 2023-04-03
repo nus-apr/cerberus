@@ -8,10 +8,10 @@ from app.core import emitter
 from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
-from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
-class SAVER(AbstractRepairTool):
+class SAVER(AbstractTool):
     relative_binary_path = None
     bug_conversion_table = {
         "Memory Leak": "MEMORY_LEAK",

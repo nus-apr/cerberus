@@ -11,10 +11,10 @@ from app.core import emitter
 from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class SenX(AbstractTool):
+class SenX(AbstractRepairTool):
     relative_binary_path: Optional[str] = None
 
     def __init__(self):

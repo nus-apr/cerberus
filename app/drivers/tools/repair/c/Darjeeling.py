@@ -7,10 +7,10 @@ from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.core.utilities import error_exit
-from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class Darjeeling(AbstractTool):
+class Darjeeling(AbstractRepairTool):
     """ """
 
     def __init__(self):
