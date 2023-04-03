@@ -17,7 +17,7 @@ from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.AbstractTool import AbstractTool
 
-class AbstractAnalysisTool(AbstractTool):
+class AbstractAnalyzeTool(AbstractTool):
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
@@ -56,12 +56,11 @@ class AbstractAnalysisTool(AbstractTool):
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
-        return
 
 
- def print_stats(
-        self, space_info: stats.SpaceStats, time_info: stats.TimeStats
-    ):
-        emitter.highlight(
-            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
-        )
+    def print_stats(
+            self, space_info: stats.SpaceStats, time_info: stats.TimeStats
+        ):
+            emitter.highlight(
+                "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
+            )
