@@ -157,8 +157,7 @@ def build_container(
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
                 continue
-            if not os.path.isdir(local_dir_path):
-                os.makedirs(local_dir_path)
+            os.makedirs(local_dir_path, exist_ok=True)
         emitter.debug(
             "Container runtime is {}".format("nvidia" if values.use_gpu else "runc")
         )
