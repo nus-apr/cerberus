@@ -1,9 +1,9 @@
-# Repair Tool
-The following document describes the interface of the AbstactRepairTool class - the order of the methods defined represnts the order in which they are ran by Cerberus
+# Analyze Tool
+The following document describes the interface of the AbstactAnalyzeTool class - the order of the methods defined represnts the order in which they are ran by Cerberus
 
 ```py
 
-class NewTool(AbstractRepairTool):
+class NewTool(AbstractAnalyzeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewTool, self).__init__(self.name)
@@ -12,7 +12,7 @@ class NewTool(AbstractRepairTool):
 The constructor should follow the following format, the line `self.image_name=...` should be an identifier for a valid docker image, preferably with a label.
 
 ```py
-     def run_repair(self, bug_info, config_info):
+     def run_analysis(self, bug_info, config_info):
         super(NewTool, self).repair(bug_info, config_info)
         '''
             self.dir_logs - directory to store logs
