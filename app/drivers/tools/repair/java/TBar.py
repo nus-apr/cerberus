@@ -38,6 +38,11 @@ class TBar(AbstractRepairTool):
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
+        self.run_command(
+            "git init && git add . && git commit -m 'TEMP COMMIT'",
+            dir_path=join(self.dir_expr, "src"),
+        )
+
         # prepare the required parameters
         parameters = self.create_parameters(bug_info)
 
