@@ -2,6 +2,8 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.core import definitions
 from app.core import emitter
@@ -24,7 +26,7 @@ class SAVER(AbstractRepairTool):
         super(SAVER, self).__init__(self.name)
 
     def populate_config_file(self, bug_info, config_path):
-        config_info = dict()
+        config_info: Dict[str, Any] = dict()
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         if bug_type not in self.bug_conversion_table:
             error_exit(f"Unsupported bug type: {bug_type}")

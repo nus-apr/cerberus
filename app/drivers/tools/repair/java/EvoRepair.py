@@ -2,6 +2,8 @@ import json
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.core import definitions
 from app.core import emitter
@@ -21,7 +23,7 @@ class EvoRepair(AbstractRepairTool):
 
     def generate_config_file(self, bug_info):
         repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
-        config_object = dict()
+        config_object: Dict[str, Dict[str, Any]] = dict()
         config_object["project"] = dict()
         subject_name = bug_info[definitions.KEY_SUBJECT]
         bug_id = bug_info[definitions.KEY_BUG_ID]
@@ -46,7 +48,7 @@ class EvoRepair(AbstractRepairTool):
         config_object["project"]["deps-directory"] = dir_java_deps
         config_object["project"]["class-directory"] = dir_java_bin
 
-        build_config = dict()
+        build_config: Dict[str, Any] = dict()
         build_config["directory"] = os.path.join(self.dir_expr, "src")
         build_config["commands"] = dict()
         build_config["commands"]["pre-build"] = "exit 0"

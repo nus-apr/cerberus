@@ -4,6 +4,7 @@ from datetime import datetime
 from os import listdir
 from os.path import isfile
 from os.path import join
+from typing import cast
 from typing import Optional
 
 from app.core import definitions
@@ -60,7 +61,10 @@ class SenX(AbstractRepairTool):
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
 
-        self.relative_binary_path = bug_info[definitions.KEY_BINARY_PATH]
+        if not bug_info[definitions.KEY_BINARY_PATH]:
+            error_exit("The bug does not have a binary path defined")
+
+        self.relative_binary_path = cast(str, bug_info[definitions.KEY_BINARY_PATH])
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
         binary_dir_path = os.path.dirname(abs_binary_path)
         struct_def_file_path = "def_file"
@@ -115,9 +119,13 @@ class SenX(AbstractRepairTool):
         emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
-        if not (self.dir_expr and self.relative_binary_path):
-            error_exit("Unset paths in setup for SenX")
-        abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
+        if not self.dir_expr:
+            error_exit("Experiment directory not set")
+        if not self.relative_binary_path:
+            error_exit("Relative binary path not set")
+        abs_binary_path = join(
+            self.dir_expr, "src", cast(str, self.relative_binary_path)
+        )
         patch_path = abs_binary_path + ".bc.patch"
         copy_command = "cp -rf {} {}/patches".format(patch_path, self.dir_output)
         self.run_command(copy_command)
