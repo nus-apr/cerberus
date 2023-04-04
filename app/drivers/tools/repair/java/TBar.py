@@ -45,10 +45,15 @@ class TBar(AbstractRepairTool):
             'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
         )
         args = (
-            "CLASS_DIRECTORY={} ".format(bug_info["class_directory"])
-            + "TEST_CLASS_DIRECTORY={} ".format(bug_info["test_class_directory"])
-            + "SOURCE_DIRECTORY={} ".format(bug_info["source_directory"])
-            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info["test_directory"])
+            "FAILING_TESTS={}".format(" ".join(bug_info[definitions.KEY_FAILING_TEST]))
+            + "CLASS_DIRECTORY={} ".format(bug_info[definitions.KEY_CLASS_DIRECTORY])
+            + "TEST_CLASS_DIRECTORY={} ".format(
+                bug_info[definitions.KEY_TEST_CLASS_DIRECTORY]
+            )
+            + "SOURCE_DIRECTORY={} ".format(bug_info[definitions.KEY_SOURCE_DIRECTORY])
+            + "TEST_SOURCE_DIRECTORY={} ".format(
+                bug_info[definitions.KEY_TEST_DIRECTORY]
+            )
         )
 
         # start running
