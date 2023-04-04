@@ -175,8 +175,8 @@ class TBar(AbstractRepairTool):
         tbar_logs_dir = join(self.tbar_root_dir, "logs")
         self.run_command("cp -r {0} {1}".format(tbar_logs_dir, self.dir_logs))
 
-        tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
-        self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
+        # tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
+        # self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
 
         super().save_artifacts(dir_info)
         return
