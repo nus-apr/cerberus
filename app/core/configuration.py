@@ -331,8 +331,12 @@ class Configurations:
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
         values.email_setup = self.__runtime_config_values["email-setup"]
-        values.cpus = min(
-            multiprocessing.cpu_count(), self.__runtime_config_values["cpu-count"]
+        values.cpus = max(
+            1,
+            min(
+                multiprocessing.cpu_count() - 2,
+                self.__runtime_config_values["cpu-count"],
+            ),
         )
 
         values.docker_host = self.__runtime_config_values.get(
