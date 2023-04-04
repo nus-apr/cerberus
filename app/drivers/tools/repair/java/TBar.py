@@ -41,13 +41,13 @@ class TBar(AbstractRepairTool):
         if self.container_id:
             # Ensure that the container has git setup
             self.run_command(
-                "bash -c 'git config --global user.email cerberus@nus-apr.com && git config --global user.name CERBERUS",
+                "bash -c 'git config --global user.email cerberus@nus-apr.com && git config --global user.name CERBERUS'",
                 dir_path=join(self.dir_expr, "src"),
             )
 
         # Ensure that there is a repo set up for the experiment and clean of any non-staged data
         self.run_command(
-            'bash -c \'git init && git add . && git commit -m "TEMP COMMIT"',
+            "bash -c 'git init && git add . && git commit -m \"TEMP COMMIT\"'",
             dir_path=join(self.dir_expr, "src"),
         )
 
