@@ -271,7 +271,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
     def update_status(self, key, status):
         if Cerberus.COLUMNS["Status"]:
             self.query_one(DataTable).update_cell(
-                key, Cerberus.COLUMNS["Status"], status
+                key, Cerberus.COLUMNS["Status"], status, update_width=True
             )
 
     async def on_cerberus_job_mount(self, message: JobMount):
