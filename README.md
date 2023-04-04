@@ -49,23 +49,21 @@ Cerberus should be considered alpha-quality software. Bugs can be reported here:
 * [Extending](doc/Extending.md)
 * [Project Architecture](doc/ProjectArchitecture.md)
 
-# Contributions
 
-We welcome contributions to improve this work, see [details](doc/Contributing.md)
 
-# Developing
+## Citation
 
-## Developers
+If you use Cerberus in your research work, we would highly appreciate it if you
+cited the [following paper](https://rshariffdeen.com/paper/ICSE23-demo.pdf):
 
-* Ridwan Shariffdeen
-* Martin Mirchev
-* Zhang Yuntong
-
-## Contributors
-
-* Gao Xiang
-* Yannic Noller
-
-# License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
+```
+@inproceedings{cerberus,
+author = {Shariffdeen, Ridwan and Mirchev, Martin and Noller, Yannic and Roychoudhury, Abhik},
+title = {Cerberus: A Program Repair Framework},
+year = {2023},
+booktitle = {Proceedings of the ACM/IEEE 45th International Conference on Software Engineering: Companion Proceedings},
+location = {Melbourne, Australia},
+series = {ICSE '23},
+note = {{To appear}}
+}
+```
