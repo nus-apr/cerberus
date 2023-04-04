@@ -1,6 +1,7 @@
 import math
 import re
 from os.path import join
+from typing import Optional
 
 from app.core import definitions
 from app.core import emitter
@@ -13,7 +14,7 @@ class AstorTool(AbstractRepairTool):
 
     astor_home = "/opt/astor"
     astor_version = "2.0.0"
-    mode = None
+    mode: Optional[str] = None
 
     def __init__(self):
         super(AstorTool, self).__init__(self.name)
@@ -142,7 +143,11 @@ class AstorTool(AbstractRepairTool):
             for line in log_lines:
                 if "child compiles" in line.lower():
                     count_compilable += 1
-                    child_id = int(str(re.search(r"id (.*)", line).group(1)).strip())
+                    identifier = re.search(r"id (.*)", line)
+                    if not identifier:
+                        emitter.warning("No Id found")
+                        continue
+                    child_id = int(str(identifier.group(1)).strip())
                     if child_id > count_enumerations:
                         count_enumerations = child_id
                 elif "found solution," in line.lower():

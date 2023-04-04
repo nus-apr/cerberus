@@ -128,7 +128,11 @@ class DeepRepair(AbstractRepairTool):
             for line in log_lines:
                 if "child compiles" in line.lower():
                     count_compilable += 1
-                    child_id = int(str(re.search(r"id (.*)", line).group(1)).strip())
+                    identifier = re.search(r"id (.*)", line)
+                    if not identifier:
+                        emitter.warning("Could not find id")
+                        continue
+                    child_id = int(str(identifier.group(1)).strip())
                     if child_id > count_enumerations:
                         count_enumerations = child_id
                 elif "found solution," in line.lower():
