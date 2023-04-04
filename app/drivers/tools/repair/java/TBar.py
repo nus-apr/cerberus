@@ -45,7 +45,9 @@ class TBar(AbstractRepairTool):
             'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
         )
         args = (
-            "FAILING_TESTS={}".format(" ".join(bug_info[definitions.KEY_FAILING_TEST]))
+            "FAILING_TESTS='{}' ".format(
+                " ".join(bug_info[definitions.KEY_FAILING_TEST])
+            )
             + "CLASS_DIRECTORY={} ".format(bug_info[definitions.KEY_CLASS_DIRECTORY])
             + "TEST_CLASS_DIRECTORY={} ".format(
                 bug_info[definitions.KEY_TEST_CLASS_DIRECTORY]
