@@ -112,9 +112,11 @@ class GenProg(AbstractRepairTool):
             ]
             for f in output_patch_list:
                 patched_source = dir_repair_local + "/" + f
-                patch_id = str(f).split("-")[-1]
+                patch_id_candidate = str(f).split("-")[-1]
                 if not str(patch_id).isnumeric():
                     patch_id = 0
+                else:
+                    patch_id = int(patch_id_candidate)
                 patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
                 diff_command = (
                     "diff -U 0 /tmp/orig.c "

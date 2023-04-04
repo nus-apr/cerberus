@@ -126,9 +126,11 @@ class CRepair(AbstractRepairTool):
                 if "evaluating candidate patch" in line:
                     count_enumerations += 1
                 if "writing" in line and "mutations" in line:
-                    search_space = int(
-                        re.search(r"writing (.*) mutations", line).group(1)
-                    )
+                    mutations = re.search(r"writing (.*) mutations", line)
+                    if not mutations:
+                        emitter.warning("No mutations found??")
+                        continue
+                    search_space = int(mutations.group(1))
                 elif "saving successful patch" in line:
                     count_plausible += 1
                 elif "failed to compile" in line:

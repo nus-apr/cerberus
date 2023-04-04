@@ -373,7 +373,7 @@ class Fix2Fit(AbstractRepairTool):
                     line.split("candidates evaluated: ")[-1].strip()
                 )
             elif "exploration progress: " in line:
-                self._space.enumerations = (
+                self._space.enumerations = int(
                     int(
                         line.split("exploration progress: ")[-1]
                         .strip()

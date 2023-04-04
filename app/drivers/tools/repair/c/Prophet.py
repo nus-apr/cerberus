@@ -2,6 +2,7 @@ import os
 import re
 from os import path
 from os.path import join
+from typing import List
 
 from app.core import definitions
 from app.core import emitter
@@ -134,9 +135,11 @@ class Prophet(AbstractRepairTool):
             ]
             for f in output_patch_list:
                 patched_source = dir_patch_local + "/" + f
-                patch_id = str(f).split("-")[-1]
+                patch_id_candidate = str(f).split("-")[-1]
                 if not str(patch_id).isnumeric():
                     patch_id = 0
+                else:
+                    patch_id = int(patch_id_candidate)
                 patch_file = dir_patch_local + "/" + str(patch_id) + ".patch"
                 diff_command = (
                     "diff -U 0 /tmp/orig.c "
@@ -150,7 +153,7 @@ class Prophet(AbstractRepairTool):
 
     def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
         filtered_list = []
-        filter_list = []
+        filter_list: List[int] = []
         if benchmark_name == "manybugs":
             if str(subject).lower() == "python":
                 filter_list = []
@@ -5646,13 +5649,14 @@ class Prophet(AbstractRepairTool):
 
     def read_log_file(self):
         self._time.set_log_time_fmt("%S")  # Temporary
-        timeline = ""
+        # timeline = ""
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")
         self._time.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "[" == line[0] and "]" in line:
-                timeline = int(line.split("]")[0].replace("[", "").strip())
+                continue
+                # timeline = int(line.split("]")[0].replace("[", "").strip())
             if "number of explored templates:" in line:
                 self._space.enumerations = int(
                     line.split("number of explored templates: ")[-1]
