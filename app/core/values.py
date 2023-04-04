@@ -11,6 +11,7 @@ from typing import Tuple
 
 from app.core.stats import SpaceStats
 from app.core.stats import TimeStats
+from app.core.status import JobStatus
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
@@ -91,6 +92,7 @@ arg_pass = False
 iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 current_profile_id = ContextVar("current_profile_id", default=None)
+experiment_status = ContextVar("experiment_status", default=JobStatus.NONE)
 
 email_configuration = {
     "ssl_from_start": True,
