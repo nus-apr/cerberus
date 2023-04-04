@@ -1,18 +1,19 @@
 # Cerberus Framework
 
 Cerberus is a program repair framework that provides the interface to multiple
-state-of-the art program repair tools such as Prophet, Darjeeling, Angelix, F1X etc.
-Encapsulating the difficulties to setup the infrastructure for repair technology, this platform provides
-the necessary framework to configure a program for repair. We have integrated multiple repair
+state-of-the art program analysis tools such as Infer and Pulse, as well as program repair tools such as Prophet, Darjeeling, Angelix, F1X etc.
+Encapsulating the difficulties to setup the infrastructure for program analysis/repair technology, this platform provides
+the necessary framework to configure a program for analysis/repair. We have integrated multiple defects
 benchmarks including but not limited to ManyBugs, VulnLoc and Defects4J. This platform also provides the necessary means for researchers to
-run experiments more efficiently and effectively.
+run experiments more efficiently and effectively, with more user-friendly features such as push notifications, and summary extraction.
 
 ## Features
 
-* Execution of repair tools on benchmarks of bugs
-* Configuration of the environment to execute repair tools properly on the bugs
-* Concurrent execution of multiple repair tools
+* Execution of analysis/repair tools on benchmarks of bugs
+* Configuration of the environment to execute analysis/repair tools properly on the bugs
+* Concurrent execution of multiple analysis/repair tools
 * Artifacts are extracted and stored for each experiment
+* Push notification once experiments are completed
 
 ## Installation Procedure
 
@@ -28,83 +29,11 @@ Following is a simple snippet for the command to run an experiment from a select
 
 ```bash
 source activate
-cerberus --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prophet/f1x]
+cerberus [analyze/repair] --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prophet/f1x]
 ```
 
-## Supported Repair Tools
-
-<details>
-<summary>C/C++</summary>
-<br>
-
-| #  | Tool       | Language | Repository                                         | Commit id |
-|----|------------| -------- |----------------------------------------------------| --------  |
-| 1  | Angelix    | C/C++    | <https://github.com/mechtaev/angelix>              | 01396ac   |
-| 2  | Prophet    | C/C++    | <https://github.com/rshariffdeen/prophet>          | 5f8c688   |
-| 3  | Darjeeling | C/C++    | <https://github.com/squareslab/darjeeling>         | ed6fb3e   |
-| 4  | CPR        | C/C++    | <https://github.com/rshariffdeen/CPR>              | 4863c60   |
-| 5  | VulnFix    | C/C++    | <https://github.com/yuntongzhang/vulnfix>          | 44bdbab   |
-| 6  | F1X        | C/C++    | <https://github.com/mechtaev/f1x>                  | e4a225e   |
-| 7  | Fix2Fit    | C/C++    | <https://github.com/gaoxiang9430/Fix2Fit>          | 349e4ba   |
-| 8  | SenX       | C/C++    | N/A                                                | N/A       |
-| 9  | GenProg    | C/C++    | <https://github.com/squaresLab/genprog-code>       | 0b25153   |
-| 10 | ExtractFix | C/C++    | N/A                                                | N/A       |
-| 11 | Verifix    | C/C++    | <https://github.com/zhiyufan/Verifix>              | 6d5bda0   |
-| 12 | SAVER      | C/C++    | <https://github.com/kupl/SAVER_public>             | e7eca63   |
-| 13 | FootPatch  | C/C++    | <https://github.com/squaresLab/footpatch>          | 8b79c19   |
-
-</details>
-
-<details>
-<summary>Java</summary>
-<br>
-
-| #  | Tool       | Language | Repository                                         | Commit id |
-|----|------------| -------- |----------------------------------------------------| --------  |
-| 1  | Hippodrome | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
-| 2  | SequenceR  | Java     | <https://github.com/KTH/sequencer>                 | 3bd0cd4   |
-| 3  | ARJA       | Java     | <https://github.com/yyxhdy/arja>                   | e795032   |
-| 4  | Cardumen   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 5  | jMutRepair | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 6  | jKali      | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 7  | jGenProg   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 8  | Nopol      | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
-| 9  | Recorder   | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
-| 10 | TBar       | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
-
-
-</details>
-
-## Supported Benchmarks of Bugs
-<details>
-<summary>C/C++</summary>
-<br>
-
-| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
-| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
-| 1 | ManyBugs          | C/C++    | <https://github.com/nus-apr/manybugs>                 |          6 |     60 |
-| 2 | VulnLoc           | C/C++    | <https://github.com/nus-apr/vulnloc-benchmark>        |         11 |     43 |
-| 3 | ExtractFix        | C/C++    | <https://github.com/nus-apr/extractfix-benchmark>     |          7 |     30 |
-| 4 | ITSP              | C/C++    | <https://github.com/nus-apr/itsp-benchmark>           |         10 |    661 |
-
-
-</details>
-
-<details>
-<summary>Java</summary>
-<br>
-
-| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
-| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
-| 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
-| 2 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
-| 3 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
-| 4 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |
-| 5 | IntroClassJava    | Java     | <https://github.com/nus-apr/introclassjava-benchmark> |          6 |    297 |
-
-</details>
-
-
+## Supported Tools and Benchmark
+Full list of supported [tools](doc/tool/ListTools.md) and [benchmarks](doc/benchmark/ListBenchmarks.md)
 
 ## Bugs
 
