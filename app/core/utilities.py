@@ -62,8 +62,7 @@ def execute_command(command: str, show_output=True, env=dict(), directory=None):
 
 def error_exit(*arg_list: Any):
     emitter.error("Repair Failed")
-    if values.email_setup:
-        email.send_message("\n".join(map(str, arg_list)), "Cerberus Repair Failed")
+    email.send_message("\n".join(map(str, arg_list)), "Cerberus Repair Failed")
     for arg in arg_list:
         emitter.error(str(arg))
     raise Exception("Error. Exiting...")

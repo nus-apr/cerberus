@@ -1,0 +1,43 @@
+from enum import Enum
+
+
+class JobStatus(Enum):
+    NONE = -1
+    SUCCESS = 0
+    FAIL = 1
+    PREPROCESSING = 2
+    REPAIRING = 3
+    EXTRACTING_PATCHES = 4
+    PREPARING_IMAGE = 5
+    FAIL_IN_SETUP = 6
+    FAIL_IN_CONFIG = 7
+    FAIL_IN_BUILD = 8
+    FAIL_IN_TEST = 9
+    FAIL_IN_VERIFY = 10
+    FAIL_IN_INSTRUMENT = 11
+
+    def __str__(self) -> str:
+        if self is self.SUCCESS:
+            return "Success"
+        elif self is self.FAIL:
+            return "Failure"
+        elif self is self.PREPROCESSING:
+            return "Preprocessing"
+        elif self is self.REPAIRING:
+            return "Repairing"
+        elif self is self.EXTRACTING_PATCHES:
+            return "Extracting Patches"
+        elif self is self.PREPARING_IMAGE:
+            return "Preparing image"
+        elif self is self.FAIL_IN_BUILD:
+            return "Failed in image building phase"
+        elif self is self.FAIL_IN_CONFIG:
+            return "Failed in image configuration phase"
+        elif self is self.FAIL_IN_TEST:
+            return "Failed in image testing phase"
+        elif self is self.FAIL_IN_VERIFY:
+            return "Failed in image verification phase"
+        elif self is self.FAIL_IN_VERIFY:
+            return "Failed in image instrumentation phase"
+        else:
+            raise NotImplementedError("New status defined but not implemented in repr")

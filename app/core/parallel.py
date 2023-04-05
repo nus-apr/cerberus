@@ -3,6 +3,8 @@ import os
 import sys
 import time
 from os.path import join
+from typing import Any
+from typing import List
 
 from app.core import emitter
 from app.core import values
@@ -18,7 +20,7 @@ max_process_count = mp.cpu_count()
 validator_pool = None
 exit_consume = 0
 consume_count = 0
-result_list = []
+result_list: List[Any] = []
 len_gen = 0
 len_processed = 0
 total_timeout = 0

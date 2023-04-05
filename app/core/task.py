@@ -9,7 +9,6 @@ from typing import Any
 from typing import cast
 from typing import Dict
 from typing import List
-from typing import Optional
 
 from app.core import analyze
 from app.core import container
@@ -24,6 +23,7 @@ from app.core import writer
 from app.core.stats import ErrorStats
 from app.core.stats import SpaceStats
 from app.core.stats import TimeStats
+from app.core.status import JobStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -391,6 +391,4 @@ def run(
 
     construct_summary()
     if values.ui_active:
-        ui.get_ui().post_message(
-            ui.JobFinish(run_identifier, ui.JobFinish.Status.SUCCESS)
-        )
+        ui.get_ui().post_message(ui.JobFinish(run_identifier, JobStatus.SUCCESS))

@@ -22,6 +22,7 @@ class Infer(AbstractAnalyzeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Infer, self).__init__(self.name)
+        self.image_name = "yuntongzhang/infer:latest"
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
@@ -33,7 +34,7 @@ class Infer(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        compile_command = "infer -j 20 -g compile -- make -j20"
+        compile_command = "infer -j 20 -g capture -- make -j20"
 
         emitter.normal("\t\t\t\t compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)

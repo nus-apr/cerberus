@@ -1,8 +1,7 @@
 import os
-import re
-from os import listdir
-from os.path import isfile
 from os.path import join
+from typing import List
+from typing import Set
 
 from app.core import container
 from app.core import definitions
@@ -188,7 +187,7 @@ class Angelix(AbstractRepairTool):
         count_plausible = 0
         count_enumerations = 0
         search_space = 0
-        reported_fail_list = set()
+        reported_fail_list: Set[str] = set()
         collect_neg = False
 
         # count number of patch files
@@ -284,9 +283,9 @@ class Angelix(AbstractRepairTool):
         self._error.is_error = is_error
         return self._space, self._time, self._error
 
-    def filter_tests(self, test_id_list, subject, bug_id):
-        filtered_list = []
-        filter_list = []
+    def filter_tests(self, test_id_list: List[str], subject, bug_id):
+        filtered_list: List[str] = []
+        filter_list: List[int] = []
         if str(subject).lower() == "gzip":
             filter_list = []
             if bug_id == "884ef6d16c":

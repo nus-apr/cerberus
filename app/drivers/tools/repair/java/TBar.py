@@ -38,6 +38,19 @@ class TBar(AbstractRepairTool):
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
+        if self.container_id:
+            # Ensure that the container has git setup
+            self.run_command(
+                "bash -c 'git config --global user.email cerberus@nus-apr.com && git config --global user.name CERBERUS'",
+                dir_path=join(self.dir_expr, "src"),
+            )
+
+        # Ensure that there is a repo set up for the experiment and clean of any non-staged data
+        self.run_command(
+            "bash -c 'git init && git add . && git commit -m \"TEMP COMMIT\"'",
+            dir_path=join(self.dir_expr, "src"),
+        )
+
         # prepare the required parameters
         parameters = self.create_parameters(bug_info)
 
@@ -45,10 +58,17 @@ class TBar(AbstractRepairTool):
             'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
         )
         args = (
-            "CLASS_DIRECTORY={} ".format(bug_info["class_directory"])
-            + "TEST_CLASS_DIRECTORY={} ".format(bug_info["test_class_directory"])
-            + "SOURCE_DIRECTORY={} ".format(bug_info["source_directory"])
-            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info["test_directory"])
+            "FAILING_TESTS='{}' ".format(
+                " ".join(bug_info[definitions.KEY_FAILING_TEST])
+            )
+            + "CLASS_DIRECTORY={} ".format(bug_info[definitions.KEY_CLASS_DIRECTORY])
+            + "TEST_CLASS_DIRECTORY={} ".format(
+                bug_info[definitions.KEY_TEST_CLASS_DIRECTORY]
+            )
+            + "SOURCE_DIRECTORY={} ".format(bug_info[definitions.KEY_SOURCE_DIRECTORY])
+            + "TEST_SOURCE_DIRECTORY={} ".format(
+                bug_info[definitions.KEY_TEST_DIRECTORY]
+            )
         )
 
         # start running
@@ -140,7 +160,7 @@ class TBar(AbstractRepairTool):
                 bug_id_str,
                 defects4j_home,
                 join(self.tbar_root_dir, "SuspiciousCodePositions"),
-                self.dir_output,
+                self.dir_output + "/",
             ]
         )
 
@@ -155,8 +175,8 @@ class TBar(AbstractRepairTool):
         tbar_logs_dir = join(self.tbar_root_dir, "logs")
         self.run_command("cp -r {0} {1}".format(tbar_logs_dir, self.dir_logs))
 
-        tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
-        self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
+        # tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
+        # self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
 
         super().save_artifacts(dir_info)
         return

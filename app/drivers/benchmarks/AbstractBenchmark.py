@@ -4,6 +4,7 @@ import os
 import shutil
 from os.path import join
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -14,6 +15,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.status import JobStatus
 
 
 class AbstractBenchmark:
@@ -76,14 +78,17 @@ class AbstractBenchmark:
 
     def load_meta_file(self):
         emitter.normal("loading experiment meta-data")
-        if not (self.meta_file and os.path.isfile(self.meta_file)):
+        if not self.meta_file:
+            utilities.error_exit("Meta file path not set")
+        if not os.path.isfile(cast(str, self.meta_file)):
             utilities.error_exit("Meta file does not exist")
-        with open(self.meta_file, "r") as in_file:
+        with open(cast(str, self.meta_file), "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
                 self.experiment_subjects = json_data
                 self.size = len(json_data)
             else:
+                values.experiment_status.set(JobStatus.FAIL_IN_SETUP)
                 utilities.error_exit("could not load meta-data from ", self.meta_file)
         return
 
@@ -211,13 +216,16 @@ class AbstractBenchmark:
             emitter.error("\t\t\t(benchmark) deploy failed")
             return True
         if not self.config(bug_index, container_id):
+            values.experiment_status.set(JobStatus.FAIL_IN_CONFIG)
             emitter.error("\t\t\t(benchmark) config failed")
             return True
         if not self.build(bug_index, container_id):
+            values.experiment_status.set(JobStatus.FAIL_IN_BUILD)
             emitter.error("\t\t\t(benchmark) build failed")
             return True
         test_choice = self.test_all if test_all else self.test
         if not test_choice(bug_index, container_id):
+            values.experiment_status.set(JobStatus.FAIL_IN_TEST)
             emitter.error("\t\t\t(benchmark) testing failed")
             return True
         emitter.success("\t\t\t(benchmark) setting up completed successfully")
