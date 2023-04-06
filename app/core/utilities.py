@@ -64,7 +64,13 @@ def error_exit(*arg_list: Any):
     notification.error_exit()
     for arg in arg_list:
         emitter.error(str(arg))
-    raise Exception("Error. Exiting...")
+    raise Exception(
+        "Error{}. Exiting...".format(
+            " for subject {}".format(values.job_identifier.get())
+            if values.job_identifier.get(None)
+            else ""
+        )
+    )
 
 
 def clean_files():

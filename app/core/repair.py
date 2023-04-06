@@ -1,24 +1,18 @@
-import hashlib
 import os
 import threading
 import time
-from os.path import abspath
-from os.path import dirname
 from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 
-from app.core import container
 from app.core import definitions
 from app.core import emitter
-from app.core import logger
 from app.core import parallel
-from app.core import ui
 from app.core import utilities
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
@@ -141,7 +135,7 @@ def repair_all(
     benchmark_name: str,
 ):
     consume_thread = None
-    tool_thread_list = []
+    tool_thread_list: List[Tuple[threading.Thread, AbstractRepairTool]] = []
     if not values.ui_active:
         parallel.initialize()
     time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
@@ -183,9 +177,13 @@ def repair_all(
                 )
 
                 def consume_patches_wrapped(
-                    v_path_info, v_dir_info, v_config_info, profile_id
+                    v_path_info, v_dir_info, v_config_info, profile_id, job_identifier
                 ):
+                    """
+                    Pass over some fields as we are going into a new thread
+                    """
                     values.current_profile_id.set(profile_id)
+                    values.job_identifier.set(job_identifier)
                     parallel.consume_patches(v_path_info, v_dir_info, v_config_info)
 
                 consume_thread = threading.Thread(
@@ -195,6 +193,7 @@ def repair_all(
                         v_dir_info,
                         v_config_info,
                         values.current_profile_id.get("NA"),
+                        values.job_identifier.get("NA"),
                     ),
                 )
                 consume_thread.start()
@@ -221,8 +220,13 @@ def repair_all(
                 container_id,
                 benchmark_name,
                 profile_id,
+                job_identifier,
             ):
+                """
+                Pass over some fields as we are going into a new thread
+                """
                 values.current_profile_id.set(profile_id)
+                values.job_identifier.set(job_identifier)
                 run_repair(
                     dir_info,
                     experiment_info,
@@ -242,6 +246,7 @@ def repair_all(
                     container_id,
                     benchmark_name,
                     values.current_profile_id.get("NA"),
+                    values.job_identifier.get("NA"),
                 ),
             )
             t_thread.start()
