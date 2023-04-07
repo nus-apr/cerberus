@@ -16,7 +16,7 @@ def create_message(text, to_address, subject):
 
 
 def send_message(text, subject="Cerberus status update"):
-    if not values.email_setup:
+    if not values.is_email_set:
         return
     client = (
         smtplib.SMTP_SSL
