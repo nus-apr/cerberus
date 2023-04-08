@@ -8,13 +8,11 @@ from copy import deepcopy
 from typing import Any
 from typing import Dict
 from typing import List
-from typing import Optional
 from typing import Tuple
 
 from textual.app import App
 from textual.app import ComposeResult
 from textual.events import Key
-from textual.message import Message
 from textual.reactive import Reactive
 from textual.widget import Widget
 from textual.widgets import DataTable
@@ -24,96 +22,54 @@ from textual.widgets import Static
 from textual.widgets import TextLog
 from textual.widgets._data_table import ColumnKey
 
-from app.core import configuration
+from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import main
-from app.core import task
 from app.core import utilities
 from app.core import values
-from app.core.status import JobStatus
+from app.core.task import task
+from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import email
+from app.ui.datatable import CustomDataTable
+from app.ui.messages import JobAllocate
+from app.ui.messages import JobFinish
+from app.ui.messages import JobMount
+from app.ui.messages import Write
 
+all_subjects_id = "all_subjects"
+finished_subjects_id = "finished_subjects"
+error_subjects_id = "error_subjects"
+running_subjects_id = "running_subjects"
 
 log_map: Dict[str, TextLog] = {}
 time_map: Dict[str, Tuple[float, float, AbstractTool]] = {}
 
 
-class JobAllocate(Message):
-    """Job allocation message."""
-
-    bubble = True
-    namespace = "cerberus"
-
-    def __init__(
-        self,
-        benchmark: AbstractBenchmark,
-        tool_list: List[AbstractTool],
-        experiment_item,
-        config_info: Dict[str, Any],
-        identifier: str,
-    ) -> None:
-        self.benchmark = benchmark
-        self.tool_list = tool_list
-        self.experiment_item = experiment_item
-        self.config_info = config_info
-        self.identifier = identifier
-        super().__init__()
-
-
-class JobFinish(Message):
-    bubble = True
-    namespace = "cerberus"
-
-    def __init__(self, key, status: JobStatus):
-        self.key = key
-        self.status = status
-        super().__init__()
-
-
-class JobMount(Message):
-    bubble = False
-    namespace = "cerberus"
-
-    def __init__(self, key):
-        self.key = key
-        super().__init__()
-
-
-class Write(Message):
-    """Write message."""
-
-    namespace = "cerberus"
-
-    def __init__(self, text, identifier):
-        self.text = text
-        self.identifier = identifier
-        super().__init__()
-
-
-class Cerberus(App[List[Tuple[str, JobStatus]]]):
+class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     """The main window"""
 
-    COLUMNS: Dict[str, Optional[ColumnKey]] = {
-        "ID": None,
-        "Benchmark": None,
-        "Tool list": None,
-        "Subject": None,
-        "Bug ID": None,
-        "Configuration Profile": None,
-        "Status": None,
-        "Patches Generated": None,
+    COLUMNS: Dict[str, Dict[str, ColumnKey]] = {
+        "ID": {},
+        "Benchmark": {},
+        "Tool list": {},
+        "Subject": {},
+        "Bug ID": {},
+        "Configuration Profile": {},
+        "Status": {},
+        "Patches Generated": {},
     }
 
     SUB_TITLE = "Program Repair Framework"
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
-        ("f", "show_finished", "Show Finished Subjects"),
-        ("r", "show_running", "Show Running Subjects"),
         ("a", "show_all_subjects", "Show All Subjects"),
+        ("r", "show_running_subjects", "Show Running Subjects"),
+        ("f", "show_finished_subjects", "Show Finished Subjects"),
+        ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
 
     def on_exit(self):
@@ -124,23 +80,64 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         self.jobs_remaining = 0
         self.finished_subjects = []
         self.jobs: Dict[str, asyncio.Future] = {}
-        self.max_jobs = values.cpus
-        self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
-        for cpu in range(self.max_jobs):
-            self.cpu_queue.put(cpu)
+
+        self.setup_cpu_allocation()
+
         values.ui_active = True
 
-        column_keys = self.query_one(DataTable).add_columns(*Cerberus.COLUMNS.keys())
-        for (k, v) in zip(Cerberus.COLUMNS.keys(), column_keys):
-            Cerberus.COLUMNS[k] = v
+        self.setup_column_keys()
+
         asyncio.get_running_loop().run_in_executor(
             None,
             self.pre_run,
         )
 
+    def setup_cpu_allocation(self):
+        self.max_jobs = values.cpus
+        self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
+        for cpu in range(self.max_jobs):
+            self.cpu_queue.put(cpu)
+
+    def setup_column_keys(self):
+        for table in self.query(CustomDataTable):
+            column_keys = table.add_columns(*Cerberus.COLUMNS.keys())
+            if not table.id:
+                utilities.error_exit(
+                    "CustomDataTable does not have ID. This should not happen"
+                )
+            for (column_name, column_key) in zip(Cerberus.COLUMNS.keys(), column_keys):
+                Cerberus.COLUMNS[column_name][table.id] = column_key
+
+    def _on_idle(self) -> None:
+        super()._on_idle()
+        # self.debug_print("Idle")
+        now = time.time()
+        to_del = []
+        for (k, v) in time_map.items():
+            (start, limit, tool) = v
+            if now - start > limit:
+                if not self.jobs[k].done():
+                    self.debug_print("TIME TO KILL {}".format(v))
+                    log_map[k].write("KILLED BY WATCHDOG")
+                    if tool.container_id:
+                        log_map["root"].write("Killing {}".format(tool.container_id))
+                        # Currently this kills the container and the tool gets a 137 status for the run command
+                        # Possibly we can also track a "critical" section of the tool run
+                        # as killing it outside of that specific moment does not seem sensible
+                        container.stop_container(tool.container_id)
+                    else:
+                        emitter.information(
+                            "Cannot kill a local process as I do not know the exact process id"
+                        )
+                    log_map[k].write("Cancelled")
+                to_del.append(k)
+
+        for k in to_del:
+            del time_map[k]
+
     def pre_run(self):
         try:
-            self.query_one(DataTable).visible = False
+            self.hide(self.query_one("#" + all_subjects_id))
 
             self.show(log_map["root"])
             self.query_one(Static).update("Cerberus is preparing tool images")
@@ -156,10 +153,8 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             if not values.debug:
                 self.hide(log_map["root"])
 
-            self.query_one(DataTable).visible = True
-            self.query_one(DataTable).styles.height = "100%"
+            self.show(self.query_one("#" + all_subjects_id))
             self.run_tasks(tools, benchmark, setup)
-
         except Exception as e:
             self.show(self.query_one(Static))
             self.query_one(Static).update(
@@ -167,14 +162,30 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             )
             self.debug_print("I got exception {}".format(e))
 
-    async def show_finished(self):
-        pass
+    def change_table(self, new_id):
+        self.debug_print("Changing table!")
+        try:
+            self.selected_table: CustomDataTable
 
-    async def show_running(self):
-        pass
+            self.hide(self.selected_table)
 
-    async def show_all_subjects(self):
-        pass
+            self.selected_table = self.query_one(new_id, CustomDataTable)
+
+            self.show(self.selected_table)
+        except Exception as e:
+            self.debug_print(e)
+
+    def action_show_finished_subjects(self):
+        self.change_table("#" + finished_subjects_id)
+
+    def action_show_running_subjects(self):
+        self.change_table("#" + running_subjects_id)
+
+    def action_show_all_subjects(self):
+        self.change_table("#" + all_subjects_id)
+
+    def action_show_error_subjects(self):
+        self.change_table("#" + error_subjects_id)
 
     def run_tasks(
         self,
@@ -199,7 +210,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
                     config_info[definitions.KEY_ID],
                 )
 
-                _ = self.query_one(DataTable).add_row(
+                _ = self.query_one("#" + all_subjects_id, CustomDataTable).add_row(
                     str(iteration),
                     benchmark.name,
                     ",".join(map(lambda t: t.name, tool_list)),
@@ -218,6 +229,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
                 self.post_message(JobMount(key))
                 self.post_message(
                     JobAllocate(
+                        str(iteration),
                         deepcopy(benchmark),
                         [deepcopy(x) for x in tool_list],
                         experiment_item,
@@ -228,12 +240,10 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
-        # self.debug_print("I am seeing? {}".format(message))
         if message.key == "escape":
             if self.selected_subject:
                 self.hide(log_map[self.selected_subject])
             self.selected_subject = None
-            # self.set_focus(self.query_one(DataTable))
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
         loop = asyncio.get_running_loop()
@@ -247,8 +257,36 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
 
             self.update_status(message.identifier, "Running")
-            status = JobStatus.SUCCESS
+
+            row_data = (
+                str(message.index),
+                message.benchmark.name,
+                ",".join(map(lambda t: t.name, message.tool_list)),
+                message.experiment_item[definitions.KEY_SUBJECT],
+                message.experiment_item[definitions.KEY_BUG_ID],
+                message.config_info[definitions.KEY_ID],
+                "Running",
+                "None",
+            )
+
+            running_row_key = self.query_one(
+                "#" + running_subjects_id, CustomDataTable
+            ).add_row(
+                *row_data,
+                key=message.identifier,
+            )
+
+            status = TaskStatus.SUCCESS
             try:
+                time_map[message.identifier] = (
+                    time.time(),
+                    60
+                    * 60
+                    * float(
+                        message.config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
+                    ),
+                    message.tool_list[-1],
+                )
                 task.run(
                     message.benchmark,
                     message.tool_list,
@@ -259,15 +297,19 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
                 )
             except Exception as e:
                 log_map[message.identifier].write(traceback.format_exc())
-                status = JobStatus.FAIL
+                status = TaskStatus.FAIL
             finally:
                 emitter.information(
                     "Finished execution for {}".format(message.identifier)
+                )
+                self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
+                    running_row_key
                 )
                 self.post_message(
                     JobFinish(
                         message.identifier,
                         values.experiment_status.get(status),
+                        row_data,
                     )
                 )
             for cpu in cpus:
@@ -277,27 +319,39 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         self.jobs[message.identifier] = task_future
 
     def update_status(self, key: str, status: str):
-        if Cerberus.COLUMNS["Status"]:
-            self.query_one(DataTable).update_cell(
-                key, Cerberus.COLUMNS["Status"], status, update_width=True
+        if self.selected_table.id:
+            self.selected_table.update_cell(
+                key,
+                Cerberus.COLUMNS["Status"][self.selected_table.id],
+                status,
+                update_width=True,
             )
 
     def update_current_job(self, status: str):
         current_job = values.job_identifier.get("NA")
-        if Cerberus.COLUMNS["Status"] and current_job != "NA":
-            self.query_one(DataTable).update_cell(
-                current_job, Cerberus.COLUMNS["Status"], status, update_width=True
+        if current_job != "NA" and self.selected_table.id:
+            self.selected_table.update_cell(
+                current_job,
+                Cerberus.COLUMNS["Status"][self.selected_table.id],
+                status,
+                update_width=True,
             )
 
     async def on_cerberus_job_mount(self, message: JobMount):
         self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
-        await self.mount(text_log, before=self.query_one(DataTable))
+        await self.mount(text_log, before=self.query_one("#" + all_subjects_id))
         text_log.write("This is the textual log for {}".format(message.key))
         self.hide(text_log)
 
     async def on_cerberus_job_finish(self, message: JobFinish):
         self.update_status(message.key, str(message.status))
+
+        self.query_one(finished_subjects_id, CustomDataTable).add_row(
+            *message.row_data,
+            key=message.key,
+        )
+
         self.jobs_remaining -= 1
         self.finished_subjects.append((message.key, message.status))
         if self.jobs_remaining == 0:
@@ -339,6 +393,12 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             log_map[self.selected_subject].scroll_end(animate=False)
 
     def compose(self) -> ComposeResult:
+        def create_table(id: str):
+            table: CustomDataTable = CustomDataTable(id=id)
+            table.cursor_type = "row"
+            table.styles.border = ("heavy", "white")
+            return table
+
         """Create child widgets for the app."""
         yield Header()
 
@@ -348,10 +408,22 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
 
         yield static_window
 
-        table: DataTable[Any] = DataTable()
-        table.cursor_type = "row"
-        table.styles.border = ("heavy", "white")
-        yield table
+        all_subjects_table = create_table(all_subjects_id)
+        yield all_subjects_table
+
+        self.selected_table = all_subjects_table
+
+        finished_subjects_table = create_table(finished_subjects_id)
+        yield finished_subjects_table
+        self.hide(finished_subjects_table)
+
+        running_subjects_table = create_table(running_subjects_id)
+        yield running_subjects_table
+        self.hide(running_subjects_table)
+
+        error_subjects_table = create_table(error_subjects_id)
+        yield error_subjects_table
+        self.hide(error_subjects_table)
 
         log_map["root"] = TextLog(highlight=True, markup=True)
         log_map["root"].styles.border = ("heavy", "white")
@@ -363,8 +435,8 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
 
     def action_toggle_dark(self) -> None:
         """Toggle dark mode."""
-        self.dark: Reactive[bool]
-        self.dark = not self.dark  # type: ignore
+        self.dark: bool
+        self.dark = not self.dark
 
     def debug_print(self, text: Any):
         if values.debug:
@@ -374,19 +446,12 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
 app: Cerberus
 
 
-def get_ui() -> Cerberus:
-    return app
-
-
 def post_write(text: str):
-    poster = (
-        app.call_from_thread
-        if app._thread_id != threading.get_ident()
-        else (lambda c: c())
-    )
-
     message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
-    poster(lambda: app.post_message(message))
+    if app._thread_id != threading.get_ident():
+        app.call_from_thread(lambda: app.post_message(message))
+    else:
+        app.post_message(message)
     pass
 
 

@@ -9,9 +9,9 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from app.core.stats import SpaceStats
-from app.core.stats import TimeStats
-from app.core.status import JobStatus
+from app.core.task.stats import SpaceStats
+from app.core.task.stats import TimeStats
+from app.core.task.status import TaskStatus
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
@@ -95,7 +95,7 @@ iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 
 current_profile_id = ContextVar("current_profile_id", default=None)
-experiment_status = ContextVar("experiment_status", default=JobStatus.NONE)
+experiment_status = ContextVar("experiment_status", default=TaskStatus.NONE)
 job_identifier = ContextVar("job_id", default="root")
 
 slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}

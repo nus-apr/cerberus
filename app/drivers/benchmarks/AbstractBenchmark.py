@@ -15,7 +15,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.status import JobStatus
+from app.core.task.status import TaskStatus
 
 
 class AbstractBenchmark:
@@ -103,7 +103,7 @@ class AbstractBenchmark:
                 self.experiment_subjects = json_data
                 self.size = len(json_data)
             else:
-                values.experiment_status.set(JobStatus.FAIL_IN_SETUP)
+                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit("could not load meta-data from ", self.meta_file)
         return
 
@@ -219,16 +219,16 @@ class AbstractBenchmark:
             emitter.error("\t\t\t(benchmark) deploy failed")
             return True
         if not self.config(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_CONFIG)
+            values.experiment_status.set(TaskStatus.FAIL_IN_CONFIG)
             emitter.error("\t\t\t(benchmark) config failed")
             return True
         if not self.build(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_BUILD)
+            values.experiment_status.set(TaskStatus.FAIL_IN_BUILD)
             emitter.error("\t\t\t(benchmark) build failed")
             return True
         test_choice = self.test_all if test_all else self.test
         if not test_choice(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_TEST)
+            values.experiment_status.set(TaskStatus.FAIL_IN_TEST)
             emitter.error("\t\t\t(benchmark) testing failed")
             return True
         emitter.success("\t\t\t(benchmark) setting up completed successfully")
