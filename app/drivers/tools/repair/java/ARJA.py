@@ -40,7 +40,7 @@ class ARJA(AbstractRepairTool):
         list_deps.append(
             join(self.arja_home, "external", "lib", "hamcrest-core-1.3.jar")
         )
-        list_deps.append(join(self.arja_home, "external", "lib", "junit-4.12.jar"))
+        list_deps.append(join(self.arja_home, "external", "lib", "junit-4.11.jar"))
         list_deps_str = ":".join(list_deps)
 
         arja_default_population_size = 40
