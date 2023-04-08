@@ -11,12 +11,12 @@ import datetime
 
 class ARJA_E(AbstractRepairTool):
 
-    arja_e_home = "/opt/arja_e"
+    arja_e_home = "/opt/arja"
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(ARJA_E, self).__init__(self.name)
-        self.image_name = "rshariffdeen/arja_e"
+        self.image_name = "rshariffdeen/arjae"
 
     def run_repair(self, bug_info, config_info):
         super(ARJA_E, self).run_repair(bug_info, config_info)
