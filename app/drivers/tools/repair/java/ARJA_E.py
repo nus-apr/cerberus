@@ -13,6 +13,8 @@ class ARJA_E(AbstractRepairTool):
 
     arja_e_home = "/opt/arja"
 
+    d4j_env = {"TZ": "America/Los_Angeles"}
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(ARJA_E, self).__init__(self.name)
@@ -28,6 +30,8 @@ class ARJA_E(AbstractRepairTool):
         """
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+
+        classpath = f"{join(self.arja_e_home, 'lib/*')}:{join(self.arja_e_home, 'bin')}"
 
         dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
         dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
@@ -50,7 +54,7 @@ class ARJA_E(AbstractRepairTool):
         # generate patches
         self.timestamp_log_start()
         arja_e_command = (
-            f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main ArjaE "
+            f"timeout -k 5m {timeout_h}h java -cp {classpath} us.msu.cse.repair.Main ArjaE "
             f"-DsrcJavaDir {dir_java_src} "
             f"-DbinJavaDir {dir_java_bin} "
             f"-DbinTestDir {dir_test_bin} "
@@ -64,7 +68,9 @@ class ARJA_E(AbstractRepairTool):
             f"-DpopulationSize {arja_default_population_size}"
         )
 
-        status = self.run_command(arja_e_command, self.log_output_path, self.arja_e_home)
+        status = self.run_command(arja_e_command, self.log_output_path,
+                                  dir_path=join(self.dir_expr, "src"),
+                                  env=self.d4j_env)
 
         if status != 0:
             self._error.is_error = True
