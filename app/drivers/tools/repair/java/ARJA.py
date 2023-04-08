@@ -39,7 +39,11 @@ class ARJA(AbstractRepairTool):
         list_deps.append(join(self.arja_home, "external", "lib", "junit-4.12.jar"))
         list_deps_str = ":".join(list_deps)
 
-        max_generations = 2000000
+        arja_default_population_size = 40
+        # use a large one to keep ARJA running forever
+        # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
+        max_generations = 0x7fffffff // (arja_default_population_size + 1)
+
         test_timeout = 30000
         # generate patches
         self.timestamp_log_start()
@@ -53,7 +57,8 @@ class ARJA(AbstractRepairTool):
             f"-DwaitTime {test_timeout} "
             f"-DmaxGenerations {max_generations} "
             f"-DpatchOutputRoot {self.dir_output}/patches "
-            f"-Ddependences {list_deps_str}"
+            f"-Ddependences {list_deps_str} "
+            f"-DpopulationSize {arja_default_population_size}"
         )
 
         status = self.run_command(arja_command, self.log_output_path, self.arja_home)
