@@ -192,6 +192,7 @@ def create_running_container(
             dir_info["local"]["setup"],
             "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id),
         )
+        os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
