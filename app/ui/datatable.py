@@ -1,6 +1,5 @@
 from typing import Any
 from typing import Iterable
-from typing import Self
 
 from textual.widgets import DataTable
 from textual.widgets._data_table import RowDoesNotExist
@@ -13,7 +12,7 @@ class CustomDataTable(DataTable[Any]):
     and Martin is waiting for a PR to have it merged in.
     """
 
-    def remove_row(self, row_key: RowKey) -> Self:
+    def remove_row(self, row_key: RowKey):
         """Remove a row.
         Args:
             row_key: Key describing the specific row to remove
@@ -35,9 +34,8 @@ class CustomDataTable(DataTable[Any]):
         self._update_count -= 1
         # self.refresh()
         self.check_idle()
-        return self
 
-    def remove_rows(self, row_keys: Iterable[RowKey]) -> Self:
+    def remove_rows(self, row_keys: Iterable[RowKey]):
         """Remove a number of rows.
         Args:
             row_keys: Iterable of keys. A key describes the specific row to remove.
@@ -46,6 +44,5 @@ class CustomDataTable(DataTable[Any]):
         """
         for row_key in row_keys:
             self.remove_row(row_key)
-        return self
 
     pass
