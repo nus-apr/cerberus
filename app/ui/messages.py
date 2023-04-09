@@ -17,7 +17,7 @@ class JobAllocate(Message):
 
     def __init__(
         self,
-        index: str,
+        index: int,
         benchmark: AbstractBenchmark,
         tool_list: List[AbstractTool],
         experiment_item,
