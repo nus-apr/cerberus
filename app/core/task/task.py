@@ -188,8 +188,9 @@ def create_running_container(
         or values.rebuild_base
         or values.rebuild_all
     ):
-        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(
-            dir_info["local"]["setup"], repair_tool.name, bug_image_id
+        tmp_dockerfile = join(
+            dir_info["local"]["setup"],
+            "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id),
         )
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
