@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 from argparse import Namespace
+from os.path import join
 from typing import Any
 from typing import Dict
 
@@ -11,6 +12,7 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
@@ -32,11 +34,9 @@ def load_class(class_name: str):
     return mod
 
 
-def load_tool(tool_name: str):
-    task_type = values.task_type
-    emitter.normal(f"loading {task_type} tool")
-    # class_file_path = values.dir_tool_drivers + tool_name + ".py"
+def load_tool(tool_name: str) -> AbstractTool:
     tool_type = values.task_type
+    emitter.normal(f"Loading {tool_type} tool")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
         (str(x).split("/")[-1], str(x).split("/")[-2])
@@ -58,6 +58,7 @@ def load_tool(tool_name: str):
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()
+    raise Exception("Should not be reached")
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
@@ -93,7 +94,8 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
 
 class Configurations:
     __config_file = None
-    __email_config_file = None
+    __email_config_file = open(join(values.dir_config, "email.json"))
+    __slack_config_file = open(join(values.dir_config, "slack.json"))
     __default_config_values: Dict[str, Any] = {
         "depth": 3,
         "iteration-limit": 1,
@@ -102,7 +104,8 @@ class Configurations:
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
-        "email-setup": False,
+        "is-email-set": False,
+        "is-slack-set": False,
         "is-debug": False,
         "use-purge": False,
         "only-analyse": False,
@@ -143,11 +146,6 @@ class Configurations:
         if arg_list.config:
             self.__config_file = arg_list.config
             self.read_config_file()
-
-        if arg_list.email_config:
-            self.__runtime_config_values["email-setup"] = True
-            self.__email_config_file = arg_list.email_config
-            self.read_email_config_file()
 
         if arg_list.docker_host:
             self.__runtime_config_values["docker-host"] = arg_list.docker_host
@@ -270,6 +268,26 @@ class Configurations:
             if key in config_info:
                 self.__runtime_config_values[key] = config_info[key]
 
+    def read_slack_config_file(self):
+        slack_config_info = {}
+        if self.__slack_config_file:
+            slack_config_info = json.load(self.__slack_config_file)
+        for key, value in slack_config_info.items():
+            if key in values.slack_configuration and type(value) == type(
+                values.slack_configuration[key]
+            ):
+                values.slack_configuration[key] = value
+            else:
+                utilities.error_exit(
+                    "[error] unknown key {} or invalid type of value".format(key)
+                )
+
+        if values.slack_configuration["hook_url"] or (
+            values.slack_configuration["oauth_token"]
+            and values.slack_configuration["channel"]
+        ):
+            self.__runtime_config_values["is-slack-set"] = True
+
     def read_email_config_file(self):
         email_config_info = {}
         if self.__email_config_file:
@@ -283,10 +301,17 @@ class Configurations:
                 utilities.error_exit(
                     "[error] unknown key {} or invalid type of value".format(key)
                 )
+        if (
+            values.email_configuration["username"]
+            and values.email_configuration["password"]
+            and values.email_configuration["host"]
+        ):
+            self.__runtime_config_values["is-email-set"] = True
 
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():
-            emitter.configuration(config_key, config_value)
+            if config_value is not None:
+                emitter.configuration(config_key, config_value)
 
     def update_configuration(self):
         emitter.normal("updating configuration values")
@@ -330,7 +355,6 @@ class Configurations:
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
-        values.email_setup = self.__runtime_config_values["email-setup"]
         values.cpus = max(
             1,
             min(
@@ -345,4 +369,7 @@ class Configurations:
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]
+
+        values.is_email_set = self.__runtime_config_values["is-email-set"]
+        values.is_slack_set = self.__runtime_config_values["is-slack-set"]
         sys.setrecursionlimit(values.default_stack_size)

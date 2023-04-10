@@ -10,9 +10,9 @@ from app.core import abstractions
 from app.core import container
 from app.core import definitions
 from app.core import emitter
-from app.core import stats
 from app.core import utilities
 from app.core import values
+from app.core.task import stats
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 
@@ -134,6 +134,21 @@ class AbstractTool:
             exit_code = execute_command(command_str, env=env, directory=dir_path)
         return exit_code
 
+    def process_status(self, status: int):
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                    self.name, status
+                )
+            )
+            if status == 137 and self.container_id:
+                # Due to the container being killed, we restart it to be able to pull out the analysis info
+                container.stop_container(self.container_id)
+                container.start_container(self.container_id)
+
+        else:
+            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+
     def pre_process(self):
         """Any pre-processing required for the repair"""
         self.check_tool_exists()
@@ -160,6 +175,11 @@ class AbstractTool:
                         )
                     )
                     # container.build_tool_image(repo_name, tag_name)
+            else:
+                # Image may exist but need to be sure it is the latest one
+                emitter.information("(information) docker image found locally")
+                # values.rebuild_all = True
+
         else:
             local_path = shutil.which(self.name.lower())
             if not local_path:

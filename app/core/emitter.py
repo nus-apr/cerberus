@@ -7,8 +7,8 @@ from enum import Enum
 
 from app.core import definitions
 from app.core import logger
-from app.core import ui
 from app.core import values
+from app.ui import ui
 
 stty_info = os.popen("stty size", "r")
 rows, columns = tuple(map(int, stty_info.read().split()))
@@ -43,13 +43,13 @@ TERMINAL_COLOR_MAP = {
 
 TEXTUALIZE_COLOR_MAP = {
     COLOR.GREY: "grey",
-    COLOR.RED: "red",
-    COLOR.GREEN: "green",
-    COLOR.YELLOW: "yellow",
+    COLOR.RED: "$error",
+    COLOR.GREEN: "$success",
+    COLOR.YELLOW: "$warning",
     COLOR.BLUE: "blue",
     COLOR.ROSE: "pink",
     COLOR.CYAN: "cyan",
-    COLOR.WHITE: "white",
+    COLOR.WHITE: "$primary",
     COLOR.PROG_OUTPUT_COLOR: "green",
     COLOR.STAT_COLOR: "green",
 }
@@ -73,16 +73,12 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
     else:
         if prefix:
             print_message = prefix + print_message
-        ui.get_ui().call_from_thread(
-            lambda: ui.get_ui().post_message(
-                ui.Write(
-                    text="[bold {}]{}{}".format(
-                        TEXTUALIZE_COLOR_MAP[print_color],
-                        ui.job_identifier.get("((DEFAULT))"),
-                        str(print_message).replace("[", "((").replace("]", "))"),
-                    ),
-                    identifier=ui.job_identifier.get("((DEFAULT))"),
-                )
+
+        ui.post_write(
+            "[bold {}]{} {}".format(
+                TEXTUALIZE_COLOR_MAP[print_color],
+                values.job_identifier.get("Root"),
+                str(print_message).replace("[", "((").replace("]", "))"),
             )
         )
 

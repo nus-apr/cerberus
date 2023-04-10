@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class JobStatus(Enum):
+class TaskStatus(Enum):
     NONE = -1
     SUCCESS = 0
     FAIL = 1
@@ -29,6 +29,8 @@ class JobStatus(Enum):
             return "Extracting Patches"
         elif self is self.PREPARING_IMAGE:
             return "Preparing image"
+        elif self is self.FAIL_IN_SETUP:
+            return "Failed in image setup phase"
         elif self is self.FAIL_IN_BUILD:
             return "Failed in image building phase"
         elif self is self.FAIL_IN_CONFIG:
@@ -37,7 +39,9 @@ class JobStatus(Enum):
             return "Failed in image testing phase"
         elif self is self.FAIL_IN_VERIFY:
             return "Failed in image verification phase"
-        elif self is self.FAIL_IN_VERIFY:
+        elif self is self.FAIL_IN_INSTRUMENT:
             return "Failed in image instrumentation phase"
+        elif self is self.NONE:
+            return "NONEEEEEE"
         else:
             raise NotImplementedError("New status defined but not implemented in repr")

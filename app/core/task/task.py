@@ -10,20 +10,18 @@ from typing import cast
 from typing import Dict
 from typing import List
 
-from app.core import analyze
 from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import repair
-from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core import writer
-from app.core.stats import ErrorStats
-from app.core.stats import SpaceStats
-from app.core.stats import TimeStats
-from app.core.status import JobStatus
+from app.core.task import analyze
+from app.core.task import repair
+from app.core.task.stats import ErrorStats
+from app.core.task.stats import SpaceStats
+from app.core.task.stats import TimeStats
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -147,17 +145,12 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list):
+def save_artifacts(dir_info_list, tool_list):
     emitter.normal("\t\t(framework) saving artifacts and cleaning up")
-    for dir_info_entry, container_id, tool in zip(
-        dir_info_list, container_id_list, tool_list
-    ):
+    for dir_info_entry, tool in zip(dir_info_list, tool_list):
         dir_info = dir_info_entry["local"]
-        # dir_expr = dir_info["experiment"]
-        # dir_artifacts = dir_info["artifacts"]
         dir_results = dir_info["results"]
-        if not os.path.isdir(dir_results):
-            os.system("mkdir -p {}".format(dir_results))
+        os.makedirs(dir_results, exist_ok=True)
         tool.save_artifacts(dir_info)
         tool.post_process()
         save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
@@ -195,9 +188,11 @@ def create_running_container(
         or values.rebuild_base
         or values.rebuild_all
     ):
-        tmp_dockerfile = "{}/Dockerfile-{}-{}".format(
-            dir_info["local"]["setup"], repair_tool.name, bug_image_id
+        tmp_dockerfile = join(
+            dir_info["local"]["setup"],
+            "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id),
         )
+        os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
         with open(tmp_dockerfile, "w") as dock_file:
             dock_file.write("FROM {}\n".format(repair_tool.image_name))
             dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
@@ -380,7 +375,7 @@ def run(
             utilities.error_exit(f"Unknown task type: {task_type}")
         if not values.only_instrument:
             analyse_result(dir_info_list, bug_info, tool_list)
-            save_artifacts(dir_info_list, bug_info, tool_list, container_id_list)
+            save_artifacts(dir_info_list, tool_list)
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
@@ -390,5 +385,3 @@ def run(
             utilities.clean_artifacts(dir_result)
 
     construct_summary()
-    if values.ui_active:
-        ui.get_ui().post_message(ui.JobFinish(run_identifier, JobStatus.SUCCESS))

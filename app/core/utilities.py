@@ -10,11 +10,10 @@ from contextlib import contextmanager
 from os.path import join
 from typing import Any
 
-from app.core import definitions
-from app.core import email
 from app.core import emitter
 from app.core import logger
 from app.core import values
+from app.notification import notification
 
 
 def escape_ansi(text: str):
@@ -62,10 +61,16 @@ def execute_command(command: str, show_output=True, env=dict(), directory=None):
 
 def error_exit(*arg_list: Any):
     emitter.error("Repair Failed")
-    email.send_message("\n".join(map(str, arg_list)), "Cerberus Repair Failed")
+    notification.error_exit()
     for arg in arg_list:
         emitter.error(str(arg))
-    raise Exception("Error. Exiting...")
+    raise Exception(
+        "Error{}. Exiting...".format(
+            " for subject {}".format(values.job_identifier.get())
+            if values.job_identifier.get(None)
+            else ""
+        )
+    )
 
 
 def clean_files():

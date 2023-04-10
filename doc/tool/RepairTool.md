@@ -25,6 +25,7 @@ The constructor should follow the following format, the line `self.image_name=..
         repair_command = ""
         status = self.run_command(repair_command,
                                   log_file_path=self.log_output_path)
+        self.process_status(status)
         self.timestamp_log_end()
 ```
 Start the repair tool. Preferably `self.timestamp_log()` is called before and after the `self.run_command` method to ensure easy tracing of the exact timing.

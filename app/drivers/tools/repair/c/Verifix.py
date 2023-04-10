@@ -38,15 +38,7 @@ class Verifix(AbstractRepairTool):
         )
         status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
@@ -79,9 +71,6 @@ class Verifix(AbstractRepairTool):
             self._time.timestamp_plausible
         """
         emitter.normal("\t\t\t analysing output of " + self.name)
-
-        count_plausible = 0
-        count_enumerations = 0
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)

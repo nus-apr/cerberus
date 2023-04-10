@@ -85,14 +85,7 @@ class TBar(AbstractRepairTool):
             dir_path=self.tbar_root_dir,
         )
 
-        if status != 0:
-            emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
@@ -242,6 +235,10 @@ class TBar(AbstractRepairTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
+                if "Patch Candidate" in line:
+                    count_enumerations += 1
+                if "failed compiling" in line:
+                    count_non_compilable += 1
                 if "Succeeded to fix the bug" in line:
                     count_plausible += 1
                     count_enumerations += 1
