@@ -119,6 +119,7 @@ class Configurations:
         "end-index": None,
         "use-tui": False,
         "cpu-count": 1,
+        "runs": 1,
         "bug-id-list": [],
         "bug-index-list": [],
         "skip-index-list": [],
@@ -203,6 +204,8 @@ class Configurations:
                     str(arg_list.bug_index_list).split(","),
                 )
             )
+        if arg_list.runs:
+            self.__runtime_config_values["runs"] = arg_list.runs
         if arg_list.cpu_count:
             self.__runtime_config_values["cpu-count"] = arg_list.cpu_count
 
@@ -263,6 +266,7 @@ class Configurations:
             "use-gpu",
             "profile-id-list",
             "docker-host",
+            "runs",
         ]
         for key in optional_keys:
             if key in config_info:
@@ -355,6 +359,7 @@ class Configurations:
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
+        values.runs = max(1, self.__runtime_config_values["runs"])
         values.cpus = max(
             1,
             min(

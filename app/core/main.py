@@ -227,6 +227,13 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_RUNS,
+        help="number of runs for an experiment",
+        type=int,
+        default=1,
+    )
+
+    optional.add_argument(
         definitions.ARG_CPU_COUNT,
         help="max amount of CPU cores which can be used by Cerberus",
         type=int,
