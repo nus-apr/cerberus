@@ -109,5 +109,25 @@ class SpaceStats:
         return summary
 
 
+class BenchmarkStats:
+    deployed = False
+    configured = False
+    built = False
+    dependencies_compressed = None
+    tested = False
+
+    def get_array(self):
+        summary = {
+            "deployed": self.deployed,
+            "configured": self.configured,
+            "built": self.built,
+            "tested": self.tested,
+        }
+
+        if self.dependencies_compressed is not None:
+            summary["dependencies_compressed"] = self.dependencies_compressed
+        return summary
+
+
 class ErrorStats:
     is_error = False

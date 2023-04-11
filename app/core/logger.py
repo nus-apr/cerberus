@@ -118,7 +118,7 @@ def warning(message):
 
 
 def log_stats(exp_id):
-    space_info, time_info = values.stats_results[exp_id]
+    space_info, time_info, benchmark_info = values.stats_results[exp_id]
 
     with open(values.file_stats_log, "a") as log_file:
         log_file.write("\n" + exp_id + "\n")

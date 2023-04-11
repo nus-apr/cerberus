@@ -9,12 +9,13 @@ class TaskStatus(Enum):
     REPAIRING = 3
     EXTRACTING_PATCHES = 4
     PREPARING_IMAGE = 5
-    FAIL_IN_SETUP = 6
-    FAIL_IN_CONFIG = 7
-    FAIL_IN_BUILD = 8
-    FAIL_IN_TEST = 9
-    FAIL_IN_VERIFY = 10
-    FAIL_IN_INSTRUMENT = 11
+    FAIL_IN_DEPLOY = 6
+    FAIL_IN_SETUP = 7
+    FAIL_IN_CONFIG = 8
+    FAIL_IN_BUILD = 9
+    FAIL_IN_TEST = 10
+    FAIL_IN_VERIFY = 11
+    FAIL_IN_INSTRUMENT = 12
 
     def __str__(self) -> str:
         if self is self.SUCCESS:

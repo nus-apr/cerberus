@@ -61,7 +61,9 @@ TEXTUALIZE_COLOR_MAP = {
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "[bold {}]{}".format(RICH_COLOR_MAP[print_color], print_message)
+    message = "[bold {}]{}".format(
+        RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
+    )
     if not values.ui_active:
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
@@ -75,7 +77,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         console.print(message, end=("\n" if new_line else "\r"))
     else:
         if prefix:
-            print_message = prefix + print_message
+            print_message = prefix + str(print_message)
 
         ui.post_write(
             "[bold {}]{} {}".format(
