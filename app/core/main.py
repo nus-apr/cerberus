@@ -10,7 +10,7 @@ from multiprocessing import set_start_method
 from typing import Any
 from typing import List
 
-import rich
+import rich.traceback
 
 from app.core import configuration
 from app.core import definitions
@@ -351,6 +351,7 @@ def main():
         import warnings
 
         warnings.simplefilter("ignore")
+    rich.traceback.install(show_locals=True)
     parsed_args = parse_args()
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
