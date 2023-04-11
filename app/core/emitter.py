@@ -81,7 +81,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
             "[bold {}]{} {}".format(
                 TEXTUALIZE_COLOR_MAP[print_color],
                 values.job_identifier.get("Root"),
-                str(print_message).replace("[", "((").replace("]", "))"),
+                str(print_message).replace("[", "\\[").replace("]", "\\]"),
             )
         )
 
