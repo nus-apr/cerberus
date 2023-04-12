@@ -39,4 +39,4 @@
 	url = https://github.com/nus-apr/saver-benchmark
 [submodule "benchmark/vul4j"]
 	path = benchmark/vul4j
-	url = git@github.com:nus-apr/vul4j.git
+	url = https://github.com/nus-apr/vul4j.git
