@@ -15,7 +15,6 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.task import stats
 from app.core.task.status import TaskStatus
 
 
@@ -40,7 +39,6 @@ class AbstractBenchmark:
     list_artifact_dirs: List[str] = []
     list_artifact_files: List[str] = []
     base_dir_experiment = "/experiment/"
-    _stats = stats.BenchmarkStats()
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
@@ -69,14 +67,6 @@ class AbstractBenchmark:
             self.build_benchmark_image()
         self.load_meta_file()
 
-    @abc.abstractmethod
-    def analyse_output(self):
-        """
-        analyse benchmark setup
-        """
-
-        return self._stats
-
     def read_file(self, container_id: Optional[str], file_path: str, encoding="utf-8"):
         return abstractions.read_file(container_id, file_path, encoding)
 
@@ -84,10 +74,6 @@ class AbstractBenchmark:
         self, container_id: Optional[str], content: List[str], file_path: str
     ):
         return abstractions.append_file(container_id, content, file_path)
-
-    def update_info(self, container_id):
-        self.container_id = container_id
-        self._stats = stats.BenchmarkStats()
 
     def update_dir_info(self, dir_info: Dict[str, Dict[str, str]]):
         self.__dir_info = dir_info
@@ -136,7 +122,9 @@ class AbstractBenchmark:
             if output:
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
-                    self.append_file(container_id, [command_str, "\n"], log_file_path)
+                    self.append_file(
+                        container_id, [command_str,"\n"], log_file_path
+                    )
 
                     if stdout:
                         self.append_file(
@@ -234,37 +222,24 @@ class AbstractBenchmark:
                 )
 
         # init log paths
-        self.log_deploy_path = join(
-            self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log"
-        )
-        self.log_config_path = join(
-            self.dir_logs, f"{self.name}-{str(bug_index)}-config.log"
-        )
-        self.log_build_path = join(
-            self.dir_logs, f"{self.name}-{str(bug_index)}-build.log"
-        )
-        self.log_test_path = join(
-            self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
-        )
+        self.log_deploy_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log")
+        self.log_config_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-config.log")
+        self.log_build_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-build.log")
+        self.log_test_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-test.log")
 
-        self._stats.deployed = self.deploy(bug_index, container_id)
-        if not self._stats.deployed:
-            values.experiment_status.set(TaskStatus.FAIL_IN_DEPLOY)
+        if not self.deploy(bug_index, container_id):
             emitter.error("\t\t\t(benchmark) deploy failed")
             return True
-        self._stats.configured = self.config(bug_index, container_id)
-        if not self._stats.configured:
+        if not self.config(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_CONFIG)
             emitter.error("\t\t\t(benchmark) config failed")
             return True
-        self._stats.built = self.build(bug_index, container_id)
-        if not self._stats.built:
+        if not self.build(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_BUILD)
             emitter.error("\t\t\t(benchmark) build failed")
             return True
         test_choice = self.test_all if test_all else self.test
-        self._stats.tested = test_choice(bug_index, container_id)
-        if not self._stats.tested:
+        if not test_choice(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_TEST)
             emitter.error("\t\t\t(benchmark) testing failed")
             return True
