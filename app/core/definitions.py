@@ -34,12 +34,6 @@ KEY_COMPILE_CMD = "compile_cmd"
 KEY_TEST_ALL_CMD = "test_all_cmd"
 KEY_FAILING_MODULE_DIRECTORY = "failing_module"
 
-KEY_JAVA_VERSION = "java_version"
-KEY_BUILD_SYSTEM = "build_system"
-KEY_COMPILE_CMD = "compile_cmd"
-KEY_TEST_ALL_CMD = "test_all_cmd"
-KEY_FAILING_MODULE_DIRECTORY = "failing_module"
-
 ARG_CPU_COUNT = "--cpu-count"
 ARG_USE_GPU = "--use-gpu"
 ARG_CACHE = "--cache"
