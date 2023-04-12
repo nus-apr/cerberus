@@ -110,23 +110,34 @@ class SpaceStats:
 
 
 class BenchmarkStats:
+    # required
     deployed = False
     configured = False
     built = False
-    dependencies_compressed = None
     tested = False
+
+    # optional
+    include_dependencies_status = False
+    dependencies_compressed = False
 
     def get_array(self):
         summary = {
-            "deployed": self.deployed,
-            "configured": self.configured,
-            "built": self.built,
-            "tested": self.tested,
+            "deployed": "OK" if self.deployed else "FAILED",
+            "configured": "OK" if self.configured else "FAILED",
+            "built": "OK" if self.built else "FAILED",
+            "tested": "OK" if self.tested else "FAILED",
         }
 
-        if self.dependencies_compressed is not None:
-            summary["dependencies_compressed"] = self.dependencies_compressed
+        if self.include_dependencies_status:
+            summary["dependencies_compressed"] = (
+                "OK" if self.dependencies_compressed else "FAILED"
+            )
+
         return summary
+
+
+class ToolStats:
+    pass
 
 
 class ErrorStats:
