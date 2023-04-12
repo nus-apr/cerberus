@@ -73,7 +73,7 @@ def parse_args():
     required.add_argument(
         "task_type",
         help="type of task to run",
-        choices=["analyze", "repair"],
+        choices=["analyze", "prepare", "repair"],
     )
 
     optional = parser.add_argument_group("Optional arguments")
@@ -304,7 +304,9 @@ def get_setup() -> Any:
 
 
 def get_tools() -> List[AbstractTool]:
-    tool_list = []
+    tool_list: List[AbstractTool] = []
+    if values.task_type == "prepare":
+        return tool_list
     if values.tool_list:
         for tool_name in values.tool_list:
             tool = configuration.load_tool(tool_name)
