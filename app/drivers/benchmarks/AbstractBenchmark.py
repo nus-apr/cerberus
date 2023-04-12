@@ -122,9 +122,7 @@ class AbstractBenchmark:
             if output:
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
-                    self.append_file(
-                        container_id, [command_str,"\n"], log_file_path
-                    )
+                    self.append_file(container_id, [command_str, "\n"], log_file_path)
 
                     if stdout:
                         self.append_file(
@@ -158,8 +156,8 @@ class AbstractBenchmark:
         if not container_id:
             utilities.error_exit("Could not setup container")
         if is_error:
+            utilities.error_exit("Setting up experiment failed")
             emitter.error("Setting up experiment failed")
-            # utilities.error_exit("Setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
@@ -222,10 +220,18 @@ class AbstractBenchmark:
                 )
 
         # init log paths
-        self.log_deploy_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log")
-        self.log_config_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-config.log")
-        self.log_build_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-build.log")
-        self.log_test_path = join(self.dir_logs, f"{self.name}-{str(bug_index)}-test.log")
+        self.log_deploy_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log"
+        )
+        self.log_config_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-config.log"
+        )
+        self.log_build_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-build.log"
+        )
+        self.log_test_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
+        )
 
         if not self.deploy(bug_index, container_id):
             emitter.error("\t\t\t(benchmark) deploy failed")
