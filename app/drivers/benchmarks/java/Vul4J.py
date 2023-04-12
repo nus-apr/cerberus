@@ -3,8 +3,6 @@ from os.path import join
 
 from app.core import definitions
 from app.core import emitter
-from app.core import values
-from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
