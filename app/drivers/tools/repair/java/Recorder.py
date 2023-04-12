@@ -40,7 +40,7 @@ class Recorder(AbstractRepairTool):
         )
         # generate patches
         self.timestamp_log_start()
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -v -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],
@@ -49,7 +49,7 @@ class Recorder(AbstractRepairTool):
             recorder_command, self.log_output_path, "/root/Repair/"
         )
 
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -v -k 5m {}h python3 repair.py {}-{}'".format(
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}-{}'".format(
             timeout_h,
             bug_info[definitions.KEY_SUBJECT],
             bug_info[definitions.KEY_BUG_ID],

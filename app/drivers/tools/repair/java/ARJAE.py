@@ -44,7 +44,7 @@ class ARJAE(AbstractRepairTool):
         # generate patches
         self.timestamp_log_start()
         arjae_command = (
-            f"timeout -v -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main ArjaE "
+            f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main ArjaE "
             f"-DsrcJavaDir {dir_java_src} "
             f"-DbinJavaDir {dir_java_bin} "
             f"-DbinTestDir {dir_test_bin} "

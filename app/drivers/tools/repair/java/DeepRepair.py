@@ -42,7 +42,7 @@ class DeepRepair(AbstractRepairTool):
         # generate patches
         self.timestamp_log_start()
         repair_command = (
-            f"timeout -v -k 5m {timeout_h}h "
+            f"timeout -k 5m {timeout_h}h "
             f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar "
             f"fr.inria.main.evolution.AstorMain "
             f"-mode deeprepair "

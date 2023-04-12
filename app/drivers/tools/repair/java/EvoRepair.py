@@ -80,7 +80,7 @@ class EvoRepair(AbstractRepairTool):
         # generate patches
         self.timestamp_log_start()
         repair_command = (
-            f"timeout -v -k 5m {timeout_h}h evorepair "
+            f"timeout -k 5m {timeout_h}h evorepair "
             f"--num-iterations {max_iterations} "
             f"--passing-tests-partitions {test_partitions} "
             f"--config {repair_config_path}"

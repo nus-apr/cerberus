@@ -49,7 +49,7 @@ class SequenceR(AbstractRepairTool):
             )
             + ".java"
         )  # construct the file's path
-        sequencer_command = "timeout -v -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
+        sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
             bug_info[definitions.KEY_FIX_LINES][0],
@@ -60,7 +60,7 @@ class SequenceR(AbstractRepairTool):
         )
 
         sequencer_command = (
-            "timeout -v -k 5m {3}h python3 validatePatch.py {0} {1} {2}".format(
+            "timeout -k 5m {3}h python3 validatePatch.py {0} {1} {2}".format(
                 join(self.dir_output, "patches"),
                 join(
                     self.dir_expr,

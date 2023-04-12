@@ -74,7 +74,7 @@ class TBar(AbstractRepairTool):
         # start running
         self.timestamp_log_start()
         tbar_command = (
-            "bash -c '{4} timeout -v -k 5m {0}h {1} -Dexec.args=\"{2} {3}\"'".format(
+            "bash -c '{4} timeout -k 5m {0}h {1} -Dexec.args=\"{2} {3}\"'".format(
                 timeout_h, command, parameters, additional_tool_param, args
             )
         )
