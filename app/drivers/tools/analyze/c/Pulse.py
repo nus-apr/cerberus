@@ -52,7 +52,7 @@ class Pulse(AbstractAnalyzeTool):
 
         self.timestamp_log_start()
         analysis_command = (
-            "timeout -k 5m {0}h infer "
+            "timeout -k 5m {0}h infer --pulse-only --pulse-max-disjuncts 100 "
             " --scheduler callgraph {1} ".format(str(timeout_h), additional_tool_param)
         )
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
