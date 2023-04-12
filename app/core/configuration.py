@@ -319,12 +319,15 @@ class Configurations:
 
     def update_configuration(self):
         emitter.normal("updating configuration values")
-        if not self.__runtime_config_values["only-setup"]:
+        values.task_type = self.__runtime_config_values["task-type"]
+        values.only_setup = self.__runtime_config_values["only-setup"]
+        if values.task_type == "prepare":
+            values.only_setup = True
+        if not values.only_setup:
             if not self.__runtime_config_values["tool-list"]:
                 emitter.error("(invalid) --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
-        values.task_type = self.__runtime_config_values["task-type"]
         values.benchmark_name = self.__runtime_config_values["benchmark-name"]
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:
@@ -353,7 +356,6 @@ class Configurations:
                 "[warning] experiment id is not specified, running all experiments"
             )
 
-        values.only_setup = self.__runtime_config_values["only-setup"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]
