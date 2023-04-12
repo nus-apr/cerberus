@@ -27,11 +27,11 @@ class Hippodrome(AbstractRepairTool):
         self.timestamp_log_start()
 
         run_dir = self.dir_expr
-        hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json".format(
+        hippodrome_command = "timeout -v -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json".format(
             timeout_h
         )
         if self.is_dir(join(self.dir_expr, "src")):
-            hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c ../CONFIG.json".format(
+            hippodrome_command = "timeout -v -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c ../CONFIG.json".format(
                 timeout_h
             )
             run_dir = join(self.dir_expr, "src")

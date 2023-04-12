@@ -56,7 +56,7 @@ class Nopol(AbstractRepairTool):
         # generate patches
         self.timestamp_log_start()
         repair_command = (
-            f"timeout -k 5m {timeout_h}h java -jar {nopol_jar_path} nopol "
+            f"timeout -v -k 5m {timeout_h}h java -jar {nopol_jar_path} nopol "
             f"{dir_java_src} "
             f"{list_deps_str} "
             f"{solver_name} "

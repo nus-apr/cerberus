@@ -54,7 +54,7 @@ class AbstractBenchmark:
             )
             if (
                 os.system(
-                    "timeout -k 5s 10s 'git submodule init && git submodule update benchmark/{}'".format(
+                    "timeout -v -k 5s 10s 'git submodule init && git submodule update benchmark/{}'".format(
                         self.name
                     )
                 )
