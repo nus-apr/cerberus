@@ -30,14 +30,16 @@ class Vul4J(AbstractBenchmark):
             bug_index, container_id, test_all
         )
 
-        self._stats.include_dependencies_status = True
-        if self.compress_dependencies(container_id, bug_index):
-            emitter.success("\t\t\t(benchmark) dependencies compressed successfully")
-            self._stats.dependencies_compressed = True
-        else:
-            emitter.error("\t\t\t(benchmark) dependencies compressed failed")
-            self._stats.dependencies_compressed = False
-            is_error = True
+        if not is_error:
+            if self.compress_dependencies(container_id, bug_index):
+                emitter.success(
+                    "\t\t\t(benchmark) dependencies compressed successfully"
+                )
+                self._stats.dependencies_created = True
+            else:
+                emitter.error("\t\t\t(benchmark) dependencies compressed failed")
+                self._stats.dependencies_created = False
+                is_error = True
 
         return is_error
 
@@ -70,7 +72,7 @@ class Vul4J(AbstractBenchmark):
             experiment_item[definitions.KEY_JAVA_VERSION]
         )
 
-        command_str = "bash -c '{0} timeout -v -k 5m {1}h {2}'".format(
+        command_str = "bash -c '{0} timeout -k 5m {1}h {2}'".format(
             set_java_home_cmd, timeout_h, experiment_item[definitions.KEY_COMPILE_CMD]
         )
         status = self.run_command(
@@ -78,7 +80,7 @@ class Vul4J(AbstractBenchmark):
         )
 
         if status != 0:
-            command_str = "bash -c 'timeout -v -k 5m {0}h {1}'".format(
+            command_str = "bash -c 'timeout -k 5m {0}h {1}'".format(
                 timeout_h, experiment_item[definitions.KEY_COMPILE_CMD]
             )
             status = self.run_command(
