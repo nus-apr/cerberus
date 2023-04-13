@@ -13,6 +13,7 @@ class Vul4J(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Vul4J, self).__init__()
+        self.image_name = "shark4ce/vul4j"
 
     def setup_container(self, bug_index, image_name, cpu: str):
         """
