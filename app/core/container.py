@@ -62,7 +62,7 @@ def get_image(image_name: str, tag_name="latest"):
 
 def pull_image(image_name: str, tag_name: str):
     client = get_client()
-    emitter.normal("pulling docker image")
+    emitter.normal("\tPulling docker image {}:{}".format(image_name, tag_name))
     image = None
     try:
         for line in client.api.pull(
@@ -82,7 +82,7 @@ def pull_image(image_name: str, tag_name: str):
 
 def build_image(dockerfile_path: str, image_name: str):
     client = get_client()
-    emitter.normal("\t\t[benchmark] building docker image")
+    emitter.normal("\t[benchmark] Building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
         dockerfilename = dockerfile_path.split("/")[-1]
@@ -169,7 +169,11 @@ def build_container(
     container_name: str, volume_list, image_name: str, cpu: str
 ) -> Optional[str]:
     client = get_client()
-    emitter.normal("\t\t\t[benchmark] building docker container")
+    emitter.normal(
+        "\t\t\t[benchmark] Building docker container based on image {} with name {}".format(
+            image_name, container_name
+        )
+    )
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":

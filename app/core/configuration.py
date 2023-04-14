@@ -16,7 +16,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
-    emitter.normal("Loading profile setup")
+    emitter.normal("\tLoading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, "r") as conf_file:
@@ -36,7 +36,7 @@ def load_class(class_name: str):
 
 def load_tool(tool_name: str) -> AbstractTool:
     tool_type = values.task_type
-    emitter.normal(f"Loading {tool_type} tool {tool_name}")
+    emitter.normal(f"\tLoading {tool_type} tool {tool_name}")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
         (str(x).split("/")[-1], str(x).split("/")[-2])
@@ -58,11 +58,10 @@ def load_tool(tool_name: str) -> AbstractTool:
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()
-    raise Exception("Should not be reached")
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
-    emitter.normal("Loading benchmark {}".format(benchmark_name))
+    emitter.normal("\tLoading benchmark {}".format(benchmark_name))
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
 
     existing_benchmark_list = [
@@ -139,8 +138,8 @@ class Configurations:
         return range(start, end + 1)
 
     def read_arg_list(self, arg_list: Namespace):
-        emitter.normal("Reading profile values")
-        emitter.normal("Reading configuration values from arguments")
+        emitter.normal("\tReading profile values")
+        emitter.normal("\tReading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         self.__runtime_config_values["task-type"] = arg_list.task_type
         if arg_list.config:
@@ -317,7 +316,7 @@ class Configurations:
                 emitter.configuration(config_key, config_value)
 
     def update_configuration(self):
-        emitter.normal("Updating configuration values")
+        emitter.normal("\tUpdating configuration values")
         values.task_type = self.__runtime_config_values["task-type"]
         values.only_setup = self.__runtime_config_values["only-setup"]
         if values.task_type == "prepare":
