@@ -269,7 +269,7 @@ def parse_args():
     return args
 
 
-def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
+def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
     emitter.sub_title("Repairing benchmark")
     iteration = 0
     for config_info in map(
@@ -277,21 +277,29 @@ def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setu
     ):
         values.current_profile_id.set(config_info[definitions.KEY_ID])
         for experiment_item in filter_experiment_list(benchmark):
-            iteration = iteration + 1
-            values.iteration_no = iteration
             bug_index = experiment_item[definitions.KEY_ID]
-            emitter.sub_sub_title(
-                "Experiment #{} - Bug #{}".format(iteration, bug_index)
+            cpu = ",".join(map(str, range(values.cpus)))
+            experiment_image_id = (
+                benchmark.get_exp_image(bug_index, values.only_test, cpu)
+                if values.use_container
+                else None
             )
-            utilities.check_space()
-            task.run(
-                benchmark,
-                repair_tool_list,
-                experiment_item,
-                config_info,
-                str(bug_index),
-                ",".join(map(str, range(values.cpus))),
-            )
+            for tool in tool_list:
+                iteration = iteration + 1
+                values.iteration_no = iteration
+                emitter.sub_sub_title(
+                    "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                )
+                utilities.check_space()
+                task.run(
+                    benchmark,
+                    tool,
+                    experiment_item,
+                    config_info,
+                    str(bug_index),
+                    cpu,
+                    experiment_image_id,
+                )
 
 
 def get_setup() -> Any:
