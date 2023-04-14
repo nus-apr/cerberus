@@ -330,7 +330,7 @@ class Fix2Fit(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            emitter.warning("\t\t\t[warning] no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
@@ -343,7 +343,7 @@ class Fix2Fit(AbstractRepairTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
                 if "no patch found" in line:
-                    emitter.warning("\t\t\t\t(warning) no patch found by F1X")
+                    emitter.warning("\t\t\t\t[warning] no patch found by F1X")
                 elif "negative tests: [" in line:
                     reported_failing_test = (
                         str(line)
@@ -393,26 +393,26 @@ class Fix2Fit(AbstractRepairTool):
                 self._error.is_error = True
             elif "tests are not specified" in line:
                 self._error.is_error = True
-                emitter.warning("\t\t\t\t(warning) no tests provided")
+                emitter.warning("\t\t\t\t[warning] no tests provided")
             elif "no negative tests" in line:
-                emitter.warning("\t\t\t\t(warning) no negative tests")
+                emitter.warning("\t\t\t\t[warning] no negative tests")
             elif "failed to infer compile commands" in line:
                 self._error.is_error = True
-                emitter.error("\t\t\t\t(error) compilation command not found")
+                emitter.error("\t\t\t\t[error] compilation command not found")
             elif "At-risk data found" in line:
                 self._error.is_error = True
-                emitter.error("\t\t\t\t(error) previous results have corrupted")
+                emitter.error("\t\t\t\t[error] previous results have corrupted")
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t(warning) timeout detected")
+            emitter.warning("\t\t\t\t[warning] timeout detected")
         if (
             reported_failing_test != fail_list
             and reported_failing_test
             and not is_timeout
         ):
-            emitter.warning("\t\t\t\t(warning) unexpected failing test-cases reported")
+            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning(
                 "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
             )

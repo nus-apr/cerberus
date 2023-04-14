@@ -317,7 +317,7 @@ class Configurations:
                 emitter.configuration(config_key, config_value)
 
     def update_configuration(self):
-        emitter.normal("updating configuration values")
+        emitter.normal("Updating configuration values")
         values.task_type = self.__runtime_config_values["task-type"]
         values.only_setup = self.__runtime_config_values["only-setup"]
         if values.task_type == "prepare":

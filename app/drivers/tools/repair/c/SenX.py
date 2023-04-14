@@ -86,7 +86,7 @@ class SenX(AbstractRepairTool):
 
         if len(test_file_list) > 1:
             emitter.warning(
-                "\t\t(warning) unimplemented functionality: SenX only supports one failing test-case"
+                "\t\t[error] unimplemented functionality: SenX only supports one failing test-case"
             )
 
         binary_input_arg = bug_info[definitions.KEY_CRASH_CMD]
@@ -144,7 +144,7 @@ class SenX(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            emitter.warning("\t\t\t[error] no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
@@ -160,6 +160,6 @@ class SenX(AbstractRepairTool):
             elif "Runtime Error" in line:
                 self._error.is_error = True
         if is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
 
         return self._space, self._time, self._error

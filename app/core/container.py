@@ -69,20 +69,20 @@ def pull_image(image_name: str, tag_name: str):
             repository=image_name, tag=tag_name, stream=True, decode=True
         ):
             for sub_line in line["status"].split("\n"):
-                emitter.build("(docker-api) {}".format(sub_line))
+                emitter.build("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(error) Unable to pull image: docker daemon error")
+        emitter.warning("[error] Unable to pull image: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(error) Unable to pull image: unhandled exception")
+        emitter.warning("[error] Unable to pull image: unhandled exception")
     return image
 
 
 def build_image(dockerfile_path: str, image_name: str):
     client = get_client()
-    emitter.normal("\t\t(benchmark) building docker image")
+    emitter.normal("\t\t[benchmark] building docker image")
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
         dockerfilename = dockerfile_path.split("/")[-1]
@@ -96,7 +96,7 @@ def build_image(dockerfile_path: str, image_name: str):
                 data = json.loads(line.strip())
                 if "stream" in data:
                     for line_stream in data["stream"].split("\n"):
-                        emitter.build("\t\t(docker-api) {}".format(line_stream))
+                        emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
@@ -138,7 +138,7 @@ def get_container(container_id: str):
         container = client.containers.get(container_id)
     except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
-        emitter.warning("\t\t(warning) Unable to find container")
+        emitter.warning("\t\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
@@ -155,7 +155,7 @@ def get_container_id(container_name: str) -> Optional[str]:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
-        emitter.warning("\t\t(warning) Unable to find container")
+        emitter.warning("\t\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
@@ -169,7 +169,7 @@ def build_container(
     container_name: str, volume_list, image_name: str, cpu: str
 ) -> Optional[str]:
     client = get_client()
-    emitter.normal("\t\t\t(benchmark) building docker container")
+    emitter.normal("\t\t\t[benchmark] building docker container")
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
@@ -247,53 +247,53 @@ def exec_command(
         )
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
-        utilities.error_exit("(error) Unable to find container: docker daemon error")
+        utilities.error_exit("[error] Unable to find container: docker daemon error")
     except Exception as ex:
         emitter.error(ex)
-        utilities.error_exit("(error) Unable to find container: unhandled exception")
+        utilities.error_exit("[error] Unable to find container: unhandled exception")
     return exit_code, output
 
 
 def remove_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tremoving docker container")
+    emitter.normal("\t\t\tRemoving docker container")
     try:
         container = client.containers.get(container_id)
         container.remove(force=True)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to remove container: docker daemon error")
+        emitter.warning("[warning] Unable to remove container: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to remove container: unhandled exception")
+        emitter.warning("[warning] Unable to remove container: unhandled exception")
 
 
 def start_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tstarting docker container {}".format(container_id))
+    emitter.normal("\t\t\tStarting docker container {}".format(container_id))
     try:
         container = client.containers.get(container_id)
         container.start()  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to stop container: docker daemon error")
+        emitter.warning("[warning] Unable to stop container: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to stop container: unhandled exception")
+        emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
 def stop_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tstopping docker container")
+    emitter.normal("\t\t\tStopping docker container")
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=20)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to stop container: docker daemon error")
+        emitter.warning("[warning] Unable to stop container: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to stop container: unhandled exception")
+        emitter.warning("[warning] Unable to stop container: unhandled exception")
 
 
 def is_file(container_id: str, file_path: str):

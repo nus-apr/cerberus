@@ -193,7 +193,7 @@ class Angelix(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            emitter.warning("\t\t\t[warning] no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
@@ -210,14 +210,14 @@ class Angelix(AbstractRepairTool):
                     count_enumerations = count_enumerations + 1
                 elif "repair test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t(warning) repair test suite: []")
+                    emitter.warning("\t\t\t\t[warning] repair test suite: []")
                 elif "validation test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t(warning) validation test suite: []")
+                    emitter.warning("\t\t\t\t[warning] validation test suite: []")
                 elif "No negative test exists" in line:
                     is_error = True
                     is_timeout = False
-                    emitter.warning("\t\t\t\t(warning) No negative test exists")
+                    emitter.warning("\t\t\t\t[warning] No negative test exists")
                 elif "no patch generated" in line:
                     is_timeout = False
                     count_plausible = 0
@@ -231,13 +231,13 @@ class Angelix(AbstractRepairTool):
                         reported_fail_list.remove(removing_test_id)
                 elif "failed to build" in line and "golden" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t(error) failed to build golden")
+                    emitter.error("\t\t\t\t[error] failed to build golden")
                 elif "failed to build" in line and "validation" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t(error) failed to build validation")
+                    emitter.error("\t\t\t\t[error] failed to build validation")
                 elif "failed to build" in line and "frontend" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t(error) failed to build frontend")
+                    emitter.error("\t\t\t\t[error] failed to build frontend")
                 elif collect_neg and "running test" in line:
                     t_id = (
                         line.split("running test ")[-1].split(" ")[0].replace("'", "")
@@ -259,7 +259,7 @@ class Angelix(AbstractRepairTool):
         )
 
         if list(reported_fail_list) != fail_list:
-            emitter.warning("\t\t\t\t(warning) unexpected failing test-cases reported")
+            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
             emitter.warning(
                 "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
             )
@@ -268,9 +268,9 @@ class Angelix(AbstractRepairTool):
                 reported_list_str = ",".join(list(reported_fail_list)[:10]) + "..."
             emitter.warning("\t\t\t\treported fail list: {0}".format(reported_list_str))
         if is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t(warning) timeout before ending")
+            emitter.warning("\t\t\t\t[warning] timeout before ending")
 
         self._space.plausible = count_plausible
         self._space.size = search_space

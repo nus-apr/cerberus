@@ -191,7 +191,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 while complete_images.qsize() != 0:
                     (id, success) = complete_images.get()
                     if not success:
-                        emitter.warning("(warning) Failed building image {}".format(id))
+                        emitter.warning("[warning] Failed building image {}".format(id))
 
             self.hide(self.query_one(Static))
             if not values.debug:
