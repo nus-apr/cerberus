@@ -2,7 +2,6 @@ import os
 import re
 from os.path import join
 
-from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -51,20 +50,9 @@ class CPR(AbstractRepairTool):
             additional_tool_param, str(timeout_m), self.log_output_path
         )
         status = self.run_command(cpr_command, self.log_output_path)
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-            if status == 137 and self.container_id:
-                # Due to the container being killed, we restart it to be able to pull out the information
-                container.stop_container(self.container_id)
-                container.start_container(self.container_id)
 
-            self._error.is_error = True
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
+
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
