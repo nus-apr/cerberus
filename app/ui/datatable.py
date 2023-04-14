@@ -27,10 +27,13 @@ class CustomDataTable(DataTable[Any]):
         del self._data[row_key]
         del self.rows[row_key]
 
-        # TODO should the cursor be modified?
+        # cell_now_unavailable = self.row_count == 0
+        # visible_cursor = self.show_cursor and self.cursor_type != "none"
+        # if cell_now_unavailable and visible_cursor:
+        #     self._highlight_cursor()
 
-        self._new_rows.remove(row_key)
         self._update_count -= 1
+        # self.refresh()
         self.check_idle()
         return self
 
