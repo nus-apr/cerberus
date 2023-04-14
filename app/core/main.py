@@ -90,13 +90,6 @@ def parse_args():
     )
 
     optional.add_argument(
-        "-e",
-        definitions.ARG_EMAIL_CONFIG,
-        help="email client configuration file",
-        type=argparse.FileType("r"),
-    )
-
-    optional.add_argument(
         "-b",
         definitions.ARG_BENCHMARK,
         help="repair benchmark",

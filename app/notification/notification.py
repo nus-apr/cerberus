@@ -1,7 +1,6 @@
 from app.core import utilities
 from app.core import values
 from app.notification import email
-from app.notification import slack
 
 
 def notify(message, data=None):
@@ -10,6 +9,8 @@ def notify(message, data=None):
         email.send_message(message)
 
     if values.is_slack_set:
+        from app.notification import slack
+
         slack.send_message(message, data)
 
 
