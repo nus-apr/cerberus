@@ -1,6 +1,8 @@
 import asyncio
-import contextvars
 import queue
+import signal
+import threading
+import time
 import traceback
 from copy import deepcopy
 from typing import Any
@@ -22,6 +24,7 @@ from textual.widgets import Static
 from textual.widgets import TextLog
 from textual.widgets._data_table import ColumnKey
 
+from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import main
@@ -33,11 +36,9 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import email
 
-job_identifier: contextvars.ContextVar[str] = contextvars.ContextVar(
-    "job_id", default="root"
-)
 
 log_map: Dict[str, TextLog] = {}
+time_map: Dict[str, Tuple[float, float, AbstractTool]] = {}
 
 
 class JobAllocate(Message):
@@ -48,14 +49,14 @@ class JobAllocate(Message):
 
     def __init__(
         self,
-        benchmark,
-        repair_tool_list,
+        benchmark: AbstractBenchmark,
+        tool_list: List[AbstractTool],
         experiment_item,
-        config_info,
-        identifier,
+        config_info: Dict[str, Any],
+        identifier: str,
     ) -> None:
         self.benchmark = benchmark
-        self.repair_tool_list = repair_tool_list
+        self.tool_list = tool_list
         self.experiment_item = experiment_item
         self.config_info = config_info
         self.identifier = identifier
@@ -103,6 +104,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         "Bug ID": None,
         "Configuration Profile": None,
         "Status": None,
+        "Patches Generated": None,
     }
 
     SUB_TITLE = "Program Repair Framework"
@@ -121,7 +123,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         self.selected_subject = None
         self.jobs_remaining = 0
         self.finished_subjects = []
-        self.jobs: List[asyncio.Future] = []
+        self.jobs: Dict[str, asyncio.Future] = {}
         self.max_jobs = values.cpus
         self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
@@ -140,16 +142,19 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
         try:
             self.query_one(DataTable).visible = False
 
-            self.query_one(Static).update("Cerberus is getting tools")
+            self.show(log_map["root"])
+            self.query_one(Static).update("Cerberus is preparing tool images")
             tools = main.get_tools()
 
-            self.query_one(Static).update("Cerberus is getting the benchmark")
+            self.query_one(Static).update("Cerberus is getting the benchmark images")
             benchmark = main.get_benchmark()
 
-            self.query_one(Static).update("Cerberus is getting the setup data")
+            self.query_one(Static).update("Cerberus is preparing setup data")
             setup = main.get_setup()
 
             self.hide(self.query_one(Static))
+            if not values.debug:
+                self.hide(log_map["root"])
 
             self.query_one(DataTable).visible = True
             self.query_one(DataTable).styles.height = "100%"
@@ -202,6 +207,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
                     experiment_item[definitions.KEY_BUG_ID],
                     config_info[definitions.KEY_ID],
                     "Allocated",
+                    "None",
                     key=key,
                 )
 
@@ -230,15 +236,18 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             # self.set_focus(self.query_one(DataTable))
 
     async def on_cerberus_job_allocate(self, message: JobAllocate):
+        loop = asyncio.get_running_loop()
+
         def job():
             self.update_status(message.identifier, "Waiting for CPU")
             cpus = []
-            for _ in range(max([x.cpu_usage for x in message.repair_tool_list])):
+            for _ in range(max([x.cpu_usage for x in message.tool_list])):
                 cpus.append(self.cpu_queue.get(block=True, timeout=None))
-            job_identifier.set(message.identifier)
+            values.job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
 
             self.update_status(message.identifier, "Running")
+            status = JobStatus.SUCCESS
             try:
                 task.run(
                     message.benchmark,
@@ -249,29 +258,35 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
                     ",".join(map(str, cpus)),
                 )
             except Exception as e:
-                self.post_message(
-                    Write(
-                        "Error {}\n{}".format(e, traceback.format_exc()),
-                        message.identifier,
-                    )
+                log_map[message.identifier].write(traceback.format_exc())
+                status = JobStatus.FAIL
+            finally:
+                emitter.information(
+                    "Finished execution for {}".format(message.identifier)
                 )
                 self.post_message(
                     JobFinish(
                         message.identifier,
-                        values.experiment_status.get(default=JobStatus.FAIL),
+                        values.experiment_status.get(status),
                     )
                 )
-            finally:
-                self.post_message(Write("Finished", message.identifier))
             for cpu in cpus:
                 self.cpu_queue.put(cpu)
 
-        self.jobs.append(asyncio.get_running_loop().run_in_executor(None, job))
+        task_future = loop.run_in_executor(None, job)
+        self.jobs[message.identifier] = task_future
 
-    def update_status(self, key, status):
+    def update_status(self, key: str, status: str):
         if Cerberus.COLUMNS["Status"]:
             self.query_one(DataTable).update_cell(
                 key, Cerberus.COLUMNS["Status"], status, update_width=True
+            )
+
+    def update_current_job(self, status: str):
+        current_job = values.job_identifier.get("NA")
+        if Cerberus.COLUMNS["Status"] and current_job != "NA":
+            self.query_one(DataTable).update_cell(
+                current_job, Cerberus.COLUMNS["Status"], status, update_width=True
             )
 
     async def on_cerberus_job_mount(self, message: JobMount):
@@ -299,17 +314,19 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             )
         self.debug_print(message.text)
 
-    def show(self, x: Widget):
+    def show(self, x: Widget) -> None:
         x.visible = True
         x.styles.height = "100%"
         x.styles.border = ("heavy", "white")
 
-    def hide(self, x: Widget):
+    def hide(self, x: Widget) -> None:
         x.visible = False
         x.styles.height = "0%"
         x.styles.border = None
 
-    async def on_data_table_row_highlighted(self, message: DataTable.RowHighlighted):
+    async def on_data_table_row_highlighted(
+        self, message: DataTable.RowHighlighted
+    ) -> None:
         # self.debug_print("I am highlighting {}".format(message.row_key.value))
         # self.selected: Optional[str]
         if self.selected_subject is not None:
@@ -324,16 +341,23 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
     def compose(self) -> ComposeResult:
         """Create child widgets for the app."""
         yield Header()
-        yield Static("Cerberus is starting")
+
+        static_window = Static("Cerberus is starting")
+        static_window.styles.text_align = "center"
+        static_window.styles.text_style = "bold italic"
+
+        yield static_window
+
         table: DataTable[Any] = DataTable()
         table.cursor_type = "row"
         table.styles.border = ("heavy", "white")
         yield table
 
-        if values.debug:
-            log_map["root"] = TextLog(highlight=True, markup=True)
-            log_map["root"].styles.border = ("heavy", "white")
-            yield log_map["root"]
+        log_map["root"] = TextLog(highlight=True, markup=True)
+        log_map["root"].styles.border = ("heavy", "white")
+        yield log_map["root"]
+        if not values.debug:
+            self.hide(log_map["root"])
 
         yield Footer()
 

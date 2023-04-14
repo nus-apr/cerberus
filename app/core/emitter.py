@@ -76,12 +76,12 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         ui.get_ui().call_from_thread(
             lambda: ui.get_ui().post_message(
                 ui.Write(
-                    text="[bold {}]{}{}".format(
+                    text="[bold {}]{} {}".format(
                         TEXTUALIZE_COLOR_MAP[print_color],
-                        ui.job_identifier.get("((DEFAULT))"),
+                        values.job_identifier.get("((DEFAULT))"),
                         str(print_message).replace("[", "((").replace("]", "))"),
                     ),
-                    identifier=ui.job_identifier.get("((DEFAULT))"),
+                    identifier=values.job_identifier.get("((DEFAULT))"),
                 )
             )
         )

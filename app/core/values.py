@@ -93,8 +93,10 @@ dump_patches = False
 arg_pass = False
 iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
+
 current_profile_id = ContextVar("current_profile_id", default=None)
 experiment_status = ContextVar("experiment_status", default=JobStatus.NONE)
+job_identifier = ContextVar("job_id", default="root")
 
 slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}
 email_configuration = {
