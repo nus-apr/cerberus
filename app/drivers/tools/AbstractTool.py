@@ -10,9 +10,9 @@ from app.core import abstractions
 from app.core import container
 from app.core import definitions
 from app.core import emitter
-from app.core import stats
 from app.core import utilities
 from app.core import values
+from app.core.task import stats
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 
@@ -175,6 +175,11 @@ class AbstractTool:
                         )
                     )
                     # container.build_tool_image(repo_name, tag_name)
+            else:
+                # Image may exist but need to be sure it is the latest one
+                emitter.information("(information) docker image found locally")
+                # values.rebuild_all = True
+
         else:
             local_path = shutil.which(self.name.lower())
             if not local_path:

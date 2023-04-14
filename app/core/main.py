@@ -9,20 +9,19 @@ from argparse import Namespace
 from multiprocessing import set_start_method
 from typing import Any
 from typing import List
-from typing import Tuple
 
 from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import task
-from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core.configuration import Configurations
+from app.core.task import task
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
+from app.ui import ui
 
 
 def create_output_directories():
@@ -309,16 +308,16 @@ def get_tools() -> List[AbstractTool]:
             if not values.only_analyse:
                 tool.check_tool_exists()
             tool_list.append(tool)
-    task_type = values.task_type
     emitter.highlight(
-        f"[profile] {task_type}-tool(s): " + " ".join([x.name for x in tool_list])
+        f"(profile) {values.task_type}-tool(s): "
+        + " ".join([x.name for x in tool_list])
     )
     return tool_list
 
 
 def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
+    emitter.highlight(f"(profile) {values.task_type}-benchmark: {benchmark.name}")
     return benchmark
 
 

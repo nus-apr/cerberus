@@ -7,8 +7,8 @@ from enum import Enum
 
 from app.core import definitions
 from app.core import logger
-from app.core import ui
 from app.core import values
+from app.ui import ui
 
 stty_info = os.popen("stty size", "r")
 rows, columns = tuple(map(int, stty_info.read().split()))
@@ -43,13 +43,13 @@ TERMINAL_COLOR_MAP = {
 
 TEXTUALIZE_COLOR_MAP = {
     COLOR.GREY: "grey",
-    COLOR.RED: "red",
-    COLOR.GREEN: "green",
-    COLOR.YELLOW: "yellow",
+    COLOR.RED: "$error",
+    COLOR.GREEN: "$success",
+    COLOR.YELLOW: "$warning",
     COLOR.BLUE: "blue",
     COLOR.ROSE: "pink",
     COLOR.CYAN: "cyan",
-    COLOR.WHITE: "white",
+    COLOR.WHITE: "$primary",
     COLOR.PROG_OUTPUT_COLOR: "green",
     COLOR.STAT_COLOR: "green",
 }
