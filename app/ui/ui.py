@@ -394,7 +394,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 shrink=False,
                 width=values.ui_max_width,
                 scroll_end=(self.selected_subject == message.identifier),
-                expand=log_map[message.identifier].visible,
+                expand=True,
             )
         self.debug_print(message.text)
 
@@ -470,7 +470,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def debug_print(self, text: Any):
         if values.debug:
-            log_map["root"].write(text)
+            log_map["root"].write(text, width=values.ui_max_width, expand=True)
 
 
 app: Cerberus
