@@ -4,7 +4,6 @@ from app.notification import email
 
 
 def notify(message, data=None):
-    print("Sending", message)
     if values.is_email_set:
         email.send_message(message)
 
@@ -20,7 +19,6 @@ def error_exit():
 
 
 def end(time_total, is_error=False):
-    print(values.arg_pass, is_error)
     if values.arg_pass and not is_error:
         end_message = (
             f"{values.tool_name} finished successfully after " f"{time_total}  minutes"
