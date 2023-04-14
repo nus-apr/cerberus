@@ -46,6 +46,21 @@ class AbstractBenchmark:
             utilities.error_exit(
                 "Concrete benchmark has not instantiated the name field. Aborting..."
             )
+        if len(os.listdir(join(values.dir_benchmark, self.name))) == 0:
+            emitter.information(
+                "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
+            )
+            if (
+                os.system(
+                    "timeout 10s -k 5s git submodule update benchmark/{}".format(
+                        self.name
+                    )
+                )
+                != 0
+            ):
+                utilities.error_exit(
+                    "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
+                )
         self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
         self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
