@@ -93,15 +93,10 @@ class Angelix(AbstractRepairTool):
         )
         self.timestamp_log_start()
         status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
+
+        self.process_status(status)
+
         self.timestamp_log_end()
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
