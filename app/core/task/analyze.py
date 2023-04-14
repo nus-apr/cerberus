@@ -12,7 +12,6 @@ from app.core import definitions
 from app.core import emitter
 from app.core import parallel
 from app.core import values
-from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
