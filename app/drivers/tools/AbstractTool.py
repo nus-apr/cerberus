@@ -178,7 +178,7 @@ class AbstractTool:
                     # container.build_tool_image(repo_name, tag_name)
             else:
                 # Image may exist but need to be sure it is the latest one
-                emitter.information("(information) docker image found locally")
+                emitter.information("\t\t(information) docker image found locally")
                 # Get the local image
                 image = container.get_image(repo_name, tag_name)
                 # Then try pulling. If it is the same one we are quick
@@ -187,7 +187,7 @@ class AbstractTool:
                 # That the storage is safe
                 possibly_new_image = container.pull_image(repo_name, tag_name)
 
-                if image.id != possibly_new_image.id:  # type: ignore
+                if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
                     emitter.information(
                         "(information) docker image is not the same as the one in the repository. Will have to rebuild"
                     )
