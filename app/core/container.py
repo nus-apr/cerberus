@@ -44,6 +44,22 @@ def image_exists(image_name: str, tag_name="latest"):
     return False
 
 
+def get_image(image_name: str, tag_name="latest"):
+    client = get_client()
+    image_list = client.images.list()
+    for image in image_list:
+        tag_list = image.tags  # type: ignore
+        if not tag_list:
+            continue
+        if image_name != tag_list[0].split(":")[0]:
+            continue
+        for tag in tag_list:
+            _, tag_id = tag.split(":")
+            if tag_name == tag_id:
+                return image
+    return None
+
+
 def pull_image(image_name: str, tag_name: str):
     client = get_client()
     emitter.normal("pulling docker image")

@@ -5,6 +5,7 @@ import shutil
 import time
 from datetime import datetime
 from os.path import join
+from typing import cast
 
 from app.core import abstractions
 from app.core import container
@@ -178,7 +179,19 @@ class AbstractTool:
             else:
                 # Image may exist but need to be sure it is the latest one
                 emitter.information("(information) docker image found locally")
-                # values.rebuild_all = True
+                # Get the local image
+                image = container.get_image(repo_name, tag_name)
+                # Then try pulling. If it is the same one we are quick
+                # If not we have to wait but it is safer than getting stale resuls.
+                # In theory this has a supply chain vulnerability but we can assume
+                # That the storage is safe
+                possibly_new_image = container.pull_image(repo_name, tag_name)
+
+                if image.id != possibly_new_image.id:  # type: ignore
+                    emitter.information(
+                        "(information) docker image is not the same as the one in the repository. Will have to rebuild"
+                    )
+                    values.rebuild_all = True
 
         else:
             local_path = shutil.which(self.name.lower())
