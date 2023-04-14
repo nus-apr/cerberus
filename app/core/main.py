@@ -279,6 +279,17 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
         for experiment_item in filter_experiment_list(benchmark):
             bug_index = experiment_item[definitions.KEY_ID]
             cpu = ",".join(map(str, range(values.cpus)))
+            if values.use_container:
+                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                values.job_identifier.set(
+                    "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                )
+                dir_info = task.generate_dir_info(
+                    benchmark.name, subject_name, bug_name
+                )
+                benchmark.update_dir_info(dir_info)
+
             experiment_image_id = (
                 benchmark.get_exp_image(bug_index, values.only_test, cpu)
                 if values.use_container
@@ -315,12 +326,11 @@ def get_tools() -> List[AbstractTool]:
     tool_list: List[AbstractTool] = []
     if values.task_type == "prepare":
         return tool_list
-    if values.tool_list:
-        for tool_name in values.tool_list:
-            tool = configuration.load_tool(tool_name)
-            if not values.only_analyse:
-                tool.check_tool_exists()
-            tool_list.append(tool)
+    for tool_name in values.tool_list:
+        tool = configuration.load_tool(tool_name)
+        if not values.only_analyse:
+            tool.check_tool_exists()
+        tool_list.append(tool)
     emitter.highlight(
         f"(profile) {values.task_type}-tool(s): "
         + " ".join([x.name for x in tool_list])

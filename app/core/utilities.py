@@ -7,6 +7,8 @@ import signal
 import subprocess
 import sys
 from contextlib import contextmanager
+from os.path import abspath
+from os.path import dirname
 from os.path import join
 from typing import Any
 from typing import NoReturn
@@ -113,6 +115,22 @@ def build_clean(program_path: str):
     (output, error) = process.communicate()
     assert int(process.returncode) == 0
     return int(process.returncode)
+
+
+def archive_results(dir_results: str, dir_archive: str):
+    for output_dir in [dir_results, dir_archive]:
+        if not os.path.isdir(output_dir):
+            os.makedirs(output_dir)
+
+    experiment_id = dir_results.split("/")[-1]
+
+    archive_command = (
+        "cd {res} ; tar cvzf {id}.tar.gz {id} ; mv {id}.tar.gz {arc}".format(
+            res=dirname(abspath(dir_results)), id=experiment_id, arc=dir_archive
+        )
+    )
+
+    execute_command(archive_command)
 
 
 @contextmanager

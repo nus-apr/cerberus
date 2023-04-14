@@ -16,7 +16,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
-    emitter.normal("loading profile setup")
+    emitter.normal("Loading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, "r") as conf_file:
@@ -36,7 +36,7 @@ def load_class(class_name: str):
 
 def load_tool(tool_name: str) -> AbstractTool:
     tool_type = values.task_type
-    emitter.normal(f"Loading {tool_type} tool")
+    emitter.normal(f"Loading {tool_type} tool {tool_name}")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
         (str(x).split("/")[-1], str(x).split("/")[-2])
@@ -62,7 +62,7 @@ def load_tool(tool_name: str) -> AbstractTool:
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
-    emitter.normal("loading benchmark")
+    emitter.normal("Loading benchmark {}".format(benchmark_name))
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
 
     existing_benchmark_list = [
@@ -89,7 +89,6 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return initializer()
-    raise Exception("Should not be reachable")
 
 
 class Configurations:
@@ -140,8 +139,8 @@ class Configurations:
         return range(start, end + 1)
 
     def read_arg_list(self, arg_list: Namespace):
-        emitter.normal("reading profile values")
-        emitter.normal("reading configuration values from arguments")
+        emitter.normal("Reading profile values")
+        emitter.normal("Reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         self.__runtime_config_values["task-type"] = arg_list.task_type
         if arg_list.config:
@@ -243,7 +242,7 @@ class Configurations:
             self.__runtime_config_values["tool-list"] = config_info["tool-list"]
 
         except KeyError as exc:
-            raise ValueError(f"missing field in configuration file: {exc}")
+            raise ValueError(f"Missing field in configuration file: {exc}")
 
         if "bug-index-list" in config_info:
             self.__runtime_config_values["bug-index-list"] = list(
@@ -283,7 +282,7 @@ class Configurations:
                 values.slack_configuration[key] = value
             else:
                 utilities.error_exit(
-                    "[error] unknown key {} or invalid type of value".format(key)
+                    "[error] Unknown key {} or invalid type of value".format(key)
                 )
 
         if values.slack_configuration["hook_url"] or (
@@ -325,14 +324,14 @@ class Configurations:
             values.only_setup = True
         if not values.only_setup:
             if not self.__runtime_config_values["tool-list"]:
-                emitter.error("(invalid) --tool/-tool-list is missing")
+                emitter.error("[invalid] --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
         values.benchmark_name = self.__runtime_config_values["benchmark-name"]
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:
             emitter.normal(
-                "[info] running experiments for subject {}".format(values.subject_name)
+                "[info] Running experiments for subject {}".format(values.subject_name)
             )
         values.file_meta_data = os.path.join(
             "benchmark", values.benchmark_name, "meta-data.json"
@@ -353,7 +352,7 @@ class Configurations:
             and values.subject_name is None
         ):
             emitter.warning(
-                "[warning] experiment id is not specified, running all experiments"
+                "[warning] Experiment id is not specified, running all experiments"
             )
 
         values.only_analyse = self.__runtime_config_values["only-analyse"]
