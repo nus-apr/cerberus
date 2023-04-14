@@ -62,8 +62,6 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         message = "[bold {}]{}".format(
             RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
         )
-        console = rich.console.Console()
-        console.show_cursor(False)
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
             len_prefix = ((indent_level + 1) * 4) + len(prefix)
@@ -73,7 +71,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
                 width=int(columns),
             )
             message = wrapper.fill(message)
-        console.print(message, end=("\n" if new_line else "\r"))
+        rich.print(message, end=("\n" if new_line else "\r"))
     else:
         if prefix:
             print_message = prefix + print_message
