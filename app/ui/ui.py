@@ -223,7 +223,6 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
 
                 log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
-                log_map[key].auto_height = True
                 self.hide(log_map[key])
 
                 self.post_message(JobMount(key))
@@ -302,9 +301,11 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 emitter.information(
                     "Finished execution for {}".format(message.identifier)
                 )
-                # self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
-                #    running_row_key
-                # )
+                self.call_from_thread(
+                    lambda: self.query_one(
+                        "#" + running_subjects_id, CustomDataTable
+                    ).remove_row(running_row_key)
+                )
                 self.post_message(
                     JobFinish(
                         message.identifier,
