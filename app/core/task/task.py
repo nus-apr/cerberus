@@ -1,6 +1,5 @@
 import hashlib
 import os
-import threading
 import time
 from os.path import abspath
 from os.path import dirname
@@ -8,7 +7,7 @@ from os.path import join
 from typing import Any
 from typing import cast
 from typing import Dict
-from typing import List
+from typing import Optional
 
 from app.core import container
 from app.core import definitions
@@ -102,25 +101,21 @@ def archive_results(dir_results: str, dir_archive: str):
     utilities.execute_command(archive_command)
 
 
-def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]):
+def analyse_result(dir_info, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t(framework) analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     patch_dir = None
-    for dir_info, tool in zip(dir_info_list, tool_list):
-        space_info, time_info, _ = tool.analyse_output(
-            dir_info, bug_id, failing_test_list
-        )
-        conf_id = str(values.current_profile_id.get("NA"))
-        exp_id = conf_id + "-" + bug_id
-        values.stats_results[exp_id] = (space_info, time_info)
-        tool.print_stats(space_info, time_info)
-        tool.log_output_path = ""
-        logger.log_stats(exp_id)
-        patch_dir = join(dir_info["local"]["artifacts"], "patches")
-        if values.use_valkyrie:
-            valkyrie.analyse_output(patch_dir, time_info)
-            break
+    space_info, time_info, _ = tool.analyse_output(dir_info, bug_id, failing_test_list)
+    conf_id = str(values.current_profile_id.get("NA"))
+    exp_id = conf_id + "-" + bug_id
+    values.stats_results[exp_id] = (space_info, time_info)
+    tool.print_stats(space_info, time_info)
+    tool.log_output_path = ""
+    logger.log_stats(exp_id)
+    patch_dir = join(dir_info["local"]["artifacts"], "patches")
+    if values.use_valkyrie:
+        valkyrie.analyse_output(patch_dir, time_info)
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
@@ -137,17 +132,16 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info_list, tool_list):
+def save_artifacts(dir_info, tool: AbstractTool):
     emitter.normal("\t\t(framework) saving artifacts and cleaning up")
-    for dir_info_entry, tool in zip(dir_info_list, tool_list):
-        dir_info = dir_info_entry["local"]
-        dir_results = dir_info["results"]
-        os.makedirs(dir_results, exist_ok=True)
-        tool.save_artifacts(dir_info)
-        tool.post_process()
-        save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
-        save_command += "cp -f {}/* {}".format(values.file_error_log, dir_results)
-        utilities.execute_command(save_command)
+    local_info = dir_info["local"]
+    dir_results = local_info["results"]
+    os.makedirs(dir_results, exist_ok=True)
+    tool.save_artifacts(local_info)
+    tool.post_process()
+    save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
+    save_command += "cp -f {}/* {}".format(values.file_error_log, dir_results)
+    utilities.execute_command(save_command)
 
 
 def create_running_container(
@@ -235,14 +229,13 @@ def construct_summary():
 
 def run(
     benchmark: AbstractBenchmark,
-    tool_list: List[AbstractTool],
+    tool: AbstractTool,
     bug_info: Dict[str, Any],
     config_info: Dict[str, Any],
     run_identifier: str,
     cpu: str,
+    expriment_image_id: Optional[str],
 ):
-    dir_info_list = []
-    container_id_list: List[str] = []
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     config_id = config_info[definitions.KEY_ID]
@@ -251,11 +244,7 @@ def run(
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    tag_name = "-".join(
-        [config_id]
-        + list(map(lambda x: x.name, tool_list))
-        + [benchmark.name, subject_name, bug_name]
-    )
+    tag_name = "-".join([config_id, tool.name, benchmark.name, subject_name, bug_name])
     dir_info = generate_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     emitter.highlight("\t(profile) identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
@@ -276,104 +265,90 @@ def run(
     emitter.highlight(
         "\t[meta-data] output directory: {}".format(dir_info["local"]["artifacts"])
     )
-    exp_img_id = None
 
     benchmark.update_dir_info(dir_info)
-    if values.use_container:
-        exp_img_id = benchmark.get_exp_image(bug_index, values.only_test, cpu)
-    else:
+    if not values.use_container:
         if not values.use_valkyrie:
             benchmark.setup_experiment(bug_index, None, values.only_test)
 
-    for index, repair_tool in enumerate(tool_list):
-        container_id = None
-        tool_name = repair_tool.name if len(tool_list) <= 1 else "multi"
-        dir_info = update_dir_info(dir_info, tool_name)
-        dir_instr_local = dir_info["local"]["instrumentation"]
-        dir_result_local = dir_info["local"]["results"]
-        # emitter.information("directory is {}".format(dir_instr_local))
-        if os.path.isdir(dir_instr_local):
-            emitter.warning(
-                "\t\t[note] there is custom instrumentation for " + repair_tool.name
-            )
-        if values.only_analyse:
-            if (
-                not os.path.isdir(dir_result_local)
-                or len(os.listdir(dir_result_local)) == 0
-            ):
-                archive_name = (
-                    "-".join(
-                        [
-                            config_id,
-                            benchmark.name,
-                            repair_tool.name,
-                            subject_name,
-                            bug_name,
-                        ]
-                    )
-                    + ".tar.gz"
+    container_id = None
+    tool_name = tool.name
+    dir_info = update_dir_info(dir_info, tool_name)
+    dir_instr_local = dir_info["local"]["instrumentation"]
+    dir_result_local = dir_info["local"]["results"]
+    # emitter.information("directory is {}".format(dir_instr_local))
+    if os.path.isdir(dir_instr_local):
+        emitter.warning("\t\t[note] there is custom instrumentation for " + tool.name)
+    if values.only_analyse:
+        can_analyse_results = True
+        if (
+            not os.path.isdir(dir_result_local)
+            or len(os.listdir(dir_result_local)) == 0
+        ):
+            archive_name = (
+                "-".join(
+                    [
+                        config_id,
+                        benchmark.name,
+                        tool.name,
+                        subject_name,
+                        bug_name,
+                    ]
                 )
-                if not retrieve_results(archive_name, repair_tool):
-                    continue
-            analyse_result(dir_info, bug_info, [repair_tool])
-            continue
-        if index == 0:
-            dir_output_local = dir_info["local"]["artifacts"]
-            dir_logs_local = dir_info["local"]["logs"]
-            utilities.clean_artifacts(dir_output_local)
-            utilities.clean_artifacts(dir_logs_local)
+                + ".tar.gz"
+            )
+            can_analyse_results = retrieve_results(archive_name, tool)
+        if can_analyse_results:
+            analyse_result(dir_info, bug_info, tool)
+    else:
+        dir_output_local = dir_info["local"]["artifacts"]
+        dir_logs_local = dir_info["local"]["logs"]
+        utilities.clean_artifacts(dir_output_local)
+        utilities.clean_artifacts(dir_logs_local)
         benchmark.update_dir_info(dir_info)
-        if values.use_container and exp_img_id:
+        if values.use_container and expriment_image_id:
             container_name = "{}-{}-{}-{}".format(
                 tool_name, benchmark.name, subject_name, bug_name
             )
-            if repair_tool.image_name is None:
+            if tool.image_name is None:
                 utilities.error_exit(
-                    "Repair tool does not have a Dockerfile: {}".format(
-                        repair_tool.name
-                    )
+                    "Repair tool does not have a Dockerfile: {}".format(tool.name)
                 )
 
             container_id = create_running_container(
-                exp_img_id, repair_tool, dir_info, container_name, cpu
+                expriment_image_id, tool, dir_info, container_name, cpu
             )
-        if container_id:
-            container_id_list.append(container_id)
-        else:
+        if not container_id:
             utilities.error_exit("Could not get container id!")
-        dir_info_list.append(dir_info)
 
     if not values.only_setup:
         task_type = values.task_type
         if values.task_type == "repair":
             repair.repair_all(
-                dir_info_list,
+                dir_info,
                 bug_info,
-                cast(List[AbstractRepairTool], tool_list),
+                cast(AbstractRepairTool, tool),
                 config_info,
-                container_id_list,
+                container_id,
                 benchmark.name,
             )
         elif values.task_type == "analyze":
             analyze.analyze_all(
-                dir_info_list,
+                dir_info,
                 bug_info,
-                cast(List[AbstractAnalyzeTool], tool_list),
+                cast(AbstractAnalyzeTool, tool),
                 config_info,
-                container_id_list,
+                container_id,
                 benchmark.name,
             )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 
         if not values.only_instrument:
-            analyse_result(dir_info_list, bug_info, tool_list)
-            save_artifacts(dir_info_list, tool_list)
-            tool_name = tool_list[0].name
-            if len(tool_list) > 1:
-                tool_name = "multi"
+            analyse_result(dir_info, bug_info, tool)
+            save_artifacts(dir_info, tool)
             dir_archive = join(values.dir_results, tool_name)
-            dir_result = dir_info_list[0]["local"]["results"]
+            dir_result = dir_info["local"]["results"]
             archive_results(dir_result, dir_archive)
             utilities.clean_artifacts(dir_result)
 

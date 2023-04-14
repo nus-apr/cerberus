@@ -1,6 +1,6 @@
 from typing import Any
 from typing import Dict
-from typing import List
+from typing import Optional
 
 from textual.message import Message
 
@@ -19,16 +19,18 @@ class JobAllocate(Message):
         self,
         index: int,
         benchmark: AbstractBenchmark,
-        tool_list: List[AbstractTool],
+        tool: AbstractTool,
         experiment_item,
         config_info: Dict[str, Any],
+        experiment_image_id: Optional[str],
         identifier: str,
     ) -> None:
         self.index = index
         self.benchmark = benchmark
-        self.tool_list = tool_list
+        self.tool = tool
         self.experiment_item = experiment_item
         self.config_info = config_info
+        self.experiment_image_id = experiment_image_id
         self.identifier = identifier
         super().__init__()
 
