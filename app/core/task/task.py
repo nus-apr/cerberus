@@ -105,7 +105,7 @@ def archive_results(dir_results: str, dir_archive: str):
 def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]):
     emitter.normal("\t\t(framework) analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
+    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     patch_dir = None
     for dir_info, tool in zip(dir_info_list, tool_list):
         space_info, time_info, _ = tool.analyse_output(
@@ -365,6 +365,7 @@ def run(
             )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
+
         if not values.only_instrument:
             analyse_result(dir_info_list, bug_info, tool_list)
             save_artifacts(dir_info_list, tool_list)
