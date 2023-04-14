@@ -356,7 +356,6 @@ class Configurations:
                 "[warning] experiment id is not specified, running all experiments"
             )
 
-        values.only_setup = self.__runtime_config_values["only-setup"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]
