@@ -74,7 +74,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         rich.print(message, end=("\n" if new_line else "\r"))
     else:
         if prefix:
-            print_message = prefix + print_message
+            print_message = prefix + str(print_message)
 
         ui.post_write(
             "[bold {}]{} {}".format(
