@@ -122,6 +122,8 @@ class AbstractBenchmark:
             if output:
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
+                    self.append_file(container_id, [command_str, "\n"], log_file_path)
+
                     if stdout:
                         self.append_file(
                             container_id, [stdout.decode("iso-8859-1")], log_file_path
@@ -215,6 +217,21 @@ class AbstractBenchmark:
                 self.run_command(
                     container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/"
                 )
+
+        # init log paths
+        self.log_deploy_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log"
+        )
+        self.log_config_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-config.log"
+        )
+        self.log_build_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-build.log"
+        )
+        self.log_test_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
+        )
+
         if not self.deploy(bug_index, container_id):
             emitter.error("\t\t\t[benchmark] deploy failed")
             return True
