@@ -251,7 +251,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             try:
                 task.run(
                     message.benchmark,
-                    message.repair_tool_list,
+                    message.tool_list,
                     message.experiment_item,
                     message.config_info,
                     message.identifier,
@@ -376,6 +376,16 @@ app: Cerberus
 
 def get_ui() -> Cerberus:
     return app
+
+
+def post_write(message: Write):
+    poster = (
+        app.call_from_thread
+        if app._thread_id != threading.get_ident()
+        else (lambda c: c())
+    )
+    poster(lambda: app.post_message(message))
+    pass
 
 
 def setup_ui():
