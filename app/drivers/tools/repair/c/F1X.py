@@ -430,13 +430,13 @@ class F1X(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            emitter.warning("\t\t\t[warning] no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Log File: " + self.log_output_path)
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            emitter.error("\t\t\t\t[error] error detected in logs")
 
         self.read_log_file()
 

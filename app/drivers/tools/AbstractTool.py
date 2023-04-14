@@ -168,7 +168,11 @@ class AbstractTool:
                 repo_name = self.image_name
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
-                emitter.warning("(warning) docker image not found in Docker registry")
+                emitter.warning(
+                    "[warning] Docker image {}:{} not found in Docker registry".format(
+                        repo_name, tag_name
+                    )
+                )
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
                         "{} does not provide a Docker image in Dockerhub".format(
@@ -178,7 +182,11 @@ class AbstractTool:
                     # container.build_tool_image(repo_name, tag_name)
             else:
                 # Image may exist but need to be sure it is the latest one
-                emitter.information("\t\t(information) docker image found locally")
+                emitter.information(
+                    "\t\t[information] Docker image found locally for {}".format(
+                        self.name
+                    )
+                )
                 # Get the local image
                 image = container.get_image(repo_name, tag_name)
                 # Then try pulling. If it is the same one we are quick

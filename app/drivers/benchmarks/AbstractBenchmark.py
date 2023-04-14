@@ -137,8 +137,8 @@ class AbstractBenchmark:
 
     def build_benchmark_image(self):
         if not container.image_exists(self.image_name):
-            emitter.warning("\t(benchmark) benchmark environment not found")
-            emitter.normal("\t(benchmark) building benchmark environment")
+            emitter.warning("\t[benchmark] benchmark environment not found")
+            emitter.normal("\t[benchmark] building benchmark environment")
             container.build_benchmark_image(self.image_name)
         else:
             emitter.success("\t\tpre-built benchmark environment found")
@@ -164,7 +164,7 @@ class AbstractBenchmark:
         which point to certain folders in the project
         """
         container_id = None
-        emitter.normal("\t\t(benchmark) preparing experiment environment")
+        emitter.normal("\t\t[benchmark] preparing experiment environment")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -203,7 +203,7 @@ class AbstractBenchmark:
     def setup_experiment(
         self, bug_index: int, container_id: Optional[str], test_all: bool
     ):
-        emitter.normal("\t\t(benchmark) preparing experiment subject")
+        emitter.normal("\t\t[benchmark] preparing experiment subject")
         if not container_id:
             self.base_dir_experiment = os.path.abspath(values.dir_experiments)
             if os.path.isdir(self.dir_expr):
@@ -216,22 +216,22 @@ class AbstractBenchmark:
                     container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/"
                 )
         if not self.deploy(bug_index, container_id):
-            emitter.error("\t\t\t(benchmark) deploy failed")
+            emitter.error("\t\t\t[benchmark] deploy failed")
             return True
         if not self.config(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_CONFIG)
-            emitter.error("\t\t\t(benchmark) config failed")
+            emitter.error("\t\t\t[benchmark] config failed")
             return True
         if not self.build(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_BUILD)
-            emitter.error("\t\t\t(benchmark) build failed")
+            emitter.error("\t\t\t[benchmark] build failed")
             return True
         test_choice = self.test_all if test_all else self.test
         if not test_choice(bug_index, container_id):
             values.experiment_status.set(TaskStatus.FAIL_IN_TEST)
-            emitter.error("\t\t\t(benchmark) testing failed")
+            emitter.error("\t\t\t[benchmark] testing failed")
             return True
-        emitter.success("\t\t\t(benchmark) setting up completed successfully")
+        emitter.success("\t\t\t[benchmark] setting up completed successfully")
         return False
 
     def get_exp_image(self, bug_index: int, test_all: bool, cpu: str):

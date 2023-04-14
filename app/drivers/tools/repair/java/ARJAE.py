@@ -58,15 +58,7 @@ class ARJAE(AbstractRepairTool):
 
         status = self.run_command(arjae_command, self.log_output_path, self.arjae_home)
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
@@ -111,7 +103,7 @@ class ARJAE(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            emitter.warning("\t\t\t[warning] no output log file found")
             return self._space, self._time, self._error
 
         emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)

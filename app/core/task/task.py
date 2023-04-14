@@ -120,7 +120,7 @@ def generate_dir_info(benchmark_name: str, subject_name: str, bug_name: str):
 
 
 def analyse_result(dir_info, experiment_info, tool: AbstractTool):
-    emitter.normal("\t\t(framework) analysing experiment results")
+    emitter.normal("\t\t[framework] analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     space_info, time_info, _ = tool.analyse_output(dir_info, bug_id, failing_test_list)
@@ -145,12 +145,16 @@ def retrieve_results(archive_name, tool: AbstractTool):
         utilities.execute_command(extract_command)
         return True
     else:
-        emitter.error("\t\t(error) result archive not found at " + archive_path)
+        emitter.error("\t\t[error] Result archive not found at {}".format(archive_path))
         return False
 
 
 def save_artifacts(dir_info, tool: AbstractTool):
-    emitter.normal("\t\t(framework) saving artifacts and cleaning up")
+    emitter.normal(
+        "\t\t[framework] Saving artifacts from tool {} and cleaning up".format(
+            tool.name
+        )
+    )
     local_info = dir_info["local"]
     dir_results = local_info["results"]
     os.makedirs(dir_results, exist_ok=True)
@@ -264,24 +268,24 @@ def run(
     tag_name = "-".join([config_id, tool.name, benchmark.name, subject_name, bug_name])
     dir_info = generate_tool_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     benchmark.update_dir_info(dir_info)
-    emitter.highlight("\t(profile) identifier: " + str(config_info[definitions.KEY_ID]))
+    emitter.highlight("\t[profile] Identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
-        "\t[profile] timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        "\t[profile] Timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
     emitter.highlight(
-        "\t[profile] fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
+        "\t[profile] Fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
     )
     emitter.highlight(
-        "\t[profile] test-suite ratio: "
+        "\t[profile] Test-suite ratio: "
         + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
-    emitter.highlight("\t(meta-data) project: {}".format(subject_name))
-    emitter.highlight("\t(meta-data) bug ID: {}".format(bug_name))
+    emitter.highlight("\t[meta-data] Project: {}".format(subject_name))
+    emitter.highlight("\t[meta-data] Bug ID: {}".format(bug_name))
     emitter.highlight(
-        "\t[meta-data] logs directory: {}".format(dir_info["local"]["logs"])
+        "\t[meta-data] Logs directory: {}".format(dir_info["local"]["logs"])
     )
     emitter.highlight(
-        "\t[meta-data] output directory: {}".format(dir_info["local"]["artifacts"])
+        "\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
     )
 
     if not values.use_container:

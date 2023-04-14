@@ -332,7 +332,7 @@ def get_tools() -> List[AbstractTool]:
             tool.check_tool_exists()
         tool_list.append(tool)
     emitter.highlight(
-        f"(profile) {values.task_type}-tool(s): "
+        f"[profile] {values.task_type}-tool(s): "
         + " ".join([x.name for x in tool_list])
     )
     return tool_list
@@ -340,7 +340,7 @@ def get_tools() -> List[AbstractTool]:
 
 def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight(f"(profile) {values.task_type}-benchmark: {benchmark.name}")
+    emitter.highlight(f"[profile] {values.task_type}-benchmark: {benchmark.name}")
     return benchmark
 
 
