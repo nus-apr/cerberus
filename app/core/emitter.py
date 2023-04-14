@@ -75,13 +75,10 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
             print_message = prefix + print_message
 
         ui.post_write(
-            ui.Write(
-                text="[bold {}]{} {}".format(
-                    TEXTUALIZE_COLOR_MAP[print_color],
-                    values.job_identifier.get("((DEFAULT))"),
-                    str(print_message).replace("[", "((").replace("]", "))"),
-                ),
-                identifier=values.job_identifier.get("((DEFAULT))"),
+            "[bold {}]{} {}".format(
+                TEXTUALIZE_COLOR_MAP[print_color],
+                values.job_identifier.get("Root"),
+                str(print_message).replace("[", "((").replace("]", "))"),
             )
         )
 

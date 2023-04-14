@@ -378,12 +378,14 @@ def get_ui() -> Cerberus:
     return app
 
 
-def post_write(message: Write):
+def post_write(text: str):
     poster = (
         app.call_from_thread
         if app._thread_id != threading.get_ident()
         else (lambda c: c())
     )
+
+    message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
     poster(lambda: app.post_message(message))
     pass
 
