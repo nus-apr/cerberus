@@ -82,6 +82,7 @@ ui_active = False
 use_tui = False
 cpus = 1
 task_type: Optional[str] = None
+ui_max_width = 1000
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000
