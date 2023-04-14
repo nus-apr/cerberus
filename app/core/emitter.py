@@ -61,7 +61,7 @@ TEXTUALIZE_COLOR_MAP = {
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "[{}]{}".format(RICH_COLOR_MAP[print_color], print_message)
+    message = "[bold {}]{}".format(RICH_COLOR_MAP[print_color], print_message)
     if not values.ui_active:
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
