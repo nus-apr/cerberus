@@ -242,6 +242,10 @@ class TBar(AbstractRepairTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
+                if "Patch Candidate" in line:
+                    count_enumerations += 1
+                if "failed compiling" in line:
+                    count_non_compilable += 1
                 if "Succeeded to fix the bug" in line:
                     count_plausible += 1
                     count_enumerations += 1
