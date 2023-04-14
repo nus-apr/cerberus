@@ -106,7 +106,7 @@ def build_image(dockerfile_path: str, image_name: str):
             emitter.error(exp)
             utilities.error_exit("[error] Unable to build image: docker daemon error")
         except Exception as ex:
-            print(ex)
+            emitter.error(ex)
             utilities.error_exit("[error] Unable to build image: unhandled exception")
     else:
         utilities.error_exit("[error] Unable to build image: Dockerfile not found")
@@ -136,7 +136,7 @@ def get_container(container_id: str):
     try:
         container = client.containers.get(container_id)
     except docker.errors.NotFound as ex:  # type: ignore
-        # emitter.error(ex)
+        emitter.error(ex)
         emitter.warning("\t\t(warning) Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
@@ -153,7 +153,7 @@ def get_container_id(container_name: str) -> Optional[str]:
     try:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
-        # emitter.error(ex)
+        emitter.error(ex)
         emitter.warning("\t\t(warning) Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
