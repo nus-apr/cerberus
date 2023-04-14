@@ -16,9 +16,6 @@ stty_info = os.popen("stty size", "r")
 rows, columns = tuple(map(int, stty_info.read().split()))
 stty_info.close()
 
-console = rich.console.Console(width=columns)
-console.show_cursor(False)
-
 
 class COLOR(Enum):
     GREY = 1
@@ -61,8 +58,12 @@ TEXTUALIZE_COLOR_MAP = {
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "[bold {}]{}".format(RICH_COLOR_MAP[print_color], print_message)
     if not values.ui_active:
+        message = "[bold {}]{}".format(
+            RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
+        )
+        console = rich.console.Console()
+        console.show_cursor(False)
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
             len_prefix = ((indent_level + 1) * 4) + len(prefix)
@@ -81,7 +82,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
             "[bold {}]{} {}".format(
                 TEXTUALIZE_COLOR_MAP[print_color],
                 values.job_identifier.get("Root"),
-                str(print_message).replace("[", "\\[").replace("]", "\\]"),
+                str(print_message).replace("[", "\\["),
             )
         )
 
