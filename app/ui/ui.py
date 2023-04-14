@@ -137,7 +137,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
-            self.debug_override = True
+            self.is_preparing = True
 
             self.show(log_map["root"])
             self.query_one(Static).update("Cerberus is preparing tool images")
@@ -196,7 +196,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.hide(self.query_one(Static))
             if not values.debug:
                 self.hide(log_map["root"])
-            self.debug_override = False
+            self.is_preparing = False
 
             self.show(self.query_one("#" + all_subjects_id))
             self.run_tasks(tools, benchmark, setup)
@@ -208,6 +208,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.debug_print("I got exception {}".format(e))
 
     def change_table(self, new_id):
+        if self.is_preparing:
+            return
         self.debug_print("Changing table!")
         try:
             self.selected_table: CustomDataTable
@@ -527,7 +529,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.dark = not self.dark
 
     def debug_print(self, text: Any):
-        if values.debug or self.debug_override:
+        if values.debug or self.is_preparing:
             log_map["root"].write(text, width=values.ui_max_width, expand=True)
 
 
