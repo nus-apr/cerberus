@@ -22,9 +22,7 @@ from textual.widgets import Static
 from textual.widgets import TextLog
 from textual.widgets._data_table import ColumnKey
 
-from app.core import configuration
 from app.core import definitions
-from app.core import email
 from app.core import emitter
 from app.core import main
 from app.core import task
@@ -33,6 +31,7 @@ from app.core import values
 from app.core.status import JobStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
+from app.notification import email
 
 job_identifier: contextvars.ContextVar[str] = contextvars.ContextVar(
     "job_id", default="root"
@@ -155,6 +154,7 @@ class Cerberus(App[List[Tuple[str, JobStatus]]]):
             self.query_one(DataTable).visible = True
             self.query_one(DataTable).styles.height = "100%"
             self.run_tasks(tools, benchmark, setup)
+
         except Exception as e:
             self.show(self.query_one(Static))
             self.query_one(Static).update(
