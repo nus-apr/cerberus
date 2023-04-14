@@ -302,9 +302,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 emitter.information(
                     "Finished execution for {}".format(message.identifier)
                 )
-                self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
-                    running_row_key
-                )
+                # self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
+                #     running_row_key
+                # )
                 self.post_message(
                     JobFinish(
                         message.identifier,
@@ -345,12 +345,42 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.hide(text_log)
 
     async def on_cerberus_job_finish(self, message: JobFinish):
-        self.update_status(message.key, str(message.status))
+        # self.update_status(message.key, str(message.status))
+        try:
+            finished_subjects_table = self.query_one(
+                "#" + finished_subjects_id, CustomDataTable
+            )
+            all_subjects_table = self.query_one("#" + all_subjects_id, CustomDataTable)
+            row_key = finished_subjects_table.add_row(
+                *message.row_data,
+                key=message.key,
+            )
+            finished_subjects_table.update_cell(
+                row_key,
+                Cerberus.COLUMNS["Status"][finished_subjects_id],
+                str(message.status),
+            )
+            all_subjects_table.update_cell(
+                row_key,
+                Cerberus.COLUMNS["Status"][all_subjects_id],
+                str(message.status),
+            )
+            if message.status is not TaskStatus.SUCCESS:
+                error_subjects_table = self.query_one(
+                    "#" + error_subjects_id, CustomDataTable
+                )
+                row_key = error_subjects_table.add_row(
+                    *message.row_data,
+                    key=message.key,
+                )
+                error_subjects_table.update_cell(
+                    row_key,
+                    Cerberus.COLUMNS["Status"][error_subjects_id],
+                    str(message.status),
+                )
 
-        self.query_one(finished_subjects_id, CustomDataTable).add_row(
-            *message.row_data,
-            key=message.key,
-        )
+        except Exception as e:
+            self.debug_print(str(e))
 
         self.jobs_remaining -= 1
         self.finished_subjects.append((message.key, message.status))
