@@ -10,6 +10,8 @@ from multiprocessing import set_start_method
 from typing import Any
 from typing import List
 
+import rich
+
 from app.core import configuration
 from app.core import definitions
 from app.core import emitter
@@ -379,6 +381,7 @@ def main():
         logger.error(traceback.format_exc())
     finally:
         values.ui_active = False
+        rich.get_console().show_cursor(True)
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
