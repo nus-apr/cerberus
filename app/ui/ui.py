@@ -302,9 +302,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 emitter.information(
                     "Finished execution for {}".format(message.identifier)
                 )
-                # self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
-                #     running_row_key
-                # )
+                self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
+                    running_row_key
+                )
                 self.post_message(
                     JobFinish(
                         message.identifier,
@@ -326,16 +326,12 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 status,
                 update_width=True,
             )
-
-    def update_current_job(self, status: str):
-        current_job = values.job_identifier.get("NA")
-        if current_job != "NA" and self.selected_table.id:
-            self.selected_table.update_cell(
-                current_job,
-                Cerberus.COLUMNS["Status"][self.selected_table.id],
-                status,
-                update_width=True,
-            )
+        self.query_one("#" + all_subjects_id, CustomDataTable).update_cell(
+            key,
+            Cerberus.COLUMNS["Status"][all_subjects_id],
+            status,
+            update_width=True,
+        )
 
     async def on_cerberus_job_mount(self, message: JobMount):
         self.debug_print("Mounting {}".format(message.key))
@@ -482,7 +478,15 @@ def post_write(text: str):
         app.call_from_thread(lambda: app.post_message(message))
     else:
         app.post_message(message)
-    pass
+
+
+def update_current_job(status: str):
+    current_job = values.job_identifier.get("NA")
+    if current_job != "NA":
+        if app._thread_id != threading.get_ident():
+            app.call_from_thread(lambda: app.update_status(current_job, status))
+        else:
+            app.update_status(current_job, status)
 
 
 def setup_ui():
