@@ -102,14 +102,14 @@ def sub_sub_title(text):
 
 def command(message):
     if values.debug:
-        prefix = "\t\t(command) "
+        prefix = "\t\t[command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
 def docker_command(message):
     if values.debug:
-        prefix = "\t\t(docker-command) "
+        prefix = "\t\t[docker-command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.docker_command(message)
 
@@ -123,14 +123,14 @@ def debug(message):
 
 def build(message):
     if values.debug:
-        prefix = "\t\t(build) "
+        prefix = "\t\t[build] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.build(message)
 
 
 def data(message, info=None):
     if values.debug:
-        prefix = "\t\t(data) "
+        prefix = "\t\t[data] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
         if info:
             write(info, COLOR.GREY, prefix=prefix, indent_level=2)
@@ -203,7 +203,7 @@ def note(message):
 
 
 def configuration(setting, value):
-    message = "\t(config) " + setting + ": " + str(value)
+    message = "\t[config] " + setting + ": " + str(value)
     write(message, COLOR.WHITE, True)
     logger.configuration(setting + ":" + str(value))
 

@@ -92,7 +92,7 @@ class AbstractBenchmark:
         return self.experiment_subjects
 
     def load_meta_file(self):
-        emitter.normal("loading experiment meta-data")
+        emitter.normal("\t[benchmark] Loading experiment meta-data")
         if not self.meta_file:
             utilities.error_exit("Meta file path not set")
         if not os.path.isfile(cast(str, self.meta_file)):
@@ -104,7 +104,7 @@ class AbstractBenchmark:
                 self.size = len(json_data)
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
-                utilities.error_exit("could not load meta-data from ", self.meta_file)
+                utilities.error_exit("Could not load meta-data from ", self.meta_file)
         return
 
     def run_command(

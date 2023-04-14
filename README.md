@@ -1,5 +1,8 @@
 # Cerberus Framework
 
+![Main View](doc/images/CerberusView.png)
+
+
 Cerberus is a program repair framework that provides the interface to multiple
 state-of-the art program analysis tools such as Infer and Pulse, as well as program repair tools such as Prophet, Darjeeling, Angelix, F1X etc.
 Encapsulating the difficulties to setup the infrastructure for program analysis/repair technology, this platform provides
@@ -48,6 +51,7 @@ Cerberus should be considered alpha-quality software. Bugs can be reported here:
 * [Manual](doc/Manual.md)
 * [Extending](doc/Extending.md)
 * [Project Architecture](doc/ProjectArchitecture.md)
+* [Notifications](doc/Notifications.md)
 
 
 

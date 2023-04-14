@@ -299,7 +299,7 @@ def run(
     # emitter.information("directory is {}".format(dir_instr_local))
     if os.path.isdir(dir_instr_local):
         emitter.warning(
-            "\t\t[note] there is custom instrumentation for {}".format(tool.name)
+            "\t\t[note] There is custom instrumentation for {}".format(tool.name)
         )
     if values.only_analyse:
         can_analyse_results = True

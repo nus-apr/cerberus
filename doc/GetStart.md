@@ -9,7 +9,7 @@ Cerberus will do the following actions in order when given a tool list and exper
 * Prepare an image for each subject, if one was not already created.
 * If sequentially running (by default), each experiment is ran on each tool in an isolated container (or locally if selected).
 
-## Sequential
+## Sequential execution
 
 We consider the [libtiff project](https://github.com/vadz/libtiff/) from the VulnLoc benchmark as a medium-sized example.
 
@@ -21,7 +21,7 @@ We consider the [libtiff project](https://github.com/vadz/libtiff/) from the Vul
 
 We have selected to run the vulnfix tool on the 22nd bug of the vulnloc benchmark. Cerberus will prepare everything  needed and run the tool on the selected subject.
 
-## Parallel
+## Parallel execution
 
 The becnhark has instrumentation setup for most of the C program repair tools currently integrated, thus we can test multiple tools and bugs in parallel and examine their results.
 
@@ -34,13 +34,14 @@ Let us run some of them - vulnfix, extractfix, f1x and fix2fit and 4 of the bugs
 Cerberus will allocate 4*4 = 16 tasks and display 2 windows - the first one is the log of the currently selected task, this by default is the first allocated, and the second window is a table showing all tasks. If the `--debug` flag is passed there will is a third window collecting all textual messages from all tasks, showing the messages in chronological order.
 
 
-![Tool Preparation Stage](images/UIPrepareTools.png)
-
-![Text log](images/TextLog.png)
+![Tool Preparation Stage](images/ToolPreparation.png)
 
 ![UI Running](images/TaskList.png)
 
 Now Cerberus is running, one can easily filter the table by clicking on the buttons in the footer or click the accelerators or clicking on the different rows of the table to select the different text logs. By default Cerberus uses 2 less than the maximum amount of cores for task allocation to ensure that the system is not overloaded. One can easily change this amount with the `--cpus` flag and achieve sequential execution with the UI active by setting the cpus to 1.
+
+The Status column can have various values and the common ones are "Allocated", "Running", "Waiting for CPU", "Successful", "Failed". Cerberus has a CPU allocation scheduling, which ensures that an experiment gets a cpu core.
+
 
 ## When complete
 
