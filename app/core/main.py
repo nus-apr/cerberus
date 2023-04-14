@@ -22,6 +22,7 @@ from app.core import values
 from app.core.configuration import Configurations
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
+from app.notification import notification
 
 
 def create_output_directories():
@@ -55,6 +56,8 @@ def shutdown(signum, frame):
 def bootstrap(arg_list: Namespace):
     emitter.sub_title("Bootstrapping framework")
     config = Configurations()
+    config.read_email_config_file()
+    config.read_slack_config_file()
     config.read_arg_list(arg_list)
     values.arg_pass = True
     config.update_configuration()
@@ -380,4 +383,6 @@ def main():
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
+        print("SENDING NOTIFICATION")
+        notification.end(total_duration, is_error)
         emitter.end(total_duration, is_error)

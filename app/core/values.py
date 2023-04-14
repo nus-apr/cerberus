@@ -33,6 +33,7 @@ dir_artifacts = join(dir_output_base, "artifacts")
 dir_output = ""
 dir_summaries = join(dir_main, "summaries")
 dir_backup = join(dir_main, "backup")
+dir_config = join(dir_main, "config")
 
 
 file_main_log = ""
@@ -72,7 +73,8 @@ use_container = True
 dump_patches = False
 use_valkyrie = False
 use_gpu = False
-email_setup = False
+is_email_set = False
+is_slack_set = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
@@ -94,6 +96,7 @@ stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 current_profile_id = ContextVar("current_profile_id", default=None)
 experiment_status = ContextVar("experiment_status", default=JobStatus.NONE)
 
+slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}
 email_configuration = {
     "ssl_from_start": True,
     "port": 465,
