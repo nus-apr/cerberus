@@ -92,6 +92,7 @@ def build_image(dockerfile_path: str, image_name: str):
             )
             id = None
             for line in logs:
+                emitter.debug(line)
                 data = json.loads(line.strip())
                 if "stream" in data:
                     for line_stream in data["stream"].split("\n"):
