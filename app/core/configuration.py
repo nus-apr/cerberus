@@ -12,6 +12,7 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
@@ -33,11 +34,9 @@ def load_class(class_name: str):
     return mod
 
 
-def load_tool(tool_name: str):
-    task_type = values.task_type
-    emitter.normal(f"loading {task_type} tool")
-    # class_file_path = values.dir_tool_drivers + tool_name + ".py"
+def load_tool(tool_name: str) -> AbstractTool:
     tool_type = values.task_type
+    emitter.normal(f"Loading {tool_type} tool")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
         (str(x).split("/")[-1], str(x).split("/")[-2])
@@ -59,6 +58,7 @@ def load_tool(tool_name: str):
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
         return initializer()
+    raise Exception("Should not be reached")
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
