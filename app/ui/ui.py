@@ -302,9 +302,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 emitter.information(
                     "Finished execution for {}".format(message.identifier)
                 )
-                self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
-                    running_row_key
-                )
+                # self.query_one("#" + running_subjects_id, CustomDataTable).remove_row(
+                #    running_row_key
+                # )
                 self.post_message(
                     JobFinish(
                         message.identifier,
