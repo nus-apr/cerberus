@@ -222,7 +222,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     key=key,
                 )
 
-                log_map[key] = TextLog(highlight=True, markup=True)
+                log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
                 log_map[key].auto_height = True
                 self.hide(log_map[key])
 
@@ -391,6 +391,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             log_map[message.identifier].write(
                 message.text,
                 shrink=False,
+                width=values.ui_max_width,
                 scroll_end=(self.selected_subject == message.identifier),
                 expand=log_map[message.identifier].visible,
             )
@@ -453,7 +454,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         yield error_subjects_table
         self.hide(error_subjects_table)
 
-        log_map["root"] = TextLog(highlight=True, markup=True)
+        log_map["root"] = TextLog(highlight=True, markup=True, wrap=True)
         log_map["root"].styles.border = ("heavy", "white")
         yield log_map["root"]
         if not values.debug:
