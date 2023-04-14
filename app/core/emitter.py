@@ -5,6 +5,8 @@ import sys
 import textwrap
 from enum import Enum
 
+import rich
+
 from app.core import definitions
 from app.core import logger
 from app.core import values
@@ -13,6 +15,9 @@ from app.ui import ui
 stty_info = os.popen("stty size", "r")
 rows, columns = tuple(map(int, stty_info.read().split()))
 stty_info.close()
+
+console = rich.console.Console(width=columns)
+console.show_cursor(False)
 
 
 class COLOR(Enum):
@@ -28,17 +33,17 @@ class COLOR(Enum):
     STAT_COLOR = 9
 
 
-TERMINAL_COLOR_MAP = {
-    COLOR.GREY: "\t\x1b[1;30m",
-    COLOR.RED: "\t\x1b[1;31m",
-    COLOR.GREEN: "\x1b[1;32m",
-    COLOR.YELLOW: "\t\x1b[1;33m",
-    COLOR.BLUE: "\t\x1b[1;34m",
-    COLOR.ROSE: "\t\x1b[1;35m",
-    COLOR.CYAN: "\x1b[1;36m",
-    COLOR.WHITE: "\t\x1b[1;37m",
-    COLOR.PROG_OUTPUT_COLOR: "\t\x1b[0;30;47m",
-    COLOR.STAT_COLOR: "\t\x1b[0;32;47m",
+RICH_COLOR_MAP = {
+    COLOR.GREY: "grey",
+    COLOR.RED: "red",
+    COLOR.GREEN: "green",
+    COLOR.YELLOW: "yellow",
+    COLOR.BLUE: "blue",
+    COLOR.ROSE: "rose",
+    COLOR.CYAN: "cyan",
+    COLOR.WHITE: "none",
+    COLOR.PROG_OUTPUT_COLOR: "blue",
+    COLOR.STAT_COLOR: "green",
 }
 
 TEXTUALIZE_COLOR_MAP = {
@@ -56,10 +61,10 @@ TEXTUALIZE_COLOR_MAP = {
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], print_message)
+    message = "[{}]{}".format(RICH_COLOR_MAP[print_color], print_message)
     if not values.ui_active:
         if prefix:
-            prefix = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], prefix)
+            prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
             len_prefix = ((indent_level + 1) * 4) + len(prefix)
             wrapper = textwrap.TextWrapper(
                 initial_indent=prefix,
@@ -67,9 +72,7 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
                 width=int(columns),
             )
             message = wrapper.fill(message)
-        sys.stdout.write(message)
-        sys.stdout.write("\n" if new_line else "\033[K\r")
-        sys.stdout.flush()
+        console.print(message, end=("\n" if new_line else "\r"))
     else:
         if prefix:
             print_message = prefix + print_message
