@@ -147,17 +147,12 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info_list, experiment_info, tool_list, container_id_list):
+def save_artifacts(dir_info_list, tool_list):
     emitter.normal("\t\t(framework) saving artifacts and cleaning up")
-    for dir_info_entry, container_id, tool in zip(
-        dir_info_list, container_id_list, tool_list
-    ):
+    for dir_info_entry, tool in zip(dir_info_list, tool_list):
         dir_info = dir_info_entry["local"]
-        # dir_expr = dir_info["experiment"]
-        # dir_artifacts = dir_info["artifacts"]
         dir_results = dir_info["results"]
-        if not os.path.isdir(dir_results):
-            os.system("mkdir -p {}".format(dir_results))
+        os.makedirs(dir_results, exist_ok=True)
         tool.save_artifacts(dir_info)
         tool.post_process()
         save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
@@ -381,7 +376,7 @@ def run(
             utilities.error_exit(f"Unknown task type: {task_type}")
         if not values.only_instrument:
             analyse_result(dir_info_list, bug_info, tool_list)
-            save_artifacts(dir_info_list, bug_info, tool_list, container_id_list)
+            save_artifacts(dir_info_list, tool_list)
             tool_name = tool_list[0].name
             if len(tool_list) > 1:
                 tool_name = "multi"
