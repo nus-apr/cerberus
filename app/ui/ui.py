@@ -211,7 +211,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
 
                 _ = self.query_one("#" + all_subjects_id, CustomDataTable).add_row(
-                    str(iteration),
+                    iteration,
                     benchmark.name,
                     ",".join(map(lambda t: t.name, tool_list)),
                     experiment_item[definitions.KEY_SUBJECT],
@@ -229,7 +229,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 self.post_message(JobMount(key))
                 self.post_message(
                     JobAllocate(
-                        str(iteration),
+                        iteration,
                         deepcopy(benchmark),
                         [deepcopy(x) for x in tool_list],
                         experiment_item,
@@ -259,7 +259,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.update_status(message.identifier, "Running")
 
             row_data = (
-                str(message.index),
+                message.index,
                 message.benchmark.name,
                 ",".join(map(lambda t: t.name, message.tool_list)),
                 message.experiment_item[definitions.KEY_SUBJECT],
@@ -356,6 +356,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 Cerberus.COLUMNS["Status"][finished_subjects_id],
                 str(message.status),
             )
+            finished_subjects_table.sort(Cerberus.COLUMNS["ID"][finished_subjects_id])
+
             all_subjects_table.update_cell(
                 row_key,
                 Cerberus.COLUMNS["Status"][all_subjects_id],
