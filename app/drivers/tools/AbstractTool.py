@@ -152,7 +152,7 @@ class AbstractTool:
 
     def pre_process(self):
         """Any pre-processing required for the repair"""
-        self.check_tool_exists()
+        # self.check_tool_exists()
         return
 
     def check_tool_exists(self):

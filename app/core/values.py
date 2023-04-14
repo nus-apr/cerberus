@@ -96,9 +96,11 @@ arg_pass = False
 iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 
-current_profile_id = ContextVar("current_profile_id", default=None)
-experiment_status = ContextVar("experiment_status", default=TaskStatus.NONE)
-job_identifier = ContextVar("job_id", default="root")
+current_profile_id: ContextVar[str] = ContextVar("current_profile_id", default="NONE")
+experiment_status: ContextVar[TaskStatus] = ContextVar(
+    "experiment_status", default=TaskStatus.NONE
+)
+job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
 
 slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}
 email_configuration = {

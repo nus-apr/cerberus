@@ -87,10 +87,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
         self.setup_column_keys()
 
-        asyncio.get_running_loop().run_in_executor(
-            None,
-            self.pre_run,
-        )
+        loop = asyncio.get_running_loop()
+        asyncio.get_running_loop().run_in_executor(None, self.prepare_run, loop)
 
     def setup_cpu_allocation(self):
         self.max_jobs = values.cpus
@@ -135,7 +133,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         for k in to_del:
             del time_map[k]
 
-    def pre_run(self):
+    def prepare_run(self, loop):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
@@ -153,11 +151,47 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
             if values.use_container:
                 self.query_one(Static).update(
-                    "Cerberus is preparing the subject images. Currently sequential"
+                    "Cerberus is preparing the subject images."
                 )
-                for experiment_item in main.filter_experiment_list(benchmark):
-                    bug_index = experiment_item[definitions.KEY_ID]
-                    benchmark.get_exp_image(bug_index, values.only_test, "1")
+                complete_images = queue.Queue(0)
+
+                def job(benchmark: AbstractBenchmark, experiment_item):
+                    cpu = self.cpu_queue.get(block=True, timeout=None)
+                    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                    values.job_identifier.set(
+                        "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                    )
+                    dir_info = task.generate_dir_info(
+                        benchmark.name, subject_name, bug_name
+                    )
+                    benchmark.update_dir_info(dir_info)
+                    try:
+                        benchmark.get_exp_image(
+                            experiment_item[definitions.KEY_ID],
+                            values.only_test,
+                            str(cpu),
+                        )
+                        complete_images.put((experiment_item[definitions.KEY_ID], True))
+                    except:
+                        complete_images.put(
+                            (experiment_item[definitions.KEY_ID], False)
+                        )
+                    finally:
+                        self.cpu_queue.put(cpu, block=False)
+
+                all_experiment_jobs = main.filter_experiment_list(benchmark)
+                for experiment_item in all_experiment_jobs:
+                    loop.run_in_executor(
+                        None, job, deepcopy(benchmark), experiment_item
+                    )
+                    # benchmark.get_exp_image(experiment_item[definitions.KEY_ID], values.only_test, "1")
+                while complete_images.qsize() != len(all_experiment_jobs):
+                    pass
+                while complete_images.qsize() != 0:
+                    (id, success) = complete_images.get()
+                    if not success:
+                        emitter.warning("(warning) Failed building image {}".format(id))
 
             self.hide(self.query_one(Static))
             if not values.debug:

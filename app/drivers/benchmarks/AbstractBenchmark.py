@@ -240,12 +240,16 @@ class AbstractBenchmark:
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
         if not container.image_exists(exp_image_name) or values.rebuild_all:
-            emitter.warning("\t\t(warning) experiment not built")
-            emitter.normal("\t\t\tpreparing/building experiment")
+            emitter.warning(
+                "\t\t[warning] Experiment subject {} with bug name {} is not built".format(
+                    subject_name, bug_id
+                )
+            )
+            emitter.normal("\t\t\tPreparing/Building said experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name, cpu)
         else:
             emitter.success(
-                "\t\t\t\tpre-built experiment found: {}".format(exp_image_name)
+                "\t\t\t\tPre-built experiment image found: {}".format(exp_image_name)
             )
         return exp_image_name
 
