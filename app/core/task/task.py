@@ -19,9 +19,6 @@ from app.core import values
 from app.core import writer
 from app.core.task import analyze
 from app.core.task import repair
-from app.core.task.stats import ErrorStats
-from app.core.task.stats import SpaceStats
-from app.core.task.stats import TimeStats
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -109,13 +106,9 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
     emitter.normal("\t\t(framework) analysing experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-    first_start = None
     patch_dir = None
     for dir_info, tool in zip(dir_info_list, tool_list):
-        space_info: SpaceStats
-        time_info: TimeStats
-        error_info: ErrorStats
-        space_info, time_info, error_info = tool.analyse_output(
+        space_info, time_info, _ = tool.analyse_output(
             dir_info, bug_id, failing_test_list
         )
         conf_id = str(values.current_profile_id.get("NA"))
@@ -124,8 +117,7 @@ def analyse_result(dir_info_list, experiment_info, tool_list: List[AbstractTool]
         tool.print_stats(space_info, time_info)
         tool.log_output_path = ""
         logger.log_stats(exp_id)
-        dir_output = dir_info["local"]["artifacts"]
-        patch_dir = dir_output + "/patches"
+        patch_dir = join(dir_info["local"]["artifacts"], "patches")
         if values.use_valkyrie:
             valkyrie.analyse_output(patch_dir, time_info)
             break
