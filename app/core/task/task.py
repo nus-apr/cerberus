@@ -10,20 +10,18 @@ from typing import cast
 from typing import Dict
 from typing import List
 
-from app.core import analyze
 from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import repair
-from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core import writer
-from app.core.stats import ErrorStats
-from app.core.stats import SpaceStats
-from app.core.stats import TimeStats
-from app.core.status import JobStatus
+from app.core.task import analyze
+from app.core.task import repair
+from app.core.task.stats import ErrorStats
+from app.core.task.stats import SpaceStats
+from app.core.task.stats import TimeStats
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -386,5 +384,3 @@ def run(
             utilities.clean_artifacts(dir_result)
 
     construct_summary()
-    if values.ui_active:
-        ui.get_ui().post_message(ui.JobFinish(run_identifier, JobStatus.SUCCESS))

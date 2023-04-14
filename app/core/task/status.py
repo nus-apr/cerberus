@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class JobStatus(Enum):
+class TaskStatus(Enum):
     NONE = -1
     SUCCESS = 0
     FAIL = 1
