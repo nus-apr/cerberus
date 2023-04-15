@@ -49,12 +49,14 @@ class Pulse(AbstractAnalyzeTool):
         super(Pulse, self).run_analysis(bug_info, config_info)
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
-
         self.timestamp_log_start()
+        max_disjuncts = 20
         analysis_command = (
-            "timeout -k 5m {0}h infer --pulse-only --pulse-max-disjuncts 100 "
-            " --scheduler callgraph {1} ".format(str(timeout_h), additional_tool_param)
+            f"timeout -k 5m {str(timeout_h)}h infer --pulse-only "
+            f" --pulse-max-disjuncts {max_disjuncts} "
+            f" --scheduler callgraph {additional_tool_param} "
         )
+
         bug_type = bug_info[definitions.KEY_BUG_TYPE]
         dir_src = join(self.dir_expr, "src")
         status = self.run_command(
