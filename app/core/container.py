@@ -137,13 +137,14 @@ def get_container(container_id: str):
     try:
         container = client.containers.get(container_id)
     except docker.errors.NotFound as ex:  # type: ignore
-        emitter.error(ex)
-        emitter.warning("\t\t[warning] Unable to find container")
+        if values.debug:
+            emitter.error(f"\t{ex}")
+        emitter.warning("\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
-        emitter.error(exp)
+        emitter.error(f"\t{exp}")
         utilities.error_exit("[error] Unable to find container: docker daemon error")
     except Exception as ex:
-        emitter.error(ex)
+        emitter.error(f"\t{ex}")
         utilities.error_exit("[error] Unable to find container: unhandled exception")
     return container
 
@@ -154,8 +155,9 @@ def get_container_id(container_name: str) -> Optional[str]:
     try:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
-        emitter.error(ex)
-        emitter.warning("\t\t[warning] Unable to find container")
+        if values.debug:
+            emitter.error(f"\t{ex}")
+        emitter.warning("\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
