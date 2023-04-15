@@ -115,7 +115,7 @@ class Configurations:
         "dump-patches": False,
         "start-index": None,
         "end-index": None,
-        "use-tui": False,
+        "parallel": False,
         "cpu-count": 1,
         "runs": 1,
         "bug-id-list": [],
@@ -187,8 +187,8 @@ class Configurations:
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
 
-        if arg_list.use_tui:
-            self.__runtime_config_values["use-tui"] = True
+        if arg_list.parallel:
+            self.__runtime_config_values["parallel"] = True
 
         if arg_list.profile_id_list:
             self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
@@ -341,7 +341,7 @@ class Configurations:
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
         values.profile_id_list = self.__runtime_config_values["profile-id-list"]
-        values.use_tui = self.__runtime_config_values["use-tui"]
+        values.parallel = self.__runtime_config_values["parallel"]
 
         if (
             values.start_index is None
