@@ -268,24 +268,26 @@ def run(
     tag_name = "-".join([config_id, tool.name, benchmark.name, subject_name, bug_name])
     dir_info = generate_tool_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     benchmark.update_dir_info(dir_info)
-    emitter.highlight("\t[profile] Identifier: " + str(config_info[definitions.KEY_ID]))
     emitter.highlight(
-        "\t[profile] Timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        "\t\t[profile] Identifier: " + str(config_info[definitions.KEY_ID])
     )
     emitter.highlight(
-        "\t[profile] Fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
+        "\t\t[profile] Timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
     emitter.highlight(
-        "\t[profile] Test-suite ratio: "
+        "\t\t[profile] Fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
+    )
+    emitter.highlight(
+        "\t\t[profile] Test-suite ratio: "
         + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
-    emitter.highlight("\t[meta-data] Project: {}".format(subject_name))
-    emitter.highlight("\t[meta-data] Bug ID: {}".format(bug_name))
+    emitter.highlight("\t\t[meta-data] Project: {}".format(subject_name))
+    emitter.highlight("\t\t[meta-data] Bug ID: {}".format(bug_name))
     emitter.highlight(
-        "\t[meta-data] Logs directory: {}".format(dir_info["local"]["logs"])
+        "\t\t[meta-data] Logs directory: {}".format(dir_info["local"]["logs"])
     )
     emitter.highlight(
-        "\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
+        "\t\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
     )
 
     if not values.use_container:
