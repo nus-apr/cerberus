@@ -51,10 +51,9 @@ class AbstractBenchmark:
                 "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
             )
             if (
-                os.system(
-                    "timeout -k 5s 10s 'git submodule init && git submodule update benchmark/{}'".format(
-                        self.name
-                    )
+                utilities.execute_command(
+                    f"timeout -k 5s 10s 'git submodule update --init benchmark/{self.name}'",
+                    directory=values.dir_main,
                 )
                 != 0
             ):
