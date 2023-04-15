@@ -86,7 +86,7 @@ def parse_args():
 
     optional.add_argument(
         "-g",
-        definitions.ARG_TUI,
+        definitions.ARG_PARALLEL,
         help="Activate Textual UI",
         action="store_true",
         default=False,
@@ -384,11 +384,11 @@ def main():
     try:
         emitter.title("Starting " + values.tool_name + " (Program Repair Framework) ")
         bootstrap(parsed_args)
-        if parsed_args.use_tui:
+        if parsed_args.parallel:
             info = sys.version_info
             if info.major < 3 or info.minor < 10:
                 utilities.error_exit(
-                    "GUI is not currently working properly on versions older than 3.10"
+                    "Parallel mode is currently supported only for versions 3.10+"
                 )
             ui.setup_ui()
         else:
