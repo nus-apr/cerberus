@@ -27,7 +27,7 @@ class Fix2Fit(AbstractRepairTool):
         if bug_info[self.key_passing_tests]:
             filtered_list = self.filter_tests(
                 bug_info[self.key_passing_tests],
-                bug_info[definitions.ARG_SUBJECT_NAME],
+                bug_info[self.key_subject],
                 bug_id,
             )
             for test_id in filtered_list:

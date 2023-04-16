@@ -49,7 +49,7 @@ class SAVER(AbstractAnalyzeTool):
         timeout_h = str(config_info[self.key_timeout])
         additional_tool_param = config_info[self.key_tool_params]
 
-        if values.use_container:
+        if self.use_container:
             self.emit_error(
                 "[Exception] unimplemented functionality: SAVER docker support not implemented"
             )
