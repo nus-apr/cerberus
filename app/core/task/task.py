@@ -40,12 +40,15 @@ def generate_local_dir_info(benchmark_name: str, subject_name: str, bug_name: st
     dir_setup_local = join(values.dir_main, "benchmark", dir_path)
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
-
+    dir_logs_local = join(values.dir_logs, dir_path)
+    dir_artifact_local = join(values.dir_artifacts, dir_path)
     for directory in [dir_exp_local, dir_setup_local, dir_aux_local, dir_base_local]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
 
     return {
+        "logs": dir_logs_local,
+        "artifacts": dir_artifact_local,
         "experiment": dir_exp_local,
         "setup": dir_setup_local,
         "base": dir_base_local,
@@ -248,6 +251,28 @@ def construct_summary():
     writer.write_as_json(results_summary, summary_f_path)
 
 
+def prepare(
+    benchmark: AbstractBenchmark,
+    bug_info: Dict[str, Any],
+    cpu: str,
+):
+    utilities.check_space()
+    bug_index = bug_info[definitions.KEY_ID]
+    experiment_image_id = None
+    if not values.use_container:
+        if not values.use_valkyrie:
+            is_error = benchmark.setup_experiment(bug_index, None, values.only_test)
+            if is_error:
+                return
+    else:
+        experiment_image_id = (
+            benchmark.get_exp_image(bug_index, values.only_test, cpu)
+            if values.use_container
+            else None
+        )
+    return experiment_image_id
+
+
 def run(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
@@ -289,12 +314,6 @@ def run(
     emitter.highlight(
         "\t\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
     )
-
-    utilities.check_space()
-
-    if not values.use_container:
-        if not values.use_valkyrie:
-            benchmark.setup_experiment(bug_index, None, values.only_test)
 
     container_id = None
     dir_info = update_dir_info(dir_info, tool.name)
