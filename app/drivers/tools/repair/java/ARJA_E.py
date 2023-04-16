@@ -59,13 +59,7 @@ class ARJA_E(AbstractRepairTool):
             arja_e_command, self.log_output_path, self.arja_e_home
         )
 
-        if status != 0:
-            self._error.is_error = True
-            self.emit_warning(
-                "(warning) {0} exited with an error code {1}".format(self.name, status)
-            )
-        else:
-            self.emit_success("(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))

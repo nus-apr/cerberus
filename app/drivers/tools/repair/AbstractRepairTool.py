@@ -25,6 +25,7 @@ class AbstractRepairTool(AbstractTool):
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
+    key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
 
     def __init__(self, tool_name):
         super().__init__(tool_name)

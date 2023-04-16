@@ -34,7 +34,6 @@ class Infer(AbstractAnalyzeTool):
         time = datetime.now()
         compile_command = "infer -j 20 -g capture -- make -j20"
 
-
         self.emit_normal("compiling subject with ")
         self.run_command(compile_command, dir_path=dir_src)
         self.emit_normal(
@@ -60,15 +59,6 @@ class Infer(AbstractAnalyzeTool):
         )
 
         self.process_status(status)
-
-        if status != 0:
-            self.emit_warning(
-                "{0} exited with an error code {1}".format(self.name, status)
-            )
-        else:
-            self.emit_success(
-                "\t\t\t[success] {0} ended successfully".format(self.name)
-            )
 
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
