@@ -42,7 +42,7 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
-        self.debug(
+        self.emit_debug(
             " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
@@ -59,7 +59,7 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
         )
-        self.debug(
+        self.emit_debug(
             " Config took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
@@ -77,7 +77,7 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
         )
-        self.debug(
+        self.emit_debug(
             " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
@@ -94,7 +94,7 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
-        self.debug(
+        self.emit_debug(
             " Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status != 0
@@ -112,7 +112,7 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
 
-        self.debug(
+        self.emit_debug(
             " Verify took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
@@ -129,7 +129,7 @@ class VulnLoc(AbstractBenchmark):
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
-        self.debug(
+        self.emit_debug(
             " Transform took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )

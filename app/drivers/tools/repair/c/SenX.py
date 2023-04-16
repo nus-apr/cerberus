@@ -31,7 +31,7 @@ class SenX(AbstractRepairTool):
         time = datetime.now()
         command_str = "bash instrument.sh {}".format(self.dir_expr)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        emitter.debug(
+        self.emit_debug(
             " Instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )

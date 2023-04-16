@@ -153,7 +153,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 self.query_one(Static).update(
                     "Cerberus is preparing the subject images."
                 )
-                complete_images = queue.Queue(0)
+                complete_images: queue.Queue[Tuple[Any, bool]] = queue.Queue(0)
 
                 def job(benchmark: AbstractBenchmark, experiment_item):
                     cpu = self.cpu_queue.get(block=True, timeout=None)

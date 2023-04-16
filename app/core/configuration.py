@@ -341,7 +341,7 @@ class Configurations:
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
         values.profile_id_list = self.__runtime_config_values["profile-id-list"]
-        values.parallel = self.__runtime_config_values["parallel"]
+        values.use_parallel = self.__runtime_config_values["parallel"]
 
         if (
             values.start_index is None

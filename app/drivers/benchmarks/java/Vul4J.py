@@ -146,7 +146,7 @@ class Vul4J(AbstractBenchmark):
             experiment_item[self.key_java_version]
         )
         command_str = "bash -c '{0} {1}'".format(
-            set_java_home_cmd, experiment_item[key_test_all_cmd]
+            set_java_home_cmd, experiment_item[self.key_test_all_cmd]
         )
         status = self.run_command(
             container_id, command_str, self.log_test_path, join(self.dir_expr, "src")

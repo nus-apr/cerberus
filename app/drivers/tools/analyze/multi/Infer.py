@@ -25,7 +25,7 @@ class Infer(AbstractAnalyzeTool):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        emitter.normal("\t\t\t preparing subject for analysis with " + self.name)
+        self.emit_normal(" preparing subject for analysis with " + self.name)
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
@@ -33,10 +33,10 @@ class Infer(AbstractAnalyzeTool):
         time = datetime.now()
         compile_command = "infer -j 20 -g capture -- make -j20"
 
-        emitter.normal("\t\t\t\t compiling subject with " + self.name)
+        self.emit_normal(" compiling subject with " + self.name)
         self.run_command(compile_command, dir_path=dir_src)
-        emitter.normal(
-            "\t\t\t\t compilation took {} second(s)".format(
+        self.emit_normal(
+            " compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -56,21 +56,13 @@ class Infer(AbstractAnalyzeTool):
         status = self.run_command(
             saver_command, dir_path=dir_src, log_file_path=self.log_output_path
         )
-        if status != 0:
-            emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            self.emit_success(
-                "\t\t\t[success] {0} ended successfully".format(self.name)
-            )
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.process_status(status)
+
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal("\t\t\t saving artifacts of " + self.name)
         infer_output = join(self.dir_expr, "src", "infer-out")
         copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
         self.run_command(copy_command)
@@ -78,7 +70,7 @@ class Infer(AbstractAnalyzeTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("\t\t\t analysing output of " + self.name)
         dir_results = join(self.dir_expr, "result")
         conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
@@ -93,6 +85,6 @@ class Infer(AbstractAnalyzeTool):
             if "ERROR:" in line:
                 self._error.is_error = True
         if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
 
         return self._space, self._time, self._error
