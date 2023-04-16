@@ -287,14 +287,14 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
                 )
             dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
             benchmark.update_dir_info(dir_info)
-
+            experiment_image_id = None
             if values.only_setup:
                 iteration = iteration + 1
                 values.iteration_no = iteration
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
                 )
-            experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
+                task.prepare(benchmark, experiment_item, cpu)
 
             for tool in tool_list:
                 iteration = iteration + 1
@@ -302,6 +302,8 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
                 )
+                if experiment_image_id is None:
+                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
                 task.run(
                     benchmark,
                     tool,
