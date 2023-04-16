@@ -23,7 +23,6 @@ class Pulse(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        bug_type = bug_info[self.key_bug_type]
         bug_id = str(bug_info[self.key_bug_id])
         self.log_prepare_path = join(
             self.dir_logs,
@@ -53,7 +52,6 @@ class Pulse(AbstractAnalyzeTool):
             f" --scheduler callgraph {additional_tool_param} "
         )
 
-        bug_type = bug_info[self.key_bug_type]
         dir_src = join(self.dir_expr, "src")
         status = self.run_command(
             analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
