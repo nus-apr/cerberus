@@ -51,7 +51,7 @@ class Fix2Fit(AbstractRepairTool):
             "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
             "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(config_info[self.key_timeout_TESTCASE]),
+            "T_TIMEOUT": "{}000".format(config_info[self.key_config_timeout_test]),
             "TIMEOUT": "{}h; ".format(config_info[self.key_timeout]),
             "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
