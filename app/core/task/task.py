@@ -363,8 +363,8 @@ def run(
             container_id = create_running_container(
                 expriment_image_id, tool, dir_info, container_name, cpu
             )
-        if not container_id:
-            utilities.error_exit("Could not get container id!")
+            if not container_id:
+                utilities.error_exit("Could not get container id!")
 
     if not values.only_setup:
         task_type = values.task_type
