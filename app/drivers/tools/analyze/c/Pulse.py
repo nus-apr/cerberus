@@ -26,8 +26,8 @@ class Pulse(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        bug_type = bug_info[self.key_bug_type]
+        bug_id = str(bug_info[self.key_bug_id])
         self.log_prepare_path = join(
             self.dir_logs,
             "{}-{}-prepare.log".format(self.name.lower(), bug_id),
@@ -49,8 +49,8 @@ class Pulse(AbstractAnalyzeTool):
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
         super(Pulse, self).run_analysis(bug_info, config_info)
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         self.timestamp_log_start()
         max_disjuncts = 20
         analysis_command = (
@@ -59,7 +59,7 @@ class Pulse(AbstractAnalyzeTool):
             f" --scheduler callgraph {additional_tool_param} "
         )
 
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         dir_src = join(self.dir_expr, "src")
         status = self.run_command(
             analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
@@ -88,7 +88,7 @@ class Pulse(AbstractAnalyzeTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),

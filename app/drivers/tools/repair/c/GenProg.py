@@ -16,15 +16,15 @@ class GenProg(AbstractRepairTool):
         super(GenProg, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        conf_id = config_info[definitions.KEY_ID]
-        passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
-        failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        conf_id = config_info[self.key_id]
+        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_list = bug_info[self.key_failing_tests]
+        bug_id = str(bug_info[self.key_bug_id])
         self.emit_normal(" running repair with " + self.name)
-        self.fix_file = bug_info[definitions.KEY_FIX_FILE]
+        self.fix_file = bug_info[self.key_fix_file]
 
-        fix_location = bug_info[definitions.KEY_FIX_LINES][0]
-        timeout = str(config_info[self.key_test_timeout])
+        fix_location = bug_info[self.key_fix_lines][0]
+        timeout = str(config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),

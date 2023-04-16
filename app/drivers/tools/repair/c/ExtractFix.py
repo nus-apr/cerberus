@@ -47,8 +47,8 @@ class ExtractFix(AbstractRepairTool):
                 "Please double check whether we are in ExtractFix container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         # prepare the config file
         parameters = self.create_parameters(bug_info)
 
@@ -76,9 +76,9 @@ class ExtractFix(AbstractRepairTool):
         # (1) source-dir
         line_source_dir = "-s " + (
             "/libtiff-3186"
-            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
+            if experiment_info[self.key_bug_id] == "CVE-2016-3186"
             else "/coreutils-25003"
-            if experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
+            if experiment_info[self.key_bug_id] == "gnubug-25003"
             else self.dir_expr
         )
 
@@ -103,17 +103,15 @@ class ExtractFix(AbstractRepairTool):
         # (4) bug type
         bug_type = "-b " + (
             "api_specific"
-            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
-            or experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
-            else ExtractFix.bug_conversion_table[
-                experiment_info[definitions.KEY_BUG_TYPE]
-            ]
+            if experiment_info[self.key_bug_id] == "CVE-2016-3186"
+            or experiment_info[self.key_bug_id] == "gnubug-25003"
+            else ExtractFix.bug_conversion_table[experiment_info[self.key_bug_type]]
         )
 
         if bug_type == "-b ":
             utilities.error_exit(
                 "Bug {} does not have {} field to indicate the type".format(
-                    experiment_info[definitions.KEY_BUG_ID], definitions.KEY_BUG_TYPE
+                    experiment_info[self.key_bug_id], self.key_bug_type
                 )
             )
 

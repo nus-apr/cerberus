@@ -19,7 +19,7 @@ class Hippodrome(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
 
         # start running
         self.timestamp_log_start()

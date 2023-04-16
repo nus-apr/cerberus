@@ -28,16 +28,16 @@ class F1X(AbstractRepairTool):
         if self.is_instrument_only:
             return
         self.emit_normal(" running repair with " + self.name)
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        fix_file = bug_info[definitions.KEY_FIX_FILE]
-        fix_location = bug_info[definitions.KEY_FIX_LOC]
-        passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
-        failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
-        timeout = str(config_info[self.key_test_timeout])
-        subject_name = bug_info[definitions.KEY_SUBJECT]
-        benchmark_name = bug_info[definitions.KEY_BENCHMARK]
-        additional_tool_param = config_info[self.key_tool_param]
+        conf_id = config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        fix_file = bug_info[self.key_fix_file]
+        fix_location = bug_info[self.key_fix_loc]
+        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_list = bug_info[self.key_failing_tests]
+        timeout = str(config_info[self.key_timeout])
+        subject_name = bug_info[self.key_subject]
+        benchmark_name = bug_info[self.key_benchmark]
+        additional_tool_param = config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),

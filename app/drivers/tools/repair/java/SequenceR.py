@@ -20,7 +20,7 @@ class SequenceR(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
 
         # The zimin/sequencer container has a bug which can only be found after be found after a removal
         # of a /dev/null pipe in sequencer-predict
@@ -30,10 +30,7 @@ class SequenceR(AbstractRepairTool):
             "/SequenceR/src/lib/OpenNMT-py",
         )
 
-        if (
-            bug_info[definitions.KEY_FIX_FILE] == ""
-            or len(bug_info[definitions.KEY_FIX_LINES]) < 1
-        ):
+        if bug_info[self.key_fix_file] == "" or len(bug_info[self.key_fix_lines]) < 1:
             utilities.error_exit(
                 "Cannot apply SequenceR on an experiment with no given buggy file or line"
             )
@@ -42,15 +39,15 @@ class SequenceR(AbstractRepairTool):
         self.timestamp_log_start()
         file = (
             join(
-                bug_info[definitions.KEY_SOURCE_DIRECTORY],
-                bug_info[definitions.KEY_FIX_FILE].replace(".", "/"),
+                bug_info[self.key_dir_source],
+                bug_info[self.key_fix_file].replace(".", "/"),
             )
             + ".java"
         )  # construct the file's path
         sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
-            bug_info[definitions.KEY_FIX_LINES][0],
+            bug_info[self.key_fix_lines][0],
             join(self.dir_output, "patches"),
         )
         status = self.run_command(

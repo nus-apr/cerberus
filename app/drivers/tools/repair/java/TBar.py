@@ -32,8 +32,8 @@ class TBar(AbstractRepairTool):
                 "Please double check whether we are in TBar container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
 
         if self.container_id:
             # Ensure that the container has git setup
@@ -55,17 +55,11 @@ class TBar(AbstractRepairTool):
             'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
         )
         args = (
-            "FAILING_TESTS='{}' ".format(
-                " ".join(bug_info[definitions.KEY_FAILING_TEST])
-            )
-            + "CLASS_DIRECTORY={} ".format(bug_info[definitions.KEY_CLASS_DIRECTORY])
-            + "TEST_CLASS_DIRECTORY={} ".format(
-                bug_info[definitions.KEY_TEST_CLASS_DIRECTORY]
-            )
-            + "SOURCE_DIRECTORY={} ".format(bug_info[definitions.KEY_SOURCE_DIRECTORY])
-            + "TEST_SOURCE_DIRECTORY={} ".format(
-                bug_info[definitions.KEY_TEST_DIRECTORY]
-            )
+            "FAILING_TESTS='{}' ".format(" ".join(bug_info[self.key_failing_tests]))
+            + "CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
+            + "TEST_CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_classY])
+            + "SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_source])
+            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_tests])
         )
 
         # start running
@@ -104,8 +98,8 @@ class TBar(AbstractRepairTool):
 
         defects4j_home = "/defects4j/"
         bug_id_str = "{0}_{1}".format(
-            experiment_info[definitions.KEY_SUBJECT],
-            experiment_info[definitions.KEY_BUG_ID],
+            experiment_info[self.key_subject],
+            experiment_info[self.key_bug_id],
         )
 
         """
@@ -137,7 +131,7 @@ class TBar(AbstractRepairTool):
             #     join(
             #         self.dir_expr,
             #         "src",
-            #         experiment_info[definitions.KEY_SOURCE_DIRECTORY],
+            #         experiment_info[self.key_dir_source],
             #         experiment_info["source_file"].replace(".", "/") + ".java",
             #     )
             # )

@@ -6,6 +6,7 @@ import time
 
 from app.core import abstractions
 from app.core import container
+from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
@@ -34,6 +35,25 @@ class AbstractTool(AbstractDriver):
     _time = stats.TimeStats()
     _space = stats.SpaceStats()
     _error = stats.ErrorStats()
+    current_profile_id = values.current_profile_id
+    key_benchmark = definitions.KEY_BENCHMARK
+    key_subject = definitions.KEY_SUBJECT
+    key_id = definitions.KEY_ID
+    key_bug_id = definitions.KEY_BUG_ID
+    key_bug_type = definitions.KEY_BUG_TYPE
+    key_tool_params = definitions.KEY_TOOL_PARAMS
+    key_timeout = definitions.KEY_CONFIG_TIMEOUT
+    key_source = definitions.KEY_SOURCE
+    key_sink = definitions.KEY_SINK
+
+    is_ui_active = values.ui_active
+    is_only_instrument = values.only_instrument
+    is_debug = values.debug
+    is_dump_patches = values.dump_patches
+
+    use_container = values.use_container
+    use_valkyrie = values.use_valkyrie
+    use_gpu = values.use_gpu
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""

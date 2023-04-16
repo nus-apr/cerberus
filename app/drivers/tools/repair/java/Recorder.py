@@ -26,21 +26,21 @@ class Recorder(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
 
         if not self.use_gpu:
             utilities.error_exit("Cannot run Recorder without a GPU")
 
         self.bug_name = "{}-{}".format(
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
         # generate patches
         self.timestamp_log_start()
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
             timeout_h,
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"
@@ -48,8 +48,8 @@ class Recorder(AbstractRepairTool):
 
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}-{}'".format(
             timeout_h,
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
 
         status = self.run_command(

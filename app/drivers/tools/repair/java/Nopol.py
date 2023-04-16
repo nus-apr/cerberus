@@ -23,8 +23,8 @@ class Nopol(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
+        timeout_h = str(config_info[self.key_timeout])
+        failing_test_list = bug_info[self.key_failing_tests]
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         self.dir_source = dir_java_src
 
