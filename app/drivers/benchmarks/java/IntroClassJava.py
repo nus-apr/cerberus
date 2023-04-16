@@ -21,13 +21,9 @@ class IntroClassJava(AbstractBenchmark):
 
         if not is_error:
             if self.instrument(bug_index, container_id):
-                self.emit_success(
-                    "self.emit_successself.emit_successself.emit_success[benchmark] instrumentation successful"
-                )
+                self.emit_success("[benchmark] instrumentation successful")
             else:
-                self.emit_error(
-                    "self.emit_successself.emit_successself.emit_success[benchmark] instrumentation failed"
-                )
+                self.emit_error("[benchmark] instrumentation failed")
                 is_error = True
         return is_error
 
@@ -51,30 +47,22 @@ class IntroClassJava(AbstractBenchmark):
         return container_id
 
     def deploy(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successdownloading experiment subject"
-        )
+        self.emit_normal("downloading experiment subject")
         return True
 
     def config(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successconfiguring experiment subject"
-        )
+        self.emit_normal("configuring experiment subject")
         return True
 
     def build(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successbuilding experiment subject"
-        )
+        self.emit_normal("building experiment subject")
         status = self.run_command(
             container_id, "mvn compile -DskipTests", dir_path=join(self.dir_expr, "src")
         )
         return status == 0
 
     def test(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtesting experiment subject"
-        )
+        self.emit_normal("testing experiment subject")
         status = self.run_command(
             container_id, "mvn test", dir_path=join(self.dir_expr, "src")
         )
@@ -83,23 +71,17 @@ class IntroClassJava(AbstractBenchmark):
         return status != 0 if bug_id != "reference" else status == 0
 
     def instrument(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successinstrumenting assertions"
-        )
+        self.emit_normal("instrumenting assertions")
         return True
 
     def clean(self, exp_dir_path, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successremoving experiment subject"
-        )
+        self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_success[benchmark] saving experiment artifacts"
-        )
+        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(IntroClassJava, self).save_artifacts(dir_info, container_id)

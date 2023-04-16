@@ -21,9 +21,7 @@ class Defects4JI(Defects4J):
             if container_id and self.instrument(bug_index, container_id):
                 self.emit_success("instrumentation successful")
             else:
-                self.emit_error(
-                    "self.emit_successself.emit_successself.emit_success[benchmark] instrumentation failed"
-                )
+                self.emit_error("[benchmark] instrumentation failed")
                 is_error = True
         return is_error
 
@@ -59,9 +57,7 @@ class Defects4JI(Defects4J):
         return container_id
 
     def instrument(self, bug_index: int, container_id: str):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successinstrumenting assertions"
-        )
+        self.emit_normal("instrumenting assertions")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_instrument_path = (
@@ -79,7 +75,7 @@ class Defects4JI(Defects4J):
                 self.dir_expr + "/src",
             )
             self.emit_debug(
-                "self.emit_successself.emit_successself.emit_success Instrumentation took {} second(s)".format(
+                " Instrumentation took {} second(s)".format(
                     (datetime.now() - time).total_seconds()
                 )
             )

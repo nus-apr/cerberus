@@ -62,23 +62,13 @@ class ARJA_E(AbstractRepairTool):
         if status != 0:
             self._error.is_error = True
             self.emit_warning(
-                "self.emit_successself.emit_successself.emit_success(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
+                "(warning) {0} exited with an error code {1}".format(self.name, status)
             )
         else:
-            self.emit_success(
-                "self.emit_successself.emit_successself.emit_success(success) {0} ended successfully".format(
-                    self.name
-                )
-            )
+            self.emit_success("(success) {0} ended successfully".format(self.name))
 
         self.timestamp_log_end()
-        self.emit_highlight(
-            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
-                self.log_output_path
-            )
-        )
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
@@ -120,9 +110,7 @@ class ARJA_E(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            self.emit_warning(
-                "self.emit_successself.emit_successself.emit_success(warning) no output log file found"
-            )
+            self.emit_warning("(warning) no output log file found")
             return self._space, self._time, self._error
 
         self.emit_highlight(f"output log file: {self.log_output_path}")

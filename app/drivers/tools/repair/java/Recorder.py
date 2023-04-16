@@ -61,11 +61,7 @@ class Recorder(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        self.emit_highlight(
-            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
-                self.log_output_path
-            )
-        )
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
