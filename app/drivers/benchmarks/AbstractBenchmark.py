@@ -167,9 +167,9 @@ class AbstractBenchmark(AbstractDriver):
         container_id = self.setup_container(bug_index, self.image_name, cpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if not container_id:
-            utilities.error_exit("Could not setup container")
+            self.emit_error("could not setup container correctly")
         if is_error:
-            utilities.error_exit("Setting up experiment failed")
+            self.emit_error("setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
