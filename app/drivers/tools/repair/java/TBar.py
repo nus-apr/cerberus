@@ -57,7 +57,7 @@ class TBar(AbstractRepairTool):
         args = (
             "FAILING_TESTS='{}' ".format(" ".join(bug_info[self.key_failing_tests]))
             + "CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
-            + "TEST_CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_classY])
+            + "TEST_CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
             + "SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_source])
             + "TEST_SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_tests])
         )
