@@ -17,10 +17,7 @@ class Pulse(AbstractAnalyzeTool):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_success preparing subject for analysis with "
-            + self.name
-        )
+        self.emit_normal(" preparing subject for analysis with " + self.name)
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
@@ -33,15 +30,12 @@ class Pulse(AbstractAnalyzeTool):
             "{}-{}-prepare.log".format(self.name.lower(), bug_id),
         )
         compile_command = "infer -j 20 capture -- make -j20"
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successself.emit_success compiling subject with "
-            + self.name
-        )
+        self.emit_normal("compiling subject with " + self.name)
         self.run_command(
             compile_command, dir_path=dir_src, log_file_path=self.log_prepare_path
         )
         self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successself.emit_success compilation took {} second(s)".format(
+            "compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -68,17 +62,10 @@ class Pulse(AbstractAnalyzeTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        self.emit_highlight(
-            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
-                self.log_output_path
-            )
-        )
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_success saving artifacts of "
-            + self.name
-        )
+        self.emit_normal(" saving artifacts of " + self.name)
         infer_output = join(self.dir_expr, "src", "infer-out")
         copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
         self.run_command(copy_command)
@@ -101,8 +88,6 @@ class Pulse(AbstractAnalyzeTool):
             if "ERROR:" in line:
                 self._error.is_error = True
         if is_error:
-            self.emit_error(
-                "self.emit_successself.emit_successself.emit_successself.emit_success[error] error detected in logs"
-            )
+            self.emit_error("error detected in logs")
 
         return self._space, self._time, self._error

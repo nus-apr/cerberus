@@ -15,9 +15,7 @@ class ManyBugs(AbstractBenchmark):
         super(ManyBugs, self).__init__()
 
     def deploy(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successdownloading experiment subject"
-        )
+        self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_deploy_path = (
@@ -30,9 +28,7 @@ class ManyBugs(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successconfiguring experiment subject"
-        )
+        self.emit_normal("configuring experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_config_path = (
@@ -45,9 +41,7 @@ class ManyBugs(AbstractBenchmark):
         return status == 0
 
     def build(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successbuilding experiment subject"
-        )
+        self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_build_path = (
@@ -60,9 +54,7 @@ class ManyBugs(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtesting experiment subject"
-        )
+        self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
@@ -75,15 +67,14 @@ class ManyBugs(AbstractBenchmark):
         return status == 0
 
     def test_all(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtesting(full) experiment subject"
-        )
+        self.emit_normal("testing(full) experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
         )
         failing_test_cases = experiment_item[self.key_failing_tests].split(",")
+        passing_test_cases = experiment_item[self.key_passing_tests].split(",")
         passing_test_cases = experiment_item[self.key_passing_tests].split(",")
         unexpected_fail_list = []
         unexpected_pass_list = []
@@ -117,48 +108,29 @@ class ManyBugs(AbstractBenchmark):
                     log_file.write("{}: PASS\n".format(test_id))
 
             if unexpected_fail_list:
-                self.emit_warning(
-                    "self.emit_successself.emit_successself.emit_successself.emit_success[warning] unexpected failing test cases"
-                )
+                self.emit_warning("unexpected failing test cases")
                 log_file.write("unexpected failing list: ")
                 for test_id in unexpected_fail_list:
                     log_file.write(str(test_id) + " ")
-                    self.emit_warning(
-                        "self.emit_successself.emit_successself.emit_successself.emit_successself.emit_success"
-                        + str(test_id)
-                    )
+                    self.emit_warning("unexpected failing test cases" + str(test_id))
                 log_file.write("\n")
             else:
-                self.emit_success(
-                    "self.emit_successself.emit_successself.emit_successself.emit_success[success] no unexpected failing test cases"
-                )
+                self.emit_success("no unexpected failing test cases")
             if unexpected_pass_list:
                 log_file.write("unexpected passing list: ")
-                self.emit_warning(
-                    "self.emit_successself.emit_successself.emit_successself.emit_success[warning] unexpected passing test cases"
-                )
+                self.emit_warning("unexpected passing test cases")
                 for test_id in unexpected_pass_list:
                     log_file.write(str(test_id) + " ")
-                    self.emit_warning(
-                        "self.emit_successself.emit_successself.emit_successself.emit_successself.emit_success"
-                        + str(test_id)
-                    )
+                    self.emit_warning("unexpected passing test cases" + str(test_id))
                 log_file.write("\n")
             else:
-                self.emit_success(
-                    "self.emit_successself.emit_successself.emit_successself.emit_success[success] no unexpected passing test cases"
-                )
+                self.emit_success("no unexpected passing test cases")
             log_file.close()
-        self.emit_highlight(
-            "self.emit_successself.emit_successself.emit_successsummary of tests written to: "
-            + self.log_test_path
-        )
+        self.emit_highlight("summary of tests written to: " + self.log_test_path)
         return True
 
     def transform(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtransform test-suite/fix-file"
-        )
+        self.emit_normal("transform test-suite/fix-file")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
@@ -171,17 +143,13 @@ class ManyBugs(AbstractBenchmark):
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successremoving experiment subject"
-        )
+        self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_success[benchmark] saving experiment artifacts"
-        )
+        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = [
             "/diffs"
         ]  # path should be relative to experiment directory

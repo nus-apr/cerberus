@@ -26,9 +26,7 @@ class Defects4J(AbstractBenchmark):
         return container_id
 
     def deploy(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successdownloading experiment subject"
-        )
+        self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
@@ -69,15 +67,11 @@ class Defects4J(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successconfiguring experiment subject"
-        )
+        self.emit_normal("configuring experiment subject")
         return True
 
     def build(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successbuilding experiment subject"
-        )
+        self.emit_normal("building experiment subject")
         custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j compile"
         status = self.run_command(
@@ -90,9 +84,7 @@ class Defects4J(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtesting experiment subject"
-        )
+        self.emit_normal("testing experiment subject")
         command_str = "defects4j test"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, join(self.dir_expr, "src")
@@ -100,17 +92,13 @@ class Defects4J(AbstractBenchmark):
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successremoving experiment subject"
-        )
+        self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_success[benchmark] saving experiment artifacts"
-        )
+        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Defects4J, self).save_artifacts(dir_info, container_id)

@@ -28,21 +28,15 @@ class Vul4J(AbstractBenchmark):
         )
 
         if self.compress_dependencies(container_id, bug_index):
-            self.emit_success(
-                "self.emit_successself.emit_successself.emit_success(benchmark) dependencies compressed successfully"
-            )
+            self.emit_success("(benchmark) dependencies compressed successfully")
         else:
-            self.emit_error(
-                "self.emit_successself.emit_successself.emit_success(benchmark) dependencies compressed failed"
-            )
+            self.emit_error("(benchmark) dependencies compressed failed")
             is_error = True
 
         return is_error
 
     def deploy(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successdownloading experiment subject"
-        )
+        self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         vul4j_id = str(experiment_item["vul4j_id"])
 
@@ -58,15 +52,11 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successconfiguring experiment subject"
-        )
+        self.emit_normal("configuring experiment subject")
         return True
 
     def build(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successbuilding experiment subject"
-        )
+        self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
 
         timeout_h = 1
@@ -95,9 +85,7 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def compress_dependencies(self, container_id, bug_index):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successcompress experiment subject's dependencies"
-        )
+        self.emit_normal("compress experiment subject's dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         build_system = experiment_item[self.key_build_system]
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
@@ -151,9 +139,7 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_index, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successtesting experiment subject"
-        )
+        self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
 
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
@@ -178,17 +164,13 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_successself.emit_successremoving experiment subject"
-        )
+        self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal(
-            "self.emit_successself.emit_success[benchmark] saving experiment artifacts"
-        )
+        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Vul4J, self).save_artifacts(dir_info, container_id)
