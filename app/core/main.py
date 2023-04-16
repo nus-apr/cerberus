@@ -270,7 +270,7 @@ def parse_args():
 
 
 def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
-    emitter.sub_title("Repairing benchmark")
+    emitter.sub_title(f"Running {values.task_type} task")
     iteration = 0
     for config_info in map(
         lambda profile_id: setup[profile_id], values.profile_id_list
@@ -279,27 +279,28 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
         for experiment_item in filter_experiment_list(benchmark):
             bug_index = experiment_item[definitions.KEY_ID]
             cpu = ",".join(map(str, range(values.cpus)))
+            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+            subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             if values.use_container:
-                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
                 values.job_identifier.set(
                     "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
                 )
-                dir_info = task.generate_dir_info(
-                    benchmark.name, subject_name, bug_name
+            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+            benchmark.update_dir_info(dir_info)
+
+            if values.only_setup:
+                iteration = iteration + 1
+                values.iteration_no = iteration
+                emitter.sub_sub_title(
+                    "Experiment #{} - Bug #{}".format(iteration, bug_index)
                 )
-                benchmark.update_dir_info(dir_info)
+            experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
 
             for tool in tool_list:
                 iteration = iteration + 1
                 values.iteration_no = iteration
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
-                )
-                experiment_image_id = (
-                    benchmark.get_exp_image(bug_index, values.only_test, cpu)
-                    if values.use_container
-                    else None
                 )
                 task.run(
                     benchmark,
