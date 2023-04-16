@@ -119,8 +119,8 @@ def generate_dir_info(benchmark_name: str, subject_name: str, bug_name: str):
     return dir_info
 
 
-def analyse_result(dir_info, experiment_info, tool: AbstractTool):
-    emitter.normal("\t\t[framework] analysing experiment results")
+def collect_result(dir_info, experiment_info, tool: AbstractTool):
+    emitter.normal("\t\t[framework] collecting experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     space_info, time_info, _ = tool.analyse_output(dir_info, bug_id, failing_test_list)
@@ -290,6 +290,8 @@ def run(
         "\t\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
     )
 
+    utilities.check_space()
+
     if not values.use_container:
         if not values.use_valkyrie:
             benchmark.setup_experiment(bug_index, None, values.only_test)
@@ -301,7 +303,7 @@ def run(
     # emitter.information("directory is {}".format(dir_instr_local))
     if os.path.isdir(dir_instr_local):
         emitter.warning(
-            "\t\t[note] There is custom instrumentation for {}".format(tool.name)
+            "\t\t[framework] there is custom instrumentation for {}".format(tool.name)
         )
     if values.only_analyse:
         can_analyse_results = True
@@ -323,7 +325,7 @@ def run(
             )
             can_analyse_results = retrieve_results(archive_name, tool)
         if can_analyse_results:
-            analyse_result(dir_info, bug_info, tool)
+            collect_result(dir_info, bug_info, tool)
     else:
         dir_output_local = dir_info["local"]["artifacts"]
         dir_logs_local = dir_info["local"]["logs"]
@@ -369,7 +371,7 @@ def run(
             utilities.error_exit(f"Unknown task type: {task_type}")
 
         if not values.only_instrument:
-            analyse_result(dir_info, bug_info, tool)
+            collect_result(dir_info, bug_info, tool)
             save_artifacts(dir_info, tool)
             dir_archive = join(values.dir_results, tool.name)
             dir_result = dir_info["local"]["results"]

@@ -3,22 +3,19 @@ import os
 import re
 import shutil
 import time
-from datetime import datetime
-from os.path import join
-from typing import cast
 
 from app.core import abstractions
 from app.core import container
-from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.core.task import stats
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
+from app.drivers.AbstractDriver import AbstractDriver
 
 
-class AbstractTool:
+class AbstractTool(AbstractDriver):
     log_instrument_path = ""
     log_output_path = ""
     image_name = ""
@@ -40,8 +37,8 @@ class AbstractTool:
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
-        emitter.debug("using tool: " + tool_name)
-        self.image_name = "cerberus:{}".format(tool_name.lower())
+        super().__init__()
+        self.name = tool_name
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -138,7 +135,7 @@ class AbstractTool:
     def process_status(self, status: int):
         if status != 0:
             emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
+                "\t\t\t[framework] {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
@@ -148,7 +145,9 @@ class AbstractTool:
                 container.start_container(self.container_id)
 
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            emitter.success(
+                "\t\t\t[framework] {0} ended successfully".format(self.name)
+            )
 
     def pre_process(self):
         """Any pre-processing required for the repair"""
@@ -169,7 +168,7 @@ class AbstractTool:
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
-                    "[warning] Docker image {}:{} not found in Docker registry".format(
+                    "[framework] docker image {}:{} not found in Docker registry".format(
                         repo_name, tag_name
                     )
                 )
@@ -183,7 +182,7 @@ class AbstractTool:
             else:
                 # Image may exist but need to be sure it is the latest one
                 emitter.information(
-                    "\t\t[information] Docker image found locally for {}".format(
+                    "\t\t[framework] docker image found locally for {}".format(
                         self.name
                     )
                 )
@@ -197,7 +196,7 @@ class AbstractTool:
 
                 if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
                     emitter.information(
-                        "(information) docker image is not the same as the one in the repository. Will have to rebuild"
+                        "[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                     )
                     values.rebuild_all = True
 
@@ -221,7 +220,6 @@ class AbstractTool:
 
     def save_artifacts(self, dir_info):
         """Store all artifacts from the tool"""
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_results = dir_info["results"]
         dir_artifacts = dir_info["artifacts"]
         dir_logs = dir_info["logs"]
@@ -288,3 +286,21 @@ class AbstractTool:
                         self.log_output_path = os.path.join(self.dir_logs, file)
                         break
         return self.log_output_path
+
+    def emit_normal(self, abstraction, concrete, message):
+        super().emit_normal(abstraction, concrete, message)
+
+    def emit_warning(self, abstraction, concrete, message):
+        super().emit_warning(abstraction, concrete, message)
+
+    def emit_error(self, abstraction, concrete, message):
+        super().emit_error(abstraction, concrete, message)
+
+    def emit_highlight(self, abstraction, concrete, message):
+        super().emit_highlight(abstraction, concrete, message)
+
+    def emit_success(self, abstraction, concrete, message):
+        super().emit_success(abstraction, concrete, message)
+
+    def emit_debug(self, abstraction, concrete, message):
+        super().emit_debug(abstraction, concrete, message)

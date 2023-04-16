@@ -1,8 +1,6 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -30,15 +28,21 @@ class Vul4J(AbstractBenchmark):
         )
 
         if self.compress_dependencies(container_id, bug_index):
-            emitter.success("\t\t\t(benchmark) dependencies compressed successfully")
+            self.emit_success(
+                "self.emit_successself.emit_successself.emit_success(benchmark) dependencies compressed successfully"
+            )
         else:
-            emitter.error("\t\t\t(benchmark) dependencies compressed failed")
+            self.emit_error(
+                "self.emit_successself.emit_successself.emit_success(benchmark) dependencies compressed failed"
+            )
             is_error = True
 
         return is_error
 
     def deploy(self, bug_index, container_id):
-        emitter.normal("\t\t\tdownloading experiment subject")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successdownloading experiment subject"
+        )
         experiment_item = self.experiment_subjects[bug_index - 1]
         vul4j_id = str(experiment_item["vul4j_id"])
 
@@ -54,20 +58,24 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_index, container_id):
-        emitter.normal("\t\t\tconfiguring experiment subject")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successconfiguring experiment subject"
+        )
         return True
 
     def build(self, bug_index, container_id):
-        emitter.normal("\t\t\tbuilding experiment subject")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successbuilding experiment subject"
+        )
         experiment_item = self.experiment_subjects[bug_index - 1]
 
         timeout_h = 1
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
-            experiment_item[definitions.KEY_JAVA_VERSION]
+            experiment_item[self.key_java_version]
         )
 
         command_str = "bash -c '{0} timeout -k 5m {1}h {2}'".format(
-            set_java_home_cmd, timeout_h, experiment_item[definitions.KEY_COMPILE_CMD]
+            set_java_home_cmd, timeout_h, experiment_item[self.key_compile_cmd]
         )
         status = self.run_command(
             container_id, command_str, self.log_build_path, join(self.dir_expr, "src")
@@ -75,7 +83,7 @@ class Vul4J(AbstractBenchmark):
 
         if status != 0:
             command_str = "bash -c 'timeout -k 5m {0}h {1}'".format(
-                timeout_h, experiment_item[definitions.KEY_COMPILE_CMD]
+                timeout_h, experiment_item[self.key_compile_cmd]
             )
             status = self.run_command(
                 container_id,
@@ -87,11 +95,13 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def compress_dependencies(self, container_id, bug_index):
-        emitter.normal("\t\t\tcompress experiment subject's dependencies")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successcompress experiment subject's dependencies"
+        )
         experiment_item = self.experiment_subjects[bug_index - 1]
-        build_system = experiment_item[definitions.KEY_BUILD_SYSTEM]
+        build_system = experiment_item[self.key_build_system]
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
-            experiment_item[definitions.KEY_JAVA_VERSION]
+            experiment_item[self.key_java_version]
         )
 
         if build_system != "maven":
@@ -107,7 +117,7 @@ class Vul4J(AbstractBenchmark):
             join(
                 self.dir_expr,
                 "src",
-                experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY],
+                experiment_item[self.key_fail_mod_dir],
             ),
         )
 
@@ -120,7 +130,7 @@ class Vul4J(AbstractBenchmark):
                 join(
                     self.dir_expr,
                     "src",
-                    experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY],
+                    experiment_item[self.key_fail_mod_dir],
                 ),
             )
 
@@ -132,7 +142,7 @@ class Vul4J(AbstractBenchmark):
             join(
                 self.dir_expr,
                 "src",
-                experiment_item[definitions.KEY_FAILING_MODULE_DIRECTORY],
+                experiment_item[self.key_fail_mod_dir],
                 "target",
             ),
         )
@@ -141,23 +151,23 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_index, container_id):
-        emitter.normal("\t\t\ttesting experiment subject")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successtesting experiment subject"
+        )
         experiment_item = self.experiment_subjects[bug_index - 1]
 
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
-            experiment_item[definitions.KEY_JAVA_VERSION]
+            experiment_item[self.key_java_version]
         )
         command_str = "bash -c '{0} {1}'".format(
-            set_java_home_cmd, experiment_item[definitions.KEY_TEST_ALL_CMD]
+            set_java_home_cmd, experiment_item[key_test_all_cmd]
         )
         status = self.run_command(
             container_id, command_str, self.log_test_path, join(self.dir_expr, "src")
         )
 
         if status != 0:
-            command_str = "bash -c '{0}'".format(
-                experiment_item[definitions.KEY_TEST_ALL_CMD]
-            )
+            command_str = "bash -c '{0}'".format(experiment_item[self.key_test_all_cmd])
             status = self.run_command(
                 container_id,
                 command_str,
@@ -168,13 +178,17 @@ class Vul4J(AbstractBenchmark):
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-        emitter.normal("\t\t\tremoving experiment subject")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successremoving experiment subject"
+        )
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t[benchmark] saving experiment artifacts")
+        self.emit_normal(
+            "self.emit_successself.emit_success[benchmark] saving experiment artifacts"
+        )
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Vul4J, self).save_artifacts(dir_info, container_id)

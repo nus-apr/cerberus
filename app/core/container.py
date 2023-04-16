@@ -62,7 +62,9 @@ def get_image(image_name: str, tag_name="latest"):
 
 def pull_image(image_name: str, tag_name: str):
     client = get_client()
-    emitter.normal("\tPulling docker image {}:{}".format(image_name, tag_name))
+    emitter.normal(
+        "\t\t[framework] pulling docker image {}:{}".format(image_name, tag_name)
+    )
     image = None
     try:
         for line in client.api.pull(
@@ -82,7 +84,7 @@ def pull_image(image_name: str, tag_name: str):
 
 def build_image(dockerfile_path: str, image_name: str):
     client = get_client()
-    emitter.normal("\t[benchmark] Building docker image {}".format(image_name))
+    emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
         dockerfilename = dockerfile_path.split("/")[-1]
@@ -156,8 +158,8 @@ def get_container_id(container_name: str) -> Optional[str]:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
         if values.debug:
-            emitter.error(f"\t{ex}")
-        emitter.warning("\t[warning] Unable to find container")
+            emitter.error(f"\t\t{ex}")
+        emitter.warning("\t\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] Unable to find container: docker daemon error")
@@ -172,7 +174,7 @@ def build_container(
 ) -> Optional[str]:
     client = get_client()
     emitter.normal(
-        "\t\t\t[benchmark] Building docker container based on image {} with name {}".format(
+        "\t\t[framework] building docker container based on image {} with name {}".format(
             image_name, container_name
         )
     )
@@ -262,7 +264,7 @@ def exec_command(
 
 def remove_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tRemoving docker container")
+    emitter.normal("\t\t\t[framework] Removing docker container")
     try:
         container = client.containers.get(container_id)
         container.remove(force=True)  # type: ignore
@@ -276,7 +278,9 @@ def remove_container(container_id: str):
 
 def start_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tStarting docker container {}".format(container_id))
+    emitter.normal(
+        "\t\t\t[framework] starting docker container {}".format(container_id)
+    )
     try:
         container = client.containers.get(container_id)
         container.start()  # type: ignore
@@ -290,7 +294,7 @@ def start_container(container_id: str):
 
 def stop_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tStopping docker container")
+    emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=20)  # type: ignore

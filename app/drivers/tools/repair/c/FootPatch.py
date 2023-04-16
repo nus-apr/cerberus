@@ -3,9 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -15,11 +12,11 @@ class FootPatch(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(FootPatch, self).__init__(self.name)
+        super().__init__(self.name)
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
-        emitter.normal("\t\t\t preparing subject for repair with " + self.name)
+        self.emit_normal(" preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
 
@@ -37,8 +34,8 @@ class FootPatch(AbstractRepairTool):
             "-j 20 --headers --no-filtering -- make -j20"
         )
         self.run_command(analysis_command, dir_path=dir_src, env=new_env)
-        emitter.normal(
-            "\t\t\t preparation took {} second(s)".format(
+        self.emit_normal(
+            " preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -46,19 +43,19 @@ class FootPatch(AbstractRepairTool):
     def run_repair(self, bug_info, config_info):
         self.prepare(bug_info)
         super(FootPatch, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_test_timeout])
+        additional_tool_param = config_info[self.key_tool_param]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
 
-        if values.use_container:
-            emitter.error(
+        if self.use_container:
+            self.emit_error(
                 "[Exception] unimplemented functionality: FootPatch docker support not implemented"
             )
             error_exit("Unhandled Exception")
@@ -88,11 +85,11 @@ class FootPatch(AbstractRepairTool):
 
         self.process_status(status)
 
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(" saving artifacts of " + self.name)
         copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
             self.dir_expr, self.dir_output
         )
@@ -101,9 +98,9 @@ class FootPatch(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
@@ -117,10 +114,10 @@ class FootPatch(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
         is_error = False
 
         # count number of patch files
@@ -145,6 +142,6 @@ class FootPatch(AbstractRepairTool):
                 elif "Filtered candidates:" in line:
                     self._space.size += int(line.split(": ")[-1])
             if is_error:
-                emitter.error("\t\t\t\t[error] error detected in logs")
+                self.emit_error("[error] error detected in logs")
 
         return self._space, self._time, self._error

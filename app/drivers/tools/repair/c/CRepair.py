@@ -2,9 +2,6 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -14,21 +11,19 @@ class CRepair(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(CRepair, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/crepair:tool"
 
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "crepair", "repair.conf")
         conf_content = []
-        poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+        poc_list = bug_info[self.key_exploit_list]
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
 
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
         conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
         conf_content.append("src_directory:src\n")
-        conf_content.append(
-            "binary_path:{}\n".format(bug_info[definitions.KEY_BINARY_PATH])
-        )
+        conf_content.append("binary_path:{}\n".format(bug_info[self.key_bin_path]))
         conf_content.append(
             "config_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(
                 self.dir_setup + "/config.sh /experiment"
@@ -39,17 +34,15 @@ class CRepair(AbstractRepairTool):
                 self.dir_setup + "/build.sh /experiment"
             )
         )
-        conf_content.append(
-            "test_input_list:{}\n".format(bug_info[definitions.KEY_CRASH_CMD])
-        )
+        conf_content.append("test_input_list:{}\n".format(bug_info[self.key_crash_cmd]))
         conf_content.append("poc_list:{}\n".format(",".join(poc_abs_list)))
         self.append_file(conf_content, repair_conf_path)
         return repair_conf_path
 
     def run_repair(self, bug_info, config_info):
         super(CRepair, self).run_repair(bug_info, config_info)
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_test_timeout])
+        additional_tool_param = config_info[self.key_tool_param]
         # repair_conf_path = self.generate_conf_file(bug_info)
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"
@@ -64,10 +57,10 @@ class CRepair(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(" saving artifacts of " + self.name)
         tool_log_dir = "/CrashRepair/logs/"
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
@@ -88,7 +81,7 @@ class CRepair(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -100,17 +93,17 @@ class CRepair(AbstractRepairTool):
             self.list_dir(
                 join(
                     self.dir_expr,
-                    "patch-valid" if values.use_valkyrie else "patches",
+                    "patch-valid" if self.use_valkyrie else "patches",
                 )
             )
         )
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -123,7 +116,7 @@ class CRepair(AbstractRepairTool):
                 if "writing" in line and "mutations" in line:
                     mutations = re.search(r"writing (.*) mutations", line)
                     if not mutations:
-                        emitter.warning("No mutations found??")
+                        self.emit_warning("No mutations found??")
                         continue
                     search_space = int(mutations.group(1))
                 elif "saving successful patch" in line:

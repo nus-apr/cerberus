@@ -2,32 +2,27 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Fix2Fit(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Fix2Fit, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/fix2fit"
 
     def run_repair(self, bug_info, config_info):
         super(Fix2Fit, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         fix_location = bug_info[definitions.KEY_FIX_FILE]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
-        abs_path_binary = join(
-            self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH]
-        )
+        abs_path_binary = join(self.dir_expr, "src", bug_info[self.key_bin_path])
         test_id_list = " ".join(bug_info[definitions.KEY_FAILING_TEST]) + " "
         if bug_info[definitions.KEY_PASSING_TEST]:
             filtered_list = self.filter_tests(
@@ -56,11 +51,9 @@ class Fix2Fit(AbstractRepairTool):
             "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
             "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(
-                config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE]
-            ),
-            "TIMEOUT": "{}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT]),
-            "BINARY_INPUT": bug_info[definitions.KEY_CRASH_CMD],
+            "T_TIMEOUT": "{}000".format(config_info[self.key_test_timeout_TESTCASE]),
+            "TIMEOUT": "{}h; ".format(config_info[self.key_test_timeout]),
+            "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
         # repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
         # repair_command += "export AFL_NO_AFFINITY='';"
@@ -70,11 +63,11 @@ class Fix2Fit(AbstractRepairTool):
         # repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
         # repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
         # repair_command += "export BINARY={}; ".format(abs_path_binary)
-        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE])
-        # repair_command += "export TIMEOUT={}h; ".format(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        # repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[definitions.KEY_CRASH_CMD])
+        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[self.key_test_timeout_TESTCASE])
+        # repair_command += "export TIMEOUT={}h; ".format(config_info[self.key_test_timeout])
+        # repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[self.key_crash_cmd])
         repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
-            str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+            str(config_info[self.key_test_timeout])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(
@@ -84,7 +77,7 @@ class Fix2Fit(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         dir_patch = join(self.dir_setup, "patches")
@@ -313,9 +306,9 @@ class Fix2Fit(AbstractRepairTool):
         return filtered_list
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
@@ -330,10 +323,10 @@ class Fix2Fit(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
 
         is_timeout = True
         reported_failing_test = []
@@ -343,7 +336,7 @@ class Fix2Fit(AbstractRepairTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
                 if "no patch found" in line:
-                    emitter.warning("\t\t\t\t[warning] no patch found by F1X")
+                    self.emit_warning("[warning] no patch found by F1X")
                 elif "negative tests: [" in line:
                     reported_failing_test = (
                         str(line)
@@ -393,33 +386,29 @@ class Fix2Fit(AbstractRepairTool):
                 self._error.is_error = True
             elif "tests are not specified" in line:
                 self._error.is_error = True
-                emitter.warning("\t\t\t\t[warning] no tests provided")
+                self.emit_warning("[warning] no tests provided")
             elif "no negative tests" in line:
-                emitter.warning("\t\t\t\t[warning] no negative tests")
+                self.emit_warning("[warning] no negative tests")
             elif "failed to infer compile commands" in line:
                 self._error.is_error = True
-                emitter.error("\t\t\t\t[error] compilation command not found")
+                self.emit_error("[error] compilation command not found")
             elif "At-risk data found" in line:
                 self._error.is_error = True
-                emitter.error("\t\t\t\t[error] previous results have corrupted")
+                self.emit_error("[error] previous results have corrupted")
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t[warning] timeout detected")
+            self.emit_warning("[warning] timeout detected")
         if (
             reported_failing_test != fail_list
             and reported_failing_test
             and not is_timeout
         ):
-            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
-            emitter.warning(
-                "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
-            )
-            emitter.warning(
-                "\t\t\t\treported fail list: {0}".format(
-                    ",".join(reported_failing_test)
-                )
+            self.emit_warning("[warning] unexpected failing test-cases reported")
+            self.emit_warning("expected fail list: {0}".format(",".join(fail_list)))
+            self.emit_warning(
+                "reported fail list: {0}".format(",".join(reported_failing_test))
             )
 
         dir_patch = self.dir_setup + "/patches"

@@ -4,9 +4,6 @@ from typing import List
 from typing import Set
 
 from app.core import container
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -14,7 +11,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class Angelix(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Angelix, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
 
     def run_repair(self, bug_info, config_info):
@@ -22,18 +19,18 @@ class Angelix(AbstractRepairTool):
             bug_info,
             config_info,
         )
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         source_file = str(bug_info[definitions.KEY_FIX_FILE])
         fix_line_number_list = bug_info[definitions.KEY_FIX_LINES]
         fix_location = bug_info[definitions.KEY_FIX_LOC]
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout = str(config_info[self.key_test_timeout])
         failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
         passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
         subject_name = bug_info[definitions.KEY_SUBJECT]
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        additional_tool_param = config_info[self.key_tool_param]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -65,7 +62,7 @@ class Angelix(AbstractRepairTool):
         if fix_location:
             arguments.append(" --lines {0}  ".format(",".join(fix_line_number_list)))
 
-        if values.dump_patches:
+        if self.is_dump_patches:
             arguments.append(" --dump-patches ")
 
         if os.path.isfile("/tmp/ANGELIX_ARGS"):
@@ -97,10 +94,10 @@ class Angelix(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(" saving artifacts of " + self.name)
         # dir_artifact = dir_info["artifact"]
         # execute_command("rm /tmp/find_dir")
         # dir_patch = join(self.dir_expr, "patches")
@@ -132,9 +129,9 @@ class Angelix(AbstractRepairTool):
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t instrumenting for " + self.name)
+        self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         buggy_file = bug_info[definitions.KEY_FIX_FILE]
         self.log_instrument_path = (
             self.dir_logs
@@ -175,7 +172,7 @@ class Angelix(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         is_error = False
         is_timeout = False
@@ -193,10 +190,10 @@ class Angelix(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -210,14 +207,14 @@ class Angelix(AbstractRepairTool):
                     count_enumerations = count_enumerations + 1
                 elif "repair test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t[warning] repair test suite: []")
+                    self.emit_warning("[warning] repair test suite: []")
                 elif "validation test suite: []" in line:
                     is_error = True
-                    emitter.warning("\t\t\t\t[warning] validation test suite: []")
+                    self.emit_warning("[warning] validation test suite: []")
                 elif "No negative test exists" in line:
                     is_error = True
                     is_timeout = False
-                    emitter.warning("\t\t\t\t[warning] No negative test exists")
+                    self.emit_warning("[warning] No negative test exists")
                 elif "no patch generated" in line:
                     is_timeout = False
                     count_plausible = 0
@@ -231,13 +228,13 @@ class Angelix(AbstractRepairTool):
                         reported_fail_list.remove(removing_test_id)
                 elif "failed to build" in line and "golden" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build golden")
+                    self.emit_error("[error] failed to build golden")
                 elif "failed to build" in line and "validation" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build validation")
+                    self.emit_error("[error] failed to build validation")
                 elif "failed to build" in line and "frontend" in line:
                     is_error = True
-                    emitter.error("\t\t\t\t[error] failed to build frontend")
+                    self.emit_error("[error] failed to build frontend")
                 elif collect_neg and "running test" in line:
                     t_id = (
                         line.split("running test ")[-1].split(" ")[0].replace("'", "")
@@ -253,24 +250,22 @@ class Angelix(AbstractRepairTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
+                    "patch-valid" if self.use_valkyrie else "patches",
                 )
             )
         )
 
         if list(reported_fail_list) != fail_list:
-            emitter.warning("\t\t\t\t[warning] unexpected failing test-cases reported")
-            emitter.warning(
-                "\t\t\t\texpected fail list: {0}".format(",".join(fail_list))
-            )
+            self.emit_warning("[warning] unexpected failing test-cases reported")
+            self.emit_warning("expected fail list: {0}".format(",".join(fail_list)))
             reported_list_str = ",".join(list(reported_fail_list))
             if len(reported_fail_list) > 10:
                 reported_list_str = ",".join(list(reported_fail_list)[:10]) + "..."
-            emitter.warning("\t\t\t\treported fail list: {0}".format(reported_list_str))
+            self.emit_warning("reported fail list: {0}".format(reported_list_str))
         if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t[warning] timeout before ending")
+            self.emit_warning("[warning] timeout before ending")
 
         self._space.plausible = count_plausible
         self._space.size = search_space

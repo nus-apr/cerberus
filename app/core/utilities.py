@@ -79,7 +79,7 @@ def error_exit(*arg_list: Any) -> NoReturn:
 def clean_files():
     # Remove other residual files stored in ./output/
     logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
-    emitter.information("Removing other residual files...")
+    emitter.information("\t[framework] removing other residual files...")
     if os.path.isdir("output"):
         clean_command = "rm -rf " + values.dir_output
         execute_command(clean_command)
@@ -157,11 +157,11 @@ def get_hash(str_value: str):
 
 
 def check_space():
-    emitter.normal("\t\t\t checking disk space")
+    emitter.normal("\t\t[framework] checking disk space")
     total, used, free = shutil.disk_usage("/")
-    emitter.information("\t\t\t\t Total: %d GiB" % (total // (2**30)))
-    emitter.information("\t\t\t\t Used: %d GiB" % (used // (2**30)))
-    emitter.information("\t\t\t\t Free: %d GiB" % (free // (2**30)))
+    emitter.information("\t\t\t total: %d GiB" % (total // (2**30)))
+    emitter.information("\t\t\t used: %d GiB" % (used // (2**30)))
+    emitter.information("\t\t\t free: %d GiB" % (free // (2**30)))
     free_size = free // (2**30)
     if int(free_size) < values.default_disk_space:
-        error_exit("insufficient disk space " + str(free_size))
+        error_exit("\t\t\tinsufficient disk space " + str(free_size))

@@ -3,9 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -21,7 +18,7 @@ class Infer(AbstractAnalyzeTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Infer, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "yuntongzhang/infer:latest"
 
     def prepare(self, bug_info):
@@ -66,7 +63,9 @@ class Infer(AbstractAnalyzeTool):
                 )
             )
         else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+            self.emit_success(
+                "\t\t\t[success] {0} ended successfully".format(self.name)
+            )
         emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
