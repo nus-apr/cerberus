@@ -64,7 +64,6 @@ class Hippodrome(AbstractAnalyzeTool):
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         infer_output = join(self.dir_expr, "src", "infer-out")
         copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
         self.run_command(copy_command)

@@ -54,7 +54,6 @@ class CPR(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         dir_patch = join(self.dir_output, "patches")
         self.run_command("cp -rf /CPR/output/{} {}".format(self.id, dir_patch))
         super(CPR, self).save_artifacts(dir_info)

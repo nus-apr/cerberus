@@ -84,7 +84,6 @@ class BugsDotJar(AbstractBenchmark):
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(BugsDotJar, self).save_artifacts(dir_info, container_id)

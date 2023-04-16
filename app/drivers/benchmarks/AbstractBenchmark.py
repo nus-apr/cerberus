@@ -314,6 +314,7 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def save_artifacts(self, dir_info, container_id: Optional[str]):
         """Save all artifacts produced by the tool"""
+        self.emit_normal("saving experiment artifacts")
         if container_id:
             dir_exp = dir_info["container"]["experiment"]
             dir_artifact = dir_info["container"]["artifacts"]
@@ -321,7 +322,6 @@ class AbstractBenchmark(AbstractDriver):
             dir_exp = dir_info["local"]["experiment"]
             dir_artifact = dir_info["local"]["artifacts"]
 
-        emitter.normal("\t\t\t[framework] saving experiment artifacts")
         if self.list_artifact_dirs:
             for art_dir in self.list_artifact_dirs:
                 art_dir_path = join(dir_exp, art_dir)

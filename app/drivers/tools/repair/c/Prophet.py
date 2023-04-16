@@ -113,7 +113,6 @@ class Prophet(AbstractRepairTool):
         self.write_file(map(lambda line: line + "\n", test_config), revlog_file)
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)

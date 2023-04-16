@@ -135,7 +135,6 @@ class SAVER(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         copy_command = "cp -rf {}/saver {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         # infer_output = join(self.dir_expr, "src", "infer-out")

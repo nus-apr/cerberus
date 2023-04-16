@@ -149,7 +149,6 @@ class ManyBugs(AbstractBenchmark):
         return
 
     def save_artifacts(self, dir_info, container_id):
-        self.emit_normal("[benchmark] saving experiment artifacts")
         self.list_artifact_dirs = [
             "/diffs"
         ]  # path should be relative to experiment directory

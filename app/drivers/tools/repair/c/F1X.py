@@ -27,7 +27,7 @@ class F1X(AbstractRepairTool):
         super(F1X, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        self.emit_normal(" running repair with " + self.name)
+
         conf_id = config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         fix_file = bug_info[self.key_fix_file]
@@ -430,10 +430,10 @@ class F1X(AbstractRepairTool):
             self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        self.emit_highlight(" Log File: " + self.log_output_path)
+        self.emit_highlight("log File: " + self.log_output_path)
 
         if self._error.is_error:
-            self.emit_error("[error] error detected in logs")
+            self.emit_error("error detected in logs")
 
         self.read_log_file()
 

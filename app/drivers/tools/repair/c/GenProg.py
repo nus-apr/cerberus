@@ -20,7 +20,6 @@ class GenProg(AbstractRepairTool):
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         bug_id = str(bug_info[self.key_bug_id])
-        self.emit_normal(" running repair with " + self.name)
         self.fix_file = bug_info[self.key_fix_file]
 
         fix_location = bug_info[self.key_fix_lines][0]
@@ -75,7 +74,6 @@ class GenProg(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         dir_results = dir_info["result"]
         dir_patch = join(self.dir_expr, "src", "..")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)

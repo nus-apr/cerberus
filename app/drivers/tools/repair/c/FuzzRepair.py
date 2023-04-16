@@ -70,7 +70,6 @@ class FuzzRepair(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         tool_log_dir = "/FuzzRepair/logs/"
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
