@@ -301,7 +301,6 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
                 )
-                utilities.check_space()
                 task.run(
                     benchmark,
                     tool,
@@ -407,6 +406,5 @@ def main():
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
-        print("SENDING NOTIFICATION")
         notification.end(total_duration, is_error)
         emitter.end(total_duration, is_error)

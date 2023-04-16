@@ -50,7 +50,7 @@ class Examples(AbstractBenchmark):
         return True
 
     def clean(self, exp_dir_path, container_id):
-        emitter.normal("\t\t\tremoving experiment subject")
+        emitter.normal("\t\t\t[framework] removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str, "/dev/null", "/")
         return

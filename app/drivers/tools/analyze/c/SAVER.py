@@ -3,9 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
@@ -15,13 +12,16 @@ class SAVER(AbstractAnalyzeTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(SAVER, self).__init__(self.name)
+        super().__init__(self.name)
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        emitter.normal("\t\t\t preparing subject for repair with " + self.name)
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_success preparing subject for repair with "
+            + self.name
+        )
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
@@ -36,10 +36,13 @@ class SAVER(AbstractAnalyzeTool):
             compile_command = (
                 "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
             )
-        emitter.normal("\t\t\t\t compiling subject with " + self.name)
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successself.emit_success compiling subject with "
+            + self.name
+        )
         self.run_command(compile_command, dir_path=dir_src)
-        emitter.normal(
-            "\t\t\t\t compilation took {} second(s)".format(
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successself.emit_success compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -53,7 +56,7 @@ class SAVER(AbstractAnalyzeTool):
         additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
 
         if values.use_container:
-            emitter.error(
+            self.emit_error(
                 "[Exception] unimplemented functionality: SAVER docker support not implemented"
             )
             error_exit("Unhandled Exception")
@@ -71,10 +74,17 @@ class SAVER(AbstractAnalyzeTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight(
+            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
+                self.log_output_path
+            )
+        )
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_success saving artifacts of "
+            + self.name
+        )
         copy_command = "cp -rf {}/saver {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         infer_output = join(self.dir_expr, "src", "infer-out")
@@ -84,7 +94,7 @@ class SAVER(AbstractAnalyzeTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         conf_id = str(values.current_profile_id.get("NA"))
         self.log_stats_path = join(
@@ -100,10 +110,13 @@ class SAVER(AbstractAnalyzeTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(
+            "self.emit_successself.emit_successself.emit_success Log File: "
+            + self.log_output_path
+        )
         is_error = False
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -113,6 +126,8 @@ class SAVER(AbstractAnalyzeTool):
             if "ERROR:" in line:
                 self._error.is_error = True
         if is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error(
+                "self.emit_successself.emit_successself.emit_successself.emit_success[error] error detected in logs"
+            )
 
         return self._space, self._time, self._error

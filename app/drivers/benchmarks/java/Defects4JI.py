@@ -3,9 +3,6 @@ from datetime import datetime
 from os.path import join
 
 from app.core import container
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.benchmarks.java.Defects4J import Defects4J
 
 
@@ -22,9 +19,11 @@ class Defects4JI(Defects4J):
         )
         if not is_error:
             if container_id and self.instrument(bug_index, container_id):
-                emitter.success("\t\t\t[benchmark] instrumentation successful")
+                self.emit_success("instrumentation successful")
             else:
-                emitter.error("\t\t\t[benchmark] instrumentation failed")
+                self.emit_error(
+                    "self.emit_successself.emit_successself.emit_success[benchmark] instrumentation failed"
+                )
                 is_error = True
         return is_error
 
@@ -37,12 +36,12 @@ class Defects4JI(Defects4J):
             bug_index, image_name, cpu
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        bug_id = str(experiment_item[self.key_bug_id])
+        subject_name = str(experiment_item[self.key_subject])
 
         bug_name = f"{subject_name.lower()}_{bug_id}"
         instrumented_diff_dir = os.path.join(
-            values.dir_benchmark, self.name, "instrumentation", "instrumented-diffs"
+            self.dir_benchmark, self.name, "instrumentation", "instrumented-diffs"
         )
 
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
@@ -60,9 +59,11 @@ class Defects4JI(Defects4J):
         return container_id
 
     def instrument(self, bug_index: int, container_id: str):
-        emitter.normal("\t\t\tinstrumenting assertions")
+        self.emit_normal(
+            "self.emit_successself.emit_successself.emit_successinstrumenting assertions"
+        )
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_instrument_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-instrument.log"
         )
@@ -77,8 +78,8 @@ class Defects4JI(Defects4J):
                 self.log_instrument_path,
                 self.dir_expr + "/src",
             )
-            emitter.debug(
-                "\t\t\t Instrumentation took {} second(s)".format(
+            self.emit_debug(
+                "self.emit_successself.emit_successself.emit_success Instrumentation took {} second(s)".format(
                     (datetime.now() - time).total_seconds()
                 )
             )

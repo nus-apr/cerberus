@@ -1,10 +1,7 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.core import utilities
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -16,7 +13,7 @@ class Recorder(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Recorder, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "zqh111/recoder:interface"
         self.bug_name = ""
 
@@ -31,7 +28,7 @@ class Recorder(AbstractRepairTool):
 
         timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
 
-        if not values.use_gpu:
+        if not self.use_gpu:
             utilities.error_exit("Cannot run Recorder without a GPU")
 
         self.bug_name = "{}-{}".format(
@@ -64,7 +61,11 @@ class Recorder(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight(
+            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
+                self.log_output_path
+            )
+        )
 
     def save_artifacts(self, dir_info):
         """
@@ -93,7 +94,7 @@ class Recorder(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -103,10 +104,10 @@ class Recorder(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

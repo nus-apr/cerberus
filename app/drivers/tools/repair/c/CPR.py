@@ -2,27 +2,24 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class CPR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(CPR, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/cpr"
         self.id = ""
 
     def run_repair(self, bug_info, config_info):
         super(CPR, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.id = bug_id
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout = str(config_info[self.key_test_timeout])
         dir_patch = join(self.dir_output, "patches")
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
@@ -35,7 +32,7 @@ class CPR(AbstractRepairTool):
         test_id_list = ",".join(bug_info[definitions.KEY_FAILING_TEST])
         seed_id_list = ",".join(bug_info[definitions.KEY_PASSING_TEST])
 
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        additional_tool_param = config_info[self.key_tool_param]
         self.timestamp_log_start()
         cpr_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(
@@ -54,19 +51,19 @@ class CPR(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(" saving artifacts of " + self.name)
         dir_patch = join(self.dir_output, "patches")
         self.run_command("cp -rf /CPR/output/{} {}".format(self.id, dir_patch))
         super(CPR, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
@@ -78,10 +75,10 @@ class CPR(AbstractRepairTool):
                     self.log_output_path = dir_results + "/" + file
                     break
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
         is_timeout = True
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -109,7 +106,7 @@ class CPR(AbstractRepairTool):
                     is_timeout = False
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
         if is_timeout:
-            emitter.warning("\t\t\t\t[warning] timeout before ending")
+            self.emit_warning("[warning] timeout before ending")
         return self._space, self._time, self._error

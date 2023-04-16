@@ -1,9 +1,6 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -11,7 +8,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class VulnFix(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(VulnFix, self).__init__(self.name)
+        super().__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
         self.image_name = "yuntongzhang/vulnfix:latest"
         self.cpu_usage = 1
@@ -24,18 +21,18 @@ class VulnFix(AbstractRepairTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
 
         dir_vulnfix_exist = self.is_dir(self.dir_root)
         if not dir_vulnfix_exist:
-            emitter.error(
+            self.emit_error(
                 "[Exception] Vulnfix repo is not at the expected location. "
                 "Please double check whether we are in VulnFix container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_test_timeout])
+        additional_tool_param = config_info[self.key_tool_param]
         # get ready the config file
         config_path = self.populate_config_file(bug_info)
 
@@ -45,7 +42,7 @@ class VulnFix(AbstractRepairTool):
             timeout_h, additional_tool_param, config_path
         )
         env = dict()
-        if values.ui_active:
+        if self.is_ui_active:
             env["AFL_NO_AFFINITY"] = 1
         status = self.run_command(
             vulnfix_command,
@@ -57,7 +54,7 @@ class VulnFix(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def populate_config_file(self, bug_info):
         """
@@ -84,26 +81,26 @@ class VulnFix(AbstractRepairTool):
         dir_src = join(self.dir_expr, "src")
         line_source_dir = "source-dir=" + dir_src + "\n"
         # (2) binary
-        rel_binary_path = bug_info[definitions.KEY_BINARY_PATH]
+        rel_binary_path = bug_info[self.key_bin_path]
         binary_path = join(dir_src, rel_binary_path)
         line_binary = "binary=" + binary_path + "\n"
         # (3) (OPTIONAL) cmd
         line_cmd = ""
         if not cmd_already_specified:
-            cmd = bug_info[definitions.KEY_CRASH_CMD]
+            cmd = bug_info[self.key_crash_cmd]
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
         # (4) exploit
 
         if (
-            definitions.KEY_EXPLOIT_LIST not in bug_info
-            or len(bug_info[definitions.KEY_EXPLOIT_LIST]) < 1
+            self.key_exploit_list not in bug_info
+            or len(bug_info[self.key_exploit_list]) < 1
         ):
             # assumes instrumentation converted stdarg as a file handling command
             exploit_path = join(self.dir_setup, "tests/exploit")
         else:
             exploit_path = join(
-                self.dir_setup, sorted(bug_info[definitions.KEY_EXPLOIT_LIST])[0]
+                self.dir_setup, sorted(bug_info[self.key_exploit_list])[0]
             )
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
@@ -159,7 +156,7 @@ class VulnFix(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         is_error = False
         count_plausible = 0
@@ -173,11 +170,10 @@ class VulnFix(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
-
+        self.emit_highlight(f"output log file: {self.log_output_path}")
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self._time.timestamp_start = log_lines[0].replace("\n", "")

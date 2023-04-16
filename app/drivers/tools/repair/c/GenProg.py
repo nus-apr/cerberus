@@ -2,32 +2,29 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class GenProg(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(GenProg, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/genprog"
         self.fix_file = ""
 
     def run_repair(self, bug_info, config_info):
         super(GenProg, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
         conf_id = config_info[definitions.KEY_ID]
         passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
         failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        emitter.normal("\t\t\t running repair with " + self.name)
+        self.emit_normal(" running repair with " + self.name)
         self.fix_file = bug_info[definitions.KEY_FIX_FILE]
 
         fix_location = bug_info[definitions.KEY_FIX_LINES][0]
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout = str(config_info[self.key_test_timeout])
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -43,7 +40,7 @@ class GenProg(AbstractRepairTool):
                 n_size=count_neg,
                 dir_exp=self.dir_expr,
                 program="{}.cil.i".format(
-                    join(self.dir_expr, "src", bug_info[definitions.KEY_BINARY_PATH])
+                    join(self.dir_expr, "src", bug_info[self.key_bin_path])
                 ),
             )
         )
@@ -75,10 +72,10 @@ class GenProg(AbstractRepairTool):
         self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
+        self.emit_normal(" saving artifacts of " + self.name)
         dir_results = dir_info["result"]
         dir_patch = join(self.dir_expr, "src", "..")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
@@ -126,9 +123,9 @@ class GenProg(AbstractRepairTool):
         super(GenProg, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
@@ -142,10 +139,10 @@ class GenProg(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
         is_interrupted = True
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self._time.timestamp_start = log_lines[0].replace("\n", "")
@@ -166,14 +163,12 @@ class GenProg(AbstractRepairTool):
             if self.is_file(dir_results + "/coverage.path"):
                 # TODO
                 if os.path.getsize(dir_results + "/coverage.path"):
-                    emitter.error("\t\t\t\t[error] error detected in coverage")
+                    self.emit_error("[error] error detected in coverage")
             else:
-                emitter.error("\t\t\t\t[error] error detected in coverage")
+                self.emit_error("[error] error detected in coverage")
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
         if is_interrupted:
-            emitter.warning(
-                "\t\t\t\t[warning] program interrupted before starting repair"
-            )
+            self.emit_warning("[warning] program interrupted before starting repair")
 
         return self._space, self._time, self._error

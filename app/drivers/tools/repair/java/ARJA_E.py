@@ -1,13 +1,9 @@
+import datetime
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import utilities
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
-import datetime
 
 class ARJA_E(AbstractRepairTool):
 
@@ -15,7 +11,7 @@ class ARJA_E(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(ARJA_E, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/arjae"
 
     def run_repair(self, bug_info, config_info):
@@ -59,20 +55,30 @@ class ARJA_E(AbstractRepairTool):
             f"-DmaxTime {repair_timeout}"
         )
 
-        status = self.run_command(arja_e_command, self.log_output_path, self.arja_e_home)
+        status = self.run_command(
+            arja_e_command, self.log_output_path, self.arja_e_home
+        )
 
         if status != 0:
             self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
+            self.emit_warning(
+                "self.emit_successself.emit_successself.emit_success(warning) {0} exited with an error code {1}".format(
                     self.name, status
                 )
             )
         else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+            self.emit_success(
+                "self.emit_successself.emit_successself.emit_success(success) {0} ended successfully".format(
+                    self.name
+                )
+            )
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight(
+            "self.emit_successself.emit_successself.emit_successlog file: {0}".format(
+                self.log_output_path
+            )
+        )
 
     def save_artifacts(self, dir_info):
         """
@@ -101,7 +107,7 @@ class ARJA_E(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -114,10 +120,12 @@ class ARJA_E(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning(
+                "self.emit_successself.emit_successself.emit_success(warning) no output log file found"
+            )
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -135,7 +143,7 @@ class ARJA_E(AbstractRepairTool):
                 for x in self.list_dir(
                     join(
                         self.dir_output,
-                        "patch-valid" if values.use_valkyrie else "patches",
+                        "patch-valid" if self.use_valkyrie else "patches",
                     )
                 )
                 if ".txt" in x

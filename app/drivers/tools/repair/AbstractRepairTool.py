@@ -13,9 +13,23 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractRepairTool(AbstractTool):
+
+    key_bin_path = definitions.KEY_BINARY_PATH
+    key_crash_cmd = definitions.KEY_CRASH_CMD
+    key_exploit_list = definitions.KEY_EXPLOIT_LIST
+    is_ui_active = values.ui_active
+    is_only_instrument = values.only_instrument
+    is_debug = values.debug
+    is_dump_patches = values.dump_patches
+    use_container = values.use_container
+    use_valkyrie = values.use_valkyrie
+    use_gpu = values.use_gpu
+    key_test_timeout = definitions.KEY_CONFIG_TIMEOUT
+    key_tool_param = definitions.KEY_TOOL_PARAMS
+    current_profile_id = values.current_profile_id
+
     def __init__(self, tool_name):
-        """add initialization commands to all tools here"""
-        emitter.debug("using tool: " + tool_name)
+        super().__init__(tool_name)
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -42,7 +56,7 @@ class AbstractRepairTool(AbstractTool):
         """instrumentation for the experiment as needed by the tool"""
         if not self.is_file(join(self.dir_inst, "instrument.sh")):
             return
-        emitter.normal("\t\t\t instrumenting for " + self.name)
+        self.emit_normal("running instrumentation script")
         bug_id = bug_info[definitions.KEY_BUG_ID]
         conf_id = str(values.current_profile_id.get("NA"))
         buggy_file = bug_info.get(definitions.KEY_FIX_FILE, "")
@@ -66,11 +80,11 @@ class AbstractRepairTool(AbstractTool):
         return
 
     def run_repair(self, bug_info, config_info):
-        emitter.normal("\t\t[repair-tool] repairing experiment subject")
+        emitter.normal("\t\t[framework] repairing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.instrument(bug_info)
-        emitter.normal("\t\t\t running repair with " + self.name)
+        self.emit_normal("executing repair command")
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         log_file_name = "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id)
@@ -120,3 +134,21 @@ class AbstractRepairTool(AbstractTool):
                     time_info.get_latency_plausible()
                 )
             )
+
+    def emit_normal(self, message):
+        super().emit_normal("repair-tool", self.name, message)
+
+    def emit_warning(self, message):
+        super().emit_warning("repair-tool", self.name, message)
+
+    def emit_error(self, message):
+        super().emit_error("repair-tool", self.name, message)
+
+    def emit_highlight(self, message):
+        super().emit_highlight("repair-tool", self.name, message)
+
+    def emit_success(self, message):
+        super().emit_success("repair-tool", self.name, message)
+
+    def emit_debug(self, message):
+        super().emit_debug("repair-tool", self.name, message)

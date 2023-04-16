@@ -2,16 +2,13 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class F1X(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(F1X, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/f1x"
 
     def generate_test_driver(self):
@@ -28,19 +25,19 @@ class F1X(AbstractRepairTool):
 
     def run_repair(self, bug_info, config_info):
         super(F1X, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
-        emitter.normal("\t\t\t running repair with " + self.name)
+        self.emit_normal(" running repair with " + self.name)
         conf_id = config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         fix_file = bug_info[definitions.KEY_FIX_FILE]
         fix_location = bug_info[definitions.KEY_FIX_LOC]
         passing_test_list = bug_info[definitions.KEY_PASSING_TEST]
         failing_test_list = bug_info[definitions.KEY_FAILING_TEST]
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout = str(config_info[self.key_test_timeout])
         subject_name = bug_info[definitions.KEY_SUBJECT]
         benchmark_name = bug_info[definitions.KEY_BENCHMARK]
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        additional_tool_param = config_info[self.key_tool_param]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -77,9 +74,9 @@ class F1X(AbstractRepairTool):
         repair_command += " -T 15000"
         repair_command += " --driver={0} ".format(test_driver_path)
         repair_command += ' -b "{0} /experiment "'.format(build_script_path)
-        if values.dump_patches:
+        if self.is_dump_patches:
             repair_command += " --output-space patch-space "
-        if values.debug:
+        if self.is_debug:
             repair_command += " -v "
 
         dry_command = repair_command + " --disable-dteq"
@@ -97,9 +94,9 @@ class F1X(AbstractRepairTool):
         # status = self.run_command(repair_command, self.log_output_path, dir_expr, container_id)
 
         self.process_status(status)
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-        if values.dump_patches:
+        if self.is_dump_patches:
             self.create_patches_from_space(fix_file)
         self.timestamp_log_end()
 
@@ -414,9 +411,9 @@ class F1X(AbstractRepairTool):
                         pass
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
@@ -430,13 +427,13 @@ class F1X(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t[error] error detected in logs")
+            self.emit_error("[error] error detected in logs")
 
         self.read_log_file()
 
@@ -444,11 +441,11 @@ class F1X(AbstractRepairTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
+                    "patch-valid" if self.use_valkyrie else "patches",
                 )
             )
         )
-        if values.use_valkyrie:
+        if self.use_valkyrie:
             self._space.plausible = self._space.generated
 
         return self._space, self._time, self._error
