@@ -22,7 +22,7 @@ class ARJAE(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
 
         dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
         dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])

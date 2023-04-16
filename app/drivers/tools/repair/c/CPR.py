@@ -17,9 +17,9 @@ class CPR(AbstractRepairTool):
         if self.is_instrument_only:
             return
         conf_id = str(self.current_profile_id.get("NA"))
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
-        timeout = str(config_info[self.key_test_timeout])
+        timeout = str(config_info[self.key_timeout])
         dir_patch = join(self.dir_output, "patches")
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
@@ -29,10 +29,10 @@ class CPR(AbstractRepairTool):
         )
         conf_path = join(self.dir_expr, "cpr", "repair.conf")
         timeout_m = str(float(timeout) * 60)
-        test_id_list = ",".join(bug_info[definitions.KEY_FAILING_TEST])
-        seed_id_list = ",".join(bug_info[definitions.KEY_PASSING_TEST])
+        test_id_list = ",".join(bug_info[self.key_failing_tests])
+        seed_id_list = ",".join(bug_info[self.key_passing_tests])
 
-        additional_tool_param = config_info[self.key_tool_param]
+        additional_tool_param = config_info[self.key_tool_params]
         self.timestamp_log_start()
         cpr_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(

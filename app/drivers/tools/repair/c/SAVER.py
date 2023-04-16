@@ -24,23 +24,23 @@ class SAVER(AbstractRepairTool):
 
     def populate_config_file(self, bug_info, config_path):
         config_info: Dict[str, Any] = dict()
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         if bug_type not in self.bug_conversion_table:
             error_exit(f"Unsupported bug type: {bug_type}")
 
         bug_type_code = self.bug_conversion_table[bug_type]
 
-        if definitions.KEY_SOURCE not in bug_info:
+        if self.key_source not in bug_info:
             error_exit(
                 f"Missing memory source information in benchmark, required for {self.name}"
             )
-        if definitions.KEY_SINK not in bug_info:
+        if self.key_sink not in bug_info:
             error_exit(
                 f"Missing memory sink information in benchmark, required for {self.name}"
             )
 
         saver_source_info = dict()
-        bench_source_info = bug_info[definitions.KEY_SOURCE]
+        bench_source_info = bug_info[self.key_source]
         if bench_source_info["src-file"]:
             saver_source_info["filename"] = bench_source_info["src-file"]
         saver_source_info["procedure"] = bench_source_info["procedure"]
@@ -48,7 +48,7 @@ class SAVER(AbstractRepairTool):
         config_info["source"] = {"node": saver_source_info, "exp": None}
 
         saver_sink_info = dict()
-        bench_sink_info = bug_info[definitions.KEY_SINK]
+        bench_sink_info = bug_info[self.key_sink]
         if bench_sink_info["src-file"]:
             saver_sink_info["filename"] = bench_sink_info["src-file"]
         saver_sink_info["procedure"] = bench_sink_info["procedure"]
@@ -68,7 +68,7 @@ class SAVER(AbstractRepairTool):
         config_path = join(self.dir_expr, self.name, "bug.json")
         self.populate_config_file(bug_info, config_path)
         time = datetime.now()
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         if bug_type == "Memory Leak":
             compile_command = (
                 "infer -j 20 -g --headers --check-nullable-only -- make -j20"
@@ -101,10 +101,10 @@ class SAVER(AbstractRepairTool):
         super(SAVER, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        conf_id = config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
@@ -121,7 +121,7 @@ class SAVER(AbstractRepairTool):
         saver_command += "timeout -k 5m {0}h saver --error-report {1} ".format(
             str(timeout_h), config_path
         )
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         if bug_type in ["Double Free", "Use After Free"]:
             saver_command += " --analysis-with-fimem "
         saver_command += "{0} >> {1} 2>&1 ".format(

@@ -45,10 +45,10 @@ class FootPatch(AbstractRepairTool):
         super(FootPatch, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        conf_id = config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),

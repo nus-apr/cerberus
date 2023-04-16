@@ -21,7 +21,7 @@ class CRepair(AbstractRepairTool):
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
 
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
-        conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
+        conf_content.append("tag_id:{}\n".format(bug_info[self.key_bug_id]))
         conf_content.append("src_directory:src\n")
         conf_content.append("binary_path:{}\n".format(bug_info[self.key_bin_path]))
         conf_content.append(
@@ -41,8 +41,8 @@ class CRepair(AbstractRepairTool):
 
     def run_repair(self, bug_info, config_info):
         super(CRepair, self).run_repair(bug_info, config_info)
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         # repair_conf_path = self.generate_conf_file(bug_info)
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"

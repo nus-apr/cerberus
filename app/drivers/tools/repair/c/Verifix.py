@@ -19,7 +19,7 @@ class Verifix(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[self.key_test_timeout])
+        timeout_h = str(config_info[self.key_timeout])
 
         # start running
         self.timestamp_log_start()
@@ -28,9 +28,9 @@ class Verifix(AbstractRepairTool):
             "true" if self.is_debug else "false",
             join(
                 self.dir_setup,
-                bug_info[definitions.KEY_FIX_FILE].replace("buggy", "correct"),
+                bug_info[self.key_fix_file].replace("buggy", "correct"),
             ),
-            join(self.dir_setup, bug_info[definitions.KEY_FIX_FILE]),
+            join(self.dir_setup, bug_info[self.key_fix_file]),
             join(self.dir_expr, "base", "test"),
         )
         status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")

@@ -18,13 +18,13 @@ class Prophet(AbstractRepairTool):
         super(Prophet, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        self.file = bug_info[definitions.KEY_FIX_FILE]
+        conf_id = config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        self.file = bug_info[self.key_fix_file]
         revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
         self.generate_revlog(bug_info, revlog_file, bug_id)
-        timeout = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        timeout = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
             self.dir_logs, conf_id, self.name.lower(), bug_id
         )
@@ -64,7 +64,7 @@ class Prophet(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def generate_localization(self, bug_info, localization_file, dir_setup):
-        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        fix_location = bug_info[self.key_fix_loc]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
             source_file, line_number = fix_location.split(":")
@@ -92,10 +92,10 @@ class Prophet(AbstractRepairTool):
                     )
 
     def generate_revlog(self, experiment_info, revlog_file, bug_id):
-        subject_name = experiment_info[definitions.KEY_SUBJECT]
-        failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-        passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-        benchmark_name = experiment_info[definitions.KEY_BENCHMARK]
+        subject_name = experiment_info[self.key_subject]
+        failing_test_list = experiment_info[self.key_failing_tests]
+        passing_test_list = experiment_info[self.key_passing_tests]
+        benchmark_name = experiment_info[self.key_benchmark]
 
         test_config = ["-", "-"]
         test_config.append("Diff Cases: Tot {0}".format(len(failing_test_list)))

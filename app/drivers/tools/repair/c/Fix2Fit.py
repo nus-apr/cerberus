@@ -16,17 +16,17 @@ class Fix2Fit(AbstractRepairTool):
         if self.is_instrument_only:
             return
         conf_id = str(self.current_profile_id.get("NA"))
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        fix_location = bug_info[definitions.KEY_FIX_FILE]
+        bug_id = str(bug_info[self.key_bug_id])
+        fix_location = bug_info[self.key_fix_file]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
         )
         abs_path_binary = join(self.dir_expr, "src", bug_info[self.key_bin_path])
-        test_id_list = " ".join(bug_info[definitions.KEY_FAILING_TEST]) + " "
-        if bug_info[definitions.KEY_PASSING_TEST]:
+        test_id_list = " ".join(bug_info[self.key_failing_tests]) + " "
+        if bug_info[self.key_passing_tests]:
             filtered_list = self.filter_tests(
-                bug_info[definitions.KEY_PASSING_TEST],
+                bug_info[self.key_passing_tests],
                 bug_info[definitions.ARG_SUBJECT_NAME],
                 bug_id,
             )
@@ -51,8 +51,8 @@ class Fix2Fit(AbstractRepairTool):
             "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
             "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(config_info[self.key_test_timeout_TESTCASE]),
-            "TIMEOUT": "{}h; ".format(config_info[self.key_test_timeout]),
+            "T_TIMEOUT": "{}000".format(config_info[self.key_timeout_TESTCASE]),
+            "TIMEOUT": "{}h; ".format(config_info[self.key_timeout]),
             "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
         # repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
@@ -63,11 +63,11 @@ class Fix2Fit(AbstractRepairTool):
         # repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
         # repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
         # repair_command += "export BINARY={}; ".format(abs_path_binary)
-        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[self.key_test_timeout_TESTCASE])
-        # repair_command += "export TIMEOUT={}h; ".format(config_info[self.key_test_timeout])
+        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[self.key_timeout_TESTCASE])
+        # repair_command += "export TIMEOUT={}h; ".format(config_info[self.key_timeout])
         # repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[self.key_crash_cmd])
         repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
-            str(config_info[self.key_test_timeout])
+            str(config_info[self.key_timeout])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(

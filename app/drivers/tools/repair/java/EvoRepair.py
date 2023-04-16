@@ -21,8 +21,8 @@ class EvoRepair(AbstractRepairTool):
         repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
         config_object: Dict[str, Dict[str, Any]] = dict()
         config_object["project"] = dict()
-        subject_name = bug_info[definitions.KEY_SUBJECT]
-        bug_id = bug_info[definitions.KEY_BUG_ID]
+        subject_name = bug_info[self.key_subject]
+        bug_id = bug_info[self.key_bug_id]
         bug_name = f"{subject_name.lower()}_{bug_id}"
         self.bug_id = bug_name
         config_object["project"]["name"] = bug_name
@@ -53,7 +53,7 @@ class EvoRepair(AbstractRepairTool):
         config_object["build"] = build_config
 
         localize_config = dict()
-        localize_config["fix-locations"] = [bug_info[definitions.KEY_FIX_LOC]]
+        localize_config["fix-locations"] = [bug_info[self.key_fix_loc]]
         config_object["localization"] = localize_config
 
         self.write_file(json.dumps(config_object), repair_config_path)
@@ -69,7 +69,7 @@ class EvoRepair(AbstractRepairTool):
         """
 
         repair_config_path = self.generate_config_file(bug_info)
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
         max_iterations = 2000000
         test_timeout = 30000
         test_partitions = 1

@@ -27,7 +27,7 @@ class SAVER(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         if bug_type == "Memory Leak":
             compile_command = (
                 "infer -j 20 -g --headers --check-nullable-only -- make -j20"
@@ -50,10 +50,10 @@ class SAVER(AbstractAnalyzeTool):
     def run_analysis(self, bug_info, config_info):
         self.prepare(bug_info)
         super(SAVER, self).run_analysis(bug_info, config_info)
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
 
         if values.use_container:
             self.emit_error(
@@ -62,7 +62,7 @@ class SAVER(AbstractAnalyzeTool):
             error_exit("Unhandled Exception")
 
         self.timestamp_log_start()
-        bug_type = bug_info[definitions.KEY_BUG_TYPE]
+        bug_type = bug_info[self.key_bug_type]
         dir_src = join(self.dir_expr, "src")
         saver_command = "timeout -k 5m {0}h infer saver --pre-analysis-only {1}".format(
             str(timeout_h), additional_tool_param
@@ -96,7 +96,7 @@ class SAVER(AbstractAnalyzeTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        conf_id = str(self.current_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
             "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),

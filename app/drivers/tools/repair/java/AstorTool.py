@@ -25,7 +25,7 @@ class AstorTool(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(config_info[self.key_timeout])
         timeout_m = str(float(timeout_h) * 60)
         max_gen = 1000000
 
@@ -38,9 +38,7 @@ class AstorTool(AbstractRepairTool):
         list_deps = [
             f"{self.dir_expr}/{x}"
             for x in bug_info["dependencies"]
-            if not (
-                bug_info[definitions.KEY_SUBJECT].lower() == "lang" and "asm.jar" in x
-            )
+            if not (bug_info[self.key_subject].lower() == "lang" and "asm.jar" in x)
         ]
         list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
         list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")

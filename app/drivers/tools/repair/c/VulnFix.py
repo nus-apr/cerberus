@@ -31,8 +31,8 @@ class VulnFix(AbstractRepairTool):
                 "Please double check whether we are in VulnFix container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         # get ready the config file
         config_path = self.populate_config_file(bug_info)
 

@@ -22,9 +22,9 @@ class SenX(AbstractRepairTool):
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
         self.emit_normal(" instrumenting for " + self.name)
-        bug_id = bug_info[definitions.KEY_BUG_ID]
+        bug_id = bug_info[self.key_bug_id]
         conf_id = str(self.current_profile_id.get("NA"))
-        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = join(
             self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
         )
@@ -49,10 +49,10 @@ class SenX(AbstractRepairTool):
         if self.is_instrument_only:
             return
         self.emit_normal(" running repair with " + self.name)
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        timeout_h = str(config_info[self.key_test_timeout])
-        additional_tool_param = config_info[self.key_tool_param]
+        conf_id = config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        timeout_h = str(config_info[self.key_timeout])
+        additional_tool_param = config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
