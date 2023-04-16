@@ -118,14 +118,16 @@ def analyze_all(
 
     if not values.ui_active:
         if not tool_thread:
-            utilities.error_exit("Tool thread was not created somehow??")
+            utilities.error_exit(
+                "\t\t[framework] tool thread was not created somehow??"
+            )
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
         tool_thread.join(wait_time)
         if tool_thread.is_alive():
             emitter.highlight(
-                "\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(
+                "\t\t\t[framework] thread for {} is not done, setting event to kill thread.".format(
                     analyze_tool.name
                 )
             )
@@ -137,7 +139,7 @@ def analyze_all(
             # the loop before finally stopping.
         else:
             emitter.highlight(
-                "\t\t\t[info] {}: thread has already finished.".format(
+                "\t\t\t[framework] thread for {} has already finished.".format(
                     analyze_tool.name
                 )
             )

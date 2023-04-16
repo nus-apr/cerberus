@@ -290,16 +290,16 @@ def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any)
                 )
                 benchmark.update_dir_info(dir_info)
 
-            experiment_image_id = (
-                benchmark.get_exp_image(bug_index, values.only_test, cpu)
-                if values.use_container
-                else None
-            )
             for tool in tool_list:
                 iteration = iteration + 1
                 values.iteration_no = iteration
                 emitter.sub_sub_title(
                     "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                )
+                experiment_image_id = (
+                    benchmark.get_exp_image(bug_index, values.only_test, cpu)
+                    if values.use_container
+                    else None
                 )
                 task.run(
                     benchmark,
