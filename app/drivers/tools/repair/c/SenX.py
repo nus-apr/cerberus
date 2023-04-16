@@ -32,7 +32,7 @@ class SenX(AbstractRepairTool):
         command_str = "bash instrument.sh {}".format(self.dir_expr)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         self.emit_debug(
-            " Instrumentation took {} second(s)".format(
+            "instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -48,7 +48,6 @@ class SenX(AbstractRepairTool):
         super(SenX, self).run_repair(bug_info, config_info)
         if self.is_instrument_only:
             return
-        self.emit_normal(" running repair with " + self.name)
         conf_id = config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         timeout_h = str(config_info[self.key_timeout])
@@ -108,7 +107,6 @@ class SenX(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         if not self.dir_expr:

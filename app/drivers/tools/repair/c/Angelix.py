@@ -97,7 +97,7 @@ class Angelix(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
+
         # dir_artifact = dir_info["artifact"]
         # execute_command("rm /tmp/find_dir")
         # dir_patch = join(self.dir_expr, "patches")

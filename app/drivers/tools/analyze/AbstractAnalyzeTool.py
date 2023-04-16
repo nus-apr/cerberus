@@ -51,19 +51,19 @@ class AbstractAnalyzeTool(AbstractTool):
         )
 
     def emit_normal(self, message):
-        super().emit_normal("repair-tool", self.name, message)
+        super().emit_normal("analyze-tool", self.name, message)
 
     def emit_warning(self, message):
-        super().emit_warning("repair-tool", self.name, message)
+        super().emit_warning("analyze-tool", self.name, message)
 
     def emit_error(self, message):
-        super().emit_error("repair-tool", self.name, message)
+        super().emit_error("analyze-tool", self.name, message)
 
     def emit_highlight(self, message):
-        super().emit_highlight("repair-tool", self.name, message)
+        super().emit_highlight("analyze-tool", self.name, message)
 
     def emit_success(self, message):
-        super().emit_success("repair-tool", self.name, message)
+        super().emit_success("analyze-tool", self.name, message)
 
     def emit_debug(self, message):
-        super().emit_debug("repair-tool", self.name, message)
+        super().emit_debug("analyze-tool", self.name, message)

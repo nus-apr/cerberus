@@ -89,7 +89,6 @@ class FootPatch(AbstractRepairTool):
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info):
-        self.emit_normal(" saving artifacts of " + self.name)
         copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
             self.dir_expr, self.dir_output
         )
