@@ -50,7 +50,6 @@ class AbstractBenchmark(AbstractDriver):
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
     key_subject = definitions.KEY_SUBJECT
-    use_valkyrie = values.use_valkyrie
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
@@ -77,6 +76,7 @@ class AbstractBenchmark(AbstractDriver):
         if values.use_container:
             self.build_benchmark_image()
         self.load_meta_file()
+        self.use_valkyrie = values.use_valkyrie
 
     def read_file(self, container_id: Optional[str], file_path: str, encoding="utf-8"):
         return abstractions.read_file(container_id, file_path, encoding)

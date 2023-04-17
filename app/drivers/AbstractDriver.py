@@ -1,6 +1,7 @@
 import abc
 
 from app.core import emitter
+from app.core import values
 
 
 class AbstractDriver:
@@ -22,3 +23,7 @@ class AbstractDriver:
 
     def emit_debug(self, abstraction, concrete, message):
         emitter.debug(f"\t\t\t[{abstraction}][{concrete}] {message}")
+
+    def get_config_value(self, config_name):
+        config_val = getattr(values, config_name)  # Same as someClass = foo.Class3
+        return config_val

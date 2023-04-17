@@ -35,7 +35,7 @@ class AbstractTool(AbstractDriver):
     _time = stats.TimeStats()
     _space = stats.SpaceStats()
     _error = stats.ErrorStats()
-    current_profile_id = values.current_profile_id
+
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
     key_id = definitions.KEY_ID
@@ -46,19 +46,18 @@ class AbstractTool(AbstractDriver):
     key_source = definitions.KEY_SOURCE
     key_sink = definitions.KEY_SINK
 
-    is_ui_active = values.ui_active
-    is_only_instrument = values.only_instrument
-    is_debug = values.debug
-    is_dump_patches = values.dump_patches
-
-    use_container = values.use_container
-    use_valkyrie = values.use_valkyrie
-    use_gpu = values.use_gpu
-
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
+        self.is_ui_active = values.ui_active
+        self.is_only_instrument = values.only_instrument
+        self.is_debug = values.debug
+        self.is_dump_patches = values.dump_patches
+        self.current_profile_id = values.current_profile_id
+        self.use_container = values.use_container
+        self.use_valkyrie = values.use_valkyrie
+        self.use_gpu = super().get_config_value("use_gpu")
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
