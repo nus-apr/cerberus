@@ -93,6 +93,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def setup_cpu_allocation(self):
         self.max_jobs = values.cpus
+        self.free_jobs = values.cpus
+        self.job_condition = threading.Condition()
         self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
             self.cpu_queue.put(cpu)
@@ -159,6 +161,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
                 complete_images: queue.Queue[Tuple[Any, bool]] = queue.Queue(0)
 
+                # The Logic here is currently differernt as one generally just needs a single CPU to build a project
                 def job(benchmark: AbstractBenchmark, experiment_item):
                     cpu = self.cpu_queue.get(block=True, timeout=None)
                     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
@@ -322,14 +325,25 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         loop = asyncio.get_running_loop()
 
         def job():
-            self.update_status(message.identifier, "Waiting for CPU")
             cpus: List[int] = []
-            for _ in range(
+            required_cpu_cores = max(
+                message.tool.cpu_usage,
                 message.container_config_info.get(
                     definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
-                )
-            ):
-                cpus.append(self.cpu_queue.get(block=True, timeout=None))
+                ),
+            )
+            self.update_status(
+                message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
+            )
+
+            with self.job_condition:
+                while self.free_jobs < required_cpu_cores:
+                    self.job_condition.wait()
+                self.debug_print("Getting {} CPU cores".format(required_cpu_cores))
+                self.free_jobs = self.free_jobs - required_cpu_cores
+                for _ in range(required_cpu_cores):
+                    cpus.append(self.cpu_queue.get(block=True, timeout=None))
+
             values.job_identifier.set(message.identifier)
             values.current_repair_profile_id.set(
                 message.repair_config_info[definitions.KEY_ID]
@@ -402,8 +416,12 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         row_data,
                     )
                 )
-            for cpu in cpus:
-                self.cpu_queue.put(cpu)
+            with self.job_condition:
+                for cpu in cpus:
+                    self.cpu_queue.put(cpu)
+                self.free_jobs += required_cpu_cores
+                self.debug_print("Putting back {} cores".format(required_cpu_cores))
+                self.job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
         self.jobs[message.identifier] = task_future
