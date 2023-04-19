@@ -439,6 +439,7 @@ def run(
             dir_archive = join(values.dir_results, tool.name)
             dir_result = dir_info["local"]["results"]
             utilities.archive_results(dir_result, dir_archive)
-            utilities.clean_artifacts(dir_result)
+            if values.compact_results:
+                utilities.clean_artifacts(dir_result)
 
     construct_summary()

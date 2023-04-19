@@ -110,6 +110,7 @@ class Configurations:
         "only-setup": False,
         "rebuild-all": False,
         "rebuild-base": False,
+        "compact-results": False,
         "subject-name": None,
         "benchmark-name": None,
         "dump-patches": False,
@@ -220,6 +221,9 @@ class Configurations:
                 arg_list.skip_index_list
             ).split(",")
 
+        if arg_list.compact_results:
+            self.__runtime_config_values["compact-results"] = arg_list.compact_results
+
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
@@ -267,6 +271,7 @@ class Configurations:
             "end-index",
             "skip-index-list",
             "use-gpu",
+            "compact-results",
             "repair-profile-id-list",
             "container-profile-id-list",
             "docker-host",
@@ -365,6 +370,7 @@ class Configurations:
                 "[warning] Experiment id is not specified, running all experiments"
             )
 
+        values.compact_results = self.__runtime_config_values["compact-results"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]

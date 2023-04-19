@@ -82,6 +82,7 @@ rebuild_all = False
 rebuild_base = False
 ui_active = False
 use_parallel = False
+compact_results = False
 cpus = 1
 task_type: Optional[str] = None
 ui_max_width = 1000

@@ -23,9 +23,9 @@ def run_repair(
     benchmark_name: str,
 ):
     fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = [
-        str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
-    ]
+    fix_line_numbers = list(
+        map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
+    )
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
@@ -253,7 +253,6 @@ def repair_all(
     if not values.ui_active:
         if tool_thread is None:
             utilities.error_exit("Thread was not created")
-            return
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()

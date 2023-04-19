@@ -166,6 +166,12 @@ def parse_args():
         default=False,
     )
     optional.add_argument(
+        definitions.ARG_COMPACT_RESUTLS,
+        help="compact results of runs - deletes artifacts after compressing",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
         definitions.ARG_REBUILD_BASE_IMAGE,
         help="rebuild the base images",
         action="store_true",
