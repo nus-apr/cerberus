@@ -33,7 +33,6 @@ from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import email
-from app.ui.datatable import CustomDataTable
 from app.ui.messages import JobAllocate
 from app.ui.messages import JobFinish
 from app.ui.messages import JobMount
@@ -100,7 +99,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.cpu_queue.put(cpu)
 
     def setup_column_keys(self):
-        for table in self.query(CustomDataTable):
+        for table in self.query(DataTable):
             column_keys = table.add_columns(*Cerberus.COLUMNS.keys())
             if not table.id:
                 utilities.error_exit(
@@ -219,11 +218,11 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             return
         self.debug_print("Changing table!")
         try:
-            self.selected_table: CustomDataTable
+            self.selected_table: DataTable
 
             self.hide(self.selected_table)
 
-            self.selected_table = self.query_one(new_id, CustomDataTable)
+            self.selected_table = self.query_one(new_id, DataTable)
 
             self.show(self.selected_table)
         except Exception as e:
@@ -282,9 +281,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                             container_config_info[definitions.KEY_ID],
                         )
 
-                        _ = self.query_one(
-                            "#" + all_subjects_id, CustomDataTable
-                        ).add_row(
+                        _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
                             iteration,
                             benchmark.name,
                             tool.name,
@@ -367,7 +364,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             )
 
             running_row_key = self.query_one(
-                "#" + running_subjects_id, CustomDataTable
+                "#" + running_subjects_id, DataTable
             ).add_row(
                 *row_data,
                 key=message.identifier,
@@ -406,7 +403,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
                 self.call_from_thread(
                     lambda: self.query_one(
-                        "#" + running_subjects_id, CustomDataTable
+                        "#" + running_subjects_id, DataTable
                     ).remove_row(running_row_key)
                 )
                 self.post_message(
@@ -434,7 +431,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 status,
                 update_width=True,
             )
-        self.query_one("#" + all_subjects_id, CustomDataTable).update_cell(
+        self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
             Cerberus.COLUMNS["Status"][all_subjects_id],
             status,
@@ -452,9 +449,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         # self.update_status(message.key, str(message.status))
         try:
             finished_subjects_table = self.query_one(
-                "#" + finished_subjects_id, CustomDataTable
+                "#" + finished_subjects_id, DataTable
             )
-            all_subjects_table = self.query_one("#" + all_subjects_id, CustomDataTable)
+            all_subjects_table = self.query_one("#" + all_subjects_id, DataTable)
             row_key = finished_subjects_table.add_row(
                 *message.row_data,
                 key=message.key,
@@ -473,7 +470,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             )
             if message.status is not TaskStatus.SUCCESS:
                 error_subjects_table = self.query_one(
-                    "#" + error_subjects_id, CustomDataTable
+                    "#" + error_subjects_id, DataTable
                 )
                 row_key = error_subjects_table.add_row(
                     *message.row_data,
@@ -531,7 +528,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def compose(self) -> ComposeResult:
         def create_table(id: str):
-            table: CustomDataTable = CustomDataTable(id=id)
+            table: DataTable = DataTable(id=id)
             table.cursor_type = "row"
             table.styles.border = ("heavy", "white")
             return table
