@@ -223,6 +223,14 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_CONTAINER_PROFILE_ID_LIST,
+        help="multiple list of container configuration profiles",
+        dest="container_profile_id_list",
+        nargs="+",
+        default=[],
+    )
+
+    optional.add_argument(
         definitions.ARG_RUNS,
         help="number of runs for an experiment",
         type=int,
@@ -269,50 +277,78 @@ def parse_args():
     return args
 
 
-def run(tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
+def run(
+    tool_list: List[AbstractTool],
+    benchmark: AbstractBenchmark,
+    setup: Any,
+    container_setup: Any,
+):
     emitter.sub_title(f"Running {values.task_type} task")
     iteration = 0
-    for config_info in map(
-        lambda profile_id: setup[profile_id], values.profile_id_list
-    ):
-        values.current_profile_id.set(config_info[definitions.KEY_ID])
-        for experiment_item in filter_experiment_list(benchmark):
-            bug_index = experiment_item[definitions.KEY_ID]
-            cpu = ",".join(map(str, range(values.cpus)))
-            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-            subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-            if values.use_container:
-                values.job_identifier.set(
-                    "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
-                )
-            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
-            benchmark.update_dir_info(dir_info)
-            experiment_image_id = None
-            if values.only_setup:
-                iteration = iteration + 1
-                values.iteration_no = iteration
-                emitter.sub_sub_title(
-                    "Experiment #{} - Bug #{}".format(iteration, bug_index)
-                )
-                task.prepare(benchmark, experiment_item, cpu)
 
-            for tool in tool_list:
-                iteration = iteration + 1
-                values.iteration_no = iteration
-                emitter.sub_sub_title(
-                    "Experiment #{} - Bug #{}".format(iteration, bug_index)
+    for container_config_info in map(
+        lambda container_profile_id: container_setup[container_profile_id],
+        values.container_profile_id_list,
+    ):
+        for config_info in map(
+            lambda profile_id: setup[profile_id], values.profile_id_list
+        ):
+            values.current_profile_id.set(config_info[definitions.KEY_ID])
+            values.current_container_profile_id.set(
+                container_config_info[definitions.KEY_ID]
+            )
+            for experiment_item in filter_experiment_list(benchmark):
+                bug_index = experiment_item[definitions.KEY_ID]
+                cpu = ",".join(
+                    map(
+                        str,
+                        range(
+                            container_config_info.get(
+                                definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                            )
+                        ),
+                    )
                 )
-                if experiment_image_id is None:
-                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
-                task.run(
-                    benchmark,
-                    tool,
-                    experiment_item,
-                    config_info,
-                    str(bug_index),
-                    cpu,
-                    experiment_image_id,
+                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                if values.use_container:
+                    values.job_identifier.set(
+                        "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                    )
+                dir_info = task.generate_dir_info(
+                    benchmark.name, subject_name, bug_name
                 )
+                benchmark.update_dir_info(dir_info)
+                experiment_image_id = None
+                if values.only_setup:
+                    iteration = iteration + 1
+                    values.iteration_no = iteration
+                    emitter.sub_sub_title(
+                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                    )
+                    task.prepare(benchmark, experiment_item, cpu)
+                    continue
+
+                for tool in tool_list:
+                    iteration = iteration + 1
+                    values.iteration_no = iteration
+                    emitter.sub_sub_title(
+                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                    )
+                    if experiment_image_id is None:
+                        experiment_image_id = task.prepare(
+                            benchmark, experiment_item, cpu
+                        )
+                    task.run(
+                        benchmark,
+                        tool,
+                        experiment_item,
+                        config_info,
+                        container_config_info,
+                        str(bug_index),
+                        cpu,
+                        experiment_image_id,
+                    )
 
 
 def get_setup() -> Any:
@@ -322,6 +358,19 @@ def get_setup() -> Any:
         if profile_id not in setup:
             utilities.error_exit("Invalid profile id {}".format(profile_id))
     return setup
+
+
+def get_container_setup() -> Any:
+    emitter.sub_title("Initializing container setup")
+    container_setup = configuration.load_configuration_details(
+        values.file_container_configuration
+    )
+    for container_profile_id in values.container_profile_id_list:
+        if container_profile_id not in container_setup:
+            utilities.error_exit(
+                "Invalid container profile id {}".format(container_profile_id)
+            )
+    return container_setup
 
 
 def get_tools() -> List[AbstractTool]:
@@ -394,7 +443,7 @@ def main():
                 )
             ui.setup_ui()
         else:
-            run(get_tools(), get_benchmark(), get_setup())
+            run(get_tools(), get_benchmark(), get_setup(), get_container_setup())
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:

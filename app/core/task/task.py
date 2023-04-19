@@ -172,9 +172,12 @@ def create_running_container(
     bug_image_id: str,
     repair_tool: AbstractTool,
     dir_info: Dict[str, Dict[str, str]],
+    image_name: str,
     container_name: str,
     cpu: str,
+    container_config_info: Dict[str, Any],
 ):
+    image_name = image_name.lower()
     container_id = container.get_container_id(container_name)
     if container_id:
         container.stop_container(container_id)
@@ -194,7 +197,7 @@ def create_running_container(
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
     if (
-        not container.image_exists(container_name.lower())
+        not container.image_exists(image_name)
         or values.rebuild_base
         or values.rebuild_all
     ):
@@ -215,11 +218,11 @@ def create_running_container(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
-        container.build_image(tmp_dockerfile, container_name.lower())
+        container.build_image(tmp_dockerfile, image_name)
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
     tmp_container_id = container.build_container(
-        container_name, dict(), container_name.lower(), cpu
+        container_name, dict(), image_name, cpu, container_config_info
     )
     if not tmp_container_id:
         utilities.error_exit("Could not create temporary container")
@@ -231,7 +234,7 @@ def create_running_container(
         container.stop_container(tmp_container_id)
         container.remove_container(tmp_container_id)
     container_id = container.build_container(
-        container_name, volume_list, container_name.lower(), cpu
+        container_name, volume_list, image_name, cpu, container_config_info
     )
     return container_id
 
@@ -278,6 +281,7 @@ def run(
     tool: AbstractTool,
     bug_info: Dict[str, Any],
     config_info: Dict[str, Any],
+    container_config_info: Dict[str, Any],
     run_identifier: str,
     cpu: str,
     expriment_image_id: Optional[str],
@@ -285,12 +289,22 @@ def run(
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     config_id = config_info[definitions.KEY_ID]
+    container_config_id = container_config_info[definitions.KEY_ID]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
         config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
-    tag_name = "-".join([config_id, tool.name, benchmark.name, subject_name, bug_name])
+    tag_name = "-".join(
+        [
+            config_id,
+            container_config_id,
+            tool.name,
+            benchmark.name,
+            subject_name,
+            bug_name,
+        ]
+    )
     dir_info = generate_tool_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     benchmark.update_dir_info(dir_info)
     emitter.highlight(
@@ -306,6 +320,27 @@ def run(
         "\t\t[profile] Test-suite ratio: "
         + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
+
+    emitter.highlight(
+        "\t\t[container profile] Identifier: "
+        + container_config_info[definitions.KEY_ID]
+    )
+
+    emitter.highlight(
+        "\t\t[container profile] CPU Count: "
+        + str(container_config_info[definitions.KEY_CONTAINER_CPU_COUNT])
+    )
+
+    emitter.highlight(
+        "\t\t[container profile] RAM Limit: "
+        + container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
+    )
+
+    emitter.highlight(
+        "\t\t[container profile] Enable Network: "
+        + str(container_config_info[definitions.KEY_CONTAINER_ENABLE_NETWORK])
+    )
+
     emitter.highlight("\t\t[meta-data] Project: {}".format(subject_name))
     emitter.highlight("\t\t[meta-data] Bug ID: {}".format(bug_name))
     emitter.highlight(
@@ -334,6 +369,7 @@ def run(
                 "-".join(
                     [
                         config_id,
+                        container_config_id,
                         benchmark.name,
                         tool.name,
                         subject_name,
@@ -352,16 +388,23 @@ def run(
         utilities.clean_artifacts(dir_logs_local)
         benchmark.update_dir_info(dir_info)
         if values.use_container and expriment_image_id:
-            container_name = "{}-{}-{}-{}".format(
+            image_name = "{}-{}-{}-{}".format(
                 tool.name, benchmark.name, subject_name, bug_name
             )
+            container_name = "{}-{}".format(container_config_id, image_name)
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a Dockerfile: {}".format(tool.name)
                 )
 
             container_id = create_running_container(
-                expriment_image_id, tool, dir_info, container_name, cpu
+                expriment_image_id,
+                tool,
+                dir_info,
+                image_name,
+                container_name,
+                cpu,
+                container_config_info,
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")

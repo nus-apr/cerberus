@@ -124,6 +124,7 @@ class Configurations:
         "tool-list": [],
         "directories": {"data": "/data"},
         "profile-id-list": ["C1"],
+        "container-profile-id-list": ["CC1"],
     }
     __runtime_config_values = __default_config_values
 
@@ -227,6 +228,11 @@ class Configurations:
 
         if arg_list.profile_id_list:
             self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+
+        if arg_list.container_profile_id_list:
+            self.__runtime_config_values[
+                "container-profile-id-list"
+            ] = arg_list.container_profile_id_list
 
     def read_config_file(self):
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
@@ -341,6 +347,9 @@ class Configurations:
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
         values.profile_id_list = self.__runtime_config_values["profile-id-list"]
+        values.container_profile_id_list = self.__runtime_config_values[
+            "container-profile-id-list"
+        ]
         values.use_parallel = self.__runtime_config_values["parallel"]
 
         if (

@@ -22,6 +22,7 @@ class JobAllocate(Message):
         tool: AbstractTool,
         experiment_item,
         config_info: Dict[str, Any],
+        container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
     ) -> None:
@@ -30,6 +31,7 @@ class JobAllocate(Message):
         self.tool = tool
         self.experiment_item = experiment_item
         self.config_info = config_info
+        self.container_config_info = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
         super().__init__()

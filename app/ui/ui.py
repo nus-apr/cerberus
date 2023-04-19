@@ -58,6 +58,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         "Subject": {},
         "Bug ID": {},
         "Configuration Profile": {},
+        "Container Configuration Profile": {},
         "Status": {},
         "Patches Generated": {},
     }
@@ -149,6 +150,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.query_one(Static).update("Cerberus is getting setup data")
             setup = main.get_setup()
 
+            self.query_one(Static).update("Cerberus is getting container setup data")
+            container_setup = main.get_container_setup()
+
             if values.use_container:
                 self.query_one(Static).update(
                     "Cerberus is preparing the subject images."
@@ -199,7 +203,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.is_preparing = False
 
             self.show(self.query_one("#" + all_subjects_id))
-            self.run_tasks(tools, benchmark, setup)
+            self.run_tasks(tools, benchmark, setup, container_setup)
         except Exception as e:
             self.show(self.query_one(Static))
             self.query_one(Static).update(
@@ -239,63 +243,72 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         tool_list: List[AbstractTool],
         benchmark: AbstractBenchmark,
         setup: Any,
+        container_setup: Any,
     ):
         utilities.check_space()
         iteration = 0
-        for config_info in map(lambda x: setup[x], values.profile_id_list):
-            for experiment_item in main.filter_experiment_list(benchmark):
-                bug_index = experiment_item[definitions.KEY_ID]
+        for container_config_info in map(
+            lambda x: container_setup[x], values.container_profile_id_list
+        ):
+            for config_info in map(lambda x: setup[x], values.profile_id_list):
+                for experiment_item in main.filter_experiment_list(benchmark):
+                    bug_index = experiment_item[definitions.KEY_ID]
 
-                # The experiment should be buit at this point, hardcoded cpu should not be a problem
-                experiment_image_id = (
-                    benchmark.get_exp_image(bug_index, values.only_test, "0")
-                    if values.use_container
-                    else None
-                )
+                    # The experiment should be built at this point, hardcoded cpu should not be a problem
+                    experiment_image_id = (
+                        benchmark.get_exp_image(bug_index, values.only_test, "0")
+                        if values.use_container
+                        else None
+                    )
 
-                for tool in tool_list:
-                    iteration = iteration + 1
-                    emitter.sub_sub_title(
-                        "Experiment #{} - Bug #{} Tool {}".format(
-                            iteration, bug_index, tool.name
+                    for tool in tool_list:
+                        iteration = iteration + 1
+                        emitter.sub_sub_title(
+                            "Experiment #{} - Bug #{} Tool {}".format(
+                                iteration, bug_index, tool.name
+                            )
                         )
-                    )
-                    key = "{}-{}-{}-{}-{}".format(
-                        benchmark.name,
-                        tool.name,
-                        experiment_item[definitions.KEY_SUBJECT],
-                        experiment_item[definitions.KEY_BUG_ID],
-                        config_info[definitions.KEY_ID],
-                    )
+                        key = "{}-{}-{}-{}-{}-{}".format(
+                            benchmark.name,
+                            tool.name,
+                            experiment_item[definitions.KEY_SUBJECT],
+                            experiment_item[definitions.KEY_BUG_ID],
+                            config_info[definitions.KEY_ID],
+                            container_config_info[definitions.KEY_ID],
+                        )
 
-                    _ = self.query_one("#" + all_subjects_id, CustomDataTable).add_row(
-                        iteration,
-                        benchmark.name,
-                        tool.name,
-                        experiment_item[definitions.KEY_SUBJECT],
-                        experiment_item[definitions.KEY_BUG_ID],
-                        config_info[definitions.KEY_ID],
-                        "Allocated",
-                        "None",
-                        key=key,
-                    )
-
-                    log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
-                    self.hide(log_map[key])
-
-                    self.post_message(JobMount(key))
-                    self.post_message(
-                        JobAllocate(
+                        _ = self.query_one(
+                            "#" + all_subjects_id, CustomDataTable
+                        ).add_row(
                             iteration,
-                            deepcopy(benchmark),
-                            deepcopy(tool),
-                            experiment_item,
-                            config_info,
-                            experiment_image_id,
-                            key,
+                            benchmark.name,
+                            tool.name,
+                            experiment_item[definitions.KEY_SUBJECT],
+                            experiment_item[definitions.KEY_BUG_ID],
+                            config_info[definitions.KEY_ID],
+                            container_config_info[definitions.KEY_ID],
+                            "Allocated",
+                            "None",
+                            key=key,
                         )
-                    )
-        self.jobs_remaining = iteration
+
+                        log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
+                        self.hide(log_map[key])
+
+                        self.post_message(JobMount(key))
+                        self.post_message(
+                            JobAllocate(
+                                iteration,
+                                deepcopy(benchmark),
+                                deepcopy(tool),
+                                experiment_item,
+                                config_info,
+                                container_config_info,
+                                experiment_image_id,
+                                key,
+                            )
+                        )
+            self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
         if message.key == "escape":
@@ -309,10 +322,17 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         def job():
             self.update_status(message.identifier, "Waiting for CPU")
             cpus = []
-            for _ in range(message.tool.cpu_usage):
+            for _ in range(
+                message.container_config_info.get(
+                    definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
+                )
+            ):
                 cpus.append(self.cpu_queue.get(block=True, timeout=None))
             values.job_identifier.set(message.identifier)
             values.current_profile_id.set(message.config_info[definitions.KEY_ID])
+            values.current_container_profile_id.set(
+                message.container_config_info[definitions.KEY_ID]
+            )
 
             self.update_status(message.identifier, "Running")
 
@@ -323,6 +343,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 message.experiment_item[definitions.KEY_SUBJECT],
                 message.experiment_item[definitions.KEY_BUG_ID],
                 message.config_info[definitions.KEY_ID],
+                message.container_config_info[definitions.KEY_ID],
                 "Running",
                 "None",
             )
@@ -345,13 +366,15 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     ),
                     message.tool,
                 )
+                cpu = ",".join(map(str, cpus))
                 task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
                     message.config_info,
+                    message.container_config_info,
                     message.identifier,
-                    ",".join(map(str, cpus)),
+                    cpu,
                     message.experiment_image_id,
                 )
             except Exception as e:
