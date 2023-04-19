@@ -177,7 +177,7 @@ def build_container(
     volume_list,
     image_name: str,
     cpu: str,
-    container_config_dict: Union[Dict[Any, Any], None] = None,
+    container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
     emitter.normal(
