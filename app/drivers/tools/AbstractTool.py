@@ -54,7 +54,6 @@ class AbstractTool(AbstractDriver):
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug
         self.is_dump_patches = values.dump_patches
-        self.current_profile_id = values.current_profile_id
         self.use_container = values.use_container
         self.use_valkyrie = values.use_valkyrie
         self.use_gpu = super().get_config_value("use_gpu")
