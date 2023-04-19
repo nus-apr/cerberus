@@ -178,7 +178,7 @@ class AbstractTool(AbstractDriver):
         if values.use_container:
             if self.image_name is None:
                 utilities.error_exit(
-                    "{} does not provide a Docker Image".format(self.name)
+                    "\t[framework] {} does not provide a Docker Image".format(self.name)
                 )
             if ":" in self.image_name:
                 repo_name, tag_name = self.image_name.split(":")
@@ -187,13 +187,13 @@ class AbstractTool(AbstractDriver):
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
-                    "[framework] docker image {}:{} not found in Docker registry".format(
+                    "\t[framework] docker image {}:{} not found in Docker registry".format(
                         repo_name, tag_name
                     )
                 )
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
-                        "{} does not provide a Docker image in Dockerhub".format(
+                        "\t[framework] {} does not provide a Docker image in Dockerhub".format(
                             self.name
                         )
                     )
@@ -215,7 +215,7 @@ class AbstractTool(AbstractDriver):
 
                 if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
                     emitter.information(
-                        "[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                        "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                     )
                     values.rebuild_all = True
 
