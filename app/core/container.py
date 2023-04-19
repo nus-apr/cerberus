@@ -1,13 +1,16 @@
 import json
 import os
 import random
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 
 import docker  # type: ignore
 
+from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
@@ -170,7 +173,11 @@ def get_container_id(container_name: str) -> Optional[str]:
 
 
 def build_container(
-    container_name: str, volume_list, image_name: str, cpu: str
+    container_name: str,
+    volume_list,
+    image_name: str,
+    cpu: str,
+    container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
     emitter.normal(
@@ -183,24 +190,37 @@ def build_container(
             if local_dir_path == "/var/run/docker.sock":
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
+
+        container_run_args = {
+            "detach": True,
+            "name": container_name,
+            "volumes": volume_list,
+            "privileged": True,
+            "cpuset_cpus": cpu,
+            "tty": True,
+            "runtime": "nvidia" if values.use_gpu else "runc",
+        }
+
+        default_mem_limit = "32g"
+        if container_config_dict:
+            container_run_args["mem_limit"] = container_config_dict.get(
+                definitions.KEY_CONTAINER_MEM_LIMIT, default_mem_limit
+            )
+
+            if not container_config_dict.get(
+                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+            ):
+                container_run_args["network_mode"] = None
+                container_run_args["network_disabled"] = False
+        else:
+            container_run_args["mem_limit"] = default_mem_limit
+
         emitter.debug(
-            "\t\t\t[framework] container runtime is {}".format(
-                "nvidia" if values.use_gpu else "runc"
+            "\t\t\t[framework] container {} is build with the following args {}".format(
+                container_name, container_run_args
             )
         )
-        container = client.containers.run(
-            image_name,
-            detach=True,
-            name=container_name,
-            volumes=volume_list,
-            privileged=True,
-            # network_mode=None,
-            # network_disabled=True,
-            mem_limit="32g",
-            cpuset_cpus=cpu,
-            tty=True,
-            runtime="nvidia" if values.use_gpu else "runc",
-        )
+        container = client.containers.run(image_name, **container_run_args)
         container_id = container.id  # type: ignore
         return container_id[:12]  # type: ignore
     except docker.errors.ContainerError as ex:  # type: ignore

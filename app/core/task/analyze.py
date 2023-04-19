@@ -16,7 +16,7 @@ def run_analysis(
     dir_info: Dict[str, Dict[str, str]],
     experiment_info,
     tool: AbstractAnalyzeTool,
-    config_info: Dict[str, Any],
+    repair_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -27,11 +27,13 @@ def run_analysis(
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
-    if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
-    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    test_timeout = int(config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
+    test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_timeout = int(
+        repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
+    )
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
@@ -43,16 +45,16 @@ def run_analysis(
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
+    repair_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
     tool.update_info(container_id, values.only_instrument, dir_info)
-    tool.run_analysis(experiment_info, config_info)
+    tool.run_analysis(experiment_info, repair_config_info)
 
 
 def analyze_all(
     dir_info: Any,
     experiment_info: Dict[str, Any],
     analyze_tool: AbstractAnalyzeTool,
-    config_info,
+    repair_config_info,
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -60,7 +62,7 @@ def analyze_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
-    time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    time_duration = float(repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     total_timeout = time.time() + 60 * 60 * time_duration
 
     if values.use_valkyrie:
@@ -71,7 +73,7 @@ def analyze_all(
             dir_info,
             experiment_info,
             analyze_tool,
-            config_info,
+            repair_config_info,
             container_id,
             benchmark_name,
         )
@@ -81,22 +83,22 @@ def analyze_all(
             dir_info,
             experiment_info,
             repair_tool,
-            config_info,
+            repair_config_info,
             container_id,
             benchmark_name,
-            profile_id,
+            repair_profile_id,
             job_identifier,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
-            values.current_profile_id.set(profile_id)
+            values.current_repair_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
             run_analysis(
                 dir_info,
                 experiment_info,
                 repair_tool,
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark_name,
             )
@@ -107,10 +109,10 @@ def analyze_all(
                 dir_info,
                 experiment_info,
                 analyze_tool,
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark_name,
-                values.current_profile_id.get("NA"),
+                values.current_repair_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
             ),
         )

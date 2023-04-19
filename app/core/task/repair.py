@@ -18,22 +18,24 @@ def run_repair(
     dir_info: Dict[str, Dict[str, str]],
     experiment_info,
     tool: AbstractRepairTool,
-    config_info: Dict[str, Any],
+    repair_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
     fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = [
-        str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
-    ]
+    fix_line_numbers = list(
+        map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
+    )
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
-    if config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
-    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    test_timeout = int(config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
+    test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_timeout = int(
+        repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
+    )
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
     if str(passing_id_list_str).replace(",", "").isnumeric():
@@ -45,9 +47,9 @@ def run_repair(
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
+    repair_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
     tool.update_info(container_id, values.only_instrument, dir_info)
-    tool.run_repair(experiment_info, config_info)
+    tool.run_repair(experiment_info, repair_config_info)
 
 
 def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmark_name):
@@ -127,7 +129,7 @@ def repair_all(
     dir_info: Any,
     experiment_info: Dict[str, Any],
     repair_tool: AbstractRepairTool,
-    config_info,
+    repair_config_info,
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -135,13 +137,13 @@ def repair_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
-    time_duration = float(config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    time_duration = float(repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
 
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
-    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     if str(passing_id_list_str).replace(",", "").isnumeric():
         passing_test_list = passing_id_list_str.split(",")
     failing_test_list = str(
@@ -162,7 +164,7 @@ def repair_all(
         patch_dir, dir_process, binary_path, oracle_path = valkyrie_setup_info
         v_path_info = (binary_path, oracle_path, fix_source_file)
         v_dir_info = (patch_dir, dir_process)
-        v_config_info = (
+        v_repair_config_info = (
             validation_test_list,
             is_rank,
             total_timeout,
@@ -170,22 +172,26 @@ def repair_all(
         )
 
         def consume_patches_wrapped(
-            v_path_info, v_dir_info, v_config_info, profile_id, job_identifier
+            v_path_info,
+            v_dir_info,
+            v_repair_config_info,
+            repair_profile_id,
+            job_identifier,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
-            values.current_profile_id.set(profile_id)
+            values.current_repair_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
-            parallel.consume_patches(v_path_info, v_dir_info, v_config_info)
+            parallel.consume_patches(v_path_info, v_dir_info, v_repair_config_info)
 
         consume_thread = threading.Thread(
             target=consume_patches_wrapped,
             args=(
                 v_path_info,
                 v_dir_info,
-                v_config_info,
-                values.current_profile_id.get("NA"),
+                v_repair_config_info,
+                values.current_repair_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
             ),
         )
@@ -199,7 +205,7 @@ def repair_all(
             dir_info,
             experiment_info,
             repair_tool,
-            config_info,
+            repair_config_info,
             container_id,
             benchmark_name,
         )
@@ -209,22 +215,22 @@ def repair_all(
             dir_info,
             experiment_info,
             repair_tool,
-            config_info,
+            repair_config_info,
             container_id,
             benchmark_name,
-            profile_id,
+            repair_profile_id,
             job_identifier,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
-            values.current_profile_id.set(profile_id)
+            values.current_repair_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
             run_repair(
                 dir_info,
                 experiment_info,
                 repair_tool,
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark_name,
             )
@@ -235,10 +241,10 @@ def repair_all(
                 dir_info,
                 experiment_info,
                 repair_tool,
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark_name,
-                values.current_profile_id.get("NA"),
+                values.current_repair_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
             ),
         )
@@ -247,7 +253,6 @@ def repair_all(
     if not values.ui_active:
         if tool_thread is None:
             utilities.error_exit("Thread was not created")
-            return
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()

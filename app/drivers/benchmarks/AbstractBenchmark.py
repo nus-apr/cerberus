@@ -72,7 +72,8 @@ class AbstractBenchmark(AbstractDriver):
                     "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
                 )
         self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
-        self.image_name = "{}-benchmark".format(self.name)
+        if self.image_name == "":
+            self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
             self.build_benchmark_image()
         self.load_meta_file()

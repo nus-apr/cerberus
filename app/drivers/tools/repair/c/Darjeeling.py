@@ -22,12 +22,12 @@ class Darjeeling(AbstractRepairTool):
         """
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = (
             self.dir_logs
             + "/"
-            + conf_id
+            + repair_conf_id
             + "-"
             + self.name
             + "-"
@@ -47,17 +47,17 @@ class Darjeeling(AbstractRepairTool):
             )
         return
 
-    def run_repair(self, bug_info, config_info):
-        super(Darjeeling, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(Darjeeling, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
         bug_id = str(bug_info[self.key_bug_id])
-        timeout = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+        timeout = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(
-                str(self.current_profile_id.get("NA")), self.name.lower(), bug_id
+                str(self.current_repair_profile_id.get("NA")), self.name.lower(), bug_id
             ),
         )
         dir_patch = self.dir_output + "/patches"
@@ -88,10 +88,10 @@ class Darjeeling(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

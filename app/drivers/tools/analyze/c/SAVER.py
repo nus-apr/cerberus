@@ -41,13 +41,13 @@ class SAVER(AbstractAnalyzeTool):
             )
         )
 
-    def run_analysis(self, bug_info, config_info):
+    def run_analysis(self, bug_info, repair_config_info):
         self.prepare(bug_info)
-        super(SAVER, self).run_analysis(bug_info, config_info)
+        super(SAVER, self).run_analysis(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        timeout_h = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
 
         if self.use_container:
             self.emit_error(
@@ -82,10 +82,10 @@ class SAVER(AbstractAnalyzeTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

@@ -1,0 +1,62 @@
+{
+  "CC1": {
+    "id": "CC1",
+    "cpu_count": 2,
+    "mem_limit": "16g",
+    "enable_network": true
+  },
+  "CC2": {
+    "id": "CC2",
+    "cpu_count": 2,
+    "mem_limit": "32g",
+    "enable_network": true
+  },
+  "CC3": {
+    "id": "CC3",
+    "cpu_count": 4,
+    "mem_limit": "16g",
+    "enable_network": true
+  },
+  "CC4": {
+    "id": "CC4",
+    "cpu_count": 4,
+    "mem_limit": "32g",
+    "enable_network": true
+  },
+  "CC5": {
+    "id": "CC5",
+    "cpu_count": 8,
+    "mem_limit": "16g",
+    "enable_network": true
+  },
+  "CC6": {
+    "id": "CC6",
+    "cpu_count": 8,
+    "mem_limit": "32g",
+    "enable_network": true
+  },
+  "CC7": {
+    "id": "CC7",
+    "cpu_count": 16,
+    "mem_limit": "16g",
+    "enable_network": true
+  },
+  "CC8": {
+    "id": "CC8",
+    "cpu_count": 16,
+    "mem_limit": "32g",
+    "enable_network": true
+  },
+  "CC9": {
+    "id": "CC9",
+    "cpu_count": 32,
+    "mem_limit": "16g",
+    "enable_network": true
+  },
+  "CC10": {
+    "id": "CC10",
+    "cpu_count": 32,
+    "mem_limit": "32g",
+    "enable_network": true
+  }
+}

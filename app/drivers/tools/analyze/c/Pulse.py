@@ -39,11 +39,11 @@ class Pulse(AbstractAnalyzeTool):
             )
         )
 
-    def run_analysis(self, bug_info, config_info):
+    def run_analysis(self, bug_info, repair_config_info):
         self.prepare(bug_info)
-        super(Pulse, self).run_analysis(bug_info, config_info)
-        timeout_h = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+        super(Pulse, self).run_analysis(bug_info, repair_config_info)
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.timestamp_log_start()
         max_disjuncts = 20
         analysis_command = (
@@ -72,10 +72,10 @@ class Pulse(AbstractAnalyzeTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
         is_error = False
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

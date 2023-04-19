@@ -35,7 +35,7 @@ class AbstractTool(AbstractDriver):
     _time = stats.TimeStats()
     _space = stats.SpaceStats()
     _error = stats.ErrorStats()
-
+    current_repair_profile_id = values.current_repair_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
     key_id = definitions.KEY_ID
@@ -54,7 +54,6 @@ class AbstractTool(AbstractDriver):
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug
         self.is_dump_patches = values.dump_patches
-        self.current_profile_id = values.current_profile_id
         self.use_container = values.use_container
         self.use_valkyrie = values.use_valkyrie
         self.use_gpu = super().get_config_value("use_gpu")
@@ -178,7 +177,7 @@ class AbstractTool(AbstractDriver):
         if values.use_container:
             if self.image_name is None:
                 utilities.error_exit(
-                    "{} does not provide a Docker Image".format(self.name)
+                    "\t[framework] {} does not provide a Docker Image".format(self.name)
                 )
             if ":" in self.image_name:
                 repo_name, tag_name = self.image_name.split(":")
@@ -187,13 +186,13 @@ class AbstractTool(AbstractDriver):
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
-                    "[framework] docker image {}:{} not found in Docker registry".format(
+                    "\t[framework] docker image {}:{} not found in Docker registry".format(
                         repo_name, tag_name
                     )
                 )
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
-                        "{} does not provide a Docker image in Dockerhub".format(
+                        "\t[framework] {} does not provide a Docker image in Dockerhub".format(
                             self.name
                         )
                     )
@@ -215,7 +214,7 @@ class AbstractTool(AbstractDriver):
 
                 if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
                     emitter.information(
-                        "[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                        "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                     )
                     values.rebuild_all = True
 

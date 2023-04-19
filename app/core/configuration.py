@@ -110,6 +110,7 @@ class Configurations:
         "only-setup": False,
         "rebuild-all": False,
         "rebuild-base": False,
+        "compact-results": False,
         "subject-name": None,
         "benchmark-name": None,
         "dump-patches": False,
@@ -123,7 +124,8 @@ class Configurations:
         "skip-index-list": [],
         "tool-list": [],
         "directories": {"data": "/data"},
-        "profile-id-list": ["C1"],
+        "repair-profile-id-list": ["C1"],
+        "container-profile-id-list": ["CC1"],
     }
     __runtime_config_values = __default_config_values
 
@@ -190,9 +192,6 @@ class Configurations:
         if arg_list.parallel:
             self.__runtime_config_values["parallel"] = True
 
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
-
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
         if arg_list.bug_index_list:
@@ -222,11 +221,21 @@ class Configurations:
                 arg_list.skip_index_list
             ).split(",")
 
+        if arg_list.compact_results:
+            self.__runtime_config_values["compact-results"] = arg_list.compact_results
+
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+        if arg_list.repair_profile_id_list:
+            self.__runtime_config_values[
+                "repair-profile-id-list"
+            ] = arg_list.repair_profile_id_list
+
+        if arg_list.container_profile_id_list:
+            self.__runtime_config_values[
+                "container-profile-id-list"
+            ] = arg_list.container_profile_id_list
 
     def read_config_file(self):
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
@@ -262,7 +271,9 @@ class Configurations:
             "end-index",
             "skip-index-list",
             "use-gpu",
-            "profile-id-list",
+            "compact-results",
+            "repair-profile-id-list",
+            "container-profile-id-list",
             "docker-host",
             "runs",
         ]
@@ -340,7 +351,12 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.profile_id_list = self.__runtime_config_values["profile-id-list"]
+        values.repair_profile_id_list = self.__runtime_config_values[
+            "repair-profile-id-list"
+        ]
+        values.container_profile_id_list = self.__runtime_config_values[
+            "container-profile-id-list"
+        ]
         values.use_parallel = self.__runtime_config_values["parallel"]
 
         if (
@@ -354,6 +370,7 @@ class Configurations:
                 "[warning] Experiment id is not specified, running all experiments"
             )
 
+        values.compact_results = self.__runtime_config_values["compact-results"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]

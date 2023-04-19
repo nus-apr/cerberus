@@ -14,8 +14,8 @@ class TBar(AbstractRepairTool):
         self.tbar_root_dir = "/TBar"
         self.image_name = "mirchevmp/tbar-cerberus:latest"
 
-    def run_repair(self, bug_info, config_info):
-        super(TBar, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(TBar, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -32,8 +32,8 @@ class TBar(AbstractRepairTool):
                 "Please double check whether we are in TBar container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
 
         if self.container_id:
             # Ensure that the container has git setup

@@ -14,26 +14,26 @@ class Angelix(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
 
-    def run_repair(self, bug_info, config_info):
+    def run_repair(self, bug_info, repair_config_info):
         super(Angelix, self).run_repair(
             bug_info,
-            config_info,
+            repair_config_info,
         )
         if self.is_instrument_only:
             return
-        conf_id = config_info[self.key_id]
+        repair_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         source_file = str(bug_info[self.key_fix_file])
         fix_line_number_list = bug_info[self.key_fix_lines]
         fix_location = bug_info[self.key_fix_loc]
-        timeout = str(config_info[self.key_timeout])
+        timeout = str(repair_config_info[self.key_timeout])
         failing_test_list = bug_info[self.key_failing_tests]
         passing_test_list = bug_info[self.key_passing_tests]
         subject_name = bug_info[self.key_subject]
-        additional_tool_param = config_info[self.key_tool_params]
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
         src_path = join(self.dir_expr, "src")
         gold_path = join(self.dir_expr, "src-gold")
@@ -131,12 +131,12 @@ class Angelix(AbstractRepairTool):
         """instrumentation for the experiment as needed by the tool"""
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = (
             self.dir_logs
             + "/"
-            + conf_id
+            + repair_conf_id
             + "-"
             + self.name
             + "-"

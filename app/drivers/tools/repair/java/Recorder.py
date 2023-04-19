@@ -17,8 +17,8 @@ class Recorder(AbstractRepairTool):
         self.image_name = "zqh111/recoder:interface"
         self.bug_name = ""
 
-    def run_repair(self, bug_info, config_info):
-        super(Recorder, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(Recorder, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -26,7 +26,7 @@ class Recorder(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[self.key_timeout])
+        timeout_h = str(repair_config_info[self.key_timeout])
 
         if not self.use_gpu:
             utilities.error_exit("Cannot run Recorder without a GPU")

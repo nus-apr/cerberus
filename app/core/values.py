@@ -43,7 +43,8 @@ file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
 file_stats_log = dir_log_base + "/log-stats"
 file_meta_data: Optional[str] = None
-file_configuration = dir_main + "/profiles/default.json"
+file_repair_configuration = dir_main + "/profiles/repair-default.json"
+file_container_configuration = dir_main + "/profiles/container-default.json"
 file_output_log = ""
 file_setup_log = ""
 file_instrument_log = ""
@@ -62,7 +63,8 @@ bug_index_list: List[int] = []
 bug_id_list: List[str] = []
 skip_index_list: List[int] = []
 benchmark_name = ""
-profile_id_list: List[str] = []
+repair_profile_id_list: List[str] = []
+container_profile_id_list: List[str] = []
 subject_name: Optional[str] = None
 is_purge = False
 only_analyse = False
@@ -80,6 +82,7 @@ rebuild_all = False
 rebuild_base = False
 ui_active = False
 use_parallel = False
+compact_results = False
 cpus = 1
 task_type: Optional[str] = None
 ui_max_width = 1000
@@ -96,7 +99,12 @@ arg_pass = False
 iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 
-current_profile_id: ContextVar[str] = ContextVar("current_profile_id", default="NONE")
+current_repair_profile_id: ContextVar[str] = ContextVar(
+    "current_repair_profile_id", default="NONE"
+)
+current_container_profile_id: ContextVar[str] = ContextVar(
+    "current_container_profile_id", default="NONE"
+)
 experiment_status: ContextVar[TaskStatus] = ContextVar(
     "experiment_status", default=TaskStatus.NONE
 )

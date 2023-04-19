@@ -39,10 +39,10 @@ class CRepair(AbstractRepairTool):
         self.append_file(conf_content, repair_conf_path)
         return repair_conf_path
 
-    def run_repair(self, bug_info, config_info):
-        super(CRepair, self).run_repair(bug_info, config_info)
-        timeout_h = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+    def run_repair(self, bug_info, repair_config_info):
+        super(CRepair, self).run_repair(bug_info, repair_config_info)
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         # repair_conf_path = self.generate_conf_file(bug_info)
         repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         bug_json_path = self.dir_expr + "/bug.json"

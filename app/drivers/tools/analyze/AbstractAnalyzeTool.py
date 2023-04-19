@@ -32,16 +32,16 @@ class AbstractAnalyzeTool(AbstractTool):
         """
         return self._space, self._time, self._error
 
-    def run_analysis(self, bug_info, config_info):
+    def run_analysis(self, bug_info, repair_config_info):
         self.emit_normal("analysing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.emit_normal("executing analysis command")
-        conf_id = config_info[definitions.KEY_ID]
+        repair_conf_id = repair_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
 

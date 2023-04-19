@@ -14,8 +14,8 @@ class Nopol(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "rshariffdeen/nopol"
 
-    def run_repair(self, bug_info, config_info):
-        super(Nopol, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(Nopol, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -23,7 +23,7 @@ class Nopol(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[self.key_timeout])
+        timeout_h = str(repair_config_info[self.key_timeout])
         failing_test_list = bug_info[self.key_failing_tests]
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         self.dir_source = dir_java_src

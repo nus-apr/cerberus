@@ -33,7 +33,6 @@ from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import email
-from app.ui.datatable import CustomDataTable
 from app.ui.messages import JobAllocate
 from app.ui.messages import JobFinish
 from app.ui.messages import JobMount
@@ -57,7 +56,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
-        "Configuration Profile": {},
+        "Repair Configuration Profile": {},
+        "Container Configuration Profile": {},
         "Status": {},
         "Patches Generated": {},
     }
@@ -92,12 +92,14 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def setup_cpu_allocation(self):
         self.max_jobs = values.cpus
+        self.free_jobs = values.cpus
+        self.job_condition = threading.Condition()
         self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
             self.cpu_queue.put(cpu)
 
     def setup_column_keys(self):
-        for table in self.query(CustomDataTable):
+        for table in self.query(DataTable):
             column_keys = table.add_columns(*Cerberus.COLUMNS.keys())
             if not table.id:
                 utilities.error_exit(
@@ -147,7 +149,10 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             benchmark = main.get_benchmark()
 
             self.query_one(Static).update("Cerberus is getting setup data")
-            setup = main.get_setup()
+            setup = main.get_repair_setup()
+
+            self.query_one(Static).update("Cerberus is getting container setup data")
+            container_setup = main.get_container_setup()
 
             if values.use_container:
                 self.query_one(Static).update(
@@ -155,6 +160,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
                 complete_images: queue.Queue[Tuple[Any, bool]] = queue.Queue(0)
 
+                # The Logic here is currently differernt as one generally just needs a single CPU to build a project
                 def job(benchmark: AbstractBenchmark, experiment_item):
                     cpu = self.cpu_queue.get(block=True, timeout=None)
                     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
@@ -199,7 +205,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.is_preparing = False
 
             self.show(self.query_one("#" + all_subjects_id))
-            self.run_tasks(tools, benchmark, setup)
+            self.run_tasks(tools, benchmark, setup, container_setup)
         except Exception as e:
             self.show(self.query_one(Static))
             self.query_one(Static).update(
@@ -212,11 +218,11 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             return
         self.debug_print("Changing table!")
         try:
-            self.selected_table: CustomDataTable
+            self.selected_table: DataTable
 
             self.hide(self.selected_table)
 
-            self.selected_table = self.query_one(new_id, CustomDataTable)
+            self.selected_table = self.query_one(new_id, DataTable)
 
             self.show(self.selected_table)
         except Exception as e:
@@ -238,64 +244,73 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self,
         tool_list: List[AbstractTool],
         benchmark: AbstractBenchmark,
-        setup: Any,
+        repair_setup: Any,
+        container_setup: Any,
     ):
         utilities.check_space()
         iteration = 0
-        for config_info in map(lambda x: setup[x], values.profile_id_list):
-            for experiment_item in main.filter_experiment_list(benchmark):
-                bug_index = experiment_item[definitions.KEY_ID]
+        for container_config_info in map(
+            lambda x: container_setup[x], values.container_profile_id_list
+        ):
+            for repair_config_info in map(
+                lambda x: repair_setup[x], values.repair_profile_id_list
+            ):
+                for experiment_item in main.filter_experiment_list(benchmark):
+                    bug_index = experiment_item[definitions.KEY_ID]
 
-                # The experiment should be buit at this point, hardcoded cpu should not be a problem
-                experiment_image_id = (
-                    benchmark.get_exp_image(bug_index, values.only_test, "0")
-                    if values.use_container
-                    else None
-                )
+                    # The experiment should be built at this point, hardcoded cpu should not be a problem
+                    experiment_image_id = (
+                        benchmark.get_exp_image(bug_index, values.only_test, "0")
+                        if values.use_container
+                        else None
+                    )
 
-                for tool in tool_list:
-                    iteration = iteration + 1
-                    emitter.sub_sub_title(
-                        "Experiment #{} - Bug #{} Tool {}".format(
-                            iteration, bug_index, tool.name
+                    for tool in tool_list:
+                        iteration = iteration + 1
+                        emitter.sub_sub_title(
+                            "Experiment #{} - Bug #{} Tool {}".format(
+                                iteration, bug_index, tool.name
+                            )
                         )
-                    )
-                    key = "{}-{}-{}-{}-{}".format(
-                        benchmark.name,
-                        tool.name,
-                        experiment_item[definitions.KEY_SUBJECT],
-                        experiment_item[definitions.KEY_BUG_ID],
-                        config_info[definitions.KEY_ID],
-                    )
+                        key = "{}-{}-{}-{}-{}-{}".format(
+                            benchmark.name,
+                            tool.name,
+                            experiment_item[definitions.KEY_SUBJECT],
+                            experiment_item[definitions.KEY_BUG_ID],
+                            repair_config_info[definitions.KEY_ID],
+                            container_config_info[definitions.KEY_ID],
+                        )
 
-                    _ = self.query_one("#" + all_subjects_id, CustomDataTable).add_row(
-                        iteration,
-                        benchmark.name,
-                        tool.name,
-                        experiment_item[definitions.KEY_SUBJECT],
-                        experiment_item[definitions.KEY_BUG_ID],
-                        config_info[definitions.KEY_ID],
-                        "Allocated",
-                        "None",
-                        key=key,
-                    )
-
-                    log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
-                    self.hide(log_map[key])
-
-                    self.post_message(JobMount(key))
-                    self.post_message(
-                        JobAllocate(
+                        _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
                             iteration,
-                            deepcopy(benchmark),
-                            deepcopy(tool),
-                            experiment_item,
-                            config_info,
-                            experiment_image_id,
-                            key,
+                            benchmark.name,
+                            tool.name,
+                            experiment_item[definitions.KEY_SUBJECT],
+                            experiment_item[definitions.KEY_BUG_ID],
+                            repair_config_info[definitions.KEY_ID],
+                            container_config_info[definitions.KEY_ID],
+                            "Allocated",
+                            "None",
+                            key=key,
                         )
-                    )
-        self.jobs_remaining = iteration
+
+                        log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
+                        self.hide(log_map[key])
+
+                        self.post_message(JobMount(key))
+                        self.post_message(
+                            JobAllocate(
+                                iteration,
+                                deepcopy(benchmark),
+                                deepcopy(tool),
+                                experiment_item,
+                                repair_config_info,
+                                container_config_info,
+                                experiment_image_id,
+                                key,
+                            )
+                        )
+            self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
         if message.key == "escape":
@@ -307,12 +322,32 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         loop = asyncio.get_running_loop()
 
         def job():
-            self.update_status(message.identifier, "Waiting for CPU")
-            cpus = []
-            for _ in range(message.tool.cpu_usage):
-                cpus.append(self.cpu_queue.get(block=True, timeout=None))
+            cpus: List[int] = []
+            required_cpu_cores = max(
+                message.tool.cpu_usage,
+                message.container_config_info.get(
+                    definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
+                ),
+            )
+            self.update_status(
+                message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
+            )
+
+            with self.job_condition:
+                while self.free_jobs < required_cpu_cores:
+                    self.job_condition.wait()
+                self.debug_print("Getting {} CPU cores".format(required_cpu_cores))
+                self.free_jobs = self.free_jobs - required_cpu_cores
+                for _ in range(required_cpu_cores):
+                    cpus.append(self.cpu_queue.get(block=True, timeout=None))
+
             values.job_identifier.set(message.identifier)
-            values.current_profile_id.set(message.config_info[definitions.KEY_ID])
+            values.current_repair_profile_id.set(
+                message.repair_config_info[definitions.KEY_ID]
+            )
+            values.current_container_profile_id.set(
+                message.container_config_info[definitions.KEY_ID]
+            )
 
             self.update_status(message.identifier, "Running")
 
@@ -322,13 +357,14 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 message.tool.name,
                 message.experiment_item[definitions.KEY_SUBJECT],
                 message.experiment_item[definitions.KEY_BUG_ID],
-                message.config_info[definitions.KEY_ID],
+                message.repair_config_info[definitions.KEY_ID],
+                message.container_config_info[definitions.KEY_ID],
                 "Running",
                 "None",
             )
 
             running_row_key = self.query_one(
-                "#" + running_subjects_id, CustomDataTable
+                "#" + running_subjects_id, DataTable
             ).add_row(
                 *row_data,
                 key=message.identifier,
@@ -341,17 +377,21 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     60
                     * 60
                     * float(
-                        message.config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
+                        message.repair_config_info.get(
+                            definitions.KEY_CONFIG_TIMEOUT, 1.0
+                        )
                     ),
                     message.tool,
                 )
+                cpu_set = ",".join(map(str, cpus))
                 task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
-                    message.config_info,
+                    message.repair_config_info,
+                    message.container_config_info,
                     message.identifier,
-                    ",".join(map(str, cpus)),
+                    cpu_set,
                     message.experiment_image_id,
                 )
             except Exception as e:
@@ -363,7 +403,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 )
                 self.call_from_thread(
                     lambda: self.query_one(
-                        "#" + running_subjects_id, CustomDataTable
+                        "#" + running_subjects_id, DataTable
                     ).remove_row(running_row_key)
                 )
                 self.post_message(
@@ -373,8 +413,12 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         row_data,
                     )
                 )
-            for cpu in cpus:
-                self.cpu_queue.put(cpu)
+            with self.job_condition:
+                for cpu in cpus:
+                    self.cpu_queue.put(cpu)
+                self.free_jobs += required_cpu_cores
+                self.debug_print("Putting back {} cores".format(required_cpu_cores))
+                self.job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
         self.jobs[message.identifier] = task_future
@@ -387,7 +431,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 status,
                 update_width=True,
             )
-        self.query_one("#" + all_subjects_id, CustomDataTable).update_cell(
+        self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
             Cerberus.COLUMNS["Status"][all_subjects_id],
             status,
@@ -405,9 +449,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         # self.update_status(message.key, str(message.status))
         try:
             finished_subjects_table = self.query_one(
-                "#" + finished_subjects_id, CustomDataTable
+                "#" + finished_subjects_id, DataTable
             )
-            all_subjects_table = self.query_one("#" + all_subjects_id, CustomDataTable)
+            all_subjects_table = self.query_one("#" + all_subjects_id, DataTable)
             row_key = finished_subjects_table.add_row(
                 *message.row_data,
                 key=message.key,
@@ -426,7 +470,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             )
             if message.status is not TaskStatus.SUCCESS:
                 error_subjects_table = self.query_one(
-                    "#" + error_subjects_id, CustomDataTable
+                    "#" + error_subjects_id, DataTable
                 )
                 row_key = error_subjects_table.add_row(
                     *message.row_data,
@@ -484,7 +528,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def compose(self) -> ComposeResult:
         def create_table(id: str):
-            table: CustomDataTable = CustomDataTable(id=id)
+            table: DataTable = DataTable(id=id)
             table.cursor_type = "row"
             table.styles.border = ("heavy", "white")
             return table
