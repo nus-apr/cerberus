@@ -323,7 +323,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
         def job():
             self.update_status(message.identifier, "Waiting for CPU")
-            cpus = []
+            cpus: List[int] = []
             for _ in range(
                 message.container_config_info.get(
                     definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
@@ -372,7 +372,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     ),
                     message.tool,
                 )
-                cpu = ",".join(map(str, cpus))
+                cpu_set = ",".join(map(str, cpus))
                 task.run(
                     message.benchmark,
                     message.tool,
@@ -380,7 +380,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     message.repair_config_info,
                     message.container_config_info,
                     message.identifier,
-                    cpu,
+                    cpu_set,
                     message.experiment_image_id,
                 )
             except Exception as e:
