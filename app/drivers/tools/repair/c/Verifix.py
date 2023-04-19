@@ -10,8 +10,8 @@ class Verifix(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "mirchevmp/verifix:latest"
 
-    def run_repair(self, bug_info, config_info):
-        super(Verifix, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(Verifix, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -19,7 +19,7 @@ class Verifix(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[self.key_timeout])
+        timeout_h = str(repair_config_info[self.key_timeout])
 
         # start running
         self.timestamp_log_start()

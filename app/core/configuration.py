@@ -16,7 +16,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
-    emitter.normal("\t[framework] loading profile setup")
+    emitter.normal("\t[framework] loading Fprofile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, "r") as conf_file:
@@ -123,7 +123,7 @@ class Configurations:
         "skip-index-list": [],
         "tool-list": [],
         "directories": {"data": "/data"},
-        "profile-id-list": ["C1"],
+        "repair-profile-id-list": ["C1"],
         "container-profile-id-list": ["CC1"],
     }
     __runtime_config_values = __default_config_values
@@ -191,9 +191,6 @@ class Configurations:
         if arg_list.parallel:
             self.__runtime_config_values["parallel"] = True
 
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
-
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
         if arg_list.bug_index_list:
@@ -226,8 +223,10 @@ class Configurations:
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+        if arg_list.repair_profile_id_list:
+            self.__runtime_config_values[
+                "repair-profile-id-list"
+            ] = arg_list.repair_profile_id_list
 
         if arg_list.container_profile_id_list:
             self.__runtime_config_values[
@@ -268,7 +267,8 @@ class Configurations:
             "end-index",
             "skip-index-list",
             "use-gpu",
-            "profile-id-list",
+            "repair-profile-id-list",
+            "container-profile-id-list",
             "docker-host",
             "runs",
         ]
@@ -346,7 +346,9 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.profile_id_list = self.__runtime_config_values["profile-id-list"]
+        values.repair_profile_id_list = self.__runtime_config_values[
+            "repair-profile-id-list"
+        ]
         values.container_profile_id_list = self.__runtime_config_values[
             "container-profile-id-list"
         ]

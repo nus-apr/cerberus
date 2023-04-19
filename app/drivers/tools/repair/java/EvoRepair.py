@@ -59,8 +59,8 @@ class EvoRepair(AbstractRepairTool):
         self.write_file(json.dumps(config_object), repair_config_path)
         return repair_config_path
 
-    def run_repair(self, bug_info, config_info):
-        super(EvoRepair, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(EvoRepair, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -69,7 +69,7 @@ class EvoRepair(AbstractRepairTool):
         """
 
         repair_config_path = self.generate_config_file(bug_info)
-        timeout_h = str(config_info[self.key_timeout])
+        timeout_h = str(repair_config_info[self.key_timeout])
         max_iterations = 2000000
         test_timeout = 30000
         test_partitions = 1

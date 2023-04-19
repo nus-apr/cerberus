@@ -127,8 +127,8 @@ def collect_result(dir_info, experiment_info, tool: AbstractTool):
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     space_info, time_info, _ = tool.analyse_output(dir_info, bug_id, failing_test_list)
-    conf_id = values.current_profile_id.get("NA")
-    exp_id = "{}-{}".format(conf_id, bug_id)
+    repair_conf_id = values.current_repair_profile_id.get("NA")
+    exp_id = "{}-{}".format(repair_conf_id, bug_id)
     values.stats_results[exp_id] = (space_info, time_info)
     tool.print_stats(space_info, time_info)
     tool.log_output_path = ""
@@ -280,24 +280,24 @@ def run(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
     bug_info: Dict[str, Any],
-    config_info: Dict[str, Any],
+    repair_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
     run_identifier: str,
     cpu: str,
-    expriment_image_id: Optional[str],
+    experiment_image_id: Optional[str],
 ):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
-    config_id = config_info[definitions.KEY_ID]
+    repair_config_id = repair_config_info[definitions.KEY_ID]
     container_config_id = container_config_info[definitions.KEY_ID]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
-        config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
+        repair_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
     tag_name = "-".join(
         [
-            config_id,
+            repair_config_id,
             container_config_id,
             tool.name,
             benchmark.name,
@@ -308,17 +308,18 @@ def run(
     dir_info = generate_tool_dir_info(benchmark.name, subject_name, bug_name, tag_name)
     benchmark.update_dir_info(dir_info)
     emitter.highlight(
-        "\t\t[profile] Identifier: " + str(config_info[definitions.KEY_ID])
+        "\t\t[profile] Identifier: " + str(repair_config_info[definitions.KEY_ID])
     )
     emitter.highlight(
-        "\t\t[profile] Timeout: " + str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        "\t\t[profile] Timeout: "
+        + str(repair_config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
     emitter.highlight(
-        "\t\t[profile] Fix-loc: " + config_info[definitions.KEY_CONFIG_FIX_LOC]
+        "\t\t[profile] Fix-loc: " + repair_config_info[definitions.KEY_CONFIG_FIX_LOC]
     )
     emitter.highlight(
         "\t\t[profile] Test-suite ratio: "
-        + str(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+        + str(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
 
     emitter.highlight(
@@ -368,7 +369,7 @@ def run(
             archive_name = (
                 "-".join(
                     [
-                        config_id,
+                        repair_config_id,
                         container_config_id,
                         benchmark.name,
                         tool.name,
@@ -387,7 +388,7 @@ def run(
         utilities.clean_artifacts(dir_output_local)
         utilities.clean_artifacts(dir_logs_local)
         benchmark.update_dir_info(dir_info)
-        if values.use_container and expriment_image_id:
+        if values.use_container and experiment_image_id:
             image_name = "{}-{}-{}-{}".format(
                 tool.name, benchmark.name, subject_name, bug_name
             )
@@ -398,7 +399,7 @@ def run(
                 )
 
             container_id = create_running_container(
-                expriment_image_id,
+                experiment_image_id,
                 tool,
                 dir_info,
                 image_name,
@@ -416,7 +417,7 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractRepairTool, tool),
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark.name,
             )
@@ -425,7 +426,7 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractAnalyzeTool, tool),
-                config_info,
+                repair_config_info,
                 container_id,
                 benchmark.name,
             )

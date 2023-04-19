@@ -12,27 +12,27 @@ class CPR(AbstractRepairTool):
         self.image_name = "rshariffdeen/cpr"
         self.id = ""
 
-    def run_repair(self, bug_info, config_info):
-        super(CPR, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(CPR, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
-        timeout = str(config_info[self.key_timeout])
+        timeout = str(repair_config_info[self.key_timeout])
         dir_patch = join(self.dir_output, "patches")
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
         conf_path = join(self.dir_expr, "cpr", "repair.conf")
         timeout_m = str(float(timeout) * 60)
         test_id_list = ",".join(bug_info[self.key_failing_tests])
         seed_id_list = ",".join(bug_info[self.key_passing_tests])
 
-        additional_tool_param = config_info[self.key_tool_params]
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.timestamp_log_start()
         cpr_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(
@@ -62,10 +62,10 @@ class CPR(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
         regex = re.compile("(.*-output.log$)")
         for _, _, files in os.walk(dir_results):

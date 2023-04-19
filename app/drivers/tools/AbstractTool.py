@@ -35,7 +35,7 @@ class AbstractTool(AbstractDriver):
     _time = stats.TimeStats()
     _space = stats.SpaceStats()
     _error = stats.ErrorStats()
-
+    current_repair_profile_id = values.current_repair_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
     key_id = definitions.KEY_ID

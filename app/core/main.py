@@ -215,9 +215,9 @@ def parse_args():
     )
 
     optional.add_argument(
-        definitions.ARG_PROFILE_ID_LIST,
-        help="multiple list of configuration profiles",
-        dest="profile_id_list",
+        definitions.ARG_REPAIR_PROFILE_ID_LIST,
+        help="multiple list of repair configuration profiles",
+        dest="repair_profile_id_list",
         nargs="+",
         default=[],
     )
@@ -280,7 +280,7 @@ def parse_args():
 def run(
     tool_list: List[AbstractTool],
     benchmark: AbstractBenchmark,
-    setup: Any,
+    repair_setup: Any,
     container_setup: Any,
 ):
     emitter.sub_title(f"Running {values.task_type} task")
@@ -290,10 +290,11 @@ def run(
         lambda container_profile_id: container_setup[container_profile_id],
         values.container_profile_id_list,
     ):
-        for config_info in map(
-            lambda profile_id: setup[profile_id], values.profile_id_list
+        for repair_config_info in map(
+            lambda repair_profile_id: repair_setup[repair_profile_id],
+            values.repair_profile_id_list,
         ):
-            values.current_profile_id.set(config_info[definitions.KEY_ID])
+            values.current_repair_profile_id.set(repair_config_info[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 container_config_info[definitions.KEY_ID]
             )
@@ -343,7 +344,7 @@ def run(
                         benchmark,
                         tool,
                         experiment_item,
-                        config_info,
+                        repair_config_info,
                         container_config_info,
                         str(bug_index),
                         cpu,
@@ -351,13 +352,17 @@ def run(
                     )
 
 
-def get_setup() -> Any:
-    emitter.sub_title("Initializing setup")
-    setup = configuration.load_configuration_details(values.file_configuration)
-    for profile_id in values.profile_id_list:
-        if profile_id not in setup:
-            utilities.error_exit("Invalid profile id {}".format(profile_id))
-    return setup
+def get_repair_setup() -> Any:
+    emitter.sub_title("Initializing repair setup")
+    repair_setup = configuration.load_configuration_details(
+        values.file_repair_configuration
+    )
+    for repair_profile_id in values.repair_profile_id_list:
+        if repair_profile_id not in repair_setup:
+            utilities.error_exit(
+                "Invalid repair profile id {}".format(repair_profile_id)
+            )
+    return repair_setup
 
 
 def get_container_setup() -> Any:
@@ -443,7 +448,7 @@ def main():
                 )
             ui.setup_ui()
         else:
-            run(get_tools(), get_benchmark(), get_setup(), get_container_setup())
+            run(get_tools(), get_benchmark(), get_repair_setup(), get_container_setup())
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:

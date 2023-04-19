@@ -23,10 +23,11 @@ class SenX(AbstractRepairTool):
         """instrumentation for the experiment as needed by the tool"""
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = join(
-            self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
+            self.dir_logs,
+            "{}-{}-{}-instrument.log".format(repair_conf_id, self.name, bug_id),
         )
         time = datetime.now()
         command_str = "bash instrument.sh {}".format(self.dir_expr)
@@ -44,17 +45,17 @@ class SenX(AbstractRepairTool):
             )
         return
 
-    def run_repair(self, bug_info, config_info):
-        super(SenX, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(SenX, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        conf_id = config_info[self.key_id]
+        repair_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        timeout_h = str(config_info[self.key_timeout])
-        additional_tool_param = config_info[self.key_tool_params]
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         if not bug_info[self.key_bin_path]:
@@ -125,10 +126,10 @@ class SenX(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(self.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

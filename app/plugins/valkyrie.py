@@ -12,11 +12,11 @@ from app.core.task import stats
 processed_count = 0
 
 
-def validate_patch(dir_info, file_info, config_info):
+def validate_patch(dir_info, file_info, repair_config_info):
     global processed_count
     dir_patch, dir_process = dir_info
     binary_path, oracle_path, source_file, patch_file = file_info
-    test_id_list, is_rank, _, single_test_timeout = config_info
+    test_id_list, is_rank, _, single_test_timeout = repair_config_info
     test_id_str = ",".join(test_id_list)
     lib_dir_path = values.dir_libs
     link_file = join(dir_process, patch_file)

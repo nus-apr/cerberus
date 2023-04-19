@@ -12,8 +12,8 @@ class NewTool(AbstractRepairTool):
 The constructor should follow the following format, the line `self.image_name=...` should be an identifier for a valid docker image, preferably with a label.
 
 ```py
-     def run_repair(self, bug_info, config_info):
-        super(NewTool, self).repair(bug_info, config_info)
+     def run_repair(self, bug_info, repair_config_info):
+        super(NewTool, self).repair(bug_info, repair_config_info)
         '''
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts

@@ -57,7 +57,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
-        "Configuration Profile": {},
+        "Repair Configuration Profile": {},
         "Container Configuration Profile": {},
         "Status": {},
         "Patches Generated": {},
@@ -148,7 +148,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             benchmark = main.get_benchmark()
 
             self.query_one(Static).update("Cerberus is getting setup data")
-            setup = main.get_setup()
+            setup = main.get_repair_setup()
 
             self.query_one(Static).update("Cerberus is getting container setup data")
             container_setup = main.get_container_setup()
@@ -242,7 +242,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self,
         tool_list: List[AbstractTool],
         benchmark: AbstractBenchmark,
-        setup: Any,
+        repair_setup: Any,
         container_setup: Any,
     ):
         utilities.check_space()
@@ -250,7 +250,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         for container_config_info in map(
             lambda x: container_setup[x], values.container_profile_id_list
         ):
-            for config_info in map(lambda x: setup[x], values.profile_id_list):
+            for repair_config_info in map(
+                lambda x: repair_setup[x], values.repair_profile_id_list
+            ):
                 for experiment_item in main.filter_experiment_list(benchmark):
                     bug_index = experiment_item[definitions.KEY_ID]
 
@@ -273,7 +275,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                             tool.name,
                             experiment_item[definitions.KEY_SUBJECT],
                             experiment_item[definitions.KEY_BUG_ID],
-                            config_info[definitions.KEY_ID],
+                            repair_config_info[definitions.KEY_ID],
                             container_config_info[definitions.KEY_ID],
                         )
 
@@ -285,7 +287,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                             tool.name,
                             experiment_item[definitions.KEY_SUBJECT],
                             experiment_item[definitions.KEY_BUG_ID],
-                            config_info[definitions.KEY_ID],
+                            repair_config_info[definitions.KEY_ID],
                             container_config_info[definitions.KEY_ID],
                             "Allocated",
                             "None",
@@ -302,7 +304,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                                 deepcopy(benchmark),
                                 deepcopy(tool),
                                 experiment_item,
-                                config_info,
+                                repair_config_info,
                                 container_config_info,
                                 experiment_image_id,
                                 key,
@@ -329,7 +331,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             ):
                 cpus.append(self.cpu_queue.get(block=True, timeout=None))
             values.job_identifier.set(message.identifier)
-            values.current_profile_id.set(message.config_info[definitions.KEY_ID])
+            values.current_repair_profile_id.set(
+                message.repair_config_info[definitions.KEY_ID]
+            )
             values.current_container_profile_id.set(
                 message.container_config_info[definitions.KEY_ID]
             )
@@ -342,7 +346,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 message.tool.name,
                 message.experiment_item[definitions.KEY_SUBJECT],
                 message.experiment_item[definitions.KEY_BUG_ID],
-                message.config_info[definitions.KEY_ID],
+                message.repair_config_info[definitions.KEY_ID],
                 message.container_config_info[definitions.KEY_ID],
                 "Running",
                 "None",
@@ -362,7 +366,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     60
                     * 60
                     * float(
-                        message.config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
+                        message.repair_config_info.get(
+                            definitions.KEY_CONFIG_TIMEOUT, 1.0
+                        )
                     ),
                     message.tool,
                 )
@@ -371,7 +377,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
-                    message.config_info,
+                    message.repair_config_info,
                     message.container_config_info,
                     message.identifier,
                     cpu,

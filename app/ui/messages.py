@@ -21,7 +21,7 @@ class JobAllocate(Message):
         benchmark: AbstractBenchmark,
         tool: AbstractTool,
         experiment_item,
-        config_info: Dict[str, Any],
+        repair_config_info: Dict[str, Any],
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
@@ -30,7 +30,7 @@ class JobAllocate(Message):
         self.benchmark = benchmark
         self.tool = tool
         self.experiment_item = experiment_item
-        self.config_info = config_info
+        self.repair_config_info = repair_config_info
         self.container_config_info = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
