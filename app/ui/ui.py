@@ -165,7 +165,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     values.job_identifier.set(
                         "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
                     )
-                    self.debug_print(
+                    emitter.information(
                         "Starting image check for {} {}".format(bug_name, subject_name)
                     )
                     dir_info = task.generate_dir_info(
