@@ -43,7 +43,7 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
         self.emit_debug(
-            " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -60,7 +60,7 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_config_path, self.dir_setup
         )
         self.emit_debug(
-            " Config took {} second(s)".format((datetime.now() - time).total_seconds())
+            "config took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -78,7 +78,7 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_build_path, self.dir_setup
         )
         self.emit_debug(
-            " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -113,7 +113,7 @@ class VulnLoc(AbstractBenchmark):
         )
 
         self.emit_debug(
-            " Verify took {} second(s)".format((datetime.now() - time).total_seconds())
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -130,7 +130,7 @@ class VulnLoc(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
         self.emit_debug(
-            " Transform took {} second(s)".format(
+            "transform took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )

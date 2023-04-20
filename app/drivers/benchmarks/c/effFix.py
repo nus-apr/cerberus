@@ -30,7 +30,7 @@ class effFix(AbstractBenchmark):
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
         self.emit_normal(
-            " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -47,7 +47,7 @@ class effFix(AbstractBenchmark):
             container_id, command_str, self.log_config_path, self.dir_setup
         )
         self.emit_normal(
-            " Config took {} second(s)".format((datetime.now() - time).total_seconds())
+            "config took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -65,7 +65,7 @@ class effFix(AbstractBenchmark):
             container_id, command_str, self.log_build_path, self.dir_setup
         )
         self.emit_normal(
-            " Setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
