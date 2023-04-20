@@ -43,7 +43,7 @@ class ARJA_E(AbstractRepairTool):
         arja_default_population_size = 40
         # use a large one to keep ARJA running forever
         # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
-        max_generations = 0x7fffffff // (arja_default_population_size + 1)
+        max_generations = 0x7FFFFFFF // (arja_default_population_size + 1)
 
         test_timeout = 30000
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
@@ -64,10 +64,12 @@ class ARJA_E(AbstractRepairTool):
             f"-DpopulationSize {arja_default_population_size}"
         )
 
-        status = self.run_command(arja_e_command, self.log_output_path,
-                                  dir_path=join(self.dir_expr, "src"),
-                                  env=self.d4j_env)
-
+        status = self.run_command(
+            arja_e_command,
+            self.log_output_path,
+            dir_path=join(self.dir_expr, "src"),
+            env=self.d4j_env,
+        )
 
         self.process_status(status)
 
