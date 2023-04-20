@@ -11,6 +11,7 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.core.task import stats
+from app.core.task.status import TaskStatus
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.AbstractDriver import AbstractDriver
@@ -152,6 +153,7 @@ class AbstractTool(AbstractDriver):
 
     def process_status(self, status: int):
         if status != 0:
+            values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
             emitter.warning(
                 "\t\t\t[framework] {0} exited with an error code {1}".format(
                     self.name, status
@@ -163,6 +165,7 @@ class AbstractTool(AbstractDriver):
                 container.start_container(self.container_id)
 
         else:
+            values.experiment_status.set(TaskStatus.SUCCESS)
             emitter.success(
                 "\t\t\t[framework] {0} ended successfully".format(self.name)
             )
