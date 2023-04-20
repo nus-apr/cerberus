@@ -168,23 +168,35 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     values.job_identifier.set(
                         "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
                     )
+                    self.debug_print(
+                        "Starting image check for {} {}".format(bug_name, subject_name)
+                    )
                     dir_info = task.generate_dir_info(
                         benchmark.name, subject_name, bug_name
                     )
                     benchmark.update_dir_info(dir_info)
                     try:
+                        emitter.information(
+                            "Image check for {} {}".format(bug_name, subject_name)
+                        )
                         benchmark.get_exp_image(
                             experiment_item[definitions.KEY_ID],
                             values.only_test,
                             str(cpu),
                         )
                         complete_images.put((experiment_item[definitions.KEY_ID], True))
-                    except:
+                    except Exception as e:
+                        emitter.information(
+                            "Error {} for {} {}".format(e, bug_name, subject_name)
+                        )
                         complete_images.put(
                             (experiment_item[definitions.KEY_ID], False)
                         )
                     finally:
                         self.cpu_queue.put(cpu, block=False)
+                    emitter.information(
+                        "Finishing image check for {} {}".format(bug_name, subject_name)
+                    )
 
                 all_experiment_jobs = main.filter_experiment_list(benchmark)
                 for experiment_item in all_experiment_jobs:
