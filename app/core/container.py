@@ -93,7 +93,10 @@ def build_image(dockerfile_path: str, image_name: str):
         dockerfilename = dockerfile_path.split("/")[-1]
         try:
             logs = client.api.build(
-                path=context_dir, tag=image_name, dockerfile=dockerfilename
+                path=context_dir,
+                tag=image_name,
+                dockerfile=dockerfilename,
+                rm=True,
             )
             id = None
             for line in logs:
