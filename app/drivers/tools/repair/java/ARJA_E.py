@@ -9,6 +9,8 @@ class ARJA_E(AbstractRepairTool):
 
     arja_e_home = "/opt/arja"
 
+    d4j_env = {"TZ": "America/Los_Angeles"}
+
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
@@ -25,6 +27,8 @@ class ARJA_E(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
+        classpath = f"{join(self.arja_e_home, 'lib/*')}:{join(self.arja_e_home, 'bin')}"
+
         dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
         dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
         dir_java_bin = join(self.dir_expr, "src", bug_info["class_directory"])
@@ -36,13 +40,17 @@ class ARJA_E(AbstractRepairTool):
         list_deps.append(join(self.arja_e_home, "external", "lib", "junit-4.12.jar"))
         list_deps_str = ":".join(list_deps)
 
-        max_generations = 2000000
+        arja_default_population_size = 40
+        # use a large one to keep ARJA running forever
+        # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
+        max_generations = 0x7fffffff // (arja_default_population_size + 1)
+
         test_timeout = 30000
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
         # generate patches
         self.timestamp_log_start()
         arja_e_command = (
-            f"timeout -k 5m {timeout_h}h java -cp lib/*:bin us.msu.cse.repair.Main ArjaE "
+            f"timeout -k 5m {timeout_h}h java -cp {classpath} us.msu.cse.repair.Main ArjaE "
             f"-DsrcJavaDir {dir_java_src} "
             f"-DbinJavaDir {dir_java_bin} "
             f"-DbinTestDir {dir_test_bin} "
@@ -52,12 +60,14 @@ class ARJA_E(AbstractRepairTool):
             f"-DmaxGenerations {max_generations} "
             f"-DpatchOutputRoot {self.dir_output}/patches "
             f"-Ddependences {list_deps_str} "
-            f"-DmaxTime {repair_timeout}"
+            f"-DmaxTime {repair_timeout} "
+            f"-DpopulationSize {arja_default_population_size}"
         )
 
-        status = self.run_command(
-            arja_e_command, self.log_output_path, self.arja_e_home
-        )
+        status = self.run_command(arja_e_command, self.log_output_path,
+                                  dir_path=join(self.dir_expr, "src"),
+                                  env=self.d4j_env)
+
 
         self.process_status(status)
 
