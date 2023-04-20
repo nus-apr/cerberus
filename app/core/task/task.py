@@ -96,11 +96,8 @@ def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name
 
 
 def generate_tool_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str, tag_name: str
+    benchmark_name: str, subject_name: str, bug_name: str, hash, tag_name: str
 ):
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode("utf-8"))
-
     dir_info = {
         "local": generate_local_tool_dir_info(
             benchmark_name, subject_name, bug_name, hash, tag_name
@@ -239,9 +236,7 @@ def create_running_container(
     return container_id
 
 
-def construct_summary():
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode("utf-8"))
+def construct_summary(hash):
     json_f_name = f"experiment-summary-{hash.hexdigest()[:8]}.json"
     summary_f_path = f"{values.dir_summaries}/{json_f_name}"
     results_summary = dict()
@@ -305,7 +300,13 @@ def run(
             bug_name,
         ]
     )
-    dir_info = generate_tool_dir_info(benchmark.name, subject_name, bug_name, tag_name)
+
+    hash = hashlib.sha1()
+    hash.update(str(time.time()).encode("utf-8"))
+
+    dir_info = generate_tool_dir_info(
+        benchmark.name, subject_name, bug_name, hash, tag_name
+    )
     benchmark.update_dir_info(dir_info)
     emitter.highlight(
         "\t\t[profile] Identifier: " + str(repair_config_info[definitions.KEY_ID])
@@ -442,4 +443,4 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
-    construct_summary()
+    construct_summary(hash)
