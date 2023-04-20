@@ -44,7 +44,7 @@ error_subjects_id = "error_subjects"
 running_subjects_id = "running_subjects"
 
 log_map: Dict[str, TextLog] = {}
-time_map: Dict[str, Tuple[float, float, AbstractTool]] = {}
+job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
 
 
 class Cerberus(App[List[Tuple[str, TaskStatus]]]):
@@ -76,7 +76,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.selected_subject = None
         self.jobs_remaining = 0
         self.finished_subjects = []
-        self.jobs: Dict[str, asyncio.Future] = {}
+        self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
 
         self.setup_cpu_allocation()
 
@@ -110,10 +110,10 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         # self.debug_print("Idle")
         now = time.time()
         to_del = []
-        for (k, v) in time_map.items():
+        for (k, v) in job_time_map.items():
             (start, limit, tool) = v
             if now - start > limit:
-                if not self.jobs[k].done():
+                if not self.jobs[k][0].done():
                     self.debug_print("TIME TO KILL {}".format(v))
                     log_map[k].write("KILLED BY WATCHDOG")
                     if tool.container_id:
@@ -130,7 +130,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 to_del.append(k)
 
         for k in to_del:
-            del time_map[k]
+            del job_time_map[k]
 
     def prepare_run(self, loop):
         try:
@@ -381,15 +381,20 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
             status = TaskStatus.SUCCESS
             try:
-                time_map[message.identifier] = (
-                    time.time(),
+
+                timeout = int(
                     60
                     * 60
                     * float(
                         message.repair_config_info.get(
                             definitions.KEY_CONFIG_TIMEOUT, 1.0
                         )
-                    ),
+                    )
+                )
+                self.debug_print("Setting a timeout of {} seconds".format(timeout))
+                job_time_map[message.identifier] = (
+                    int(time.time()),
+                    timeout,
                     message.tool,
                 )
                 cpu_set = ",".join(map(str, cpus))
@@ -430,7 +435,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 self.job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
-        self.jobs[message.identifier] = task_future
+        self.jobs[message.identifier] = (task_future, message.tool)
 
     def update_status(self, key: str, status: str):
         if self.selected_table.id:
@@ -469,6 +474,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 row_key,
                 Cerberus.COLUMNS["Status"][finished_subjects_id],
                 str(message.status),
+                update_width=True,
             )
             finished_subjects_table.sort(Cerberus.COLUMNS["ID"][finished_subjects_id])
 
@@ -476,6 +482,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 row_key,
                 Cerberus.COLUMNS["Status"][all_subjects_id],
                 str(message.status),
+                update_width=True,
             )
             if message.status is not TaskStatus.SUCCESS:
                 error_subjects_table = self.query_one(
@@ -489,6 +496,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     row_key,
                     Cerberus.COLUMNS["Status"][error_subjects_id],
                     str(message.status),
+                    update_width=True,
                 )
                 error_subjects_table.sort(Cerberus.COLUMNS["ID"][error_subjects_id])
 
@@ -499,7 +507,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.finished_subjects.append((message.key, message.status))
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
-            self.exit(self.finished_subjects)
+            if not values.debug:
+                self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
