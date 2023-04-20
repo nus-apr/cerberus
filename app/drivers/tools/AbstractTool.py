@@ -159,7 +159,7 @@ class AbstractTool(AbstractDriver):
                     self.name, status
                 )
             )
-            if status == 137 and self.container_id:
+            if (status == 137 or status == 124) and self.container_id:
                 # Due to the container being killed, we restart it to be able to pull out the analysis info
                 container.stop_container(self.container_id)
                 container.start_container(self.container_id)

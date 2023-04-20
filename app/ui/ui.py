@@ -1,6 +1,5 @@
 import asyncio
 import queue
-import signal
 import threading
 import time
 import traceback
@@ -56,8 +55,10 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
-        "Repair Configuration Profile": {},
-        "Container Configuration Profile": {},
+        "Repair Profile": {},
+        "Container Profile": {},
+        "Started at": {},
+        "Should finish by": {},
         "Status": {},
         "Patches Generated": {},
     }
@@ -71,6 +72,13 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         ("f", "show_finished_subjects", "Show Finished Subjects"),
         ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
+
+    # async def _on_exit_app(self) -> None:
+    #     for (id,(task,tool)) in self.jobs.items():
+    #         if tool.container_id:
+    #             container.stop_container(tool.container_id)
+    #         task.cancel()
+    #     return await super()._on_exit_app()
 
     def on_mount(self):
         self.selected_subject = None
@@ -166,7 +174,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
                     )
                     emitter.information(
-                        "Starting image check for {} {}".format(bug_name, subject_name)
+                        "\t[framework] Starting image check for {} {}".format(
+                            bug_name, subject_name
+                        )
                     )
                     dir_info = task.generate_dir_info(
                         benchmark.name, subject_name, bug_name
@@ -174,7 +184,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     benchmark.update_dir_info(dir_info)
                     try:
                         emitter.information(
-                            "Image check for {} {}".format(bug_name, subject_name)
+                            "\t[framework] Image check for {} {}".format(
+                                bug_name, subject_name
+                            )
                         )
                         benchmark.get_exp_image(
                             experiment_item[definitions.KEY_ID],
@@ -184,7 +196,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         complete_images.put((experiment_item[definitions.KEY_ID], True))
                     except Exception as e:
                         emitter.information(
-                            "Error {} for {} {}".format(e, bug_name, subject_name)
+                            "\t[framework] Error {} for {} {}".format(
+                                e, bug_name, subject_name
+                            )
                         )
                         complete_images.put(
                             (experiment_item[definitions.KEY_ID], False)
@@ -192,7 +206,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     finally:
                         self.cpu_queue.put(cpu, block=False)
                     emitter.information(
-                        "Finishing image check for {} {}".format(bug_name, subject_name)
+                        "\t[framework] Finishing image check for {} {}".format(
+                            bug_name, subject_name
+                        )
                     )
 
                 all_experiment_jobs = main.filter_experiment_list(benchmark)
@@ -206,7 +222,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 while complete_images.qsize() != 0:
                     (id, success) = complete_images.get()
                     if not success:
-                        emitter.warning("[warning] Failed building image {}".format(id))
+                        emitter.warning(
+                            "\t[warning] Failed building image {}".format(id)
+                        )
 
             self.hide(self.query_one(Static))
             if not values.debug:
@@ -298,6 +316,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                             experiment_item[definitions.KEY_BUG_ID],
                             repair_config_info[definitions.KEY_ID],
                             container_config_info[definitions.KEY_ID],
+                            "N/A",
+                            "N/A",
                             "Allocated",
                             "None",
                             key=key,
@@ -360,6 +380,23 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
             self.update_status(message.identifier, "Running")
 
+            start_time = int(time.time())
+            start_date = time.ctime()
+            timeout = int(
+                60
+                * 60
+                * float(
+                    message.repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
+                )
+            )
+            finish_date = time.asctime(time.localtime(float(start_time + timeout)))
+            self.debug_print("Setting a timeout of {} seconds".format(timeout))
+            job_time_map[message.identifier] = (
+                start_time,
+                timeout,
+                message.tool,
+            )
+
             row_data = (
                 message.index,
                 message.benchmark.name,
@@ -368,6 +405,8 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 message.experiment_item[definitions.KEY_BUG_ID],
                 message.repair_config_info[definitions.KEY_ID],
                 message.container_config_info[definitions.KEY_ID],
+                start_date,
+                finish_date,
                 "Running",
                 "None",
             )
@@ -379,24 +418,22 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 key=message.identifier,
             )
 
+            self.query_one("#" + all_subjects_id, DataTable).update_cell(
+                message.identifier,
+                Cerberus.COLUMNS["Started at"][all_subjects_id],
+                start_date,
+                update_width=True,
+            )
+            self.query_one("#" + all_subjects_id, DataTable).update_cell(
+                message.identifier,
+                Cerberus.COLUMNS["Should finish by"][all_subjects_id],
+                finish_date,
+                update_width=True,
+            )
+
             status = TaskStatus.SUCCESS
             try:
 
-                timeout = int(
-                    60
-                    * 60
-                    * float(
-                        message.repair_config_info.get(
-                            definitions.KEY_CONFIG_TIMEOUT, 1.0
-                        )
-                    )
-                )
-                self.debug_print("Setting a timeout of {} seconds".format(timeout))
-                job_time_map[message.identifier] = (
-                    int(time.time()),
-                    timeout,
-                    message.tool,
-                )
                 cpu_set = ",".join(map(str, cpus))
                 task.run(
                     message.benchmark,
@@ -409,6 +446,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     message.experiment_image_id,
                 )
             except Exception as e:
+                del job_time_map[message.identifier]
                 log_map[message.identifier].write(traceback.format_exc())
                 status = TaskStatus.FAIL
             finally:
@@ -439,12 +477,15 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     def update_status(self, key: str, status: str):
         if self.selected_table.id:
-            self.selected_table.update_cell(
-                key,
-                Cerberus.COLUMNS["Status"][self.selected_table.id],
-                status,
-                update_width=True,
-            )
+            try:
+                self.selected_table.update_cell(
+                    key,
+                    Cerberus.COLUMNS["Status"][self.selected_table.id],
+                    status,
+                    update_width=True,
+                )
+            except:
+                pass
         self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
             Cerberus.COLUMNS["Status"][all_subjects_id],
