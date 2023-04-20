@@ -108,7 +108,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     def _on_idle(self) -> None:
         super()._on_idle()
         # self.debug_print("Idle")
-        now = time.time()
+        now = int(time.time())
         to_del = []
         for (k, v) in job_time_map.items():
             (start, limit, tool) = v
