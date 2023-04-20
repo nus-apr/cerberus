@@ -75,7 +75,7 @@ class Defects4JI(Defects4J):
                 self.dir_expr + "/src",
             )
             self.emit_debug(
-                " Instrumentation took {} second(s)".format(
+                "instrumentation took {} second(s)".format(
                     (datetime.now() - time).total_seconds()
                 )
             )

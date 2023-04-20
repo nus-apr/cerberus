@@ -67,7 +67,7 @@ class AbstractRepairTool(AbstractTool):
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         emitter.debug(
-            "\t\t\t Instrumentation took {} second(s)".format(
+            "\t\t\t instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
