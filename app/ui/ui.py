@@ -32,7 +32,7 @@ from app.core.task import task
 from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
-from app.notification import email
+from app.notification import notification
 from app.ui.messages import JobAllocate
 from app.ui.messages import JobFinish
 from app.ui.messages import JobMount
@@ -71,9 +71,6 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         ("f", "show_finished_subjects", "Show Finished Subjects"),
         ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
-
-    def on_exit(self):
-        values.ui_active = False
 
     def on_mount(self):
         self.selected_subject = None
@@ -493,6 +490,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     Cerberus.COLUMNS["Status"][error_subjects_id],
                     str(message.status),
                 )
+                error_subjects_table.sort(Cerberus.COLUMNS["ID"][error_subjects_id])
 
         except Exception as e:
             self.debug_print(str(e))
@@ -501,7 +499,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.finished_subjects.append((message.key, message.status))
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
-            # self.exit(self.finished_subjects)
+            self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):
         if message.identifier in log_map:
@@ -613,14 +611,17 @@ def setup_ui():
     global app
     app = Cerberus()
     experiment_results = app.run()
+    values.ui_active = False
     emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:
         values.iteration_no = len(experiment_results)
-        email.send_message(
+        notification.notify(
             "Cerberus has finished running! These are the following results:\n"
             + "\n".join(map(lambda t: "{} -> {}".format(*t), experiment_results))
         )
         for (experiment, status) in experiment_results:
             emitter.information(
-                "Experiment {} has final status {}".format(experiment, status)
+                "\t[framework] Experiment {} has final status {}".format(
+                    experiment, status
+                )
             )
