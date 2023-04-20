@@ -9,19 +9,22 @@ from argparse import Namespace
 from multiprocessing import set_start_method
 from typing import Any
 from typing import List
-from typing import Tuple
+
+import rich.traceback
+from rich import get_console
 
 from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
-from app.core import task
-from app.core import ui
 from app.core import utilities
 from app.core import values
 from app.core.configuration import Configurations
+from app.core.task import task
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
+from app.notification import notification
+from app.ui import ui
 
 
 def create_output_directories():
@@ -55,6 +58,8 @@ def shutdown(signum, frame):
 def bootstrap(arg_list: Namespace):
     emitter.sub_title("Bootstrapping framework")
     config = Configurations()
+    config.read_email_config_file()
+    config.read_slack_config_file()
     config.read_arg_list(arg_list)
     values.arg_pass = True
     config.update_configuration()
@@ -68,7 +73,7 @@ def parse_args():
     required.add_argument(
         "task_type",
         help="type of task to run",
-        choices=["analyze", "repair"],
+        choices=["analyze", "prepare", "repair"],
     )
 
     optional = parser.add_argument_group("Optional arguments")
@@ -81,17 +86,10 @@ def parse_args():
 
     optional.add_argument(
         "-g",
-        definitions.ARG_TUI,
+        definitions.ARG_PARALLEL,
         help="Activate Textual UI",
         action="store_true",
         default=False,
-    )
-
-    optional.add_argument(
-        "-e",
-        definitions.ARG_EMAIL_CONFIG,
-        help="email client configuration file",
-        type=argparse.FileType("r"),
     )
 
     optional.add_argument(
@@ -168,6 +166,12 @@ def parse_args():
         default=False,
     )
     optional.add_argument(
+        definitions.ARG_COMPACT_RESUTLS,
+        help="compact results of runs - deletes artifacts after compressing",
+        action="store_true",
+        default=False,
+    )
+    optional.add_argument(
         definitions.ARG_REBUILD_BASE_IMAGE,
         help="rebuild the base images",
         action="store_true",
@@ -217,11 +221,26 @@ def parse_args():
     )
 
     optional.add_argument(
-        definitions.ARG_PROFILE_ID_LIST,
-        help="multiple list of configuration profiles",
-        dest="profile_id_list",
+        definitions.ARG_REPAIR_PROFILE_ID_LIST,
+        help="multiple list of repair configuration profiles",
+        dest="repair_profile_id_list",
         nargs="+",
         default=[],
+    )
+
+    optional.add_argument(
+        definitions.ARG_CONTAINER_PROFILE_ID_LIST,
+        help="multiple list of container configuration profiles",
+        dest="container_profile_id_list",
+        nargs="+",
+        default=[],
+    )
+
+    optional.add_argument(
+        definitions.ARG_RUNS,
+        help="number of runs for an experiment",
+        type=int,
+        default=1,
     )
 
     optional.add_argument(
@@ -264,58 +283,126 @@ def parse_args():
     return args
 
 
-def run(repair_tool_list: List[AbstractTool], benchmark: AbstractBenchmark, setup: Any):
-    emitter.sub_title("Repairing benchmark")
+def run(
+    tool_list: List[AbstractTool],
+    benchmark: AbstractBenchmark,
+    repair_setup: Any,
+    container_setup: Any,
+):
+    emitter.sub_title(f"Running {values.task_type} task")
     iteration = 0
-    for config_info in map(
-        lambda profile_id: setup[profile_id], values.profile_id_list
+
+    for container_config_info in map(
+        lambda container_profile_id: container_setup[container_profile_id],
+        values.container_profile_id_list,
     ):
-        values.current_profile_id.set(config_info[definitions.KEY_ID])
-        for experiment_item in filter_experiment_list(benchmark):
-            iteration = iteration + 1
-            values.iteration_no = iteration
-            bug_index = experiment_item[definitions.KEY_ID]
-            emitter.sub_sub_title(
-                "Experiment #{} - Bug #{}".format(iteration, bug_index)
+        for repair_config_info in map(
+            lambda repair_profile_id: repair_setup[repair_profile_id],
+            values.repair_profile_id_list,
+        ):
+            values.current_repair_profile_id.set(repair_config_info[definitions.KEY_ID])
+            values.current_container_profile_id.set(
+                container_config_info[definitions.KEY_ID]
             )
-            utilities.check_space()
-            task.run(
-                benchmark,
-                repair_tool_list,
-                experiment_item,
-                config_info,
-                str(bug_index),
-                ",".join(map(str, range(values.cpus))),
-            )
+            for experiment_item in filter_experiment_list(benchmark):
+                bug_index = experiment_item[definitions.KEY_ID]
+                cpu = ",".join(
+                    map(
+                        str,
+                        range(
+                            container_config_info.get(
+                                definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                            )
+                        ),
+                    )
+                )
+                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                if values.use_container:
+                    values.job_identifier.set(
+                        "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                    )
+                dir_info = task.generate_dir_info(
+                    benchmark.name, subject_name, bug_name
+                )
+                benchmark.update_dir_info(dir_info)
+                experiment_image_id = None
+                if values.only_setup:
+                    iteration = iteration + 1
+                    values.iteration_no = iteration
+                    emitter.sub_sub_title(
+                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                    )
+                    task.prepare(benchmark, experiment_item, cpu)
+                    continue
+
+                for tool in tool_list:
+                    iteration = iteration + 1
+                    values.iteration_no = iteration
+                    emitter.sub_sub_title(
+                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                    )
+                    if experiment_image_id is None:
+                        experiment_image_id = task.prepare(
+                            benchmark, experiment_item, cpu
+                        )
+                    task.run(
+                        benchmark,
+                        tool,
+                        experiment_item,
+                        repair_config_info,
+                        container_config_info,
+                        str(bug_index),
+                        cpu,
+                        experiment_image_id,
+                    )
 
 
-def get_setup() -> Any:
-    emitter.sub_title("Initializing setup")
-    setup = configuration.load_configuration_details(values.file_configuration)
-    for profile_id in values.profile_id_list:
-        if profile_id not in setup:
-            utilities.error_exit("invalid profile id " + profile_id)
-    return setup
+def get_repair_setup() -> Any:
+    emitter.sub_title("Initializing repair setup")
+    repair_setup = configuration.load_configuration_details(
+        values.file_repair_configuration
+    )
+    for repair_profile_id in values.repair_profile_id_list:
+        if repair_profile_id not in repair_setup:
+            utilities.error_exit(
+                "Invalid repair profile id {}".format(repair_profile_id)
+            )
+    return repair_setup
+
+
+def get_container_setup() -> Any:
+    emitter.sub_title("Initializing container setup")
+    container_setup = configuration.load_configuration_details(
+        values.file_container_configuration
+    )
+    for container_profile_id in values.container_profile_id_list:
+        if container_profile_id not in container_setup:
+            utilities.error_exit(
+                "Invalid container profile id {}".format(container_profile_id)
+            )
+    return container_setup
 
 
 def get_tools() -> List[AbstractTool]:
-    tool_list = []
-    if values.tool_list:
-        for tool_name in values.tool_list:
-            tool = configuration.load_tool(tool_name)
-            if not values.only_analyse:
-                tool.check_tool_exists()
-            tool_list.append(tool)
-    task_type = values.task_type
+    tool_list: List[AbstractTool] = []
+    if values.task_type == "prepare":
+        return tool_list
+    for tool_name in values.tool_list:
+        tool = configuration.load_tool(tool_name)
+        if not values.only_analyse:
+            tool.check_tool_exists()
+        tool_list.append(tool)
     emitter.highlight(
-        f"[profile] {task_type}-tool(s): " + " ".join([x.name for x in tool_list])
+        f"\t[profile] {values.task_type}-tool(s): "
+        + " ".join([x.name for x in tool_list])
     )
     return tool_list
 
 
 def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight("[profile] repair-benchmark: " + benchmark.name)
+    emitter.highlight(f"\t[profile] {values.task_type}-benchmark: {benchmark.name}")
     return benchmark
 
 
@@ -347,6 +434,7 @@ def main():
         import warnings
 
         warnings.simplefilter("ignore")
+    rich.traceback.install(show_locals=True)
     parsed_args = parse_args()
     is_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
@@ -358,15 +446,15 @@ def main():
     try:
         emitter.title("Starting " + values.tool_name + " (Program Repair Framework) ")
         bootstrap(parsed_args)
-        if parsed_args.use_tui:
+        if parsed_args.parallel:
             info = sys.version_info
             if info.major < 3 or info.minor < 10:
                 utilities.error_exit(
-                    "GUI is not currently working properly on versions older than 3.10"
+                    "Parallel mode is currently supported only for versions 3.10+"
                 )
             ui.setup_ui()
         else:
-            run(get_tools(), get_benchmark(), get_setup())
+            run(get_tools(), get_benchmark(), get_repair_setup(), get_container_setup())
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
@@ -377,7 +465,9 @@ def main():
         logger.error(traceback.format_exc())
     finally:
         values.ui_active = False
+        get_console().show_cursor(True)
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
+        notification.end(total_duration, is_error)
         emitter.end(total_duration, is_error)

@@ -2,10 +2,7 @@ import os
 from os.path import basename
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.core import utilities
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -13,30 +10,30 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class TBar(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(TBar, self).__init__(self.name)
+        super().__init__(self.name)
         self.tbar_root_dir = "/TBar"
         self.image_name = "mirchevmp/tbar-cerberus:latest"
 
-    def run_repair(self, bug_info, config_info):
-        super(TBar, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(TBar, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
 
         dir_tbar_exist = self.is_dir(self.tbar_root_dir)
         if not dir_tbar_exist:
-            emitter.error(
+            self.emit_error(
                 "[Exception] TBar repo is not at the expected location. "
                 "Please double check whether we are in TBar container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
 
         if self.container_id:
             # Ensure that the container has git setup
@@ -58,17 +55,11 @@ class TBar(AbstractRepairTool):
             'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
         )
         args = (
-            "FAILING_TESTS='{}' ".format(
-                " ".join(bug_info[definitions.KEY_FAILING_TEST])
-            )
-            + "CLASS_DIRECTORY={} ".format(bug_info[definitions.KEY_CLASS_DIRECTORY])
-            + "TEST_CLASS_DIRECTORY={} ".format(
-                bug_info[definitions.KEY_TEST_CLASS_DIRECTORY]
-            )
-            + "SOURCE_DIRECTORY={} ".format(bug_info[definitions.KEY_SOURCE_DIRECTORY])
-            + "TEST_SOURCE_DIRECTORY={} ".format(
-                bug_info[definitions.KEY_TEST_DIRECTORY]
-            )
+            "FAILING_TESTS='{}' ".format(" ".join(bug_info[self.key_failing_tests]))
+            + "CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
+            + "TEST_CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
+            + "SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_source])
+            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_tests])
         )
 
         # start running
@@ -85,17 +76,10 @@ class TBar(AbstractRepairTool):
             dir_path=self.tbar_root_dir,
         )
 
-        if status != 0:
-            emitter.warning(
-                "\t\t\t[warning] {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t[success] {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def create_parameters(self, experiment_info):
         """
@@ -110,8 +94,8 @@ class TBar(AbstractRepairTool):
 
         defects4j_home = "/defects4j/"
         bug_id_str = "{0}_{1}".format(
-            experiment_info[definitions.KEY_SUBJECT],
-            experiment_info[definitions.KEY_BUG_ID],
+            experiment_info[self.key_subject],
+            experiment_info[self.key_bug_id],
         )
 
         """
@@ -143,7 +127,7 @@ class TBar(AbstractRepairTool):
             #     join(
             #         self.dir_expr,
             #         "src",
-            #         experiment_info[definitions.KEY_SOURCE_DIRECTORY],
+            #         experiment_info[self.key_dir_source],
             #         experiment_info["source_file"].replace(".", "/") + ".java",
             #     )
             # )
@@ -199,7 +183,7 @@ class TBar(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         is_error = False
         count_generated = 0
@@ -231,10 +215,10 @@ class TBar(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t[warning] no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -242,6 +226,10 @@ class TBar(AbstractRepairTool):
             self._time.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
+                if "Patch Candidate" in line:
+                    count_enumerations += 1
+                if "failed compiling" in line:
+                    count_non_compilable += 1
                 if "Succeeded to fix the bug" in line:
                     count_plausible += 1
                     count_enumerations += 1

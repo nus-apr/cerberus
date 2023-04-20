@@ -3,9 +3,6 @@ import os
 import re
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -15,7 +12,7 @@ class Darjeeling(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Darjeeling, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/darjeeling"
 
     def instrument(self, bug_info):
@@ -23,14 +20,14 @@ class Darjeeling(AbstractRepairTool):
         Instrumentation for the experiment as needed by the tool
         - requires sudo
         """
-        emitter.normal("\t\t\t instrumenting for " + self.name)
-        bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.current_profile_id.get("NA"))
-        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        self.emit_normal(" instrumenting for " + self.name)
+        bug_id = bug_info[self.key_bug_id]
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = (
             self.dir_logs
             + "/"
-            + conf_id
+            + repair_conf_id
             + "-"
             + self.name
             + "-"
@@ -50,18 +47,17 @@ class Darjeeling(AbstractRepairTool):
             )
         return
 
-    def run_repair(self, bug_info, config_info):
-        super(Darjeeling, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+    def run_repair(self, bug_info, repair_config_info):
+        super(Darjeeling, self).run_repair(bug_info, repair_config_info)
+        if self.is_instrument_only:
             return
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        emitter.normal("\t\t\t running repair with " + self.name)
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        bug_id = str(bug_info[self.key_bug_id])
+        timeout = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(
-                str(values.current_profile_id.get("NA")), self.name.lower(), bug_id
+                str(self.current_repair_profile_id.get("NA")), self.name.lower(), bug_id
             ),
         )
         dir_patch = self.dir_output + "/patches"
@@ -77,31 +73,25 @@ class Darjeeling(AbstractRepairTool):
         )
         repair_command += " --threads {} ".format(mp.cpu_count())
         repair_command += additional_tool_param + " "
-        if values.dump_patches:
+        if self.is_dump_patches:
             repair_command += " --dump-all "
         repair_command += " repair.yml"
         self.timestamp_log_start()
         status = self.run_command(
             repair_command, self.log_output_path, self.dir_expr + "/src"
         )
+        self.process_status(status)
+
         self.timestamp_log_end()
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")
@@ -112,10 +102,10 @@ class Darjeeling(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no log file found")
+            self.emit_warning("[warning] no log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         time_stamp_first_plausible = None
         time_stamp_first_validation = None
@@ -166,7 +156,7 @@ class Darjeeling(AbstractRepairTool):
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
+                    "patch-valid" if self.use_valkyrie else "patches",
                 )
             )
         )

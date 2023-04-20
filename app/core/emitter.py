@@ -5,10 +5,12 @@ import sys
 import textwrap
 from enum import Enum
 
+import rich
+
 from app.core import definitions
 from app.core import logger
-from app.core import ui
 from app.core import values
+from app.ui import ui
 
 stty_info = os.popen("stty size", "r")
 rows, columns = tuple(map(int, stty_info.read().split()))
@@ -28,38 +30,40 @@ class COLOR(Enum):
     STAT_COLOR = 9
 
 
-TERMINAL_COLOR_MAP = {
-    COLOR.GREY: "\t\x1b[1;30m",
-    COLOR.RED: "\t\x1b[1;31m",
-    COLOR.GREEN: "\x1b[1;32m",
-    COLOR.YELLOW: "\t\x1b[1;33m",
-    COLOR.BLUE: "\t\x1b[1;34m",
-    COLOR.ROSE: "\t\x1b[1;35m",
-    COLOR.CYAN: "\x1b[1;36m",
-    COLOR.WHITE: "\t\x1b[1;37m",
-    COLOR.PROG_OUTPUT_COLOR: "\t\x1b[0;30;47m",
-    COLOR.STAT_COLOR: "\t\x1b[0;32;47m",
-}
-
-TEXTUALIZE_COLOR_MAP = {
+RICH_COLOR_MAP = {
     COLOR.GREY: "grey",
     COLOR.RED: "red",
     COLOR.GREEN: "green",
     COLOR.YELLOW: "yellow",
     COLOR.BLUE: "blue",
+    COLOR.ROSE: "rose",
+    COLOR.CYAN: "cyan",
+    COLOR.WHITE: "none",
+    COLOR.PROG_OUTPUT_COLOR: "blue",
+    COLOR.STAT_COLOR: "green",
+}
+
+TEXTUALIZE_COLOR_MAP = {
+    COLOR.GREY: "grey",
+    COLOR.RED: "$error",
+    COLOR.GREEN: "$success",
+    COLOR.YELLOW: "$warning",
+    COLOR.BLUE: "blue",
     COLOR.ROSE: "pink",
     COLOR.CYAN: "cyan",
-    COLOR.WHITE: "white",
+    COLOR.WHITE: "$primary",
     COLOR.PROG_OUTPUT_COLOR: "green",
     COLOR.STAT_COLOR: "green",
 }
 
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
-    message = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], print_message)
     if not values.ui_active:
+        message = "[bold {}]{}".format(
+            RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
+        )
         if prefix:
-            prefix = "\033[K{}{}\x1b[0m".format(TERMINAL_COLOR_MAP[print_color], prefix)
+            prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
             len_prefix = ((indent_level + 1) * 4) + len(prefix)
             wrapper = textwrap.TextWrapper(
                 initial_indent=prefix,
@@ -67,22 +71,16 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
                 width=int(columns),
             )
             message = wrapper.fill(message)
-        sys.stdout.write(message)
-        sys.stdout.write("\n" if new_line else "\033[K\r")
-        sys.stdout.flush()
+        rich.print(message, end=("\n" if new_line else "\r"))
     else:
         if prefix:
-            print_message = prefix + print_message
-        ui.get_ui().call_from_thread(
-            lambda: ui.get_ui().post_message(
-                ui.Write(
-                    text="[bold {}]{}{}".format(
-                        TEXTUALIZE_COLOR_MAP[print_color],
-                        ui.job_identifier.get("((DEFAULT))"),
-                        str(print_message).replace("[", "((").replace("]", "))"),
-                    ),
-                    identifier=ui.job_identifier.get("((DEFAULT))"),
-                )
+            print_message = prefix + str(print_message)
+
+        ui.post_write(
+            "[bold {}]{} {}".format(
+                TEXTUALIZE_COLOR_MAP[print_color],
+                values.job_identifier.get("Root"),
+                str(print_message).replace("[", "\\["),
             )
         )
 
@@ -104,14 +102,14 @@ def sub_sub_title(text):
 
 def command(message):
     if values.debug:
-        prefix = "\t\t(command) "
+        prefix = "\t\t[command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
 def docker_command(message):
     if values.debug:
-        prefix = "\t\t(docker-command) "
+        prefix = "\t\t[docker-command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.docker_command(message)
 
@@ -125,14 +123,14 @@ def debug(message):
 
 def build(message):
     if values.debug:
-        prefix = "\t\t(build) "
+        prefix = "\t\t[build] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.build(message)
 
 
 def data(message, info=None):
     if values.debug:
-        prefix = "\t\t(data) "
+        prefix = "\t\t[data] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
         if info:
             write(info, COLOR.GREY, prefix=prefix, indent_level=2)
@@ -205,7 +203,7 @@ def note(message):
 
 
 def configuration(setting, value):
-    message = "\t(config) " + setting + ": " + str(value)
+    message = "\t[config] " + setting + ": " + str(value)
     write(message, COLOR.WHITE, True)
     logger.configuration(setting + ":" + str(value))
 
@@ -332,7 +330,7 @@ def emit_help():
     )
     write(
         "\t"
-        + definitions.ARG_PROFILE_ID_LIST.ljust(max_length)
+        + definitions.ARG_REPAIR_PROFILE_ID_LIST.ljust(max_length)
         + "\t| "
         + "specify a different profile using config ID",
         COLOR.WHITE,

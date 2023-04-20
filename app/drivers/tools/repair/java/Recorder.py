@@ -1,10 +1,7 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.core import utilities
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -16,12 +13,12 @@ class Recorder(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Recorder, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "zqh111/recoder:interface"
         self.bug_name = ""
 
-    def run_repair(self, bug_info, config_info):
-        super(Recorder, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(Recorder, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -29,21 +26,21 @@ class Recorder(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(repair_config_info[self.key_timeout])
 
-        if not values.use_gpu:
+        if not self.use_gpu:
             utilities.error_exit("Cannot run Recorder without a GPU")
 
         self.bug_name = "{}-{}".format(
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
         # generate patches
         self.timestamp_log_start()
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
             timeout_h,
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"
@@ -51,8 +48,8 @@ class Recorder(AbstractRepairTool):
 
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}-{}'".format(
             timeout_h,
-            bug_info[definitions.KEY_SUBJECT],
-            bug_info[definitions.KEY_BUG_ID],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
 
         status = self.run_command(
@@ -61,18 +58,10 @@ class Recorder(AbstractRepairTool):
             "/root/Repair/",
         )
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
@@ -101,7 +90,7 @@ class Recorder(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -111,10 +100,10 @@ class Recorder(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

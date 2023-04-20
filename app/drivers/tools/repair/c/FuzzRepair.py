@@ -1,8 +1,6 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -10,7 +8,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class FuzzRepair(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(FuzzRepair, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/fuzzrepair:tool"
         self.bug_id = ""
 
@@ -20,27 +18,23 @@ class FuzzRepair(AbstractRepairTool):
         # check there is a file-input defined, if not use default exploit command
         # for example coreutils in vulnloc/extractfix benchmarks have stdarg which are not file inputs
         # instrumentation should convert such to a file argument
-        exploit_file_list = bug_info[definitions.KEY_EXPLOIT_LIST]
+        exploit_file_list = bug_info[self.key_exploit_list]
         if exploit_file_list:
-            poc_list = bug_info[definitions.KEY_EXPLOIT_LIST]
-            crash_cmd = bug_info[definitions.KEY_CRASH_CMD]
+            poc_list = bug_info[self.key_exploit_list]
+            crash_cmd = bug_info[self.key_crash_cmd]
         else:
             poc_list = ["tests/exploit"]
             crash_cmd = ""
 
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
-        self.bug_id = bug_info[definitions.KEY_BUG_ID]
+        self.bug_id = bug_info[self.key_bug_id]
         conf_content.append("dir_exp:{}\n".format(self.dir_expr))
-        conf_content.append("tag_id:{}\n".format(bug_info[definitions.KEY_BUG_ID]))
-        conf_content.append(
-            "binary_path:src/{}\n".format(bug_info[definitions.KEY_BINARY_PATH])
-        )
+        conf_content.append("tag_id:{}\n".format(bug_info[self.key_bug_id]))
+        conf_content.append("binary_path:src/{}\n".format(bug_info[self.key_bin_path]))
 
         conf_content.append("exploit_command:{}\n".format(crash_cmd))
         conf_content.append(
-            "fix_file:{}\n".format(bug_info[definitions.KEY_FIX_FILE]).replace(
-                "//", "/"
-            )
+            "fix_file:{}\n".format(bug_info[self.key_fix_file]).replace("//", "/")
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
 
@@ -51,11 +45,11 @@ class FuzzRepair(AbstractRepairTool):
         self.write_file(conf_content, repair_conf_path)
         return repair_conf_path
 
-    def run_repair(self, bug_info, config_info):
-        super(FuzzRepair, self).run_repair(bug_info, config_info)
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+    def run_repair(self, bug_info, repair_config_info):
+        super(FuzzRepair, self).run_repair(bug_info, repair_config_info)
+        timeout_h = str(repair_config_info[self.key_timeout])
         timeout_m = str(int(float(timeout_h) * 60))
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        additional_tool_param = repair_config_info[self.key_tool_params]
         repair_conf_path = self.generate_conf_file(bug_info)
         # repair_conf_path = self.dir_setup + "/crepair/repair.conf"
         self.timestamp_log_start()
@@ -69,19 +63,13 @@ class FuzzRepair(AbstractRepairTool):
         )
 
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+
+        self.process_status(status)
+
         self.timestamp_log_end()
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
         tool_log_dir = "/FuzzRepair/logs/"
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
@@ -106,7 +94,7 @@ class FuzzRepair(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -119,10 +107,10 @@ class FuzzRepair(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

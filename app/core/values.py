@@ -9,9 +9,9 @@ from typing import List
 from typing import Optional
 from typing import Tuple
 
-from app.core.stats import SpaceStats
-from app.core.stats import TimeStats
-from app.core.status import JobStatus
+from app.core.task.stats import SpaceStats
+from app.core.task.stats import TimeStats
+from app.core.task.status import TaskStatus
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
@@ -33,6 +33,7 @@ dir_artifacts = join(dir_output_base, "artifacts")
 dir_output = ""
 dir_summaries = join(dir_main, "summaries")
 dir_backup = join(dir_main, "backup")
+dir_config = join(dir_main, "config")
 
 
 file_main_log = ""
@@ -42,7 +43,8 @@ file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
 file_stats_log = dir_log_base + "/log-stats"
 file_meta_data: Optional[str] = None
-file_configuration = dir_main + "/profiles/default.json"
+file_repair_configuration = dir_main + "/profiles/repair-default.json"
+file_container_configuration = dir_main + "/profiles/container-default.json"
 file_output_log = ""
 file_setup_log = ""
 file_instrument_log = ""
@@ -61,7 +63,8 @@ bug_index_list: List[int] = []
 bug_id_list: List[str] = []
 skip_index_list: List[int] = []
 benchmark_name = ""
-profile_id_list: List[str] = []
+repair_profile_id_list: List[str] = []
+container_profile_id_list: List[str] = []
 subject_name: Optional[str] = None
 is_purge = False
 only_analyse = False
@@ -72,14 +75,18 @@ use_container = True
 dump_patches = False
 use_valkyrie = False
 use_gpu = False
-email_setup = False
+is_email_set = False
+is_slack_set = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
 ui_active = False
-use_tui = False
+use_parallel = False
+compact_results = False
 cpus = 1
 task_type: Optional[str] = None
+ui_max_width = 1000
+runs = 1
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000
@@ -91,9 +98,19 @@ dump_patches = False
 arg_pass = False
 iteration_no = -1
 stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
-current_profile_id = ContextVar("current_profile_id", default=None)
-experiment_status = ContextVar("experiment_status", default=JobStatus.NONE)
 
+current_repair_profile_id: ContextVar[str] = ContextVar(
+    "current_repair_profile_id", default="NONE"
+)
+current_container_profile_id: ContextVar[str] = ContextVar(
+    "current_container_profile_id", default="NONE"
+)
+experiment_status: ContextVar[TaskStatus] = ContextVar(
+    "experiment_status", default=TaskStatus.NONE
+)
+job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
+
+slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}
 email_configuration = {
     "ssl_from_start": True,
     "port": 465,

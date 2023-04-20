@@ -4,37 +4,34 @@ from os import path
 from os.path import join
 from typing import List
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Prophet(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Prophet, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/prophet"
         self.file = ""
 
-    def run_repair(self, bug_info, config_info):
-        super(Prophet, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+    def run_repair(self, bug_info, repair_config_info):
+        super(Prophet, self).run_repair(bug_info, repair_config_info)
+        if self.is_instrument_only:
             return
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        self.file = bug_info[definitions.KEY_FIX_FILE]
+        repair_conf_id = repair_config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        self.file = bug_info[self.key_fix_file]
         revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
         self.generate_revlog(bug_info, revlog_file, bug_id)
-        timeout = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
-            self.dir_logs, conf_id, self.name.lower(), bug_id
+            self.dir_logs, repair_conf_id, self.name.lower(), bug_id
         )
 
         repair_file = self.dir_expr + "/prophet/prophet.conf"
         if not self.is_file(repair_file):
-            emitter.error("\t\t(error) no repair config file detected")
+            self.emit_error("[error] no repair config file detected")
             return
         # instrument_command = "prophet prophet/prophet.conf  -r workdir -init-only -o patches"
         # self.run_command(instrument_command, self.log_instrument_path, dir_expr)
@@ -52,32 +49,28 @@ class Prophet(AbstractRepairTool):
         repair_command += " -cond-ext -replace-ext "
         repair_command += " -o {}".format(join(self.dir_output, "patches"))
         # repair_command += " >> {}".format(self.log_output_path)
-        if values.dump_patches:
+        if self.is_dump_patches:
             repair_command += " -dump-all "
         if additional_tool_param:
             repair_command += " " + additional_tool_param
         # repair_command += " -timeout {0} ".format(int(timeout))
         self.timestamp_log_start()
+
         status = self.run_command(repair_command, self.log_output_path, self.dir_expr)
+
+        self.process_status(status)
+
         self.timestamp_log_end()
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def generate_localization(self, bug_info, localization_file, dir_setup):
-        fix_location = bug_info[definitions.KEY_FIX_LOC]
+        fix_location = bug_info[self.key_fix_loc]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
             source_file, line_number = fix_location.split(":")
             fault_loc = (
                 "{file_path} {line} {column} {file_path} {line} {column}"
-                " \t\t\t 3000000 \t\t 687352 \t\t 16076\n".format(
+                "  3000000  687352  16076\n".format(
                     file_path=source_file, line=line_number, column=3
                 )
             )
@@ -99,10 +92,10 @@ class Prophet(AbstractRepairTool):
                     )
 
     def generate_revlog(self, experiment_info, revlog_file, bug_id):
-        subject_name = experiment_info[definitions.KEY_SUBJECT]
-        failing_test_list = experiment_info[definitions.KEY_FAILING_TEST]
-        passing_test_list = experiment_info[definitions.KEY_PASSING_TEST]
-        benchmark_name = experiment_info[definitions.KEY_BENCHMARK]
+        subject_name = experiment_info[self.key_subject]
+        failing_test_list = experiment_info[self.key_failing_tests]
+        passing_test_list = experiment_info[self.key_passing_tests]
+        benchmark_name = experiment_info[self.key_benchmark]
 
         test_config = ["-", "-"]
         test_config.append("Diff Cases: Tot {0}".format(len(failing_test_list)))
@@ -120,7 +113,6 @@ class Prophet(AbstractRepairTool):
         self.write_file(map(lambda line: line + "\n", test_config), revlog_file)
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)
@@ -5672,9 +5664,7 @@ class Prophet(AbstractRepairTool):
             elif "Segmentation fault" in line:
                 self._error.is_error = True
             elif "Verification failed!" in line or "Repair error:" in line:
-                emitter.warning(
-                    "\t\t\t\t(warning) verification error detected in test suite"
-                )
+                self.emit_warning("[warning] verification error detected in test suite")
             elif "validation time: " in line:
                 time = line.split("validation time: ")[-1].strip().replace("\n", "")
                 self._time.total_validation += float(time)
@@ -5712,11 +5702,11 @@ class Prophet(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = path.join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = "{}/{}-{}-{}-stats.log".format(
-            self.dir_logs, conf_id, self.name.lower(), bug_id
+            self.dir_logs, repair_conf_id, self.name.lower(), bug_id
         )
 
         regex = re.compile("(.*-output.log$)")
@@ -5728,21 +5718,21 @@ class Prophet(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         self.read_log_file()
 
         if self._error.is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            self.emit_error("[error] error detected in logs")
 
         self._space.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
-                    "patch-valid" if values.use_valkyrie else "patches",
+                    "patch-valid" if self.use_valkyrie else "patches",
                 )
             )
         )

@@ -7,9 +7,6 @@ from os.path import join
 from typing import cast
 from typing import Optional
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -20,22 +17,23 @@ class SenX(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(SenX, self).__init__(self.name)
+        super().__init__(self.name)
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
-        emitter.normal("\t\t\t instrumenting for " + self.name)
-        bug_id = bug_info[definitions.KEY_BUG_ID]
-        conf_id = str(values.current_profile_id.get("NA"))
-        buggy_file = bug_info[definitions.KEY_FIX_FILE]
+        self.emit_normal(" instrumenting for " + self.name)
+        bug_id = bug_info[self.key_bug_id]
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = join(
-            self.dir_logs, "{}-{}-{}-instrument.log".format(conf_id, self.name, bug_id)
+            self.dir_logs,
+            "{}-{}-{}-instrument.log".format(repair_conf_id, self.name, bug_id),
         )
         time = datetime.now()
         command_str = "bash instrument.sh {}".format(self.dir_expr)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        emitter.debug(
-            "\t\t\t Instrumentation took {} second(s)".format(
+        self.emit_debug(
+            "instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -47,32 +45,31 @@ class SenX(AbstractRepairTool):
             )
         return
 
-    def run_repair(self, bug_info, config_info):
-        super(SenX, self).run_repair(bug_info, config_info)
-        if values.only_instrument:
+    def run_repair(self, bug_info, repair_config_info):
+        super(SenX, self).run_repair(bug_info, repair_config_info)
+        if self.is_instrument_only:
             return
-        emitter.normal("\t\t\t running repair with " + self.name)
-        conf_id = config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        repair_conf_id = repair_config_info[self.key_id]
+        bug_id = str(bug_info[self.key_bug_id])
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
-        if not bug_info[definitions.KEY_BINARY_PATH]:
+        if not bug_info[self.key_bin_path]:
             error_exit("The bug does not have a binary path defined")
 
-        self.relative_binary_path = cast(str, bug_info[definitions.KEY_BINARY_PATH])
+        self.relative_binary_path = cast(str, bug_info[self.key_bin_path])
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
         binary_dir_path = os.path.dirname(abs_binary_path)
         struct_def_file_path = "def_file"
 
         test_dir = self.dir_setup + "/tests"
         test_file_list = []
-        if values.use_container:
-            emitter.error(
+        if self.use_container:
+            self.emit_error(
                 "[Exception] unimplemented functionality: SenX docker support not implemented"
             )
             error_exit("Unhandled Exception")
@@ -85,11 +82,11 @@ class SenX(AbstractRepairTool):
                 ]
 
         if len(test_file_list) > 1:
-            emitter.warning(
-                "\t\t(warning) unimplemented functionality: SenX only supports one failing test-case"
+            self.emit_warning(
+                "[error] unimplemented functionality: SenX only supports one failing test-case"
             )
 
-        binary_input_arg = bug_info[definitions.KEY_CRASH_CMD]
+        binary_input_arg = bug_info[self.key_crash_cmd]
         if "$POC" in binary_input_arg:
             binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
         self.timestamp_log_start()
@@ -104,19 +101,13 @@ class SenX(AbstractRepairTool):
             additional_tool_param, self.log_output_path
         )
         status = execute_command(senx_command)
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+
+        self.process_status(status)
+
         self.timestamp_log_end()
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         if not self.dir_expr:
@@ -133,12 +124,12 @@ class SenX(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        conf_id = str(values.current_profile_id.get("NA"))
+        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")
@@ -149,10 +140,10 @@ class SenX(AbstractRepairTool):
                     break
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("[error] no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Log File: " + self.log_output_path)
+        self.emit_highlight(" Log File: " + self.log_output_path)
         is_error = False
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -165,6 +156,6 @@ class SenX(AbstractRepairTool):
             elif "Runtime Error" in line:
                 self._error.is_error = True
         if is_error:
-            emitter.error("\t\t\t\t(error) error detected in logs")
+            self.emit_error("[error] error detected in logs")
 
         return self._space, self._time, self._error

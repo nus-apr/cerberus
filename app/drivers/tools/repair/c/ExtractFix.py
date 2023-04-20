@@ -1,10 +1,7 @@
 import os
 from os import path
 
-from app.core import definitions
-from app.core import emitter
 from app.core import utilities
-from app.core import values
 from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -23,12 +20,12 @@ class ExtractFix(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(ExtractFix, self).__init__(self.name)
+        super().__init__(self.name)
         self.dir_root = "/ExtractFix/"
         self.image_name = "gaoxiang9430/extractfix:demo"
 
-    def run_repair(self, bug_info, config_info):
-        super(ExtractFix, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(ExtractFix, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -36,7 +33,7 @@ class ExtractFix(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        if values.only_instrument:
+        if self.is_instrument_only:
             return
 
         # modify the output directory as it depends on the experiment
@@ -45,13 +42,13 @@ class ExtractFix(AbstractRepairTool):
 
         dir_extractfix_exist = self.is_dir(self.dir_root)
         if not dir_extractfix_exist:
-            emitter.error(
+            self.emit_error(
                 "[Exception] ExtractFix repo is not at the expected location. "
                 "Please double check whether we are in ExtractFix container."
             )
             error_exit("Unhandled exception")
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
-        additional_tool_param = config_info[definitions.KEY_TOOL_PARAMS]
+        timeout_h = str(repair_config_info[self.key_timeout])
+        additional_tool_param = repair_config_info[self.key_tool_params]
         # prepare the config file
         parameters = self.create_parameters(bug_info)
 
@@ -65,17 +62,11 @@ class ExtractFix(AbstractRepairTool):
             log_file_path=self.log_output_path,
             dir_path=path.join(self.dir_root, "build"),
         )
-        self.timestamp_log_end()
 
-        if status != 0:
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.process_status(status)
+
+        self.timestamp_log_end()
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def create_parameters(self, experiment_info):
         """
@@ -85,9 +76,9 @@ class ExtractFix(AbstractRepairTool):
         # (1) source-dir
         line_source_dir = "-s " + (
             "/libtiff-3186"
-            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
+            if experiment_info[self.key_bug_id] == "CVE-2016-3186"
             else "/coreutils-25003"
-            if experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
+            if experiment_info[self.key_bug_id] == "gnubug-25003"
             else self.dir_expr
         )
 
@@ -95,14 +86,14 @@ class ExtractFix(AbstractRepairTool):
         # dir_tests = "/".join([self.dir_setup, "tests"])
         # tests_list = self.list_dir(dir_tests)
         # if not tests_list:
-        #     emitter.error(
+        #     self.emit_error(
         #         "[Exception] there needs to be at least 1 exploit (failing) input!"
         #     )
         #     error_exit("Unhandled Exception")
         # Currently we assume that the test cases are copied, this can be simplified by using the tests_lsit above
         test_case = "-t " + (
-            experiment_info[definitions.KEY_EXPLOIT_LIST][0]
-            if len(experiment_info[definitions.KEY_EXPLOIT_LIST]) != 0
+            experiment_info[self.key_exploit_list][0]
+            if len(experiment_info[self.key_exploit_list]) != 0
             else "dummy"
         )
 
@@ -112,22 +103,20 @@ class ExtractFix(AbstractRepairTool):
         # (4) bug type
         bug_type = "-b " + (
             "api_specific"
-            if experiment_info[definitions.KEY_BUG_ID] == "CVE-2016-3186"
-            or experiment_info[definitions.KEY_BUG_ID] == "gnubug-25003"
-            else ExtractFix.bug_conversion_table[
-                experiment_info[definitions.KEY_BUG_TYPE]
-            ]
+            if experiment_info[self.key_bug_id] == "CVE-2016-3186"
+            or experiment_info[self.key_bug_id] == "gnubug-25003"
+            else ExtractFix.bug_conversion_table[experiment_info[self.key_bug_type]]
         )
 
         if bug_type == "-b ":
             utilities.error_exit(
                 "Bug {} does not have {} field to indicate the type".format(
-                    experiment_info[definitions.KEY_BUG_ID], definitions.KEY_BUG_TYPE
+                    experiment_info[self.key_bug_id], self.key_bug_type
                 )
             )
 
         # (5) buggy program
-        program = "-n " + experiment_info[definitions.KEY_BINARY_PATH].split("/")[-1]
+        program = "-n " + experiment_info[self.key_bin_path].split("/")[-1]
 
         # (6) verbose?
         verbose = "-v"
@@ -170,7 +159,7 @@ class ExtractFix(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         is_error = False
         count_plausible = 0
@@ -184,10 +173,10 @@ class ExtractFix(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

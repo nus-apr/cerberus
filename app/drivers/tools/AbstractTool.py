@@ -3,21 +3,20 @@ import os
 import re
 import shutil
 import time
-from datetime import datetime
-from os.path import join
 
 from app.core import abstractions
 from app.core import container
 from app.core import definitions
 from app.core import emitter
-from app.core import stats
 from app.core import utilities
 from app.core import values
+from app.core.task import stats
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
+from app.drivers.AbstractDriver import AbstractDriver
 
 
-class AbstractTool:
+class AbstractTool(AbstractDriver):
     log_instrument_path = ""
     log_output_path = ""
     image_name = ""
@@ -36,11 +35,28 @@ class AbstractTool:
     _time = stats.TimeStats()
     _space = stats.SpaceStats()
     _error = stats.ErrorStats()
+    current_repair_profile_id = values.current_repair_profile_id
+    key_benchmark = definitions.KEY_BENCHMARK
+    key_subject = definitions.KEY_SUBJECT
+    key_id = definitions.KEY_ID
+    key_bug_id = definitions.KEY_BUG_ID
+    key_bug_type = definitions.KEY_BUG_TYPE
+    key_tool_params = definitions.KEY_TOOL_PARAMS
+    key_timeout = definitions.KEY_CONFIG_TIMEOUT
+    key_source = definitions.KEY_SOURCE
+    key_sink = definitions.KEY_SINK
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
-        emitter.debug("using tool: " + tool_name)
-        self.image_name = "cerberus:{}".format(tool_name.lower())
+        super().__init__()
+        self.name = tool_name
+        self.is_ui_active = values.ui_active
+        self.is_only_instrument = values.only_instrument
+        self.is_debug = values.debug
+        self.is_dump_patches = values.dump_patches
+        self.use_container = values.use_container
+        self.use_valkyrie = values.use_valkyrie
+        self.use_gpu = super().get_config_value("use_gpu")
 
     @abc.abstractmethod
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -134,9 +150,26 @@ class AbstractTool:
             exit_code = execute_command(command_str, env=env, directory=dir_path)
         return exit_code
 
+    def process_status(self, status: int):
+        if status != 0:
+            emitter.warning(
+                "\t\t\t[framework] {0} exited with an error code {1}".format(
+                    self.name, status
+                )
+            )
+            if status == 137 and self.container_id:
+                # Due to the container being killed, we restart it to be able to pull out the analysis info
+                container.stop_container(self.container_id)
+                container.start_container(self.container_id)
+
+        else:
+            emitter.success(
+                "\t\t\t[framework] {0} ended successfully".format(self.name)
+            )
+
     def pre_process(self):
         """Any pre-processing required for the repair"""
-        self.check_tool_exists()
+        # self.check_tool_exists()
         return
 
     def check_tool_exists(self):
@@ -144,7 +177,7 @@ class AbstractTool:
         if values.use_container:
             if self.image_name is None:
                 utilities.error_exit(
-                    "{} does not provide a Docker Image".format(self.name)
+                    "\t[framework] {} does not provide a Docker Image".format(self.name)
                 )
             if ":" in self.image_name:
                 repo_name, tag_name = self.image_name.split(":")
@@ -152,14 +185,39 @@ class AbstractTool:
                 repo_name = self.image_name
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
-                emitter.warning("(warning) docker image not found in Docker registry")
+                emitter.warning(
+                    "\t[framework] docker image {}:{} not found in Docker registry".format(
+                        repo_name, tag_name
+                    )
+                )
                 if container.pull_image(repo_name, tag_name) is None:
                     utilities.error_exit(
-                        "{} does not provide a Docker image in Dockerhub".format(
+                        "\t[framework] {} does not provide a Docker image in Dockerhub".format(
                             self.name
                         )
                     )
                     # container.build_tool_image(repo_name, tag_name)
+            else:
+                # Image may exist but need to be sure it is the latest one
+                emitter.information(
+                    "\t\t[framework] docker image found locally for {}".format(
+                        self.name
+                    )
+                )
+                # Get the local image
+                image = container.get_image(repo_name, tag_name)
+                # Then try pulling. If it is the same one we are quick
+                # If not we have to wait but it is safer than getting stale resuls.
+                # In theory this has a supply chain vulnerability but we can assume
+                # That the storage is safe
+                possibly_new_image = container.pull_image(repo_name, tag_name)
+
+                if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
+                    emitter.information(
+                        "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                    )
+                    values.rebuild_all = True
+
         else:
             local_path = shutil.which(self.name.lower())
             if not local_path:
@@ -180,7 +238,6 @@ class AbstractTool:
 
     def save_artifacts(self, dir_info):
         """Store all artifacts from the tool"""
-        emitter.normal("\t\t\t saving artifacts of " + self.name)
         dir_results = dir_info["results"]
         dir_artifacts = dir_info["artifacts"]
         dir_logs = dir_info["logs"]
@@ -247,3 +304,21 @@ class AbstractTool:
                         self.log_output_path = os.path.join(self.dir_logs, file)
                         break
         return self.log_output_path
+
+    def emit_normal(self, abstraction, concrete, message):
+        super().emit_normal(abstraction, concrete, message)
+
+    def emit_warning(self, abstraction, concrete, message):
+        super().emit_warning(abstraction, concrete, message)
+
+    def emit_error(self, abstraction, concrete, message):
+        super().emit_error(abstraction, concrete, message)
+
+    def emit_highlight(self, abstraction, concrete, message):
+        super().emit_highlight(abstraction, concrete, message)
+
+    def emit_success(self, abstraction, concrete, message):
+        super().emit_success(abstraction, concrete, message)
+
+    def emit_debug(self, abstraction, concrete, message):
+        super().emit_debug(abstraction, concrete, message)

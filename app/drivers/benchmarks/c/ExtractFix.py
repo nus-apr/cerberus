@@ -1,8 +1,5 @@
 import os
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -18,24 +15,24 @@ class ExtractFix(AbstractBenchmark):
 
         if not is_error:
             if self.verify(bug_index, container_id):
-                emitter.success("\t\t\t(benchmark) verified successfully")
+                self.emit_success("[benchmark] Verified successfully")
             else:
-                emitter.error("\t\t\t(benchmark) verification failed")
+                self.emit_error("[benchmark] Verification failed")
                 is_error = True
-            if not values.use_valkyrie:
-                emitter.normal("\t\t\tskipping transformation")
+            if not self.use_valkyrie:
+                self.emit_normal("skipping transformation")
             else:
                 if self.transform(bug_index, container_id):
-                    emitter.success("\t\t\t(benchmark) transformation successful")
+                    self.emit_success("[benchmark] Transformation successful")
                 else:
-                    emitter.error("\t\t\t(benchmark) transformation failed")
+                    self.emit_error("[benchmark] Transformation failed")
                     is_error = True
         return is_error
 
     def deploy(self, bug_index, container_id):
-        emitter.normal("\t\t\tdownloading experiment subject")
+        self.emit_normal("Downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
@@ -46,9 +43,9 @@ class ExtractFix(AbstractBenchmark):
         return status == 0
 
     def config(self, bug_index, container_id):
-        emitter.normal("\t\t\tconfiguring experiment subject")
+        self.emit_normal("configuring experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_config_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
@@ -59,9 +56,9 @@ class ExtractFix(AbstractBenchmark):
         return status == 0
 
     def build(self, bug_index, container_id):
-        emitter.normal("\t\t\tbuilding experiment subject")
+        self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_build_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
@@ -72,9 +69,9 @@ class ExtractFix(AbstractBenchmark):
         return status == 0
 
     def test(self, bug_index, container_id):
-        emitter.normal("\t\t\ttesting experiment subject")
+        self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
@@ -85,9 +82,9 @@ class ExtractFix(AbstractBenchmark):
         return status != 0
 
     def verify(self, bug_index, container_id):
-        emitter.normal("\t\t\tverify dev patch and test-oracle")
+        self.emit_normal("verify dev patch and test-oracle")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
@@ -98,9 +95,9 @@ class ExtractFix(AbstractBenchmark):
         return status == 0
 
     def transform(self, bug_index, container_id):
-        emitter.normal("\t\t\ttransform fix-file")
+        self.emit_normal("transform fix-file")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
@@ -111,13 +108,12 @@ class ExtractFix(AbstractBenchmark):
         return status == 0
 
     def clean(self, exp_dir_path, container_id):
-        emitter.normal("\t\t\tremoving experiment subject")
+        self.emit_normal("[framework] removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t(benchmark) saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(ExtractFix, self).save_artifacts(dir_info, container_id)

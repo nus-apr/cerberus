@@ -4,6 +4,7 @@ import os
 import pathlib
 import sys
 from argparse import Namespace
+from os.path import join
 from typing import Any
 from typing import Dict
 
@@ -11,10 +12,11 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
-    emitter.normal("loading profile setup")
+    emitter.normal("\t[framework] loading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, "r") as conf_file:
@@ -32,11 +34,9 @@ def load_class(class_name: str):
     return mod
 
 
-def load_tool(tool_name: str):
-    task_type = values.task_type
-    emitter.normal(f"loading {task_type} tool")
-    # class_file_path = values.dir_tool_drivers + tool_name + ".py"
+def load_tool(tool_name: str) -> AbstractTool:
     tool_type = values.task_type
+    emitter.normal(f"\t[framework] loading {tool_type} tool {tool_name}")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
         (str(x).split("/")[-1], str(x).split("/")[-2])
@@ -61,7 +61,7 @@ def load_tool(tool_name: str):
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
-    emitter.normal("loading benchmark")
+    emitter.normal("\t[framework] loading benchmark {}".format(benchmark_name))
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
 
     existing_benchmark_list = [
@@ -88,12 +88,12 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return initializer()
-    raise Exception("Should not be reachable")
 
 
 class Configurations:
     __config_file = None
-    __email_config_file = None
+    __email_config_file = open(join(values.dir_config, "email.json"))
+    __slack_config_file = open(join(values.dir_config, "slack.json"))
     __default_config_values: Dict[str, Any] = {
         "depth": 3,
         "iteration-limit": 1,
@@ -102,26 +102,30 @@ class Configurations:
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
-        "email-setup": False,
+        "is-email-set": False,
+        "is-slack-set": False,
         "is-debug": False,
         "use-purge": False,
         "only-analyse": False,
         "only-setup": False,
         "rebuild-all": False,
         "rebuild-base": False,
+        "compact-results": False,
         "subject-name": None,
         "benchmark-name": None,
         "dump-patches": False,
         "start-index": None,
         "end-index": None,
-        "use-tui": False,
+        "parallel": False,
         "cpu-count": 1,
+        "runs": 1,
         "bug-id-list": [],
         "bug-index-list": [],
         "skip-index-list": [],
         "tool-list": [],
         "directories": {"data": "/data"},
-        "profile-id-list": ["C1"],
+        "repair-profile-id-list": ["C1"],
+        "container-profile-id-list": ["CC1"],
     }
     __runtime_config_values = __default_config_values
 
@@ -136,18 +140,13 @@ class Configurations:
         return range(start, end + 1)
 
     def read_arg_list(self, arg_list: Namespace):
-        emitter.normal("reading profile values")
-        emitter.normal("reading configuration values from arguments")
+        emitter.normal("\t[framework] reading profile values")
+        emitter.normal("\t[framework] reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         self.__runtime_config_values["task-type"] = arg_list.task_type
         if arg_list.config:
             self.__config_file = arg_list.config
             self.read_config_file()
-
-        if arg_list.email_config:
-            self.__runtime_config_values["email-setup"] = True
-            self.__email_config_file = arg_list.email_config
-            self.read_email_config_file()
 
         if arg_list.docker_host:
             self.__runtime_config_values["docker-host"] = arg_list.docker_host
@@ -190,11 +189,8 @@ class Configurations:
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
 
-        if arg_list.use_tui:
-            self.__runtime_config_values["use-tui"] = True
-
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["config-id-list"] = arg_list.profile_id_list
+        if arg_list.parallel:
+            self.__runtime_config_values["parallel"] = True
 
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
@@ -205,6 +201,8 @@ class Configurations:
                     str(arg_list.bug_index_list).split(","),
                 )
             )
+        if arg_list.runs:
+            self.__runtime_config_values["runs"] = arg_list.runs
         if arg_list.cpu_count:
             self.__runtime_config_values["cpu-count"] = arg_list.cpu_count
 
@@ -223,11 +221,21 @@ class Configurations:
                 arg_list.skip_index_list
             ).split(",")
 
+        if arg_list.compact_results:
+            self.__runtime_config_values["compact-results"] = arg_list.compact_results
+
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
-        if arg_list.profile_id_list:
-            self.__runtime_config_values["profile-id-list"] = arg_list.profile_id_list
+        if arg_list.repair_profile_id_list:
+            self.__runtime_config_values[
+                "repair-profile-id-list"
+            ] = arg_list.repair_profile_id_list
+
+        if arg_list.container_profile_id_list:
+            self.__runtime_config_values[
+                "container-profile-id-list"
+            ] = arg_list.container_profile_id_list
 
     def read_config_file(self):
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
@@ -242,7 +250,7 @@ class Configurations:
             self.__runtime_config_values["tool-list"] = config_info["tool-list"]
 
         except KeyError as exc:
-            raise ValueError(f"missing field in configuration file: {exc}")
+            raise ValueError(f"Missing field in configuration file: {exc}")
 
         if "bug-index-list" in config_info:
             self.__runtime_config_values["bug-index-list"] = list(
@@ -263,12 +271,35 @@ class Configurations:
             "end-index",
             "skip-index-list",
             "use-gpu",
-            "profile-id-list",
+            "compact-results",
+            "repair-profile-id-list",
+            "container-profile-id-list",
             "docker-host",
+            "runs",
         ]
         for key in optional_keys:
             if key in config_info:
                 self.__runtime_config_values[key] = config_info[key]
+
+    def read_slack_config_file(self):
+        slack_config_info = {}
+        if self.__slack_config_file:
+            slack_config_info = json.load(self.__slack_config_file)
+        for key, value in slack_config_info.items():
+            if key in values.slack_configuration and type(value) == type(
+                values.slack_configuration[key]
+            ):
+                values.slack_configuration[key] = value
+            else:
+                utilities.error_exit(
+                    "[error] Unknown key {} or invalid type of value".format(key)
+                )
+
+        if values.slack_configuration["hook_url"] or (
+            values.slack_configuration["oauth_token"]
+            and values.slack_configuration["channel"]
+        ):
+            self.__runtime_config_values["is-slack-set"] = True
 
     def read_email_config_file(self):
         email_config_info = {}
@@ -283,24 +314,34 @@ class Configurations:
                 utilities.error_exit(
                     "[error] unknown key {} or invalid type of value".format(key)
                 )
+        if (
+            values.email_configuration["username"]
+            and values.email_configuration["password"]
+            and values.email_configuration["host"]
+        ):
+            self.__runtime_config_values["is-email-set"] = True
 
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():
-            emitter.configuration(config_key, config_value)
+            if config_value is not None:
+                emitter.configuration(config_key, config_value)
 
     def update_configuration(self):
-        emitter.normal("updating configuration values")
-        if not self.__runtime_config_values["only-setup"]:
+        emitter.normal("\t[framework] updating configuration values")
+        values.task_type = self.__runtime_config_values["task-type"]
+        values.only_setup = self.__runtime_config_values["only-setup"]
+        if values.task_type == "prepare":
+            values.only_setup = True
+        if not values.only_setup:
             if not self.__runtime_config_values["tool-list"]:
-                emitter.error("(invalid) --tool/-tool-list is missing")
+                emitter.error("[invalid] --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
-        values.task_type = self.__runtime_config_values["task-type"]
         values.benchmark_name = self.__runtime_config_values["benchmark-name"]
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:
             emitter.normal(
-                "[info] running experiments for subject {}".format(values.subject_name)
+                "[info] Running experiments for subject {}".format(values.subject_name)
             )
         values.file_meta_data = os.path.join(
             "benchmark", values.benchmark_name, "meta-data.json"
@@ -310,8 +351,13 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.profile_id_list = self.__runtime_config_values["profile-id-list"]
-        values.use_tui = self.__runtime_config_values["use-tui"]
+        values.repair_profile_id_list = self.__runtime_config_values[
+            "repair-profile-id-list"
+        ]
+        values.container_profile_id_list = self.__runtime_config_values[
+            "container-profile-id-list"
+        ]
+        values.use_parallel = self.__runtime_config_values["parallel"]
 
         if (
             values.start_index is None
@@ -321,16 +367,16 @@ class Configurations:
             and values.subject_name is None
         ):
             emitter.warning(
-                "[warning] experiment id is not specified, running all experiments"
+                "[warning] Experiment id is not specified, running all experiments"
             )
 
-        values.only_setup = self.__runtime_config_values["only-setup"]
+        values.compact_results = self.__runtime_config_values["compact-results"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
-        values.email_setup = self.__runtime_config_values["email-setup"]
+        values.runs = max(1, self.__runtime_config_values["runs"])
         values.cpus = max(
             1,
             min(
@@ -345,4 +391,7 @@ class Configurations:
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]
+
+        values.is_email_set = self.__runtime_config_values["is-email-set"]
+        values.is_slack_set = self.__runtime_config_values["is-slack-set"]
         sys.setrecursionlimit(values.default_stack_size)

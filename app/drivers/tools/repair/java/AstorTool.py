@@ -3,10 +3,6 @@ import re
 from os.path import join
 from typing import Optional
 
-from app.core import definitions
-from app.core import emitter
-from app.core import utilities
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -17,11 +13,11 @@ class AstorTool(AbstractRepairTool):
     mode: Optional[str] = None
 
     def __init__(self):
-        super(AstorTool, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/astor"
 
-    def run_repair(self, bug_info, config_info):
-        super(AstorTool, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(AstorTool, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -29,7 +25,7 @@ class AstorTool(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(repair_config_info[self.key_timeout])
         timeout_m = str(float(timeout_h) * 60)
         max_gen = 1000000
 
@@ -42,9 +38,7 @@ class AstorTool(AbstractRepairTool):
         list_deps = [
             f"{self.dir_expr}/{x}"
             for x in bug_info["dependencies"]
-            if not (
-                bug_info[definitions.KEY_SUBJECT].lower() == "lang" and "asm.jar" in x
-            )
+            if not (bug_info[self.key_subject].lower() == "lang" and "asm.jar" in x)
         ]
         list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
         list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
@@ -57,7 +51,7 @@ class AstorTool(AbstractRepairTool):
             f"java -cp target/astor-{self.astor_version}-jar-with-dependencies.jar "
             f"fr.inria.main.evolution.AstorMain "
             f"-mode {self.mode} "
-            + (f"-loglevel DEBUG " if values.debug else "-loglevel INFO ")
+            + (f"-loglevel DEBUG " if self.is_debug else "-loglevel INFO ")
             + f"-srcjavafolder {dir_java_src} "
             f"-srctestfolder {dir_test_src}  "
             f"-binjavafolder {dir_java_bin} "
@@ -71,18 +65,10 @@ class AstorTool(AbstractRepairTool):
 
         status = self.run_command(repair_command, self.log_output_path, self.astor_home)
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
@@ -117,7 +103,7 @@ class AstorTool(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -131,10 +117,10 @@ class AstorTool(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -145,7 +131,7 @@ class AstorTool(AbstractRepairTool):
                     count_compilable += 1
                     identifier = re.search(r"id (.*)", line)
                     if not identifier:
-                        emitter.warning("No Id found")
+                        self.emit_warning("No Id found")
                         continue
                     child_id = int(str(identifier.group(1)).strip())
                     if child_id > count_enumerations:

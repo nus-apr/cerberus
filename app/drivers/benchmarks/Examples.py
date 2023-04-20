@@ -50,13 +50,12 @@ class Examples(AbstractBenchmark):
         return True
 
     def clean(self, exp_dir_path, container_id):
-        emitter.normal("\t\t\tremoving experiment subject")
+        emitter.normal("\t\t\t[framework] removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str, "/dev/null", "/")
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t(benchmark) saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Examples, self).save_artifacts(dir_info, container_id)

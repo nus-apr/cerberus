@@ -1,13 +1,9 @@
 import json
 import os
-import re
 from os.path import join
 from typing import Any
 from typing import Dict
 
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -17,7 +13,7 @@ class EvoRepair(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(EvoRepair, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "rshariffdeen/evorepair"
         self.bug_id = ""
 
@@ -25,8 +21,8 @@ class EvoRepair(AbstractRepairTool):
         repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
         config_object: Dict[str, Dict[str, Any]] = dict()
         config_object["project"] = dict()
-        subject_name = bug_info[definitions.KEY_SUBJECT]
-        bug_id = bug_info[definitions.KEY_BUG_ID]
+        subject_name = bug_info[self.key_subject]
+        bug_id = bug_info[self.key_bug_id]
         bug_name = f"{subject_name.lower()}_{bug_id}"
         self.bug_id = bug_name
         config_object["project"]["name"] = bug_name
@@ -57,14 +53,14 @@ class EvoRepair(AbstractRepairTool):
         config_object["build"] = build_config
 
         localize_config = dict()
-        localize_config["fix-locations"] = [bug_info[definitions.KEY_FIX_LOC]]
+        localize_config["fix-locations"] = [bug_info[self.key_fix_loc]]
         config_object["localization"] = localize_config
 
         self.write_file(json.dumps(config_object), repair_config_path)
         return repair_config_path
 
-    def run_repair(self, bug_info, config_info):
-        super(EvoRepair, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(EvoRepair, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -73,7 +69,7 @@ class EvoRepair(AbstractRepairTool):
         """
 
         repair_config_path = self.generate_config_file(bug_info)
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(repair_config_info[self.key_timeout])
         max_iterations = 2000000
         test_timeout = 30000
         test_partitions = 1
@@ -90,18 +86,10 @@ class EvoRepair(AbstractRepairTool):
             repair_command, self.log_output_path, self.evorepair_home
         )
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
@@ -141,17 +129,17 @@ class EvoRepair(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
         count_non_compilable = 0
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

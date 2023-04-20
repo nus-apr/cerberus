@@ -1,8 +1,6 @@
 import os
 from os.path import join
 
-from app.core import definitions
-from app.core import emitter
 from app.core import utilities
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -10,11 +8,11 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class SequenceR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(SequenceR, self).__init__(self.name)
+        super().__init__(self.name)
         self.image_name = "zimin/sequencer:1.0"
 
-    def run_repair(self, bug_info, config_info):
-        super(SequenceR, self).run_repair(bug_info, config_info)
+    def run_repair(self, bug_info, repair_config_info):
+        super(SequenceR, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -22,7 +20,7 @@ class SequenceR(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(config_info[definitions.KEY_CONFIG_TIMEOUT])
+        timeout_h = str(repair_config_info[self.key_timeout])
 
         # The zimin/sequencer container has a bug which can only be found after be found after a removal
         # of a /dev/null pipe in sequencer-predict
@@ -32,10 +30,7 @@ class SequenceR(AbstractRepairTool):
             "/SequenceR/src/lib/OpenNMT-py",
         )
 
-        if (
-            bug_info[definitions.KEY_FIX_FILE] == ""
-            or len(bug_info[definitions.KEY_FIX_LINES]) < 1
-        ):
+        if bug_info[self.key_fix_file] == "" or len(bug_info[self.key_fix_lines]) < 1:
             utilities.error_exit(
                 "Cannot apply SequenceR on an experiment with no given buggy file or line"
             )
@@ -44,15 +39,15 @@ class SequenceR(AbstractRepairTool):
         self.timestamp_log_start()
         file = (
             join(
-                bug_info[definitions.KEY_SOURCE_DIRECTORY],
-                bug_info[definitions.KEY_FIX_FILE].replace(".", "/"),
+                bug_info[self.key_dir_source],
+                bug_info[self.key_fix_file].replace(".", "/"),
             )
             + ".java"
         )  # construct the file's path
         sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
-            bug_info[definitions.KEY_FIX_LINES][0],
+            bug_info[self.key_fix_lines][0],
             join(self.dir_output, "patches"),
         )
         status = self.run_command(
@@ -77,18 +72,10 @@ class SequenceR(AbstractRepairTool):
             "/SequenceR/src/Defects4J_Experiment",
         )
 
-        if status != 0:
-            self._error.is_error = True
-            emitter.warning(
-                "\t\t\t(warning) {0} exited with an error code {1}".format(
-                    self.name, status
-                )
-            )
-        else:
-            emitter.success("\t\t\t(success) {0} ended successfully".format(self.name))
+        self.process_status(status)
 
         self.timestamp_log_end()
-        emitter.highlight("\t\t\tlog file: {0}".format(self.log_output_path))
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
         """
@@ -117,7 +104,7 @@ class SequenceR(AbstractRepairTool):
             self._time.timestamp_validation
             self._time.timestamp_plausible
         """
-        emitter.normal("\t\t\t analysing output of " + self.name)
+        self.emit_normal("reading output")
 
         count_plausible = 0
         count_enumerations = 0
@@ -130,10 +117,10 @@ class SequenceR(AbstractRepairTool):
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
-            emitter.warning("\t\t\t(warning) no output log file found")
+            self.emit_warning("no output log file found")
             return self._space, self._time, self._error
 
-        emitter.highlight("\t\t\t Output Log File: " + self.log_output_path)
+        self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

@@ -15,10 +15,11 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.status import JobStatus
+from app.core.task.status import TaskStatus
+from app.drivers.AbstractDriver import AbstractDriver
 
 
-class AbstractBenchmark:
+class AbstractBenchmark(AbstractDriver):
     experiment_subjects: List[Any] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
@@ -30,6 +31,7 @@ class AbstractBenchmark:
     dir_base_expr = ""
     dir_inst = ""
     dir_setup = ""
+    dir_benchmark = values.dir_benchmark
     log_dir_path = "None"
     log_deploy_path = "None"
     log_config_path = "None"
@@ -39,6 +41,15 @@ class AbstractBenchmark:
     list_artifact_dirs: List[str] = []
     list_artifact_files: List[str] = []
     base_dir_experiment = "/experiment/"
+    key_bug_id = definitions.KEY_BUG_ID
+    key_failing_tests = definitions.KEY_FAILING_TEST
+    key_passing_tests = definitions.KEY_PASSING_TEST
+    key_java_version = definitions.KEY_JAVA_VERSION
+    key_compile_cmd = definitions.KEY_COMPILE_CMD
+    key_build_system = definitions.KEY_BUILD_SYSTEM
+    key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
+    key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
+    key_subject = definitions.KEY_SUBJECT
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
@@ -46,11 +57,27 @@ class AbstractBenchmark:
             utilities.error_exit(
                 "Concrete benchmark has not instantiated the name field. Aborting..."
             )
+        if len(os.listdir(join(values.dir_benchmark, self.name))) == 0:
+            emitter.information(
+                "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
+            )
+            if (
+                utilities.execute_command(
+                    f"timeout -k 5s 10s 'git submodule update --init benchmark/{self.name}'",
+                    directory=values.dir_main,
+                )
+                != 0
+            ):
+                utilities.error_exit(
+                    "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
+                )
         self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
-        self.image_name = "{}-benchmark".format(self.name)
+        if self.image_name == "":
+            self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
             self.build_benchmark_image()
         self.load_meta_file()
+        self.use_valkyrie = values.use_valkyrie
 
     def read_file(self, container_id: Optional[str], file_path: str, encoding="utf-8"):
         return abstractions.read_file(container_id, file_path, encoding)
@@ -77,7 +104,7 @@ class AbstractBenchmark:
         return self.experiment_subjects
 
     def load_meta_file(self):
-        emitter.normal("loading experiment meta-data")
+        emitter.normal("\t[framework] loading experiment meta-data")
         if not self.meta_file:
             utilities.error_exit("Meta file path not set")
         if not os.path.isfile(cast(str, self.meta_file)):
@@ -88,8 +115,8 @@ class AbstractBenchmark:
                 self.experiment_subjects = json_data
                 self.size = len(json_data)
             else:
-                values.experiment_status.set(JobStatus.FAIL_IN_SETUP)
-                utilities.error_exit("could not load meta-data from ", self.meta_file)
+                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+                utilities.error_exit("Could not load meta-data from ", self.meta_file)
         return
 
     def run_command(
@@ -107,6 +134,8 @@ class AbstractBenchmark:
             if output:
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
+                    self.append_file(container_id, [command_str, "\n"], log_file_path)
+
                     if stdout:
                         self.append_file(
                             container_id, [stdout.decode("iso-8859-1")], log_file_path
@@ -122,11 +151,13 @@ class AbstractBenchmark:
 
     def build_benchmark_image(self):
         if not container.image_exists(self.image_name):
-            emitter.warning("\t(benchmark) benchmark environment not found")
-            emitter.normal("\t(benchmark) building benchmark environment")
+            emitter.warning(
+                f"\t[framework] benchmark environment not found for {self.image_name}"
+            )
+            emitter.normal("\t[framework] building benchmark environment")
             container.build_benchmark_image(self.image_name)
         else:
-            emitter.success("\t\tpre-built benchmark environment found")
+            emitter.success("\t\t[framework] pre-built benchmark environment found")
 
     def build_experiment_image(
         self, bug_index: int, test_all: bool, exp_image_name: str, cpu: str
@@ -137,9 +168,9 @@ class AbstractBenchmark:
         container_id = self.setup_container(bug_index, self.image_name, cpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if not container_id:
-            utilities.error_exit("Could not setup container")
+            self.emit_error("could not setup container correctly")
         if is_error:
-            utilities.error_exit("Setting up experiment failed")
+            self.emit_error("setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
 
@@ -149,7 +180,7 @@ class AbstractBenchmark:
         which point to certain folders in the project
         """
         container_id = None
-        emitter.normal("\t\t(benchmark) preparing experiment environment")
+        emitter.normal("\t\t[framework] preparing experiment environment")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -188,7 +219,7 @@ class AbstractBenchmark:
     def setup_experiment(
         self, bug_index: int, container_id: Optional[str], test_all: bool
     ):
-        emitter.normal("\t\t(benchmark) preparing experiment subject")
+        self.emit_normal("preparing experiment subject")
         if not container_id:
             self.base_dir_experiment = os.path.abspath(values.dir_experiments)
             if os.path.isdir(self.dir_expr):
@@ -200,23 +231,39 @@ class AbstractBenchmark:
                 self.run_command(
                     container_id, "mkdir -p {}".format(self.dir_logs), dir_path="/"
                 )
+
+        # init log paths
+        self.log_deploy_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log"
+        )
+        self.log_config_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-config.log"
+        )
+        self.log_build_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-build.log"
+        )
+        self.log_test_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
+        )
+
         if not self.deploy(bug_index, container_id):
-            emitter.error("\t\t\t(benchmark) deploy failed")
+            self.emit_error("deploy failed")
             return True
         if not self.config(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_CONFIG)
-            emitter.error("\t\t\t(benchmark) config failed")
+            values.experiment_status.set(TaskStatus.FAIL_IN_CONFIG)
+            self.emit_error("config failed")
             return True
         if not self.build(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_BUILD)
-            emitter.error("\t\t\t(benchmark) build failed")
+            values.experiment_status.set(TaskStatus.FAIL_IN_BUILD)
+            self.emit_error("build failed")
             return True
         test_choice = self.test_all if test_all else self.test
         if not test_choice(bug_index, container_id):
-            values.experiment_status.set(JobStatus.FAIL_IN_TEST)
-            emitter.error("\t\t\t(benchmark) testing failed")
+            values.experiment_status.set(TaskStatus.FAIL_IN_TEST)
+            self.emit_error("testing failed")
             return True
-        emitter.success("\t\t\t(benchmark) setting up completed successfully")
+
+        self.emit_success("setting up completed successfully")
         return False
 
     def get_exp_image(self, bug_index: int, test_all: bool, cpu: str):
@@ -225,12 +272,18 @@ class AbstractBenchmark:
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
         if not container.image_exists(exp_image_name) or values.rebuild_all:
-            emitter.warning("\t\t(warning) experiment not built")
-            emitter.normal("\t\t\tpreparing/building experiment")
+            emitter.warning(
+                "\t\t[framework][WARNING] experiment subject {} with bug name {} is not built".format(
+                    subject_name, bug_id
+                )
+            )
+            emitter.normal("\t\t\t[framework] preparing/building said experiment")
             self.build_experiment_image(bug_index, test_all, exp_image_name, cpu)
         else:
             emitter.success(
-                "\t\t\t\tpre-built experiment found: {}".format(exp_image_name)
+                "\t\t[framework] pre-built experiment image found: {}".format(
+                    exp_image_name
+                )
             )
         return exp_image_name
 
@@ -262,6 +315,7 @@ class AbstractBenchmark:
     @abc.abstractmethod
     def save_artifacts(self, dir_info, container_id: Optional[str]):
         """Save all artifacts produced by the tool"""
+        self.emit_normal("saving experiment artifacts")
         if container_id:
             dir_exp = dir_info["container"]["experiment"]
             dir_artifact = dir_info["container"]["artifacts"]
@@ -269,7 +323,6 @@ class AbstractBenchmark:
             dir_exp = dir_info["local"]["experiment"]
             dir_artifact = dir_info["local"]["artifacts"]
 
-        emitter.normal("\t\t\tsaving experiment dev-patch")
         if self.list_artifact_dirs:
             for art_dir in self.list_artifact_dirs:
                 art_dir_path = join(dir_exp, art_dir)
@@ -287,3 +340,21 @@ class AbstractBenchmark:
     def clean(self, exp_dir_path: str, container_id: Optional[str]):
         """Clean up any residual files. This method is used for the case where Cerberus has been ran1 locally."""
         return
+
+    def emit_normal(self, message):
+        super().emit_normal("benchmark", self.name, message)
+
+    def emit_warning(self, message):
+        super().emit_warning("benchmark", self.name, message)
+
+    def emit_error(self, message):
+        super().emit_error("benchmark", self.name, message)
+
+    def emit_highlight(self, message):
+        super().emit_highlight("benchmark", self.name, message)
+
+    def emit_success(self, message):
+        super().emit_success("benchmark", self.name, message)
+
+    def emit_debug(self, message):
+        super().emit_debug("benchmark", self.name, message)

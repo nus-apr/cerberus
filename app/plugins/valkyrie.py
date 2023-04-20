@@ -4,23 +4,23 @@ from os import listdir
 from os.path import isfile
 from os.path import join
 
-from app.core import stats
 from app.core import definitions
 from app.core import emitter
 from app.core import values
+from app.core.task import stats
 
 processed_count = 0
 
 
-def validate_patch(dir_info, file_info, config_info):
+def validate_patch(dir_info, file_info, repair_config_info):
     global processed_count
     dir_patch, dir_process = dir_info
     binary_path, oracle_path, source_file, patch_file = file_info
-    test_id_list, is_rank, _, single_test_timeout = config_info
+    test_id_list, is_rank, _, single_test_timeout = repair_config_info
     test_id_str = ",".join(test_id_list)
     lib_dir_path = values.dir_libs
-    link_file = dir_process + "/" + patch_file
-    patch_file = dir_patch + "/" + patch_file
+    link_file = join(dir_process, patch_file)
+    patch_file = join(dir_patch, patch_file)
     validate_command = "ln -sf {} {};".format(patch_file, link_file)
     total_timeout = len(test_id_list) * single_test_timeout
     if binary_path:
@@ -77,10 +77,10 @@ def analyse_output(patch_dir, time_info: stats.TimeStats):
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.list_consumed)
     parent_dir = os.path.dirname(patch_dir)
-    dir_valid = parent_dir + "/patch-valid"
-    dir_invalid = parent_dir + "/patch-invalid"
-    dir_error = parent_dir + "/patch-error"
-    dir_ranked = parent_dir + "/patch-ranked"
+    dir_valid = join(parent_dir, "patch-valid")
+    dir_invalid = join(parent_dir, "patch-invalid")
+    dir_error = join(parent_dir, "patch-error")
+    dir_ranked = join(parent_dir, "patch-ranked")
     len_dir_valid = 0
     len_dir_invalid = 0
     len_dir_error = 0

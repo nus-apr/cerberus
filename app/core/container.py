@@ -1,13 +1,16 @@
 import json
 import os
 import random
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Tuple
+from typing import Union
 
 import docker  # type: ignore
 
+from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
@@ -44,29 +47,47 @@ def image_exists(image_name: str, tag_name="latest"):
     return False
 
 
+def get_image(image_name: str, tag_name="latest"):
+    client = get_client()
+    image_list = client.images.list()
+    for image in image_list:
+        tag_list = image.tags  # type: ignore
+        if not tag_list:
+            continue
+        if image_name != tag_list[0].split(":")[0]:
+            continue
+        for tag in tag_list:
+            _, tag_id = tag.split(":")
+            if tag_name == tag_id:
+                return image
+    return None
+
+
 def pull_image(image_name: str, tag_name: str):
     client = get_client()
-    emitter.normal("pulling docker image")
+    emitter.normal(
+        "\t\t[framework] pulling docker image {}:{}".format(image_name, tag_name)
+    )
     image = None
     try:
         for line in client.api.pull(
             repository=image_name, tag=tag_name, stream=True, decode=True
         ):
             for sub_line in line["status"].split("\n"):
-                emitter.build("(docker-api) {}".format(sub_line))
+                emitter.build("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(error) Unable to pull image: docker daemon error")
+        emitter.warning("[error] unable to pull image: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(error) Unable to pull image: unhandled exception")
+        emitter.warning("[error] unable to pull image: unhandled exception")
     return image
 
 
 def build_image(dockerfile_path: str, image_name: str):
     client = get_client()
-    emitter.normal("\t\t(benchmark) building docker image")
+    emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
         dockerfilename = dockerfile_path.split("/")[-1]
@@ -76,24 +97,25 @@ def build_image(dockerfile_path: str, image_name: str):
             )
             id = None
             for line in logs:
+                # emitter.debug(line)
                 data = json.loads(line.strip())
                 if "stream" in data:
                     for line_stream in data["stream"].split("\n"):
-                        emitter.build("\t\t(docker-api) {}".format(line_stream))
+                        emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in data["stream"]:
                         id = data["stream"].split(" ")[-1]
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
-            utilities.error_exit("[error] Unable to build image: build failed")
+            utilities.error_exit("[error] unable to build image: build failed")
         except docker.errors.APIError as exp:  # type: ignore
             emitter.error(exp)
-            utilities.error_exit("[error] Unable to build image: docker daemon error")
+            utilities.error_exit("[error] unable to build image: docker daemon error")
         except Exception as ex:
-            print(ex)
-            utilities.error_exit("[error] Unable to build image: unhandled exception")
+            emitter.error(ex)
+            utilities.error_exit("[error] unable to build image: unhandled exception")
     else:
-        utilities.error_exit("[error] Unable to build image: Dockerfile not found")
+        utilities.error_exit("[error] unable to build image: Dockerfile not found")
 
 
 def build_benchmark_image(image_name: str) -> Optional[str]:
@@ -120,14 +142,15 @@ def get_container(container_id: str):
     try:
         container = client.containers.get(container_id)
     except docker.errors.NotFound as ex:  # type: ignore
-        # emitter.error(ex)
-        emitter.warning("\t\t(warning) Unable to find container")
+        if values.debug:
+            emitter.error(f"\t{ex}")
+        emitter.warning("\t[warning] Unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
-        emitter.error(exp)
-        utilities.error_exit("[error] Unable to find container: docker daemon error")
+        emitter.error(f"\t{exp}")
+        utilities.error_exit("[error] unable to find container: docker daemon error")
     except Exception as ex:
-        emitter.error(ex)
-        utilities.error_exit("[error] Unable to find container: unhandled exception")
+        emitter.error(f"\t{ex}")
+        utilities.error_exit("[error] unable to find container: unhandled exception")
     return container
 
 
@@ -137,57 +160,87 @@ def get_container_id(container_name: str) -> Optional[str]:
     try:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
-        # emitter.error(ex)
-        emitter.warning("\t\t(warning) Unable to find container")
+        if values.debug:
+            emitter.error(f"\t\t{ex}")
+        emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
-        utilities.error_exit("[error] Unable to find container: docker daemon error")
+        utilities.error_exit("[error] unable to find container: docker daemon error")
     except Exception as ex:
         emitter.error(ex)
-        utilities.error_exit("[error] Unable to find container: unhandled exception")
+        utilities.error_exit("[error] unable to find container: unhandled exception")
     return container_id
 
 
 def build_container(
-    container_name: str, volume_list, image_name: str, cpu: str
+    container_name: str,
+    volume_list,
+    image_name: str,
+    cpu: str,
+    container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
-    emitter.normal("\t\t\t(benchmark) building docker container")
+    emitter.normal(
+        "\t\t[framework] building docker container based on image {} with name {}".format(
+            image_name, container_name
+        )
+    )
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
+
+        container_run_args = {
+            "detach": True,
+            "name": container_name,
+            "volumes": volume_list,
+            "privileged": True,
+            "cpuset_cpus": cpu,
+            "tty": True,
+            "runtime": "nvidia" if values.use_gpu else "runc",
+        }
+
+        default_mem_limit = "32g"
+        if container_config_dict:
+            container_run_args["mem_limit"] = container_config_dict.get(
+                definitions.KEY_CONTAINER_MEM_LIMIT, default_mem_limit
+            )
+
+            if not container_config_dict.get(
+                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+            ):
+                container_run_args["network_mode"] = None
+                container_run_args["network_disabled"] = False
+        else:
+            container_run_args["mem_limit"] = default_mem_limit
+
         emitter.debug(
-            "Container runtime is {}".format("nvidia" if values.use_gpu else "runc")
+            "\t\t\t[framework] container {} is build with the following args {}".format(
+                container_name, container_run_args
+            )
         )
-        container = client.containers.run(
-            image_name,
-            detach=True,
-            name=container_name,
-            volumes=volume_list,
-            privileged=True,
-            mem_limit="30g",
-            cpuset_cpus=cpu,
-            tty=True,
-            runtime="nvidia" if values.use_gpu else "runc",
-        )
+        container = client.containers.run(image_name, **container_run_args)
         container_id = container.id  # type: ignore
         return container_id[:12]  # type: ignore
     except docker.errors.ContainerError as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
-            "[error] Unable to build container: container exited with a non-zero exit code"
+            "\t\t\t[error] unable to build container: container exited with a non-zero exit code"
         )
     except docker.errors.ImageNotFound as ex:  # type: ignore
         emitter.error(ex)
-        utilities.error_exit("[error] Unable to build container: image not found")
+        utilities.error_exit("\t\t\t[error] unable to build container: image not found")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
-        utilities.error_exit("[error] Unable to build container: docker daemon error")
+        utilities.error_exit(
+            "\t\t\t[error] unable to build container: docker daemon error"
+        )
     except Exception as ex:
         emitter.error(ex)
-        utilities.error_exit("[error] Unable to build container: unhandled exception")
+        utilities.error_exit(
+            "\t\t\t[error] unable to build container: unhandled exception"
+        )
     return None
 
 
@@ -228,53 +281,67 @@ def exec_command(
         )
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
-        utilities.error_exit("(error) Unable to find container: docker daemon error")
+        utilities.error_exit(
+            "\t\t\t[error] unable to find container: docker daemon error"
+        )
     except Exception as ex:
         emitter.error(ex)
-        utilities.error_exit("(error) Unable to find container: unhandled exception")
+        utilities.error_exit(
+            "\t\t\t[error] unable to find container: unhandled exception"
+        )
     return exit_code, output
 
 
 def remove_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tremoving docker container")
+    emitter.normal("\t\t\t[framework] removing docker container")
     try:
         container = client.containers.get(container_id)
         container.remove(force=True)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to remove container: docker daemon error")
+        emitter.warning("[warning] unable to remove container: docker daemon error")
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to remove container: unhandled exception")
+        emitter.warning("[warning] unable to remove container: unhandled exception")
 
 
 def start_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tstarting docker container {}".format(container_id))
+    emitter.normal(
+        "\t\t\t[framework] starting docker container {}".format(container_id)
+    )
     try:
         container = client.containers.get(container_id)
         container.start()  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to stop container: docker daemon error")
+        emitter.warning(
+            "\t\t\t[framework] unable to stop container: docker daemon error"
+        )
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to stop container: unhandled exception")
+        emitter.warning(
+            "\t\t\t[framework] unable to stop container: unhandled exception"
+        )
 
 
 def stop_container(container_id: str):
     client = get_client()
-    emitter.normal("\t\t\tstopping docker container")
+    emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=20)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("(warning) Unable to stop container: docker daemon error")
+        emitter.warning(
+            "\t\t\t[framework] unable to stop container: docker daemon error"
+        )
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("(warning) Unable to stop container: unhandled exception")
+        emitter.warning(
+            "\t\t\t[framework] unable to stop container: unhandled exception"
+        )
 
 
 def is_file(container_id: str, file_path: str):

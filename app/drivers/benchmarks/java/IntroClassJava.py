@@ -1,12 +1,6 @@
 import os
-import shutil
-from datetime import datetime
 from os.path import join
 
-from app.core import container
-from app.core import definitions
-from app.core import emitter
-from app.core import values
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -27,9 +21,9 @@ class IntroClassJava(AbstractBenchmark):
 
         if not is_error:
             if self.instrument(bug_index, container_id):
-                emitter.success("\t\t\t(benchmark) instrumentation successful")
+                self.emit_success("[benchmark] instrumentation successful")
             else:
-                emitter.error("\t\t\t(benchmark) instrumentation failed")
+                self.emit_error("[benchmark] instrumentation failed")
                 is_error = True
         return is_error
 
@@ -43,8 +37,8 @@ class IntroClassJava(AbstractBenchmark):
         )
 
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
-        subject = str(experiment_item[definitions.KEY_SUBJECT])
+        bug_id = str(experiment_item[self.key_bug_id])
+        subject = str(experiment_item[self.key_subject])
 
         self.run_command(
             container_id, "cp -rf {} {}/src".format(self.dir_setup, self.dir_expr)
@@ -53,41 +47,40 @@ class IntroClassJava(AbstractBenchmark):
         return container_id
 
     def deploy(self, bug_index, container_id):
-        emitter.normal("\t\t\tdownloading experiment subject")
+        self.emit_normal("downloading experiment subject")
         return True
 
     def config(self, bug_index, container_id):
-        emitter.normal("\t\t\tconfiguring experiment subject")
+        self.emit_normal("configuring experiment subject")
         return True
 
     def build(self, bug_index, container_id):
-        emitter.normal("\t\t\tbuilding experiment subject")
+        self.emit_normal("building experiment subject")
         status = self.run_command(
             container_id, "mvn compile -DskipTests", dir_path=join(self.dir_expr, "src")
         )
         return status == 0
 
     def test(self, bug_index, container_id):
-        emitter.normal("\t\t\ttesting experiment subject")
+        self.emit_normal("testing experiment subject")
         status = self.run_command(
             container_id, "mvn test", dir_path=join(self.dir_expr, "src")
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[definitions.KEY_BUG_ID])
+        bug_id = str(experiment_item[self.key_bug_id])
         return status != 0 if bug_id != "reference" else status == 0
 
     def instrument(self, bug_index, container_id):
-        emitter.normal("\t\t\tinstrumenting assertions")
+        self.emit_normal("instrumenting assertions")
         return True
 
     def clean(self, exp_dir_path, container_id):
-        emitter.normal("\t\t\tremoving experiment subject")
+        self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
     def save_artifacts(self, dir_info, container_id):
-        emitter.normal("\t\t(benchmark) saving experiment artifacts")
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(IntroClassJava, self).save_artifacts(dir_info, container_id)
