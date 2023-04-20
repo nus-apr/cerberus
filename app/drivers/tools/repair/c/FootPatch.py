@@ -29,10 +29,7 @@ class FootPatch(AbstractRepairTool):
             del new_env["GLOBAL_REPAIR"]
         new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
-        analysis_command = (
-            "~/footpatch/infer-linux64-v0.9.3/infer/bin/infer  "
-            "-j 20 --headers --no-filtering -- make -j20"
-        )
+        analysis_command = "footpatch " "-j 20 --headers --no-filtering -- make -j20"
         self.run_command(analysis_command, dir_path=dir_src, env=new_env)
         self.emit_normal(
             " preparation took {} second(s)".format(
@@ -71,7 +68,7 @@ class FootPatch(AbstractRepairTool):
 
         self.timestamp_log_start()
         footpatch_command = (
-            "timeout -k 5m {0}h ~/footpatch/infer-linux64-v0.9.3/infer/bin/infer "
+            "timeout -k 5m {0}h footpatch "
             "-j 20 --headers --no-filtering {1} "
             "-- make -j20".format(timeout_h, additional_tool_param)
         )
