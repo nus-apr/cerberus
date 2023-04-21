@@ -402,7 +402,7 @@ def get_tools() -> List[AbstractTool]:
 
 def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight(f"\t[profile] {values.task_type}-benchmark: {benchmark.name}")
+    emitter.highlight(f"\t[framework] {values.task_type}-benchmark: {benchmark.name}")
     return benchmark
 
 
