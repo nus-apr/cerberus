@@ -359,27 +359,25 @@ def run(
 
 
 def get_repair_setup() -> Any:
-    emitter.sub_title("Initializing repair setup")
     repair_setup = configuration.load_configuration_details(
         values.file_repair_configuration
     )
     for repair_profile_id in values.repair_profile_id_list:
         if repair_profile_id not in repair_setup:
             utilities.error_exit(
-                "Invalid repair profile id {}".format(repair_profile_id)
+                "invalid repair profile id {}".format(repair_profile_id)
             )
     return repair_setup
 
 
 def get_container_setup() -> Any:
-    emitter.sub_title("Initializing container setup")
     container_setup = configuration.load_configuration_details(
         values.file_container_configuration
     )
     for container_profile_id in values.container_profile_id_list:
         if container_profile_id not in container_setup:
             utilities.error_exit(
-                "Invalid container profile id {}".format(container_profile_id)
+                "invalid container profile id {}".format(container_profile_id)
             )
     return container_setup
 

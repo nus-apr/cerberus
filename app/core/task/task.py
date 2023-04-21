@@ -309,17 +309,19 @@ def run(
     )
     benchmark.update_dir_info(dir_info)
     emitter.highlight(
-        "\t\t[profile] Identifier: " + str(repair_config_info[definitions.KEY_ID])
+        "\t\t[repair profile] Identifier: "
+        + str(repair_config_info[definitions.KEY_ID])
     )
     emitter.highlight(
-        "\t\t[profile] Timeout: "
+        "\t\t[repair profile] Timeout: "
         + str(repair_config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
     emitter.highlight(
-        "\t\t[profile] Fix-loc: " + repair_config_info[definitions.KEY_CONFIG_FIX_LOC]
+        "\t\t[repair profile] Fix-loc: "
+        + repair_config_info[definitions.KEY_CONFIG_FIX_LOC]
     )
     emitter.highlight(
-        "\t\t[profile] Test-suite ratio: "
+        "\t\t[repair profile] Test-suite ratio: "
         + str(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
 
