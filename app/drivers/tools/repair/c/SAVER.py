@@ -114,7 +114,7 @@ class SAVER(AbstractRepairTool):
             )
 
         self.timestamp_log_start()
-        saver_command = "timeout -k 5m {0}h saver --error-report {1} ".format(
+        saver_command = "timeout -k 5m {0}h infer saver --error-report {1} ".format(
             str(timeout_h), config_path
         )
         bug_type = bug_info[self.key_bug_type]
