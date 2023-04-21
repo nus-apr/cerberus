@@ -92,12 +92,12 @@ class SenX(AbstractRepairTool):
             self.relative_binary_path.split("/")[-1],
             struct_def_file_path,
         )
-        senx_command += binary_input_arg
-        senx_command += f" {additional_tool_param} "
 
+        senx_command += f" {binary_input_arg} {additional_tool_param} "
+        dir_src = join(self.dir_expr, "src")
         status = self.run_command(
             senx_command,
-            dir_path=binary_dir_path,
+            dir_path=dir_src,
             log_file_path=self.log_output_path,
         )
 
