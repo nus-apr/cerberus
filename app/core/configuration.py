@@ -366,7 +366,7 @@ class Configurations:
             and values.subject_name is None
         ):
             emitter.warning(
-                "[warning] Experiment id is not specified, running all experiments"
+                "\t[framework][warning] experiment id is not specified, running all experiments"
             )
 
         values.compact_results = self.__runtime_config_values["compact-results"]
