@@ -250,9 +250,10 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
         )
 
-        if not self.deps(bug_index, container_id):
-            self.emit_error("installing deps failed")
-            return True
+        # if not self.deps(bug_index, container_id):
+        #     self.emit_error("installing deps failed")
+        #     return True
+
         if not self.deploy(bug_index, container_id):
             self.emit_error("deploy failed")
             return True
@@ -299,10 +300,10 @@ class AbstractBenchmark(AbstractDriver):
         """Prepares the experiment, e.g. download or copy and synthesize an image for the bug from the benchmark"""
         return
 
-    @abc.abstractmethod
-    def deps(self, bug_index, container_id: Optional[str]):
-        """Prepares the environment with dependencies, e.g. install using apt-get"""
-        return
+    # @abc.abstractmethod
+    # def deps(self, bug_index, container_id: Optional[str]):
+    #     """Prepares the environment with dependencies, e.g. install using apt-get"""
+    #     return
 
     @abc.abstractmethod
     def config(self, bug_index, container_id: Optional[str]):
