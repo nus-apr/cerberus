@@ -124,7 +124,7 @@ class SAVER(AbstractRepairTool):
         saver_command += "{0} >> {1} 2>&1 ".format(
             additional_tool_param, self.log_output_path
         )
-        status = execute_command(saver_command)
+        status = self.execute_command(saver_command)
 
         self.process_status(status)
 
