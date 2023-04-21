@@ -29,10 +29,10 @@ class AstorTool(AbstractRepairTool):
         timeout_m = str(float(timeout_h) * 60)
         max_gen = 1000000
 
-        dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
-        dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
-        dir_java_bin = bug_info["class_directory"]
-        dir_test_bin = bug_info["test_class_directory"]
+        dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
+        dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
+        dir_java_bin = bug_info[self.key_dir_source]
+        dir_test_bin = bug_info[self.key_dir_test_class]
 
         # there is a bug in running Lang subjects with asm.jar
         list_deps = [
