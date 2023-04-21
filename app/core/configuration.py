@@ -140,7 +140,6 @@ class Configurations:
         return range(start, end + 1)
 
     def read_arg_list(self, arg_list: Namespace):
-        emitter.normal("\t[framework] reading profile values")
         emitter.normal("\t[framework] reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         self.__runtime_config_values["task-type"] = arg_list.task_type
