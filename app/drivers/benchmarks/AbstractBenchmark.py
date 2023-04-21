@@ -370,3 +370,9 @@ class AbstractBenchmark(AbstractDriver):
 
     def emit_debug(self, message):
         super().emit_debug("benchmark", self.name, message)
+
+    def is_dir(self, dir_path, container_id):
+        return abstractions.is_dir(container_id, dir_path)
+
+    def is_file(self, file_path, container_id):
+        return abstractions.is_file(container_id, file_path)
