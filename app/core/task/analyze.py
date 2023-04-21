@@ -47,7 +47,10 @@ def run_analysis(
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     repair_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
     tool.update_info(container_id, values.only_instrument, dir_info)
-    tool.run_analysis(experiment_info, repair_config_info)
+    try:
+        tool.run_analysis(experiment_info, repair_config_info)
+    except Exception as ex:
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
 
 
 def analyze_all(

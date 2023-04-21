@@ -1,7 +1,6 @@
 import os
 from os.path import join
 
-from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -26,11 +25,11 @@ class VulnFix(AbstractRepairTool):
 
         dir_vulnfix_exist = self.is_dir(self.dir_root)
         if not dir_vulnfix_exist:
-            self.emit_error(
-                "[Exception] Vulnfix repo is not at the expected location. "
-                "Please double check whether we are in VulnFix container."
-            )
-            error_exit("Unhandled exception")
+            # self.emit_error(
+            #     "[Exception] Vulnfix repo is not at the expected location. "
+            #     "Please double check whether we are in VulnFix container."
+            # )
+            self.error_exit("vulnfix repo is not at the expected location")
         timeout_h = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
         # get ready the config file

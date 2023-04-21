@@ -4,7 +4,6 @@ from typing import List
 from typing import Set
 
 from app.core import container
-from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -146,7 +145,7 @@ class Angelix(AbstractRepairTool):
         command_str = "bash instrument.sh {} {}".format(self.dir_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
         if status not in [0, 126]:
-            error_exit(
+            self.error_exit(
                 "error with instrumentation of "
                 + self.name
                 + "; exit code "

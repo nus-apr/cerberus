@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core.utilities import error_exit
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
@@ -50,10 +49,9 @@ class SAVER(AbstractAnalyzeTool):
         additional_tool_param = repair_config_info[self.key_tool_params]
 
         if self.use_container:
-            self.emit_error(
-                "[Exception] unimplemented functionality: SAVER docker support not implemented"
+            self.error_exit(
+                "unimplemented functionality: SAVER docker support not implemented"
             )
-            error_exit("Unhandled Exception")
 
         self.timestamp_log_start()
         bug_type = bug_info[self.key_bug_type]

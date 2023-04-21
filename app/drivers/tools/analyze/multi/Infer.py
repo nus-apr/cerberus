@@ -3,8 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core.utilities import error_exit
-from app.core.utilities import execute_command
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 

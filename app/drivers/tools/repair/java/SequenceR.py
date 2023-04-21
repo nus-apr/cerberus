@@ -1,7 +1,6 @@
 import os
 from os.path import join
 
-from app.core import utilities
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -31,7 +30,7 @@ class SequenceR(AbstractRepairTool):
         )
 
         if bug_info[self.key_fix_file] == "" or len(bug_info[self.key_fix_lines]) < 1:
-            utilities.error_exit(
+            self.error_exit(
                 "Cannot apply SequenceR on an experiment with no given buggy file or line"
             )
 

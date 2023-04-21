@@ -1,8 +1,6 @@
 import os
 from os import path
 
-from app.core import utilities
-from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -42,11 +40,11 @@ class ExtractFix(AbstractRepairTool):
 
         dir_extractfix_exist = self.is_dir(self.dir_root)
         if not dir_extractfix_exist:
-            self.emit_error(
-                "[Exception] ExtractFix repo is not at the expected location. "
-                "Please double check whether we are in ExtractFix container."
-            )
-            error_exit("Unhandled exception")
+            # self.emit_error(
+            #     "[Exception] ExtractFix repo is not at the expected location. "
+            #     "Please double check whether we are in ExtractFix container."
+            # )
+            self.error_exit("ExtractFix repo is not at the expected location.")
         timeout_h = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
         # prepare the config file
@@ -109,7 +107,7 @@ class ExtractFix(AbstractRepairTool):
         )
 
         if bug_type == "-b ":
-            utilities.error_exit(
+            self.error_exit(
                 "Bug {} does not have {} field to indicate the type".format(
                     experiment_info[self.key_bug_id], self.key_bug_type
                 )

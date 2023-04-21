@@ -7,8 +7,6 @@ from os.path import join
 from typing import cast
 from typing import Optional
 
-from app.core.utilities import error_exit
-from app.core.utilities import execute_command
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -38,7 +36,7 @@ class SenX(AbstractRepairTool):
             )
         )
         if status not in [0, 126]:
-            error_exit(
+            self.error_exit(
                 "error with instrumentation of {}; exit code {}".format(
                     self.name, str(status)
                 )
@@ -59,7 +57,7 @@ class SenX(AbstractRepairTool):
         )
 
         if not bug_info[self.key_bin_path]:
-            error_exit("The bug does not have a binary path defined")
+            self.error_exit("The bug does not have a binary path defined")
 
         self.relative_binary_path = cast(str, bug_info[self.key_bin_path])
         abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
@@ -69,10 +67,9 @@ class SenX(AbstractRepairTool):
         test_dir = self.dir_setup + "/tests"
         test_file_list = []
         if self.use_container:
-            self.emit_error(
-                "[Exception] unimplemented functionality: SenX docker support not implemented"
+            self.error_exit(
+                "unimplemented functionality: SenX docker support not implemented"
             )
-            error_exit("Unhandled Exception")
         else:
             if os.path.isdir(test_dir):
                 test_file_list = [
@@ -111,9 +108,9 @@ class SenX(AbstractRepairTool):
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         if not self.dir_expr:
-            error_exit("Experiment directory not set")
+            self.error_exit("experiment directory not set")
         if not self.relative_binary_path:
-            error_exit("Relative binary path not set")
+            self.error_exit("relative binary path not set")
         abs_binary_path = join(
             self.dir_expr, "src", cast(str, self.relative_binary_path)
         )

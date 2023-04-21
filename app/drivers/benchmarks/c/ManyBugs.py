@@ -1,7 +1,6 @@
 import os
 from os.path import join
 
-from app.core.utilities import execute_command
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
