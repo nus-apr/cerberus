@@ -18,11 +18,6 @@ class effFix(AbstractBenchmark):
 
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
-        experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[self.key_bug_id])
-        self.log_deploy_path = (
-            self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
-        )
         time = datetime.now()
         command_str = "bash setup.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
@@ -32,6 +27,21 @@ class effFix(AbstractBenchmark):
             "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
+
+    def deps(self, bug_index, container_id):
+        self.emit_normal("installing experiment dependencies")
+        time = datetime.now()
+        if self.is_file(f"{self.dir_setup}/deps.sh"):
+            command_str = "bash deps.sh {}".format(self.base_dir_experiment)
+            status = self.run_command(
+                container_id, command_str, self.log_deps_path, self.dir_setup
+            )
+            self.emit_normal(
+                "dependencies took {} second(s)".format(
+                    (datetime.now() - time).total_seconds()
+                )
+            )
+            return status == 0
 
     def config(self, bug_index, container_id):
         self.emit_normal("configuring experiment subject")
