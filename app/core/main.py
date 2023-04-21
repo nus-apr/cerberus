@@ -359,6 +359,7 @@ def run(
 
 
 def get_repair_setup() -> Any:
+    emitter.normal("\t[framework] loading repair profile setup")
     repair_setup = configuration.load_configuration_details(
         values.file_repair_configuration
     )
@@ -371,6 +372,7 @@ def get_repair_setup() -> Any:
 
 
 def get_container_setup() -> Any:
+    emitter.normal("\t[framework] loading container profile setup")
     container_setup = configuration.load_configuration_details(
         values.file_container_configuration
     )
