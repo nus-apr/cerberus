@@ -32,9 +32,3 @@ class AbstractDriver:
 
     def error_exit(self, message):
         raise Exception(message)
-
-    def is_dir(self, dir_path):
-        return abstractions.is_dir(self.container_id, dir_path)
-
-    def is_file(self, file_path):
-        return abstractions.is_file(self.container_id, file_path)

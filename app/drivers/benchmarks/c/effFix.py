@@ -31,7 +31,7 @@ class effFix(AbstractBenchmark):
     def deps(self, bug_index, container_id):
         self.emit_normal("installing experiment dependencies")
         time = datetime.now()
-        if self.is_file(f"{self.dir_setup}/deps.sh"):
+        if self.is_file(f"{self.dir_setup}/deps.sh", container_id):
             command_str = "bash deps.sh {}".format(self.base_dir_experiment)
             status = self.run_command(
                 container_id, command_str, self.log_deps_path, self.dir_setup
