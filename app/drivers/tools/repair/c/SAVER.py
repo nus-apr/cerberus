@@ -114,18 +114,20 @@ class SAVER(AbstractRepairTool):
             )
 
         self.timestamp_log_start()
-        saver_command = "cd {};".format(join(self.dir_expr, "src"))
-        saver_command += "timeout -k 5m {0}h saver --error-report {1} ".format(
+        saver_command = "timeout -k 5m {0}h saver --error-report {1} ".format(
             str(timeout_h), config_path
         )
         bug_type = bug_info[self.key_bug_type]
         if bug_type in ["Double Free", "Use After Free"]:
             saver_command += " --analysis-with-fimem "
-        saver_command += "{0} >> {1} 2>&1 ".format(
-            additional_tool_param, self.log_output_path
-        )
-        status = self.run_command(saver_command)
+        saver_command += f" {additional_tool_param} "
 
+        dir_src = join(self.dir_expr, "src")
+        status = self.run_command(
+            saver_command,
+            dir_path=dir_src,
+            log_file_path=self.log_output_path,
+        )
         self.process_status(status)
 
         self.timestamp_log_end()

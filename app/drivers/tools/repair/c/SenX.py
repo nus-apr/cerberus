@@ -87,20 +87,21 @@ class SenX(AbstractRepairTool):
         if "$POC" in binary_input_arg:
             binary_input_arg = binary_input_arg.replace("$POC", test_file_list[0])
         self.timestamp_log_start()
-        senx_command = "cd {};".format(binary_dir_path)
-        senx_command += "timeout -k 5m {0}h senx -struct-def={2} {1}.bc ".format(
+        senx_command = "timeout -k 5m {0}h senx -struct-def={2} {1}.bc ".format(
             str(timeout_h),
             self.relative_binary_path.split("/")[-1],
             struct_def_file_path,
         )
         senx_command += binary_input_arg
-        senx_command += "{0} >> {1} 2>&1 ".format(
-            additional_tool_param, self.log_output_path
+        senx_command += f" {additional_tool_param} "
+
+        status = self.run_command(
+            senx_command,
+            dir_path=binary_dir_path,
+            log_file_path=self.log_output_path,
         )
-        status = self.run_command(senx_command)
 
         self.process_status(status)
-
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
