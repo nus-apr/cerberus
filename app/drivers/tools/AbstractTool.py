@@ -288,12 +288,6 @@ class AbstractTool(AbstractDriver):
     def list_dir(self, dir_path, regex=None):
         return abstractions.list_dir(self.container_id, dir_path, regex)
 
-    def is_dir(self, dir_path):
-        return abstractions.is_dir(self.container_id, dir_path)
-
-    def is_file(self, file_path):
-        return abstractions.is_file(self.container_id, file_path)
-
     def get_time_stats(self):
         return self._time
 

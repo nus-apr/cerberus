@@ -33,6 +33,7 @@ class AbstractBenchmark(AbstractDriver):
     dir_setup = ""
     dir_benchmark = values.dir_benchmark
     log_dir_path = "None"
+    log_deps_path = "None"
     log_deploy_path = "None"
     log_config_path = "None"
     log_build_path = "None"
@@ -233,6 +234,9 @@ class AbstractBenchmark(AbstractDriver):
                 )
 
         # init log paths
+        self.log_deps_path = join(
+            self.dir_logs, f"{self.name}-{str(bug_index)}-deps.log"
+        )
         self.log_deploy_path = join(
             self.dir_logs, f"{self.name}-{str(bug_index)}-deploy.log"
         )
@@ -246,6 +250,9 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
         )
 
+        if not self.deps(bug_index, container_id):
+            self.emit_error("installing deps failed")
+            return True
         if not self.deploy(bug_index, container_id):
             self.emit_error("deploy failed")
             return True
@@ -290,6 +297,11 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def deploy(self, bug_index, container_id: Optional[str]):
         """Prepares the experiment, e.g. download or copy and synthesize an image for the bug from the benchmark"""
+        return
+
+    @abc.abstractmethod
+    def deps(self, bug_index, container_id: Optional[str]):
+        """Prepares the environment with dependencies, e.g. install using apt-get"""
         return
 
     @abc.abstractmethod
