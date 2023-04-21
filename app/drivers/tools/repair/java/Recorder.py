@@ -1,7 +1,6 @@
 import os
 from os.path import join
 
-from app.core import utilities
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -29,7 +28,7 @@ class Recorder(AbstractRepairTool):
         timeout_h = str(repair_config_info[self.key_timeout])
 
         if not self.use_gpu:
-            utilities.error_exit("Cannot run Recorder without a GPU")
+            self.error_exit("cannot run Recorder without a GPU")
 
         self.bug_name = "{}-{}".format(
             bug_info[self.key_subject],

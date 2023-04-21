@@ -2,7 +2,6 @@ import os
 import shutil
 from datetime import datetime
 
-from app.core.utilities import execute_command
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 

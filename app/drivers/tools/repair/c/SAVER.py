@@ -5,8 +5,6 @@ from os.path import join
 from typing import Any
 from typing import Dict
 
-from app.core.utilities import error_exit
-from app.core.utilities import execute_command
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -26,16 +24,16 @@ class SAVER(AbstractRepairTool):
         config_info: Dict[str, Any] = dict()
         bug_type = bug_info[self.key_bug_type]
         if bug_type not in self.bug_conversion_table:
-            error_exit(f"Unsupported bug type: {bug_type}")
+            self.error_exit(f"Unsupported bug type: {bug_type}")
 
         bug_type_code = self.bug_conversion_table[bug_type]
 
         if self.key_source not in bug_info:
-            error_exit(
+            self.error_exit(
                 f"Missing memory source information in benchmark, required for {self.name}"
             )
         if self.key_sink not in bug_info:
-            error_exit(
+            self.error_exit(
                 f"Missing memory sink information in benchmark, required for {self.name}"
             )
 
@@ -111,10 +109,9 @@ class SAVER(AbstractRepairTool):
         )
 
         if self.use_container:
-            self.emit_error(
-                "[Exception] unimplemented functionality: SAVER docker support not implemented"
+            self.error_exit(
+                "unimplemented functionality: SAVER docker support not implemented"
             )
-            error_exit("Unhandled Exception")
 
         self.timestamp_log_start()
         saver_command = "cd {};".format(join(self.dir_expr, "src"))

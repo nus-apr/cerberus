@@ -2,8 +2,6 @@ import os
 from os.path import basename
 from os.path import join
 
-from app.core import utilities
-from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -27,11 +25,11 @@ class TBar(AbstractRepairTool):
 
         dir_tbar_exist = self.is_dir(self.tbar_root_dir)
         if not dir_tbar_exist:
-            self.emit_error(
-                "[Exception] TBar repo is not at the expected location. "
-                "Please double check whether we are in TBar container."
-            )
-            error_exit("Unhandled exception")
+            # self.emit_error(
+            #     "[Exception] TBar repo is not at the expected location. "
+            #     "Please double check whether we are in TBar container."
+            # )
+            self.error_exit("TBar repo is not at the expected location.")
         timeout_h = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
 
@@ -114,7 +112,7 @@ class TBar(AbstractRepairTool):
         )
 
         if not self.is_file(fl_data):
-            utilities.error_exit(
+            self.error_exit(
                 "There is no fault localization data. This is currently unsupported"
             )
             # emitter.debug("Making 'weak' fault Localization")

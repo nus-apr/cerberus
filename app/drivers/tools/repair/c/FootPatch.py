@@ -3,7 +3,6 @@ import re
 from datetime import datetime
 from os.path import join
 
-from app.core.utilities import error_exit
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -52,10 +51,9 @@ class FootPatch(AbstractRepairTool):
         )
 
         if self.use_container:
-            self.emit_error(
-                "[Exception] unimplemented functionality: FootPatch docker support not implemented"
+            self.error_exit(
+                "unimplemented functionality: FootPatch docker support not implemented"
             )
-            error_exit("Unhandled Exception")
 
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
