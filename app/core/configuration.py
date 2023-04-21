@@ -16,7 +16,6 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 def load_configuration_details(config_file_path: str):
-    emitter.normal("\t[framework] loading profile setup")
     json_data = None
     if os.path.isfile(config_file_path):
         with open(config_file_path, "r") as conf_file:
