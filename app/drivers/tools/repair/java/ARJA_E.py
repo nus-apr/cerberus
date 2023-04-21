@@ -29,11 +29,13 @@ class ARJA_E(AbstractRepairTool):
 
         classpath = f"{join(self.arja_e_home, 'lib/*')}:{join(self.arja_e_home, 'bin')}"
 
-        dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
-        dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
-        dir_java_bin = join(self.dir_expr, "src", bug_info["class_directory"])
-        dir_test_bin = join(self.dir_expr, "src", bug_info["test_class_directory"])
-        list_deps = [join(self.dir_expr, dep) for dep in bug_info["dependencies"]]
+        dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
+        dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
+        dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
+        dir_test_bin = join(self.dir_expr, "src", bug_info[self.key_dir_test_class])
+        list_deps = [
+            join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
+        ]
         list_deps.append(
             join(self.arja_e_home, "external", "lib", "hamcrest-core-1.3.jar")
         )
