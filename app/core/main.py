@@ -394,7 +394,7 @@ def get_tools() -> List[AbstractTool]:
             tool.check_tool_exists()
         tool_list.append(tool)
     emitter.highlight(
-        f"\t[profile] {values.task_type}-tool(s): "
+        f"\t[framework] {values.task_type}-tool(s): "
         + " ".join([x.name for x in tool_list])
     )
     return tool_list
