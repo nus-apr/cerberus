@@ -97,7 +97,7 @@ class SenX(AbstractRepairTool):
         senx_command += "{0} >> {1} 2>&1 ".format(
             additional_tool_param, self.log_output_path
         )
-        status = execute_command(senx_command)
+        status = self.execute_command(senx_command)
 
         self.process_status(status)
 
