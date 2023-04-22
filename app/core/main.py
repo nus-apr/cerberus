@@ -292,14 +292,16 @@ def run(
     emitter.sub_title(f"Running {values.task_type} task")
     iteration = 0
 
-    for container_config_info in map(
-        lambda container_profile_id: container_setup[container_profile_id],
-        values.container_profile_id_list,
+    for repair_config_info in map(
+        lambda repair_profile_id: repair_setup[repair_profile_id],
+        values.repair_profile_id_list,
     ):
-        for repair_config_info in map(
-            lambda repair_profile_id: repair_setup[repair_profile_id],
-            values.repair_profile_id_list,
+
+        for container_config_info in map(
+            lambda container_profile_id: container_setup[container_profile_id],
+            values.container_profile_id_list,
         ):
+
             values.current_repair_profile_id.set(repair_config_info[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 container_config_info[definitions.KEY_ID]

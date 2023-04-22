@@ -325,25 +325,26 @@ def run(
         + str(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
 
-    emitter.highlight(
-        "\t\t[container profile] Identifier: "
-        + container_config_info[definitions.KEY_ID]
-    )
+    if values.use_container:
+        emitter.highlight(
+            "\t\t[container profile] Identifier: "
+            + container_config_info[definitions.KEY_ID]
+        )
 
-    emitter.highlight(
-        "\t\t[container profile] CPU Count: "
-        + str(container_config_info[definitions.KEY_CONTAINER_CPU_COUNT])
-    )
+        emitter.highlight(
+            "\t\t[container profile] CPU Count: "
+            + str(container_config_info[definitions.KEY_CONTAINER_CPU_COUNT])
+        )
 
-    emitter.highlight(
-        "\t\t[container profile] RAM Limit: "
-        + container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
-    )
+        emitter.highlight(
+            "\t\t[container profile] RAM Limit: "
+            + container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
+        )
 
-    emitter.highlight(
-        "\t\t[container profile] Enable Network: "
-        + str(container_config_info[definitions.KEY_CONTAINER_ENABLE_NETWORK])
-    )
+        emitter.highlight(
+            "\t\t[container profile] Enable Network: "
+            + str(container_config_info[definitions.KEY_CONTAINER_ENABLE_NETWORK])
+        )
 
     emitter.highlight("\t\t[meta-data] Project: {}".format(subject_name))
     emitter.highlight("\t\t[meta-data] Bug ID: {}".format(bug_name))
