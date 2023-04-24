@@ -16,6 +16,7 @@ class TaskStatus(Enum):
     FAIL_IN_VERIFY = 10
     FAIL_IN_INSTRUMENT = 11
     FAIL_IN_TOOL = 12
+    CANCELLED = 13
 
     def __str__(self) -> str:
         if self is self.SUCCESS:
@@ -44,6 +45,8 @@ class TaskStatus(Enum):
             return "Failed in image instrumentation phase"
         elif self is self.FAIL_IN_TOOL:
             return "Tool returned non-zero status"
+        elif self is self.CANCELLED:
+            return "Job Cancelled"
         elif self is self.NONE:
             return "NONEEEEEE"
         else:

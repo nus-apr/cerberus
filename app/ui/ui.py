@@ -73,18 +73,22 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
 
-    # async def _on_exit_app(self) -> None:
-    #     for (id,(task,tool)) in self.jobs.items():
-    #         if tool.container_id:
-    #             container.stop_container(tool.container_id)
-    #         task.cancel()
-    #     return await super()._on_exit_app()
+    async def _on_exit_app(self) -> None:
+        self.job_cancellation = True
+        for (id, (task, tool)) in self.jobs.items():
+            if tool.container_id:
+                container.stop_container(tool.container_id)
+            task.cancel()
+            self.finished_subjects.append((id, TaskStatus.CANCELLED))
+        self._return_value = self.finished_subjects
+        return await super()._on_exit_app()
 
     def on_mount(self):
         self.selected_subject = None
         self.jobs_remaining = 0
-        self.finished_subjects = []
+        self.finished_subjects: List[Tuple[str, TaskStatus]] = []
         self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
+        self.job_cancellation = False
 
         self.setup_cpu_allocation()
 
@@ -365,6 +369,11 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             with self.job_condition:
                 while self.free_jobs < required_cpu_cores:
                     self.job_condition.wait()
+                if self.job_cancellation:
+                    self.finished_subjects.append(
+                        (message.identifier, TaskStatus.CANCELLED)
+                    )
+                    return
                 self.debug_print("Getting {} CPU cores".format(required_cpu_cores))
                 self.free_jobs = self.free_jobs - required_cpu_cores
                 for _ in range(required_cpu_cores):
@@ -546,6 +555,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
         self.jobs_remaining -= 1
         self.finished_subjects.append((message.key, message.status))
+        del job_time_map[message.identifier]
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
@@ -565,7 +575,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     def show(self, x: Widget) -> None:
         x.visible = True
         x.styles.height = "100%"
-        x.styles.border = ("heavy", "white")
+        x.styles.border = ("heavy", "orange")
 
     def hide(self, x: Widget) -> None:
         x.visible = False
@@ -590,7 +600,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         def create_table(id: str):
             table: DataTable = DataTable(id=id)
             table.cursor_type = "row"
-            table.styles.border = ("heavy", "white")
+            table.styles.border = ("heavy", "orange")
             return table
 
         """Create child widgets for the app."""
@@ -620,7 +630,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
         self.hide(error_subjects_table)
 
         log_map["root"] = TextLog(highlight=True, markup=True, wrap=True)
-        log_map["root"].styles.border = ("heavy", "white")
+        log_map["root"].styles.border = ("heavy", "orange")
         yield log_map["root"]
         if not values.debug:
             self.hide(log_map["root"])
