@@ -45,6 +45,8 @@ running_subjects_id = "running_subjects"
 log_map: Dict[str, TextLog] = {}
 job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
 
+job_condition = threading.Condition()
+
 
 class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     """The main window"""
@@ -75,6 +77,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
 
     async def _on_exit_app(self) -> None:
         self.job_cancellation = True
+        self.free_jobs = 10000
+        with job_condition:
+            job_condition.notify_all()
         for (id, (task, tool)) in self.jobs.items():
             if tool.container_id:
                 container.stop_container(tool.container_id)
@@ -102,7 +107,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     def setup_cpu_allocation(self):
         self.max_jobs = values.cpus
         self.free_jobs = values.cpus
-        self.job_condition = threading.Condition()
+
         self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
         for cpu in range(self.max_jobs):
             self.cpu_queue.put(cpu)
@@ -343,7 +348,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                                 key,
                             )
                         )
-            self.jobs_remaining = iteration
+        self.jobs_remaining = iteration
 
     async def on_key(self, message: Key):
         if message.key == "escape":
@@ -366,13 +371,14 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                 message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
             )
 
-            with self.job_condition:
+            with job_condition:
                 while self.free_jobs < required_cpu_cores:
-                    self.job_condition.wait()
+                    job_condition.wait()
                 if self.job_cancellation:
                     self.finished_subjects.append(
                         (message.identifier, TaskStatus.CANCELLED)
                     )
+                    job_condition.notify(1)
                     return
                 self.debug_print("Getting {} CPU cores".format(required_cpu_cores))
                 self.free_jobs = self.free_jobs - required_cpu_cores
@@ -474,12 +480,12 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         row_data,
                     )
                 )
-            with self.job_condition:
+            with job_condition:
                 for cpu in cpus:
                     self.cpu_queue.put(cpu)
                 self.free_jobs += required_cpu_cores
                 self.debug_print("Putting back {} cores".format(required_cpu_cores))
-                self.job_condition.notify_all()
+                job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
         self.jobs[message.identifier] = (task_future, message.tool)
