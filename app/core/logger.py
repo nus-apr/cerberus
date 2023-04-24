@@ -44,7 +44,7 @@ def store_log_file(log_file_path):
 
 def store_logs():
     if os.path.isfile(values.file_main_log):
-        copyfile(values.file_main_log, join(values.dir_logs + "log-latest"))
+        copyfile(values.file_main_log, join(values.dir_logs, "log-latest"))
     log_file_list = [
         values.file_command_log,
         values.file_build_log,
