@@ -76,6 +76,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
     ]
 
     async def _on_exit_app(self) -> None:
+        values.ui_active = False
         self.job_cancellation = True
         self.free_jobs = 10000
         with job_condition:
