@@ -29,7 +29,13 @@ class FootPatch(AbstractRepairTool):
         new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
         analysis_command = "footpatch " "-j 20 --headers --no-filtering -- make -j20"
-        self.run_command(analysis_command, dir_path=dir_src, env=new_env)
+        log_analysis_path = join(self.dir_logs, "footpatch-capture-output.log")
+        self.run_command(
+            analysis_command,
+            dir_path=dir_src,
+            env=new_env,
+            log_file_path=log_analysis_path,
+        )
         self.emit_normal(
             " preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()

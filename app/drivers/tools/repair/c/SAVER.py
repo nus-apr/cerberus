@@ -76,7 +76,10 @@ class SAVER(AbstractRepairTool):
                 "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
             )
         self.emit_normal(" compiling subject with " + self.name)
-        self.run_command(compile_command, dir_path=dir_src)
+        log_compile_path = join(self.dir_logs, "saver-compile-output.log")
+        self.run_command(
+            compile_command, dir_path=dir_src, log_file_path=log_compile_path
+        )
         self.emit_normal(
             " compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -85,7 +88,10 @@ class SAVER(AbstractRepairTool):
         time = datetime.now()
         self.emit_normal(" analysing subject with " + self.name)
         analysis_command = "infer saver --pre-analysis-only "
-        self.run_command(analysis_command, dir_path=dir_src)
+        log_analysis_path = join(self.dir_logs, "saver-analysis-output.log")
+        self.run_command(
+            analysis_command, dir_path=dir_src, log_file_path=log_analysis_path
+        )
         self.emit_normal(
             " analysis took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
