@@ -693,6 +693,9 @@ def setup_ui():
         for (experiment, status, dir_info) in experiment_results:
             emitter.information(
                 "\t[framework] Experiment {} has final status {} with logs directory {} and results directory {}".format(
-                    experiment, status, dir_info["logs"], dir_info["artifacts"]
+                    experiment,
+                    status,
+                    dir_info.get("logs", "N/A"),
+                    dir_info.get("artifacts", "N/A"),
                 )
             )
