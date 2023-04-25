@@ -47,8 +47,10 @@ job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
 
 job_condition = threading.Condition()
 
+Result = Tuple[str, TaskStatus, Dict[str, str]]
 
-class Cerberus(App[List[Tuple[str, TaskStatus]]]):
+
+class Cerberus(App[List[Result]]):
     """The main window"""
 
     COLUMNS: Dict[str, Dict[str, ColumnKey]] = {
@@ -85,14 +87,14 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             if tool.container_id:
                 container.stop_container(tool.container_id)
             task.cancel()
-            self.finished_subjects.append((id, TaskStatus.CANCELLED))
+            self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
         self._return_value = self.finished_subjects
         return await super()._on_exit_app()
 
     def on_mount(self):
         self.selected_subject = None
         self.jobs_remaining = 0
-        self.finished_subjects: List[Tuple[str, TaskStatus]] = []
+        self.finished_subjects: List[Result] = []
         self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
         self.job_cancellation = False
 
@@ -377,7 +379,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                     job_condition.wait()
                 if self.job_cancellation:
                     self.finished_subjects.append(
-                        (message.identifier, TaskStatus.CANCELLED)
+                        (message.identifier, TaskStatus.CANCELLED, {})
                     )
                     job_condition.notify(1)
                     return
@@ -448,10 +450,10 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             )
 
             status = TaskStatus.SUCCESS
+            dir_info = {}
             try:
-
                 cpu_set = ",".join(map(str, cpus))
-                task.run(
+                dir_info = task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
@@ -479,6 +481,7 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
                         message.identifier,
                         values.experiment_status.get(status),
                         row_data,
+                        dir_info["local"] if dir_info else None,
                     )
                 )
             with job_condition:
@@ -561,8 +564,9 @@ class Cerberus(App[List[Tuple[str, TaskStatus]]]):
             self.debug_print(str(e))
 
         self.jobs_remaining -= 1
-        self.finished_subjects.append((message.key, message.status))
-        del job_time_map[message.identifier]
+
+        self.finished_subjects.append((message.key, message.status, message.dir_info))
+        del job_time_map[message.key]
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
@@ -686,9 +690,9 @@ def setup_ui():
             "Cerberus has finished running! These are the following results:\n"
             + "\n".join(map(lambda t: "{} -> {}".format(*t), experiment_results))
         )
-        for (experiment, status) in experiment_results:
+        for (experiment, status, dir_info) in experiment_results:
             emitter.information(
-                "\t[framework] Experiment {} has final status {}".format(
-                    experiment, status
+                "\t[framework] Experiment {} has final status {} with logs directory {} and results directory {}".format(
+                    experiment, status, dir_info["logs"], dir_info["artifacts"]
                 )
             )
