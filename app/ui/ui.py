@@ -86,8 +86,9 @@ class Cerberus(App[List[Result]]):
         for (id, (task, tool)) in self.jobs.items():
             if tool.container_id:
                 container.stop_container(tool.container_id)
-            task.cancel()
-            self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
+            if not task.done():
+                task.cancel()
+                self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
         self._return_value = self.finished_subjects
         return await super()._on_exit_app()
 
