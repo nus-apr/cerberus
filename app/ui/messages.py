@@ -41,10 +41,11 @@ class JobFinish(Message):
     bubble = True
     namespace = "cerberus"
 
-    def __init__(self, key, status: TaskStatus, row_data):
+    def __init__(self, key, status: TaskStatus, row_data, dir_info: Dict[str, str]):
         self.key = key
         self.status = status
         self.row_data = row_data
+        self.dir_info = dir_info
         super().__init__()
 
 
