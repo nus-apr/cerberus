@@ -46,6 +46,7 @@ class AbstractTool(AbstractDriver):
     key_timeout = definitions.KEY_CONFIG_TIMEOUT
     key_source = definitions.KEY_SOURCE
     key_sink = definitions.KEY_SINK
+    key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""

@@ -24,13 +24,16 @@ class SAVER(AbstractAnalyzeTool):
 
         time = datetime.now()
         bug_type = bug_info[self.key_bug_type]
+        compile_list = bug_info[self.key_compile_programs]
         if bug_type == "Memory Leak":
             compile_command = (
-                "infer -j 20 -g --headers --check-nullable-only -- make -j20"
+                "infer -j 20 -g --headers --check-nullable-only -- make -j20 {}".format(
+                    " ".join(compile_list)
+                )
             )
         else:
-            compile_command = (
-                "infer -j 20 run -g --headers --check-nullable-only -- make -j20"
+            compile_command = "infer -j 20 run -g --headers --check-nullable-only -- make -j20 {}".format(
+                " ".join(compile_list)
             )
         self.emit_normal("compiling subject with " + self.name)
         log_compile_path = join(self.dir_logs, "saver-compile-output.log")
