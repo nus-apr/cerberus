@@ -28,7 +28,7 @@ class FootPatch(AbstractRepairTool):
             del new_env["GLOBAL_REPAIR"]
         new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
-        compile_list = bug_info[self.key_compile_programs]
+        compile_list = bug_info.get(self.key_compile_programs, [])
         analysis_command = (
             "footpatch "
             "-j 20 --headers --no-filtering -- make -j20 {}".format(
@@ -77,7 +77,7 @@ class FootPatch(AbstractRepairTool):
         new_env["GLOBAL_REPAIR"] = "1"
 
         self.timestamp_log_start()
-        compile_list = bug_info[self.key_compile_programs]
+        compile_list = bug_info.get(self.key_compile_programs, [])
         footpatch_command = (
             "timeout -k 5m {0}h footpatch "
             "-j 20 --headers --no-filtering {1} "
