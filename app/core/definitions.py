@@ -27,7 +27,7 @@ KEY_TEST_DIRECTORY = "test_directory"
 KEY_DEPENDENCIES = "dependencies"
 KEY_SOURCE = "source"
 KEY_SINK = "sink"
-
+KEY_COMPILE_PROGRAMS = "compile_programs"
 KEY_CONTAINER_CPU_COUNT = "cpu_count"
 KEY_CONTAINER_MEM_LIMIT = "mem_limit"
 KEY_CONTAINER_ENABLE_NETWORK = "enable_network"
