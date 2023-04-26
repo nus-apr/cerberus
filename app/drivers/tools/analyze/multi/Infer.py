@@ -31,12 +31,15 @@ class Infer(AbstractAnalyzeTool):
 
         time = datetime.now()
         compile_list = bug_info[self.key_compile_programs]
+        log_compile_path = join(self.dir_logs, "infer-compile-output.log")
         compile_command = "infer -j 20 -g capture -- make -j20 {}".format(
             " ".join(compile_list)
         )
 
         self.emit_normal("compiling subject with ")
-        self.run_command(compile_command, dir_path=dir_src)
+        self.run_command(
+            compile_command, dir_path=dir_src, log_file_path=log_compile_path
+        )
         self.emit_normal(
             "compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
