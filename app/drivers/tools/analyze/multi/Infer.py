@@ -30,7 +30,7 @@ class Infer(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        compile_list = bug_info[self.key_compile_programs]
+        compile_list = bug_info.get(self.key_compile_programs, [])
         log_compile_path = join(self.dir_logs, "infer-compile-output.log")
         compile_command = "infer -j 20 -g capture -- make -j20 {}".format(
             " ".join(compile_list)
@@ -54,7 +54,7 @@ class Infer(AbstractAnalyzeTool):
 
         self.timestamp_log_start()
         dir_src = join(self.dir_expr, "src")
-        compile_list = bug_info[self.key_compile_programs]
+        compile_list = bug_info.get(self.key_compile_programs, [])
         saver_command = "timeout -k 5m {0}h infer analyze {1} -- make -j20 {2}".format(
             str(timeout_h), additional_tool_param, " ".join(compile_list)
         )

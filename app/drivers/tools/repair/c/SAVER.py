@@ -67,7 +67,7 @@ class SAVER(AbstractRepairTool):
         self.populate_config_file(bug_info, config_path)
         time = datetime.now()
         bug_type = bug_info[self.key_bug_type]
-        compile_list = bug_info[self.key_compile_programs]
+        compile_list = bug_info.get(self.key_compile_programs, [])
         if bug_type == "Memory Leak":
             compile_command = (
                 "infer -j 20 -g --headers --check-nullable-only -- make -j20 {}".format(
