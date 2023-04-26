@@ -272,9 +272,10 @@ def exec_command(
             for stream in output:
                 if stream is None:
                     continue
-                for line in stream.decode("ascii", "ignore").split("\n"):
-                    if line != "":
-                        emitter.debug(line)
+                if values.debug:
+                    for line in stream.decode("ascii", "ignore").split("\n"):
+                        if line != "":
+                            emitter.debug(line)
     except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
