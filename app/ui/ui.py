@@ -384,7 +384,7 @@ class Cerberus(App[List[Result]]):
                     )
                     job_condition.notify(1)
                     return
-                self.debug_print("Getting {} CPU cores".format(required_cpu_cores))
+                emitter.debug("Getting {} CPU cores".format(required_cpu_cores))
                 self.free_jobs = self.free_jobs - required_cpu_cores
                 for _ in range(required_cpu_cores):
                     cpus.append(self.cpu_queue.get(block=True, timeout=None))
@@ -409,7 +409,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
-            self.debug_print("Setting a timeout of {} seconds".format(timeout))
+            emitter.debug("Setting a timeout of {} seconds".format(timeout))
             job_time_map[message.identifier] = (
                 start_time,
                 timeout,
@@ -489,7 +489,7 @@ class Cerberus(App[List[Result]]):
                 for cpu in cpus:
                     self.cpu_queue.put(cpu)
                 self.free_jobs += required_cpu_cores
-                self.debug_print("Putting back {} cores".format(required_cpu_cores))
+                emitter.debug("Putting back {} cores".format(required_cpu_cores))
                 job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
