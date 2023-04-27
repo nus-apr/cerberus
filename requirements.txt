@@ -1,5 +1,5 @@
 docker
 more_itertools
 pre-commit
-textual==0.20.1
+textual==0.21
 slack_sdk

@@ -567,7 +567,8 @@ class Cerberus(App[List[Result]]):
         self.jobs_remaining -= 1
 
         self.finished_subjects.append((message.key, message.status, message.dir_info))
-        del job_time_map[message.key]
+        if message.key in job_time_map:
+            del job_time_map[message.key]
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
@@ -689,11 +690,21 @@ def setup_ui():
         values.iteration_no = len(experiment_results)
         notification.notify(
             "Cerberus has finished running! These are the following results:\n"
-            + "\n".join(map(lambda t: "{} -> {}".format(*t), experiment_results))
+            + "\n\n".join(
+                map(
+                    lambda t: "Experiment {} has final status {}\n logs directory: `{}`\n results directory `{}`".format(
+                        t[0],
+                        t[1],
+                        t[2].get("logs", "N/A"),
+                        t[2].get("artifacts", "N/A"),
+                    ),
+                    experiment_results,
+                )
+            )
         )
-        for (experiment, status, dir_info) in experiment_results:
+        for experiment, status, dir_info in experiment_results:
             emitter.information(
-                "\t[framework] Experiment {} has final status {} with logs directory {} and results directory {}".format(
+                "\t[framework] Experiment {} has final status {}\n\tlogs directory {}\n\tresults directory {}\n".format(
                     experiment,
                     status,
                     dir_info.get("logs", "N/A"),
