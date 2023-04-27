@@ -466,7 +466,6 @@ def main():
         emitter.error(str(e))
         logger.error(traceback.format_exc())
     finally:
-        values.ui_active = False
         get_console().show_cursor(True)
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
