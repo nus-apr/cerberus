@@ -262,7 +262,7 @@ def repair_all(
         tool_thread.join(wait_time)
         if tool_thread.is_alive():
             emitter.highlight(
-                "\t\t\t[info] {}: thread is not done, setting event to kill thread.".format(
+                "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
                     repair_tool.name
                 )
             )
@@ -274,7 +274,9 @@ def repair_all(
             # the loop before finally stopping.
         else:
             emitter.highlight(
-                "\t\t\t[info] {}: thread has already finished.".format(repair_tool.name)
+                "\t\t\t[framework] {}: thread has already finished.".format(
+                    repair_tool.name
+                )
             )
 
         # Thread can still be alive at this point. Do another join without a timeout

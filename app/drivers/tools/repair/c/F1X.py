@@ -398,9 +398,6 @@ class F1X(AbstractRepairTool):
                     self._space.generated = -1
                 elif "explored count: 1" in line:
                     if self._time.timestamp_validation == 0:
-                        # self._time.timestamp_validation = (
-                        #     line.split("[info]")[0].replace("[", "").replace("]", "")
-                        # )
                         pass
 
                 elif "PASS" in line and "[debug]" in line:
