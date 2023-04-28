@@ -201,11 +201,7 @@ class Cerberus(App[List[Result]]):
                                 bug_name, subject_name
                             )
                         )
-                        benchmark.get_exp_image(
-                            experiment_item[definitions.KEY_ID],
-                            values.only_test,
-                            str(cpu),
-                        )
+                        task.prepare(benchmark, experiment_item, str(cpu))
                         complete_images.put((experiment_item[definitions.KEY_ID], True))
                     except Exception as e:
                         emitter.information(
@@ -300,7 +296,7 @@ class Cerberus(App[List[Result]]):
 
                     # The experiment should be built at this point, hardcoded cpu should not be a problem
                     experiment_image_id = (
-                        benchmark.get_exp_image(bug_index, values.only_test, "0")
+                        benchmark.get_exp_image(bug_index, values.only_test, "0", True)
                         if values.use_container
                         else None
                     )

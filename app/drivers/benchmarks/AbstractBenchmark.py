@@ -300,12 +300,16 @@ class AbstractBenchmark(AbstractDriver):
         self.emit_success("setting up completed successfully")
         return False
 
-    def get_exp_image(self, bug_index: int, test_all: bool, cpu: str):
+    def get_exp_image(
+        self, bug_index: int, test_all: bool, cpu: str, ignore_rebuild: bool = False
+    ):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
-        if not container.image_exists(exp_image_name) or values.rebuild_all:
+        if not container.image_exists(exp_image_name) or (
+            not ignore_rebuild and values.rebuild_all
+        ):
             emitter.warning(
                 "\t\t[framework][WARNING] experiment subject {} with bug name {} is not built".format(
                     subject_name, bug_id
