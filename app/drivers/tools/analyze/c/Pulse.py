@@ -28,7 +28,11 @@ class Pulse(AbstractAnalyzeTool):
             self.dir_logs,
             "{}-{}-prepare.log".format(self.name.lower(), bug_id),
         )
-        compile_command = "infer -j 20 capture -- make -j20"
+
+        compile_list = bug_info.get(self.key_compile_programs, [])
+        compile_command = "infer -j 20 capture -- make -j20 {}".format(
+            " ".join(compile_list)
+        )
         self.emit_normal("compiling subject with " + self.name)
         status = self.run_command(
             compile_command, dir_path=dir_src, log_file_path=self.log_prepare_path
