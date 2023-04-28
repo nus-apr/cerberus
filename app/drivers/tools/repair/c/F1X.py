@@ -371,8 +371,8 @@ class F1X(AbstractRepairTool):
     def read_log_file(self):
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
+            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "candidates evaluated: " in line:
                     count = (
@@ -381,31 +381,35 @@ class F1X(AbstractRepairTool):
                         .replace("\n", "")
                     )
                     if str(count).isnumeric():
-                        self._space.enumerations = int(count)
+                        self.stats.patches_stats.enumerations = int(count)
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
-                    self._time.total_validation += float(time)
+                    self.stats.time_stats.total_validation += float(time)
                 elif "build time: " in line:
                     time = line.split("build time: ")[-1].strip().replace("\n", "")
-                    self._time.total_build += float(time)
+                    self.stats.time_stats.total_build += float(time)
                 elif "validating patch " in line:
-                    self._space.enumerations += 1
+                    self.stats.patches_stats.enumerations += 1
                 elif "search space size: " in line:
-                    self._space.generated = int(line.split("search space size: ")[-1])
+                    self.stats.patches_stats.generated = int(
+                        line.split("search space size: ")[-1]
+                    )
                 elif "plausible patches: " in line:
-                    self._space.plausible = int(line.split("plausible patches: ")[-1])
+                    self.stats.patches_stats.plausible = int(
+                        line.split("plausible patches: ")[-1]
+                    )
                 elif "failed to infer compile commands" in line:
-                    self._space.generated = -1
+                    self.stats.patches_stats.generated = -1
                 elif "explored count: 1" in line:
-                    if self._time.timestamp_validation == 0:
-                        # self._time.timestamp_validation = (
+                    if self.stats.time_stats.timestamp_validation == 0:
+                        # self.stats.time_stats.timestamp_validation = (
                         #     line.split("[info]")[0].replace("[", "").replace("]", "")
                         # )
                         pass
 
                 elif "PASS" in line and "[debug]" in line:
-                    if self._time.timestamp_plausible == 0:
-                        # self._time.timestamp_plausible = (
+                    if self.stats.time_stats.timestamp_plausible == 0:
+                        # self.stats.time_stats.timestamp_plausible = (
                         #     line.split("[debug]")[0].replace("[", "").replace("]", "")
                         # )
                         pass
@@ -428,16 +432,16 @@ class F1X(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight("log File: " + self.log_output_path)
 
-        if self._error.is_error:
+        if self.stats.error_stats.is_error:
             self.emit_error("error detected in logs")
 
         self.read_log_file()
 
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -446,6 +450,6 @@ class F1X(AbstractRepairTool):
             )
         )
         if self.use_valkyrie:
-            self._space.plausible = self._space.generated
+            self.stats.patches_stats.plausible = self.stats.patches_stats.generated
 
-        return self._space, self._time, self._error
+        return self.stats

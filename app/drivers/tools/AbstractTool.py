@@ -10,7 +10,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.task import stats
+from app.core.task.stats import ToolStats
 from app.core.task.status import TaskStatus
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
@@ -33,9 +33,6 @@ class AbstractTool(AbstractDriver):
     container_id = None
     is_instrument_only = False
     timestamp_fmt = "%a %d %b %Y %H:%M:%S %p"
-    _time = stats.TimeStats()
-    _space = stats.SpaceStats()
-    _error = stats.ErrorStats()
     current_repair_profile_id = values.current_repair_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
@@ -52,6 +49,7 @@ class AbstractTool(AbstractDriver):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
+        self.stats = ToolStats()
         self.is_ui_active = values.ui_active
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug
@@ -67,19 +65,19 @@ class AbstractTool(AbstractDriver):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self._space.non_compilable
-            self._space.plausible
-            self._space.size
-            self._space.enumerations
-            self._space.generated
+            self.stats.patches_stats.non_compilable
+            self.stats.patches_stats.plausible
+            self.stats.patches_stats.size
+            self.stats.patches_stats.enumerations
+            self.stats.patches_stats.generated
 
-            self._time.total_validation
-            self._time.total_build
-            self._time.timestamp_compilation
-            self._time.timestamp_validation
-            self._time.timestamp_plausible
+            self.stats.time_stats.total_validation
+            self.stats.time_stats.total_build
+            self.stats.time_stats.timestamp_compilation
+            self.stats.time_stats.timestamp_validation
+            self.stats.time_stats.timestamp_plausible
         """
-        return self._space, self._time, self._error
+        return self.stats
 
     def clean_up(self):
         if self.container_id:
@@ -93,9 +91,10 @@ class AbstractTool(AbstractDriver):
         self.container_id = container_id
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
-        self._time = stats.TimeStats()
-        self._space = stats.SpaceStats()
-        self._error = stats.ErrorStats()
+
+    def update_container_stats(self, container_id):
+        container_stats = container.get_container_stats(container_id)
+        self.stats.container_stats.load_container_stats(container_stats)
 
     def update_dir_info(self, dir_info):
         if self.container_id:
@@ -236,7 +235,7 @@ class AbstractTool(AbstractDriver):
             self.clean_up()
         return
 
-    def print_stats(self, space_info: stats.SpaceStats, time_info: stats.TimeStats):
+    def print_stats(self):
         """Print the statistics of the tool."""
         pass
 
@@ -294,9 +293,6 @@ class AbstractTool(AbstractDriver):
 
     def is_file(self, file_path):
         return abstractions.is_file(self.container_id, file_path)
-
-    def get_time_stats(self):
-        return self._time
 
     def get_output_log_path(self):
         # parse this file for time info

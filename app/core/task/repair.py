@@ -11,6 +11,7 @@ from app.core import emitter
 from app.core import parallel
 from app.core import utilities
 from app.core import values
+from app.core.task.status import TaskStatus
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -144,6 +145,8 @@ def repair_all(
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
 
+    final_status = [TaskStatus.NONE]
+
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
@@ -223,6 +226,7 @@ def repair_all(
             benchmark_name,
             repair_profile_id,
             job_identifier,
+            final_status,
         ):
             """
             Pass over some fields as we are going into a new thread
@@ -237,6 +241,7 @@ def repair_all(
                 container_id,
                 benchmark_name,
             )
+            final_status[0] = values.experiment_status.get(TaskStatus.NONE)
 
         tool_thread = threading.Thread(
             target=repair_wrapped,
@@ -249,6 +254,7 @@ def repair_all(
                 benchmark_name,
                 values.current_repair_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
+                final_status,
             ),
         )
         tool_thread.start()
@@ -280,6 +286,7 @@ def repair_all(
         # Thread can still be alive at this point. Do another join without a timeout
         # to verify thread shutdown.
         tool_thread.join()
+        values.experiment_status.set(final_status[0])
         # if tool.log_output_path:
         #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
         #     utilities.execute_command(timestamp_command)

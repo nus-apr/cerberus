@@ -88,7 +88,7 @@ class CRepair(AbstractRepairTool):
         search_space = 0
 
         # count number of patch files
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_expr,
@@ -100,14 +100,14 @@ class CRepair(AbstractRepairTool):
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
+            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
 
             for line in log_lines:
                 if "evaluating candidate patch" in line:
@@ -124,10 +124,10 @@ class CRepair(AbstractRepairTool):
                     count_compile_errors += 1
 
                 if any(err in line.lower() for err in self.error_messages):
-                    self._error.is_error = True
+                    self.stats.error_stats.is_error = True
 
-        self._space.non_compilable = count_compile_errors
-        self._space.plausible = count_plausible
-        self._space.enumerations = count_enumerations
-        self._space.size = search_space
-        return self._space, self._time, self._error
+        self.stats.patches_stats.non_compilable = count_compile_errors
+        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patches_stats.size = search_space
+        return self.stats

@@ -38,19 +38,19 @@ Save useful artifacts from the repair execution, the main folders one should tra
 ```py
     def analyse_output(self, dir_info, bug_id, fail_list):
         emitter.normal("\t\t\t analysing output of " + self.name)
-        return self._space, self._time, self._error
+        return self.stats
 ```
 Analyse the output of the tool to gather certain properties if they are defined. Output of the tool should be logged at `self.log_output_path`. The fields that one should try to extract are:
 
-* `self._space.non_compilable`
-* `self._space.plausible`
-* `self._space.size`
-* `self._space.enumerations`
-* `self._space.generated`
+* `self.stats.patches_stats.non_compilable`
+* `self.stats.patches_stats.plausible`
+* `self.stats.patches_stats.size`
+* `self.stats.patches_stats.enumerations`
+* `self.stats.patches_stats.generated`
 
-* `self._time.total_validation`
-* `self._time.total_build`
-* `self._time.timestamp_compilation`
-* `self._time.timestamp_validation`
-* `self._time.timestamp_plausible`
-* `self._error.is_error`
+* `self.stats.time_stats.total_validation`
+* `self.stats.time_stats.total_build`
+* `self.stats.time_stats.timestamp_compilation`
+* `self.stats.time_stats.timestamp_validation`
+* `self.stats.time_stats.timestamp_plausible`
+* `self.stats.error_stats.is_error`

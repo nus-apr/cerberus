@@ -124,7 +124,7 @@ class FootPatch(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_error = False
@@ -132,12 +132,12 @@ class FootPatch(AbstractRepairTool):
         # count number of patch files
         dir_footpatch = join(self.dir_expr, "src", "infer-out", "footpatch")
         list_patches = self.list_dir(dir_footpatch, regex="*.patch")
-        self._space.generated = len(list_patches)
+        self.stats.patches_stats.generated = len(list_patches)
 
         footpatch_std_out = self.log_output_path
         log_lines = self.read_file(footpatch_std_out, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         footpatch_log_path = join(
             self.dir_expr, "src", "infer-out", "footpatch", "log.txt"
         )
@@ -145,12 +145,12 @@ class FootPatch(AbstractRepairTool):
             log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
             for line in log_lines:
                 if "Patch routine" in line:
-                    self._space.enumerations += 1
+                    self.stats.patches_stats.enumerations += 1
                 elif "Writing patches" in line:
-                    self._space.plausible += 1
+                    self.stats.patches_stats.plausible += 1
                 elif "Filtered candidates:" in line:
-                    self._space.size += int(line.split(": ")[-1])
+                    self.stats.patches_stats.size += int(line.split(": ")[-1])
             if is_error:
                 self.emit_error("[error] error detected in logs")
 
-        return self._space, self._time, self._error
+        return self.stats

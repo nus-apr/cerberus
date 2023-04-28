@@ -138,35 +138,39 @@ class GenProg(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_interrupted = True
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "variant " in line:
-                self._space.enumerations = int(line.split("/")[0].split(" ")[-1])
+                self.stats.patches_stats.enumerations = int(
+                    line.split("/")[0].split(" ")[-1]
+                )
             elif "possible edits" in line:
-                self._space.generated = int(line.split(": ")[2].split(" ")[0])
+                self.stats.patches_stats.generated = int(
+                    line.split(": ")[2].split(" ")[0]
+                )
             elif "fails to compile" in line:
-                self._space.non_compilable += 1
+                self.stats.patches_stats.non_compilable += 1
             elif "Repair Found" in line:
-                self._space.plausible += 1
+                self.stats.patches_stats.plausible += 1
             elif "cilrep done serialize" in line:
                 is_interrupted = False
 
-        if self._space.generated == 0:
+        if self.stats.patches_stats.generated == 0:
             if self.is_file(dir_results + "/coverage.path"):
                 # TODO
                 if os.path.getsize(dir_results + "/coverage.path"):
                     self.emit_error("[error] error detected in coverage")
             else:
                 self.emit_error("[error] error detected in coverage")
-        if self._error.is_error:
+        if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
         if is_interrupted:
             self.emit_warning("[warning] program interrupted before starting repair")
 
-        return self._space, self._time, self._error
+        return self.stats

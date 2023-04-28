@@ -5640,49 +5640,49 @@ class Prophet(AbstractRepairTool):
         return filtered_list
 
     def read_log_file(self):
-        self._time.set_log_time_fmt("%S")  # Temporary
+        self.stats.time_stats.set_log_time_fmt("%S")  # Temporary
         # timeline = ""
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "[" == line[0] and "]" in line:
                 continue
                 # timeline = int(line.split("]")[0].replace("[", "").strip())
             if "number of explored templates:" in line:
-                self._space.enumerations = int(
+                self.stats.patches_stats.enumerations = int(
                     line.split("number of explored templates: ")[-1]
                 )
             elif "Single building" in line and "failed as well!" in line:
-                self._space.non_compilable += 1
+                self.stats.patches_stats.non_compilable += 1
             elif "different repair candidate" in line:
-                self._space.size = int(
+                self.stats.patches_stats.size = int(
                     line.split(" different repair candidate")[0]
                     .replace("Total ", "")
                     .strip()
                 )
             elif "Segmentation fault" in line:
-                self._error.is_error = True
+                self.stats.error_stats.is_error = True
             elif "Verification failed!" in line or "Repair error:" in line:
                 self.emit_warning("[warning] verification error detected in test suite")
             elif "validation time: " in line:
                 time = line.split("validation time: ")[-1].strip().replace("\n", "")
-                self._time.total_validation += float(time)
+                self.stats.time_stats.total_validation += float(time)
             elif "build time: " in line:
                 time = line.split("build time: ")[-1].strip().replace("\n", "")
-                self._time.total_build += float(time)
-                # if self._time.timestamp_compilation == 0:
-                #     self._time.timestamp_compilation = timeline
+                self.stats.time_stats.total_build += float(time)
+                # if self.stats.time_stats.timestamp_compilation == 0:
+                #     self.stats.time_stats.timestamp_compilation = timeline
             elif "Passed!" in line:
-                # if self._time.timestamp_validation == 0:
-                #     self._time.timestamp_validation = int(
+                # if self.stats.time_stats.timestamp_validation == 0:
+                #     self.stats.time_stats.timestamp_validation = int(
                 #         line.replace("[", "").replace("] Passed!", " ").strip()
                 #     )
-                self._space.plausible += 1
+                self.stats.patches_stats.plausible += 1
             elif "Testing" in line:
                 pass
-                # if self._time.timestamp_plausible == 0:
-                #     self._time.timestamp_plausible = timeline
+                # if self.stats.time_stats.timestamp_plausible == 0:
+                #     self.stats.time_stats.timestamp_plausible = timeline
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
@@ -5690,17 +5690,17 @@ class Prophet(AbstractRepairTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self._space.non_compilable
-            self._space.plausible
-            self._space.size
-            self._space.enumerations
-            self._space.generated
+            self.stats.patches_stats.non_compilable
+            self.stats.patches_stats.plausible
+            self.stats.patches_stats.size
+            self.stats.patches_stats.enumerations
+            self.stats.patches_stats.generated
 
-            self._time.total_validation
-            self._time.total_build
-            self._time.timestamp_compilation
-            self._time.timestamp_validation
-            self._time.timestamp_plausible
+            self.stats.time_stats.total_validation
+            self.stats.time_stats.total_build
+            self.stats.time_stats.timestamp_compilation
+            self.stats.time_stats.timestamp_validation
+            self.stats.time_stats.timestamp_plausible
         """
         self.emit_normal("reading output")
         dir_results = path.join(self.dir_expr, "result")
@@ -5719,16 +5719,16 @@ class Prophet(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
         self.read_log_file()
 
-        if self._error.is_error:
+        if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
 
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -5737,4 +5737,4 @@ class Prophet(AbstractRepairTool):
             )
         )
 
-        return self._space, self._time, self._error
+        return self.stats
