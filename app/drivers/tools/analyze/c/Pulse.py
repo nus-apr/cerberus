@@ -17,7 +17,7 @@ class Pulse(AbstractAnalyzeTool):
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        self.emit_normal(" preparing subject for analysis with " + self.name)
+        self.emit_normal("preparing subject for analysis with " + self.name)
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         self.run_command(clean_command, dir_path=dir_src)
@@ -30,9 +30,12 @@ class Pulse(AbstractAnalyzeTool):
         )
         compile_command = "infer -j 20 capture -- make -j20"
         self.emit_normal("compiling subject with " + self.name)
-        self.run_command(
+        status = self.run_command(
             compile_command, dir_path=dir_src, log_file_path=self.log_prepare_path
         )
+        if status != 0:
+            self.emit_error("pulse capture command returned non-zero exit")
+
         self.emit_normal(
             "compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -56,6 +59,8 @@ class Pulse(AbstractAnalyzeTool):
         status = self.run_command(
             analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
         )
+        if status != 0:
+            self.emit_error("pulse analyze command returned non-zero exit")
 
         self.process_status(status)
 
