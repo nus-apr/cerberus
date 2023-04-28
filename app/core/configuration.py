@@ -339,7 +339,9 @@ class Configurations:
         values.subject_name = self.__runtime_config_values["subject-name"]
         if values.subject_name:
             emitter.normal(
-                "[info] Running experiments for subject {}".format(values.subject_name)
+                "\t[framework] Running experiments for subject {}".format(
+                    values.subject_name
+                )
             )
         values.file_meta_data = os.path.join(
             "benchmark", values.benchmark_name, "meta-data.json"

@@ -15,6 +15,7 @@ from app.core.task.status import TaskStatus
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.AbstractDriver import AbstractDriver
+from app.ui import ui
 
 
 class AbstractTool(AbstractDriver):
@@ -226,6 +227,9 @@ class AbstractTool(AbstractDriver):
             if not local_path:
                 error_exit("{} not Found".format(self.name))
         return
+
+    def update_experiment_status(self, status: str):
+        ui.update_current_job(status)
 
     def post_process(self):
         """Any post-processing required for the repair"""

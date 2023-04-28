@@ -17,7 +17,7 @@ from app.core import values
 from app.core import writer
 from app.core.task import analyze
 from app.core.task import repair
-from app.core.task.typing import DirInfo
+from app.core.task.typing import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -25,7 +25,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
 
-def update_dir_info(dir_info: DirInfo, tool_name: str) -> DirInfo:
+def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
     dir_setup_local = dir_info["local"]["setup"]
     dir_setup_container = dir_info["container"]["setup"]
     dir_instrumentation_local = join(dir_setup_local, str(tool_name).lower())
@@ -98,8 +98,8 @@ def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name
 
 def generate_tool_dir_info(
     benchmark_name: str, subject_name: str, bug_name: str, hash, tag_name: str
-) -> DirInfo:
-    dir_info: DirInfo = {
+) -> DirectoryInfo:
+    dir_info: DirectoryInfo = {
         "local": generate_local_tool_dir_info(
             benchmark_name, subject_name, bug_name, hash, tag_name
         ),
@@ -110,8 +110,10 @@ def generate_tool_dir_info(
     return dir_info
 
 
-def generate_dir_info(benchmark_name: str, subject_name: str, bug_name: str) -> DirInfo:
-    dir_info: DirInfo = {
+def generate_dir_info(
+    benchmark_name: str, subject_name: str, bug_name: str
+) -> DirectoryInfo:
+    dir_info: DirectoryInfo = {
         "local": generate_local_dir_info(benchmark_name, subject_name, bug_name),
         "container": generate_container_dir_info(
             benchmark_name, subject_name, bug_name
@@ -140,7 +142,7 @@ def collect_benchmark_result(bug_info, benchmark: AbstractBenchmark):
     construct_job_summary(benchmark_tag_name, benchmark.stats.get_array())
 
 
-def collect_tool_result(dir_info: DirInfo, experiment_info, tool: AbstractTool):
+def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t[framework] collecting experiment results")
     task_tag_name = dir_info["local"]["logs"].split("/")[-1]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
@@ -169,7 +171,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info: DirInfo, tool: AbstractTool):
+def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool):
     emitter.normal(
         "\t\t[framework] Saving artifacts from tool {} and cleaning up".format(
             tool.name
@@ -188,7 +190,7 @@ def save_artifacts(dir_info: DirInfo, tool: AbstractTool):
 def create_running_container(
     bug_image_id: str,
     repair_tool: AbstractTool,
-    dir_info: DirInfo,
+    dir_info: DirectoryInfo,
     image_name: str,
     container_name: str,
     cpu: str,
@@ -291,7 +293,7 @@ def run(
     run_identifier: str,
     cpu: str,
     experiment_image_id: Optional[str],
-) -> DirInfo:
+):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     repair_config_id = repair_config_info[definitions.KEY_ID]

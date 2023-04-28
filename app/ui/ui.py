@@ -59,12 +59,13 @@ class Cerberus(App[List[Result]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
-        "Repair Profile": {},
-        "Container Profile": {},
-        "Started at": {},
-        "Should finish by": {},
-        "Status": {},
-        "Patches Generated": {},
+        definitions.UI_REPAIR_PROFILE: {},
+        definitions.UI_CONTAINER_PROFILE: {},
+        definitions.UI_STARTED_AT: {},
+        definitions.UI_SHOULD_FINISH: {},
+        definitions.UI_STATUS: {},
+        definitions.UI_PLAUSIBLE_PATCHES: {},
+        definitions.UI_DURATION: {},
     }
 
     SUB_TITLE = "Program Repair Framework"
@@ -328,7 +329,8 @@ class Cerberus(App[List[Result]]):
                             "N/A",
                             "N/A",
                             "Allocated",
-                            "None",
+                            "N/A",
+                            "N/A",
                             key=key,
                         )
 
@@ -435,13 +437,13 @@ class Cerberus(App[List[Result]]):
 
             self.query_one("#" + all_subjects_id, DataTable).update_cell(
                 message.identifier,
-                Cerberus.COLUMNS["Started at"][all_subjects_id],
+                Cerberus.COLUMNS[definitions.UI_STARTED_AT][all_subjects_id],
                 start_date,
                 update_width=True,
             )
             self.query_one("#" + all_subjects_id, DataTable).update_cell(
                 message.identifier,
-                Cerberus.COLUMNS["Should finish by"][all_subjects_id],
+                Cerberus.COLUMNS[definitions.UI_SHOULD_FINISH][all_subjects_id],
                 finish_date,
                 update_width=True,
             )
@@ -450,7 +452,7 @@ class Cerberus(App[List[Result]]):
             dir_info = {}
             try:
                 cpu_set = ",".join(map(str, cpus))
-                dir_info = task.run(
+                dir_info, res_info = task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
@@ -479,13 +481,16 @@ class Cerberus(App[List[Result]]):
                         values.experiment_status.get(status),
                         row_data,
                         dir_info["local"] if dir_info else None,
+                        res_info,
                     )
                 )
             with job_condition:
                 for cpu in cpus:
                     self.cpu_queue.put(cpu)
                 self.free_jobs += required_cpu_cores
-                emitter.debug("Putting back {} cores".format(required_cpu_cores))
+                emitter.debug(
+                    "Putting back {} cores to the job queue".format(required_cpu_cores)
+                )
                 job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
@@ -496,7 +501,7 @@ class Cerberus(App[List[Result]]):
             try:
                 self.selected_table.update_cell(
                     key,
-                    Cerberus.COLUMNS["Status"][self.selected_table.id],
+                    Cerberus.COLUMNS[definitions.UI_STATUS][self.selected_table.id],
                     status,
                     update_width=True,
                 )
@@ -504,7 +509,7 @@ class Cerberus(App[List[Result]]):
                 pass
         self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
-            Cerberus.COLUMNS["Status"][all_subjects_id],
+            Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
             status,
             update_width=True,
         )
@@ -517,6 +522,27 @@ class Cerberus(App[List[Result]]):
         self.hide(text_log)
 
     async def on_cerberus_job_finish(self, message: JobFinish):
+        def update_table(key, id, table):
+            table.update_cell(
+                key,
+                Cerberus.COLUMNS[definitions.UI_STATUS][id],
+                str(message.status),
+                update_width=True,
+            )
+            table.sort(Cerberus.COLUMNS["ID"][id])
+            table.update_cell(
+                key,
+                Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
+                message.res_info[0].plausible,
+                update_width=True,
+            )
+            table.update_cell(
+                key,
+                Cerberus.COLUMNS[definitions.UI_DURATION][id],
+                "{} second(s)".format(message.res_info[1].get_duration()),
+                update_width=True,
+            )
+
         # self.update_status(message.key, str(message.status))
         try:
             finished_subjects_table = self.query_one(
@@ -527,20 +553,10 @@ class Cerberus(App[List[Result]]):
                 *message.row_data,
                 key=message.key,
             )
-            finished_subjects_table.update_cell(
-                row_key,
-                Cerberus.COLUMNS["Status"][finished_subjects_id],
-                str(message.status),
-                update_width=True,
-            )
-            finished_subjects_table.sort(Cerberus.COLUMNS["ID"][finished_subjects_id])
+            update_table(row_key, finished_subjects_id, finished_subjects_table)
 
-            all_subjects_table.update_cell(
-                row_key,
-                Cerberus.COLUMNS["Status"][all_subjects_id],
-                str(message.status),
-                update_width=True,
-            )
+            update_table(row_key, all_subjects_id, all_subjects_table)
+
             if message.status is not TaskStatus.SUCCESS:
                 error_subjects_table = self.query_one(
                     "#" + error_subjects_id, DataTable
@@ -549,13 +565,7 @@ class Cerberus(App[List[Result]]):
                     *message.row_data,
                     key=message.key,
                 )
-                error_subjects_table.update_cell(
-                    row_key,
-                    Cerberus.COLUMNS["Status"][error_subjects_id],
-                    str(message.status),
-                    update_width=True,
-                )
-                error_subjects_table.sort(Cerberus.COLUMNS["ID"][error_subjects_id])
+                update_table(row_key, error_subjects_id, error_subjects_table)
 
         except Exception as e:
             self.debug_print(str(e))
@@ -668,6 +678,8 @@ def post_write(text: str):
 
 
 def update_current_job(status: str):
+    if not values.ui_active:
+        return
     current_job = values.job_identifier.get("NA")
     if current_job != "NA":
         if app._thread_id != threading.get_ident():

@@ -16,7 +16,7 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import BenchmarkStats
 from app.core.task.status import TaskStatus
-from app.core.task.typing import DirInfo
+from app.core.task.typing import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
 
 
@@ -26,7 +26,7 @@ class AbstractBenchmark(AbstractDriver):
     bench_dir_path = None
     name: str = ""
     image_name: str = ""
-    __dir_info: DirInfo = dict()
+    __dir_info: DirectoryInfo = dict()
     dir_logs = ""
     dir_expr = ""
     dir_base_expr = ""
@@ -101,8 +101,8 @@ class AbstractBenchmark(AbstractDriver):
         emitter.highlight("\t\t\t configured: {0}\n".format(self.stats.configured))
         emitter.highlight("\t\t\t built: {0}\n".format(self.stats.built))
         emitter.highlight("\t\t\t tested: {0}\n".format(self.stats.tested))
-
-    def update_dir_info(self, dir_info: DirInfo):
+        
+    def update_dir_info(self, dir_info: DirectoryInfo):
         self.__dir_info = dir_info
         if not values.use_container:
             self.dir_expr = dir_info["local"]["experiment"]
