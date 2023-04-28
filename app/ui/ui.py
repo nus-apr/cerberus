@@ -202,11 +202,7 @@ class Cerberus(App[List[Result]]):
                                 bug_name, subject_name
                             )
                         )
-                        benchmark.get_exp_image(
-                            experiment_item[definitions.KEY_ID],
-                            values.only_test,
-                            str(cpu),
-                        )
+                        task.prepare(benchmark, experiment_item, str(cpu))
                         complete_images.put((experiment_item[definitions.KEY_ID], True))
                     except Exception as e:
                         emitter.information(
@@ -301,7 +297,7 @@ class Cerberus(App[List[Result]]):
 
                     # The experiment should be built at this point, hardcoded cpu should not be a problem
                     experiment_image_id = (
-                        benchmark.get_exp_image(bug_index, values.only_test, "0")
+                        benchmark.get_exp_image(bug_index, values.only_test, "0", True)
                         if values.use_container
                         else None
                     )
@@ -456,7 +452,7 @@ class Cerberus(App[List[Result]]):
             dir_info = {}
             try:
                 cpu_set = ",".join(map(str, cpus))
-                dir_info, res_info = task.run(
+                dir_info = task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
@@ -485,7 +481,7 @@ class Cerberus(App[List[Result]]):
                         values.experiment_status.get(status),
                         row_data,
                         dir_info["local"] if dir_info else None,
-                        res_info,
+                        message.tool.stats,
                     )
                 )
             with job_condition:
@@ -537,13 +533,13 @@ class Cerberus(App[List[Result]]):
             table.update_cell(
                 key,
                 Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
-                message.res_info[0].plausible,
+                message.res_info.patches_stats.plausible,
                 update_width=True,
             )
             table.update_cell(
                 key,
                 Cerberus.COLUMNS[definitions.UI_DURATION][id],
-                "{} second(s)".format(message.res_info[1].get_duration()),
+                "{} second(s)".format(message.res_info.time_stats.get_duration()),
                 update_width=True,
             )
 

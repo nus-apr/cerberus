@@ -1,7 +1,10 @@
 from datetime import datetime
 
+from app.core import values
+from app.core.task.status import TaskStatus
 
-class TimeStats:
+
+class ToolTimeStats:
     timestamp_start = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_end = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_compilation = 0
@@ -79,7 +82,7 @@ class TimeStats:
         return summary
 
 
-class SpaceStats:
+class ToolPatchesStats:
     non_compilable: int = 0
     plausible: int = 0
     generated: int = 0
@@ -111,3 +114,140 @@ class SpaceStats:
 
 class ErrorStats:
     is_error = False
+
+
+class ContainerStats:
+    mem_usage_gb: float
+    total_rx_bytes: float
+    total_tx_bytes: float
+    network_int_count: int
+
+    def __init__(self):
+        self.mem_usage_gb = 0
+        self.total_rx_bytes = 0
+        self.total_tx_bytes = 0
+        self.network_int_count = 0
+
+    @staticmethod
+    def compute_cpu_usage(container_stats: dict):
+        cpu_usage_delta = (
+            container_stats["cpu_stats"]["cpu_usage"]["total_usage"]
+            - container_stats["precpu_stats"]["cpu_usage"]["total_usage"]
+        )
+        system_cpu_usage_delta = (
+            container_stats["cpu_stats"]["system_cpu_usage"]
+            - container_stats["precpu_stats"]["system_cpu_usage"]
+        )
+
+        percentage_usage = 0
+        if system_cpu_usage_delta != 0:
+            round(
+                (cpu_usage_delta / system_cpu_usage_delta)
+                * container_stats["cpu_stats"]["online_cpus"]
+                * 100,
+                3,
+            )
+
+        return percentage_usage
+
+    @staticmethod
+    def compute_network_usage(container_stats: dict):
+        networks = container_stats["networks"]
+        nr_network_interfaces = len(networks)
+        total_rx_bytes = 0
+        total_tx_bytes = 0
+
+        for int_name, network_obj in networks.items():
+            total_rx_bytes += network_obj["rx_bytes"]
+            total_tx_bytes += network_obj["tx_bytes"]
+
+        return nr_network_interfaces, total_rx_bytes, total_tx_bytes
+
+    def load_container_stats(self, container_stats: dict):
+        self.mem_usage_gb = round(
+            container_stats["memory_stats"]["max_usage"] / (1024 * 1024 * 1024), 3
+        )
+        (
+            self.network_int_count,
+            self.total_rx_bytes,
+            self.total_tx_bytes,
+        ) = ContainerStats.compute_network_usage(container_stats)
+
+    def get_array(self):
+
+        return {
+            "mem_usage": f"{self.mem_usage_gb} GiB",
+            "network_usage": {
+                "total_received": f"{self.total_rx_bytes} bytes",
+                "total_transmitted": f"{self.total_tx_bytes} bytes",
+                "interfaces_count": self.network_int_count,
+            },
+        }
+
+
+class ToolStats:
+    time_stats: ToolTimeStats
+    patches_stats: ToolPatchesStats
+    container_stats: ContainerStats
+    error_stats: ErrorStats
+
+    def __init__(self):
+        self.time_stats = ToolTimeStats()
+        self.patches_stats = ToolPatchesStats()
+        self.container_stats = ContainerStats()
+        self.error_stats = ErrorStats()
+
+    def get_array(self):
+
+        return {
+            "status": str(values.experiment_status.get(TaskStatus.NONE)),
+            "details": {
+                "time": self.time_stats.get_array(),
+                "space": self.patches_stats.get_array(),
+                "container": self.container_stats.get_array(),
+            },
+        }
+
+
+class BenchmarkStats:
+    # required
+    deployed: bool
+    configured: bool
+    built: bool
+    tested: bool
+    error_stats: ErrorStats
+    container_stats: ContainerStats
+
+    # optional
+    include_dependencies_status: bool
+    dependencies_compressed: bool
+
+    def __init__(self):
+        self.deployed = False
+        self.configured = False
+        self.built = False
+        self.tested = False
+        self.include_dependencies_status = False
+        self.dependencies_compressed = False
+        self.error_stats = ErrorStats()
+        self.container_stats = ContainerStats()
+
+    def get_array(self):
+        summary_general = {
+            "deployed": "OK" if self.deployed else "FAILED",
+            "configured": "OK" if self.configured else "FAILED",
+            "built": "OK" if self.built else "FAILED",
+            "tested": "OK" if self.tested else "FAILED",
+        }
+
+        if self.include_dependencies_status:
+            summary_general["dependencies_compressed"] = (
+                "OK" if self.dependencies_compressed else "FAILED"
+            )
+
+        summary = {
+            "general": summary_general,
+            "container": self.container_stats.get_array(),
+        }
+
+        return summary

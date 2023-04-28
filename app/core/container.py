@@ -175,6 +175,38 @@ def get_container_id(container_name: str) -> Optional[str]:
     return container_id
 
 
+def get_container_stats(
+    container_id: str,
+):
+    container = get_container(container_id)
+    try:
+        container_stats = container.stats(stream=False)
+        return container_stats
+    except docker.errors.NotFound as ex:  # type: ignore
+        emitter.error(ex)
+        utilities.error_exit(
+            "\t\t\t[error] unable to find container: container not found: {}".format(
+                container_id
+            )
+        )
+    except docker.errors.APIError as exp:  # type: ignore
+        emitter.error(exp)
+        utilities.error_exit(
+            "\t\t\t[error] unable to get stats of the container with id: {0}: docker daemon error".format(
+                container_id
+            )
+        )
+    except Exception as ex:
+        emitter.error(ex)
+        utilities.error_exit(
+            "\t\t\t[error] unable to get stats of the container with id: {0}: unhandled exception".format(
+                container_id
+            )
+        )
+
+    return None
+
+
 def build_container(
     container_name: str,
     volume_list,

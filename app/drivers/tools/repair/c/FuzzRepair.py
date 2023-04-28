@@ -101,31 +101,31 @@ class FuzzRepair(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = escape_ansi(log_lines[0].rstrip())
-            self._time.timestamp_end = escape_ansi(log_lines[-1].rstrip())
+            self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].rstrip())
+            self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].rstrip())
 
             for line in log_lines:
                 if "Generating patch" in line:
                     count_plausible += 1
                     count_enumerations += 1
                 elif "Runtime Error" in line:
-                    self._error.is_error = True
+                    self.stats.error_stats.is_error = True
                 elif "statistics" in line:
                     is_timeout = False
 
-        self._space.plausible = count_plausible
-        self._space.enumerations = count_enumerations
-        return self._space, self._time, self._error
+        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patches_stats.enumerations = count_enumerations
+        return self.stats

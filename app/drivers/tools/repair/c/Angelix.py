@@ -159,17 +159,17 @@ class Angelix(AbstractRepairTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self._space.non_compilable
-            self._space.plausible
-            self._space.size
-            self._space.enumerations
-            self._space.generated
+            self.stats.patches_stats.non_compilable
+            self.stats.patches_stats.plausible
+            self.stats.patches_stats.size
+            self.stats.patches_stats.enumerations
+            self.stats.patches_stats.generated
 
-            self._time.total_validation
-            self._time.total_build
-            self._time.timestamp_compilation
-            self._time.timestamp_validation
-            self._time.timestamp_plausible
+            self.stats.time_stats.total_validation
+            self.stats.time_stats.total_build
+            self.stats.time_stats.timestamp_compilation
+            self.stats.time_stats.timestamp_validation
+            self.stats.time_stats.timestamp_plausible
         """
         self.emit_normal("reading output")
 
@@ -183,21 +183,21 @@ class Angelix(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             [name for name in list_output_dir if "patch" in name]
         )
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
+            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
 
             for line in log_lines:
                 if "selected expressions" in line:
@@ -245,7 +245,7 @@ class Angelix(AbstractRepairTool):
         if is_timeout:
             count_enumerations = count_enumerations - 1
 
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -266,11 +266,11 @@ class Angelix(AbstractRepairTool):
         if is_timeout:
             self.emit_warning("[warning] timeout before ending")
 
-        self._space.plausible = count_plausible
-        self._space.size = search_space
-        self._space.enumerations = count_enumerations
-        self._error.is_error = is_error
-        return self._space, self._time, self._error
+        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patches_stats.size = search_space
+        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.error_stats.is_error = is_error
+        return self.stats
 
     def filter_tests(self, test_id_list: List[str], subject, bug_id):
         filtered_list: List[str] = []
