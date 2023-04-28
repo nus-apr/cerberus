@@ -59,13 +59,13 @@ class Cerberus(App[List[Result]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
-        "Repair Profile": {},
-        "Container Profile": {},
-        "Started at": {},
-        "Should finish by": {},
-        "Status": {},
-        "Plausible Patches": {},
-        "Duration": {},
+        definitions.UI_REPAIR_PROFILE: {},
+        definitions.UI_CONTAINER_PROFILE: {},
+        definitions.UI_STARTED_AT: {},
+        definitions.UI_SHOULD_FINISH: {},
+        definitions.UI_STATUS: {},
+        definitions.UI_PLAUSIBLE_PATCHES: {},
+        definitions.UI_DURATION: {},
     }
 
     SUB_TITLE = "Program Repair Framework"
@@ -441,13 +441,13 @@ class Cerberus(App[List[Result]]):
 
             self.query_one("#" + all_subjects_id, DataTable).update_cell(
                 message.identifier,
-                Cerberus.COLUMNS["Started at"][all_subjects_id],
+                Cerberus.COLUMNS[definitions.UI_STARTED_AT][all_subjects_id],
                 start_date,
                 update_width=True,
             )
             self.query_one("#" + all_subjects_id, DataTable).update_cell(
                 message.identifier,
-                Cerberus.COLUMNS["Should finish by"][all_subjects_id],
+                Cerberus.COLUMNS[definitions.UI_SHOULD_FINISH][all_subjects_id],
                 finish_date,
                 update_width=True,
             )
@@ -492,7 +492,9 @@ class Cerberus(App[List[Result]]):
                 for cpu in cpus:
                     self.cpu_queue.put(cpu)
                 self.free_jobs += required_cpu_cores
-                emitter.debug("Putting back {} cores".format(required_cpu_cores))
+                emitter.debug(
+                    "Putting back {} cores to the job queue".format(required_cpu_cores)
+                )
                 job_condition.notify_all()
 
         task_future = loop.run_in_executor(None, job)
@@ -503,7 +505,7 @@ class Cerberus(App[List[Result]]):
             try:
                 self.selected_table.update_cell(
                     key,
-                    Cerberus.COLUMNS["Status"][self.selected_table.id],
+                    Cerberus.COLUMNS[definitions.UI_STATUS][self.selected_table.id],
                     status,
                     update_width=True,
                 )
@@ -511,7 +513,7 @@ class Cerberus(App[List[Result]]):
                 pass
         self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
-            Cerberus.COLUMNS["Status"][all_subjects_id],
+            Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
             status,
             update_width=True,
         )
@@ -527,20 +529,20 @@ class Cerberus(App[List[Result]]):
         def update_table(key, id, table):
             table.update_cell(
                 key,
-                Cerberus.COLUMNS["Status"][id],
+                Cerberus.COLUMNS[definitions.UI_STATUS][id],
                 str(message.status),
                 update_width=True,
             )
             table.sort(Cerberus.COLUMNS["ID"][id])
             table.update_cell(
                 key,
-                Cerberus.COLUMNS["Plausible Patches"][id],
+                Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
                 message.res_info[0].plausible,
                 update_width=True,
             )
             table.update_cell(
                 key,
-                Cerberus.COLUMNS["Duration"][id],
+                Cerberus.COLUMNS[definitions.UI_DURATION][id],
                 "{} second(s)".format(message.res_info[1].get_duration()),
                 update_width=True,
             )
@@ -680,6 +682,8 @@ def post_write(text: str):
 
 
 def update_current_job(status: str):
+    if not values.ui_active:
+        return
     current_job = values.job_identifier.get("NA")
     if current_job != "NA":
         if app._thread_id != threading.get_ident():

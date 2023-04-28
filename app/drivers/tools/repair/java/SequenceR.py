@@ -43,6 +43,10 @@ class SequenceR(AbstractRepairTool):
             )
             + ".java"
         )  # construct the file's path
+
+        # Optional - update the status of the experiment to allow for tracking of intermediate states in parallel mode
+        self.update_experiment_status("Generatng predictions")
+
         sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
@@ -52,6 +56,9 @@ class SequenceR(AbstractRepairTool):
         status = self.run_command(
             sequencer_command, self.log_output_path, "/SequenceR/src"
         )
+
+        # Optional - update the status of the experiment to allow for tracking of intermediate states in parallel mode
+        self.update_experiment_status("Validating predictions")
 
         sequencer_command = (
             "timeout -k 5m {3}h python3 validatePatch.py {0} {1} {2}".format(
