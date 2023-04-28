@@ -17,6 +17,7 @@ class TaskStatus(Enum):
     FAIL_IN_INSTRUMENT = 11
     FAIL_IN_TOOL = 12
     CANCELLED = 13
+    VALIDATING = 14
 
     def __str__(self) -> str:
         if self is self.SUCCESS:
@@ -47,6 +48,8 @@ class TaskStatus(Enum):
             return "Tool returned non-zero status"
         elif self is self.CANCELLED:
             return "Job Cancelled"
+        elif self is self.VALIDATING:
+            return "Tool validating patches"
         elif self is self.NONE:
             return "NONEEEEEE"
         else:
