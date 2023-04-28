@@ -72,7 +72,7 @@ def compute_latency_valkyrie(start_time_str, tend):
     return duration
 
 
-def analyse_output(patch_dir, time_info: stats.TimeStats):
+def analyse_output(patch_dir, tool_stats: stats.ToolStats):
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.list_consumed)
@@ -119,10 +119,10 @@ def analyse_output(patch_dir, time_info: stats.TimeStats):
                 time_first_validation = modified_time
 
     time_latency_1 = compute_latency_valkyrie(
-        time_info.timestamp_start, time_first_patch
+        tool_stats.time_stats.timestamp_start, time_first_patch
     )
     time_latency_2 = compute_latency_valkyrie(
-        time_info.timestamp_start, time_first_validation
+        tool_stats.time_stats.timestamp_start, time_first_validation
     )
 
     emitter.highlight(

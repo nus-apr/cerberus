@@ -326,7 +326,7 @@ class Fix2Fit(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
 
@@ -334,8 +334,8 @@ class Fix2Fit(AbstractRepairTool):
         reported_failing_test = []
         if self.is_file(dir_results + "/original.txt"):
             log_lines = self.read_file(dir_results + "/original.txt")
-            self._time.timestamp_start = log_lines[0].replace("\n", "")
-            self._time.timestamp_end = log_lines[-1].replace("\n", "")
+            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
             for line in log_lines:
                 if "no patch found" in line:
                     self.emit_warning("[warning] no patch found by F1X")
@@ -347,58 +347,60 @@ class Fix2Fit(AbstractRepairTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self._space.size = int(
+                    self.stats.patches_stats.size = int(
                         line.split("search space size: ")[-1].strip()
                     )
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "search space size: " in line:
-                self._space.size = int(line.split("search space size: ")[-1].strip())
+                self.stats.patches_stats.size = int(
+                    line.split("search space size: ")[-1].strip()
+                )
             elif "candidates evaluated: " in line:
-                self._space.enumerations = int(
+                self.stats.patches_stats.enumerations = int(
                     line.split("candidates evaluated: ")[-1].strip()
                 )
             elif "exploration progress: " in line:
-                self._space.enumerations = int(
+                self.stats.patches_stats.enumerations = int(
                     int(
                         line.split("exploration progress: ")[-1]
                         .strip()
                         .replace("%", "")
                     )
                     / 100
-                    * self._space.size
+                    * self.stats.patches_stats.size
                 )
             elif "plausible patches: " in line:
-                self._space.plausible = int(
+                self.stats.patches_stats.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
             elif "partition size: " in line:
-                self._space.plausible = (
+                self.stats.patches_stats.plausible = (
                     int(line.split("partition size: ")[-1].strip())
-                    + self._space.plausible
+                    + self.stats.patches_stats.plausible
                 )
             elif "patches successfully generated" in line:
                 is_timeout = False
             elif "no patch found" in line:
                 is_timeout = False
             elif "Fail to execute f1x" in line:
-                self._error.is_error = True
+                self.stats.error_stats.is_error = True
             elif "tests are not specified" in line:
-                self._error.is_error = True
+                self.stats.error_stats.is_error = True
                 self.emit_warning("[warning] no tests provided")
             elif "no negative tests" in line:
                 self.emit_warning("[warning] no negative tests")
             elif "failed to infer compile commands" in line:
-                self._error.is_error = True
+                self.stats.error_stats.is_error = True
                 self.emit_error("[error] compilation command not found")
             elif "At-risk data found" in line:
-                self._error.is_error = True
+                self.stats.error_stats.is_error = True
                 self.emit_error("[error] previous results have corrupted")
 
-        if self._error.is_error:
+        if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
         if is_timeout:
             self.emit_warning("[warning] timeout detected")
@@ -414,5 +416,5 @@ class Fix2Fit(AbstractRepairTool):
             )
 
         dir_patch = self.dir_setup + "/patches"
-        self._space.generated = len(self.list_dir(dir_patch))
-        return self._space, self._time, self._error
+        self.stats.patches_stats.generated = len(self.list_dir(dir_patch))
+        return self.stats

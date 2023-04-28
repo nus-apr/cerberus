@@ -4,13 +4,9 @@ from contextvars import ContextVar
 from os.path import dirname
 from os.path import join
 from typing import Any
-from typing import Dict
 from typing import List
 from typing import Optional
-from typing import Tuple
 
-from app.core.task.stats import SpaceStats
-from app.core.task.stats import TimeStats
 from app.core.task.status import TaskStatus
 
 tool_name = "Cerberus"
@@ -97,7 +93,6 @@ default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
 iteration_no = -1
-stats_results: Dict[str, Tuple[SpaceStats, TimeStats]] = dict()
 
 current_repair_profile_id: ContextVar[str] = ContextVar(
     "current_repair_profile_id", default="NONE"

@@ -7,7 +7,6 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.task import stats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -39,19 +38,19 @@ class AbstractRepairTool(AbstractTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self._space.non_compilable
-            self._space.plausible
-            self._space.size
-            self._space.enumerations
-            self._space.generated
+            self.stats.patches_stats.non_compilable
+            self.stats.patches_stats.plausible
+            self.stats.patches_stats.size
+            self.stats.patches_stats.enumerations
+            self.stats.patches_stats.generated
 
-            self._time.total_validation
-            self._time.total_build
-            self._time.timestamp_compilation
-            self._time.timestamp_validation
-            self._time.timestamp_plausible
+            self.stats.time_stats.total_validation
+            self.stats.time_stats.total_build
+            self.stats.time_stats.timestamp_compilation
+            self.stats.time_stats.timestamp_validation
+            self.stats.time_stats.timestamp_plausible
         """
-        return self._space, self._time, self._error
+        return self.stats
 
     def instrument(self, bug_info):
         """instrumentation for the experiment as needed by the tool"""
@@ -96,46 +95,62 @@ class AbstractRepairTool(AbstractTool):
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
-    def print_stats(self, space_info: stats.SpaceStats, time_info: stats.TimeStats):
-        emitter.highlight("\t\t\t search space size: {0}".format(space_info.size))
+    def print_stats(self):
         emitter.highlight(
-            "\t\t\t count enumerations: {0}".format(space_info.enumerations)
+            "\t\t\t search space size: {0}".format(self.stats.patches_stats.size)
         )
         emitter.highlight(
-            "\t\t\t count plausible patches: {0}".format(space_info.plausible)
-        )
-        emitter.highlight("\t\t\t count generated: {0}".format(space_info.generated))
-        emitter.highlight(
-            "\t\t\t count non-compiling patches: {0}".format(space_info.non_compilable)
+            "\t\t\t count enumerations: {0}".format(
+                self.stats.patches_stats.enumerations
+            )
         )
         emitter.highlight(
-            "\t\t\t count implausible patches: {0}".format(space_info.get_implausible())
+            "\t\t\t count plausible patches: {0}".format(
+                self.stats.patches_stats.plausible
+            )
+        )
+        emitter.highlight(
+            "\t\t\t count generated: {0}".format(self.stats.patches_stats.generated)
+        )
+        emitter.highlight(
+            "\t\t\t count non-compiling patches: {0}".format(
+                self.stats.patches_stats.non_compilable
+            )
+        )
+        emitter.highlight(
+            "\t\t\t count implausible patches: {0}".format(
+                self.stats.patches_stats.get_implausible()
+            )
         )
 
         emitter.highlight(
-            "\t\t\t time duration: {0} seconds".format(time_info.get_duration())
+            "\t\t\t time duration: {0} seconds".format(
+                self.stats.time_stats.get_duration()
+            )
         )
         emitter.highlight(
-            "\t\t\t time build: {0} seconds".format(time_info.total_build)
+            "\t\t\t time build: {0} seconds".format(self.stats.time_stats.total_build)
         )
         emitter.highlight(
-            "\t\t\t time validation: {0} seconds".format(time_info.total_validation)
+            "\t\t\t time validation: {0} seconds".format(
+                self.stats.time_stats.total_validation
+            )
         )
 
         if values.use_valkyrie:
             emitter.highlight(
                 "\t\t\t time latency compilation: {0} seconds".format(
-                    time_info.get_latency_compilation()
+                    self.stats.time_stats.get_latency_compilation()
                 )
             )
             emitter.highlight(
                 "\t\t\t time latency validation: {0} seconds".format(
-                    time_info.get_latency_validation()
+                    self.stats.time_stats.get_latency_validation()
                 )
             )
             emitter.highlight(
                 "\t\t\t time latency plausible: {0} seconds".format(
-                    time_info.get_latency_plausible()
+                    self.stats.time_stats.get_latency_plausible()
                 )
             )
 

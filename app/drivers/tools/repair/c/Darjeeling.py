@@ -102,7 +102,7 @@ class Darjeeling(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("[warning] no log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
@@ -112,15 +112,15 @@ class Darjeeling(AbstractRepairTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
+            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "evaluated candidate" in line:
-                    self._space.enumerations += 1
+                    self.stats.patches_stats.enumerations += 1
                     if time_stamp_first_validation is None:
                         time_stamp_first_validation = line.split(" | ")[0]
                 elif "found plausible patch" in line:
-                    self._space.plausible += 1
+                    self.stats.patches_stats.plausible += 1
                     if time_stamp_first_plausible is None:
                         time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
@@ -130,7 +130,7 @@ class Darjeeling(AbstractRepairTool):
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
-                    self._time.total_validation += float(time)
+                    self.stats.time_stats.total_validation += float(time)
                 elif "build time: " in line:
                     time = (
                         line.split("build time: ")[-1]
@@ -138,20 +138,22 @@ class Darjeeling(AbstractRepairTool):
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
-                    self._time.total_build += float(time)
+                    self.stats.time_stats.total_build += float(time)
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
                 elif "possible edits" in line:
-                    self._space.size = int(line.split(": ")[2].split(" ")[0])
+                    self.stats.patches_stats.size = int(
+                        line.split(": ")[2].split(" ")[0]
+                    )
                 elif "plausible patches" in line:
-                    self._space.plausible = int(
+                    self.stats.patches_stats.plausible = int(
                         line.split("found ")[-1]
                         .replace(" plausible patches", "")
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
 
-        self._space.generated = len(
+        self.stats.patches_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -160,4 +162,4 @@ class Darjeeling(AbstractRepairTool):
             )
         )
 
-        return self._space, self._time, self._error
+        return self.stats

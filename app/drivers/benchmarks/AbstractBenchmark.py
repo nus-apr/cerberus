@@ -14,6 +14,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.task.stats import BenchmarkStats
 from app.core.task.status import TaskStatus
 from app.core.task.typing import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
@@ -54,6 +55,9 @@ class AbstractBenchmark(AbstractDriver):
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
+        self.stats = BenchmarkStats()
+        self.pre_built = False
+
         if not self.name:
             utilities.error_exit(
                 "Concrete benchmark has not instantiated the name field. Aborting..."
@@ -88,6 +92,16 @@ class AbstractBenchmark(AbstractDriver):
     ):
         return abstractions.append_file(container_id, content, file_path)
 
+    def _update_container_stats(self, container_id):
+        container_stats = container.get_container_stats(container_id)
+        self.stats.container_stats.load_container_stats(container_stats)
+
+    def print_stats(self):
+        emitter.highlight("\t\t\t deployed: {0}\n".format(self.stats.deployed))
+        emitter.highlight("\t\t\t configured: {0}\n".format(self.stats.configured))
+        emitter.highlight("\t\t\t built: {0}\n".format(self.stats.built))
+        emitter.highlight("\t\t\t tested: {0}\n".format(self.stats.tested))
+        
     def update_dir_info(self, dir_info: DirectoryInfo):
         self.__dir_info = dir_info
         if not values.use_container:
@@ -155,8 +169,9 @@ class AbstractBenchmark(AbstractDriver):
             emitter.warning(
                 f"\t[framework] benchmark environment not found for {self.image_name}"
             )
-            emitter.normal("\t[framework] building benchmark environment")
-            container.build_benchmark_image(self.image_name)
+            if not container.pull_image(self.image_name, "latest"):
+                emitter.normal("\t[framework] building benchmark environment")
+                container.build_benchmark_image(self.image_name)
         else:
             emitter.success("\t\t[framework] pre-built benchmark environment found")
 
@@ -217,6 +232,16 @@ class AbstractBenchmark(AbstractDriver):
         self.run_command(container_id, copy_local_cmd, "/dev/null", "/")
         return container_id
 
+    def _handle_setup_exp_error(
+        self, task_status: TaskStatus, error_msg: str, container_id: Optional[str]
+    ):
+        values.experiment_status.set(task_status)
+        self.emit_error(error_msg)
+        if container_id:
+            self._update_container_stats(container_id)
+
+        return True
+
     def setup_experiment(
         self, bug_index: int, container_id: Optional[str], test_all: bool
     ):
@@ -250,36 +275,41 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_logs, f"{self.name}-{str(bug_index)}-test.log"
         )
 
-        # if not self.deps(bug_index, container_id):
-        #     self.emit_error("installing deps failed")
-        #     return True
-
-        if not self.deploy(bug_index, container_id):
-            self.emit_error("deploy failed")
-            return True
-        if not self.config(bug_index, container_id):
-            values.experiment_status.set(TaskStatus.FAIL_IN_CONFIG)
-            self.emit_error("config failed")
-            return True
-        if not self.build(bug_index, container_id):
-            values.experiment_status.set(TaskStatus.FAIL_IN_BUILD)
-            self.emit_error("build failed")
-            return True
+        self.stats.deployed = self.deploy(bug_index, container_id)
+        if not self.stats.deployed:
+            return self._handle_setup_exp_error(
+                TaskStatus.FAIL_IN_DEPLOY, "deploy failed", container_id
+            )
+        self.stats.configured = self.config(bug_index, container_id)
+        if not self.stats.configured:
+            return self._handle_setup_exp_error(
+                TaskStatus.FAIL_IN_CONFIG, "config failed", container_id
+            )
+        self.stats.built = self.build(bug_index, container_id)
+        if not self.stats.built:
+            return self._handle_setup_exp_error(
+                TaskStatus.FAIL_IN_BUILD, "build failed", container_id
+            )
         test_choice = self.test_all if test_all else self.test
-        if not test_choice(bug_index, container_id):
-            values.experiment_status.set(TaskStatus.FAIL_IN_TEST)
-            self.emit_error("testing failed")
-            return True
+        self.stats.tested = test_choice(bug_index, container_id)
+        if not self.stats.tested:
+            return self._handle_setup_exp_error(
+                TaskStatus.FAIL_IN_TEST, "testing failed", container_id
+            )
 
         self.emit_success("setting up completed successfully")
         return False
 
-    def get_exp_image(self, bug_index: int, test_all: bool, cpu: str):
+    def get_exp_image(
+        self, bug_index: int, test_all: bool, cpu: str, ignore_rebuild: bool = False
+    ):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
-        if not container.image_exists(exp_image_name) or values.rebuild_all:
+        if not container.image_exists(exp_image_name) or (
+            not ignore_rebuild and values.rebuild_all
+        ):
             emitter.warning(
                 "\t\t[framework][WARNING] experiment subject {} with bug name {} is not built".format(
                     subject_name, bug_id
@@ -293,6 +323,7 @@ class AbstractBenchmark(AbstractDriver):
                     exp_image_name
                 )
             )
+            self.pre_built = True
         return exp_image_name
 
     @abc.abstractmethod

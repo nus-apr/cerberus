@@ -89,11 +89,12 @@ class Infer(AbstractAnalyzeTool):
         )
         is_error = False
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "ERROR:" in line:
-                self._error.is_error = True
+                is_error = True
+                self.stats.error_stats.is_error = True
         if is_error:
             self.emit_error("error detected in logs")
-        return self._space, self._time, self._error
+        return self.stats

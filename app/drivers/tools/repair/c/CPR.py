@@ -75,17 +75,17 @@ class CPR(AbstractRepairTool):
                     break
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_timeout = True
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self._time.timestamp_start = log_lines[0].rstrip()
-            self._time.timestamp_end = log_lines[-1].rstrip()
+            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
+            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "|P|=" in line:
-                    self._space.plausible = int(
+                    self.stats.patches_stats.plausible = int(
                         line.split("|P|=")[-1]
                         .strip()
                         .replace("^[[0m", "")
@@ -98,14 +98,14 @@ class CPR(AbstractRepairTool):
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
-                    self._space.enumerations = count_enumerations
+                    self.stats.patches_stats.enumerations = count_enumerations
                 elif "Runtime Error" in line:
-                    self._error.is_error = True
+                    self.stats.error_stats.is_error = True
                 elif "statistics" in line:
                     is_timeout = False
 
-        if self._error.is_error:
+        if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
         if is_timeout:
             self.emit_warning("[warning] timeout before ending")
-        return self._space, self._time, self._error
+        return self.stats

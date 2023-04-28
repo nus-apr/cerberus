@@ -139,21 +139,22 @@ class SenX(AbstractRepairTool):
 
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("[error] no output log file found")
-            return self._space, self._time, self._error
+            return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_error = False
 
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-        self._time.timestamp_start = log_lines[0].replace("\n", "")
-        self._time.timestamp_end = log_lines[-1].replace("\n", "")
+        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "Creating patch" in line:
-                self._space.plausible += 1
-                self._space.enumerations += 1
+                self.stats.patches_stats.plausible += 1
+                self.stats.patches_stats.enumerations += 1
             elif "Runtime Error" in line:
-                self._error.is_error = True
+                is_error = True
+                self.stats.error_stats.is_error = True
         if is_error:
             self.emit_error("[error] error detected in logs")
 
-        return self._space, self._time, self._error
+        return self.stats
