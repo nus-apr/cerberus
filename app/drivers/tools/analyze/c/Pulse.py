@@ -11,7 +11,7 @@ class Pulse(AbstractAnalyzeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "yuntongzhang/infer:release"
+        self.image_name = "yuntongzhang/infer:v2"
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
