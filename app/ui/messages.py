@@ -4,9 +4,8 @@ from typing import Optional
 
 from textual.message import Message
 
+from app.core.task.stats import ToolStats
 from app.core.task.status import TaskStatus
-from app.core.task.typing import DirectoryInfo
-from app.core.task.typing import ResultInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -49,7 +48,7 @@ class JobFinish(Message):
         status: TaskStatus,
         row_data,
         dir_info: Dict[str, str],
-        res_info: ResultInfo,
+        res_info: ToolStats,
     ):
         self.key = key
         self.status = status
