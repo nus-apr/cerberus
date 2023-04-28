@@ -5,6 +5,8 @@ from typing import Optional
 from textual.message import Message
 
 from app.core.task.status import TaskStatus
+from app.core.task.typing import DirectoryInfo
+from app.core.task.typing import ResultInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -41,11 +43,19 @@ class JobFinish(Message):
     bubble = True
     namespace = "cerberus"
 
-    def __init__(self, key, status: TaskStatus, row_data, dir_info: Dict[str, str]):
+    def __init__(
+        self,
+        key,
+        status: TaskStatus,
+        row_data,
+        dir_info: Dict[str, str],
+        res_info: ResultInfo,
+    ):
         self.key = key
         self.status = status
         self.row_data = row_data
         self.dir_info = dir_info
+        self.res_info = res_info
         super().__init__()
 
 

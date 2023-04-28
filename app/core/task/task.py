@@ -17,7 +17,7 @@ from app.core import values
 from app.core import writer
 from app.core.task import analyze
 from app.core.task import repair
-from app.core.task.typing import DirInfo
+from app.core.task.typing import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -25,7 +25,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
 
-def update_dir_info(dir_info: DirInfo, tool_name: str) -> DirInfo:
+def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
     dir_setup_local = dir_info["local"]["setup"]
     dir_setup_container = dir_info["container"]["setup"]
     dir_instrumentation_local = join(dir_setup_local, str(tool_name).lower())
@@ -98,8 +98,8 @@ def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name
 
 def generate_tool_dir_info(
     benchmark_name: str, subject_name: str, bug_name: str, hash, tag_name: str
-) -> DirInfo:
-    dir_info: DirInfo = {
+) -> DirectoryInfo:
+    dir_info: DirectoryInfo = {
         "local": generate_local_tool_dir_info(
             benchmark_name, subject_name, bug_name, hash, tag_name
         ),
@@ -110,8 +110,10 @@ def generate_tool_dir_info(
     return dir_info
 
 
-def generate_dir_info(benchmark_name: str, subject_name: str, bug_name: str) -> DirInfo:
-    dir_info: DirInfo = {
+def generate_dir_info(
+    benchmark_name: str, subject_name: str, bug_name: str
+) -> DirectoryInfo:
+    dir_info: DirectoryInfo = {
         "local": generate_local_dir_info(benchmark_name, subject_name, bug_name),
         "container": generate_container_dir_info(
             benchmark_name, subject_name, bug_name
@@ -120,11 +122,13 @@ def generate_dir_info(benchmark_name: str, subject_name: str, bug_name: str) -> 
     return dir_info
 
 
-def collect_result(dir_info: DirInfo, experiment_info, tool: AbstractTool):
+def collect_result(dir_info: DirectoryInfo, experiment_info, tool: AbstractTool):
     emitter.normal("\t\t[framework] collecting experiment results")
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
-    space_info, time_info, _ = tool.analyse_output(dir_info, bug_id, failing_test_list)
+    space_info, time_info, err_info = tool.analyse_output(
+        dir_info, bug_id, failing_test_list
+    )
     repair_conf_id = values.current_repair_profile_id.get("NA")
     exp_id = "{}-{}".format(repair_conf_id, bug_id)
     values.stats_results[exp_id] = (space_info, time_info)
@@ -134,6 +138,7 @@ def collect_result(dir_info: DirInfo, experiment_info, tool: AbstractTool):
     patch_dir = join(dir_info["local"]["artifacts"], "patches")
     if values.use_valkyrie:
         valkyrie.analyse_output(patch_dir, time_info)
+    return (space_info, time_info, err_info)
 
 
 def retrieve_results(archive_name, tool: AbstractTool):
@@ -150,7 +155,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info: DirInfo, tool: AbstractTool):
+def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool):
     emitter.normal(
         "\t\t[framework] Saving artifacts from tool {} and cleaning up".format(
             tool.name
@@ -169,7 +174,7 @@ def save_artifacts(dir_info: DirInfo, tool: AbstractTool):
 def create_running_container(
     bug_image_id: str,
     repair_tool: AbstractTool,
-    dir_info: DirInfo,
+    dir_info: DirectoryInfo,
     image_name: str,
     container_name: str,
     cpu: str,
@@ -281,7 +286,7 @@ def run(
     run_identifier: str,
     cpu: str,
     experiment_image_id: Optional[str],
-) -> DirInfo:
+):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     repair_config_id = repair_config_info[definitions.KEY_ID]
@@ -360,6 +365,7 @@ def run(
     dir_info = update_dir_info(dir_info, tool.name)
     dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
+    res_info = None
     # emitter.information("directory is {}".format(dir_instr_local))
     if os.path.isdir(dir_instr_local):
         emitter.warning(
@@ -386,7 +392,7 @@ def run(
             )
             can_analyse_results = retrieve_results(archive_name, tool)
         if can_analyse_results:
-            collect_result(dir_info, bug_info, tool)
+            res_info = collect_result(dir_info, bug_info, tool)
     else:
         dir_output_local = dir_info["local"]["artifacts"]
         dir_logs_local = dir_info["local"]["logs"]
@@ -439,7 +445,7 @@ def run(
             utilities.error_exit(f"Unknown task type: {task_type}")
 
         if not values.only_instrument:
-            collect_result(dir_info, bug_info, tool)
+            res_info = collect_result(dir_info, bug_info, tool)
             save_artifacts(dir_info, tool)
             dir_archive = join(values.dir_results, tool.name)
             dir_result = dir_info["local"]["results"]
@@ -448,4 +454,4 @@ def run(
                 utilities.clean_artifacts(dir_result)
 
     construct_summary(hash)
-    return dir_info
+    return dir_info, res_info
