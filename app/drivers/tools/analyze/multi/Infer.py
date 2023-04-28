@@ -37,9 +37,11 @@ class Infer(AbstractAnalyzeTool):
         )
 
         self.emit_normal("compiling subject with ")
-        self.run_command(
+        status = self.run_command(
             compile_command, dir_path=dir_src, log_file_path=log_compile_path
         )
+        if status != 0:
+            self.emit_error("infer capture command returned non-zero exit")
         self.emit_normal(
             "compilation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
@@ -62,6 +64,8 @@ class Infer(AbstractAnalyzeTool):
         status = self.run_command(
             saver_command, dir_path=dir_src, log_file_path=self.log_output_path
         )
+        if status != 0:
+            self.emit_error("infer analyze command returned non-zero exit")
 
         self.process_status(status)
 
