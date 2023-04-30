@@ -138,6 +138,7 @@ class Cerberus(App[List[Result]]):
                 if not self.jobs[k][0].done():
                     self.debug_print("TIME TO KILL {}".format(v))
                     log_map[k].write("KILLED BY WATCHDOG")
+                    self.update_status(k, "KILLED BY WATCHDOG")
                     if tool.container_id:
                         log_map["root"].write("Killing {}".format(tool.container_id))
                         # Currently this kills the container and the tool gets a 137 status for the run command

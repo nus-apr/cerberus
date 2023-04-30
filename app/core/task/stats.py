@@ -1,5 +1,6 @@
 from datetime import datetime
 
+from app.core import emitter
 from app.core import values
 from app.core.task.status import TaskStatus
 
@@ -157,15 +158,20 @@ class ContainerStats:
         total_rx_bytes = 0
         total_tx_bytes = 0
 
-        for int_name, network_obj in networks.items():
+        for _, network_obj in networks.items():
             total_rx_bytes += network_obj["rx_bytes"]
             total_tx_bytes += network_obj["tx_bytes"]
 
         return nr_network_interfaces, total_rx_bytes, total_tx_bytes
 
     def load_container_stats(self, container_stats: dict):
+        emitter.debug(container_stats)
         self.mem_usage_gb = round(
-            container_stats["memory_stats"]["max_usage"] / (1024 * 1024 * 1024), 3
+            container_stats["memory_stats"].get(
+                "max_usage", container_stats["memory_stats"].get("usage", 0)
+            )
+            / (1024 * 1024 * 1024),
+            3,
         )
         (
             self.network_int_count,
