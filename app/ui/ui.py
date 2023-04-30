@@ -579,6 +579,9 @@ class Cerberus(App[List[Result]]):
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
+                # Ensure that the job is not counted for twice
+                if message.key in self.jobs:
+                    del self.jobs[message.key]
                 self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):
