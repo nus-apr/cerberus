@@ -481,7 +481,7 @@ class Cerberus(App[List[Result]]):
                         message.identifier,
                         values.experiment_status.get(status),
                         row_data,
-                        dir_info["local"] if dir_info else None,
+                        dir_info["local"] if dir_info else {},
                         message.tool.stats,
                     )
                 )
