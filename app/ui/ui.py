@@ -387,6 +387,10 @@ class Cerberus(App[List[Result]]):
                 self.free_jobs = self.free_jobs - required_cpu_cores
                 for _ in range(required_cpu_cores):
                     cpus.append(self.cpu_queue.get(block=True, timeout=None))
+                if (
+                    self.free_jobs > 0
+                ):  # Try to wake up another thread if there are more free CPUs
+                    job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
             values.current_repair_profile_id.set(

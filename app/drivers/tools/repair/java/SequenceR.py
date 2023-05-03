@@ -8,7 +8,7 @@ class SequenceR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "zimin/sequencer:1.0"
+        self.image_name = "mirchevmp/sequencer:latest"
 
     def run_repair(self, bug_info, repair_config_info):
         super(SequenceR, self).run_repair(bug_info, repair_config_info)
@@ -47,7 +47,7 @@ class SequenceR(AbstractRepairTool):
         # Optional - update the status of the experiment to allow for tracking of intermediate states in parallel mode
         self.update_experiment_status("Generatng predictions")
 
-        sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
+        sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --model=/SequenceR/model/model.pt --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
             bug_info[self.key_fix_lines][0],
