@@ -156,12 +156,6 @@ class SAVER(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
-        self.log_stats_path = join(
-            self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
-        )
-
         regex = re.compile("(.*-output.log$)")
         for _, _, files in os.walk(dir_results):
             for file in files:
@@ -179,21 +173,26 @@ class SAVER(AbstractRepairTool):
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
         self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
+        count_enumerations = 0
+        count_candidates = 0
         for line in log_lines:
             if "of the total solutions found" in line:
-                count = int(line.split(": ")[-1])
-                self.stats.patches_stats.plausible = count
-                self.stats.patches_stats.enumerations = count
+                count_enumerations = int(line.split(": ")[-1])
             elif "opeartion space" in line:
                 space_size = line.split(": ")[-1]
                 if str(space_size).isnumeric():
-                    self.stats.patches_stats.size += int(space_size)
+                    count_candidates += int(space_size)
             elif "CONVERTING FAILS" in line:
                 self.stats.patches_stats.plausible = 0
             elif "ERROR:" in line:
                 is_error = True
-                self.stats.error_stats.is_error = True
         if is_error:
             self.emit_error("[error] error detected in logs")
+
+        self.stats.patches_stats.plausible = count_enumerations
+        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patches_stats.size = count_candidates
+        self.stats.patches_stats.generated = 0
+        self.stats.error_stats.is_error = is_error
 
         return self.stats
