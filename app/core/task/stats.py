@@ -203,8 +203,13 @@ class ToolStats:
         self.container_stats = ContainerStats()
         self.error_stats = ErrorStats()
 
-    def get_array(self):
+    def reset(self):
+        self.time_stats = ToolTimeStats()
+        self.patches_stats = ToolPatchesStats()
+        self.container_stats = ContainerStats()
+        self.error_stats = ErrorStats()
 
+    def get_array(self):
         return {
             "status": str(values.experiment_status.get(TaskStatus.NONE)),
             "details": {
