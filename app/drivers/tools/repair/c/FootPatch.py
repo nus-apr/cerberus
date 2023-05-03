@@ -18,9 +18,8 @@ class FootPatch(AbstractRepairTool):
         self.emit_normal(" preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
+        clean_command = "rm /tmp/td_candidates/*; make clean"
         self.run_command(clean_command, dir_path=dir_src)
 
         new_env = os.environ.copy()
@@ -94,9 +93,10 @@ class FootPatch(AbstractRepairTool):
         )
 
         self.process_status(status)
-
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
+        clean_command = "rm /tmp/*footpatch*"
+        self.run_command(clean_command, dir_path=dir_src)
 
     def save_artifacts(self, dir_info):
         copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
@@ -109,6 +109,7 @@ class FootPatch(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
+        regex = re.compile("(.*-output.log$)")
         regex = re.compile("(.*-output.log$)")
         for _, _, files in os.walk(dir_results):
             for file in files:
