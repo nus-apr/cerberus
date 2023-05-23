@@ -3,3 +3,4 @@ more_itertools
 pre-commit
 textual==0.22.3
 slack_sdk
+cython
