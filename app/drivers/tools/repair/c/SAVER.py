@@ -194,5 +194,4 @@ class SAVER(AbstractRepairTool):
         self.stats.patches_stats.size = count_candidates
         self.stats.patches_stats.generated = 0
         self.stats.error_stats.is_error = is_error
-
         return self.stats

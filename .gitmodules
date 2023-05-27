@@ -39,7 +39,7 @@
 	url = https://github.com/nus-apr/saver-benchmark
 [submodule "benchmark/efffix"]
 	path = benchmark/efffix
-	url = git@github.com:nus-apr/effFix-benchmark.git
+	url = https://github.com/nus-apr/effFix-benchmark.git
 [submodule "benchmark/vul4j"]
 	path = benchmark/vul4j
 	url = https://github.com/nus-apr/vul4j.git
