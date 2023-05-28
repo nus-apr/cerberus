@@ -18,9 +18,8 @@ class FootPatch(AbstractRepairTool):
         self.emit_normal(" preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
+        clean_command = "rm /tmp/td_candidates/*; make clean"
         self.run_command(clean_command, dir_path=dir_src)
 
         new_env = os.environ.copy()
@@ -94,9 +93,10 @@ class FootPatch(AbstractRepairTool):
         )
 
         self.process_status(status)
-
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
+        clean_command = "rm /tmp/*footpatch*"
+        self.run_command(clean_command, dir_path=dir_src)
 
     def save_artifacts(self, dir_info):
         copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
@@ -109,12 +109,7 @@ class FootPatch(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
-        self.log_stats_path = join(
-            self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
-        )
-
+        regex = re.compile("(.*-output.log$)")
         regex = re.compile("(.*-output.log$)")
         for _, _, files in os.walk(dir_results):
             for file in files:
@@ -132,7 +127,6 @@ class FootPatch(AbstractRepairTool):
         # count number of patch files
         dir_footpatch = join(self.dir_expr, "src", "infer-out", "footpatch")
         list_patches = self.list_dir(dir_footpatch, regex="*.patch")
-        self.stats.patches_stats.generated = len(list_patches)
 
         footpatch_std_out = self.log_output_path
         log_lines = self.read_file(footpatch_std_out, encoding="iso-8859-1")
@@ -141,16 +135,27 @@ class FootPatch(AbstractRepairTool):
         footpatch_log_path = join(
             self.dir_expr, "src", "infer-out", "footpatch", "log.txt"
         )
+
+        count_enumerations = 0
+        count_plausible = 0
+        count_candidates = 0
+
         if self.is_file(footpatch_log_path):
             log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
             for line in log_lines:
                 if "Patch routine" in line:
-                    self.stats.patches_stats.enumerations += 1
+                    count_enumerations += 1
                 elif "Writing patches" in line:
-                    self.stats.patches_stats.plausible += 1
+                    count_plausible += 1
                 elif "Filtered candidates:" in line:
-                    self.stats.patches_stats.size += int(line.split(": ")[-1])
+                    count_candidates += int(line.split(": ")[-1])
             if is_error:
                 self.emit_error("[error] error detected in logs")
+
+        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patches_stats.size = count_candidates
+        self.stats.patches_stats.generated = len(list_patches)
+        self.stats.error_stats.is_error = is_error
 
         return self.stats

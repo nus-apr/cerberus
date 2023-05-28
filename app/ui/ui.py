@@ -138,6 +138,7 @@ class Cerberus(App[List[Result]]):
                 if not self.jobs[k][0].done():
                     self.debug_print("TIME TO KILL {}".format(v))
                     log_map[k].write("KILLED BY WATCHDOG")
+                    self.update_status(k, "KILLED BY WATCHDOG")
                     if tool.container_id:
                         log_map["root"].write("Killing {}".format(tool.container_id))
                         # Currently this kills the container and the tool gets a 137 status for the run command
@@ -386,6 +387,10 @@ class Cerberus(App[List[Result]]):
                 self.free_jobs = self.free_jobs - required_cpu_cores
                 for _ in range(required_cpu_cores):
                     cpus.append(self.cpu_queue.get(block=True, timeout=None))
+                if (
+                    self.free_jobs > 0
+                ):  # Try to wake up another thread if there are more free CPUs
+                    job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
             values.current_repair_profile_id.set(
@@ -480,7 +485,7 @@ class Cerberus(App[List[Result]]):
                         message.identifier,
                         values.experiment_status.get(status),
                         row_data,
-                        dir_info["local"] if dir_info else None,
+                        dir_info["local"] if dir_info else {},
                         message.tool.stats,
                     )
                 )
@@ -578,6 +583,9 @@ class Cerberus(App[List[Result]]):
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
+                # Ensure that the job is not counted for twice
+                if message.key in self.jobs:
+                    del self.jobs[message.key]
                 self.exit(self.finished_subjects)
 
     async def on_cerberus_write(self, message: Write):

@@ -454,7 +454,8 @@ def run(
             utilities.error_exit(f"Unknown task type: {task_type}")
 
         # update container stats
-        tool.update_container_stats(container_id)
+        if values.use_container:
+            tool.update_container_stats(container_id)
 
         if not values.only_instrument:
             collect_tool_result(dir_info, bug_info, tool)

@@ -8,66 +8,46 @@ from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 class Hippodrome(AbstractAnalyzeTool):
     def __init__(self):
+        self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mirchevmp/hippodrome:latest"
 
-    def prepare(self, bug_info):
-        tool_dir = join(self.dir_expr, self.name)
-        if not self.is_dir(tool_dir):
-            self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        self.emit_normal(" preparing subject for analysis with " + self.name)
-        dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
-        self.run_command(clean_command, dir_path=dir_src)
-
-        time = datetime.now()
-        bug_type = bug_info[self.key_bug_type]
-        bug_id = str(bug_info[self.key_bug_id])
-        self.log_prepare_path = join(
-            self.dir_logs,
-            "{}-{}-prepare.log".format(self.name.lower(), bug_id),
-        )
-        compile_command = "infer -j 20 compile -- make -j20"
-        self.emit_normal("compiling subject with " + self.name)
-        self.run_command(
-            compile_command, dir_path=dir_src, log_file_path=self.log_prepare_path
-        )
-        self.emit_normal(
-            "compilation took {} second(s)".format(
-                (datetime.now() - time).total_seconds()
-            )
-        )
-
     def run_analysis(self, bug_info, repair_config_info):
         super(Hippodrome, self).run_analysis(bug_info, repair_config_info)
-        self.prepare(bug_info)
-        super(Hippodrome, self).run_analysis(bug_info, repair_config_info)
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
 
-        self.timestamp_log_start()
-        analysis_command = (
-            "timeout -k 5m {0}h infer "
-            " --racerdfix-only --starvation --no-deduplicate {1} ".format(
-                str(timeout_h), additional_tool_param
+        timeout_h = str(repair_config_info[self.key_timeout])
+
+        # start running
+        self.timestamp_log()
+
+        run_dir = self.dir_expr
+        hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c CONFIG.json".format(
+            timeout_h
+        )
+        if self.is_dir(join(self.dir_expr, "src")):
+            hippodrome_command = "timeout -k 5m {}h java -jar /hippodrome/target/hippodrome-1.0-jar-with-dependencies.jar -c ../CONFIG.json".format(
+                timeout_h
             )
-        )
-        bug_type = bug_info[self.key_bug_type]
-        dir_src = join(self.dir_expr, "src")
-        status = self.run_command(
-            analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
-        )
+            run_dir = join(self.dir_expr, "src")
+
+        status = self.run_command(hippodrome_command, self.log_output_path, run_dir)
 
         self.process_status(status)
 
-        self.emit_highlight("log file: {0}".format(self.log_output_path))
-        self.timestamp_log_end()
+        self.timestamp_log()
+        self.emit_highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        infer_output = join(self.dir_expr, "src", "infer-out")
-        copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
-        self.run_command(copy_command)
-        super(Hippodrome, self).save_artifacts(dir_info)
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+
+        self.run_command("mkdir -p /output/", "/dev/null", "/")
+        self.run_command("cp -rf {} /output/".format(self.dir_expr))
+        super().save_artefacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -86,6 +66,13 @@ class Hippodrome(AbstractAnalyzeTool):
             if "ERROR:" in line:
                 is_error = True
                 self.stats.error_stats.is_error = True
+            if "Patch ID:" in line:
+                count = int(line.split(":")[-1])
+                self.stats.patches_stats.generated = (
+                    self.stats.patches_stats.enumerations
+                ) = max(self.stats.patches_stats, count)
+            if "Applying Patch ID" in line:
+                self.stats.patches_stats.plausible += 1
         if is_error:
             self.emit_error("error detected in logs")
 

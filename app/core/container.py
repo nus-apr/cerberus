@@ -33,7 +33,13 @@ def get_client():
 
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
-    image_list = client.images.list()
+    try:
+        image_list = client.images.list()
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     for image in image_list:
         tag_list = image.tags  # type: ignore
         if not tag_list:
@@ -49,7 +55,14 @@ def image_exists(image_name: str, tag_name="latest"):
 
 def get_image(image_name: str, tag_name="latest"):
     client = get_client()
-    image_list = client.images.list()
+    try:
+        image_list = client.images.list()
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
+
     for image in image_list:
         tag_list = image.tags  # type: ignore
         if not tag_list:
@@ -79,6 +92,11 @@ def pull_image(image_name: str, tag_name: str):
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("[error] unable to pull image: docker daemon error")
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     except Exception as ex:
         emitter.warning(ex)
         emitter.warning("[error] unable to pull image: unhandled exception")
@@ -114,6 +132,11 @@ def build_image(dockerfile_path: str, image_name: str):
         except docker.errors.APIError as exp:  # type: ignore
             emitter.error(exp)
             utilities.error_exit("[error] unable to build image: docker daemon error")
+        except IOError as ex:
+            emitter.error(ex)
+            raise RuntimeError(
+                "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+            )
         except Exception as ex:
             emitter.error(ex)
             utilities.error_exit("[error] unable to build image: unhandled exception")
@@ -151,6 +174,11 @@ def get_container(container_id: str):
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(f"\t{exp}")
         utilities.error_exit("[error] unable to find container: docker daemon error")
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     except Exception as ex:
         emitter.error(f"\t{ex}")
         utilities.error_exit("[error] unable to find container: unhandled exception")
@@ -169,6 +197,11 @@ def get_container_id(container_name: str) -> Optional[str]:
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] unable to find container: docker daemon error")
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit("[error] unable to find container: unhandled exception")
@@ -195,6 +228,11 @@ def get_container_stats(
             "\t\t\t[error] unable to get stats of the container with id: {0}: docker daemon error".format(
                 container_id
             )
+        )
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
         )
     except Exception as ex:
         emitter.error(ex)
@@ -271,6 +309,11 @@ def build_container(
         utilities.error_exit(
             "\t\t\t[error] unable to build container: docker daemon error"
         )
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit(
@@ -320,6 +363,12 @@ def exec_command(
         utilities.error_exit(
             "\t\t\t[error] unable to find container: docker daemon error"
         )
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
+
     except Exception as ex:
         emitter.error(ex)
         utilities.error_exit(
@@ -337,6 +386,11 @@ def remove_container(container_id: str):
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning("[warning] unable to remove container: docker daemon error")
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
     except Exception as ex:
         emitter.warning(ex)
         emitter.warning("[warning] unable to remove container: unhandled exception")
@@ -372,6 +426,11 @@ def stop_container(container_id: str):
         emitter.warning(exp)
         emitter.warning(
             "\t\t\t[framework] unable to stop container: docker daemon error"
+        )
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
         )
     except Exception as ex:
         emitter.warning(ex)
