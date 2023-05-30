@@ -21,9 +21,7 @@ class EvoRepair(AbstractRepairTool):
         repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
         config_object: Dict[str, Dict[str, Any]] = dict()
         config_object["project"] = dict()
-        subject_name = bug_info[self.key_subject]
-        bug_id = bug_info[self.key_bug_id]
-        bug_name = f"{subject_name.lower()}_{bug_id}"
+        bug_name = bug_info[self.key_bug_id].replace("-", "_").lower()
         self.bug_id = bug_name
         config_object["project"]["name"] = bug_name
         config_object["project"]["tag"] = bug_name
