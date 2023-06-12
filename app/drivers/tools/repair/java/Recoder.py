@@ -31,8 +31,6 @@ class Recoder(AbstractRepairTool):
         #     self.error_exit("cannot run Recorder without a GPU")
 
         self.bug_name = bug_info[self.key_bug_id]
-        self.full_bug_name = "{}-{}".format(bug_info[self.key_subject],
-                                            bug_info[self.key_bug_id])
         file = (
             join(
                 bug_info[self.key_dir_source],
@@ -43,7 +41,7 @@ class Recoder(AbstractRepairTool):
         if self.use_gpu:
             recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {} --use_gpu'".format(  # currently supporting only defects4j
                 timeout_h,
-                self.full_bug_name,
+                self.bug_name,
                 bug_info[self.key_fix_file],
                 join(self.dir_expr, "src", file),
                 bug_info[self.key_fix_lines][0]
@@ -51,7 +49,7 @@ class Recoder(AbstractRepairTool):
         else:
             recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {}'".format(  # currently supporting only defects4j
                 timeout_h,
-                self.full_bug_name,
+                self.bug_name,
                 bug_info[self.key_fix_file],
                 join(self.dir_expr, "src", file),
                 bug_info[self.key_fix_lines][0]
@@ -62,7 +60,7 @@ class Recoder(AbstractRepairTool):
 
         recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 validate.py --bug_id {} --patch_info patch/{}-{} --dir {} --buggy_file {}'".format(
             timeout_h,
-            self.full_bug_name,
+            self.bug_name,
             bug_info[self.key_subject],
             bug_info[self.key_bug_id],
             join(self.dir_expr, "src"), 
@@ -126,7 +124,7 @@ class Recoder(AbstractRepairTool):
 
         if not self.stats.error_stats.is_error:
             self.run_command(
-                "cp /root/Repair/patches/{}patch.txt /output/".format(self.full_bug_name)
+                "cp /root/Repair/patches/{}patch.txt /output/".format(self.bug_name)
             )
             self.stats.patches_stats.generated = 1
             self.stats.patches_stats.enumerations = 1
