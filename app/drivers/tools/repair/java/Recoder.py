@@ -27,8 +27,8 @@ class Recoder(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
-        # if not self.use_gpu:
-        #     self.error_exit("cannot run Recorder without a GPU")
+        if len(bug_info[self.key_fix_lines]) == 0:
+            self.error_exit("no line number to fix")
 
         self.bug_name = bug_info[self.key_bug_id]
         file = (
