@@ -1,0 +1,2039 @@
+[
+    {
+        "id": 1,
+        "subject": "alibaba",
+        "bug_id": "CVE-2017-18349",
+        "vul4j_id": "VUL4J-1",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "com.alibaba.json.bvt.bug.Issue1005"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 2,
+        "subject": "apache",
+        "bug_id": "CVE-2017-5662",
+        "vul4j_id": "VUL4J-2",
+        "failing_module": "batik-dom",
+        "source_directory": "batik-dom/src/main/java",
+        "class_directory": "batik-dom/target/classes",
+        "test_directory": "batik-dom/src/test/java",
+        "test_class_directory": "batik-dom/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/batik-dom/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl batik-dom",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.batik.dom.util.TestCVE_2017_5662"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 3,
+        "subject": "apache",
+        "bug_id": "CVE-2015-0263",
+        "vul4j_id": "VUL4J-3",
+        "failing_module": "camel-core",
+        "source_directory": "camel-core/src/main/java",
+        "class_directory": "camel-core/target/classes",
+        "test_directory": "camel-core/src/test/java",
+        "test_class_directory": "camel-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/camel-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl camel-core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.camel.component.xslt.XsltDTDTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 4,
+        "subject": "apache",
+        "bug_id": "CVE-2015-0264",
+        "vul4j_id": "VUL4J-4",
+        "failing_module": "camel-core",
+        "source_directory": "camel-core/src/main/java",
+        "class_directory": "camel-core/target/classes",
+        "test_directory": "camel-core/src/test/java",
+        "test_class_directory": "camel-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/camel-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl camel-core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.camel.builder.xml.XPathFeatureTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 5,
+        "subject": "apache",
+        "bug_id": "APACHE-COMMONS-001",
+        "vul4j_id": "VUL4J-5",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.compress.archivers.examples.ExpanderTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 6,
+        "subject": "apache",
+        "bug_id": "CVE-2018-1324",
+        "vul4j_id": "VUL4J-6",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.compress.Test_CVE_2018_1324"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 7,
+        "subject": "apache",
+        "bug_id": "CVE-2018-11771",
+        "vul4j_id": "VUL4J-7",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.compress.archivers.zip.ZipArchiveInputStreamTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 8,
+        "subject": "apache",
+        "bug_id": "CVE-2019-12402",
+        "vul4j_id": "VUL4J-8",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.compress.archivers.zip.NioZipEncodingTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 9,
+        "subject": "apache",
+        "bug_id": "CVE-2020-1953",
+        "vul4j_id": "VUL4J-9",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.configuration2.TestYAMLConfiguration"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 10,
+        "subject": "apache",
+        "bug_id": "CVE-2013-2186",
+        "vul4j_id": "VUL4J-10",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.fileupload.DiskFileItemSerializeTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 11,
+        "subject": "apache",
+        "bug_id": "CVE-2014-0050",
+        "vul4j_id": "VUL4J-11",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.fileupload.MultipartStreamTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 12,
+        "subject": "apache",
+        "bug_id": "CVE-2018-17202",
+        "vul4j_id": "VUL4J-12",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.imaging.formats.jpeg.decoder.JpegDecoderTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 13,
+        "subject": "apache",
+        "bug_id": "CVE-2018-17201",
+        "vul4j_id": "VUL4J-13",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.imaging.formats.rgbe.RgbeReadTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 14,
+        "subject": "apache",
+        "bug_id": "CVE-2021-29425",
+        "vul4j_id": "VUL4J-14",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.commons.io.FilenameUtilsTestCase"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 15,
+        "subject": "apache",
+        "bug_id": "CVE-2016-8739",
+        "vul4j_id": "VUL4J-15",
+        "failing_module": "rt/rs/extensions/providers",
+        "source_directory": "rt/rs/extensions/providers/src/main/java",
+        "class_directory": "rt/rs/extensions/providers/target/classes",
+        "test_directory": "rt/rs/extensions/providers/src/test/java",
+        "test_class_directory": "rt/rs/extensions/providers/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/rt/rs/extensions/providers/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn -pl rt/rs/extensions/providers",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.cxf.jaxrs.provider.atom.AtomPojoProviderTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 16,
+        "subject": "apache",
+        "bug_id": "CVE-2015-5253",
+        "vul4j_id": "VUL4J-16",
+        "failing_module": "rt/rs/security/sso/saml",
+        "source_directory": "rt/rs/security/sso/saml/src/main/java",
+        "class_directory": "rt/rs/security/sso/saml/target/classes",
+        "test_directory": "rt/rs/security/sso/saml/src/test/java",
+        "test_class_directory": "rt/rs/security/sso/saml/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/rt/rs/security/sso/saml/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn -pl rt/rs/security/sso/saml",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.cxf.rs.security.saml.sso.CombinedValidatorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 17,
+        "subject": "apache",
+        "bug_id": "HTTPCLIENT-1803",
+        "vul4j_id": "VUL4J-17",
+        "failing_module": "httpclient",
+        "source_directory": "httpclient/src/main/java",
+        "class_directory": "httpclient/target/classes",
+        "test_directory": "httpclient/src/test/java",
+        "test_class_directory": "httpclient/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/httpclient/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl httpclient",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.http.client.utils.TestURIBuilder"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 18,
+        "subject": "apache",
+        "bug_id": "CVE-2019-0225",
+        "vul4j_id": "VUL4J-18",
+        "failing_module": "jspwiki-main",
+        "source_directory": "jspwiki-main/src/main/java",
+        "class_directory": "jspwiki-main/target/classes",
+        "test_directory": "jspwiki-main/src/test/java",
+        "test_class_directory": "jspwiki-main/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/jspwiki-main/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl jspwiki-main",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.wiki.WikiServletTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 19,
+        "subject": "apache",
+        "bug_id": "PDFBOX-3341",
+        "vul4j_id": "VUL4J-19",
+        "failing_module": "pdfbox",
+        "source_directory": "pdfbox/src/main/java",
+        "class_directory": "pdfbox/target/classes",
+        "test_directory": "pdfbox/src/test/java",
+        "test_class_directory": "pdfbox/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/pdfbox/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl pdfbox",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.pdfbox.encryption.TestSymmetricKeyEncryption"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 20,
+        "subject": "apache",
+        "bug_id": "CVE-2018-11797",
+        "vul4j_id": "VUL4J-20",
+        "failing_module": "pdfbox",
+        "source_directory": "pdfbox/src/main/java",
+        "class_directory": "pdfbox/target/classes",
+        "test_directory": "pdfbox/src/test/java",
+        "test_class_directory": "pdfbox/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/pdfbox/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl pdfbox",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.pdfbox.pdmodel.TestPDDocument"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 21,
+        "subject": "apache",
+        "bug_id": "CVE-2014-8152",
+        "vul4j_id": "VUL4J-21",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.xml.security.test.stax.signature.SignatureVerificationTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 22,
+        "subject": "apache",
+        "bug_id": "CVE-2016-6802",
+        "vul4j_id": "VUL4J-22",
+        "failing_module": "web",
+        "source_directory": "web/src/main/java",
+        "class_directory": "web/target/classes",
+        "test_directory": "web/src/test/groovy",
+        "test_class_directory": "web/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/web/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl web",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.shiro.web.util.WebUtilsTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 23,
+        "subject": "apache",
+        "bug_id": "CVE-2016-5394",
+        "vul4j_id": "VUL4J-23",
+        "failing_module": "bundles/extensions/xss",
+        "source_directory": "bundles/extensions/xss/src/main/java",
+        "class_directory": "bundles/extensions/xss/target/classes",
+        "test_directory": "bundles/extensions/xss/src/test/java",
+        "test_class_directory": "bundles/extensions/xss/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/bundles/extensions/xss/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl bundles/extensions/xss",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.sling.xss.impl.XSSAPIImplTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 24,
+        "subject": "apache",
+        "bug_id": "CVE-2016-6798",
+        "vul4j_id": "VUL4J-24",
+        "failing_module": "bundles/extensions/xss",
+        "source_directory": "bundles/extensions/xss/src/main/java",
+        "class_directory": "bundles/extensions/xss/target/classes",
+        "test_directory": "bundles/extensions/xss/src/test/java",
+        "test_class_directory": "bundles/extensions/xss/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/bundles/extensions/xss/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl bundles/extensions/xss",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.sling.xss.impl.XSSAPIImplTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 25,
+        "subject": "apache",
+        "bug_id": "CVE-2017-15717",
+        "vul4j_id": "VUL4J-25",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.sling.xss.impl.XSSAPIImplTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 26,
+        "subject": "apache",
+        "bug_id": "CVE-2016-4465",
+        "vul4j_id": "VUL4J-26",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.validator.URLValidatorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 27,
+        "subject": "apache",
+        "bug_id": "CVE-2014-0112",
+        "vul4j_id": "VUL4J-27",
+        "failing_module": "xwork-core",
+        "source_directory": "xwork-core/src/main/java",
+        "class_directory": "xwork-core/target/classes",
+        "test_directory": "xwork-core/src/test/java",
+        "test_class_directory": "xwork-core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/xwork-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl xwork-core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.interceptor.ParametersInterceptorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 28,
+        "subject": "apache",
+        "bug_id": "CVE-2014-0113",
+        "vul4j_id": "VUL4J-28",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.struts2.interceptor.CookieInterceptorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 29,
+        "subject": "apache",
+        "bug_id": "CVE-2014-0116",
+        "vul4j_id": "VUL4J-29",
+        "failing_module": "xwork-core",
+        "source_directory": "xwork-core/src/main/java",
+        "class_directory": "xwork-core/target/classes",
+        "test_directory": "xwork-core/src/test/java",
+        "test_class_directory": "xwork-core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/xwork-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.struts2.interceptor.CookieInterceptorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 30,
+        "subject": "apache",
+        "bug_id": "CVE-2016-8738",
+        "vul4j_id": "VUL4J-30",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.validator.URLValidatorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 31,
+        "subject": "apache",
+        "bug_id": "CVE-2016-4436",
+        "vul4j_id": "VUL4J-31",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.struts2.dispatcher.mapper.DefaultActionMapperTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 32,
+        "subject": "apache",
+        "bug_id": "CVE-2015-1831",
+        "vul4j_id": "VUL4J-32",
+        "failing_module": "xwork-core",
+        "source_directory": "xwork-core/src/main/java",
+        "class_directory": "xwork-core/target/classes",
+        "test_directory": "xwork-core/src/test/java",
+        "test_class_directory": "xwork-core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/xwork-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl xwork-core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.security.DefaultExcludedPatternsCheckerTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 33,
+        "subject": "apache",
+        "bug_id": "CVE-2016-3081",
+        "vul4j_id": "VUL4J-33",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.ognl.OgnlUtilTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 34,
+        "subject": "apache",
+        "bug_id": "CVE-2016-2162",
+        "vul4j_id": "VUL4J-34",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "com.opensymphony.xwork2.interceptor.I18nInterceptorTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 35,
+        "subject": "apache",
+        "bug_id": "CVE-2014-7809",
+        "vul4j_id": "VUL4J-35",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests -DskipAssembly clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.struts2.util.TokenHelperTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 36,
+        "subject": "apache",
+        "bug_id": "CVE-2018-8017",
+        "vul4j_id": "VUL4J-36",
+        "failing_module": "tika-parsers",
+        "source_directory": "tika-parsers/src/main/java",
+        "class_directory": "tika-parsers/target/classes",
+        "test_directory": "tika-parsers/src/test/java",
+        "test_class_directory": "tika-parsers/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/tika-parsers/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl tika-parsers",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.tika.parser.iptc.IptcParserTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 37,
+        "subject": "apache",
+        "bug_id": "CVE-2015-8581",
+        "vul4j_id": "VUL4J-37",
+        "failing_module": "container/openejb-core",
+        "source_directory": "container/openejb-core/src/main/java",
+        "class_directory": "container/openejb-core/target/classes",
+        "test_directory": "container/openejb-core/src/test/java",
+        "test_class_directory": "container/openejb-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/container/openejb-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl container/openejb-core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.apache.openejb.core.rmi.BlacklistClassResolverTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 38,
+        "subject": "apereo",
+        "bug_id": "CVE-2014-4172",
+        "vul4j_id": "VUL4J-38",
+        "failing_module": "cas-client-core",
+        "source_directory": "cas-client-core/src/main/java",
+        "class_directory": "cas-client-core/target/classes",
+        "test_directory": "cas-client-core/src/test/java",
+        "test_class_directory": "cas-client-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/cas-client-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl cas-client-core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.jasig.cas.client.validation.Cas10TicketValidatorTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 39,
+        "subject": "cloudfoundry",
+        "bug_id": "CVE-2018-1192",
+        "vul4j_id": "VUL4J-39",
+        "failing_module": "server",
+        "source_directory": "server/src/main/java",
+        "class_directory": "server/build/classes/main",
+        "test_directory": "server/src/test/java",
+        "test_class_directory": "server/build/classes/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :cloudfoundry-identity-server:compileTestJava ",
+        "test_all_cmd": "./gradlew :cloudfoundry-identity-server:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.cloudfoundry.identity.uaa.authentication.event.UserAuthenticationSuccessEventTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 40,
+        "subject": "cloudfoundry",
+        "bug_id": "CVE-2019-3775",
+        "vul4j_id": "VUL4J-40",
+        "failing_module": "server",
+        "source_directory": "server/src/main/java",
+        "class_directory": "server/build/classes/java/main",
+        "test_directory": "server/src/test/java",
+        "test_class_directory": "server/build/classes/java/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :cloudfoundry-identity-server:compileTestJava ",
+        "test_all_cmd": "./gradlew :cloudfoundry-identity-server:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.cloudfoundry.identity.uaa.security.ScimUserSelfUpdateAllowedTest$WithInternalUserStoreEnabled$WhenAttemptingToUpdateAFieldThatIsNotAllowedToBeUpdated$WhenUpdatingTheEmailField"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 41,
+        "subject": "codehaus-plexus",
+        "bug_id": "CVE-2018-1002200",
+        "vul4j_id": "VUL4J-41",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.codehaus.plexus.archiver.zip.ZipUnArchiverTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 42,
+        "subject": "codehaus-plexus",
+        "bug_id": "CVE-2017-1000487",
+        "vul4j_id": "VUL4J-42",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.codehaus.plexus.util.cli.CommandlineTest",
+            "org.codehaus.plexus.util.cli.shell.BourneShellTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 43,
+        "subject": "eclipse",
+        "bug_id": "CVE-2018-20227",
+        "vul4j_id": "VUL4J-43",
+        "failing_module": "util",
+        "source_directory": "util/src/main/java",
+        "class_directory": "util/target/classes",
+        "test_directory": "util/src/test/java",
+        "test_class_directory": "util/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/util/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install; mvn -pl util test-compile -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl util",
+        "line_numbers": [],
+        "failing_test": [
+            "org.eclipse.rdf4j.common.io.ZipUtilTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 44,
+        "subject": "ESAPI",
+        "bug_id": "CVE-2013-5960",
+        "vul4j_id": "VUL4J-44",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.OWASP.esapi.codecs.CodecImmunityTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 45,
+        "subject": "esigate",
+        "bug_id": "CVE-2018-1000854",
+        "vul4j_id": "VUL4J-45",
+        "failing_module": "esigate-core",
+        "source_directory": "esigate-core/src/main/java",
+        "class_directory": "esigate-core/target/classes",
+        "test_directory": "esigate-core/src/test/java",
+        "test_class_directory": "esigate-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/esigate-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl esigate-core",
+        "line_numbers": [],
+        "failing_test": [
+            "org.esigate.xml.XsltRendererTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 46,
+        "subject": "FasterXML",
+        "bug_id": "CVE-2016-3720",
+        "vul4j_id": "VUL4J-46",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "com.fasterxml.jackson.dataformat.xml.TestCVE_2016_3720"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 47,
+        "subject": "FasterXML",
+        "bug_id": "CVE-2016-7051",
+        "vul4j_id": "VUL4J-47",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "com.fasterxml.jackson.dataformat.xml.SupportDTDDefaultsTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 48,
+        "subject": "inversoft",
+        "bug_id": "CVE-2018-1000531",
+        "vul4j_id": "VUL4J-48",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.primeframework.jwt.VulnerabilityTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 49,
+        "subject": "inversoft",
+        "bug_id": "CVE-2018-1000125",
+        "vul4j_id": "VUL4J-49",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.primeframework.jwt.JWTTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 50,
+        "subject": "javamelody",
+        "bug_id": "CVE-2013-4378",
+        "vul4j_id": "VUL4J-50",
+        "failing_module": "javamelody-core",
+        "source_directory": "javamelody-core/src/main/java",
+        "class_directory": "javamelody-core/target/classes",
+        "test_directory": "javamelody-core/src/test/java",
+        "test_class_directory": "javamelody-core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/javamelody-core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl javamelody-core",
+        "line_numbers": [],
+        "failing_test": [
+            "net.bull.javamelody.TestHtmlSessionInformationsReport"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 51,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000054",
+        "vul4j_id": "VUL4J-51",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.plugins.ccm.CcmPublisherTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 52,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000865",
+        "vul4j_id": "VUL4J-52",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.kohsuke.groovy.sandbox.FinalizerTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 53,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1999044",
+        "vul4j_id": "VUL4J-53",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.scheduler.CronTabTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 54,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2017-1000355",
+        "vul4j_id": "VUL4J-54",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.util.XStream2Test"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 55,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000864",
+        "vul4j_id": "VUL4J-55",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/target/classes",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/core/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl core",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.scheduler.CronTabTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 56,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000056",
+        "vul4j_id": "VUL4J-56",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.tasks.junit.JUnitResultArchiverTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 57,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000089",
+        "vul4j_id": "VUL4J-57",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.jenkinsci.plugins.workflow.support.steps.build.BuildTriggerStepTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 58,
+        "subject": "jenkinsci",
+        "bug_id": "CVE-2018-1000111",
+        "vul4j_id": "VUL4J-58",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "hudson.scm.SubversionStatusTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 59,
+        "subject": "jhy",
+        "bug_id": "CVE-2015-6748",
+        "vul4j_id": "VUL4J-59",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.jsoup.parser.XmlTreeBuilderTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 60,
+        "subject": "nahsra",
+        "bug_id": "CVE-2016-10006",
+        "vul4j_id": "VUL4J-60",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.owasp.validator.html.test.AntiSamyTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 61,
+        "subject": "neo4j-contrib",
+        "bug_id": "CVE-2018-1000820",
+        "vul4j_id": "VUL4J-61",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "build/classes/java/main",
+        "test_directory": "src/test/java",
+        "test_class_directory": "build/classes/java/main",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew compileTestJava ",
+        "test_all_cmd": "./gradlew test",
+        "line_numbers": [],
+        "failing_test": [
+            "apoc.load.XmlTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 62,
+        "subject": "neo4j",
+        "bug_id": "CVE-2018-18389",
+        "vul4j_id": "VUL4J-62",
+        "failing_module": "enterprise/security",
+        "source_directory": "enterprise/security/src/main/java",
+        "class_directory": "enterprise/security/target/classes",
+        "test_directory": "enterprise/security/src/test/java",
+        "test_class_directory": "enterprise/security/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/enterprise/security/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn failsafe:integration-test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.neo4j.server.security.enterprise.auth.integration.bolt.LdapAuthIT"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 63,
+        "subject": "opennetworkinglab",
+        "bug_id": "CVE-2018-1000615",
+        "vul4j_id": "VUL4J-63",
+        "failing_module": "protocols/ovsdb/rfc",
+        "source_directory": "protocols/ovsdb/rfc/src/main/java",
+        "class_directory": "protocols/ovsdb/rfc/target/classes",
+        "test_directory": "protocols/ovsdb/rfc/src/test/java",
+        "test_class_directory": "protocols/ovsdb/rfc/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/protocols/ovsdb/rfc/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl protocols/ovsdb/rfc",
+        "line_numbers": [],
+        "failing_test": [
+            "org.onosproject.ovsdb.rfc.utils.VersionUtilTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 64,
+        "subject": "OpenRefine",
+        "bug_id": "CVE-2018-20157",
+        "vul4j_id": "VUL4J-64",
+        "failing_module": "main",
+        "source_directory": "main/src",
+        "class_directory": "main/webapp/WEB-INF/classes",
+        "test_directory": "main/tests/server/src",
+        "test_class_directory": "main/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/main/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "./refine build -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl main",
+        "line_numbers": [],
+        "failing_test": [
+            "com.google.refine.tests.importers.XmlImporterTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 65,
+        "subject": "OpenRefine",
+        "bug_id": "CVE-2018-19859",
+        "vul4j_id": "VUL4J-65",
+        "failing_module": "main",
+        "source_directory": "main/src",
+        "class_directory": "main/webapp/WEB-INF/classes",
+        "test_directory": "main/tests/server/src",
+        "test_class_directory": "main/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/main/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "./refine build -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl main",
+        "line_numbers": [],
+        "failing_test": [
+            "com.google.refine.tests.importing.ImportingUtilitiesTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 66,
+        "subject": "resteasy",
+        "bug_id": "CVE-2020-1695",
+        "vul4j_id": "VUL4J-66",
+        "failing_module": "testsuite/unit-tests",
+        "source_directory": "testsuite/unit-tests/../../resteasy-core/src/main/java",
+        "class_directory": "testsuite/unit-tests/../../resteasy-core/target/classes",
+        "test_directory": "testsuite/unit-tests/src/test/java",
+        "test_class_directory": "testsuite/unit-tests/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/testsuite/unit-tests/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "cd testsuite;mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.jboss.resteasy.test.mediatype.MediaTypeHeaderTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 67,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2018-1274",
+        "vul4j_id": "VUL4J-67",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.data.mapping.PropertyPathUnitTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 68,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2017-8046",
+        "vul4j_id": "VUL4J-68",
+        "failing_module": "spring-data-rest-webmvc",
+        "source_directory": "spring-data-rest-webmvc/src/main/java",
+        "class_directory": "spring-data-rest-webmvc/target/classes",
+        "test_directory": "spring-data-rest-webmvc/src/test/java",
+        "test_class_directory": "spring-data-rest-webmvc/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/spring-data-rest-webmvc/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl spring-data-rest-webmvc",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.data.rest.webmvc.json.patch.JsonPatchTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 69,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2016-9878",
+        "vul4j_id": "VUL4J-69",
+        "failing_module": "spring-webmvc",
+        "source_directory": "spring-webmvc/src/main/java",
+        "class_directory": "spring-webmvc/build/classes/main",
+        "test_directory": "spring-webmvc/src/test/java",
+        "test_class_directory": "spring-webmvc/build/classes/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-webmvc:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-webmvc:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.web.servlet.ResourceServletTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 70,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2018-15756",
+        "vul4j_id": "VUL4J-70",
+        "failing_module": "spring-web",
+        "source_directory": "spring-web/src/main/java",
+        "class_directory": "spring-web/build/classes/java/main",
+        "test_directory": "spring-web/src/test/java",
+        "test_class_directory": "spring-web/build/classes/java/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-web:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-web:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.http.HttpRangeTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 71,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2018-1272",
+        "vul4j_id": "VUL4J-71",
+        "failing_module": "spring-core",
+        "source_directory": "spring-core/src/main/java",
+        "class_directory": "spring-core/build/classes/main",
+        "test_directory": "spring-core/src/test/java",
+        "test_class_directory": "spring-core/build/classes/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-core:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-core:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.util.MimeTypeTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 72,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2018-15801",
+        "vul4j_id": "VUL4J-72",
+        "failing_module": "oauth2/oauth2-jose",
+        "source_directory": "oauth2/oauth2-jose/src/main/java",
+        "class_directory": "oauth2/oauth2-jose/build/classes/java/main",
+        "test_directory": "oauth2/oauth2-jose/src/test/java",
+        "test_class_directory": "oauth2/oauth2-jose/build/classes/java/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-security-oauth2-jose:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-security-oauth2-jose:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.security.oauth2.jwt.JwtIssuerValidatorTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 73,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2019-11272",
+        "vul4j_id": "VUL4J-73",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/build/classes/main",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/build/classes/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-security-core:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-security-core:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.security.authentication.encoding.PlaintextPasswordEncoderTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 74,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2019-3795",
+        "vul4j_id": "VUL4J-74",
+        "failing_module": "core",
+        "source_directory": "core/src/main/java",
+        "class_directory": "core/build/classes/java/main",
+        "test_directory": "core/src/test/java",
+        "test_class_directory": "core/build/classes/java/test",
+        "java_version": 8,
+        "build_system": "gradle",
+        "dependencies": [],
+        "compile_cmd": "./gradlew :spring-security-core:compileTestJava ",
+        "test_all_cmd": "./gradlew :spring-security-core:test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.security.core.token.SecureRandomFactoryBeanTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 75,
+        "subject": "spring-projects",
+        "bug_id": "CVE-2016-4977",
+        "vul4j_id": "VUL4J-75",
+        "failing_module": "spring-security-oauth2",
+        "source_directory": "spring-security-oauth2/src/main/java",
+        "class_directory": "spring-security-oauth2/target/classes",
+        "test_directory": "spring-security-oauth2/src/test/java",
+        "test_class_directory": "spring-security-oauth2/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/spring-security-oauth2/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl spring-security-oauth2",
+        "line_numbers": [],
+        "failing_test": [
+            "org.springframework.security.oauth2.provider.endpoint.SpelViewTests"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 76,
+        "subject": "square",
+        "bug_id": "CVE-2018-1000850",
+        "vul4j_id": "VUL4J-76",
+        "failing_module": "retrofit",
+        "source_directory": "retrofit/src/main/java",
+        "class_directory": "retrofit/target/classes",
+        "test_directory": "retrofit/src/test/java",
+        "test_class_directory": "retrofit/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/retrofit/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl retrofit",
+        "line_numbers": [],
+        "failing_test": [
+            "retrofit2.RequestFactoryTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 77,
+        "subject": "swagger-api",
+        "bug_id": "CVE-2017-1000207",
+        "vul4j_id": "VUL4J-77",
+        "failing_module": "modules/swagger-parser",
+        "source_directory": "modules/swagger-parser/src/main/java",
+        "class_directory": "modules/swagger-parser/target/classes",
+        "test_directory": "modules/swagger-parser/src/test/java",
+        "test_class_directory": "modules/swagger-parser/target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/modules/swagger-parser/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl modules/swagger-parser",
+        "line_numbers": [],
+        "failing_test": [
+            "io.swagger.parser.util.SwaggerDeserializerTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 78,
+        "subject": "x-stream",
+        "bug_id": "CVE-2019-10173",
+        "vul4j_id": "VUL4J-78",
+        "failing_module": "xstream",
+        "source_directory": "xstream/src/java",
+        "class_directory": "xstream/target/classes",
+        "test_directory": "xstream/src/test",
+        "test_class_directory": "xstream/target/test-classes",
+        "java_version": 7,
+        "build_system": "maven",
+        "dependencies": [
+            "src/xstream/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test -pl xstream",
+        "line_numbers": [],
+        "failing_test": [
+            "com.thoughtworks.acceptance.SecurityVulnerabilityTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    },
+    {
+        "id": 79,
+        "subject": "zeroturnaround",
+        "bug_id": "CVE-2018-1002201",
+        "vul4j_id": "VUL4J-79",
+        "failing_module": "",
+        "source_directory": "src/main/java",
+        "class_directory": "target/classes",
+        "test_directory": "src/test/java",
+        "test_class_directory": "target/test-classes",
+        "java_version": 8,
+        "build_system": "maven",
+        "dependencies": [
+            "src/target/all-dependencies.jar"
+        ],
+        "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+        "test_all_cmd": "mvn test",
+        "line_numbers": [],
+        "failing_test": [
+            "org.zeroturnaround.zip.DirectoryTraversalMaliciousTest"
+        ],
+        "passing_test": [],
+        "count_neg": 0,
+        "count_pos": 0,
+        "test_timeout": 5
+    }
+]

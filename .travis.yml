@@ -1,0 +1,58 @@
+language: python
+sudo: required
+
+branches:
+  only:
+  - master
+  - dev
+
+python:
+  - '3.8'
+  - '3.9'
+  - '3.10'
+  - 'pypy3'
+
+matrix:
+    include:
+        - os: linux
+          dist: trusty
+services:
+  - docker
+
+cache:
+    directories:
+        - benchmark
+
+
+git:
+  submodules: false
+  depth: 3
+
+before_install:
+  - uname -a
+  - python --version
+  - docker version
+  - source activate
+  - docker pull yuntongzhang/vulnfix
+
+install:
+  - git submodule update --init benchmark/vulnloc
+  - pip install --upgrade .
+  - pip install -r requirements.txt
+
+
+jobs:
+  include:
+  - python: "2.7"
+    env: TEST_SUITE=suite_2_7
+  - python: "3.8"
+    env: TEST_SUITE=suite_3_8
+  - python: "pypy"
+    env: TEST_SUITE=suite_pypy
+
+script:
+  - cerberus --help
+  - cerberus repair -t vulnfix -b vulnloc --bug-index 11
+
+notifications:
+  email: true
