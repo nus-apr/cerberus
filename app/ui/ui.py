@@ -560,6 +560,7 @@ class Cerberus(App[List[Result]]):
                     definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
                 ),
             )
+            values.job_identifier.set(message.identifier)
             self.update_status(
                 message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
             )
@@ -590,7 +591,6 @@ class Cerberus(App[List[Result]]):
                 ):  # Try to wake up another thread if there are more free CPUs
                     job_condition.notify_all()
 
-            values.job_identifier.set(message.identifier)
             values.current_task_profile_id.set(
                 message.task_config_info[definitions.KEY_ID]
             )
