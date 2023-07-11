@@ -13,7 +13,7 @@ class Recoder(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "zqh111/recoder:interface"
+        self.image_name = "thanhlecong/recoder:v1"
         self.bug_name = ""
 
     def run_repair(self, bug_info, repair_config_info):
@@ -27,23 +27,44 @@ class Recoder(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
-        if not self.use_gpu:
-            self.error_exit("cannot run Recorder without a GPU")
+        if len(bug_info[self.key_fix_lines]) == 0:
+            self.error_exit("no line number to fix")
 
         self.bug_name = bug_info[self.key_bug_id]
-        # generate patches
-        self.timestamp_log_start()
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}'".format(  # currently supporting only defects4j
-            timeout_h,
-            bug_info[self.key_bug_id],
+        file = (
+            join(
+                bug_info[self.key_dir_source],
+                bug_info[self.key_fix_file].replace(".", "/"),
+            )
+            + ".java"
         )
+        if self.use_gpu:
+            recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {} --use_gpu'".format(  # currently supporting only defects4j
+                timeout_h,
+                self.bug_name,
+                bug_info[self.key_fix_file],
+                join(self.dir_expr, "src", file),
+                bug_info[self.key_fix_lines][0]
+            )
+        else:
+            recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {}'".format(  # currently supporting only defects4j
+                timeout_h,
+                self.bug_name,
+                bug_info[self.key_fix_file],
+                join(self.dir_expr, "src", file),
+                bug_info[self.key_fix_lines][0]
+            )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"
         )
 
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}'".format(
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 validate.py --bug_id {} --patch_info patch/{}-{} --dir {} --buggy_file {}'".format(
             timeout_h,
+            self.bug_name,
+            bug_info[self.key_subject],
             bug_info[self.key_bug_id],
+            join(self.dir_expr, "src"), 
+            join(self.dir_expr, "src", file),
         )
 
         status = self.run_command(
@@ -99,7 +120,7 @@ class Recoder(AbstractRepairTool):
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
+            self.stats.time_stats.timestamp_end = log_lines[-3].replace("\n", "")
 
         if not self.stats.error_stats.is_error:
             self.run_command(
