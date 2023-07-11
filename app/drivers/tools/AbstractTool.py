@@ -34,7 +34,7 @@ class AbstractTool(AbstractDriver):
     container_id = None
     is_instrument_only = False
     timestamp_fmt = "%a %d %b %Y %H:%M:%S %p"
-    current_repair_profile_id = values.current_repair_profile_id
+    current_task_profile_id = values.current_task_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
     key_id = definitions.KEY_ID

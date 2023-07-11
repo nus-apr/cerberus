@@ -18,7 +18,7 @@ class Prophet(AbstractRepairTool):
         super(Prophet, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        repair_conf_id = repair_config_info[self.key_id]
+        task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         self.file = bug_info[self.key_fix_file]
         revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
@@ -26,7 +26,7 @@ class Prophet(AbstractRepairTool):
         timeout = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
-            self.dir_logs, repair_conf_id, self.name.lower(), bug_id
+            self.dir_logs, task_conf_id, self.name.lower(), bug_id
         )
 
         repair_file = self.dir_expr + "/prophet/prophet.conf"
@@ -5704,9 +5704,9 @@ class Prophet(AbstractRepairTool):
         """
         self.emit_normal("reading output")
         dir_results = path.join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = "{}/{}-{}-{}-stats.log".format(
-            self.dir_logs, repair_conf_id, self.name.lower(), bug_id
+            self.dir_logs, task_conf_id, self.name.lower(), bug_id
         )
 
         regex = re.compile("(.*-output.log$)")

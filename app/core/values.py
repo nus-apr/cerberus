@@ -96,7 +96,7 @@ dump_patches = False
 arg_pass = False
 iteration_no = -1
 
-current_repair_profile_id: ContextVar[str] = ContextVar(
+current_task_profile_id: ContextVar[str] = ContextVar(
     "current_repair_profile_id", default="NONE"
 )
 current_container_profile_id: ContextVar[str] = ContextVar(

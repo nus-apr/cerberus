@@ -400,7 +400,7 @@ class Cerberus(App[List[Result]]):
                     job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
-            values.current_repair_profile_id.set(
+            values.current_task_profile_id.set(
                 message.repair_config_info[definitions.KEY_ID]
             )
             values.current_container_profile_id.set(

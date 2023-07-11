@@ -86,10 +86,10 @@ class SAVER(AbstractAnalyzeTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

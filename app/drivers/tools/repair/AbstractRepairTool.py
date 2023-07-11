@@ -58,11 +58,11 @@ class AbstractRepairTool(AbstractTool):
             return
         self.emit_normal("running instrumentation script")
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        repair_conf_id = str(values.current_repair_profile_id.get("NA"))
+        task_conf_id = str(values.current_task_profile_id.get("NA"))
         buggy_file = bug_info.get(definitions.KEY_FIX_FILE, "")
         self.log_instrument_path = join(
             self.dir_logs,
-            "{}-{}-{}-instrument.log".format(repair_conf_id, self.name, bug_id),
+            "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),
         )
         time = datetime.now()
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
@@ -86,10 +86,10 @@ class AbstractRepairTool(AbstractTool):
         self.pre_process()
         self.instrument(bug_info)
         self.emit_normal("executing repair command")
-        repair_conf_id = repair_config_info[definitions.KEY_ID]
+        task_conf_id = repair_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         log_file_name = "{}-{}-{}-output.log".format(
-            repair_conf_id, self.name.lower(), bug_id
+            task_conf_id, self.name.lower(), bug_id
         )
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")

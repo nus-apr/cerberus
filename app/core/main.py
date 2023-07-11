@@ -85,7 +85,7 @@ def run(
             values.container_profile_id_list,
         ):
 
-            values.current_repair_profile_id.set(repair_config_info[definitions.KEY_ID])
+            values.current_task_profile_id.set(repair_config_info[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 container_config_info[definitions.KEY_ID]
             )
@@ -219,6 +219,7 @@ def main():
         import warnings
 
         warnings.simplefilter("ignore")
+
     rich.traceback.install(show_locals=True)
     parsed_args = parse_args()
     is_error = False
@@ -228,6 +229,7 @@ def main():
     start_time = time.time()
     create_output_directories()
     logger.create_log_files()
+
     try:
         emitter.title(
             "Starting {} (Program Repair Framework) ".format(values.tool_name)

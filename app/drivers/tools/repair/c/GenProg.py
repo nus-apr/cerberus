@@ -16,7 +16,7 @@ class GenProg(AbstractRepairTool):
         super(GenProg, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        repair_conf_id = repair_config_info[self.key_id]
+        task_conf_id = repair_config_info[self.key_id]
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         bug_id = str(bug_info[self.key_bug_id])
@@ -26,7 +26,7 @@ class GenProg(AbstractRepairTool):
         timeout = str(repair_config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         count_pass = len(passing_test_list)
         count_neg = len(failing_test_list)
@@ -123,10 +123,10 @@ class GenProg(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

@@ -16,7 +16,7 @@ class CPR(AbstractRepairTool):
         super(CPR, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
         timeout = str(repair_config_info[self.key_timeout])
@@ -25,7 +25,7 @@ class CPR(AbstractRepairTool):
         self.run_command(mkdir_command, self.log_output_path, "/")
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         conf_path = join(self.dir_expr, "cpr", "repair.conf")
         timeout_m = str(float(timeout) * 60)
@@ -62,10 +62,10 @@ class CPR(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         regex = re.compile("(.*-output.log$)")
         for _, _, files in os.walk(dir_results):

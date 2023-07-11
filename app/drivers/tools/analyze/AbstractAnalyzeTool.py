@@ -36,11 +36,11 @@ class AbstractAnalyzeTool(AbstractTool):
         utilities.check_space()
         self.pre_process()
         self.emit_normal("executing analysis command")
-        repair_conf_id = repair_config_info[definitions.KEY_ID]
+        task_conf_id = repair_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
 
