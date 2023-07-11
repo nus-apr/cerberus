@@ -151,7 +151,7 @@ def run(
 def get_repair_setup() -> Any:
     emitter.normal("\t[framework] loading repair profile setup")
     repair_setup = configuration.load_configuration_details(
-        values.file_repair_configuration
+        values.file_task_configuration
     )
     for repair_profile_id in values.task_profile_id_list:
         if repair_profile_id not in repair_setup:
