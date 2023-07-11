@@ -707,6 +707,10 @@ def setup_ui():
     global app
     app = Cerberus()
     experiment_results = app.run()
+    print_results(experiment_results)
+
+
+def print_results(experiment_results):
     values.ui_active = False
     emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:

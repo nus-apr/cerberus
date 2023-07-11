@@ -72,7 +72,7 @@ def run(
     repair_setup: Any,
     container_setup: Any,
 ):
-    emitter.sub_title(f"Running {values.task_type} task")
+    emitter.sub_title(f"Running {values.task_type.get()} task")
     iteration = 0
 
     for repair_config_info in map(
@@ -171,7 +171,7 @@ def get_container_setup() -> Any:
 
 def get_tools() -> List[AbstractTool]:
     tool_list: List[AbstractTool] = []
-    if values.task_type == "prepare":
+    if values.task_type.get() == "prepare":
         return tool_list
     for tool_name in values.tool_list:
         tool = configuration.load_tool(tool_name)
@@ -179,7 +179,7 @@ def get_tools() -> List[AbstractTool]:
             tool.check_tool_exists()
         tool_list.append(tool)
     emitter.highlight(
-        f"\t[framework] {values.task_type}-tool(s): "
+        f"\t[framework] {values.task_type.get()}-tool(s): "
         + " ".join([x.name for x in tool_list])
     )
     return tool_list
@@ -187,7 +187,9 @@ def get_tools() -> List[AbstractTool]:
 
 def get_benchmark() -> AbstractBenchmark:
     benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight(f"\t[framework] {values.task_type}-benchmark: {benchmark.name}")
+    emitter.highlight(
+        f"\t[framework] {values.task_type.get()}-benchmark: {benchmark.name}"
+    )
     return benchmark
 
 

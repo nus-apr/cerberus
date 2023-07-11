@@ -433,8 +433,8 @@ def run(
                 utilities.error_exit("Could not get container id!")
 
     if not values.only_setup:
-        task_type = values.task_type
-        if values.task_type == "repair":
+        task_type = values.task_type.get()
+        if task_type == "repair":
             repair.repair_all(
                 dir_info,
                 bug_info,
@@ -443,7 +443,7 @@ def run(
                 container_id,
                 benchmark.name,
             )
-        elif values.task_type == "analyze":
+        elif task_type == "analyze":
             analyze.analyze_all(
                 dir_info,
                 bug_info,
