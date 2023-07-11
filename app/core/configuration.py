@@ -330,7 +330,7 @@ class Configurations:
         if self.__discord_config_file:
             discord_config_info = json.load(self.__discord_config_file)
 
-        if "hook_url" in discord_config_info and "hook_url" != "":
+        if "hook_url" in discord_config_info and discord_config_info["hook_url"] != "":
             if type(discord_config_info["hook_url"]) != str:
                 utilities.error_exit("[error] Invalid webhook URL")
             values.discord_configuration["hook_url"] = discord_config_info["hook_url"]

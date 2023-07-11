@@ -629,7 +629,7 @@ class Cerberus(App[List[Result]]):
         if message.row_key.value:
             self.selected_subject = message.row_key.value
             self.show(log_map[self.selected_subject])
-            self.set_focus(log_map[self.selected_subject])
+            self.set_focus(log_map[self.selected_subject], scroll_visible=True)
             log_map[self.selected_subject].scroll_end(animate=False)
 
     def compose(self) -> ComposeResult:
