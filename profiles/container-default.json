@@ -1,91 +1,91 @@
 {
-  "CC1": {
-    "id": "CC1",
+  "CP1": {
+    "id": "CP1",
     "cpu_count": 2,
     "mem_limit": "16g",
     "enable_network": true
   },
-  "CC2": {
-    "id": "CC2",
+  "CP2": {
+    "id": "CP2",
     "cpu_count": 2,
     "mem_limit": "32g",
     "enable_network": true
   },
-  "CC3": {
-    "id": "CC3",
+  "CP3": {
+    "id": "CP3",
     "cpu_count": 2,
     "mem_limit": "64g",
     "enable_network": true
   },
 
-  "CC4": {
-    "id": "CC4",
+  "CP4": {
+    "id": "CP4",
     "cpu_count": 4,
     "mem_limit": "16g",
     "enable_network": true
   },
-  "CC5": {
-    "id": "CC5",
+  "CP5": {
+    "id": "CP5",
     "cpu_count": 4,
     "mem_limit": "32g",
     "enable_network": true
   },
-  "CC6": {
-    "id": "CC6",
+  "CP6": {
+    "id": "CP6",
     "cpu_count": 4,
     "mem_limit": "64g",
     "enable_network": true
   },
-  "CC7": {
-    "id": "CC7",
+  "CP7": {
+    "id": "CP7",
     "cpu_count": 8,
     "mem_limit": "16g",
     "enable_network": true
   },
-  "CC8": {
-    "id": "CC8",
+  "CP8": {
+    "id": "CP8",
     "cpu_count": 8,
     "mem_limit": "32g",
     "enable_network": true
   },
-  "CC9": {
-    "id": "CC9",
+  "CP9": {
+    "id": "CP9",
     "cpu_count": 8,
     "mem_limit": "64g",
     "enable_network": true
   },
-  "CC10": {
-    "id": "CC10",
+  "CP10": {
+    "id": "CP10",
     "cpu_count": 16,
     "mem_limit": "16g",
     "enable_network": true
   },
-  "CC11": {
-    "id": "CC11",
+  "CP11": {
+    "id": "CP11",
     "cpu_count": 16,
     "mem_limit": "32g",
     "enable_network": true
   },
-  "CC12": {
-    "id": "CC12",
+  "CP12": {
+    "id": "CP12",
     "cpu_count": 16,
     "mem_limit": "64g",
     "enable_network": true
   },
-  "CC13": {
-    "id": "CC13",
+  "CP13": {
+    "id": "CP13",
     "cpu_count": 32,
     "mem_limit": "16g",
     "enable_network": true
   },
-  "CC14": {
-    "id": "CC14",
+  "CP14": {
+    "id": "CP14",
     "cpu_count": 32,
     "mem_limit": "32g",
     "enable_network": true
   },
-  "CC15": {
-    "id": "CC15",
+  "CP15": {
+    "id": "CP15",
     "cpu_count": 32,
     "mem_limit": "64g",
     "enable_network": true
