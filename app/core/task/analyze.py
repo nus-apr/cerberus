@@ -17,7 +17,7 @@ def run_analysis(
     dir_info: Dict[str, Dict[str, str]],
     experiment_info,
     tool: AbstractAnalyzeTool,
-    repair_config_info: Dict[str, Any],
+    analyze_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -28,12 +28,12 @@ def run_analysis(
     experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
-    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+    if analyze_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
-    test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_ratio = float(analyze_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
-        repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
+        analyze_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
     passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
     passing_test_list = []
@@ -46,10 +46,9 @@ def run_analysis(
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    repair_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
-        tool.run_analysis(experiment_info, repair_config_info)
+        tool.run_analysis(experiment_info, analyze_config_info)
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
             values.experiment_status.set(TaskStatus.SUCCESS)
     except Exception as ex:
@@ -61,7 +60,7 @@ def analyze_all(
     dir_info: Any,
     experiment_info: Dict[str, Any],
     analyze_tool: AbstractAnalyzeTool,
-    repair_config_info,
+    analyze_config_info,
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -69,7 +68,7 @@ def analyze_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
-    time_duration = float(repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    time_duration = float(analyze_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     total_timeout = time.time() + 60 * 60 * time_duration
 
     final_status = [TaskStatus.NONE]
@@ -82,7 +81,7 @@ def analyze_all(
             dir_info,
             experiment_info,
             analyze_tool,
-            repair_config_info,
+            analyze_config_info,
             container_id,
             benchmark_name,
         )
@@ -122,7 +121,7 @@ def analyze_all(
                 dir_info,
                 experiment_info,
                 analyze_tool,
-                repair_config_info,
+                analyze_config_info,
                 container_id,
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),

@@ -243,6 +243,7 @@ def create_running_container(
         container.build_image(tmp_dockerfile, image_name)
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
+    emitter.information("building temporary container for log extraction")
     tmp_container_id = container.build_container(
         container_name, dict(), image_name, cpu, container_config_info
     )
@@ -254,6 +255,7 @@ def create_running_container(
         )
         container.stop_container(tmp_container_id)
         container.remove_container(tmp_container_id)
+    emitter.information("building main container for experiment")
     container_id = container.build_container(
         container_name, volume_list, image_name, cpu, container_config_info
     )
@@ -290,7 +292,7 @@ def run(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
     bug_info: Dict[str, Any],
-    repair_config_info: Dict[str, Any],
+    task_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
     run_identifier: str,
     cpu: str,
@@ -298,16 +300,16 @@ def run(
 ):
     bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
-    repair_config_id = repair_config_info[definitions.KEY_ID]
+    task_config_id = task_config_info[definitions.KEY_ID]
     container_config_id = container_config_info[definitions.KEY_ID]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
-        repair_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
+        task_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
     tag_name = "-".join(
         [
-            repair_config_id,
+            task_config_id,
             container_config_id,
             tool.name,
             benchmark.name,
@@ -324,20 +326,19 @@ def run(
     )
     benchmark.update_dir_info(dir_info)
     emitter.highlight(
-        "\t\t[repair profile] Identifier: "
-        + str(repair_config_info[definitions.KEY_ID])
+        "\t\t[task profile] Identifier: " + str(task_config_info[definitions.KEY_ID])
     )
     emitter.highlight(
-        "\t\t[repair profile] Timeout: "
-        + str(repair_config_info[definitions.KEY_CONFIG_TIMEOUT])
+        "\t\t[task profile] Timeout: "
+        + str(task_config_info[definitions.KEY_CONFIG_TIMEOUT])
     )
     emitter.highlight(
-        "\t\t[repair profile] Fix-loc: "
-        + repair_config_info[definitions.KEY_CONFIG_FIX_LOC]
+        "\t\t[task profile] Fix-loc: "
+        + task_config_info[definitions.KEY_CONFIG_FIX_LOC]
     )
     emitter.highlight(
-        "\t\t[repair profile] Test-suite ratio: "
-        + str(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+        "\t\t[task profile] Test-suite ratio: "
+        + str(task_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     )
 
     if values.use_container:
@@ -391,7 +392,7 @@ def run(
             archive_name = (
                 "-".join(
                     [
-                        repair_config_id,
+                        task_config_id,
                         container_config_id,
                         benchmark.name,
                         tool.name,
@@ -439,7 +440,7 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractRepairTool, tool),
-                repair_config_info,
+                task_config_info,
                 container_id,
                 benchmark.name,
             )
@@ -448,7 +449,7 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractAnalyzeTool, tool),
-                repair_config_info,
+                task_config_info,
                 container_id,
                 benchmark.name,
             )
