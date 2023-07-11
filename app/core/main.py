@@ -18,8 +18,12 @@ from app.core import logger
 from app.core import utilities
 from app.core import values
 from app.core.args import parse_args
+from app.core.configs.ConfigDataFactory import ConfigDataFactory
+from app.core.configs.ConfigDataLoader import ConfigDataLoader
+from app.core.configs.ConfigValidationSchemas import config_validation_schema
 from app.core.configuration import Configurations
 from app.core.task import task
+from app.core.task.TaskProcessor import TaskProcessor
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
@@ -217,7 +221,31 @@ def filter_experiment_list(benchmark: AbstractBenchmark):
     return filtered_list
 
 
+def process_configs(
+    task_config, benchmark, experiment_item, task_profile, container_profile
+):
+    for (k, v) in task_config.__dict__.items():
+        if k != "task_type" and v is not None:
+            emitter.configuration(k, v)
+            setattr(values, k, v)
+    values.task_type.set(task_config.task_type)
+    values.current_container_profile_id.set(container_profile[definitions.KEY_ID])
+    values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
+
+    if values.use_container:
+        values.job_identifier.set(
+            "-".join(
+                [
+                    benchmark.name,
+                    experiment_item[definitions.KEY_SUBJECT],
+                    experiment_item[definitions.KEY_BUG_ID],
+                ]
+            )
+        )
+
+
 def main():
+    global iteration
     if not sys.warnoptions:
         import warnings
 
@@ -232,21 +260,68 @@ def main():
     start_time = time.time()
     create_output_directories()
     logger.create_log_files()
-
+    # TODO Do overwrite magic
     try:
         emitter.title(
             "Starting {} (Program Repair Framework) ".format(values.tool_name)
         )
-        bootstrap(parsed_args)
-        if parsed_args.parallel:
-            info = sys.version_info
-            if info.major < 3 or info.minor < 10:
-                utilities.error_exit(
-                    "Parallel mode is currently supported only for versions 3.10+"
-                )
-            ui.setup_ui()
+
+        if parsed_args.config_file:
+            values.arg_pass = True
+            config_loader = ConfigDataLoader(
+                file_path=parsed_args.config_file,
+                validation_schema=config_validation_schema,
+            )
+            config_loader.load()
+            config_loader.validate()
+            config = ConfigDataFactory.create(
+                config_data_dict=config_loader.get_config_data()
+            )
+            tasks = TaskProcessor.execute(config)
+            if config.general.is_parallel_mode():
+                iteration = ui.setup_ui(tasks)
+            else:
+                # The tool and benchmark images are going to be created while enumerating
+                for iteration, (task_config, task_data) in enumerate(tasks):
+                    (
+                        benchmark,
+                        tool,
+                        experiment_item,
+                        task_profile,
+                        container_profile,
+                        bug_index,
+                    ) = task_data
+                    process_configs(
+                        task_config,
+                        benchmark,
+                        experiment_item,
+                        task_profile,
+                        container_profile,
+                    )
+                    iteration = iteration + 1
+                    emitter.sub_sub_title(
+                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
+                    )
+                    cpu = ",".join(map(str, range(values.cpus)))
+                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
+                    if not values.only_setup:
+                        task.run(*task_data, cpu, experiment_image_id)
         else:
-            run(get_tools(), get_benchmark(), get_repair_setup(), get_container_setup())
+            bootstrap(parsed_args)
+            if parsed_args.parallel:
+                info = sys.version_info
+                if info.major < 3 or info.minor < 10:
+                    utilities.error_exit(
+                        "Parallel mode is currently supported only for versions 3.10+"
+                    )
+                iteration = ui.setup_ui()
+            else:
+                run(
+                    get_tools(),
+                    get_benchmark(),
+                    get_repair_setup(),
+                    get_container_setup(),
+                )
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
