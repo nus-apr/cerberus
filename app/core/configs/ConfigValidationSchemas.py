@@ -12,8 +12,13 @@ general_section_schema = {
     "properties": {
         ConfigFieldsEnum.PARALLEL_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
+        ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
     },
-    "required": [ConfigFieldsEnum.PARALLEL_MODE.value, ConfigFieldsEnum.UI_MODE.value],
+    "required": [
+        ConfigFieldsEnum.PARALLEL_MODE.value,
+        ConfigFieldsEnum.UI_MODE.value,
+        ConfigFieldsEnum.DEBUG_MODE.value,
+    ],
     "additionalProperties": False,
 }
 
@@ -163,7 +168,6 @@ task_default_schema = {
     "type": "object",
     "properties": {
         ConfigFieldsEnum.COMPACT_RESULTS.value: {"type": "boolean"},
-        ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DUMP_PATCHES.value: {"type": "boolean"},
         ConfigFieldsEnum.DOCKER_HOST.value: {"type": "string"},
         ConfigFieldsEnum.ONLY_ANALYSE.value: {"type": "boolean"},
@@ -190,7 +194,6 @@ task_default_schema = {
     },
     "required": [
         ConfigFieldsEnum.COMPACT_RESULTS.value,
-        ConfigFieldsEnum.DEBUG_MODE.value,
         ConfigFieldsEnum.DUMP_PATCHES.value,
         ConfigFieldsEnum.DOCKER_HOST.value,
         ConfigFieldsEnum.ONLY_ANALYSE.value,

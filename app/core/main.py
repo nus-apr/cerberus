@@ -278,6 +278,7 @@ def main():
                 config_data_dict=config_loader.get_config_data()
             )
             tasks = TaskProcessor.execute(config)
+            values.debug = config.general.debug_mode
             if config.general.is_parallel_mode():
                 iteration = ui.setup_ui(tasks)
             else:
