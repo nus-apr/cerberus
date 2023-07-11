@@ -3,6 +3,7 @@ import os
 from typing import Any
 from typing import Dict
 from typing import Iterable
+from typing import List
 
 from app.core import configuration
 from app.core import definitions
@@ -32,21 +33,21 @@ TaskList = Iterable[
 
 class TaskProcessor:
     @staticmethod
-    def expand_interval(interval):
+    def expand_interval(interval) -> List[int]:
         start_range, end_range = interval.split("-")
         return list(range(int(start_range), int(end_range) + 1))
 
     @staticmethod
-    def normalize_id_list(id_list_raw, size):
+    def normalize_id_list(id_list_raw, size) -> List[int]:
         # TODO: Add support for "*"
-        id_list = []
+        id_list: List[int] = []
         for element in id_list_raw:
             if "*" == element:
                 id_list.extend(range(1, size + 1))
             elif "-" in element:
                 id_list.extend(TaskProcessor.expand_interval(element))
             else:
-                id_list.append(element)
+                id_list.append(int(element))
 
         return id_list
 
