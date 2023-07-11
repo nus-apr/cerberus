@@ -551,8 +551,11 @@ class Cerberus(App[List[Result]]):
 
         def job():
             cpus: List[int] = []
-            required_cpu_cores = max(
+            required_cpu_cores = min(
                 message.tool.cpu_usage,
+                message.task_config.max_cpu_count
+                if message.task_config
+                else float("inf"),
                 message.container_config_info.get(
                     definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
                 ),
