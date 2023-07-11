@@ -30,6 +30,7 @@ class SequenceR(AbstractRepairTool):
         )
 
         if bug_info[self.key_fix_file] == "" or len(bug_info[self.key_fix_lines]) < 1:
+            self.update_experiment_status("No fault localization info given")
             self.error_exit(
                 "Cannot apply SequenceR on an experiment with no given buggy file or line"
             )

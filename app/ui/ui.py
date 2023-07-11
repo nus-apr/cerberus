@@ -132,13 +132,13 @@ class Cerberus(App[List[Result]]):
         # self.debug_print("Idle")
         now = int(time.time())
         to_del = []
-        for (k, v) in job_time_map.items():
-            (start, limit, tool) = v
+        for (job_id, info) in job_time_map.items():
+            (start, limit, tool) = info
             if now - start > limit:
-                if not self.jobs[k][0].done():
-                    self.debug_print("TIME TO KILL {}".format(v))
-                    log_map[k].write("KILLED BY WATCHDOG")
-                    self.update_status(k, "KILLED BY WATCHDOG")
+                if not self.jobs[job_id][0].done():
+                    self.debug_print("TIME TO KILL {}".format(info))
+                    log_map[job_id].write("KILLED BY WATCHDOG")
+                    self.update_status(job_id, "KILLED BY WATCHDOG")
                     if tool.container_id:
                         log_map["root"].write("Killing {}".format(tool.container_id))
                         # Currently this kills the container and the tool gets a 137 status for the run command
@@ -149,11 +149,11 @@ class Cerberus(App[List[Result]]):
                         emitter.information(
                             "Cannot kill a local process as I do not know the exact process id"
                         )
-                    log_map[k].write("Cancelled")
-                to_del.append(k)
+                    log_map[job_id].write("Cancelled")
+                to_del.append(job_id)
 
-        for k in to_del:
-            del job_time_map[k]
+        for job_id in to_del:
+            del job_time_map[job_id]
 
     def prepare_run(self, loop):
         try:

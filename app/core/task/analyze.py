@@ -50,7 +50,10 @@ def run_analysis(
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
         tool.run_analysis(experiment_info, repair_config_info)
+        if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
+            values.experiment_status.set(TaskStatus.SUCCESS)
     except Exception as ex:
+        values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
 
 
@@ -109,7 +112,7 @@ def analyze_all(
                 container_id,
                 benchmark_name,
             )
-            final_status[0] = values.experiment_status.get(TaskStatus.NONE)
+            final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
 
         tool_thread = threading.Thread(
             target=analyze_wrapped,
@@ -123,6 +126,9 @@ def analyze_all(
                 values.current_repair_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
                 final_status,
+            ),
+            name="Wrapper thread for analysis {} {} {}".format(
+                analyze_tool.name, benchmark_name, container_id
             ),
         )
         tool_thread.start()
