@@ -66,14 +66,17 @@ def bootstrap(arg_list: Namespace):
     config.print_configuration()
 
 
+iteration = 0
+
+
 def run(
     tool_list: List[AbstractTool],
     benchmark: AbstractBenchmark,
     task_setup: Any,
     container_setup: Any,
 ):
+    global iteration
     emitter.sub_title(f"Running {values.task_type.get()} task")
-    iteration = 0
 
     for task_config_info in map(
         lambda task_profile_id: task_setup[task_profile_id],
@@ -114,7 +117,6 @@ def run(
                 experiment_image_id = None
                 if values.only_setup:
                     iteration = iteration + 1
-                    values.iteration_no = iteration
                     emitter.sub_sub_title(
                         "Experiment #{} - Bug #{}".format(iteration, bug_index)
                     )
@@ -123,7 +125,6 @@ def run(
 
                 for tool in tool_list:
                     iteration = iteration + 1
-                    values.iteration_no = iteration
                     emitter.sub_sub_title(
                         "Experiment #{} - Bug #{}".format(iteration, bug_index)
                     )
@@ -174,7 +175,7 @@ def get_tools() -> List[AbstractTool]:
     if values.task_type.get() == "prepare":
         return tool_list
     for tool_name in values.tool_list:
-        tool = configuration.load_tool(tool_name)
+        tool = configuration.load_tool(tool_name, values.task_type.get())
         if not values.only_analyse:
             tool.check_tool_exists()
         tool_list.append(tool)
@@ -261,4 +262,4 @@ def main():
         total_duration = format((time.time() - start_time) / 60, ".3f")
         if not parsed_args.parallel:
             notification.end(total_duration, is_error)
-        emitter.end(total_duration, is_error)
+        emitter.end(total_duration, iteration, is_error)

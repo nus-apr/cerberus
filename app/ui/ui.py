@@ -726,13 +726,13 @@ def setup_ui():
     app = Cerberus()
     experiment_results = app.run()
     print_results(experiment_results)
+    return len(experiment_results)
 
 
 def print_results(experiment_results):
     values.ui_active = False
     emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:
-        values.iteration_no = len(experiment_results)
         notification.notify(
             "Cerberus has finished running! These are the following results:\n"
             + "\n\n".join(

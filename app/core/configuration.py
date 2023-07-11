@@ -33,8 +33,7 @@ def load_class(class_name: str):
     return mod
 
 
-def load_tool(tool_name: str) -> AbstractTool:
-    tool_type = values.task_type.get()
+def load_tool(tool_name: str, tool_type: str) -> AbstractTool:
     emitter.normal(f"\t[framework] loading {tool_type} tool {tool_name}")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
