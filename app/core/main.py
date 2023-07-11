@@ -267,6 +267,7 @@ def main():
     create_output_directories()
     logger.create_log_files()
     # TODO Do overwrite magic
+    bootstrap(parsed_args)
     try:
         emitter.title(
             "Starting {} (Program Repair Framework) ".format(values.tool_name)
@@ -318,7 +319,6 @@ def main():
                 utilities.error_exit(
                     "Configuration file was not passed. Please provide a task type!"
                 )
-            bootstrap(parsed_args)
             if parsed_args.parallel:
                 info = sys.version_info
                 if info.major < 3 or info.minor < 10:

@@ -3,10 +3,6 @@ from typing import List
 from app.core.configs.Config import Config
 from app.core.configs.ConfigFieldsEnum import ConfigFieldsEnum
 from app.core.configs.general.GeneralConfig import GeneralConfig
-from app.core.configs.notifiers.DiscordConfig import DiscordConfig
-from app.core.configs.notifiers.EmailConfig import EmailConfig
-from app.core.configs.notifiers.NotifiersConfig import NotifiersConfig
-from app.core.configs.notifiers.SlackConfig import SlackConfig
 from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.ProfilesConfig import ProfilesConfig
 from app.core.configs.profiles.TaskProfile import TaskProfile
@@ -67,49 +63,6 @@ class ConfigDataFactory:
         return ProfilesConfig(
             task_profiles_list=task_profiles_list,
             container_profiles_list=container_profiles_list,
-        )
-
-    @staticmethod
-    def _create_notifiers_config(notifiers_config_dict: dict) -> NotifiersConfig:
-
-        if ConfigFieldsEnum.SLACK.value in notifiers_config_dict:
-            slack_config_dict = notifiers_config_dict[ConfigFieldsEnum.SLACK.value]
-            slack_config = SlackConfig(
-                enable=slack_config_dict[ConfigFieldsEnum.ENABLE.value],
-                hook_url=slack_config_dict[ConfigFieldsEnum.HOOK_URL.value],
-                oauth_token=slack_config_dict[ConfigFieldsEnum.OAUTH_TOKEN.value],
-                channel=slack_config_dict[ConfigFieldsEnum.CHANNEL.value],
-            )
-        else:
-            slack_config = None
-
-        if ConfigFieldsEnum.EMAIL.value in notifiers_config_dict:
-            email_config_dict = notifiers_config_dict[ConfigFieldsEnum.EMAIL.value]
-            email_config = EmailConfig(
-                enable=email_config_dict[ConfigFieldsEnum.ENABLE.value],
-                username=email_config_dict[ConfigFieldsEnum.USERNAME.value],
-                password=email_config_dict[ConfigFieldsEnum.PASSWORD.value],
-                host=email_config_dict[ConfigFieldsEnum.HOST.value],
-                port=email_config_dict[ConfigFieldsEnum.PORT.value],
-                ssl_from_start=email_config_dict[ConfigFieldsEnum.SSL_FROM_START.value],
-                recipients=email_config_dict[ConfigFieldsEnum.RECIPIENTS.value],
-            )
-        else:
-            email_config = None
-
-        if ConfigFieldsEnum.DISCORD.value in notifiers_config_dict:
-            discord_config_dict = notifiers_config_dict[ConfigFieldsEnum.DISCORD.value]
-            discord_config = DiscordConfig(
-                enable=discord_config_dict[ConfigFieldsEnum.ENABLE.value],
-                hook_url=discord_config_dict[ConfigFieldsEnum.HOOK_URL.value],
-            )
-        else:
-            discord_config = None
-
-        return NotifiersConfig(
-            email_config=email_config,
-            slack_config=slack_config,
-            discord_config=discord_config,
         )
 
     @staticmethod
@@ -213,9 +166,6 @@ class ConfigDataFactory:
             ),
             profiles=ConfigDataFactory._create_profiles_config(
                 config_data_dict[ConfigFieldsEnum.PROFILES.value]
-            ),
-            notifiers=ConfigDataFactory._create_notifiers_config(
-                config_data_dict[ConfigFieldsEnum.NOTIFIERS.value]
             ),
             tasks_configs_list=ConfigDataFactory._create_tasks_chunks_config(
                 config_data_dict[ConfigFieldsEnum.TASKS_DATA.value]

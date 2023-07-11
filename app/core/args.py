@@ -20,28 +20,21 @@ def parse_args():
         formatter_class=SortingHelpFormatter,
     )
     parser._action_groups.pop()
-    required = parser.add_argument_group("Required arguments")
+    # required = parser.add_argument_group("Required arguments")
 
     optional = parser.add_argument_group("Optional arguments")
 
     optional.add_argument(
-        "--task-type",
+        definitions.ARG_TASK_TYPE,
         "-task",
         help="type of task to run {analyze, prepare, repair, fuzz}",
-        default="repair",
+        default=None,
         required=False,
         choices=["analyze", "prepare", "repair", "fuzz"],
         metavar="task_type",
     )
     optional.add_argument(
-        "-f", "--config-file", type=str, help="Path to the JSON config file"
-    )
-
-    optional.add_argument(
-        definitions.ARG_CONFIG_FILE,
-        "-c",
-        help="configuration file",
-        type=argparse.FileType("r"),
+        definitions.ARG_CONFIG_FILE, "-c", type=str, help="Path to the JSON config file"
     )
 
     optional.add_argument(
@@ -117,7 +110,10 @@ def parse_args():
         help="filter the bugs using the subject name",
     )
     optional.add_argument(
-        definitions.ARG_TOOL_PARAMS, "-p", help="pass parameters to the tool"
+        definitions.ARG_TOOL_PARAMS,
+        "-p",
+        help="pass parameters to the tool",
+        default="",
     )
     optional.add_argument(
         definitions.ARG_TOOL_LIST,

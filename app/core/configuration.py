@@ -89,7 +89,6 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
 
 
 class Configurations:
-    __config_file = None
     __email_config_file = open(join(values.dir_config, "email.json"))
     __slack_config_file = open(join(values.dir_config, "slack.json"))
     __discord_config_file = open(join(values.dir_config, "discord.json"))
@@ -114,12 +113,14 @@ class Configurations:
         "start-index": None,
         "end-index": None,
         "parallel": False,
+        "has-config-file": False,
         "cpu-count": 1,
         "runs": 1,
         "bug-id-list": [],
         "bug-index-list": [],
         "skip-index-list": [],
         "tool-list": [],
+        "tool-params": "",
         "directories": {"data": "/data"},
         "repair-profile-id-list": ["C1"],
         "container-profile-id-list": ["CC1"],
@@ -141,9 +142,6 @@ class Configurations:
         emitter.normal("\t[framework] reading configuration values from arguments")
         flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
         self.__runtime_config_values["task-type"] = arg_list.task_type
-        if arg_list.config:
-            self.__config_file = arg_list.config
-            self.read_config_file()
 
         if arg_list.docker_host:
             self.__runtime_config_values["docker-host"] = arg_list.docker_host
@@ -167,6 +165,9 @@ class Configurations:
 
         if arg_list.rebuild_base:
             self.__runtime_config_values["rebuild-base"] = True
+
+        if arg_list.config_file:
+            self.__runtime_config_values["has-config-file"] = True
 
         if arg_list.debug:
             self.__runtime_config_values["is-debug"] = True
@@ -237,50 +238,6 @@ class Configurations:
                 "container-profile-id-list"
             ] = arg_list.container_profile_id_list
 
-    def read_config_file(self):
-        flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
-        config_info = {}
-        if self.__config_file:
-            config_info = json.load(self.__config_file)
-
-        try:
-            self.__runtime_config_values["benchmark-name"] = config_info[
-                "benchmark-name"
-            ]
-            self.__runtime_config_values["tool-list"] = config_info["tool-list"]
-
-        except KeyError as exc:
-            raise ValueError(f"Missing field in configuration file: {exc}")
-
-        if "bug-index-list" in config_info:
-            self.__runtime_config_values["bug-index-list"] = list(
-                flat_map(
-                    self.convert_range,
-                    str(config_info["bug-index-list"]).split(","),
-                )
-            )
-
-        optional_keys = [
-            "subject-name",
-            "tool-params",
-            "use-purge",
-            "use-container",
-            "dir-data",
-            "bug-id-list",
-            "start-index",
-            "end-index",
-            "skip-index-list",
-            "use-gpu",
-            "compact-results",
-            "repair-profile-id-list",
-            "container-profile-id-list",
-            "docker-host",
-            "runs",
-        ]
-        for key in optional_keys:
-            if key in config_info:
-                self.__runtime_config_values[key] = config_info[key]
-
     def read_slack_config_file(self):
         slack_config_info = {}
         if self.__slack_config_file:
@@ -295,7 +252,7 @@ class Configurations:
                     "[error] Unknown key {} or invalid type of value".format(key)
                 )
 
-        if not (
+        if values.slack_configuration["enabled"] and not (
             values.slack_configuration["hook_url"]
             or (
                 values.slack_configuration["oauth_token"]
@@ -317,7 +274,7 @@ class Configurations:
                 utilities.error_exit(
                     "[error] unknown key {} or invalid type of value".format(key)
                 )
-        if not (
+        if values.email_configuration["enabled"] and not (
             values.email_configuration["username"]
             and values.email_configuration["password"]
             and values.email_configuration["host"]
@@ -338,7 +295,9 @@ class Configurations:
                 utilities.error_exit(
                     "[error] unknown key {} or invalid type of value".format(key)
                 )
-        if not (values.discord_configuration["hook_url"]):
+        if values.discord_configuration["enabled"] and not (
+            values.discord_configuration["hook_url"]
+        ):
             utilities.error_exit("[error] invalid configuration for discord.")
 
     def print_configuration(self):
@@ -352,7 +311,10 @@ class Configurations:
         values.only_setup = self.__runtime_config_values["only-setup"]
         if values.task_type.get() == "prepare":
             values.only_setup = True
-        if not values.only_setup:
+        if (
+            not values.only_setup
+            and not self.__runtime_config_values["has-config-file"]
+        ):
             if not self.__runtime_config_values["tool-list"]:
                 emitter.error("[invalid] --tool/-tool-list is missing")
                 emitter.emit_help()
@@ -365,9 +327,6 @@ class Configurations:
                     values.subject_name
                 )
             )
-        values.file_meta_data = os.path.join(
-            "benchmark", values.benchmark_name, "meta-data.json"
-        )
         values.start_index = self.__runtime_config_values["start-index"]
         values.end_index = self.__runtime_config_values["end-index"]
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])

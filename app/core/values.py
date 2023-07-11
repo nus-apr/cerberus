@@ -39,7 +39,6 @@ file_last_log = dir_log_base + "/log-latest"
 file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
 file_stats_log = dir_log_base + "/log-stats"
-file_meta_data: Optional[str] = None
 file_task_configuration = join(dir_main, "profiles", "task-default.json")
 file_container_configuration = join(dir_main, "profiles", "container-default.json")
 file_output_log = ""

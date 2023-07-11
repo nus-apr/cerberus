@@ -96,28 +96,5 @@
                 "passing-test-ratio": 1
             }
         ]
-    },
-    "notifiers":{
-        "slack": {
-            "enable": false,
-            "hook-url": "",
-            "oauth-token": "",
-            "channel": ""
-        },
-        "discord": {
-            "enable": false,
-            "hook-url": ""
-        },
-        "email": {
-            "enable": false,
-            "username": "",
-            "password": "",
-            "host": "",
-            "port": 465,
-            "ssl-from-start": false,
-            "recipients": [
-                ""
-            ]
-        }
     }
 }
