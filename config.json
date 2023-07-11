@@ -1,12 +1,12 @@
 {
     "general": {
         "parallel": true,
-        "enable_ui": false
+        "enable_ui": false,
+        "debug-mode": true
     },
     "tasks-data": {
         "default-config": {
             "compact-results": true,
-            "debug-mode": false,
             "dump-patches": false,
             "docker-host": "unix:///var/run/docker.sock",
             "only-analyse": false,
@@ -29,7 +29,6 @@
         },
         "tasks-chunks": [
             {
-                "debug-mode": true,
                 "type": "repair",
                 "benchmarks":[
                     {
@@ -49,7 +48,6 @@
                 ]
             },
             {
-                "debug-mode": true,
                 "type": "repair",
                 "benchmarks":[
                     {
@@ -65,7 +63,6 @@
                 ]
             },
             {
-                "debug-mode": true,
                 "type": "repair",
                 "benchmarks":[
                     {
