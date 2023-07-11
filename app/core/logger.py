@@ -182,7 +182,7 @@ def log_tool_stats(task_tag_name, tool_stats: ToolStats):
 def log_benchmark_stats(benchmark_tag, benchmark_stats: BenchmarkStats):
 
     with open(values.file_stats_log, "a") as log_file:
-        log_file.write("\n benchmark bug: " + benchmark_tag + "\n")
+        log_file.write("\n benchmark bug: {0}\n".format(benchmark_tag))
         log_file.write("\t\t deployed: {0}\n".format(benchmark_stats.deployed))
         log_file.write("\t\t configured: {0}\n".format(benchmark_stats.configured))
         log_file.write("\t\t built: {0}\n".format(benchmark_stats.built))
