@@ -230,7 +230,7 @@ def parse_args():
         help="pull latest image from Dockerhub",
         dest="use_latest_image",
         action="store_true",
-        default=True,
+        default=False,
     )
 
     optional.add_argument(
