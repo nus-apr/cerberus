@@ -1,6 +1,7 @@
 import os
 from os.path import join
 
+from app.core import abstractions
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
@@ -14,6 +15,59 @@ class Refactory(AbstractBenchmark):
             bug_index, container_id, test_all
         )
         return is_error
+
+    def setup_container(self, bug_index, image_name, cpu):
+        """
+        Setup the container for the experiment by constructing volumes,
+        which point to certain folders in the project
+        """
+        container_id = super(Refactory, self).setup_container(
+            bug_index, image_name, cpu
+        )
+        experiment_item = self.experiment_subjects[bug_index - 1]
+
+        root = join(self.dir_expr, "src")
+
+        self.run_command(
+            container_id,
+            "mkdir -p {}".format(join(root, "code")),
+        )
+
+        for dir in ["wrong", "reference", "correct"]:
+            self.run_command(
+                container_id,
+                "mkdir -p {}".format(join(root, "code", dir)),
+            )
+
+        self.run_command(
+            container_id,
+            "cp -r {} {}".format(
+                join(self.dir_expr, "base", experiment_item[self.key_subject], "ans"),
+                root,
+            ),
+        )
+
+        self.run_command(
+            container_id,
+            "cp -r {} {}".format(
+                join(self.dir_setup, "reference.py"), join(root, "code", "reference")
+            ),
+        )
+
+        self.run_command(
+            container_id,
+            "cp {} {}".format(join(self.dir_setup, "global.py"), join(root, "code")),
+        )
+
+        self.run_command(
+            container_id,
+            "cp -r {} {}".format(
+                join(self.dir_setup, experiment_item["source_file"]),
+                join(root, "code", "wrong"),
+            ),
+        )
+
+        return container_id
 
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")

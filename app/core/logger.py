@@ -30,7 +30,7 @@ def setup_logger(name, log_file, level=logging.INFO, formatter=None):
 
 def create_log_files():
     global _logger_main, _logger_build, _logger_command, _logger_error
-    log_file_name = "log-" + str(time.time())
+    log_file_name = "log-{}".format(time.strftime("%b_%d_%H_%M"))
     log_file_path = join(values.dir_log_base, log_file_name)
     values.file_main_log = log_file_path
     _logger_main = setup_logger("main", values.file_main_log, level=logging.DEBUG)
@@ -122,7 +122,7 @@ def warning(message):
 def log_tool_stats(task_tag_name, tool_stats: ToolStats):
 
     with open(values.file_stats_log, "a") as log_file:
-        log_file.write("\nexperiment: " + task_tag_name + "\n")
+        log_file.write("\nexperiment: {0}\n".format(task_tag_name))
         log_file.write(
             "\t\t search space size: {0}\n".format(tool_stats.patches_stats.size)
         )

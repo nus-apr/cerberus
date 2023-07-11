@@ -148,8 +148,8 @@ def build_image(dockerfile_path: str, image_name: str):
 
 def build_benchmark_image(image_name: str) -> Optional[str]:
     benchmark_name = image_name.split("-")[0]
-    dockerfile_path = "{}/{}/Dockerfile".format(
-        values.dir_benchmark, benchmark_name.lower()
+    dockerfile_path = os.path.join(
+        values.dir_benchmark, benchmark_name.lower(), "Dockerfile"
     )
     tool_image_id = build_image(dockerfile_path, image_name)
     return tool_image_id

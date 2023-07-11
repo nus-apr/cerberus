@@ -154,6 +154,7 @@ class AbstractTool(AbstractDriver):
 
     def process_status(self, status: int):
         if status != 0:
+            self.stats.error_stats.is_error = True
             values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
             emitter.warning(
                 "\t\t\t[framework] {0} exited with an error code {1}".format(
