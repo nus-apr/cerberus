@@ -101,9 +101,6 @@ class Configurations:
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
-        "is-email-set": False,
-        "is-discord-set": False,
-        "is-slack-set": False,
         "is-debug": False,
         "use-purge": False,
         "only-analyse": False,
@@ -298,11 +295,14 @@ class Configurations:
                     "[error] Unknown key {} or invalid type of value".format(key)
                 )
 
-        if values.slack_configuration["hook_url"] or (
-            values.slack_configuration["oauth_token"]
-            and values.slack_configuration["channel"]
+        if not (
+            values.slack_configuration["hook_url"]
+            or (
+                values.slack_configuration["oauth_token"]
+                and values.slack_configuration["channel"]
+            )
         ):
-            self.__runtime_config_values["is-slack-set"] = True
+            utilities.error_exit("[error] invalid configuration for slack.")
 
     def read_email_config_file(self):
         email_config_info = {}
@@ -317,12 +317,12 @@ class Configurations:
                 utilities.error_exit(
                     "[error] unknown key {} or invalid type of value".format(key)
                 )
-        if (
+        if not (
             values.email_configuration["username"]
             and values.email_configuration["password"]
             and values.email_configuration["host"]
         ):
-            self.__runtime_config_values["is-email-set"] = True
+            utilities.error_exit("[error] invalid configuration for email.")
 
     def read_discord_config_file(self):
         discord_config_info = {}
@@ -331,9 +331,8 @@ class Configurations:
 
         if "hook_url" in discord_config_info and discord_config_info["hook_url"] != "":
             if type(discord_config_info["hook_url"]) != str:
-                utilities.error_exit("[error] Invalid webhook URL")
+                utilities.error_exit("[error] invalid webhook URL")
             values.discord_configuration["hook_url"] = discord_config_info["hook_url"]
-            self.__runtime_config_values["is-discord-set"] = True
 
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():
@@ -410,8 +409,5 @@ class Configurations:
         values.tool_list = self.__runtime_config_values["tool-list"]
 
         values.tool_params = self.__runtime_config_values["tool-params"]
-        values.is_email_set = self.__runtime_config_values["is-email-set"]
-        values.is_slack_set = self.__runtime_config_values["is-slack-set"]
-        values.is_discord_set = self.__runtime_config_values["is-discord-set"]
 
         sys.setrecursionlimit(values.default_stack_size)

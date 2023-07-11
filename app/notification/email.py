@@ -2,6 +2,7 @@ import smtplib
 from email.mime.text import MIMEText
 from email.utils import formataddr
 
+from app.core import definitions
 from app.core import values
 
 
@@ -15,7 +16,7 @@ def create_message(text, to_address, subject):
 
 
 def send_message(text, subject="Cerberus status update"):
-    if not values.is_email_set:
+    if not values.email_configuration[definitions.KEY_ENABLED]:
         return
     client = (
         smtplib.SMTP_SSL
