@@ -90,12 +90,14 @@ def pull_image(image_name: str, tag_name: str):
                 emitter.build("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
     except docker.errors.APIError as exp:  # type: ignore
-        emitter.warning(exp)
-        emitter.warning("[error] unable to pull image: docker daemon error")
+        emitter.warning(
+            "\t[docker-api][warning] unable to pull image: docker daemon error"
+        )
+        emitter.debug(exp)
     except IOError as ex:
         emitter.error(ex)
         raise RuntimeError(
-            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+            "\t[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
         )
     except Exception as ex:
         emitter.warning(ex)

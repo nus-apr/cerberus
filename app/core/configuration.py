@@ -125,6 +125,7 @@ class Configurations:
         "directories": {"data": "/data"},
         "repair-profile-id-list": ["C1"],
         "container-profile-id-list": ["CC1"],
+        "use-latest-image": False,
     }
     __runtime_config_values = __default_config_values
 
@@ -186,6 +187,9 @@ class Configurations:
 
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
+
+        if arg_list.use_latest_image:
+            self.__runtime_config_values["use-latest-image"] = True
 
         if arg_list.parallel:
             self.__runtime_config_values["parallel"] = True
@@ -358,6 +362,7 @@ class Configurations:
             "container-profile-id-list"
         ]
         values.use_parallel = self.__runtime_config_values["parallel"]
+        values.use_latest_image = self.__runtime_config_values["use-latest-image"]
 
         if (
             values.start_index is None

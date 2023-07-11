@@ -209,18 +209,20 @@ class AbstractTool(AbstractDriver):
                     )
                 )
                 # Get the local image
-                image = container.get_image(repo_name, tag_name)
+                local_image = container.get_image(repo_name, tag_name)
                 # Then try pulling. If it is the same one we are quick
-                # If not we have to wait but it is safer than getting stale resuls.
+                # If not we have to wait but it is safer than getting stale results.
                 # In theory this has a supply chain vulnerability but we can assume
                 # That the storage is safe
-                possibly_new_image = container.pull_image(repo_name, tag_name)
+                if values.use_latest_image:
+                    remote_image = container.pull_image(repo_name, tag_name)
 
-                if possibly_new_image and image.id != possibly_new_image.id:  # type: ignore
-                    emitter.information(
-                        "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
-                    )
-                    values.rebuild_all = True
+                    if remote_image and local_image.id != remote_image.id:  # type: ignore
+                        emitter.information(
+                            "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                        )
+                        if values.use_latest_image:
+                            values.rebuild_all = True
 
         else:
             local_path = shutil.which(self.name.lower())
