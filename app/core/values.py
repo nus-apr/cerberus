@@ -71,9 +71,6 @@ use_container = True
 dump_patches = False
 use_valkyrie = False
 use_gpu = False
-is_email_set = False
-is_slack_set = False
-is_discord_set = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
@@ -106,8 +103,14 @@ experiment_status: ContextVar[TaskStatus] = ContextVar(
 )
 job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
 
-slack_configuration = {"hook_url": "", "oauth_token": "", "channel": ""}
+slack_configuration = {
+    "enabled": False,
+    "hook_url": "",
+    "oauth_token": "",
+    "channel": "",
+}
 email_configuration = {
+    "enabled": False,
     "ssl_from_start": True,
     "port": 465,
     "host": "",
@@ -115,7 +118,7 @@ email_configuration = {
     "password": "",
     "to": "",
 }
-discord_configuration = {"hook_url": ""}
+discord_configuration = {"enabled": False, "hook_url": ""}
 
 
 running_tool = False

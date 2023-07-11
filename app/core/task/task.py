@@ -243,7 +243,9 @@ def create_running_container(
         container.build_image(tmp_dockerfile, image_name)
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
-    emitter.information("building temporary container for log extraction")
+    emitter.information(
+        "\t\t[framework] building temporary container for log extraction"
+    )
     tmp_container_id = container.build_container(
         container_name, dict(), image_name, cpu, container_config_info
     )
@@ -255,7 +257,7 @@ def create_running_container(
         )
         container.stop_container(tmp_container_id)
         container.remove_container(tmp_container_id)
-    emitter.information("building main container for experiment")
+    emitter.information("\t\t[framework] building main container for experiment")
     container_id = container.build_container(
         container_name, volume_list, image_name, cpu, container_config_info
     )

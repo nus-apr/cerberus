@@ -31,6 +31,7 @@ KEY_COMPILE_PROGRAMS = "compile_programs"
 KEY_CONTAINER_CPU_COUNT = "cpu_count"
 KEY_CONTAINER_MEM_LIMIT = "mem_limit"
 KEY_CONTAINER_ENABLE_NETWORK = "enable_network"
+KEY_ENABLED = "enabled"
 
 KEY_JAVA_VERSION = "java_version"
 KEY_BUILD_SYSTEM = "build_system"

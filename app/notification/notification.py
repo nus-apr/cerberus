@@ -1,18 +1,19 @@
+from app.core import definitions
 from app.core import utilities
 from app.core import values
 from app.notification import email
 
 
 def notify(message, data=None):
-    if values.is_email_set:
+    if values.email_configuration[definitions.KEY_ENABLED]:
         email.send_message(message)
 
-    if values.is_slack_set:
+    if values.slack_configuration[definitions.KEY_ENABLED]:
         from app.notification import slack
 
         slack.send_message(message, data)
 
-    if values.is_discord_set:
+    if values.discord_configuration[definitions.KEY_ENABLED]:
         from app.notification import discord
 
         discord.send_message(message)
