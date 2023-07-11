@@ -311,7 +311,7 @@ class AbstractBenchmark(AbstractDriver):
             not ignore_rebuild and values.rebuild_all
         ):
             emitter.warning(
-                "\t\t[framework][WARNING] experiment subject {} with bug name {} is not built".format(
+                "\t\t[framework][WARNING] experiment subject {} with bug name {} is not built or is needed to be rebuilt".format(
                     subject_name, bug_id
                 )
             )
@@ -382,7 +382,7 @@ class AbstractBenchmark(AbstractDriver):
 
     @abc.abstractmethod
     def clean(self, exp_dir_path: str, container_id: Optional[str]):
-        """Clean up any residual files. This method is used for the case where Cerberus has been ran1 locally."""
+        """Clean up any residual files. This method is used for the case where Cerberus has been ran locally."""
         return
 
     def emit_normal(self, message):

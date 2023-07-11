@@ -260,10 +260,6 @@ class AbstractTool(AbstractDriver):
             container.copy_file_from_container(
                 self.container_id, self.dir_output, dir_artifacts
             )
-            container.copy_file_from_container(
-                self.container_id, self.dir_logs, dir_logs
-            )
-            pass
         else:
             save_command = "cp -rf {}/* {};".format(self.dir_output, dir_results)
             if self.dir_logs != "":
@@ -274,7 +270,6 @@ class AbstractTool(AbstractDriver):
                 save_command += "cp -rf {}/* {}".format(self.dir_logs, dir_logs)
 
             execute_command(save_command)
-        return
 
     def read_file(self, file_path, encoding="utf-8"):
         return abstractions.read_file(self.container_id, file_path, encoding)
