@@ -1,0 +1,252 @@
+{
+    "general": {
+        "parallel": true,
+        "enable_ui": false
+    },
+    "tasks-data": {
+        "default-config": {
+            "compact-results": true,
+            "debug-mode": false,
+            "dump-patches": false,
+            "docker-host": "unix:///var/run/docker.sock",
+            "only-analyse": false,
+            "only-setup": false,
+            "only-instrument": false,
+            "only-test": false,
+            "rebuild-all": false,
+            "rebuild-base": false,
+            "use-cache": false,
+            "use-container": true,
+            "use-gpu": false,
+            "use-purge": false,
+            "max-cpu-count": 4,
+            "container-profiles-id-list": [
+                "CP1"
+            ],
+            "task-profiles-id-list": [
+                "TP1"
+            ]
+        },
+        "tasks-chunks": [
+            {
+                "debug-mode": true,
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "vulnloc",
+                        "bug-id-list":["28-29"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"extractfix",
+                        "params":""
+                    },
+                    {
+                        "name":"vulnfix",
+                        "params":""
+                    }
+                ]
+            },
+            {
+                "debug-mode": true,
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "vulnloc",
+                        "bug-id-list":["31-33"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"extractfix",
+                        "params":""
+                    }
+                ]
+            },
+            {
+                "debug-mode": true,
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "refactory",
+                        "bug-id-list":["1-3"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"refactory",
+                        "params":""
+                    }
+                ]
+            }
+        ]
+    },
+    "profiles": {
+        "container-profiles": [
+            {
+                "id": "CP1",
+                "cpu-count": 2,
+                "mem-limit": "16g",
+                "enable-network": true
+            },
+            {
+                "id": "CP2",
+                "cpu-count": 2,
+                "mem-limit": "32g",
+                "enable-network": true
+            },
+            {
+                "id": "CP3",
+                "cpu-count": 2,
+                "mem-limit": "64g",
+                "enable-network": true
+            },
+            {
+                "id": "CP4",
+                "cpu-count": 4,
+                "mem-limit": "16g",
+                "enable-network": true
+            },
+            {
+                "id": "CP5",
+                "cpu-count": 4,
+                "mem-limit": "32g",
+                "enable-network": true
+            },
+            {
+                "id": "CP6",
+                "cpu-count": 4,
+                "mem-limit": "64g",
+                "enable-network": true
+            },
+            {
+                "id": "CP7",
+                "cpu-count": 8,
+                "mem-limit": "16g",
+                "enable-network": true
+            },
+            {
+                "id": "CP8",
+                "cpu-count": 8,
+                "mem-limit": "32g",
+                "enable-network": true
+            },
+            {
+                "id": "CP9",
+                "cpu-count": 8,
+                "mem-limit": "64g",
+                "enable-network": true
+            },
+            {
+                "id": "CP10",
+                "cpu-count": 16,
+                "mem-limit": "16g",
+                "enable-network": true
+            },
+            {
+                "id": "CP11",
+                "cpu-count": 16,
+                "mem-limit": "32g",
+                "enable-network": true
+            },
+            {
+                "id": "CP12",
+                "cpu-count": 16,
+                "mem-limit": "64g",
+                "enable-network": true
+            },
+            {
+                "id": "CP13",
+                "cpu-count": 32,
+                "mem-limit": "16g",
+                "enable-network": true
+            },
+            {
+                "id": "CP14",
+                "cpu-count": 32,
+                "mem-limit": "32g",
+                "enable-network": true
+            },
+            {
+                "id": "CP15",
+                "cpu-count": 32,
+                "mem-limit": "64g",
+                "enable-network": true
+            }
+        ],
+        "task-profiles": [
+            {
+                "id": "TP1",
+                "timeout": "1",
+                "fault-location": "auto",
+                "passing-test-ratio": 1
+            },
+            {
+                "id": "TP2",
+                "timeout": "1",
+                "fault-location": "dev",
+                "passing-test-ratio": 1
+            },
+            {
+                "id": "TP3",
+                "timeout": "1",
+                "fault-location": "dev",
+                "passing-test-ratio": 0
+            },
+            {
+                "id": "TP4",
+                "timeout": "1",
+                "fault-location": "dev",
+                "passing-test-ratio": 0.5
+            },
+            {
+                "id": "TP5",
+                "timeout": "2",
+                "fault-location": "auto",
+                "passing-test-ratio": 1
+            },
+            {
+                "id": "TP6",
+                "timeout": "2",
+                "fault-location": "dev",
+                "passing-test-ratio": 1
+            },
+            {
+                "id": "TP7",
+                "timeout": "2",
+                "fault-location": "dev",
+                "passing-test-ratio": 0
+            },
+            {
+                "id": "TP8",
+                "timeout": "2",
+                "fault-location": "dev",
+                "passing-test-ratio": 0.5
+            }
+        ]
+    },
+    "notifiers":{
+        "slack": {
+            "enable": false,
+            "hook-url": "as",
+            "oauth-token": "as",
+            "channel": "d"
+        },
+        "discord": {
+            "enable": false,
+            "hook-url": "as"
+        },
+        "email": {
+            "enable": false,
+            "username": "sad8",
+            "password": "as4a",
+            "host": "",
+            "port": 465,
+            "ssl-from-start": false,
+            "recipients": [
+                "a@gmail.com"
+            ]
+        }
+    }
+}
