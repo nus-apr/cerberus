@@ -28,7 +28,7 @@ class F1X(AbstractRepairTool):
         if self.is_instrument_only:
             return
 
-        repair_conf_id = repair_config_info[self.key_id]
+        task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         fix_file = bug_info[self.key_fix_file]
         fix_location = bug_info[self.key_fix_loc]
@@ -40,7 +40,7 @@ class F1X(AbstractRepairTool):
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         self.generate_test_driver()
         test_driver_path = join(self.dir_expr, "f1x-test")
@@ -414,10 +414,10 @@ class F1X(AbstractRepairTool):
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
-            "{}-{}-{}-stats.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         regex = re.compile("(.*-output.log$)")

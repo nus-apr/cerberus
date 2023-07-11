@@ -102,7 +102,7 @@ def analyze_all(
             """
             Pass over some fields as we are going into a new thread
             """
-            values.current_repair_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
             run_analysis(
                 dir_info,
@@ -123,7 +123,7 @@ def analyze_all(
                 repair_config_info,
                 container_id,
                 benchmark_name,
-                values.current_repair_profile_id.get("NA"),
+                values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
                 final_status,
             ),

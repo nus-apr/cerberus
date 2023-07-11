@@ -52,13 +52,13 @@ class FootPatch(AbstractRepairTool):
         super(FootPatch, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        repair_conf_id = repair_config_info[self.key_id]
+        task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         timeout_h = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         if self.use_container:

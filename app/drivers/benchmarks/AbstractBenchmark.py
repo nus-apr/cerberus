@@ -118,6 +118,19 @@ class AbstractBenchmark(AbstractDriver):
     def get_list(self):
         return self.experiment_subjects
 
+    @staticmethod
+    def load_meta_file_static(path, name):
+        meta_file_path = join(path, name, "meta-data.json")
+        with open(meta_file_path, "r") as in_file:
+            json_data = json.load(in_file)
+            if json_data:
+                return json_data
+            else:
+                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+                utilities.error_exit(
+                    "Could not load meta-data from ", meta_file_path.meta_file
+                )
+
     def load_meta_file(self):
         emitter.normal("\t[framework] loading experiment meta-data")
         if not self.meta_file:

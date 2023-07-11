@@ -20,7 +20,7 @@ class Angelix(AbstractRepairTool):
         )
         if self.is_instrument_only:
             return
-        repair_conf_id = repair_config_info[self.key_id]
+        task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         source_file = str(bug_info[self.key_fix_file])
         fix_line_number_list = bug_info[self.key_fix_lines]
@@ -32,7 +32,7 @@ class Angelix(AbstractRepairTool):
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
-            "{}-{}-{}-output.log".format(repair_conf_id, self.name.lower(), bug_id),
+            "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         src_path = join(self.dir_expr, "src")
         gold_path = join(self.dir_expr, "src-gold")
@@ -130,12 +130,12 @@ class Angelix(AbstractRepairTool):
         """instrumentation for the experiment as needed by the tool"""
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
-        repair_conf_id = str(self.current_repair_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         buggy_file = bug_info[self.key_fix_file]
         self.log_instrument_path = (
             self.dir_logs
             + "/"
-            + repair_conf_id
+            + task_conf_id
             + "-"
             + self.name
             + "-"
