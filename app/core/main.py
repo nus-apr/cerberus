@@ -314,6 +314,10 @@ def main():
                     if not values.only_setup:
                         task.run(*task_data, cpu, experiment_image_id)
         else:
+            if not parsed_args.task_type:
+                utilities.error_exit(
+                    "Configuration file was not passed. Please provide a task type!"
+                )
             bootstrap(parsed_args)
             if parsed_args.parallel:
                 info = sys.version_info

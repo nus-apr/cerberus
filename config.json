@@ -4,8 +4,8 @@
         "enable_ui": false,
         "debug-mode": true
     },
-    "tasks-data": {
-        "default-config": {
+    "tasks": {
+        "default": {
             "compact-results": true,
             "dump-patches": false,
             "docker-host": "unix:///var/run/docker.sock",
@@ -27,7 +27,7 @@
                 "TP1"
             ]
         },
-        "tasks-chunks": [
+        "chunks": [
             {
                 "type": "repair",
                 "benchmarks":[
