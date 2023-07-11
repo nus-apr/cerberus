@@ -113,15 +113,6 @@ class SequenceR(AbstractRepairTool):
         """
         self.emit_normal("reading output")
 
-        count_plausible = 0
-        count_enumerations = 0
-
-        # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
