@@ -246,10 +246,9 @@ def create_running_container(
     if not tmp_container_id:
         utilities.error_exit("Could not create temporary container")
     else:
-        copy_log_cmd = "docker cp {}:{} {}".format(
+        container.copy_file_from_container(
             tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
         )
-        utilities.execute_command(copy_log_cmd)
         container.stop_container(tmp_container_id)
         container.remove_container(tmp_container_id)
     container_id = container.build_container(
