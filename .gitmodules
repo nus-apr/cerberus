@@ -49,3 +49,6 @@
 [submodule "benchmark/quixbugspython"]
 	path = benchmark/quixbugspython
 	url = https://github.com/nus-apr/quixbugs-python-benchmark.git
+[submodule "benchmark/autocodepython"]
+	path = benchmark/autocodepython
+	url = https://github.com/RepairComp/autocodepython.git
