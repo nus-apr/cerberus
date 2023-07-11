@@ -62,20 +62,7 @@ class AbstractBenchmark(AbstractDriver):
             utilities.error_exit(
                 "Concrete benchmark has not instantiated the name field. Aborting..."
             )
-        if len(os.listdir(join(values.dir_benchmark, self.name))) == 0:
-            emitter.information(
-                "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
-            )
-            if (
-                utilities.execute_command(
-                    f"timeout -k 5s 10s 'git submodule update --init benchmark/{self.name}'",
-                    directory=values.dir_main,
-                )
-                != 0
-            ):
-                utilities.error_exit(
-                    "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
-                )
+        AbstractBenchmark.check_benchmark_folder(self.name)
         self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
         if self.image_name == "":
             self.image_name = "{}-benchmark".format(self.name)
@@ -121,6 +108,7 @@ class AbstractBenchmark(AbstractDriver):
     @staticmethod
     def load_meta_file_static(path, name) -> List[Any]:
         meta_file_path = join(path, name, "meta-data.json")
+        AbstractBenchmark.check_benchmark_folder(name)
         with open(meta_file_path, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
@@ -129,6 +117,23 @@ class AbstractBenchmark(AbstractDriver):
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit(
                     "Could not load meta-data from {}".format(meta_file_path)
+                )
+
+    @staticmethod
+    def check_benchmark_folder(name):
+        if len(os.listdir(join(values.dir_benchmark, name))) == 0:
+            emitter.information(
+                "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
+            )
+            if (
+                utilities.execute_command(
+                    f"timeout -k 5s 10s 'git submodule update --init benchmark/{name}'",
+                    directory=values.dir_main,
+                )
+                != 0
+            ):
+                utilities.error_exit(
+                    "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
                 )
 
     def load_meta_file(self):
