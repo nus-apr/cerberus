@@ -270,7 +270,6 @@ def repair_all(
         )
         tool_thread.start()
 
-    if not values.ui_active:
         if tool_thread is None:
             utilities.error_exit("Thread was not created")
         wait_time = 5.0

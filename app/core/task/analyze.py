@@ -135,7 +135,6 @@ def analyze_all(
         )
         tool_thread.start()
 
-    if not values.ui_active:
         if not tool_thread:
             utilities.error_exit(
                 "\t\t[framework] tool thread was not created somehow??"

@@ -115,11 +115,11 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_setup = dir_info["container"]["setup"]
             self.dir_base_expr = "/experiment/"
 
-    def get_list(self):
+    def get_list(self) -> List[Any]:
         return self.experiment_subjects
 
     @staticmethod
-    def load_meta_file_static(path, name):
+    def load_meta_file_static(path, name) -> List[Any]:
         meta_file_path = join(path, name, "meta-data.json")
         with open(meta_file_path, "r") as in_file:
             json_data = json.load(in_file)
@@ -128,7 +128,7 @@ class AbstractBenchmark(AbstractDriver):
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit(
-                    "Could not load meta-data from ", meta_file_path.meta_file
+                    "Could not load meta-data from {}".format(meta_file_path)
                 )
 
     def load_meta_file(self):
@@ -145,7 +145,6 @@ class AbstractBenchmark(AbstractDriver):
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit("Could not load meta-data from ", self.meta_file)
-        return
 
     def run_command(
         self,
