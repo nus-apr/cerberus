@@ -358,7 +358,9 @@ class Configurations:
         values.dump_patches = self.__runtime_config_values["dump-patches"]
         values.rebuild_all = self.__runtime_config_values["rebuild-all"]
         values.use_gpu = self.__runtime_config_values["use-gpu"]
+        values.use_purge = self.__runtime_config_values["use-purge"]
         values.runs = max(1, self.__runtime_config_values["runs"])
+        values.use_cache = self.__runtime_config_values["use-cache"]
         values.cpus = max(
             1,
             min(

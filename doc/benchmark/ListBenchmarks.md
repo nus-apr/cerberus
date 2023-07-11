@@ -45,7 +45,8 @@
 
 | # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
 | - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
-<!-- | 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
+<!--
+| 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
 | 2 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
 | 3 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
 | 4 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |

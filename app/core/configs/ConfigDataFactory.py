@@ -1,5 +1,6 @@
 from typing import List
 
+from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.ConfigFieldsEnum import ConfigFieldsEnum
 from app.core.configs.general.GeneralConfig import GeneralConfig
@@ -82,34 +83,48 @@ class ConfigDataFactory:
             tasks_chunk_config_dict = {**task_default_config, **tasks_chunk_config_dict}
             task_config = TaskConfig(
                 task_type=tasks_chunk_config_dict[ConfigFieldsEnum.TYPE.value],
-                compact_results=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.COMPACT_RESULTS.value
-                ],
-                dump_patches=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.DUMP_PATCHES.value
-                ],
-                docker_host=tasks_chunk_config_dict[ConfigFieldsEnum.DOCKER_HOST.value],
-                only_analyse=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.ONLY_ANALYSE.value
-                ],
-                only_setup=tasks_chunk_config_dict[ConfigFieldsEnum.ONLY_SETUP.value],
-                only_instrument=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.ONLY_INSTRUMENT.value
-                ],
-                only_test=tasks_chunk_config_dict[ConfigFieldsEnum.ONLY_TEST.value],
-                rebuild_all=tasks_chunk_config_dict[ConfigFieldsEnum.REBUILD_ALL.value],
-                rebuild_base=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.REBUILD_BASE.value
-                ],
-                use_cache=tasks_chunk_config_dict[ConfigFieldsEnum.USE_CACHE.value],
-                use_container=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.USE_CONTAINER.value
-                ],
-                use_gpu=tasks_chunk_config_dict[ConfigFieldsEnum.USE_GPU.value],
-                use_purge=tasks_chunk_config_dict[ConfigFieldsEnum.USE_PURGE.value],
-                max_cpu_count=tasks_chunk_config_dict[
-                    ConfigFieldsEnum.MAX_CPU_COUNT.value
-                ],
+                compact_results=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.COMPACT_RESULTS.value, values.compact_results
+                ),
+                dump_patches=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.DUMP_PATCHES.value, values.dump_patches
+                ),
+                docker_host=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.DOCKER_HOST.value, values.docker_host
+                ),
+                only_analyse=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.ONLY_ANALYSE.value, values.only_analyse
+                ),
+                only_setup=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.ONLY_SETUP.value, values.only_setup
+                ),
+                only_instrument=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.ONLY_INSTRUMENT.value, values.only_instrument
+                ),
+                only_test=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.ONLY_TEST.value, values.only_test
+                ),
+                rebuild_all=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.REBUILD_ALL.value, values.rebuild_all
+                ),
+                rebuild_base=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.REBUILD_BASE.value, values.rebuild_base
+                ),
+                use_cache=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_CACHE.value, values.use_cache
+                ),
+                use_container=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_CONTAINER.value, values.use_container
+                ),
+                use_gpu=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_GPU.value, values.use_gpu
+                ),
+                use_purge=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_PURGE.value, values.use_purge
+                ),
+                max_cpu_count=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.MAX_CPU_COUNT.value, 1
+                ),
             )
 
             benchmarks_config_list = []

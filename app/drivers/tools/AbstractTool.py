@@ -238,7 +238,7 @@ class AbstractTool(AbstractDriver):
         """Any post-processing required for the repair"""
         if self.container_id:
             container.stop_container(self.container_id)
-        if values.is_purge:
+        if values.use_purge:
             self.clean_up()
         return
 
