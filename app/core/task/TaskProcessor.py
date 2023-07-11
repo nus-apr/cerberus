@@ -55,13 +55,6 @@ class TaskProcessor:
     def execute(
         config: Config,
     ) -> TaskList:
-        if config.notifiers.discord_config:
-            values.discord_configuration = config.notifiers.discord_config.__dict__
-        if config.notifiers.slack_config:
-            values.slack_configuration = config.notifiers.slack_config.__dict__
-        if config.notifiers.email_config:
-            values.email_configuration = config.notifiers.email_config.__dict__
-
         for tasks_chunk_config in config.tasks_configs_list:
 
             for container_profile_id in tasks_chunk_config.container_profile_id_list:
