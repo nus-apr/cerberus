@@ -69,23 +69,23 @@ def bootstrap(arg_list: Namespace):
 def run(
     tool_list: List[AbstractTool],
     benchmark: AbstractBenchmark,
-    repair_setup: Any,
+    task_setup: Any,
     container_setup: Any,
 ):
     emitter.sub_title(f"Running {values.task_type.get()} task")
     iteration = 0
 
-    for repair_config_info in map(
-        lambda repair_profile_id: repair_setup[repair_profile_id],
-        values.repair_profile_id_list,
+    for task_config_info in map(
+        lambda task_profile_id: task_setup[task_profile_id],
+        values.task_profile_id_list,
     ):
-
+        task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
         for container_config_info in map(
             lambda container_profile_id: container_setup[container_profile_id],
             values.container_profile_id_list,
         ):
 
-            values.current_task_profile_id.set(repair_config_info[definitions.KEY_ID])
+            values.current_task_profile_id.set(task_config_info[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 container_config_info[definitions.KEY_ID]
             )
@@ -135,7 +135,7 @@ def run(
                         benchmark,
                         tool,
                         experiment_item,
-                        repair_config_info,
+                        task_config_info,
                         container_config_info,
                         str(bug_index),
                         cpu,
@@ -148,7 +148,7 @@ def get_repair_setup() -> Any:
     repair_setup = configuration.load_configuration_details(
         values.file_repair_configuration
     )
-    for repair_profile_id in values.repair_profile_id_list:
+    for repair_profile_id in values.task_profile_id_list:
         if repair_profile_id not in repair_setup:
             utilities.error_exit(
                 "invalid repair profile id {}".format(repair_profile_id)

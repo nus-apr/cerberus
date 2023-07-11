@@ -283,7 +283,7 @@ class Cerberus(App[List[Result]]):
         self,
         tool_list: List[AbstractTool],
         benchmark: AbstractBenchmark,
-        repair_setup: Any,
+        task_setup: Any,
         container_setup: Any,
     ):
         utilities.check_space()
@@ -291,8 +291,8 @@ class Cerberus(App[List[Result]]):
         for container_config_info in map(
             lambda x: container_setup[x], values.container_profile_id_list
         ):
-            for repair_config_info in map(
-                lambda x: repair_setup[x], values.repair_profile_id_list
+            for task_config_info in map(
+                lambda x: task_setup[x], values.task_profile_id_list
             ):
                 for experiment_item in main.filter_experiment_list(benchmark):
                     bug_index = experiment_item[definitions.KEY_ID]
@@ -311,52 +311,70 @@ class Cerberus(App[List[Result]]):
                                 iteration, bug_index, tool.name
                             )
                         )
-                        key = "-".join(
-                            [
-                                benchmark.name,
-                                tool.name,
-                                experiment_item[definitions.KEY_SUBJECT],
-                                experiment_item[definitions.KEY_BUG_ID],
-                                repair_config_info[definitions.KEY_ID],
-                                container_config_info[definitions.KEY_ID],
-                            ]
-                        )
-
-                        _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
+                        self.consturct_job(
+                            benchmark,
+                            tool,
+                            task_config_info,
+                            container_config_info,
+                            experiment_item,
+                            experiment_image_id,
                             iteration,
-                            benchmark.name,
-                            tool.name,
-                            experiment_item[definitions.KEY_SUBJECT],
-                            experiment_item[definitions.KEY_BUG_ID],
-                            repair_config_info[definitions.KEY_ID],
-                            container_config_info[definitions.KEY_ID],
-                            "N/A",
-                            "N/A",
-                            "Allocated",
-                            "N/A",
-                            "N/A",
-                            key=key,
-                        )
-
-                        log_map[key] = TextLog(
-                            highlight=True, markup=True, wrap=True, id=key + "_log"
-                        )
-                        self.hide(log_map[key])
-
-                        self.post_message(JobMount(key))
-                        self.post_message(
-                            JobAllocate(
-                                iteration,
-                                deepcopy(benchmark),
-                                deepcopy(tool),
-                                experiment_item,
-                                repair_config_info,
-                                container_config_info,
-                                experiment_image_id,
-                                key,
-                            )
                         )
         self.jobs_remaining = iteration
+
+    def consturct_job(
+        self,
+        benchmark,
+        tool,
+        task_config_info,
+        container_config_info,
+        experiment_item,
+        experiment_image_id,
+        iteration,
+    ):
+        key = "-".join(
+            [
+                benchmark.name,
+                tool.name,
+                experiment_item[definitions.KEY_SUBJECT],
+                experiment_item[definitions.KEY_BUG_ID],
+                task_config_info[definitions.KEY_ID],
+                container_config_info[definitions.KEY_ID],
+            ]
+        )
+
+        _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
+            iteration,
+            benchmark.name,
+            tool.name,
+            experiment_item[definitions.KEY_SUBJECT],
+            experiment_item[definitions.KEY_BUG_ID],
+            task_config_info[definitions.KEY_ID],
+            container_config_info[definitions.KEY_ID],
+            "N/A",
+            "N/A",
+            "Allocated",
+            "N/A",
+            "N/A",
+            key=key,
+        )
+
+        log_map[key] = TextLog(highlight=True, markup=True, wrap=True, id=key + "_log")
+        self.hide(log_map[key])
+
+        self.post_message(JobMount(key))
+        self.post_message(
+            JobAllocate(
+                iteration,
+                deepcopy(benchmark),
+                deepcopy(tool),
+                experiment_item,
+                task_config_info,
+                container_config_info,
+                experiment_image_id,
+                key,
+            )
+        )
 
     @on(Key)
     async def handle_key_press(self, message: Key):

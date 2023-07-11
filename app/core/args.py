@@ -24,11 +24,16 @@ def parse_args():
     required.add_argument(
         "task_type",
         help="type of task to run {analyze, prepare, repair}",
-        choices=["analyze", "prepare", "repair"],
+        choices=["analyze", "prepare", "repair", "fuzz"],
         metavar="task_type",
     )
 
     optional = parser.add_argument_group("Optional arguments")
+
+    optional.add_argument(
+        "-f", "--config-file", type=str, help="Path to the JSON config file"
+    )
+
     optional.add_argument(
         definitions.ARG_CONFIG_FILE,
         "-c",
@@ -217,7 +222,7 @@ def parse_args():
         definitions.ARG_CPU_COUNT,
         help="max amount of CPU cores which can be used by Cerberus",
         type=int,
-        default=multiprocessing.cpu_count(),
+        default=max(1, multiprocessing.cpu_count() - 2),
     )
 
     optional.add_argument(

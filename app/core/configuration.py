@@ -368,7 +368,7 @@ class Configurations:
         values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.repair_profile_id_list = self.__runtime_config_values[
+        values.task_profile_id_list = self.__runtime_config_values[
             "repair-profile-id-list"
         ]
         values.container_profile_id_list = self.__runtime_config_values[
@@ -410,6 +410,7 @@ class Configurations:
         values.debug = self.__runtime_config_values["is-debug"]
         values.tool_list = self.__runtime_config_values["tool-list"]
 
+        values.tool_params = self.__runtime_config_values["tool-params"]
         values.is_email_set = self.__runtime_config_values["is-email-set"]
         values.is_slack_set = self.__runtime_config_values["is-slack-set"]
         values.is_discord_set = self.__runtime_config_values["is-discord-set"]
