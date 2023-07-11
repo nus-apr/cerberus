@@ -20,7 +20,6 @@ class TaskStatus(Enum):
     CANCELLED = 14
     VALIDATING = 15
 
-
     def __str__(self) -> str:
         if self is self.SUCCESS:
             return "Success"

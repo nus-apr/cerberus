@@ -44,7 +44,7 @@ class Recoder(AbstractRepairTool):
                 self.bug_name,
                 bug_info[self.key_fix_file],
                 join(self.dir_expr, "src", file),
-                bug_info[self.key_fix_lines][0]
+                bug_info[self.key_fix_lines][0],
             )
         else:
             recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {}'".format(  # currently supporting only defects4j
@@ -52,7 +52,7 @@ class Recoder(AbstractRepairTool):
                 self.bug_name,
                 bug_info[self.key_fix_file],
                 join(self.dir_expr, "src", file),
-                bug_info[self.key_fix_lines][0]
+                bug_info[self.key_fix_lines][0],
             )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"
@@ -63,7 +63,7 @@ class Recoder(AbstractRepairTool):
             self.bug_name,
             bug_info[self.key_subject],
             bug_info[self.key_bug_id],
-            join(self.dir_expr, "src"), 
+            join(self.dir_expr, "src"),
             join(self.dir_expr, "src", file),
         )
 

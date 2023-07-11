@@ -666,7 +666,7 @@ class Cerberus(App[List[Result]]):
 
     def action_toggle_dark(self) -> None:
         """Toggle dark mode."""
-        self.dark: bool
+        self.dark: Reactive[bool]
         self.dark = not self.dark
 
     def debug_print(self, text: Any):

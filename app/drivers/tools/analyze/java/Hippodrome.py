@@ -37,19 +37,6 @@ class Hippodrome(AbstractAnalyzeTool):
         self.timestamp_log()
         self.emit_highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
-        """
-        Save useful artifacts from the repair execution
-        output folder -> self.dir_output
-        logs folder -> self.dir_logs
-        The parent method should be invoked at last to archive the results
-        """
-
-        self.run_command("mkdir -p /output/", "/dev/null", "/")
-        self.run_command("cp -rf {} /output/".format(self.dir_expr))
-        super().save_artefacts(dir_info)
-        return
-
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
@@ -70,7 +57,7 @@ class Hippodrome(AbstractAnalyzeTool):
                 count = int(line.split(":")[-1])
                 self.stats.patches_stats.generated = (
                     self.stats.patches_stats.enumerations
-                ) = max(self.stats.patches_stats, count)
+                ) = max(self.stats.patches_stats.generated, count)
             if "Applying Patch ID" in line:
                 self.stats.patches_stats.plausible += 1
         if is_error:

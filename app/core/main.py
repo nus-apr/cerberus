@@ -289,7 +289,7 @@ def parse_args():
     optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")
     optional.add_argument(
         definitions.ARG_BUG_ID_LIST,
-        type=list,
+        type=list,  # type: ignore
         help="list of identifiers for the bugs",
         nargs="+",
         default=[],
