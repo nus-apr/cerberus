@@ -463,7 +463,7 @@ def fix_permissions(container_id: str, dir_path: str):
 
 def list_dir(container_id: str, dir_path: str, regex=None):
     if not regex:
-        regex = "*"
+        regex = ".*"
     exist_command = 'find {} -regex "{}"'.format(dir_path, regex)
     _, output = exec_command(container_id, exist_command)
     file_list = []

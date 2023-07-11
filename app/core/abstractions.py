@@ -51,13 +51,15 @@ def write_json(container_id: Optional[str], data: Any, file_path: str):
 
 def list_dir(container_id: Optional[str], dir_path: str, regex=None):
     file_list = []
-    if not regex:
-        regex = "*"
     if container_id:
+        if not regex:
+            regex = ".*"
         if container.is_dir(container_id, dir_path):
             list_files = container.list_dir(container_id, dir_path, regex)
             file_list = [os.path.join(dir_path, t) for t in list_files]
     else:
+        if not regex:
+            regex = "*"
         if os.path.isdir(dir_path):
             list_files = list(pathlib.Path(dir_path).rglob(regex))
             file_list = [os.path.join(dir_path, t) for t in list_files]
