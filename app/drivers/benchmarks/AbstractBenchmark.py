@@ -15,7 +15,7 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.core.task.stats import BenchmarkStats
-from app.core.task.status import TaskStatus
+from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
 
