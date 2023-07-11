@@ -55,7 +55,7 @@ def list_dir(container_id: Optional[str], dir_path: str, regex=None):
         regex = "*"
     if container_id:
         if container.is_dir(container_id, dir_path):
-            list_files = container.list_dir(container_id, dir_path)
+            list_files = container.list_dir(container_id, dir_path, regex)
             file_list = [os.path.join(dir_path, t) for t in list_files]
     else:
         if os.path.isdir(dir_path):

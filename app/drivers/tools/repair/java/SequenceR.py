@@ -135,15 +135,14 @@ class SequenceR(AbstractRepairTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
         if not self.stats.error_stats.is_error:
-            patch_space = self.list_dir("/output/patches")
-            self.stats.patches_stats.generated = len(patch_space)
-            self.stats.patches_stats.enumerations = len(patch_space)
+            patch_space = len(self.list_dir("/output/patches", regex=".*java"))
+            self.stats.patches_stats.generated = patch_space
+            self.stats.patches_stats.enumerations = patch_space
             self.stats.patches_stats.plausible = len(
-                list(filter(lambda x: "passed" in x, patch_space))
+                self.list_dir("/output/patches", regex=".*/[0-9]+_passed/.*java")
             )
-            self.stats.patches_stats.non_compilable = (
-                self.stats.patches_stats.generated
-                - self.stats.patches_stats.enumerations
+            self.stats.patches_stats.non_compilable = len(
+                self.list_dir("/output/patches", regex=".*/[0-9]+/.*java")
             )
 
         return self.stats
