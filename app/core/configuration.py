@@ -34,7 +34,7 @@ def load_class(class_name: str):
 
 
 def load_tool(tool_name: str) -> AbstractTool:
-    tool_type = values.task_type
+    tool_type = values.task_type.get()
     emitter.normal(f"\t[framework] loading {tool_type} tool {tool_name}")
     tool_directory = f"{values.dir_tool_drivers}/{tool_type}"
     existing_tool_list = [
@@ -343,9 +343,9 @@ class Configurations:
 
     def update_configuration(self):
         emitter.normal("\t[framework] updating configuration values")
-        values.task_type = self.__runtime_config_values["task-type"]
+        values.task_type.set(self.__runtime_config_values["task-type"])
         values.only_setup = self.__runtime_config_values["only-setup"]
-        if values.task_type == "prepare":
+        if values.task_type.get() == "prepare":
             values.only_setup = True
         if not values.only_setup:
             if not self.__runtime_config_values["tool-list"]:

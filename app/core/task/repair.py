@@ -186,10 +186,12 @@ def repair_all(
             v_repair_config_info,
             repair_profile_id,
             job_identifier,
+            task_type,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
+            values.task_type.set(task_type)
             values.current_task_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
             parallel.consume_patches(v_path_info, v_dir_info, v_repair_config_info)
@@ -202,6 +204,7 @@ def repair_all(
                 v_repair_config_info,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
+                values.task_type.get("NA"),
             ),
         )
         consume_thread.start()
@@ -229,11 +232,13 @@ def repair_all(
             benchmark_name,
             repair_profile_id,
             job_identifier,
+            task_type,
             final_status,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
+            values.task_type.set(task_type)
             values.current_task_profile_id.set(repair_profile_id)
             values.job_identifier.set(job_identifier)
             run_repair(
@@ -257,6 +262,7 @@ def repair_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
+                values.task_type.get("NA"),
                 final_status,
             ),
             name="Wrapper thread for repair {} {} {}".format(

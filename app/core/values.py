@@ -81,7 +81,7 @@ ui_active = False
 use_parallel = False
 compact_results = False
 cpus = 1
-task_type: Optional[str] = None
+task_type: ContextVar[str] = ContextVar("task_type", default="")
 ui_max_width = 1000
 runs = 1
 use_latest_image = False
