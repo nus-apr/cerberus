@@ -8,7 +8,7 @@ from typing import Any
 from typing import List
 from typing import Optional
 
-from app.core.task.status import TaskStatus
+from app.core.task.TaskStatus import TaskStatus
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"

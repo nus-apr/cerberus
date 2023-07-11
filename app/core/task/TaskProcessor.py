@@ -15,6 +15,21 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
+TaskList = Iterable[
+    tuple[
+        TaskConfig,
+        tuple[
+            AbstractBenchmark,
+            AbstractTool,
+            Any,
+            dict[str, Any],
+            dict[str, Any],
+            str,
+        ],
+    ]
+]
+
+
 class TaskProcessor:
     @staticmethod
     def expand_interval(interval):
@@ -38,19 +53,7 @@ class TaskProcessor:
     @staticmethod
     def execute(
         config: Config,
-    ) -> Iterable[
-        tuple[
-            TaskConfig,
-            tuple[
-                AbstractBenchmark,
-                AbstractTool,
-                Any,
-                Dict[str, Any],
-                Dict[str, Any],
-                str,
-            ],
-        ]
-    ]:
+    ) -> TaskList:
         if config.notifiers.discord_config:
             values.discord_configuration = config.notifiers.discord_config.__dict__
         if config.notifiers.slack_config:

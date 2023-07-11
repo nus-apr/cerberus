@@ -9,7 +9,7 @@ from app.core import emitter
 from app.core import parallel
 from app.core import utilities
 from app.core import values
-from app.core.task.status import TaskStatus
+from app.core.task.TaskStatus import TaskStatus
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 

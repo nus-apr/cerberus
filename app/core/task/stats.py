@@ -2,7 +2,7 @@ from datetime import datetime
 
 from app.core import emitter
 from app.core import values
-from app.core.task.status import TaskStatus
+from app.core.task.TaskStatus import TaskStatus
 
 
 class ToolTimeStats:

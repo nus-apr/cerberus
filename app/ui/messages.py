@@ -6,7 +6,7 @@ from textual.message import Message
 
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.stats import ToolStats
-from app.core.task.status import TaskStatus
+from app.core.task.TaskStatus import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 

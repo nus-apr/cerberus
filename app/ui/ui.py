@@ -33,8 +33,8 @@ from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
-from app.core.task.status import TaskStatus
-from app.core.task.TaskProcessor import TaskProcessor
+from app.core.task.TaskProcessor import TaskList
+from app.core.task.TaskStatus import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
@@ -84,21 +84,7 @@ class Cerberus(App[List[Result]]):
         ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
 
-    tasks: Optional[
-        Iterable[
-            tuple[
-                TaskConfig,
-                tuple[
-                    AbstractBenchmark,
-                    AbstractTool,
-                    Any,
-                    dict[str, Any],
-                    dict[str, Any],
-                    str,
-                ],
-            ]
-        ]
-    ]
+    tasks: Optional[TaskList]
 
     async def _on_exit_app(self) -> None:
         values.ui_active = False
@@ -894,23 +880,7 @@ def update_current_job(status: str):
             app.update_status(current_job, status)
 
 
-def setup_ui(
-    tasks: Optional[
-        Iterable[
-            tuple[
-                TaskConfig,
-                tuple[
-                    AbstractBenchmark,
-                    AbstractTool,
-                    Any,
-                    dict[str, Any],
-                    dict[str, Any],
-                    str,
-                ],
-            ]
-        ]
-    ]
-):
+def setup_ui(tasks: Optional[TaskList] = None):
     global app
     app = Cerberus()
     app.tasks = tasks
