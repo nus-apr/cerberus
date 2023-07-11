@@ -6,6 +6,7 @@ import traceback
 from argparse import Namespace
 from multiprocessing import set_start_method
 from typing import Any
+from typing import Dict
 from typing import List
 
 import rich.traceback
@@ -21,6 +22,7 @@ from app.core.args import parse_args
 from app.core.configs.ConfigDataFactory import ConfigDataFactory
 from app.core.configs.ConfigDataLoader import ConfigDataLoader
 from app.core.configs.ConfigValidationSchemas import config_validation_schema
+from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configuration import Configurations
 from app.core.task import task
 from app.core.task.TaskProcessor import TaskProcessor
@@ -222,7 +224,11 @@ def filter_experiment_list(benchmark: AbstractBenchmark):
 
 
 def process_configs(
-    task_config, benchmark, experiment_item, task_profile, container_profile
+    task_config: TaskConfig,
+    benchmark: AbstractBenchmark,
+    experiment_item,
+    task_profile: Dict[str, Any],
+    container_profile: Dict[str, Any],
 ):
     for (k, v) in task_config.__dict__.items():
         if k != "task_type" and v is not None:
