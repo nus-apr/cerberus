@@ -29,4 +29,27 @@
 
 </details>
 
+<details>
+<summary>Python</summary>
+<br>
+
+| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
+| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
+| 1 | Refactory         | Python   | <https://github.com/nus-apr/refactory-benchmark>      |         5  |   1783 |
+
+</details>
+
+<details>
+<summary>JavaScript</summary>
+<br>
+
+| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
+| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
+<!-- | 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
+| 2 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
+| 3 | QuixBugs          | Java     | <https://github.com/nus-apr/quixbugs-java-benchmark>  |         40 |     40 |
+| 4 | Bears             | Java     | <https://github.com/nus-apr/bears-benchmark>          |         72 |    251 |
+| 5 | IntroClassJava    | Java     | <https://github.com/nus-apr/introclassjava-benchmark> |          6 |    297 | -->
+
+</details>
 

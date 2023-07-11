@@ -100,23 +100,23 @@
     "notifiers":{
         "slack": {
             "enable": false,
-            "hook-url": "as",
-            "oauth-token": "as",
-            "channel": "d"
+            "hook-url": "",
+            "oauth-token": "",
+            "channel": ""
         },
         "discord": {
             "enable": false,
-            "hook-url": "as"
+            "hook-url": ""
         },
         "email": {
             "enable": false,
-            "username": "sad8",
-            "password": "as4a",
+            "username": "",
+            "password": "",
             "host": "",
             "port": 465,
             "ssl-from-start": false,
             "recipients": [
-                "a@gmail.com"
+                ""
             ]
         }
     }
