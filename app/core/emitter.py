@@ -208,10 +208,10 @@ def configuration(setting, value):
     logger.configuration(setting + ":" + str(value))
 
 
-def end(time_total, is_error=False):
+def end(time_total, experiments_executed, is_error=False):
     if values.arg_pass:
         statistics("\nRun time statistics:\n-----------------------\n")
-        statistics("Experiment Count: " + str(values.iteration_no))
+        statistics("Experiment Count: {}".format(experiments_executed))
         action = error if is_error else success
         text = "exited with an error" if is_error else "finished successfully"
 

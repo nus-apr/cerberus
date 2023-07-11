@@ -94,7 +94,6 @@ default_valkyrie_waittime = 0.1
 default_disk_space = 5  # 5GB
 dump_patches = False
 arg_pass = False
-iteration_no = -1
 
 current_task_profile_id: ContextVar[str] = ContextVar(
     "current_repair_profile_id", default="NONE"
