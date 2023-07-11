@@ -285,14 +285,14 @@ def main():
             )
             tasks = TaskProcessor.execute(config)
             values.debug = config.general.debug_mode
-            if config.general.is_parallel_mode():
+            if config.general.parallel_mode:
                 iteration = ui.setup_ui(tasks)
             else:
                 # The tool and benchmark images are going to be created while enumerating
                 for iteration, (task_config, task_data) in enumerate(tasks):
                     (
                         benchmark,
-                        tool,
+                        _,
                         experiment_item,
                         task_profile,
                         container_profile,
