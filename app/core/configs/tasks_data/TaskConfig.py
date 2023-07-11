@@ -14,7 +14,6 @@ class TaskConfig(TaskDefaultConfig):
         self,
         task_type: str,
         compact_results: bool,
-        debug: bool,
         dump_patches: bool,
         docker_host: str,
         only_analyse: bool,
@@ -32,7 +31,6 @@ class TaskConfig(TaskDefaultConfig):
 
         super().__init__(
             compact_results,
-            debug,
             dump_patches,
             docker_host,
             only_analyse,

@@ -22,6 +22,7 @@ class ConfigDataFactory:
         return GeneralConfig(
             parallel_mode=general_config_dict[ConfigFieldsEnum.PARALLEL_MODE.value],
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
+            debug_mode=general_config_dict[ConfigFieldsEnum.DEBUG_MODE.value],
         )
 
     @staticmethod
@@ -131,7 +132,6 @@ class ConfigDataFactory:
                 compact_results=tasks_chunk_config_dict[
                     ConfigFieldsEnum.COMPACT_RESULTS.value
                 ],
-                debug=tasks_chunk_config_dict[ConfigFieldsEnum.DEBUG_MODE.value],
                 dump_patches=tasks_chunk_config_dict[
                     ConfigFieldsEnum.DUMP_PATCHES.value
                 ],

@@ -2,7 +2,6 @@ class TaskDefaultConfig:
     def __init__(
         self,
         compact_results: bool,
-        debug: bool,
         dump_patches: bool,
         docker_host: str,
         only_analyse: bool,
@@ -19,7 +18,6 @@ class TaskDefaultConfig:
     ):
 
         self.compact_results = compact_results
-        self.debug = debug
         self.dump_patches = dump_patches
         self.docker_host = docker_host
         self.only_analyse = only_analyse
