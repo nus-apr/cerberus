@@ -32,7 +32,7 @@ Following is a simple snippet for the command to run an experiment from a select
 
 ```bash
 source activate
-cerberus [analyze/repair] --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prophet/f1x]
+cerberus -task [analyze/repair] --bug-index=ID  --benchmark=[manybugs/vulnloc] --tool=[cpr/angelix/prophet/f1x]
 ```
 
 ## Supported Tools and Benchmark
