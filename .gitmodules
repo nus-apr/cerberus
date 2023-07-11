@@ -45,4 +45,4 @@
 	url = https://github.com/nus-apr/vul4j.git
 [submodule "benchmark/refactory"]
 	path = benchmark/refactory
-	url = https://github.com/nus-apr/refactory-benchmark
+	url = https://github.com/nus-apr/refactory-benchmark.git
