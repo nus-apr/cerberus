@@ -9,6 +9,7 @@ from typing import Dict
 from typing import List
 from typing import Tuple
 
+from textual._on import on
 from textual.app import App
 from textual.app import ComposeResult
 from textual.events import Key
@@ -335,7 +336,9 @@ class Cerberus(App[List[Result]]):
                             key=key,
                         )
 
-                        log_map[key] = TextLog(highlight=True, markup=True, wrap=True)
+                        log_map[key] = TextLog(
+                            highlight=True, markup=True, wrap=True, id=key + "_log"
+                        )
                         self.hide(log_map[key])
 
                         self.post_message(JobMount(key))
@@ -353,13 +356,15 @@ class Cerberus(App[List[Result]]):
                         )
         self.jobs_remaining = iteration
 
-    async def on_key(self, message: Key):
+    @on(Key)
+    async def handle_key_press(self, message: Key):
         if message.key == "escape":
             if self.selected_subject:
                 self.hide(log_map[self.selected_subject])
             self.selected_subject = None
 
-    async def on_cerberus_job_allocate(self, message: JobAllocate):
+    @on(JobAllocate)
+    async def on_job_allocate(self, message: JobAllocate):
         loop = asyncio.get_running_loop()
 
         def job():
@@ -519,14 +524,16 @@ class Cerberus(App[List[Result]]):
             update_width=True,
         )
 
-    async def on_cerberus_job_mount(self, message: JobMount):
+    @on(JobMount)
+    async def on_job_mount(self, message: JobMount):
         self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
         await self.mount(text_log, before=self.query_one("#" + all_subjects_id))
         text_log.write("This is the textual log for {}".format(message.key))
         self.hide(text_log)
 
-    async def on_cerberus_job_finish(self, message: JobFinish):
+    @on(JobFinish)
+    async def on_job_finish(self, message: JobFinish):
         def update_table(key, id, table):
             table.update_cell(
                 key,
@@ -588,7 +595,8 @@ class Cerberus(App[List[Result]]):
                     del self.jobs[message.key]
                 self.exit(self.finished_subjects)
 
-    async def on_cerberus_write(self, message: Write):
+    @on(Write)
+    async def write_message(self, message: Write):
         if message.identifier in log_map:
             log_map[message.identifier].write(
                 message.text,
@@ -609,6 +617,7 @@ class Cerberus(App[List[Result]]):
         x.styles.height = "0%"
         x.styles.border = None
 
+    @on(DataTable.RowHighlighted)
     async def on_data_table_row_highlighted(
         self, message: DataTable.RowHighlighted
     ) -> None:
@@ -656,7 +665,7 @@ class Cerberus(App[List[Result]]):
         yield error_subjects_table
         self.hide(error_subjects_table)
 
-        log_map["root"] = TextLog(highlight=True, markup=True, wrap=True)
+        log_map["root"] = TextLog(highlight=True, markup=True, wrap=True, id="root_log")
         log_map["root"].styles.border = ("heavy", "orange")
         yield log_map["root"]
         if not values.debug:
@@ -679,10 +688,7 @@ app: Cerberus
 
 def post_write(text: str):
     message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
-    if app._thread_id != threading.get_ident():
-        app.call_from_thread(lambda: app.post_message(message))
-    else:
-        app.post_message(message)
+    app.post_message(message)
 
 
 def update_current_job(status: str):
