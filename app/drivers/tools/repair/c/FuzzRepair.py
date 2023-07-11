@@ -74,7 +74,7 @@ class FuzzRepair(AbstractRepairTool):
         tool_log_files = [
             "{}/{}".format(tool_log_dir, f)
             for f in self.list_dir(tool_log_dir)
-            if ".log" in f
+            if "log-" in f
         ]
         for log_file in tool_log_files:
             copy_command = "cp -rf {} {}".format(log_file, self.dir_output)
