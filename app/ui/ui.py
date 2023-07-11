@@ -886,7 +886,7 @@ def setup_ui(tasks: Optional[TaskList] = None):
     app.tasks = tasks
     experiment_results = app.run()
     print_results(experiment_results)
-    return len(experiment_results)
+    return len(experiment_results) if experiment_results else 0
 
 
 def print_results(experiment_results):
