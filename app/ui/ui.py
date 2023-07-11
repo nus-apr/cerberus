@@ -187,7 +187,7 @@ class Cerberus(App[List[Result]]):
                     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
                     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
                     values.job_identifier.set(
-                        "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                        "-".join([benchmark.name, subject_name, bug_name])
                     )
                     emitter.information(
                         "\t[framework] Starting image check for {} {}".format(
@@ -311,13 +311,15 @@ class Cerberus(App[List[Result]]):
                                 iteration, bug_index, tool.name
                             )
                         )
-                        key = "{}-{}-{}-{}-{}-{}".format(
-                            benchmark.name,
-                            tool.name,
-                            experiment_item[definitions.KEY_SUBJECT],
-                            experiment_item[definitions.KEY_BUG_ID],
-                            repair_config_info[definitions.KEY_ID],
-                            container_config_info[definitions.KEY_ID],
+                        key = "-".join(
+                            [
+                                benchmark.name,
+                                tool.name,
+                                experiment_item[definitions.KEY_SUBJECT],
+                                experiment_item[definitions.KEY_BUG_ID],
+                                repair_config_info[definitions.KEY_ID],
+                                container_config_info[definitions.KEY_ID],
+                            ]
                         )
 
                         _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
@@ -507,16 +509,15 @@ class Cerberus(App[List[Result]]):
         self.jobs[message.identifier] = (task_future, message.tool)
 
     def update_status(self, key: str, status: str):
-        if self.selected_table.id:
-            try:
-                self.selected_table.update_cell(
-                    key,
-                    Cerberus.COLUMNS[definitions.UI_STATUS][self.selected_table.id],
-                    status,
-                    update_width=True,
-                )
-            except:
-                pass
+        try:  # generally a running task will be updating its status
+            self.query_one("#" + running_subjects_id, DataTable).update_cell(
+                key,
+                Cerberus.COLUMNS[definitions.UI_STATUS][running_subjects_id],
+                status,
+                update_width=True,
+            )
+        except:
+            pass
         self.query_one("#" + all_subjects_id, DataTable).update_cell(
             key,
             Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
@@ -525,7 +526,7 @@ class Cerberus(App[List[Result]]):
         )
 
     @on(JobMount)
-    async def on_job_mount(self, message: JobMount):
+    async def mount_job(self, message: JobMount):
         self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
         await self.mount(text_log, before=self.query_one("#" + all_subjects_id))

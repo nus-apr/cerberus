@@ -105,7 +105,7 @@ def run(
                 subject_name = str(experiment_item[definitions.KEY_SUBJECT])
                 if values.use_container:
                     values.job_identifier.set(
-                        "{}-{}-{}".format(benchmark.name, subject_name, bug_name)
+                        "-".join([benchmark.name, subject_name, bug_name])
                     )
                 dir_info = task.generate_dir_info(
                     benchmark.name, subject_name, bug_name
