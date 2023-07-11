@@ -52,6 +52,7 @@ Cerberus should be considered alpha-quality software. Bugs can be reported here:
 * [Extending](doc/Extending.md)
 * [Project Architecture](doc/ProjectArchitecture.md)
 * [Notifications](doc/Notifications.md)
+* [Configuration file](doc/AdvancedConfiguration.md)
 
 
 
@@ -67,6 +68,7 @@ title = {Cerberus: A Program Repair Framework},
 year = {2023},
 booktitle = {Proceedings of the ACM/IEEE 45th International Conference on Software Engineering: Companion Proceedings},
 location = {Melbourne, Australia},
-series = {ICSE '23}
+series = {ICSE '23},
+note = {{To appear}}
 }
 ```

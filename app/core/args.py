@@ -23,7 +23,7 @@ def parse_args():
     required = parser.add_argument_group("Required arguments")
     required.add_argument(
         "task_type",
-        help="type of task to run {analyze, prepare, repair}",
+        help="type of task to run {analyze, prepare, repair, fuzz}",
         choices=["analyze", "prepare", "repair", "fuzz"],
         metavar="task_type",
     )

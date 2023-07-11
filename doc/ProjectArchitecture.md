@@ -5,11 +5,12 @@
 The benchmark folder contains all possible benchmarks which can be dynamically instantiated when Cerberus is started. A benchmark is stored locally or can be set as a github submodule. (Check [how to add a benchmark](benchmark/AddBenchmark.md)) for more information.
 
 ## App
-This is the root directory of the project. It contains all code for the project
+This is the root directory of the project. It contains all code for the project.
 
 ### Core
 
  * The abstractions file contains abstractions over operations, which are dependent on whether Cerberus is using containers for the experiments or running them locally.
+ * The args file contains the command line argument definitions.
  * The configuration file contains the dynamic loading and command line argument parsing.
  * The container file contains all the methods used for interaction with the containers created. Cerberus uses the official [Docker Python SDK](docker-py.readthedocs.io/).
  * The definitions file contains all constants used across the project, allowing for a unified "magic string" storage.
@@ -24,25 +25,29 @@ This is the root directory of the project. It contains all code for the project
 
 #### Task
 
-The task module contains all operations which Cerberus supports. Currently they are analyze and repair. Inside this module the analysis functionality is store, statistics and the TaskStatus enumerable.
+The task module contains all operations which Cerberus supports. Currently they are analyze and repair with fuzzing in development. Inside this module the analysis functionality is store, statistics and the TaskStatus enumerable.
+
+#### Configs
+
+The configs module contains the new configuration processing logic. More information in [the specialized documentation file](AdvancedConfiguration.md).
 
 ### Drivers
 
 The drivers folder contains two folders - benchmarks and tools.
 
 * The tools folder contains all possible tools. (Check [how to add a tool](benchmark/AddTool.md)) for more information.
-* The benchmarks folder contains all possible benchmarks.
+* The benchmarks folder contains all possible benchmarks. (Check [how to add a bencjmark](benchmark/AddBenchmark.md)) for more information.
 
 ### Notification
 
-The notification module currently supports sending messages via Slack or via email to notify of the completion of Cerberus.
+The notification module currently supports sending messages via Slack, Discord or email to notify of the completion of Cerberus.
 This module will be more tightly integrated later on.
 
 ### Plugins
 
 * Valkyrie - Not Yet Implemented. Future work
 
-### Ui
+### UI
 
 The main module providing everything needed to have a user interface in the terminal. By default image creation of experiment subjects is parallelized and simiarly for the experiments themselves.
 

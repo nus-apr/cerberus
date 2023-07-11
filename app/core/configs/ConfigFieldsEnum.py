@@ -40,9 +40,9 @@ class ConfigFieldsEnum(Enum):
     CHANNEL = "channel"
 
     # tasks chunks section
-    TASKS_DATA = "tasks-data"
-    TASKS_CHUNKS = "tasks-chunks"
-    DEFAULT_CONFIG = "default-config"
+    TASKS_DATA = "tasks"
+    TASKS_CHUNKS = "chunks"
+    DEFAULT_CONFIG = "default"
 
     NAME = "name"
     TYPE = "type"
