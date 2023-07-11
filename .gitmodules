@@ -52,3 +52,6 @@
 [submodule "benchmark/autocodepython"]
 	path = benchmark/autocodepython
 	url = https://github.com/RepairComp/autocodepython.git
+[submodule "benchmark/autocodejs"]
+	path = benchmark/autocodejs
+	url = https://github.com/RepairComp/autocodejs.git
