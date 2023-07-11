@@ -93,6 +93,7 @@ class Configurations:
     __config_file = None
     __email_config_file = open(join(values.dir_config, "email.json"))
     __slack_config_file = open(join(values.dir_config, "slack.json"))
+    __discord_config_file = open(join(values.dir_config, "discord.json"))
     __default_config_values: Dict[str, Any] = {
         "depth": 3,
         "iteration-limit": 1,
@@ -102,6 +103,7 @@ class Configurations:
         "use-gpu": False,
         "use-container": True,
         "is-email-set": False,
+        "is-discord-set": False,
         "is-slack-set": False,
         "is-debug": False,
         "use-purge": False,
@@ -323,6 +325,18 @@ class Configurations:
         ):
             self.__runtime_config_values["is-email-set"] = True
 
+    def read_discord_config_file(self):
+        discord_config_info = {}
+        if self.__discord_config_file:
+            discord_config_info = json.load(self.__discord_config_file)
+
+        if "hook_url" in discord_config_info and "hook_url" != "":
+            print("I got {}".format(discord_config_info["hook_url"]))
+            if type(discord_config_info["hook_url"]) != str:
+                utilities.error_exit("[error] Invalid webhook URL")
+            values.discord_configuration["hook_url"] = discord_config_info["hook_url"]
+            self.__runtime_config_values["is-discord-set"] = True
+
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():
             if config_value is not None:
@@ -399,4 +413,6 @@ class Configurations:
 
         values.is_email_set = self.__runtime_config_values["is-email-set"]
         values.is_slack_set = self.__runtime_config_values["is-slack-set"]
+        values.is_discord_set = self.__runtime_config_values["is-discord-set"]
+
         sys.setrecursionlimit(values.default_stack_size)

@@ -73,6 +73,7 @@ use_valkyrie = False
 use_gpu = False
 is_email_set = False
 is_slack_set = False
+is_discord_set = False
 use_vthreads = False
 rebuild_all = False
 rebuild_base = False
@@ -115,6 +116,7 @@ email_configuration = {
     "password": "",
     "to": "",
 }
+discord_configuration = {"hook_url": ""}
 
 
 running_tool = False

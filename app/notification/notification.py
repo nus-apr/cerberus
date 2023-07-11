@@ -12,6 +12,11 @@ def notify(message, data=None):
 
         slack.send_message(message, data)
 
+    if values.is_discord_set:
+        from app.notification import discord
+
+        discord.send_message(message)
+
 
 def error_exit():
     error_message = "Cerberus Exited Abruptly"
