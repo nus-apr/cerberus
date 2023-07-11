@@ -714,11 +714,12 @@ def setup_ui():
             "Cerberus has finished running! These are the following results:\n"
             + "\n\n".join(
                 map(
-                    lambda t: "Experiment {} has final status {}\n logs directory: `{}`\n results directory `{}`".format(
-                        t[0],
-                        t[1],
-                        t[2].get("logs", "N/A"),
-                        t[2].get("artifacts", "N/A"),
+                    lambda result: "Experiment {} has final status {}\n logs directory: `{}`\n results directory `{}`\n summary file `{}`".format(
+                        result[0],
+                        result[1],
+                        result[2].get("logs", "N/A"),
+                        result[2].get("artifacts", "N/A"),
+                        result[2].get("summary", "N/A"),
                     ),
                     experiment_results,
                 )
@@ -726,10 +727,11 @@ def setup_ui():
         )
         for experiment, status, dir_info in experiment_results:
             emitter.information(
-                "\t[framework] Experiment {} has final status {}\n\tlogs directory {}\n\tresults directory {}\n".format(
+                "\t[framework] Experiment {} has final status {}\n\tlogs directory {}\n\tresults directory {}\n\tsummary file {}\n".format(
                     experiment,
                     status,
                     dir_info.get("logs", "N/A"),
                     dir_info.get("artifacts", "N/A"),
+                    dir_info.get("summary", "N/A"),
                 )
             )

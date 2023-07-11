@@ -124,8 +124,9 @@ def generate_dir_info(
 
 def construct_job_summary(job_identifier, results_summary):
     json_f_name = f"experiment-summary-{job_identifier}.json"
-    summary_f_path = f"{values.dir_summaries}/{json_f_name}"
+    summary_f_path = join(values.dir_summaries, json_f_name)
     writer.write_as_json(results_summary, summary_f_path)
+    return summary_f_path
 
 
 def collect_benchmark_result(bug_info, benchmark: AbstractBenchmark):
@@ -151,7 +152,9 @@ def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: Abstract
     tool.print_stats()
     tool.log_output_path = ""
     logger.log_tool_stats(task_tag_name, tool.stats)
-    construct_job_summary(task_tag_name, tool.stats.get_array())
+    dir_info["local"]["summary"] = construct_job_summary(
+        task_tag_name, tool.stats.get_array()
+    )
     patch_dir = join(dir_info["local"]["artifacts"], "patches")
     if values.use_valkyrie:
         valkyrie.analyse_output(patch_dir, tool.stats)
