@@ -21,15 +21,18 @@ def parse_args():
     )
     parser._action_groups.pop()
     required = parser.add_argument_group("Required arguments")
-    required.add_argument(
-        "task_type",
-        help="type of task to run {analyze, prepare, repair, fuzz}",
-        choices=["analyze", "prepare", "repair", "fuzz"],
-        metavar="task_type",
-    )
 
     optional = parser.add_argument_group("Optional arguments")
 
+    optional.add_argument(
+        "--task-type",
+        "-task",
+        help="type of task to run {analyze, prepare, repair, fuzz}",
+        default="repair",
+        required=False,
+        choices=["analyze", "prepare", "repair", "fuzz"],
+        metavar="task_type",
+    )
     optional.add_argument(
         "-f", "--config-file", type=str, help="Path to the JSON config file"
     )
