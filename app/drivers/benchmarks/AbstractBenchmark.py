@@ -202,6 +202,9 @@ class AbstractBenchmark(AbstractDriver):
             self.emit_error("setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
         container_obj.commit(exp_image_name)
+        container.stop_container(container_id)
+        if not values.debug:
+            container.remove_container(container_id)
 
     def setup_container(self, bug_index: int, image_name: str, cpu: str):
         """
