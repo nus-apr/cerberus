@@ -2,7 +2,7 @@
 
 ## Intrduction
 
-Cerberus started as a command line interface tool but with the creation of the Program Repair Competition, we have developed a more advanced configuration module, which would allow for easier orchestration of running various subjects on different tools in different profiles. An example config file `config.json` is provided in the root directory of the repository to allow for a template `cerberus -f config.json`.
+Cerberus started as a command line interface tool but with the creation of the Program Repair Competition, we have developed a more advanced configuration module, which would allow for easier orchestration of running various subjects on different tools in different profiles. An example config file `config.json` is provided in the root directory of the repository to allow for a template `cerberus -c config.json`.
 
 ## Structure
 
