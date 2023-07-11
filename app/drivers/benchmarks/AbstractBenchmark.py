@@ -101,7 +101,7 @@ class AbstractBenchmark(AbstractDriver):
         emitter.highlight("\t\t\t configured: {0}\n".format(self.stats.configured))
         emitter.highlight("\t\t\t built: {0}\n".format(self.stats.built))
         emitter.highlight("\t\t\t tested: {0}\n".format(self.stats.tested))
-        
+
     def update_dir_info(self, dir_info: DirectoryInfo):
         self.__dir_info = dir_info
         if not values.use_container:

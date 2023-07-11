@@ -401,7 +401,7 @@ class F1X(AbstractRepairTool):
                 elif "failed to infer compile commands" in line:
                     self.stats.patches_stats.generated = -1
                 elif "explored count: 1" in line:
-                    if self._time.timestamp_validation == 0:
+                    if self.stats.time_stats.timestamp_validation == 0:
                         pass
 
                 elif "PASS" in line and "[debug]" in line:
