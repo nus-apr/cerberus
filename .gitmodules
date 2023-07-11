@@ -46,3 +46,6 @@
 [submodule "benchmark/refactory"]
 	path = benchmark/refactory
 	url = https://github.com/nus-apr/refactory-benchmark.git
+[submodule "benchmark/quixbugspython"]
+	path = benchmark/quixbugspython
+	url = https://github.com/nus-apr/quixbugs-python-benchmark.git

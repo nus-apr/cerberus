@@ -212,22 +212,10 @@ def end(time_total, is_error=False):
     if values.arg_pass:
         statistics("\nRun time statistics:\n-----------------------\n")
         statistics("Experiment Count: " + str(values.iteration_no))
-        if is_error:
-            error(
-                "\n"
-                + values.tool_name
-                + " exited with an error after "
-                + time_total
-                + " minutes \n"
-            )
-        else:
-            success(
-                "\n"
-                + values.tool_name
-                + " finished successfully after "
-                + time_total
-                + " minutes \n"
-            )
+        action = error if is_error else success
+        text = "exited with an error" if is_error else "finished successfully"
+
+        action("\n {} {} after {} minutes\n".format(values.tool_name, text, time_total))
     else:
         error("Could not process configuration arguments\n")
 
