@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import pathlib
 from contextvars import ContextVar
@@ -77,7 +78,7 @@ rebuild_base = False
 ui_active = False
 use_parallel = False
 compact_results = False
-cpus = 1
+cpus = max(1, multiprocessing.cpu_count() - 2)
 task_type: ContextVar[str] = ContextVar("task_type", default="")
 ui_max_width = 1000
 runs = 1

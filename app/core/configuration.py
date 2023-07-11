@@ -329,10 +329,17 @@ class Configurations:
         if self.__discord_config_file:
             discord_config_info = json.load(self.__discord_config_file)
 
-        if "hook_url" in discord_config_info and discord_config_info["hook_url"] != "":
-            if type(discord_config_info["hook_url"]) != str:
-                utilities.error_exit("[error] invalid webhook URL")
-            values.discord_configuration["hook_url"] = discord_config_info["hook_url"]
+        for key, value in discord_config_info.items():
+            if key in values.discord_configuration and type(value) == type(
+                values.discord_configuration[key]
+            ):
+                values.discord_configuration[key] = value
+            else:
+                utilities.error_exit(
+                    "[error] unknown key {} or invalid type of value".format(key)
+                )
+        if not (values.discord_configuration["hook_url"]):
+            utilities.error_exit("[error] invalid configuration for discord.")
 
     def print_configuration(self):
         for config_key, config_value in self.__runtime_config_values.items():

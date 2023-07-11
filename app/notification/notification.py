@@ -5,15 +5,15 @@ from app.notification import email
 
 
 def notify(message, data=None):
-    if values.email_configuration[definitions.KEY_ENABLED]:
+    if values.email_configuration.get(definitions.KEY_ENABLED, False):
         email.send_message(message)
 
-    if values.slack_configuration[definitions.KEY_ENABLED]:
+    if values.slack_configuration.get(definitions.KEY_ENABLED, False):
         from app.notification import slack
 
         slack.send_message(message, data)
 
-    if values.discord_configuration[definitions.KEY_ENABLED]:
+    if values.discord_configuration.get(definitions.KEY_ENABLED, False):
         from app.notification import discord
 
         discord.send_message(message)
