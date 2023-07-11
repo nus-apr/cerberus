@@ -1,0 +1,100 @@
+{
+    "general": {
+        "parallel": true,
+        "enable_ui": false,
+        "debug-mode": true
+    },
+    "tasks": {
+        "default": {
+            "compact-results": true,
+            "dump-patches": false,
+            "docker-host": "unix:///var/run/docker.sock",
+            "only-analyse": false,
+            "only-setup": false,
+            "only-instrument": false,
+            "only-test": false,
+            "rebuild-all": false,
+            "rebuild-base": false,
+            "use-cache": false,
+            "use-container": true,
+            "use-gpu": false,
+            "use-purge": false,
+            "max-cpu-count": 4,
+            "container-profiles-id-list": [
+                "CP1"
+            ],
+            "task-profiles-id-list": [
+                "TP1"
+            ]
+        },
+        "chunks": [
+            {
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "vulnloc",
+                        "bug-id-list":["28-29"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"extractfix",
+                        "params":""
+                    },
+                    {
+                        "name":"vulnfix",
+                        "params":""
+                    }
+                ]
+            },
+            {
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "vulnloc",
+                        "bug-id-list":["31-33"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"extractfix",
+                        "params":""
+                    }
+                ]
+            },
+            {
+                "type": "repair",
+                "benchmarks":[
+                    {
+                        "name": "refactory",
+                        "bug-id-list":["1-3"]
+                    }
+                ],
+                "tools":[
+                    {
+                        "name":"refactory",
+                        "params":""
+                    }
+                ]
+            }
+        ]
+    },
+    "profiles": {
+        "container-profiles": [
+            {
+                "id": "CP1",
+                "cpu-count": 2,
+                "mem-limit": "16g",
+                "enable-network": true
+            }
+        ],
+        "task-profiles": [
+            {
+                "id": "TP1",
+                "timeout": "1",
+                "fault-location": "auto",
+                "passing-test-ratio": 1
+            }
+        ]
+    }
+}
