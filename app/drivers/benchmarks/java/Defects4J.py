@@ -28,7 +28,7 @@ class Defects4J(AbstractBenchmark):
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[self.key_bug_id]).split('-')[1]
+        bug_id = str(experiment_item[self.key_bug_id]).split("-")[-1]
         custom_env = {"JAVA_TOOL_OPTIONS": "-Dfile.encoding=UTF8"}
         command_str = "defects4j checkout -p {} -v {}b -w {}".format(
             experiment_item[self.key_subject],
