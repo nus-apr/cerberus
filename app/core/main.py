@@ -5,8 +5,10 @@ import signal
 import sys
 import time
 import traceback
+from argparse import HelpFormatter
 from argparse import Namespace
 from multiprocessing import set_start_method
+from operator import attrgetter
 from typing import Any
 from typing import List
 
@@ -25,6 +27,12 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
 from app.ui import ui
+
+
+class SortingHelpFormatter(HelpFormatter):
+    def add_arguments(self, actions):
+        actions = sorted(actions, key=attrgetter("option_strings"))
+        super(SortingHelpFormatter, self).add_arguments(actions)
 
 
 def create_output_directories():
@@ -67,40 +75,48 @@ def bootstrap(arg_list: Namespace):
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(prog=values.tool_name, usage="%(prog)s [options]")
+    parser = argparse.ArgumentParser(
+        prog=values.tool_name,
+        usage="%(prog)s [options]",
+        formatter_class=SortingHelpFormatter,
+    )
     parser._action_groups.pop()
     required = parser.add_argument_group("Required arguments")
     required.add_argument(
         "task_type",
-        help="type of task to run",
+        help="type of task to run {analyze, prepare, repair}",
         choices=["analyze", "prepare", "repair"],
+        metavar="task_type",
     )
 
     optional = parser.add_argument_group("Optional arguments")
     optional.add_argument(
-        "-c",
         definitions.ARG_CONFIG_FILE,
+        "-c",
         help="configuration file",
         type=argparse.FileType("r"),
     )
 
     optional.add_argument(
-        "-g",
         definitions.ARG_PARALLEL,
+        "-g",
         help="Activate Textual UI",
         action="store_true",
         default=False,
     )
 
     optional.add_argument(
-        "-b",
         definitions.ARG_BENCHMARK,
-        help="repair benchmark",
+        "-b",
+        help="program repair/analysis benchmark {"
+        + ", ".join(values.get_list_benchmarks())
+        + "}",
         choices=values.get_list_benchmarks(),
+        metavar="",
     )
     optional.add_argument(
-        "-d",
         definitions.ARG_DEBUG_MODE,
+        "-d",
         help="print debugging information",
         action="store_true",
         default=False,
@@ -124,9 +140,10 @@ def parse_args():
         help="custom URL for the docker server which will host the containers",
     )
     optional.add_argument(
-        "-t",
         definitions.ARG_TOOL_NAME,
-        help="name of the repair/analysis tool",
+        "-t",
+        help="name of the repair/analysis tool\n\n"
+        + ", ".join(values.get_list_tools()),
         choices=values.get_list_tools(),
         metavar="TOOL",
     )
@@ -146,18 +163,21 @@ def parse_args():
     # group.add_argument('tomato', help="Sliced and diced", action='none')
 
     optional.add_argument(
-        "-s",
         definitions.ARG_SUBJECT_NAME,
+        "-s",
         help="filter the bugs using the subject name",
     )
     optional.add_argument(
-        "-p", definitions.ARG_TOOL_PARAMS, help="pass parameters to the tool"
+        definitions.ARG_TOOL_PARAMS, "-p", help="pass parameters to the tool"
     )
     optional.add_argument(
         definitions.ARG_TOOL_LIST,
         nargs="+",
-        help="list of the repair/analysis tool",
+        help="list of the repair/analysis tool {"
+        + ", ".join(values.get_list_tools())
+        + "}",
         choices=values.get_list_tools(),
+        metavar="",
     )
     optional.add_argument(
         definitions.ARG_REBUILD_ALL_IMAGES,
@@ -204,6 +224,15 @@ def parse_args():
         action="store_true",
         default=True,
     )
+
+    optional.add_argument(
+        definitions.ARG_USE_LATEST_IMAGE,
+        help="pull latest image from Dockerhub",
+        dest="use_latest_image",
+        action="store_true",
+        default=True,
+    )
+
     optional.add_argument(
         definitions.ARG_USE_LOCAL,
         help="use local machine for experiments",
