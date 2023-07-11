@@ -1,4 +1,5 @@
 import math
+from typing import cast
 
 from discord import SyncWebhook
 
@@ -10,7 +11,7 @@ max_length = (
 
 
 def send_message(message):
-    webhook = SyncWebhook.from_url(values.discord_configuration["hook_url"])
+    webhook = SyncWebhook.from_url(cast(str, values.discord_configuration["hook_url"]))
 
     chunks = len(message) / max_length
 
