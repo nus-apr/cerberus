@@ -4,7 +4,7 @@ from os.path import join
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class Recorder(AbstractRepairTool):
+class Recoder(AbstractRepairTool):
     """
     Requirements for this tool:
     15 GB of VRAM, at most 7.0 CUDA (e.g. Nvidia V100) compute and 20 GB of RAM
@@ -17,7 +17,7 @@ class Recorder(AbstractRepairTool):
         self.bug_name = ""
 
     def run_repair(self, bug_info, repair_config_info):
-        super(Recorder, self).run_repair(bug_info, repair_config_info)
+        super(Recoder, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -30,24 +30,19 @@ class Recorder(AbstractRepairTool):
         if not self.use_gpu:
             self.error_exit("cannot run Recorder without a GPU")
 
-        self.bug_name = "{}-{}".format(
-            bug_info[self.key_subject],
-            bug_info[self.key_bug_id],
-        )
+        self.bug_name = bug_info[self.key_bug_id]
         # generate patches
         self.timestamp_log_start()
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}-{}'".format(  # currently supporting only defects4j
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 testDefect4jv21.py {}'".format(  # currently supporting only defects4j
             timeout_h,
-            bug_info[self.key_subject],
             bug_info[self.key_bug_id],
         )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"
         )
 
-        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}-{}'".format(
+        recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 repair.py {}'".format(
             timeout_h,
-            bug_info[self.key_subject],
             bug_info[self.key_bug_id],
         )
 
@@ -90,9 +85,6 @@ class Recorder(AbstractRepairTool):
             self.stats.time_stats.timestamp_plausible
         """
         self.emit_normal("reading output")
-
-        count_plausible = 0
-        count_enumerations = 0
 
         # count number of patch files
         self.stats.patches_stats.generated = 1
