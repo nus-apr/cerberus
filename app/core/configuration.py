@@ -122,8 +122,8 @@ class Configurations:
         "tool-list": [],
         "tool-params": "",
         "directories": {"data": "/data"},
-        "repair-profile-id-list": ["C1"],
-        "container-profile-id-list": ["CC1"],
+        "repair-profile-id-list": ["TP1"],
+        "container-profile-id-list": ["CP1"],
         "use-latest-image": False,
     }
     __runtime_config_values = __default_config_values

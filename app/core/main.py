@@ -134,10 +134,8 @@ def run(
                     emitter.sub_sub_title(
                         "Experiment #{} - Bug #{}".format(iteration, bug_index)
                     )
-                    if experiment_image_id is None:
-                        experiment_image_id = task.prepare(
-                            benchmark, experiment_item, cpu
-                        )
+
+                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
                     task.run(
                         benchmark,
                         tool,
