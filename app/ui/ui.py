@@ -6,7 +6,9 @@ import traceback
 from copy import deepcopy
 from typing import Any
 from typing import Dict
+from typing import Iterable
 from typing import List
+from typing import Optional
 from typing import Tuple
 
 from textual._on import on
@@ -28,8 +30,11 @@ from app.core import emitter
 from app.core import main
 from app.core import utilities
 from app.core import values
+from app.core.configs.Config import Config
+from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
 from app.core.task.status import TaskStatus
+from app.core.task.TaskProcessor import TaskProcessor
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
@@ -79,6 +84,22 @@ class Cerberus(App[List[Result]]):
         ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
 
+    tasks: Optional[
+        Iterable[
+            tuple[
+                TaskConfig,
+                tuple[
+                    AbstractBenchmark,
+                    AbstractTool,
+                    Any,
+                    dict[str, Any],
+                    dict[str, Any],
+                    str,
+                ],
+            ]
+        ]
+    ]
+
     async def _on_exit_app(self) -> None:
         values.ui_active = False
         self.job_cancellation = True
@@ -108,7 +129,11 @@ class Cerberus(App[List[Result]]):
         self.setup_column_keys()
 
         loop = asyncio.get_running_loop()
-        asyncio.get_running_loop().run_in_executor(None, self.prepare_run, loop)
+        asyncio.get_running_loop().run_in_executor(
+            None,
+            self.prepare_default_run if not self.tasks else self.prepare_tasks_run,
+            loop,
+        )
 
     def setup_cpu_allocation(self):
         self.max_jobs = values.cpus
@@ -156,7 +181,7 @@ class Cerberus(App[List[Result]]):
         for job_id in to_del:
             del job_time_map[job_id]
 
-    def prepare_run(self, loop):
+    def prepare_default_run(self, loop):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
@@ -252,6 +277,141 @@ class Cerberus(App[List[Result]]):
             )
             self.debug_print("I got exception {}".format(e))
 
+    def prepare_tasks_run(self, loop):
+        try:
+            self.hide(self.query_one("#" + all_subjects_id))
+
+            self.is_preparing = True
+
+            self.show(log_map["root"])
+            self.query_one(Static).update(
+                "Cerberus is preparing tool and benchmark images"
+            )
+            tasks = []
+            if self.tasks:
+                tasks = list(
+                    self.tasks
+                )  # Sequentially prepares the benchmarks and tools, will be parallelized later on
+
+            images = {}
+            if values.use_container:
+                self.query_one(Static).update(
+                    "Cerberus is preparing the subject images."
+                )
+                complete_images: queue.Queue[
+                    Tuple[str, str, Optional[str], bool]
+                ] = queue.Queue(0)
+                # The Logic here is currently differernt as one generally just needs a single CPU to build a project
+                def job(benchmark: AbstractBenchmark, experiment_item, job_identifier):
+                    cpu = self.cpu_queue.get(block=True, timeout=None)
+                    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                    values.job_identifier.set(job_identifier)
+                    emitter.information(
+                        "\t[framework] Starting image check for bug {} from subject {}".format(
+                            bug_name, subject_name
+                        )
+                    )
+                    dir_info = task.generate_dir_info(
+                        benchmark.name, subject_name, bug_name
+                    )
+                    benchmark.update_dir_info(dir_info)
+                    try:
+                        emitter.information(
+                            "\t[framework] Image check for bug {} from subject {}".format(
+                                bug_name, subject_name
+                            )
+                        )
+                        experiment_image_id = task.prepare(
+                            benchmark, experiment_item, str(cpu)
+                        )
+                        complete_images.put(
+                            (
+                                experiment_item[definitions.KEY_ID],
+                                job_identifier,
+                                experiment_image_id,
+                                True,
+                            )
+                        )
+                    except Exception as e:
+                        emitter.information(
+                            "\t[framework] Error {} for bug {} from subject {}".format(
+                                e, bug_name, subject_name
+                            )
+                        )
+                        complete_images.put(
+                            (
+                                experiment_item[definitions.KEY_ID],
+                                job_identifier,
+                                None,
+                                False,
+                            )
+                        )
+                    finally:
+                        self.cpu_queue.put(cpu, block=False)
+                    emitter.information(
+                        "\t[framework] Finishing image check for {} {}".format(
+                            bug_name, subject_name
+                        )
+                    )
+
+                for (task_config, task_data) in tasks:
+                    bug_name = str(task_data[2][definitions.KEY_BUG_ID])
+                    subject_name = str(task_data[2][definitions.KEY_SUBJECT])
+                    job_identifier = "-".join(
+                        [task_data[0].name, subject_name, bug_name]
+                    )
+                    loop.run_in_executor(
+                        None, job, task_data[0], task_data[2], job_identifier
+                    )
+                while complete_images.qsize() != len(tasks):
+                    pass
+                while complete_images.qsize() != 0:
+                    (id, job_identifier, image_name, success) = complete_images.get()
+                    if success:
+                        images[job_identifier] = image_name
+                    else:
+                        emitter.warning(
+                            "\t[warning] Failed building image {}".format(id)
+                        )
+
+            self.hide(self.query_one(Static))
+            if not values.debug:
+                self.hide(log_map["root"])
+            self.is_preparing = False
+
+            self.show(self.query_one("#" + all_subjects_id))
+            for iteration, (task_config, task_data) in enumerate(tasks):
+                (
+                    benchmark,
+                    tool,
+                    experiment_item,
+                    task_profile,
+                    container_profile,
+                    bug_index,
+                ) = task_data
+                bug_name = str(task_data[2][definitions.KEY_BUG_ID])
+                subject_name = str(task_data[2][definitions.KEY_SUBJECT])
+                job_identifier = "-".join([benchmark.name, subject_name, bug_name])
+                self.consturct_job(
+                    benchmark,
+                    tool,
+                    task_profile,
+                    container_profile,
+                    experiment_item,
+                    images.get(job_identifier, None),
+                    iteration,
+                    task_config,
+                )
+            self.jobs_remaining = iteration
+
+        except Exception as e:
+            self.show(self.query_one(Static))
+            self.query_one(Static).update(
+                "{}\n{}".format(str(e), traceback.format_exc())
+            )
+            self.debug_print("I got exception {}".format(e))
+
     def change_table(self, new_id):
         if self.is_preparing:
             return
@@ -331,6 +491,7 @@ class Cerberus(App[List[Result]]):
         experiment_item,
         experiment_image_id,
         iteration,
+        task_config=None,
     ):
         key = "-".join(
             [
@@ -373,6 +534,7 @@ class Cerberus(App[List[Result]]):
                 container_config_info,
                 experiment_image_id,
                 key,
+                task_config,
             )
         )
 
@@ -398,6 +560,14 @@ class Cerberus(App[List[Result]]):
             self.update_status(
                 message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
             )
+            if message.task_config:
+                main.process_configs(
+                    message.task_config,
+                    message.benchmark,
+                    message.experiment_item,
+                    message.task_config_info,
+                    message.container_config_info,
+                )
 
             with job_condition:
                 while self.free_jobs < required_cpu_cores:
@@ -419,7 +589,7 @@ class Cerberus(App[List[Result]]):
 
             values.job_identifier.set(message.identifier)
             values.current_task_profile_id.set(
-                message.repair_config_info[definitions.KEY_ID]
+                message.task_config_info[definitions.KEY_ID]
             )
             values.current_container_profile_id.set(
                 message.container_config_info[definitions.KEY_ID]
@@ -433,7 +603,7 @@ class Cerberus(App[List[Result]]):
                 60
                 * 60
                 * float(
-                    message.repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
+                    message.task_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
                 )
             )
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
@@ -450,7 +620,7 @@ class Cerberus(App[List[Result]]):
                 message.tool.name,
                 message.experiment_item[definitions.KEY_SUBJECT],
                 message.experiment_item[definitions.KEY_BUG_ID],
-                message.repair_config_info[definitions.KEY_ID],
+                message.task_config_info[definitions.KEY_ID],
                 message.container_config_info[definitions.KEY_ID],
                 start_date,
                 finish_date,
@@ -486,7 +656,7 @@ class Cerberus(App[List[Result]]):
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
-                    message.repair_config_info,
+                    message.task_config_info,
                     message.container_config_info,
                     message.identifier,
                     cpu_set,
@@ -721,9 +891,26 @@ def update_current_job(status: str):
             app.update_status(current_job, status)
 
 
-def setup_ui():
+def setup_ui(
+    tasks: Optional[
+        Iterable[
+            tuple[
+                TaskConfig,
+                tuple[
+                    AbstractBenchmark,
+                    AbstractTool,
+                    Any,
+                    dict[str, Any],
+                    dict[str, Any],
+                    str,
+                ],
+            ]
+        ]
+    ]
+):
     global app
     app = Cerberus()
+    app.tasks = tasks
     experiment_results = app.run()
     print_results(experiment_results)
     return len(experiment_results)

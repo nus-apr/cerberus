@@ -4,6 +4,7 @@ from typing import Optional
 
 from textual.message import Message
 
+from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.stats import ToolStats
 from app.core.task.status import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -26,15 +27,17 @@ class JobAllocate(Message):
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
+        task_config: Optional[TaskConfig] = None,
     ) -> None:
         self.index = index
         self.benchmark = benchmark
         self.tool = tool
         self.experiment_item = experiment_item
-        self.repair_config_info = repair_config_info
+        self.task_config_info = repair_config_info
         self.container_config_info = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
+        self.task_config = task_config
         super().__init__()
 
 
