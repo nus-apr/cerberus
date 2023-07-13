@@ -52,6 +52,7 @@ class AbstractBenchmark(AbstractDriver):
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
     key_subject = definitions.KEY_SUBJECT
+    has_standard_name: bool = False
 
     def __init__(self):
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
@@ -65,6 +66,7 @@ class AbstractBenchmark(AbstractDriver):
         AbstractBenchmark.check_benchmark_folder(self.name)
         self.meta_file = join(self.bench_dir_path, self.name, "meta-data.json")
         if self.image_name == "":
+            self.has_standard_name = True
             self.image_name = "{}-benchmark".format(self.name)
         if values.use_container:
             self.build_benchmark_image()
@@ -186,7 +188,9 @@ class AbstractBenchmark(AbstractDriver):
             emitter.warning(
                 f"\t[framework] benchmark environment not found for {self.image_name}"
             )
-            if not container.pull_image(self.image_name, "latest"):
+            if self.has_standard_name or not container.pull_image(
+                self.image_name, "latest"
+            ):
                 emitter.normal("\t[framework] building benchmark environment")
                 container.build_benchmark_image(self.image_name)
         else:
