@@ -42,7 +42,7 @@ class BugsDotJar(AbstractBenchmark):
 
         self.run_command(
             container_id,
-            "git clone --commit {} https://github.com/bugs-dot-jar/{} {}".format(
+            "git clone --branch {} https://github.com/bugs-dot-jar/{} {}".format(
                 experiment_item["branch"],
                 experiment_item["subject"],
                 join(self.dir_expr, "src"),
