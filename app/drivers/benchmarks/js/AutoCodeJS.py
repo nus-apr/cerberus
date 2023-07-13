@@ -77,4 +77,4 @@ class AutoCodeJS(AbstractBenchmark):
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(AutoCodePython, self).save_artifacts(dir_info, container_id)
+        super(AutoCodeJS, self).save_artifacts(dir_info, container_id)
