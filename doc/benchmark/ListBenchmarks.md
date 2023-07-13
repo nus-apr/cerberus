@@ -36,6 +36,7 @@
 | # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
 | - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
 | 1 | Refactory         | Python   | <https://github.com/nus-apr/refactory-benchmark>      |         5  |   1783 |
+| 2 | AutoCodePython    | Python   | <https://github.com/RepairComp/autocodepython>        |         6  |     28 |
 
 </details>
 
@@ -43,8 +44,9 @@
 <summary>JavaScript</summary>
 <br>
 
-| # | Benchmark         | Language | Repository                                            | # Projects | # Bugs |
-| - | ----------------- | -------- | ----------------------------------------------------- | ----------:| ------:|
+| # | Benchmark         | Language     | Repository                                            | # Projects | # Bugs |
+| - | ----------------- | ------------ | ----------------------------------------------------- | ----------:| ------:|
+| 1 | AutoCodeJS        | JavaScript   | <https://github.com/RepairComp/autocodejs>            |         8  |     26 |
 <!--
 | 1 | Hippodrome        | Java     | <https://github.com/nus-apr/hippodrome-benchmark>     |         16 |     25 |
 | 2 | Defects4J         | Java     | <https://github.com/nus-apr/defects4j>                |         17 |    835 |
