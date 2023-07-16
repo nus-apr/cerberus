@@ -8,8 +8,9 @@ class NewTool(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewTool, self).__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
+        self.hash_digest = "sha256:80b895841178"
 ```
-The constructor should follow the following format, the line `self.image_name=...` should be an identifier for a valid docker image, preferably with a label.
+The constructor should follow the following format, the line `self.image_name=...` should be an identifier for a valid docker image, preferably with a label. The line `self.hash_digest=...` should be a prefix of the hash of the image and is mandatory when Cerberus is ran with the `secure_hash` flag enabled (used for APR-COMP).
 
 ```py
      def run_repair(self, bug_info, repair_config_info):
