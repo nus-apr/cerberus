@@ -31,6 +31,7 @@ class AbstractTool(AbstractDriver):
     cpu_usage = 1
     dir_inst = ""
     dir_setup = ""
+    hash_digest = ""
     container_id = None
     is_instrument_only = False
     timestamp_fmt = "%a %d %b %Y %H:%M:%S %p"
@@ -180,6 +181,8 @@ class AbstractTool(AbstractDriver):
     def check_tool_exists(self):
         """Any pre-processing required for the repair"""
         if values.use_container:
+            if not self.hash_digest.startswith("sha256:"):
+                self.hash_digest = "sha256:" + self.hash_digest
             if self.image_name is None:
                 utilities.error_exit(
                     "\t[framework] {} does not provide a Docker Image".format(self.name)
@@ -191,13 +194,20 @@ class AbstractTool(AbstractDriver):
                 tag_name = "latest"
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
-                    "\t[framework] docker image {}:{} not found in Docker registry".format(
+                    "\t[framework] docker image {}:{} not found in local docker registry".format(
                         repo_name, tag_name
                     )
                 )
-                if container.pull_image(repo_name, tag_name) is None:
+                image = container.pull_image(repo_name, tag_name)
+                if image is None:
                     utilities.error_exit(
                         "\t[framework] {} does not provide a Docker image in Dockerhub".format(
+                            self.name
+                        )
+                    )
+                if values.secure_hash and not image.id.startswith(self.hash_digest):
+                    utilities.error_exit(
+                        "\t[framework] pulled an image for {} whose hash did start with the prefix in the driver. aborting".format(
                             self.name
                         )
                     )
@@ -222,8 +232,13 @@ class AbstractTool(AbstractDriver):
                         emitter.information(
                             "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                         )
-                        if values.use_latest_image:
-                            values.rebuild_all = True
+                        if values.secure_hash and not image.id.startswith(
+                            self.hash_digest
+                        ):
+                            utilities.error_exit(
+                                "\t[framework] secure mode is enabled. aborting"
+                            )
+                        values.rebuild_all = True
 
         else:
             local_path = shutil.which(self.name.lower())
