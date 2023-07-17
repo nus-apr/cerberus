@@ -1,10 +1,13 @@
 class GeneralConfig:
-    def __init__(self, parallel_mode: bool, ui_mode: bool, debug_mode: bool):
+    def __init__(
+        self, parallel_mode: bool, ui_mode: bool, debug_mode: bool, secure_hash: bool
+    ):
 
         # validate config
         self.parallel_mode = parallel_mode
         self.ui_mode = ui_mode
         self.debug_mode = debug_mode
+        self.secure_hash = secure_hash
 
     def __str__(self):
         return (

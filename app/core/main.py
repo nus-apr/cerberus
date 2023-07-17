@@ -284,6 +284,7 @@ def main():
             )
             tasks = TaskProcessor.execute(config)
             values.debug = config.general.debug_mode
+            values.secure_hash = config.general.secure_hash
             if config.general.parallel_mode:
                 iteration = ui.setup_ui(tasks)
             else:

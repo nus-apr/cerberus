@@ -100,6 +100,7 @@ class Configurations:
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
+        "secure-hash": False,
         "is-debug": False,
         "use-purge": False,
         "only-analyse": False,
@@ -168,6 +169,9 @@ class Configurations:
 
         if arg_list.config_file:
             self.__runtime_config_values["has-config-file"] = True
+
+        if arg_list.secure_hash:
+            self.__runtime_config_values["secure-hash"] = True
 
         if arg_list.debug:
             self.__runtime_config_values["is-debug"] = True
@@ -374,6 +378,7 @@ class Configurations:
         )
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
+        values.secure_hash = self.__runtime_config_values["secure-hash"]
         values.tool_list = self.__runtime_config_values["tool-list"]
 
         values.tool_params = self.__runtime_config_values["tool-params"]

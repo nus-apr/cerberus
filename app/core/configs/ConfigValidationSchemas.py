@@ -13,11 +13,13 @@ general_section_schema = {
         ConfigFieldsEnum.PARALLEL_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
+        ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
         ConfigFieldsEnum.UI_MODE.value,
         ConfigFieldsEnum.DEBUG_MODE.value,
+        ConfigFieldsEnum.SECURE_HASH.value,
     ],
     "additionalProperties": False,
 }
