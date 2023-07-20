@@ -119,6 +119,7 @@ class Cerberus(App[List[Result]]):
             None,
             self.prepare_default_run if not self.tasks else self.prepare_tasks_run,
             loop,
+            values.task_type.get("NAN"),
         )
 
     def setup_cpu_allocation(self):
@@ -167,11 +168,12 @@ class Cerberus(App[List[Result]]):
         for job_id in to_del:
             del job_time_map[job_id]
 
-    def prepare_default_run(self, loop):
+    def prepare_default_run(self, loop, task_type):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
             self.is_preparing = True
+            values.task_type.set(task_type)
 
             self.show(log_map["root"])
             self.query_one(Static).update("Cerberus is preparing tool images")
@@ -194,6 +196,7 @@ class Cerberus(App[List[Result]]):
 
                 # The Logic here is currently differernt as one generally just needs a single CPU to build a project
                 def job(benchmark: AbstractBenchmark, experiment_item):
+                    values.task_type.set(task_type)
                     cpu = self.cpu_queue.get(block=True, timeout=None)
                     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
                     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -263,7 +266,7 @@ class Cerberus(App[List[Result]]):
             )
             self.debug_print("I got exception {}".format(e))
 
-    def prepare_tasks_run(self, loop):
+    def prepare_tasks_run(self, loop, _):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
@@ -477,7 +480,7 @@ class Cerberus(App[List[Result]]):
         experiment_item,
         experiment_image_id,
         iteration,
-        task_config=None,
+        task_config: Optional[TaskConfig] = None,
     ):
         key = "-".join(
             [
@@ -520,6 +523,9 @@ class Cerberus(App[List[Result]]):
                 container_config_info,
                 experiment_image_id,
                 key,
+                values.task_type.get("NAN")
+                if not task_config
+                else task_config.task_type,
                 task_config,
             )
         )

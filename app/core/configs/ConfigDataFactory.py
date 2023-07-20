@@ -20,6 +20,7 @@ class ConfigDataFactory:
             parallel_mode=general_config_dict[ConfigFieldsEnum.PARALLEL_MODE.value],
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
             debug_mode=general_config_dict[ConfigFieldsEnum.DEBUG_MODE.value],
+            secure_hash=general_config_dict[ConfigFieldsEnum.SECURE_HASH.value],
         )
 
     @staticmethod

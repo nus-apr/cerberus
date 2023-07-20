@@ -62,6 +62,13 @@ def parse_args():
         default=False,
     )
     optional.add_argument(
+        definitions.ARG_SECURE_HASH,
+        help="activate secure hash checks",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
         definitions.ARG_CACHE,
         help="use cached information for the process",
         action="store_true",

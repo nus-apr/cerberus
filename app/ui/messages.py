@@ -27,6 +27,7 @@ class JobAllocate(Message):
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
+        task_type: str,
         task_config: Optional[TaskConfig] = None,
     ) -> None:
         self.index = index
@@ -37,6 +38,7 @@ class JobAllocate(Message):
         self.container_config_info = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
+        self.task_type = task_type
         self.task_config = task_config
         super().__init__()
 

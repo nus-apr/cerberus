@@ -81,6 +81,7 @@ ARG_REBUILD_ALL_IMAGES = "--rebuild-all"
 ARG_REBUILD_EXPERIMENT_IMAGE = "--rebuild-exp"
 ARG_COMPACT_RESUTLS = "--compact-results"
 ARG_TASK_TYPE = "--task-type"
+ARG_SECURE_HASH = "--secure-hash"
 
 UI_REPAIR_PROFILE = "Repair Profile"
 UI_CONTAINER_PROFILE = "Container Profile"
