@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import Iterable
 from typing import List
+from typing import Tuple
 
 from app.core import configuration
 from app.core import definitions
@@ -17,14 +18,14 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 TaskList = Iterable[
-    tuple[
+    Tuple[
         TaskConfig,
-        tuple[
+        Tuple[
             AbstractBenchmark,
             AbstractTool,
             Any,
-            dict[str, Any],
-            dict[str, Any],
+            Dict[str, Any],
+            Dict[str, Any],
             str,
         ],
     ]
