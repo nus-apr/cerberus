@@ -380,19 +380,7 @@ def run(
             not os.path.isdir(dir_result_local)
             or len(os.listdir(dir_result_local)) == 0
         ):
-            archive_name = (
-                "-".join(
-                    [
-                        task_config_id,
-                        container_config_id,
-                        benchmark.name,
-                        tool.name,
-                        subject_name,
-                        bug_name,
-                    ]
-                )
-                + ".tar.gz"
-            )
+            archive_name = tag_name + ".tar.gz"
             can_analyse_results = retrieve_results(archive_name, tool)
         if can_analyse_results:
             collect_tool_result(dir_info, bug_info, tool)
@@ -406,7 +394,7 @@ def run(
             image_name = "{}-{}-{}-{}".format(
                 tool.name, benchmark.name, subject_name, bug_name
             )
-            container_name = "{}-{}".format(container_config_id, image_name)
+            container_name = tag_name
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a Dockerfile: {}".format(tool.name)
