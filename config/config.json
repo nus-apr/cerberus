@@ -2,6 +2,7 @@
     "general": {
         "parallel": true,
         "enable_ui": false,
+        "secure-hash": false,
         "debug-mode": true
     },
     "tasks": {
