@@ -252,6 +252,10 @@ tasks_chunks_schema = {
     "properties": {
         **cast(Dict[str, Any], task_default_schema["properties"]),
         ConfigFieldsEnum.TYPE.value: {"type": "string"},
+        ConfigFieldsEnum.RUNS.value: {
+            "type": "number",
+            "minimum": 1,
+        },
         ConfigFieldsEnum.BENCHMARKS.value: {
             "type": "array",
             "minItems": 1,

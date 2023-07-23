@@ -43,6 +43,7 @@ class ConfigFieldsEnum(Enum):
     TASKS_DATA = "tasks"
     TASKS_CHUNKS = "chunks"
     DEFAULT_CONFIG = "default"
+    RUNS = "runs"
 
     NAME = "name"
     TYPE = "type"

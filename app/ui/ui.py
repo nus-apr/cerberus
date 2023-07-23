@@ -382,16 +382,18 @@ class Cerberus(App[List[Result]]):
                 bug_name = str(task_data[2][definitions.KEY_BUG_ID])
                 subject_name = str(task_data[2][definitions.KEY_SUBJECT])
                 job_identifier = "-".join([benchmark.name, subject_name, bug_name])
-                self.consturct_job(
-                    benchmark,
-                    tool,
-                    task_profile,
-                    container_profile,
-                    experiment_item,
-                    images.get(job_identifier, None),
-                    iteration,
-                    task_config,
-                )
+                for run in range(task_config.runs):
+                    self.construct_job(
+                        benchmark,
+                        tool,
+                        task_profile,
+                        container_profile,
+                        experiment_item,
+                        images.get(job_identifier, None),
+                        iteration,
+                        task_config,
+                        str(run),
+                    )
             self.jobs_remaining = iteration
 
         except Exception as e:
@@ -454,32 +456,35 @@ class Cerberus(App[List[Result]]):
                     )
 
                     for tool in tool_list:
-                        iteration = iteration + 1
-                        emitter.sub_sub_title(
-                            "Experiment #{} - Bug #{} Tool {}".format(
-                                iteration, bug_index, tool.name
+                        for run_index in range(values.runs):
+                            iteration = iteration + 1
+                            emitter.sub_sub_title(
+                                "Experiment #{} - Bug #{} Run #{} Tool {}".format(
+                                    iteration, bug_index, run_index, tool.name
+                                )
                             )
-                        )
-                        self.consturct_job(
-                            benchmark,
-                            tool,
-                            task_config_info,
-                            container_config_info,
-                            experiment_item,
-                            experiment_image_id,
-                            iteration,
-                        )
+                            self.construct_job(
+                                benchmark,
+                                tool,
+                                task_config_info,
+                                container_config_info,
+                                experiment_item,
+                                experiment_image_id,
+                                iteration,
+                                str(run_index),
+                            )
         self.jobs_remaining = iteration
 
-    def consturct_job(
+    def construct_job(
         self,
-        benchmark,
-        tool,
+        benchmark: AbstractBenchmark,
+        tool: AbstractTool,
         task_config_info,
         container_config_info,
         experiment_item,
-        experiment_image_id,
-        iteration,
+        experiment_image_id: str,
+        iteration: int,
+        run: str,
         task_config: Optional[TaskConfig] = None,
     ):
         key = "-".join(
@@ -490,6 +495,7 @@ class Cerberus(App[List[Result]]):
                 experiment_item[definitions.KEY_BUG_ID],
                 task_config_info[definitions.KEY_ID],
                 container_config_info[definitions.KEY_ID],
+                run,
             ]
         )
 
