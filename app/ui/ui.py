@@ -65,6 +65,7 @@ class Cerberus(App[List[Result]]):
         "Tool": {},
         "Subject": {},
         "Bug ID": {},
+        "Run": {},
         definitions.UI_REPAIR_PROFILE: {},
         definitions.UI_CONTAINER_PROFILE: {},
         definitions.UI_STARTED_AT: {},
@@ -454,7 +455,7 @@ class Cerberus(App[List[Result]]):
                         if values.use_container
                         else None
                     )
-
+                    task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
                     for tool in tool_list:
                         for run_index in range(values.runs):
                             iteration = iteration + 1
@@ -505,6 +506,7 @@ class Cerberus(App[List[Result]]):
             tool.name,
             experiment_item[definitions.KEY_SUBJECT],
             experiment_item[definitions.KEY_BUG_ID],
+            run,
             task_config_info[definitions.KEY_ID],
             container_config_info[definitions.KEY_ID],
             "N/A",
@@ -548,6 +550,7 @@ class Cerberus(App[List[Result]]):
         loop = asyncio.get_running_loop()
 
         def job():
+            values.task_type.set(message.task_type)
             cpus: List[int] = []
             required_cpu_cores = min(
                 message.tool.cpu_usage,
