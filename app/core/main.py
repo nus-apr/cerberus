@@ -130,22 +130,36 @@ def run(
                     continue
 
                 for tool in tool_list:
-                    iteration = iteration + 1
-                    emitter.sub_sub_title(
-                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
-                    )
-
                     experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
-                    task.run(
-                        benchmark,
-                        tool,
-                        experiment_item,
-                        task_config_info,
-                        container_config_info,
-                        str(bug_index),
-                        cpu,
-                        experiment_image_id,
-                    )
+                    for run_index in range(values.runs):
+                        iteration = iteration + 1
+                        emitter.sub_sub_title(
+                            "Experiment #{} - Bug #{} Run #{}".format(
+                                iteration, bug_index, run_index + 1
+                            )
+                        )
+                        key = "-".join(
+                            [
+                                benchmark.name,
+                                tool.name,
+                                experiment_item[definitions.KEY_SUBJECT],
+                                experiment_item[definitions.KEY_BUG_ID],
+                                task_config_info[definitions.KEY_ID],
+                                container_config_info[definitions.KEY_ID],
+                                str(run_index),
+                            ]
+                        )
+
+                        task.run(
+                            benchmark,
+                            tool,
+                            experiment_item,
+                            task_config_info,
+                            container_config_info,
+                            key,
+                            cpu,
+                            experiment_image_id,
+                        )
 
 
 def get_repair_setup() -> Any:
@@ -292,7 +306,7 @@ def main():
                 for iteration, (task_config, task_data) in enumerate(tasks):
                     (
                         benchmark,
-                        _,
+                        tool,
                         experiment_item,
                         task_profile,
                         container_profile,
@@ -305,14 +319,40 @@ def main():
                         task_profile,
                         container_profile,
                     )
-                    iteration = iteration + 1
-                    emitter.sub_sub_title(
-                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
-                    )
-                    cpu = ",".join(map(str, range(values.cpus)))
-                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
-                    if not values.only_setup:
-                        task.run(*task_data, cpu, experiment_image_id)
+                    for run_index in range(task_config.runs):
+                        iteration = iteration + 1
+                        emitter.sub_sub_title(
+                            "Experiment #{} - Bug #{} Run #{}".format(
+                                iteration, bug_index, run_index + 1
+                            )
+                        )
+                        cpu = ",".join(map(str, range(values.cpus)))
+                        experiment_image_id = task.prepare(
+                            benchmark, experiment_item, cpu
+                        )
+                        key = "-".join(
+                            [
+                                benchmark.name,
+                                tool.name,
+                                experiment_item[definitions.KEY_SUBJECT],
+                                experiment_item[definitions.KEY_BUG_ID],
+                                task_profile[definitions.KEY_ID],
+                                container_profile[definitions.KEY_ID],
+                                str(run_index),
+                            ]
+                        )
+
+                        if not values.only_setup:
+                            task.run(
+                                benchmark,
+                                tool,
+                                experiment_item,
+                                task_profile,
+                                container_profile,
+                                key,
+                                cpu,
+                                experiment_image_id,
+                            )
         else:
             if not parsed_args.task_type:
                 utilities.error_exit(

@@ -296,11 +296,10 @@ def run(
     bug_info: Dict[str, Any],
     task_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
-    run_identifier: str,
+    tag_name: str,
     cpu: str,
     experiment_image_id: Optional[str],
 ):
-    bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     task_config_id = task_config_info[definitions.KEY_ID]
     container_config_id = container_config_info[definitions.KEY_ID]
@@ -309,16 +308,6 @@ def run(
         task_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
-    tag_name = "-".join(
-        [
-            task_config_id,
-            container_config_id,
-            tool.name,
-            benchmark.name,
-            subject_name,
-            bug_name,
-        ]
-    )
 
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
