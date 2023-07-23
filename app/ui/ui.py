@@ -392,8 +392,8 @@ class Cerberus(App[List[Result]]):
                         experiment_item,
                         images.get(job_identifier, None),
                         iteration,
-                        task_config,
                         str(run),
+                        task_config,
                     )
             self.jobs_remaining = iteration
 
