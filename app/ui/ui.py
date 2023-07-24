@@ -6,7 +6,6 @@ import traceback
 from copy import deepcopy
 from typing import Any
 from typing import Dict
-from typing import Iterable
 from typing import List
 from typing import Optional
 from typing import Tuple
@@ -30,7 +29,6 @@ from app.core import emitter
 from app.core import main
 from app.core import utilities
 from app.core import values
-from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
 from app.core.task.TaskProcessor import TaskList
@@ -104,6 +102,7 @@ class Cerberus(App[List[Result]]):
 
     def on_mount(self):
         self.selected_subject = None
+        self.jobs_remaining_mutex = threading.Lock()
         self.jobs_remaining = 0
         self.finished_subjects: List[Result] = []
         self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
@@ -371,6 +370,7 @@ class Cerberus(App[List[Result]]):
             self.is_preparing = False
 
             self.show(self.query_one("#" + all_subjects_id))
+            total_jobs = 0
             for iteration, (task_config, task_data) in enumerate(tasks):
                 (
                     benchmark,
@@ -384,6 +384,7 @@ class Cerberus(App[List[Result]]):
                 subject_name = str(task_data[2][definitions.KEY_SUBJECT])
                 job_identifier = "-".join([benchmark.name, subject_name, bug_name])
                 for run in range(task_config.runs):
+                    total_jobs += 1
                     self.construct_job(
                         benchmark,
                         tool,
@@ -395,7 +396,9 @@ class Cerberus(App[List[Result]]):
                         str(run),
                         task_config,
                     )
-            self.jobs_remaining = iteration
+            self.jobs_remaining_mutex.acquire()
+            self.jobs_remaining += total_jobs
+            self.jobs_remaining_mutex.release()
 
         except Exception as e:
             self.show(self.query_one(Static))
@@ -457,8 +460,8 @@ class Cerberus(App[List[Result]]):
                     )
                     task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
                     for tool in tool_list:
+                        iteration = iteration + 1
                         for run_index in range(values.runs):
-                            iteration = iteration + 1
                             emitter.sub_sub_title(
                                 "Experiment #{} - Bug #{} Run #{} Tool {}".format(
                                     iteration, bug_index, run_index, tool.name
@@ -474,7 +477,9 @@ class Cerberus(App[List[Result]]):
                                 iteration,
                                 str(run_index),
                             )
-        self.jobs_remaining = iteration
+        self.jobs_remaining_mutex.acquire()
+        self.jobs_remaining = values.runs * iteration
+        self.jobs_remaining_mutex.release()
 
     def construct_job(
         self,
@@ -775,7 +780,9 @@ class Cerberus(App[List[Result]]):
         except Exception as e:
             self.debug_print(str(e))
 
+        self.jobs_remaining_mutex.acquire()
         self.jobs_remaining -= 1
+        self.jobs_remaining_mutex.release()
 
         self.finished_subjects.append((message.key, message.status, message.dir_info))
         if message.key in job_time_map:
@@ -819,7 +826,7 @@ class Cerberus(App[List[Result]]):
         if self.selected_subject is not None:
             self.hide(log_map[self.selected_subject])
 
-        if message.row_key.value and self.selected_subject in log_map:
+        if message.row_key.value and message.row_key.value in log_map:
             self.selected_subject = message.row_key.value
             self.show(log_map[self.selected_subject])
             self.set_focus(log_map[self.selected_subject], scroll_visible=True)
