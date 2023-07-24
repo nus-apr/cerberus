@@ -819,7 +819,7 @@ class Cerberus(App[List[Result]]):
         if self.selected_subject is not None:
             self.hide(log_map[self.selected_subject])
 
-        if message.row_key.value:
+        if message.row_key.value and self.selected_subject in log_map:
             self.selected_subject = message.row_key.value
             self.show(log_map[self.selected_subject])
             self.set_focus(log_map[self.selected_subject], scroll_visible=True)
