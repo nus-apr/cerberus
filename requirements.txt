@@ -5,3 +5,4 @@ textual==0.28.1
 slack_sdk
 discord
 cython
+jsonschema
