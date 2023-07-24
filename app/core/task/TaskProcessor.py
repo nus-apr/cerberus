@@ -75,6 +75,11 @@ class TaskProcessor:
                                 definitions.KEY_TOOL_PARAMS,
                                 tool_config.params,
                             )
+                            setattr(
+                                task_profile,
+                                definitions.KEY_TOOL_TAG,
+                                tool_config.tag,
+                            )
                             benchmark_name = benchmark_config.name
 
                             benchmark_subjects = (
