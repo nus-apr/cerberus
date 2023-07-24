@@ -300,6 +300,11 @@ def main():
             values.debug = config.general.debug_mode
             values.secure_hash = config.general.secure_hash
             if config.general.parallel_mode:
+                info = sys.version_info
+                if info.major < 3 or info.minor < 10:
+                    utilities.error_exit(
+                        "Parallel mode is currently supported only for versions 3.10+"
+                    )
                 iteration = ui.setup_ui(tasks)
             else:
                 # The tool and benchmark images are going to be created while enumerating
