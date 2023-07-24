@@ -459,6 +459,7 @@ class Cerberus(App[List[Result]]):
                         else None
                     )
                     task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
+                    task_config_info[definitions.KEY_TOOL_TAG] = values.tool_tag
                     for tool in tool_list:
                         iteration = iteration + 1
                         for run_index in range(values.runs):
@@ -493,10 +494,11 @@ class Cerberus(App[List[Result]]):
         run: str,
         task_config: Optional[TaskConfig] = None,
     ):
+        tool_tag = task_config_info.get(definitions.KEY_TOOL_TAG, "")
         key = "-".join(
             [
                 benchmark.name,
-                tool.name,
+                tool.name if tool_tag == "" else f"{tool.name}-{tool_tag}",
                 experiment_item[definitions.KEY_SUBJECT],
                 experiment_item[definitions.KEY_BUG_ID],
                 task_config_info[definitions.KEY_ID],

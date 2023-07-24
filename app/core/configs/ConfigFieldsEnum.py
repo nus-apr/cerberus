@@ -57,6 +57,7 @@ class ConfigFieldsEnum(Enum):
     # Tools
     TOOLS = "tools"
     PARAMS = "params"
+    TAG = "tag"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"

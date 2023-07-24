@@ -49,6 +49,7 @@ file_instrument_log = ""
 data_path = "/data"
 tool_path = ""
 tool_params = ""
+tool_tag = ""
 tool_list: List[str] = []
 debug = False
 start_index = None

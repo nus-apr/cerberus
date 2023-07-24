@@ -89,6 +89,7 @@ def run(
         values.task_profile_id_list,
     ):
         task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
+        task_config_info[definitions.KEY_TOOL_TAG] = values.tool_tag
         for container_config_info in map(
             lambda container_profile_id: container_setup[container_profile_id],
             values.container_profile_id_list,
@@ -138,10 +139,13 @@ def run(
                                 iteration, bug_index, run_index + 1
                             )
                         )
+                        tool_tag = task_config_info[definitions.KEY_TOOL_TAG]
                         key = "-".join(
                             [
                                 benchmark.name,
-                                tool.name,
+                                tool.name
+                                if tool_tag == ""
+                                else f"{tool.name}-{tool_tag}",
                                 experiment_item[definitions.KEY_SUBJECT],
                                 experiment_item[definitions.KEY_BUG_ID],
                                 task_config_info[definitions.KEY_ID],
@@ -335,10 +339,13 @@ def main():
                         experiment_image_id = task.prepare(
                             benchmark, experiment_item, cpu
                         )
+                        tool_tag = task_profile[definitions.KEY_TOOL_TAG]
                         key = "-".join(
                             [
                                 benchmark.name,
-                                tool.name,
+                                tool.name
+                                if tool_tag == ""
+                                else f"{tool.name}-{tool_tag}",
                                 experiment_item[definitions.KEY_SUBJECT],
                                 experiment_item[definitions.KEY_BUG_ID],
                                 task_profile[definitions.KEY_ID],

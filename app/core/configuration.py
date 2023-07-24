@@ -122,6 +122,7 @@ class Configurations:
         "skip-index-list": [],
         "tool-list": [],
         "tool-params": "",
+        "tool-tag": "",
         "directories": {"data": "/data"},
         "repair-profile-id-list": ["TP1"],
         "container-profile-id-list": ["CP1"],
@@ -160,6 +161,9 @@ class Configurations:
 
         if arg_list.tool_param:
             self.__runtime_config_values["tool-params"] = arg_list.tool_param
+
+        if arg_list.tool_tag:
+            self.__runtime_config_values["tool-tag"] = arg_list.tool_tag
 
         if arg_list.rebuild_all:
             self.__runtime_config_values["rebuild-all"] = True
@@ -382,5 +386,6 @@ class Configurations:
         values.tool_list = self.__runtime_config_values["tool-list"]
 
         values.tool_params = self.__runtime_config_values["tool-params"]
+        values.tool_tag = self.__runtime_config_values["tool-tag"]
 
         sys.setrecursionlimit(values.default_stack_size)

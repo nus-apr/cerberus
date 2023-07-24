@@ -243,6 +243,7 @@ tool_config_schema = {
     "properties": {
         ConfigFieldsEnum.NAME.value: {"type": "string"},
         ConfigFieldsEnum.PARAMS.value: {"type": "string"},
+        ConfigFieldsEnum.TAG.value: {"type": "string"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
     "additionalProperties": False,

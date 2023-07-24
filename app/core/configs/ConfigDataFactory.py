@@ -156,6 +156,9 @@ class ConfigDataFactory:
                     ToolConfig(
                         name=tool_config_dict[ConfigFieldsEnum.NAME.value],
                         params=tool_config_dict[ConfigFieldsEnum.PARAMS.value],
+                        tag=tool_config_dict[ConfigFieldsEnum.TAG.value]
+                        if ConfigFieldsEnum.TAG.value in tool_config_dict
+                        else "",
                     )
                 )
 
