@@ -489,7 +489,7 @@ class Cerberus(App[List[Result]]):
         task_config_info,
         container_config_info,
         experiment_item,
-        experiment_image_id: str,
+        experiment_image_id: Optional[str],
         iteration: int,
         run: str,
         task_config: Optional[TaskConfig] = None,

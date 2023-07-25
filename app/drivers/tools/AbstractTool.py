@@ -234,7 +234,7 @@ class AbstractTool(AbstractDriver):
                         emitter.information(
                             "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                         )
-                        if values.secure_hash and not image.id.startswith(
+                        if values.secure_hash and not remote_image.id.startswith(
                             self.hash_digest
                         ):
                             utilities.error_exit(
