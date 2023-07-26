@@ -116,11 +116,11 @@ class Darjeeling(AbstractRepairTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "evaluated candidate" in line:
-                    self.stats.patches_stats.enumerations += 1
+                    self.stats.patch_stats.enumerations += 1
                     if time_stamp_first_validation is None:
                         time_stamp_first_validation = line.split(" | ")[0]
                 elif "found plausible patch" in line:
-                    self.stats.patches_stats.plausible += 1
+                    self.stats.patch_stats.plausible += 1
                     if time_stamp_first_plausible is None:
                         time_stamp_first_plausible = line.split(" | ")[0]
                 elif "validation time: " in line:
@@ -142,18 +142,16 @@ class Darjeeling(AbstractRepairTool):
                     if time_stamp_first_compilation is None:
                         time_stamp_first_compilation = line.split(" | ")[0]
                 elif "possible edits" in line:
-                    self.stats.patches_stats.size = int(
-                        line.split(": ")[2].split(" ")[0]
-                    )
+                    self.stats.patch_stats.size = int(line.split(": ")[2].split(" ")[0])
                 elif "plausible patches" in line:
-                    self.stats.patches_stats.plausible = int(
+                    self.stats.patch_stats.plausible = int(
                         line.split("found ")[-1]
                         .replace(" plausible patches", "")
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,

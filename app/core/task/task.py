@@ -16,11 +16,13 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.task import analyze
+from app.core.task import fuzz
 from app.core.task import repair
 from app.core.task.typing import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
@@ -428,6 +430,15 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractAnalyzeTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "fuzz":
+            fuzz.fuzz_all(
+                dir_info,
+                bug_info,
+                cast(AbstractFuzzTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,

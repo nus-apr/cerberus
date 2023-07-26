@@ -183,15 +183,15 @@ class SAVER(AbstractRepairTool):
                 if str(space_size).isnumeric():
                     count_candidates += int(space_size)
             elif "CONVERTING FAILS" in line:
-                self.stats.patches_stats.plausible = 0
+                self.stats.patch_stats.plausible = 0
             elif "ERROR:" in line:
                 is_error = True
         if is_error:
             self.emit_error("[error] error detected in logs")
 
-        self.stats.patches_stats.plausible = count_enumerations
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.size = count_candidates
-        self.stats.patches_stats.generated = 0
+        self.stats.patch_stats.plausible = count_enumerations
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = count_candidates
+        self.stats.patch_stats.generated = 0
         self.stats.error_stats.is_error = is_error
         return self.stats

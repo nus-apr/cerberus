@@ -192,10 +192,10 @@ class EffFix(AbstractRepairTool):
             if is_error:
                 self.emit_error("[error] error detected in logs")
 
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.size = count_candidates
-        self.stats.patches_stats.generated = len(list_patches)
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.size = count_candidates
+        self.stats.patch_stats.generated = len(list_patches)
         self.stats.error_stats.is_error = is_error
 
         return self.stats

@@ -147,21 +147,21 @@ class GenProg(AbstractRepairTool):
         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "variant " in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     line.split("/")[0].split(" ")[-1]
                 )
             elif "possible edits" in line:
-                self.stats.patches_stats.generated = int(
+                self.stats.patch_stats.generated = int(
                     line.split(": ")[2].split(" ")[0]
                 )
             elif "fails to compile" in line:
-                self.stats.patches_stats.non_compilable += 1
+                self.stats.patch_stats.non_compilable += 1
             elif "Repair Found" in line:
-                self.stats.patches_stats.plausible += 1
+                self.stats.patch_stats.plausible += 1
             elif "cilrep done serialize" in line:
                 is_interrupted = False
 
-        if self.stats.patches_stats.generated == 0:
+        if self.stats.patch_stats.generated == 0:
             if self.is_file(dir_results + "/coverage.path"):
                 # TODO
                 if os.path.getsize(dir_results + "/coverage.path"):

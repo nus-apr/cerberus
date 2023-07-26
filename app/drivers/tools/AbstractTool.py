@@ -48,12 +48,14 @@ class AbstractTool(AbstractDriver):
     key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
     key_build_command = definitions.KEY_BUILD_COMMAND
     key_config_command = definitions.KEY_CONFIG_COMMAND
+    stats: ToolStats
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
-        self.stats = ToolStats()
+        if not self.stats:
+            self.error_exit("Stats should be set in the abstract tool constructor!")
         self.is_ui_active = values.ui_active
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug

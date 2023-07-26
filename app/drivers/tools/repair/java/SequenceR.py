@@ -127,12 +127,12 @@ class SequenceR(AbstractRepairTool):
 
         if not self.stats.error_stats.is_error:
             patch_space = len(self.list_dir("/output/patches", regex=".*java"))
-            self.stats.patches_stats.generated = patch_space
-            self.stats.patches_stats.enumerations = patch_space
-            self.stats.patches_stats.plausible = len(
+            self.stats.patch_stats.generated = patch_space
+            self.stats.patch_stats.enumerations = patch_space
+            self.stats.patch_stats.plausible = len(
                 self.list_dir("/output/patches", regex=".*/[0-9]+_passed/.*java")
             )
-            self.stats.patches_stats.non_compilable = len(
+            self.stats.patch_stats.non_compilable = len(
                 self.list_dir("/output/patches", regex=".*/[0-9]+/.*java")
             )
 

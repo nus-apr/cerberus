@@ -55,11 +55,11 @@ class Hippodrome(AbstractAnalyzeTool):
                 self.stats.error_stats.is_error = True
             if "Patch ID:" in line:
                 count = int(line.split(":")[-1])
-                self.stats.patches_stats.generated = (
-                    self.stats.patches_stats.enumerations
-                ) = max(self.stats.patches_stats.generated, count)
+                self.stats.patch_stats.generated = (
+                    self.stats.patch_stats.enumerations
+                ) = max(self.stats.patch_stats.generated, count)
             if "Applying Patch ID" in line:
-                self.stats.patches_stats.plausible += 1
+                self.stats.patch_stats.plausible += 1
         if is_error:
             self.emit_error("error detected in logs")
 

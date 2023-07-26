@@ -381,7 +381,7 @@ class F1X(AbstractRepairTool):
                         .replace("\n", "")
                     )
                     if str(count).isnumeric():
-                        self.stats.patches_stats.enumerations = int(count)
+                        self.stats.patch_stats.enumerations = int(count)
                 elif "validation time: " in line:
                     time = line.split("validation time: ")[-1].strip().replace("\n", "")
                     self.stats.time_stats.total_validation += float(time)
@@ -389,17 +389,17 @@ class F1X(AbstractRepairTool):
                     time = line.split("build time: ")[-1].strip().replace("\n", "")
                     self.stats.time_stats.total_build += float(time)
                 elif "validating patch " in line:
-                    self.stats.patches_stats.enumerations += 1
+                    self.stats.patch_stats.enumerations += 1
                 elif "search space size: " in line:
-                    self.stats.patches_stats.generated = int(
+                    self.stats.patch_stats.generated = int(
                         line.split("search space size: ")[-1]
                     )
                 elif "plausible patches: " in line:
-                    self.stats.patches_stats.plausible = int(
+                    self.stats.patch_stats.plausible = int(
                         line.split("plausible patches: ")[-1]
                     )
                 elif "failed to infer compile commands" in line:
-                    self.stats.patches_stats.generated = -1
+                    self.stats.patch_stats.generated = -1
                 elif "explored count: 1" in line:
                     if self.stats.time_stats.timestamp_validation == 0:
                         pass
@@ -438,7 +438,7 @@ class F1X(AbstractRepairTool):
 
         self.read_log_file()
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -447,6 +447,6 @@ class F1X(AbstractRepairTool):
             )
         )
         if self.use_valkyrie:
-            self.stats.patches_stats.plausible = self.stats.patches_stats.generated
+            self.stats.patch_stats.plausible = self.stats.patch_stats.generated
 
         return self.stats

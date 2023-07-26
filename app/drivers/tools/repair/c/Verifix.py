@@ -71,7 +71,7 @@ class Verifix(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -88,7 +88,7 @@ class Verifix(AbstractRepairTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
         if not self.stats.error_stats.is_error:
-            self.stats.patches_stats.plausible = 1
-            self.stats.patches_stats.enumerations = 1
+            self.stats.patch_stats.plausible = 1
+            self.stats.patch_stats.enumerations = 1
 
         return self.stats
