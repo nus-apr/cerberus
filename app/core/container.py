@@ -271,7 +271,7 @@ def build_container(
             "privileged": True,
             "cpuset_cpus": cpu,
             "tty": True,
-            "runtime": "nvidia" if values.use_gpu else "runc",
+            "device_requests": [docker.types.DeviceRequest(count=-1, capabilities=[['gpu']])] if values.use_gpu else [],
         }
 
         default_mem_limit = "32g"
