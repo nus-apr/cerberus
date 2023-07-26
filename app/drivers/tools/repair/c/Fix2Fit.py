@@ -347,7 +347,7 @@ class Fix2Fit(AbstractRepairTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self.stats.patches_stats.size = int(
+                    self.stats.patch_stats.size = int(
                         line.split("search space size: ")[-1].strip()
                     )
 
@@ -356,31 +356,31 @@ class Fix2Fit(AbstractRepairTool):
         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "search space size: " in line:
-                self.stats.patches_stats.size = int(
+                self.stats.patch_stats.size = int(
                     line.split("search space size: ")[-1].strip()
                 )
             elif "candidates evaluated: " in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     line.split("candidates evaluated: ")[-1].strip()
                 )
             elif "exploration progress: " in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     int(
                         line.split("exploration progress: ")[-1]
                         .strip()
                         .replace("%", "")
                     )
                     / 100
-                    * self.stats.patches_stats.size
+                    * self.stats.patch_stats.size
                 )
             elif "plausible patches: " in line:
-                self.stats.patches_stats.plausible = int(
+                self.stats.patch_stats.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
             elif "partition size: " in line:
-                self.stats.patches_stats.plausible = (
+                self.stats.patch_stats.plausible = (
                     int(line.split("partition size: ")[-1].strip())
-                    + self.stats.patches_stats.plausible
+                    + self.stats.patch_stats.plausible
                 )
             elif "patches successfully generated" in line:
                 is_timeout = False
@@ -416,5 +416,5 @@ class Fix2Fit(AbstractRepairTool):
             )
 
         dir_patch = self.dir_setup + "/patches"
-        self.stats.patches_stats.generated = len(self.list_dir(dir_patch))
+        self.stats.patch_stats.generated = len(self.list_dir(dir_patch))
         return self.stats

@@ -5,7 +5,7 @@ from app.core import values
 from app.core.task.TaskStatus import TaskStatus
 
 
-class ToolTimeStats:
+class TimeStats:
     timestamp_start = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_end = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_compilation = 0
@@ -83,7 +83,7 @@ class ToolTimeStats:
         return summary
 
 
-class ToolPatchesStats:
+class PatchStats:
     non_compilable: int = 0
     plausible: int = 0
     generated: int = 0
@@ -109,6 +109,26 @@ class ToolPatchesStats:
             "plausible": self.plausible,
             "implausible": self.get_implausible(),
             "generated": self.generated,
+        }
+        return summary
+
+
+class FuzzerStats:
+    time_to_bug: int = 0
+    line_coverage: int = 0
+    total_lines: int = 0
+    branch_coverage: int = 0
+    total_branches: int = 0
+    executions: int = 0
+
+    def get_array(self):
+        summary = {
+            "time to bug": self.time_to_bug,
+            "line coverage": self.line_coverage,
+            "total lines": self.total_lines,
+            "branch covarege": self.branch_coverage,
+            "total branches": self.total_branches,
+            "executions": self.executions,
         }
         return summary
 
@@ -192,20 +212,17 @@ class ContainerStats:
 
 
 class ToolStats:
-    time_stats: ToolTimeStats
-    patches_stats: ToolPatchesStats
+    time_stats: TimeStats
     container_stats: ContainerStats
     error_stats: ErrorStats
 
     def __init__(self):
-        self.time_stats = ToolTimeStats()
-        self.patches_stats = ToolPatchesStats()
+        self.time_stats = TimeStats()
         self.container_stats = ContainerStats()
         self.error_stats = ErrorStats()
 
     def reset(self):
-        self.time_stats = ToolTimeStats()
-        self.patches_stats = ToolPatchesStats()
+        self.time_stats = TimeStats()
         self.container_stats = ContainerStats()
         self.error_stats = ErrorStats()
 
@@ -214,10 +231,151 @@ class ToolStats:
             "status": str(values.experiment_status.get(TaskStatus.NONE)),
             "details": {
                 "time": self.time_stats.get_array(),
-                "space": self.patches_stats.get_array(),
                 "container": self.container_stats.get_array(),
             },
         }
+
+    def write(self, printer, prefix=""):
+        printer(
+            "{1} time build: {0} seconds\n".format(self.time_stats.total_build, prefix)
+        )
+        printer(
+            "{1} time validation: {0} seconds\n".format(
+                self.time_stats.total_validation, prefix
+            )
+        )
+        printer(
+            "{1} time duration: {0} seconds\n".format(
+                self.time_stats.get_duration(), prefix
+            )
+        )
+
+        if values.use_valkyrie:
+            printer(
+                "{1} latency compilation: {0} seconds\n".format(
+                    self.time_stats.get_latency_compilation(), prefix
+                )
+            )
+            printer(
+                "{1} latency validation: {0} seconds\n".format(
+                    self.time_stats.get_latency_validation(), prefix
+                )
+            )
+            printer(
+                "{1} latency plausible: {0} seconds\n".format(
+                    self.time_stats.get_latency_plausible(), prefix
+                )
+            )
+
+
+class RepairToolStats(ToolStats):
+    patch_stats: PatchStats
+
+    def __init__(self):
+        self.patch_stats = PatchStats()
+        super(RepairToolStats, self).__init__()
+
+    def get_array(self):
+        res = super(RepairToolStats, self).get_array()
+        res["details"]["space"] = self.patch_stats.get_array()
+        return res
+
+    def write(self, printer, prefix=""):
+        printer("{1} search space size: {0}\n".format(self.patch_stats.size, prefix))
+        printer(
+            "{1} count enumerations: {0}\n".format(
+                self.patch_stats.enumerations, prefix
+            )
+        )
+        printer(
+            "{1} count plausible patches: {0}\n".format(
+                self.patch_stats.plausible, prefix
+            )
+        )
+        printer("{1} count generated: {0}\n".format(self.patch_stats.generated, prefix))
+        printer(
+            "{1} count non-compiling patches: {0}\n".format(
+                self.patch_stats.non_compilable, prefix
+            )
+        )
+        printer(
+            "{1} count implausible patches: {0}\n".format(
+                self.patch_stats.get_implausible(), prefix
+            )
+        )
+        super(RepairToolStats, self).write(printer, prefix)
+
+
+class AnalysisToolStats(ToolStats):
+    patch_stats: PatchStats
+
+    def __init__(self):
+        self.patch_stats = PatchStats()
+        super(AnalysisToolStats, self).__init__()
+
+    def get_array(self):
+        res = super(AnalysisToolStats, self).get_array()
+        res["details"]["space"] = self.patch_stats.get_array()
+        return res
+
+    def write(self, printer, prefix=""):
+        printer("{1} search space size: {0}\n".format(self.patch_stats.size, prefix))
+        printer(
+            "{1} count enumerations: {0}\n".format(
+                self.patch_stats.enumerations, prefix
+            )
+        )
+        printer(
+            "{1} count plausible patches: {0}\n".format(
+                self.patch_stats.plausible, prefix
+            )
+        )
+        printer("{1} count generated: {0}\n".format(self.patch_stats.generated, prefix))
+        printer(
+            "{1} count non-compiling patches: {0}\n".format(
+                self.patch_stats.non_compilable, prefix
+            )
+        )
+        printer(
+            "{1} count implausible patches: {0}\n".format(
+                self.patch_stats.get_implausible(), prefix
+            )
+        )
+        super(AnalysisToolStats, self).write(printer, prefix)
+
+
+class FuzzToolStats(ToolStats):
+    fuzzing_stats: FuzzerStats
+
+    def __init__(self):
+        self.fuzzing_stats = FuzzerStats()
+        super(FuzzToolStats, self).__init__()
+
+    def get_array(self):
+        res = super(FuzzToolStats, self).get_array()
+        res["details"]["space"] = self.fuzzing_stats.get_array()
+        return res
+
+    def write(self, printer, prefix=""):
+        printer(
+            "{1} time to bug: {0} second(s)\n".format(
+                self.fuzzing_stats.time_to_bug, prefix
+            )
+        )
+        printer("{1} executions: {0}\n".format(self.fuzzing_stats.executions, prefix))
+        printer(
+            "{1} lines covered: {0} out of {2}\n".format(
+                self.fuzzing_stats.line_coverage, prefix, self.fuzzing_stats.total_lines
+            )
+        )
+        printer(
+            "{1} branches covered: {0} out of {2}\n".format(
+                self.fuzzing_stats.branch_coverage,
+                prefix,
+                self.fuzzing_stats.total_branches,
+            )
+        )
+        super(FuzzToolStats, self).write(printer, prefix)
 
 
 class BenchmarkStats:

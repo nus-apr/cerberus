@@ -85,7 +85,7 @@ class CPR(AbstractRepairTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "|P|=" in line:
-                    self.stats.patches_stats.plausible = int(
+                    self.stats.patch_stats.plausible = int(
                         line.split("|P|=")[-1]
                         .strip()
                         .replace("^[[0m", "")
@@ -98,7 +98,7 @@ class CPR(AbstractRepairTool):
                         .split("\x1b")[0]
                         .split(".0")[0]
                     )
-                    self.stats.patches_stats.enumerations = count_enumerations
+                    self.stats.patch_stats.enumerations = count_enumerations
                 elif "Runtime Error" in line:
                     self.stats.error_stats.is_error = True
                 elif "statistics" in line:

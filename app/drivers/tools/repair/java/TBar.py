@@ -207,9 +207,9 @@ class TBar(AbstractRepairTool):
                         "Patch" in file_patch_name
                         and file_patch_name not in list_patches_files_set
                     ):
-                        self.stats.patches_stats.generated += 1
+                        self.stats.patch_stats.generated += 1
                         count_generated += 1
-        self.stats.patches_stats.generated = count_generated
+        self.stats.patch_stats.generated = count_generated
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -238,9 +238,9 @@ class TBar(AbstractRepairTool):
                     count_non_compilable += 1
                     count_enumerations += 1
 
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.non_compilable = count_non_compilable
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.non_compilable = count_non_compilable
         self.stats.error_stats.is_error = is_error
 
         return self.stats

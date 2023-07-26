@@ -5,6 +5,7 @@ import time
 import traceback
 from copy import deepcopy
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -31,6 +32,7 @@ from app.core import utilities
 from app.core import values
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
+from app.core.task.stats import RepairToolStats
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskStatus import TaskStatus
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -742,16 +744,18 @@ class Cerberus(App[List[Result]]):
                 update_width=True,
             )
             table.sort(Cerberus.COLUMNS["ID"][id])
-            table.update_cell(
-                key,
-                Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
-                message.res_info.patches_stats.plausible,
-                update_width=True,
-            )
+            # TODO temporary
+            if values.task_type.get() != "fuzz":
+                table.update_cell(
+                    key,
+                    Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
+                    cast(RepairToolStats, message.results).patch_stats.plausible,
+                    update_width=True,
+                )
             table.update_cell(
                 key,
                 Cerberus.COLUMNS[definitions.UI_DURATION][id],
-                "{} second(s)".format(message.res_info.time_stats.get_duration()),
+                "{} second(s)".format(message.results.time_stats.get_duration()),
                 update_width=True,
             )
 
@@ -786,7 +790,9 @@ class Cerberus(App[List[Result]]):
         self.jobs_remaining -= 1
         self.jobs_remaining_mutex.release()
 
-        self.finished_subjects.append((message.key, message.status, message.dir_info))
+        self.finished_subjects.append(
+            (message.key, message.status, message.directory_info)
+        )
         if message.key in job_time_map:
             del job_time_map[message.key]
         if self.jobs_remaining == 0:

@@ -6,31 +6,21 @@ from os.path import join
 from app.core import definitions
 from app.core import utilities
 from app.core import values
-from app.core.task.stats import RepairToolStats
+from app.core.task.stats import FuzzToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-class AbstractRepairTool(AbstractTool):
-
+class AbstractFuzzTool(AbstractTool):
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
-    key_fix_file = definitions.KEY_FIX_FILE
-    key_fix_lines = definitions.KEY_FIX_LINES
-    key_fix_loc = definitions.KEY_FIX_LOC
-    key_failing_tests = definitions.KEY_FAILING_TEST
-    key_passing_tests = definitions.KEY_PASSING_TEST
-    key_dir_class = definitions.KEY_CLASS_DIRECTORY
-    key_dir_source = definitions.KEY_SOURCE_DIRECTORY
-    key_dir_tests = definitions.KEY_TEST_DIRECTORY
-    key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
-    stats: RepairToolStats
+    stats: FuzzToolStats
 
     def __init__(self, tool_name):
-        self.stats = RepairToolStats()
+        self.stats = FuzzToolStats()
         super().__init__(tool_name)
 
     @abc.abstractmethod
@@ -40,17 +30,7 @@ class AbstractRepairTool(AbstractTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self.stats.patches_stats.non_compilable
-            self.stats.patches_stats.plausible
-            self.stats.patches_stats.size
-            self.stats.patches_stats.enumerations
-            self.stats.patches_stats.generated
-
-            self.stats.time_stats.total_validation
-            self.stats.time_stats.total_build
-            self.stats.time_stats.timestamp_compilation
-            self.stats.time_stats.timestamp_validation
-            self.stats.time_stats.timestamp_plausible
+            ?
         """
         return self.stats
 
@@ -82,39 +62,37 @@ class AbstractRepairTool(AbstractTool):
             )
         return
 
-    def run_repair(self, bug_info, repair_config_info):
+    def run_fuzz(self, bug_info, fuzzer_config_info):
         self.emit_normal("\t\t[framework] repairing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.instrument(bug_info)
         self.emit_normal("executing repair command")
-        task_conf_id = repair_config_info[definitions.KEY_ID]
+        task_conf_id = fuzzer_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
-        return
 
     def print_stats(self):
-
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("repair-tool", self.name, message)
+        super().emit_normal("fuzz-tool", self.name, message)
 
     def emit_warning(self, message):
-        super().emit_warning("repair-tool", self.name, message)
+        super().emit_warning("fuzz-tool", self.name, message)
 
     def emit_error(self, message):
-        super().emit_error("repair-tool", self.name, message)
+        super().emit_error("fuzz-tool", self.name, message)
 
     def emit_highlight(self, message):
-        super().emit_highlight("repair-tool", self.name, message)
+        super().emit_highlight("fuzz-tool", self.name, message)
 
     def emit_success(self, message):
-        super().emit_success("repair-tool", self.name, message)
+        super().emit_success("fuzz-tool", self.name, message)
 
     def emit_debug(self, message):
-        super().emit_debug("repair-tool", self.name, message)
+        super().emit_debug("fuzz-tool", self.name, message)

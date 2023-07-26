@@ -88,7 +88,7 @@ class CRepair(AbstractRepairTool):
         search_space = 0
 
         # count number of patch files
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_expr,
@@ -126,8 +126,8 @@ class CRepair(AbstractRepairTool):
                 if any(err in line.lower() for err in self.error_messages):
                     self.stats.error_stats.is_error = True
 
-        self.stats.patches_stats.non_compilable = count_compile_errors
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.size = search_space
+        self.stats.patch_stats.non_compilable = count_compile_errors
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = search_space
         return self.stats

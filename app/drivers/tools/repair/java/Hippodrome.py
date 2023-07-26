@@ -87,10 +87,10 @@ class Hippodrome(AbstractRepairTool):
             for line in log_lines:
                 if "Patch ID:" in line:
                     count = int(line.split(":")[-1])
-                    self.stats.patches_stats.plausible = (
-                        self.stats.patches_stats.enumerations
-                    ) = max(self.stats.patches_stats.generated, count)
+                    self.stats.patch_stats.plausible = (
+                        self.stats.patch_stats.enumerations
+                    ) = max(self.stats.patch_stats.generated, count)
                 if "Applying Patch ID" in line:
-                    self.stats.patches_stats.generated += 1
+                    self.stats.patch_stats.generated += 1
 
         return self.stats

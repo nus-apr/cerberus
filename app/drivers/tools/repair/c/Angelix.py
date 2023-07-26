@@ -183,7 +183,7 @@ class Angelix(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if "patch" in name]
         )
 
@@ -245,7 +245,7 @@ class Angelix(AbstractRepairTool):
         if is_timeout:
             count_enumerations = count_enumerations - 1
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,
@@ -266,9 +266,9 @@ class Angelix(AbstractRepairTool):
         if is_timeout:
             self.emit_warning("[warning] timeout before ending")
 
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.size = search_space
-        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.size = search_space
+        self.stats.patch_stats.enumerations = count_enumerations
         self.stats.error_stats.is_error = is_error
         return self.stats
 
