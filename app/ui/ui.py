@@ -50,6 +50,7 @@ running_subjects_id = "running_subjects"
 
 log_map: Dict[str, TextLog] = {}
 job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
+job_time_map_mutex = threading.Lock()
 
 job_condition = threading.Condition()
 
@@ -147,6 +148,8 @@ class Cerberus(App[List[Result]]):
         # self.debug_print("Idle")
         now = int(time.time())
         to_del = []
+
+        job_time_map_mutex.acquire()
         for (job_id, info) in job_time_map.items():
             (start, limit, tool) = info
             if now - start > limit:
@@ -169,6 +172,9 @@ class Cerberus(App[List[Result]]):
 
         for job_id in to_del:
             del job_time_map[job_id]
+        job_time_map_mutex.release()
+
+
 
     def prepare_default_run(self, loop, task_type):
         try:
@@ -621,6 +627,7 @@ class Cerberus(App[List[Result]]):
             )
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
+            
             job_time_map[message.identifier] = (
                 start_time,
                 timeout,
@@ -676,7 +683,10 @@ class Cerberus(App[List[Result]]):
                     message.experiment_image_id,
                 )
             except Exception as e:
+                job_time_map_mutex.acquire()
                 del job_time_map[message.identifier]
+                job_time_map_mutex.release()
+
                 log_map[message.identifier].write(traceback.format_exc())
                 status = TaskStatus.FAIL
             finally:
@@ -793,8 +803,13 @@ class Cerberus(App[List[Result]]):
         self.finished_subjects.append(
             (message.key, message.status, message.directory_info)
         )
+        
+        job_time_map_mutex.acquire()
         if message.key in job_time_map:
             del job_time_map[message.key]
+        job_time_map_mutex.release()
+
+
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
             if not values.debug:
