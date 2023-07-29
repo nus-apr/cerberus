@@ -1,4 +1,5 @@
 # coding: utf-8
+# setup tool
 import os
 import fnmatch
 import sysconfig
