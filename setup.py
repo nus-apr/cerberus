@@ -1,5 +1,5 @@
 # coding: utf-8
-# setup tool 123123
+# setup tool
 import os
 import fnmatch
 import sysconfig
@@ -11,6 +11,10 @@ from Cython.Build import cythonize
 
 EXCLUDE_FILES = []
 
+
+# TODO: Implement this function
+def my_function():
+    pass
 
 def get_ext_paths(root_dir, exclude_files):
     """get filepaths for compilation"""
