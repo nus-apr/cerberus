@@ -173,7 +173,7 @@ class ContainerStats:
 
     @staticmethod
     def compute_network_usage(container_stats: dict):
-        networks = container_stats["networks"]
+        networks = container_stats.get("networks", {})
         nr_network_interfaces = len(networks)
         total_rx_bytes = 0
         total_tx_bytes = 0
