@@ -200,6 +200,7 @@ def create_running_container(
     container_name: str,
     cpu: str,
     container_config_info: Dict[str, Any],
+    extra_volumes: Optional[Dict[str, Any]] = None,
 ):
     image_name = image_name.lower()
     container_id = container.get_container_id(container_name)
@@ -220,6 +221,10 @@ def create_running_container(
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
+
+    if extra_volumes:
+        volume_list.update(extra_volumes)
+
     if (
         not container.image_exists(image_name)
         or values.rebuild_base
@@ -412,6 +417,7 @@ def run(
                 container_name,
                 cpu,
                 container_config_info,
+                tool.bindings,
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")
