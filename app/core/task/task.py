@@ -249,6 +249,12 @@ def create_running_container(
                         join(dir_info["container"]["setup"], "deps.sh")
                     )
                 )
+            if os.path.exists(join(dir_info["container"]["setup"], "install_deps")):
+                dock_file.write(
+                    "RUN bash {0} || sudo bash {0} ; return 0".format(
+                        join(dir_info["container"]["setup"], "install_deps")
+                    )
+                )
         container.build_image(tmp_dockerfile, image_name)
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
