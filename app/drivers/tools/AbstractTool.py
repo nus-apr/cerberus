@@ -3,6 +3,9 @@ import os
 import re
 import shutil
 import time
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 from app.core import abstractions
 from app.core import container
@@ -49,6 +52,7 @@ class AbstractTool(AbstractDriver):
     key_build_command = definitions.KEY_BUILD_COMMAND
     key_config_command = definitions.KEY_CONFIG_COMMAND
     stats: ToolStats
+    bindings: Optional[Dict[str, Any]] = None
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
