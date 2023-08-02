@@ -88,7 +88,7 @@ class F1X(AbstractRepairTool):
         abs_path_buggy_file = join(
             self.dir_expr, "src", fix_location if fix_location else fix_file
         )
-        dir_patch = "output/patches"
+        dir_patch = f"{self.dir_output}/patches"
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
 
@@ -110,7 +110,7 @@ class F1X(AbstractRepairTool):
         all_command = (
             repair_command
             + " --enable-assignment --disable-dteq --enable-validation  -a -o {}  ".format(
-                self.dir_output
+                dir_patch
             )
         )
         if additional_tool_param:
@@ -155,7 +155,7 @@ class F1X(AbstractRepairTool):
                 elif "validating patch " in line:
                     self.stats.patch_stats.enumerations += 1
                 elif "search space size: " in line:
-                    self.stats.patch_stats.generated = int(
+                    self.stats.patch_stats.size = int(
                         line.split("search space size: ")[-1]
                     )
                 elif "plausible patches: " in line:
