@@ -41,6 +41,7 @@ class AbstractTool(AbstractDriver):
     current_task_profile_id = values.current_task_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
+    key_language = definitions.KEY_LANGUAGE
     key_id = definitions.KEY_ID
     key_bug_id = definitions.KEY_BUG_ID
     key_bug_type = definitions.KEY_BUG_TYPE
