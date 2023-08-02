@@ -243,13 +243,13 @@ def create_running_container(
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
 
-            if os.path.exists(join(dir_info["container"]["setup"], "deps.sh")):
+            if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
                 dock_file.write(
                     "RUN bash {0} || sudo bash {0} ; return 0".format(
                         join(dir_info["container"]["setup"], "deps.sh")
                     )
                 )
-            if os.path.exists(join(dir_info["container"]["setup"], "install_deps")):
+            if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
                 dock_file.write(
                     "RUN bash {0} || sudo bash {0} ; return 0".format(
                         join(dir_info["container"]["setup"], "install_deps")
