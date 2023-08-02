@@ -7,50 +7,145 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Darjeeling(AbstractRepairTool):
-    """ """
+
+    CONFIG_TEMPLATE = """
+algorithm:
+  type: exhaustive
+coverage:
+  method:
+    type: gcov
+localization:
+  type: spectrum-based
+  metric: tarantula
+{fix_file_list}
+optimizations:
+  ignore-dead-code: true
+  ignore-equivalent-insertions: true
+  ignore-string-equivalent-snippets: true
+program:
+  build-instructions:
+    steps:
+    - command: ./{config_script}
+      directory: {dir_setup}
+    - command: ./{build_script}
+      directory: {dir_setup}
+    steps-for-coverage:
+    - command: CFLAGS="--coverage " CXXFLAGS="--coverage "  LDFLAGS="--coverage " ./{config_script}
+      directory: {dir_setup}
+    - command: CFLAGS="--coverage " CXXFLAGS="--coverage " LDFLAGS="--coverage " ./{build_script}
+      directory: {dir_setup}
+    time-limit: 30
+  image: {tag_id}-runtime
+  language: {prog_language}
+  source-directory: {dir_src}
+  tests:
+    tests:
+    - ./{test_script}
+    time-limit: 5
+    type: shell
+    workdir: {dir_setup}
+resource-limits:
+  candidates: 100000
+seed: 0
+threads: 4
+transformations:
+  schemas:
+  - type: delete-statement
+  - type: append-statement
+  - type: prepend-statement
+  - type: replace-statement
+version: 1.0
+    """
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/darjeeling"
 
-    def instrument(self, bug_info):
-        """
-        Instrumentation for the experiment as needed by the tool
-        - requires sudo
-        """
-        self.emit_normal(" instrumenting for " + self.name)
-        bug_id = bug_info[self.key_bug_id]
-        task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info[self.key_fix_file]
-        self.log_instrument_path = (
-            self.dir_logs
-            + "/"
-            + task_conf_id
-            + "-"
-            + self.name
-            + "-"
-            + bug_id
-            + "-instrument.log"
+    def generate_repair_config(
+        self, c_script, b_script, t_script, p_lang, fix_files, tag_id, test_driver
+    ):
+        self.emit_normal(f"generating config file for {self.name}")
+        config_file_path = join(self.dir_setup, "darjeeling.yml")
+        file_list_str = ""
+        if fix_files:
+            file_list_str = "  restrict-to-files:\n"
+            for f in fix_files:
+                file_list_str += f"  - {f}\n"
+        config_content = self.CONFIG_TEMPLATE.format(
+            config_script=c_script,
+            build_script=b_script,
+            test_script=t_script,
+            prog_language=p_lang,
+            fix_file_list=file_list_str,
+            tag_id=tag_id,
+            dir_src=join(self.dir_expr, "src"),
+            dir_setup=self.dir_setup,
+            test_driver=test_driver,
         )
-        command_str = "sudo bash instrument.sh {} {}".format(
-            self.dir_base_expr, buggy_file
+        self.write_file(config_content, config_file_path)
+        return config_file_path
+
+    def generate_runtime_dockerfile(self, docker_image_tag):
+        # the dockerfile is created at the setup dir and docker build will be run at the setup dir
+        self.emit_normal(f"generating runtime Dockerfile for {self.name}")
+        dockerfile_path = self.dir_setup + "/Dockerfile"
+        self.write_file(
+            [
+                f"FROM {docker_image_tag}\n",
+                "USER root\n",
+                "RUN apt update; apt install -y make g++\n"
+                f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n"
+                "WORKDIR /experiment\n",
+            ],
+            dockerfile_path,
         )
-        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        if status not in [0, 126]:
-            self.error_exit(
-                "error with instrumentation of "
-                + self.name
-                + "; exit code "
-                + str(status)
-            )
-        return
+        return dockerfile_path
+
+    def build_runtime_docker_image(self, docker_tag):
+        dockerfile_path = self.generate_runtime_dockerfile(docker_tag)
+        self.emit_normal(f"building runtime Dockerfile for {self.name}")
+        build_command = f"docker build -t {docker_tag}-runtime -f {dockerfile_path} ."
+        log_docker_build_path = join(self.dir_logs, "darjeeling-docker.log")
+        self.run_command(
+            build_command, dir_path=self.dir_setup, log_file_path=log_docker_build_path
+        )
 
     def run_repair(self, bug_info, repair_config_info):
+        config_script = bug_info.get(self.key_config_script, None)
+        build_script = bug_info.get(self.key_build_script, None)
+        test_script = bug_info.get(self.key_test_script, None)
+        prog_lang = bug_info.get(self.key_language, None)
+
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        if not build_script:
+            self.error_exit(f"{self.name} requires a build script as input")
+        if not test_script:
+            self.error_exit(f"{self.name} requires a test script as input")
+        if not prog_lang:
+            self.error_exit(
+                f"{self.name} requires bug to specify the programming language"
+            )
+
+        benchmark_name = bug_info.get(self.key_benchmark)
+        subject_name = bug_info.get(self.key_subject)
+        bug_id = str(bug_info[self.key_bug_id])
+        docker_tag_id = f"{self.name}-{benchmark_name}-{subject_name}-{bug_id.lower()}"
+        self.build_runtime_docker_image(docker_tag_id)
+        self.generate_repair_config(
+            c_script=config_script,
+            b_script=build_script,
+            t_script=test_script,
+            p_lang=str(prog_lang).lower(),
+            fix_files=[bug_info[self.key_fix_file]],
+            tag_id=docker_tag_id,
+            test_driver=test_script,
+        )
         super(Darjeeling, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
-        bug_id = str(bug_info[self.key_bug_id])
+
         timeout = str(repair_config_info[self.key_timeout])
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
@@ -70,14 +165,13 @@ class Darjeeling(AbstractRepairTool):
         repair_command += "darjeeling repair --continue --patch-dir {} ".format(
             dir_patch
         )
-        repair_command += " --threads {} ".format(mp.cpu_count())
         repair_command += additional_tool_param + " "
         if self.is_dump_patches:
             repair_command += " --dump-all "
-        repair_command += " repair.yml"
+        repair_command += " darjeeling.yml"
         self.timestamp_log_start()
         status = self.run_command(
-            repair_command, self.log_output_path, self.dir_expr + "/src"
+            repair_command, self.log_output_path, dir_path=self.dir_setup
         )
         self.process_status(status)
 
