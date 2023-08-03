@@ -98,6 +98,7 @@ class F1X(AbstractRepairTool):
         repair_command += " -f {0} ".format(abs_path_buggy_file)
         repair_command += " -t {0} ".format(test_id_list)
         repair_command += " -T 15000"
+        repair_command += " --output-top 5"
         repair_command += " --driver={0} ".format(test_driver_path)
         repair_command += '-b "{0}"'.format(build_script_path)
         if self.is_dump_patches:
