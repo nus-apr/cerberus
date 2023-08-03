@@ -149,12 +149,9 @@ def repair_all(
 
     final_status = [TaskStatus.NONE]
 
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    if isinstance(passing_id_list_str, list):
-        passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
-    else:
-        if str(passing_id_list_str).replace(",", "").isnumeric():
-            passing_test_list = passing_id_list_str.split(",")
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
 
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     failing_test_list = str(
