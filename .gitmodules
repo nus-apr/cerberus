@@ -49,12 +49,12 @@
 [submodule "benchmark/quixbugspython"]
 	path = benchmark/quixbugspython
 	url = https://github.com/nus-apr/quixbugs-python-benchmark.git
-[submodule "benchmark/autocodepython"]
-	path = benchmark/autocodepython
-	url = https://github.com/RepairComp/autocodepython.git
-[submodule "benchmark/autocodejs"]
-	path = benchmark/autocodejs
-	url = https://github.com/RepairComp/autocodejs.git
 [submodule "benchmark/aprcompvulnc"]
 	path = benchmark/aprcompvulnc
 	url = https://github.com/APR-Comp/vulnerabilities-c
+[submodule "benchmark/aprcompaipython"]
+	path = benchmark/aprcompaipython
+	url = https://github.com/RepairComp/autocodepython.git
+[submodule "benchmark/aprcompaijs"]
+	path = benchmark/aprcompaijs
+	url = https://github.com/RepairComp/autocodejs.git
