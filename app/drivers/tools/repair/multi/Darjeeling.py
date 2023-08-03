@@ -8,7 +8,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 class Darjeeling(AbstractRepairTool):
 
-    CONFIG_TEMPLATE = """
+    CONFIG_C_TEMPLATE = """
 algorithm:
   type: exhaustive
 coverage:
@@ -40,14 +40,14 @@ program:
   source-directory: {dir_src}
   tests:
     tests:
-    - ./{test_script}
+{test_cases}
     time-limit: 5
     type: shell
     workdir: {dir_setup}
 resource-limits:
   candidates: 100000
 seed: 0
-threads: 4
+threads: 1
 transformations:
   schemas:
   - type: delete-statement
@@ -56,6 +56,50 @@ transformations:
   - type: replace-statement
 version: 1.0
     """
+    CONFIG_PYTHON_TEMPLATE = """
+version: '1.0'
+seed: 0
+threads: 1
+localization:
+  type: spectrum
+  metric: weighted
+algorithm:
+  type: exhaustive
+coverage:
+  method:
+    type: coverage.py
+{fix_file_list}
+program:
+  image: {tag_id}-runtime
+  language: python
+  source-directory: {dir_src}
+  build-instructions:
+    time-limit: 1
+    steps: []
+    steps-for-coverage: []
+  tests:
+    type: pytest
+    workdir: {dir_src}
+    tests:
+{test_cases}
+transformations:
+  schemas:
+    - type: delete-statement
+    - type: replace-statement
+    - type: prepend-statement
+    - type: append-statement
+optimizations:
+  use-scope-checking: false
+  use-syntax-scope-checking: false
+  ignore-dead-code: false
+  ignore-equivalent-insertions: false
+  ignore-untyped-returns: false
+  ignore-string-equivalent-snippets: false
+  ignore-decls: false
+  only-insert-executed-code: false
+resource-limits:
+  candidates: 10000
+    """
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
@@ -63,7 +107,15 @@ version: 1.0
         self.image_name = "rshariffdeen/darjeeling"
 
     def generate_repair_config(
-        self, c_script, b_script, t_script, p_lang, fix_files, tag_id, test_driver
+        self,
+        c_script,
+        b_script,
+        t_script,
+        p_lang,
+        fix_files,
+        tag_id,
+        test_driver,
+        test_list,
     ):
         self.emit_normal(f"generating config file for {self.name}")
         config_file_path = join(self.dir_setup, "darjeeling.yml")
@@ -72,17 +124,37 @@ version: 1.0
             file_list_str = "  restrict-to-files:\n"
             for f in fix_files:
                 file_list_str += f"  - {f}\n"
-        config_content = self.CONFIG_TEMPLATE.format(
-            config_script=c_script,
-            build_script=b_script,
-            test_script=t_script,
-            prog_language=p_lang,
-            fix_file_list=file_list_str,
-            tag_id=tag_id,
-            dir_src=join(self.dir_expr, "src"),
-            dir_setup=self.dir_setup,
-            test_driver=test_driver,
-        )
+
+        config_content = ""
+        if p_lang.lower() in ["c", "c++"]:
+            test_cases_str = ""
+            for t in test_list:
+                test_cases_str += f"    - ./{test_driver} {t}\n"
+            config_content = self.CONFIG_C_TEMPLATE.format(
+                config_script=c_script,
+                build_script=b_script,
+                test_script=t_script,
+                prog_language=p_lang,
+                fix_file_list=file_list_str,
+                tag_id=tag_id,
+                dir_src=join(self.dir_expr, "src"),
+                dir_setup=self.dir_setup,
+                test_cases=test_cases_str,
+            )
+        elif p_lang.lower() == "python":
+            test_cases_str = ""
+            for t in test_list:
+                test_cases_str += f"    - {t}\n"
+            config_content = self.CONFIG_PYTHON_TEMPLATE.format(
+                test_script=t_script,
+                prog_language=p_lang,
+                fix_file_list=file_list_str,
+                tag_id=tag_id,
+                dir_src=join(self.dir_expr, "src"),
+                test_cases=test_cases_str,
+            )
+        else:
+            self.error_exit(f"unsupported programming language {p_lang}")
         self.write_file(config_content, config_file_path)
         return config_file_path
 
@@ -94,8 +166,9 @@ version: 1.0
             [
                 f"FROM {docker_image_tag}\n",
                 "USER root\n",
-                "RUN apt update; apt install -y make g++\n"
-                f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n"
+                "RUN apt update; apt install -y make g++\n",
+                "RUN pip3 install coverage pytest pytest-cov\n",
+                f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
                 "WORKDIR /experiment\n",
             ],
             dockerfile_path,
@@ -117,21 +190,24 @@ version: 1.0
         test_script = bug_info.get(self.key_test_script, None)
         prog_lang = bug_info.get(self.key_language, None)
 
-        if not config_script:
-            self.error_exit(f"{self.name} requires a configuration script as input")
-        if not build_script:
-            self.error_exit(f"{self.name} requires a build script as input")
-        if not test_script:
-            self.error_exit(f"{self.name} requires a test script as input")
         if not prog_lang:
             self.error_exit(
                 f"{self.name} requires bug to specify the programming language"
             )
+        if not config_script and prog_lang not in ["python"]:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        if not build_script and prog_lang not in ["python"]:
+            self.error_exit(f"{self.name} requires a build script as input")
+        if not test_script:
+            self.error_exit(f"{self.name} requires a test script as input")
 
         benchmark_name = bug_info.get(self.key_benchmark)
         subject_name = bug_info.get(self.key_subject)
         bug_id = str(bug_info[self.key_bug_id])
         docker_tag_id = f"{self.name}-{benchmark_name}-{subject_name}-{bug_id.lower()}"
+        test_list = bug_info.get(self.key_passing_tests) + bug_info.get(
+            self.key_failing_tests
+        )
         self.build_runtime_docker_image(docker_tag_id)
         self.generate_repair_config(
             c_script=config_script,
@@ -141,6 +217,7 @@ version: 1.0
             fix_files=[bug_info[self.key_fix_file]],
             tag_id=docker_tag_id,
             test_driver=test_script,
+            test_list=test_list,
         )
         super(Darjeeling, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
