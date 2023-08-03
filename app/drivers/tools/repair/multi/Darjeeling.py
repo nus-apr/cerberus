@@ -62,7 +62,7 @@ seed: 0
 threads: 1
 localization:
   type: spectrum
-  metric: weighted
+  metric: tarantula
 algorithm:
   type: exhaustive
 coverage:
