@@ -17,6 +17,8 @@ class CRepair(AbstractRepairTool):
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "crepair", "repair.conf")
         conf_content = []
+        if self.key_exploit_list not in bug_info:
+            self.error_exit("CRepair requires a proof of concept")
         poc_list = bug_info[self.key_exploit_list]
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
 
@@ -34,6 +36,9 @@ class CRepair(AbstractRepairTool):
                 self.dir_setup + "/build.sh /experiment"
             )
         )
+        if self.key_crash_cmd not in bug_info:
+            self.error_exit("CRepair requires a test input list")
+
         conf_content.append("test_input_list:{}\n".format(bug_info[self.key_crash_cmd]))
         conf_content.append("poc_list:{}\n".format(",".join(poc_abs_list)))
         self.append_file(conf_content, repair_conf_path)

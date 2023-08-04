@@ -18,7 +18,7 @@ class FuzzRepair(AbstractRepairTool):
         # check there is a file-input defined, if not use default exploit command
         # for example coreutils in vulnloc/extractfix benchmarks have stdarg which are not file inputs
         # instrumentation should convert such to a file argument
-        exploit_file_list = bug_info[self.key_exploit_list]
+        exploit_file_list = bug_info.get(self.key_exploit_list, None)
         if exploit_file_list:
             poc_list = bug_info[self.key_exploit_list]
             crash_cmd = bug_info[self.key_crash_cmd]
