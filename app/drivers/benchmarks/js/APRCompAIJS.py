@@ -5,13 +5,13 @@ from os.path import join
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
-class AutoCodeJS(AbstractBenchmark):
+class APRCompAIJS(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(AutoCodeJS, self).__init__()
+        super(APRCompAIJS, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(AutoCodeJS, self).setup_experiment(
+        is_error = super(APRCompAIJS, self).setup_experiment(
             bug_index, container_id, test_all
         )
         return is_error
@@ -50,7 +50,7 @@ class AutoCodeJS(AbstractBenchmark):
         )
         status = self.run_command(
             container_id,
-            "run_test 1",
+            "{} 1".format(join(self.dir_setup, "run_test")),
             self.log_test_path,
             join(self.dir_expr, "src"),
         )
@@ -74,4 +74,4 @@ class AutoCodeJS(AbstractBenchmark):
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(AutoCodeJS, self).save_artifacts(dir_info, container_id)
+        super(APRCompAIJS, self).save_artifacts(dir_info, container_id)
