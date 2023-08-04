@@ -174,8 +174,6 @@ class Cerberus(App[List[Result]]):
             del job_time_map[job_id]
         job_time_map_mutex.release()
 
-
-
     def prepare_default_run(self, loop, task_type):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
@@ -627,7 +625,7 @@ class Cerberus(App[List[Result]]):
             )
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
-            
+
             job_time_map[message.identifier] = (
                 start_time,
                 timeout,
@@ -803,12 +801,11 @@ class Cerberus(App[List[Result]]):
         self.finished_subjects.append(
             (message.key, message.status, message.directory_info)
         )
-        
+
         job_time_map_mutex.acquire()
         if message.key in job_time_map:
             del job_time_map[message.key]
         job_time_map_mutex.release()
-
 
         if self.jobs_remaining == 0:
             self.debug_print("DONE!")
