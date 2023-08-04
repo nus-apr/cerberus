@@ -42,6 +42,8 @@ class Fix2Fit(AbstractRepairTool):
         )
 
         self.timestamp_log_start()
+        if self.key_crash_cmd not in bug_info:
+            self.error_exit("No Crash command provided")
         environment_vars = {
             "SUBJECT_DIR": self.dir_setup,
             "AFL_NO_AFFINITY": "",

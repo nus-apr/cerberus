@@ -86,6 +86,8 @@ class VulnFix(AbstractRepairTool):
         # (3) (OPTIONAL) cmd
         line_cmd = ""
         if not cmd_already_specified:
+            if self.key_crash_cmd not in bug_info:
+                self.error_exit("No Crash command provided")
             cmd = bug_info[self.key_crash_cmd]
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
