@@ -50,7 +50,7 @@ class APRCompAIPython(AbstractBenchmark):
         )
         status = self.run_command(
             container_id,
-            "run_test 1",
+            "{} 1".format(join(self.dir_setup, "run_test")),
             self.log_test_path,
             join(self.dir_expr, "src"),
         )
