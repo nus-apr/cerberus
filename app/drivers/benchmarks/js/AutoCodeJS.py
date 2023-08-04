@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from os.path import join
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -15,26 +16,22 @@ class AutoCodeJS(AbstractBenchmark):
         )
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu):
-        """
-        Setup the container for the experiment by constructing volumes,
-        which point to certain folders in the project
-        """
-        container_id = super(AutoCodeJS, self).setup_container(
-            bug_index, image_name, cpu
-        )
-        root = join(self.dir_expr, "src")
-
-        self.run_command(
-            container_id,
-            "cp -r {} {}".format(self.dir_setup, root),
-        )
-
-        return container_id
-
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_deploy_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
+        )
+        time = datetime.now()
+        command_str = "bash setup_subject"
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def config(self, bug_index, container_id):
         self.emit_normal("configuring experiment subject")
@@ -53,12 +50,12 @@ class AutoCodeJS(AbstractBenchmark):
         )
         status = self.run_command(
             container_id,
-            "mocha --color=no",
+            "run_test 1",
             self.log_test_path,
             join(self.dir_expr, "src"),
         )
         self.emit_debug("Status is {}".format(status))
-        return status != 0
+        return status != 255
 
     def verify(self, bug_index, container_id):
         self.emit_normal("verify dev patch and test-oracle")
