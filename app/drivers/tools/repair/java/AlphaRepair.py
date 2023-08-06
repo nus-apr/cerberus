@@ -39,7 +39,7 @@ class AlphaRepair(AbstractRepairTool):
             + ".java"
         )
     
-        repair_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 main.py --task repair --bug_id {} --src_dir {} --buggy_file {} --buggy_loc {} --re_rank --beam_width 1 --top_n_patches 10 --output_folder {}'".format(  # currently supporting only defects4j
+        repair_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 main.py --task repair --bug_id {} --src_dir {} --buggy_file {} --buggy_loc {} --re_rank --beam_width 25 --top_n_patches 5000 --output_folder {}'".format(  # currently supporting only defects4j
             timeout_h,
             self.bug_name,
             join(self.dir_expr, "src"),
