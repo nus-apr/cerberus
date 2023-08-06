@@ -276,6 +276,7 @@ def repair_all(
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
         tool_thread.join(wait_time)
+        
         if tool_thread.is_alive():
             emitter.highlight(
                 "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
