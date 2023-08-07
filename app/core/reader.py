@@ -1,3 +1,4 @@
+import csv
 import json
 import os
 import pickle
@@ -18,3 +19,11 @@ def read_pickle(file_path: str):
         with open(file_path, "rb") as pickle_file:
             pickle_object = pickle.load(pickle_file)
     return pickle_object
+
+
+def read_csv(file_path: str):
+    csv_data = None
+    if os.path.isfile(file_path):
+        with open(file_path, newline="") as csv_file:
+            csv_data = csv.DictReader(csv_file)
+    return csv_data
