@@ -149,30 +149,36 @@ class Cerberus(App[List[Result]]):
         now = int(time.time())
         to_del = []
 
-        job_time_map_mutex.acquire()
-        for (job_id, info) in job_time_map.items():
-            (start, limit, tool) = info
-            if now - start > limit:
-                if not self.jobs[job_id][0].done():
-                    self.debug_print("TIME TO KILL {}".format(info))
-                    log_map[job_id].write("KILLED BY WATCHDOG")
-                    self.update_status(job_id, "KILLED BY WATCHDOG")
-                    if tool.container_id:
-                        log_map["root"].write("Killing {}".format(tool.container_id))
-                        # Currently this kills the container and the tool gets a 137 status for the run command
-                        # Possibly we can also track a "critical" section of the tool run
-                        # as killing it outside of that specific moment does not seem sensible
-                        container.stop_container(tool.container_id)
-                    else:
-                        emitter.information(
-                            "Cannot kill a local process as I do not know the exact process id"
-                        )
-                    log_map[job_id].write("Cancelled")
-                to_del.append(job_id)
+        try:
+            job_time_map_mutex.acquire(timeout=0.1)
+            for (job_id, info) in job_time_map.items():
+                (start, limit, tool) = info
+                if now - start > limit:
+                    if not self.jobs[job_id][0].done():
+                        self.debug_print("TIME TO KILL {}".format(info))
+                        log_map[job_id].write("KILLED BY WATCHDOG")
+                        self.update_status(job_id, "KILLED BY WATCHDOG")
+                        if tool.container_id:
+                            log_map["root"].write(
+                                "Killing {}".format(tool.container_id)
+                            )
+                            # Currently this kills the container and the tool gets a 137 status for the run command
+                            # Possibly we can also track a "critical" section of the tool run
+                            # as killing it outside of that specific moment does not seem sensible
+                            container.stop_container(tool.container_id)
+                        else:
+                            emitter.information(
+                                "Cannot kill a local process as I do not know the exact process id"
+                            )
+                        log_map[job_id].write("Cancelled")
+                    to_del.append(job_id)
 
-        for job_id in to_del:
-            del job_time_map[job_id]
-        job_time_map_mutex.release()
+            for job_id in to_del:
+                del job_time_map[job_id]
+        except TimeoutError:
+            pass
+        finally:
+            job_time_map_mutex.release()
 
     def prepare_default_run(self, loop, task_type):
         try:
@@ -681,9 +687,14 @@ class Cerberus(App[List[Result]]):
                     message.experiment_image_id,
                 )
             except Exception as e:
-                job_time_map_mutex.acquire()
-                del job_time_map[message.identifier]
-                job_time_map_mutex.release()
+                try:
+                    job_time_map_mutex.acquire()
+                    del job_time_map[message.identifier]
+                except Exception as e:
+                    pass
+                finally:
+                    job_time_map_mutex.release()
+
 
                 log_map[message.identifier].write(traceback.format_exc())
                 status = TaskStatus.FAIL

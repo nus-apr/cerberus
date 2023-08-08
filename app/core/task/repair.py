@@ -275,6 +275,8 @@ def repair_all(
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
+        # give 5 min grace period for threads to finish
+        wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
         
         if tool_thread.is_alive():

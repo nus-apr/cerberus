@@ -2,6 +2,8 @@ import abc
 import os
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.core import definitions
 from app.core import utilities
@@ -82,7 +84,7 @@ class AbstractRepairTool(AbstractTool):
             )
         return
 
-    def run_repair(self, bug_info, repair_config_info):
+    def run_repair(self, bug_info: Dict[str, Any], repair_config_info: Dict[str, Any]):
         self.emit_normal("repairing experiment subject")
         utilities.check_space()
         self.pre_process()
