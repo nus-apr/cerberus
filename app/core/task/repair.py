@@ -278,6 +278,7 @@ def repair_all(
         # give 5 min grace period for threads to finish
         wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
+        
         if tool_thread.is_alive():
             emitter.highlight(
                 "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(

@@ -695,6 +695,7 @@ class Cerberus(App[List[Result]]):
                 finally:
                     job_time_map_mutex.release()
 
+
                 log_map[message.identifier].write(traceback.format_exc())
                 status = TaskStatus.FAIL
             finally:
