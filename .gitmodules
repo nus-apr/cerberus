@@ -58,3 +58,6 @@
 [submodule "benchmark/aprcompaijs"]
 	path = benchmark/aprcompaijs
 	url = https://github.com/RepairComp/autocodejs.git
+[submodule "benchmark/aprcompvulnjava"]
+	path = benchmark/aprcompvulnjava
+	url = https://github.com/apR-Comp/vulnerabilities-java
