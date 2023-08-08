@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from os.path import join
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -25,6 +26,11 @@ class APRCompVulnJava(AbstractBenchmark):
                 self.emit_success("verified successfully")
                 if self.transform(bug_index, container_id):
                     self.emit_success("transformation successful")
+                    if self.compress_dependencies(container_id, bug_index):
+                        self.emit_success("dependencies compressed successfully")
+                    else:
+                        self.emit_error("dependency compression failed")
+                        is_error = True
                 else:
                     self.emit_error("transformation failed")
                     is_error = True
@@ -104,6 +110,26 @@ class APRCompVulnJava(AbstractBenchmark):
         )
         return status == 0
 
+    def compress_dependencies(self, container_id, bug_index):
+        self.emit_normal("compressing experiment dependencies")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_compress_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-compress.log"
+        )
+        time = datetime.now()
+        command_str = f"bash compress_deps"
+        status = self.run_command(
+            container_id, command_str, self.log_compress_path, self.dir_setup
+        )
+        self.emit_debug(
+            " compression took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+
+        return status == 0
+
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -118,7 +144,7 @@ class APRCompVulnJava(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            " test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status != 0
 
