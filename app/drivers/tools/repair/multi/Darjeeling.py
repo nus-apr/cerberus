@@ -178,7 +178,9 @@ resource-limits:
     def build_runtime_docker_image(self, docker_tag):
         dockerfile_path = self.generate_runtime_dockerfile(docker_tag)
         self.emit_normal(f"building runtime Dockerfile for {self.name}")
-        build_command = f"docker build -t {docker_tag}-runtime -f {dockerfile_path} ."
+        build_command = (
+            f"sudo docker build -t {docker_tag}-runtime -f {dockerfile_path} ."
+        )
         log_docker_build_path = join(self.dir_logs, "darjeeling-docker.log")
         self.run_command(
             build_command, dir_path=self.dir_setup, log_file_path=log_docker_build_path
