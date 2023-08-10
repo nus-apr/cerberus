@@ -119,6 +119,7 @@ class Cerberus(App[List[Result]]):
         self.setup_column_keys()
 
         loop = asyncio.get_running_loop()
+        loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus + 1))
         asyncio.get_running_loop().run_in_executor(
             None,
             self.prepare_default_run if not self.tasks else self.prepare_tasks_run,
@@ -935,9 +936,6 @@ def update_current_job(status: str):
 
 def setup_ui(tasks: Optional[TaskList] = None):
     global app
-    loop = asyncio.get_running_loop()
-    # one extra thread for the UI
-    loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus + 1))
     app = Cerberus()
     app.tasks = tasks
     experiment_results = app.run()
