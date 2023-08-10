@@ -127,6 +127,10 @@ def build_image(dockerfile_path: str, image_name: str):
                         emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in line["stream"]:
                         id = line["stream"].split(" ")[-1]
+            if id is None:
+                utilities.error_exit(
+                    "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
+                )
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
