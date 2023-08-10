@@ -50,6 +50,16 @@ class Refactory(AbstractBenchmark):
         self.run_command(
             container_id,
             "cp -r {} {}".format(
+                join(
+                    self.dir_expr, "base", experiment_item[self.key_subject], "correct"
+                ),
+                join(root, "code"),
+            ),
+        )
+
+        self.run_command(
+            container_id,
+            "cp -r {} {}".format(
                 join(self.dir_setup, "reference.py"), join(root, "code", "reference")
             ),
         )
