@@ -3,6 +3,7 @@ import queue
 import threading
 import time
 import traceback
+from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from typing import Any
 from typing import cast
@@ -695,7 +696,6 @@ class Cerberus(App[List[Result]]):
                 finally:
                     job_time_map_mutex.release()
 
-
                 log_map[message.identifier].write(traceback.format_exc())
                 status = TaskStatus.FAIL
             finally:
@@ -935,6 +935,9 @@ def update_current_job(status: str):
 
 def setup_ui(tasks: Optional[TaskList] = None):
     global app
+    loop = asyncio.get_running_loop()
+    # one extra thread for the UI
+    loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus + 1))
     app = Cerberus()
     app.tasks = tasks
     experiment_results = app.run()
