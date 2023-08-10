@@ -71,25 +71,11 @@ class FuzzRepair(AbstractRepairTool):
 
     def save_artifacts(self, dir_info):
         tool_log_dir = "/FuzzRepair/logs/"
-        tool_log_files = [
-            "{}/{}".format(tool_log_dir, f)
-            for f in self.list_dir(tool_log_dir)
-            if "log-" in f
-        ]
-        for log_file in tool_log_files:
-            copy_command = "cp -rf {} {}".format(log_file, self.dir_output)
-            self.run_command(copy_command)
-        tool_artifact_dir = "/FuzzRepair/output/"
-        tool_artifact_files = [
-            "{}/{}".format(tool_artifact_dir, f)
-            for f in self.list_dir(tool_artifact_dir)
-        ]
-        for a_file in tool_artifact_files:
-            copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
-            self.run_command(copy_command)
-        self.run_command(
-            "cp -rf /FuzzRepair/output/{} {}".format(self.bug_id, self.dir_output)
-        )
+        copy_command = "cp -rf {} {}".format(tool_log_dir, self.dir_output)
+        self.run_command(copy_command)
+        tool_artifact_dir = "/FuzzRepair/output/{}".format(self.bug_id)
+        copy_command = "cp -rf {} {}".format(tool_artifact_dir, self.dir_output)
+        self.run_command(copy_command)
         super(FuzzRepair, self).save_artifacts(dir_info)
         return
 
