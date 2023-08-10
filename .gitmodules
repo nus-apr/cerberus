@@ -61,3 +61,6 @@
 [submodule "benchmark/aprcompvulnjava"]
 	path = benchmark/aprcompvulnjava
 	url = https://github.com/apR-Comp/vulnerabilities-java
+[submodule "benchmark/aprcompedupython"]
+	path = benchmark/aprcompedupython
+	url = https://github.com/APR-Comp/education-python-benchmark.git
