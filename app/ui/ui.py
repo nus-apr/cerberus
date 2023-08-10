@@ -5,7 +5,6 @@ import time
 import traceback
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -120,7 +119,6 @@ class Cerberus(App[List[Result]]):
         self.setup_column_keys()
 
         loop = asyncio.get_running_loop()
-        loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus))
         asyncio.get_running_loop().run_in_executor(
             None,
             self.prepare_default_run if not self.tasks else self.prepare_tasks_run,
