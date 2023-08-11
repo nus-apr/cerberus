@@ -631,6 +631,8 @@ class Cerberus(App[List[Result]]):
                     message.task_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1.0)
                 )
             )
+            # give it more time so things can finish
+            timeout = timeout + 60.0 * 10
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
 
