@@ -430,7 +430,7 @@ def stop_container(container_id: str):
     emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
-        container.stop(timeout=20)  # type: ignore
+        container.stop(timeout=120)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
