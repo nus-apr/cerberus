@@ -7,7 +7,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class SelfAPR(AbstractRepairTool):
     """
     Requirements for this tool:
-    10 GB of VRAM, at most 7.0 CUDA (e.g. Nvidia V100) compute and 5 GB of RAM
+    5 GB of VRAM and 6 GB of RAM
     """
 
     def __init__(self):
