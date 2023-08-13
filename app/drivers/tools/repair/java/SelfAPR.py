@@ -6,8 +6,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 class SelfAPR(AbstractRepairTool):
     """
-    Requirements for this tool:
-    5 GB of VRAM and 6 GB of RAM
+    Requirements for this tool: 6GB of VRAM (for GPUs)
     """
 
     def __init__(self):
