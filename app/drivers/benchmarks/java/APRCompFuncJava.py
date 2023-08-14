@@ -119,7 +119,7 @@ class APRCompFuncJava(AbstractBenchmark):
         )
         time = datetime.now()
         dir_classes = join(self.dir_expr, "src", experiment_item[self.key_dir_class])
-        dir_target = "/".join(dir_classes.split("/")[:-2])
+        dir_target = "/".join(dir_classes.split("/")[:-1])
         command_str = f"bash compress_deps {dir_target}"
         status = self.run_command(
             container_id, command_str, self.log_compress_path, self.dir_setup
