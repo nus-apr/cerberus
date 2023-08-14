@@ -51,6 +51,10 @@ class AbstractBenchmark(AbstractDriver):
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
+    key_dir_class = definitions.KEY_CLASS_DIRECTORY
+    key_dir_source = definitions.KEY_SOURCE_DIRECTORY
+    key_dir_tests = definitions.KEY_TEST_DIRECTORY
+    key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_subject = definitions.KEY_SUBJECT
     has_standard_name: bool = False
 
