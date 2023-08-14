@@ -4,19 +4,19 @@ from os.path import join
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class SelfAPR(AbstractRepairTool):
+class RewardRepairI(AbstractRepairTool):
     """
-    Requirements for this tool: 6GB of VRAM (for GPUs)
+    Requirements for this tool: 2GB of VRAM (for GPUs)
     """
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "thanhlecong/selfapr:cerberus"
+        self.image_name = "thanhlecong/rewardrepair:cerberus"
         self.bug_name = ""
 
     def run_repair(self, bug_info, repair_config_info):
-        super(SelfAPR, self).run_repair(bug_info, repair_config_info)
+        super(RewardRepairI, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -44,11 +44,11 @@ class SelfAPR(AbstractRepairTool):
             join(self.dir_expr, "src"),
             join(file),
             bug_info[self.key_fix_lines][0],
-            50, #top_n_patches
+            200, #top_n_patches
             join(self.dir_output)
         )        
         status = self.run_command(
-            repair_command, self.log_output_path, "/repair/SelfAPR"
+            repair_command, self.log_output_path, "/repair/RewardRepair"
         )
 
         repair_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 main.py --task validate --bug_id {} --src_dir {} --buggy_file {} --buggy_loc {} --output_folder {}'".format(
@@ -63,7 +63,7 @@ class SelfAPR(AbstractRepairTool):
         status = self.run_command(
             repair_command,
             self.log_output_path,
-            "/repair/SelfAPR",
+            "/repair/RewardRepair",
         )
 
         self.process_status(status)
