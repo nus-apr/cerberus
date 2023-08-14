@@ -100,7 +100,7 @@ class APRCompFuncC(AbstractBenchmark):
             container_id, command_str, self.log_build_path, self.dir_setup
         )
         self.emit_debug(
-            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "build took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -118,7 +118,7 @@ class APRCompFuncC(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            "test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status != 0
 
