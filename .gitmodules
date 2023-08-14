@@ -67,3 +67,6 @@
 [submodule "benchmark/aprcompfuncc"]
 	path = benchmark/aprcompfuncc
 	url = https://github.com/APR-Comp/functional-c
+[submodule "benchmark/aprcompfuncjava"]
+	path = benchmark/aprcompfuncjava
+	url = https://github.com/apr-comp/functional-java
