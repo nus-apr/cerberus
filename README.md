@@ -1,4 +1,4 @@
-# [APRComp24] RepairCat
+# [APRComp24] RepairCat - Functional Errors
 
 # Cerberus Framework
 
