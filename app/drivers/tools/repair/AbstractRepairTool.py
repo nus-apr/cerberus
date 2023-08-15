@@ -4,9 +4,9 @@ from datetime import datetime
 from os.path import join
 
 from app.core import definitions
-from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.task.stats import RepairToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -27,8 +27,10 @@ class AbstractRepairTool(AbstractTool):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
+    stats: RepairToolStats
 
     def __init__(self, tool_name):
+        self.stats = RepairToolStats()
         super().__init__(tool_name)
 
     @abc.abstractmethod
@@ -67,7 +69,7 @@ class AbstractRepairTool(AbstractTool):
         time = datetime.now()
         command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
         status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        emitter.debug(
+        self.emit_debug(
             "\t\t\t instrumentation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
@@ -81,7 +83,7 @@ class AbstractRepairTool(AbstractTool):
         return
 
     def run_repair(self, bug_info, repair_config_info):
-        emitter.normal("\t\t[framework] repairing experiment subject")
+        self.emit_normal("repairing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.instrument(bug_info)
@@ -96,63 +98,8 @@ class AbstractRepairTool(AbstractTool):
         return
 
     def print_stats(self):
-        emitter.highlight(
-            "\t\t\t search space size: {0}".format(self.stats.patches_stats.size)
-        )
-        emitter.highlight(
-            "\t\t\t count enumerations: {0}".format(
-                self.stats.patches_stats.enumerations
-            )
-        )
-        emitter.highlight(
-            "\t\t\t count plausible patches: {0}".format(
-                self.stats.patches_stats.plausible
-            )
-        )
-        emitter.highlight(
-            "\t\t\t count generated: {0}".format(self.stats.patches_stats.generated)
-        )
-        emitter.highlight(
-            "\t\t\t count non-compiling patches: {0}".format(
-                self.stats.patches_stats.non_compilable
-            )
-        )
-        emitter.highlight(
-            "\t\t\t count implausible patches: {0}".format(
-                self.stats.patches_stats.get_implausible()
-            )
-        )
 
-        emitter.highlight(
-            "\t\t\t time duration: {0} seconds".format(
-                self.stats.time_stats.get_duration()
-            )
-        )
-        emitter.highlight(
-            "\t\t\t time build: {0} seconds".format(self.stats.time_stats.total_build)
-        )
-        emitter.highlight(
-            "\t\t\t time validation: {0} seconds".format(
-                self.stats.time_stats.total_validation
-            )
-        )
-
-        if values.use_valkyrie:
-            emitter.highlight(
-                "\t\t\t time latency compilation: {0} seconds".format(
-                    self.stats.time_stats.get_latency_compilation()
-                )
-            )
-            emitter.highlight(
-                "\t\t\t time latency validation: {0} seconds".format(
-                    self.stats.time_stats.get_latency_validation()
-                )
-            )
-            emitter.highlight(
-                "\t\t\t time latency plausible: {0} seconds".format(
-                    self.stats.time_stats.get_latency_plausible()
-                )
-            )
+        self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
         super().emit_normal("repair-tool", self.name, message)

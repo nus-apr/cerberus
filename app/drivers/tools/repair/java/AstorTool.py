@@ -111,7 +111,7 @@ class AstorTool(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -139,15 +139,15 @@ class AstorTool(AbstractRepairTool):
                 elif "found solution," in line.lower():
                     count_plausible += 1
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [
                 x
                 for x in self.list_dir(join(self.astor_home, "diffSolutions"))
                 if ".diff" in x
             ]
         )
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.non_compilable = count_enumerations - count_compilable
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.non_compilable = count_enumerations - count_compilable
 
         return self.stats

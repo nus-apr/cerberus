@@ -67,6 +67,10 @@ class Refactory(AbstractBenchmark):
             ),
         )
 
+        self.run_command(
+            container_id, "bash -c 'cp -r {}/* {}'".format(self.dir_setup, root)
+        )
+
         return container_id
 
     def deploy(self, bug_index, container_id):

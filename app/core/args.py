@@ -123,6 +123,12 @@ def parse_args():
         default="",
     )
     optional.add_argument(
+        definitions.ARG_TOOL_TAG,
+        "-tt",
+        help="append identifier to the tool name",
+        default="",
+    )
+    optional.add_argument(
         definitions.ARG_TOOL_LIST,
         nargs="+",
         help="list of the repair/analysis tool {"

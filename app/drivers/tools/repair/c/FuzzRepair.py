@@ -18,7 +18,7 @@ class FuzzRepair(AbstractRepairTool):
         # check there is a file-input defined, if not use default exploit command
         # for example coreutils in vulnloc/extractfix benchmarks have stdarg which are not file inputs
         # instrumentation should convert such to a file argument
-        exploit_file_list = bug_info[self.key_exploit_list]
+        exploit_file_list = bug_info.get(self.key_exploit_list, None)
         if exploit_file_list:
             poc_list = bug_info[self.key_exploit_list]
             crash_cmd = bug_info[self.key_crash_cmd]
@@ -101,7 +101,7 @@ class FuzzRepair(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -126,6 +126,6 @@ class FuzzRepair(AbstractRepairTool):
                 elif "statistics" in line:
                     is_timeout = False
 
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
         return self.stats

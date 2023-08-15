@@ -255,11 +255,9 @@ def build_container(
     container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
-    emitter.normal(
-        "\t\t[framework] building docker container based on image {} with name {}".format(
-            image_name, container_name
-        )
-    )
+    emitter.normal("\t\t[framework] building docker container: ")
+    emitter.normal("\t\t\t container image {}".format(image_name))
+    emitter.normal("\t\t\t container name {}".format(container_name))
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
@@ -273,8 +271,13 @@ def build_container(
             "privileged": True,
             "cpuset_cpus": cpu,
             "tty": True,
-            "runtime": "nvidia" if values.use_gpu else "runc",
         }
+
+        if values.use_gpu:
+            # This may not exist on older docker-py versions
+            container_run_args["device_requests"] = [
+                docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])
+            ]
 
         default_mem_limit = "32g"
         if container_config_dict:

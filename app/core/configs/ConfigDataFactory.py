@@ -126,6 +126,7 @@ class ConfigDataFactory:
                 max_cpu_count=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.MAX_CPU_COUNT.value, 1
                 ),
+                runs=tasks_chunk_config_dict.get(ConfigFieldsEnum.RUNS.value, 1),
             )
 
             benchmarks_config_list = []
@@ -155,6 +156,7 @@ class ConfigDataFactory:
                     ToolConfig(
                         name=tool_config_dict[ConfigFieldsEnum.NAME.value],
                         params=tool_config_dict[ConfigFieldsEnum.PARAMS.value],
+                        tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
                     )
                 )
 

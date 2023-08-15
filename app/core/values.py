@@ -31,7 +31,7 @@ dir_output = ""
 dir_summaries = join(dir_main, "summaries")
 dir_backup = join(dir_main, "backup")
 dir_config = join(dir_main, "config")
-
+dir_dynamic = join(dir_main, "dynamic")
 
 file_main_log = ""
 file_error_log = dir_log_base + "/log-error"
@@ -49,6 +49,7 @@ file_instrument_log = ""
 data_path = "/data"
 tool_path = ""
 tool_params = ""
+tool_tag = ""
 tool_list: List[str] = []
 debug = False
 start_index = None

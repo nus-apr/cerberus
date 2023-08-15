@@ -123,60 +123,7 @@ def log_tool_stats(task_tag_name, tool_stats: ToolStats):
 
     with open(values.file_stats_log, "a") as log_file:
         log_file.write("\nexperiment: {0}\n".format(task_tag_name))
-        log_file.write(
-            "\t\t search space size: {0}\n".format(tool_stats.patches_stats.size)
-        )
-        log_file.write(
-            "\t\t count enumerations: {0}\n".format(
-                tool_stats.patches_stats.enumerations
-            )
-        )
-        log_file.write(
-            "\t\t count plausible patches: {0}\n".format(
-                tool_stats.patches_stats.plausible
-            )
-        )
-        log_file.write(
-            "\t\t count generated: {0}\n".format(tool_stats.patches_stats.generated)
-        )
-        log_file.write(
-            "\t\t count non-compiling patches: {0}\n".format(
-                tool_stats.patches_stats.non_compilable
-            )
-        )
-        log_file.write(
-            "\t\t count implausible patches: {0}\n".format(
-                tool_stats.patches_stats.get_implausible()
-            )
-        )
-        log_file.write(
-            "\t\t time build: {0} seconds\n".format(tool_stats.time_stats.total_build)
-        )
-        log_file.write(
-            "\t\t time validation: {0} seconds\n".format(
-                tool_stats.time_stats.total_validation
-            )
-        )
-        log_file.write(
-            "\t\t time duration: {0} seconds\n".format(
-                tool_stats.time_stats.get_duration()
-            )
-        )
-        log_file.write(
-            "\t\t latency compilation: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_compilation()
-            )
-        )
-        log_file.write(
-            "\t\t latency validation: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_validation()
-            )
-        )
-        log_file.write(
-            "\t\t latency plausible: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_plausible()
-            )
-        )
+        tool_stats.write(log_file.write, "\t\t")
 
 
 def log_benchmark_stats(benchmark_tag, benchmark_stats: BenchmarkStats):

@@ -43,6 +43,7 @@ class ConfigFieldsEnum(Enum):
     TASKS_DATA = "tasks"
     TASKS_CHUNKS = "chunks"
     DEFAULT_CONFIG = "default"
+    RUNS = "runs"
 
     NAME = "name"
     TYPE = "type"
@@ -56,6 +57,7 @@ class ConfigFieldsEnum(Enum):
     # Tools
     TOOLS = "tools"
     PARAMS = "params"
+    TAG = "tag"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"

@@ -3,6 +3,9 @@ import os
 import re
 import shutil
 import time
+from typing import Any
+from typing import Dict
+from typing import Optional
 
 from app.core import abstractions
 from app.core import container
@@ -38,6 +41,7 @@ class AbstractTool(AbstractDriver):
     current_task_profile_id = values.current_task_profile_id
     key_benchmark = definitions.KEY_BENCHMARK
     key_subject = definitions.KEY_SUBJECT
+    key_language = definitions.KEY_LANGUAGE
     key_id = definitions.KEY_ID
     key_bug_id = definitions.KEY_BUG_ID
     key_bug_type = definitions.KEY_BUG_TYPE
@@ -46,12 +50,20 @@ class AbstractTool(AbstractDriver):
     key_source = definitions.KEY_SOURCE
     key_sink = definitions.KEY_SINK
     key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
+    key_build_command = definitions.KEY_BUILD_COMMAND
+    key_config_command = definitions.KEY_CONFIG_COMMAND
+    key_build_script = definitions.KEY_BUILD_SCRIPT
+    key_config_script = definitions.KEY_CONFIG_SCRIPT
+    key_test_script = definitions.KEY_TEST_SCRIPT
+    stats: ToolStats
+    bindings: Optional[Dict[str, Any]] = None
 
     def __init__(self, tool_name):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
-        self.stats = ToolStats()
+        if not self.stats:
+            self.error_exit("Stats should be set in the abstract tool constructor!")
         self.is_ui_active = values.ui_active
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug
@@ -232,7 +244,7 @@ class AbstractTool(AbstractDriver):
                         emitter.information(
                             "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
                         )
-                        if values.secure_hash and not image.id.startswith(
+                        if values.secure_hash and not remote_image.id.startswith(
                             self.hash_digest
                         ):
                             utilities.error_exit(

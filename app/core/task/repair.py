@@ -37,10 +37,10 @@ def run_repair(
     test_timeout = int(
         repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    passing_test_list = []
-    if str(passing_id_list_str).replace(",", "").isnumeric():
-        passing_test_list = passing_id_list_str.split(",")
+
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
@@ -149,11 +149,11 @@ def repair_all(
 
     final_status = [TaskStatus.NONE]
 
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    passing_test_list = []
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
+
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    if str(passing_id_list_str).replace(",", "").isnumeric():
-        passing_test_list = passing_id_list_str.split(",")
     failing_test_list = str(
         experiment_info.get(definitions.KEY_FAILING_TEST, "")
     ).split(",")
@@ -275,6 +275,8 @@ def repair_all(
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
+        # give 5 min grace period for threads to finish
+        wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
         if tool_thread.is_alive():
             emitter.highlight(

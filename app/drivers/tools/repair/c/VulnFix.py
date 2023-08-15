@@ -86,6 +86,8 @@ class VulnFix(AbstractRepairTool):
         # (3) (OPTIONAL) cmd
         line_cmd = ""
         if not cmd_already_specified:
+            if self.key_crash_cmd not in bug_info:
+                self.error_exit("No Crash command provided")
             cmd = bug_info[self.key_crash_cmd]
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
@@ -163,7 +165,7 @@ class VulnFix(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -183,7 +185,7 @@ class VulnFix(AbstractRepairTool):
                     count_plausible += 1
                     count_enumerations += 1
 
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
         self.stats.error_stats.is_error = is_error
         return self.stats

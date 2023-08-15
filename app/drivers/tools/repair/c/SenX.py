@@ -149,8 +149,8 @@ class SenX(AbstractRepairTool):
         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "Creating patch" in line:
-                self.stats.patches_stats.plausible += 1
-                self.stats.patches_stats.enumerations += 1
+                self.stats.patch_stats.plausible += 1
+                self.stats.patch_stats.enumerations += 1
             elif "Runtime Error" in line:
                 is_error = True
                 self.stats.error_stats.is_error = True

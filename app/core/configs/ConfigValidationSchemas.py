@@ -193,6 +193,10 @@ task_default_schema = {
             "minItems": 1,
             "items": {"type": "string"},
         },
+        ConfigFieldsEnum.RUNS.value: {
+            "type": "number",
+            "minimum": 1,
+        },
     },
     "required": [
         ConfigFieldsEnum.MAX_CPU_COUNT.value,
@@ -239,6 +243,7 @@ tool_config_schema = {
     "properties": {
         ConfigFieldsEnum.NAME.value: {"type": "string"},
         ConfigFieldsEnum.PARAMS.value: {"type": "string"},
+        ConfigFieldsEnum.TAG.value: {"type": "string"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
     "additionalProperties": False,

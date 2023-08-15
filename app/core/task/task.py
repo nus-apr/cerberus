@@ -16,11 +16,13 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.task import analyze
+from app.core.task import fuzz
 from app.core.task import repair
 from app.core.task.typing import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
@@ -198,6 +200,7 @@ def create_running_container(
     container_name: str,
     cpu: str,
     container_config_info: Dict[str, Any],
+    extra_volumes: Optional[Dict[str, Any]] = None,
 ):
     image_name = image_name.lower()
     container_id = container.get_container_id(container_name)
@@ -218,6 +221,10 @@ def create_running_container(
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
+
+    if extra_volumes:
+        volume_list.update(extra_volumes)
+
     if (
         not container.image_exists(image_name)
         or values.rebuild_base
@@ -235,11 +242,19 @@ def create_running_container(
                 "COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment")
             )
             dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-            dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0".format(
-                    join(dir_info["container"]["setup"], "deps.sh")
+
+            if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
+                dock_file.write(
+                    "RUN bash {0} || sudo bash {0} ; return 0".format(
+                        join(dir_info["container"]["setup"], "deps.sh")
+                    )
                 )
-            )
+            if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
+                dock_file.write(
+                    "RUN bash {0} || sudo bash {0} ; return 0".format(
+                        join(dir_info["container"]["setup"], "install_deps")
+                    )
+                )
         container.build_image(tmp_dockerfile, image_name)
         os.remove(tmp_dockerfile)
     # Need to copy the logs from benchmark setup before instantiating the running container
@@ -296,11 +311,10 @@ def run(
     bug_info: Dict[str, Any],
     task_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
-    run_identifier: str,
+    tag_name: str,
     cpu: str,
     experiment_image_id: Optional[str],
 ):
-    bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     task_config_id = task_config_info[definitions.KEY_ID]
     container_config_id = container_config_info[definitions.KEY_ID]
@@ -309,16 +323,6 @@ def run(
         task_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
-    tag_name = "-".join(
-        [
-            task_config_id,
-            container_config_id,
-            tool.name,
-            benchmark.name,
-            subject_name,
-            bug_name,
-        ]
-    )
 
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
@@ -391,19 +395,7 @@ def run(
             not os.path.isdir(dir_result_local)
             or len(os.listdir(dir_result_local)) == 0
         ):
-            archive_name = (
-                "-".join(
-                    [
-                        task_config_id,
-                        container_config_id,
-                        benchmark.name,
-                        tool.name,
-                        subject_name,
-                        bug_name,
-                    ]
-                )
-                + ".tar.gz"
-            )
+            archive_name = tag_name + ".tar.gz"
             can_analyse_results = retrieve_results(archive_name, tool)
         if can_analyse_results:
             collect_tool_result(dir_info, bug_info, tool)
@@ -417,7 +409,7 @@ def run(
             image_name = "{}-{}-{}-{}".format(
                 tool.name, benchmark.name, subject_name, bug_name
             )
-            container_name = "{}-{}".format(container_config_id, image_name)
+            container_name = tag_name
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a Dockerfile: {}".format(tool.name)
@@ -431,6 +423,7 @@ def run(
                 container_name,
                 cpu,
                 container_config_info,
+                tool.bindings,
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")
@@ -451,6 +444,15 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractAnalyzeTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "fuzz":
+            fuzz.fuzz_all(
+                dir_info,
+                bug_info,
+                cast(AbstractFuzzTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,

@@ -27,6 +27,7 @@ class TaskConfig(TaskDefaultConfig):
         use_gpu: bool,
         use_purge: bool,
         max_cpu_count: int,
+        runs: int = 1,
     ):
 
         super().__init__(
@@ -44,6 +45,7 @@ class TaskConfig(TaskDefaultConfig):
             use_gpu,
             use_purge,
             max_cpu_count,
+            runs,
         )
 
         self.task_type = task_type

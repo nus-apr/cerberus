@@ -105,7 +105,7 @@ class Nopol(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -126,10 +126,10 @@ class Nopol(AbstractRepairTool):
                 elif "PATCH FOUND" in line:
                     count_plausible += 1
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [x for x in self.list_dir(join(self.dir_source, "spooned")) if ".java" in x]
         )
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
 
         return self.stats

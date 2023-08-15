@@ -3,11 +3,15 @@ from os.path import join
 
 from app.core import definitions
 from app.core import utilities
+from app.core.task.stats import AnalysisToolStats
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractAnalyzeTool(AbstractTool):
+    stats: AnalysisToolStats
+
     def __init__(self, tool_name):
+        self.stats = AnalysisToolStats()
         super().__init__(tool_name)
 
     @abc.abstractmethod
