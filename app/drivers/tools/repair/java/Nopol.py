@@ -1,3 +1,8 @@
+"""
+Driver for Nopol:
+Paper: Nopol: Automatic Repair of Conditional Statement Bugs in Java Programs (Jifeng Xuan, Matias Martinez, Favio Demarco, Maxime Clément, Sebastian Lamelas, Thomas Durieux, Daniel Le Berre and Martin Monperrus), In IEEE Transactions on Software Engineering, 2016.
+Tool: https://github.com/SpoonLabs/nopol/
+"""
 import os
 from os.path import join
 
