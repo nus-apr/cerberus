@@ -155,15 +155,18 @@ class EffFix(AbstractRepairTool):
         dir_patch = join(self.dir_output, "final-patches")
         list_patches = self.list_dir(dir_patch, regex="*.patch")
         count_enumerations = 0
-        count_plausible = len(list_patches)
+        count_plausible = 0
         space_size = 0
-        self.stats.patch_stats.generated = count_plausible
-
+        self.stats.patch_stats.generated = len(list_patches)
+        is_error = False
         if self.is_file(json_report):
             self.emit_normal("reading result.json")
             result_info = self.read_json(json_report, encoding="iso-8859-1")
             space_size = result_info["stats"]["total_search_space"]
             count_enumerations = result_info["stats"]["total_num_patches"]
+            count_plausible = result_info["stats"][
+                "total_num_locally_plausible_patches"
+            ]
         else:
             self.emit_normal("reading stdout log")
             if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -171,7 +174,6 @@ class EffFix(AbstractRepairTool):
                 return self.stats
 
             self.emit_highlight(" Log File: " + self.log_output_path)
-            is_error = False
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
             self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
@@ -191,12 +193,5 @@ class EffFix(AbstractRepairTool):
         self.stats.patch_stats.plausible = count_plausible
         self.stats.patch_stats.enumerations = count_enumerations
         self.stats.patch_stats.size = space_size
-        return self.stats
-
-        self.stats.patch_stats.enumerations = count_enumerations
-        self.stats.patch_stats.plausible = count_plausible
-        self.stats.patch_stats.size = count_candidates
-        self.stats.patch_stats.generated = len(list_patches)
         self.stats.error_stats.is_error = is_error
-
         return self.stats
