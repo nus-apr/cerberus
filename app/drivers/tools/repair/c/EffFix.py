@@ -131,7 +131,7 @@ class EffFix(AbstractRepairTool):
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h effFix "
-            f"--stage repair --disjuncts {num_disjuncts} --budget {time_budget}"
+            f"--stage repair --disjuncts {num_disjuncts} --budget {time_budget} "
             f"{additional_tool_param} {config_path}"
         )
         status = self.run_command(
@@ -151,47 +151,47 @@ class EffFix(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        self.emit_normal("reading output")
-        dir_results = join(self.dir_expr, "result")
-        regex = re.compile("(.*-output.log$)")
-        regex = re.compile("(.*-output.log$)")
-        for _, _, files in os.walk(dir_results):
-            for file in files:
-                if regex.match(file) and self.name in file:
-                    self.log_output_path = dir_results + "/" + file
-                    break
-
-        if not self.log_output_path or not self.is_file(self.log_output_path):
-            self.emit_warning("no output log file found")
-            return self.stats
-
-        self.emit_highlight(" Log File: " + self.log_output_path)
-        is_error = False
-
-        # count number of patch files
-        dir_patch = join(self.dir_expr, "final-patches")
+        json_report = join(self.dir_output, "result.json")
+        dir_patch = join(self.dir_output, "final-patches")
         list_patches = self.list_dir(dir_patch, regex="*.patch")
-
-        efffix_std_out = self.log_output_path
-        log_lines = self.read_file(efffix_std_out, encoding="iso-8859-1")
-        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
-
         count_enumerations = 0
-        count_plausible = 0
-        count_candidates = 0
+        count_plausible = len(list_patches)
+        space_size = 0
+        self.stats.patch_stats.generated = count_plausible
 
-        if self.is_file(efffix_std_out):
-            log_lines = self.read_file(efffix_std_out, encoding="iso-8859-1")
-            for line in log_lines:
-                if "Patch routine" in line:
-                    count_enumerations += 1
-                elif "Writing patches" in line:
-                    count_plausible += 1
-                elif "Filtered candidates:" in line:
-                    count_candidates += int(line.split(": ")[-1])
-            if is_error:
-                self.emit_error("[error] error detected in logs")
+        if self.is_file(json_report):
+            self.emit_normal("reading result.json")
+            result_info = self.read_json(self.log_output_path, encoding="iso-8859-1")
+            space_size = result_info["stats"]["total_search_space"]
+            count_enumerations = result_info["stats"]["total_num_patches"]
+        else:
+            self.emit_normal("reading stdout log")
+            if not self.log_output_path or not self.is_file(self.log_output_path):
+                self.emit_warning("no output log file found")
+                return self.stats
+
+            self.emit_highlight(" Log File: " + self.log_output_path)
+            is_error = False
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
+
+            if self.is_file(self.log_output_path):
+                log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+                for line in log_lines:
+                    if "Adding new patch" in line:
+                        count_enumerations += 1
+                    elif "Plausible Patch:" in line:
+                        count_plausible += 1
+                    elif "search space size: " in line:
+                        space_size = int(line.split("search space size: ")[-1])
+                if is_error:
+                    self.emit_error("[error] error detected in logs")
+
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = space_size
+        return self.stats
 
         self.stats.patch_stats.enumerations = count_enumerations
         self.stats.patch_stats.plausible = count_plausible
