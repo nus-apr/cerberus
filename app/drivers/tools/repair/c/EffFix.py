@@ -161,7 +161,7 @@ class EffFix(AbstractRepairTool):
 
         if self.is_file(json_report):
             self.emit_normal("reading result.json")
-            result_info = self.read_json(self.log_output_path, encoding="iso-8859-1")
+            result_info = self.read_json(json_report, encoding="iso-8859-1")
             space_size = result_info["stats"]["total_search_space"]
             count_enumerations = result_info["stats"]["total_num_patches"]
         else:
