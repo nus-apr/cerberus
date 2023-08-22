@@ -76,7 +76,7 @@ class effFix(AbstractBenchmark):
             container_id, command_str, self.log_build_path, self.dir_setup
         )
         self.emit_normal(
-            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+            "build took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
