@@ -1,10 +1,10 @@
 import os
-import re
 from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
 
+from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -175,8 +175,8 @@ class EffFix(AbstractRepairTool):
 
             self.emit_highlight(" Log File: " + self.log_output_path)
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
+            self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
+            self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
 
             if self.is_file(self.log_output_path):
                 log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -186,7 +186,10 @@ class EffFix(AbstractRepairTool):
                     elif "Plausible Patch:" in line:
                         count_plausible += 1
                     elif "search space size: " in line:
-                        space_size = int(line.split("search space size: ")[-1])
+                        size_str = escape_ansi(
+                            line.split("search space size: ")[-1].strip()
+                        )
+                        space_size = int(size_str)
                 if is_error:
                     self.emit_error("[error] error detected in logs")
 
