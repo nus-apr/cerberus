@@ -159,6 +159,16 @@ class EffFix(AbstractRepairTool):
         space_size = 0
         self.stats.patch_stats.generated = len(list_patches)
         is_error = False
+
+        self.emit_normal("reading stdout log")
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            self.emit_warning("no output log file found")
+            return self.stats
+
+        self.emit_highlight(" Log File: " + self.log_output_path)
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
+        self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
         if self.is_file(json_report):
             self.emit_normal("reading result.json")
             result_info = self.read_json(json_report, encoding="iso-8859-1")
@@ -168,30 +178,19 @@ class EffFix(AbstractRepairTool):
                 "total_num_locally_plausible_patches"
             ]
         else:
-            self.emit_normal("reading stdout log")
-            if not self.log_output_path or not self.is_file(self.log_output_path):
-                self.emit_warning("no output log file found")
-                return self.stats
-
-            self.emit_highlight(" Log File: " + self.log_output_path)
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
-            self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
-
-            if self.is_file(self.log_output_path):
-                log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-                for line in log_lines:
-                    if "Adding new patch" in line:
-                        count_enumerations += 1
-                    elif "Plausible Patch:" in line:
-                        count_plausible += 1
-                    elif "search space size: " in line:
-                        size_str = escape_ansi(
-                            line.split("search space size: ")[-1].strip()
-                        )
-                        space_size = int(size_str)
-                if is_error:
-                    self.emit_error("[error] error detected in logs")
+            for line in log_lines:
+                if "Adding new patch" in line:
+                    count_enumerations += 1
+                elif "Plausible Patch:" in line:
+                    count_plausible += 1
+                elif "search space size: " in line:
+                    size_str = escape_ansi(
+                        line.split("search space size: ")[-1].strip()
+                    )
+                    space_size = int(size_str)
+            if is_error:
+                self.emit_error("[error] error detected in logs")
 
         self.stats.patch_stats.plausible = count_plausible
         self.stats.patch_stats.enumerations = count_enumerations
