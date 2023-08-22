@@ -73,3 +73,6 @@
 [submodule "benchmark/aprcompeduc"]
 	path = benchmark/aprcompeduc
 	url = https://github.com/APR-Comp/education-c-benchmark.git
+[submodule "benchmark/aprcompaijava"]
+	path = benchmark/aprcompaijava
+	url = https://github.com/APR-Comp/autocode-java.git
