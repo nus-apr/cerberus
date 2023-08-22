@@ -127,10 +127,11 @@ class EffFix(AbstractRepairTool):
         if subject_name in names_100:
             num_disjuncts = 100
 
+        time_budget = 20
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h effFix "
-            f"--stage repair --disjuncts {num_disjuncts} --budget 20 "
+            f"--stage repair --disjuncts {num_disjuncts} --budget {time_budget}"
             f"{additional_tool_param} {config_path}"
         )
         status = self.run_command(
