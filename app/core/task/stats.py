@@ -92,10 +92,7 @@ class PatchStats:
     __implausible = None
 
     def get_implausible(self):
-        if self.__implausible is None:
-            self.__implausible = (
-                self.enumerations - self.plausible - self.non_compilable
-            )
+        self.__implausible = self.enumerations - self.plausible - self.non_compilable
         return self.__implausible
 
     def get_exploration_ratio(self):
