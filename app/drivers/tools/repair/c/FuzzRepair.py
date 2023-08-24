@@ -12,6 +12,63 @@ class FuzzRepair(AbstractRepairTool):
         self.image_name = "rshariffdeen/fuzzrepair:tool"
         self.bug_id = ""
 
+    def transform_source(self, source_file_list):
+        self.emit_normal("applying transformations for source files")
+        script_path = self.dir_expr + f"/{self.name}-transform"
+        if not source_file_list:
+            return
+        source_list_str = " ".join([f"'{s}'" for s in source_file_list])
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"file_list=({source_list_str})\n",
+                f"cd $LIBPATCH_DIR/rewriter\n",
+                'for t in "${file_list[@]}"\n',
+                "do\n",
+                "./rewritecond $t -o $t\n",
+                "ret=$?\n",
+                "if [[ ret -eq 1 ]]\n",
+                "then\n",
+                "exit 128\n",
+                "fi\n" "done\n",
+            ],
+            script_path,
+        )
+        reconfig_command = "bash {}".format(script_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-transform.log")
+        status = self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+        if status != 0:
+            self.error_exit("transforming subject failed")
+
+    def rerun_configuration(self, config_script, build_script, cc, cxx):
+        self.emit_normal("re-building subject with fuzzrepair compilers")
+        script_path = self.dir_expr + f"/{self.name}-rebuild"
+        dir_src = join(self.dir_expr, "src")
+        content_list = [
+            "#!/bin/bash\n",
+            f"cd {dir_src}\n",
+            "make distclean; rm -f CMakeCache.txt\n",
+            f"CC={cc} CXX={cxx} {config_script} {self.dir_base_expr}\n",
+            f"cd {dir_src}\n",
+            'sed -i "s/-I/-isystem/g" compile_commands.json\n',
+        ]
+
+        if cc == "fuzzrepair-cc":
+            content_list.append(
+                f'CC={cc} CXX={cxx} CFLAGS="-Wno-error" {build_script} {self.dir_base_expr}\n'
+            )
+        else:
+            content_list.append(
+                f"CC={cc} CXX={cxx} bear {build_script} {self.dir_base_expr}\n"
+            )
+
+        self.write_file(content_list, script_path)
+        reconfig_command = "bash {}".format(script_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-build.log")
+        status = self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+        if status != 0:
+            self.error_exit("rebuilding subject failed")
+
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
         conf_content = []
@@ -46,12 +103,38 @@ class FuzzRepair(AbstractRepairTool):
         return repair_conf_path
 
     def run_repair(self, bug_info, repair_config_info):
+        config_script = bug_info.get(self.key_config_script, None)
+        build_script = bug_info.get(self.key_build_script, None)
+
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        if not build_script:
+            self.error_exit(f"{self.name} requires a build script as input")
+
+        config_script_path = join(self.dir_setup, config_script)
+        build_script_path = join(self.dir_setup, build_script)
+        fix_file = bug_info[self.key_fix_file]
+        dir_src = join(self.dir_expr, "src")
+        if isinstance(fix_file, list):
+            transform_file_list = [f"{dir_src}/{f}" for f in fix_file]
+        elif isinstance(fix_file, str):
+            transform_file_list = [f"{dir_src}/{fix_file}"]
+
         super(FuzzRepair, self).run_repair(bug_info, repair_config_info)
+        if not bug_info[self.key_benchmark] == "vulnloc":
+            self.rerun_configuration(
+                config_script_path, build_script_path, "clang", "clang++"
+            )
+            self.transform_source(transform_file_list)
+            self.rerun_configuration(
+                config_script_path, build_script_path, "fuzzrepair-cc", "fuzzrepair-cxx"
+            )
+
         timeout_h = str(repair_config_info[self.key_timeout])
         timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         repair_conf_path = self.generate_conf_file(bug_info)
-        # repair_conf_path = self.dir_setup + "/crepair/repair.conf"
+
         self.timestamp_log_start()
         repair_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h ".format(
