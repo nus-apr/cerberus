@@ -19,8 +19,8 @@ class F1X(AbstractRepairTool):
             [
                 "#!/bin/bash\n",
                 f"cd {dir_src}\n",
-                "make distclean; rm CMakeCache.txt\n",
-                "CC=f1x-cc CXX=f1x-cxx {0}".format(config_script),
+                "make distclean; rm -f CMakeCache.txt\n",
+                f"CC=f1x-cc CXX=f1x-cxx {config_script} {self.dir_expr}\n",
             ],
             f1x_config_path,
         )
