@@ -51,7 +51,6 @@ class FuzzRepair(AbstractRepairTool):
             "make distclean; rm -f CMakeCache.txt\n",
             f"CC={cc} CXX={cxx} {config_script} {self.dir_base_expr}\n",
             f"cd {dir_src}\n",
-            'sed -i "s/-I/-isystem/g" compile_commands.json\n',
         ]
 
         if cc == "fuzzrepair-cc":
@@ -62,7 +61,7 @@ class FuzzRepair(AbstractRepairTool):
             content_list.append(
                 f"CC={cc} CXX={cxx} bear {build_script} {self.dir_base_expr}\n"
             )
-
+        content_list.append('sed -i "s/-I/-isystem/g" compile_commands.json\n')
         self.write_file(content_list, script_path)
         reconfig_command = "bash {}".format(script_path)
         log_reconfig_path = join(self.dir_logs, f"{self.name}-re-build.log")
