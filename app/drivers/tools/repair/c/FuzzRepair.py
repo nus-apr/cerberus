@@ -210,6 +210,7 @@ class FuzzRepair(AbstractRepairTool):
 
         count_plausible = count_enumerations - count_over_fitting - count_invalid
         self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.non_compilable = count_invalid
         self.stats.patch_stats.enumerations = count_enumerations
         self.stats.patch_stats.size = space_size
         self.stats.error_stats.is_error = is_error
