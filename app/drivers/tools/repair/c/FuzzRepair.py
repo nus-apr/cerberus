@@ -55,7 +55,7 @@ class FuzzRepair(AbstractRepairTool):
 
         if cc == "fuzzrepair-cc":
             content_list.append(
-                f'CC={cc} CXX={cxx} CFLAGS="-Wno-error" {build_script} {self.dir_base_expr}\n'
+                f'CC={cc} CXX={cxx} CFLAGS="-Wno-error -fPIC" CPPFLAGS=$CFLAGS CXXFLAGS=$CFLAGS {build_script} {self.dir_base_expr}\n'
             )
         else:
             content_list.append(
