@@ -1,4 +1,5 @@
 import os
+import re
 from os.path import join
 
 from app.core.utilities import escape_ansi
@@ -163,38 +164,54 @@ class FuzzRepair(AbstractRepairTool):
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        self.emit_normal("reading output")
-
-        count_plausible = 0
+        json_report = join(self.dir_output, self.bug_id, "final-result")
+        dir_patch = join(self.dir_output, self.bug_id, "plausible-patches")
+        list_patches = self.list_dir(dir_patch, regex="*.patch")
         count_enumerations = 0
+        count_over_fitting = 0
+        count_invalid = 0
+        space_size = 0
+        self.stats.patch_stats.generated = len(list_patches)
+        is_error = False
 
-        # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patch_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
-        # extract information from output log
+        self.emit_normal("reading stdout log")
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
             return self.stats
 
-        self.emit_highlight(f"output log file: {self.log_output_path}")
+        self.emit_highlight(" Log File: " + self.log_output_path)
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
+        self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
+        if self.is_file(json_report):
+            self.emit_normal("reading result.json")
+            result_info = self.read_json(json_report, encoding="iso-8859-1")
+            count_enumerations = int(
+                result_info["agg-stats"]["patch-fuzzing-num-new-unique-patches"]
+            )
+            count_invalid = int(
+                result_info["agg-stats"]["prune-stage-num-invalid-patches"]
+            )
+            count_over_fitting = int(
+                result_info["agg-stats"]["prune-stage-num-pruned-total"]
+            )
 
-        if self.is_file(self.log_output_path):
+        else:
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].rstrip())
-            self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].rstrip())
-
             for line in log_lines:
-                if "Generating patch" in line:
-                    count_plausible += 1
-                    count_enumerations += 1
-                elif "Runtime Error" in line:
-                    self.stats.error_stats.is_error = True
-                elif "statistics" in line:
-                    is_timeout = False
+                if "patch-fuzzing-num-new-unique-patches" in line:
+                    count_enumerations = int(re.search(r"\', (.*?)\)", line).group(1))
+                elif "prune-stage-num-invalid-patches" in line:
+                    count_invalid = int(re.search(r"\', (.*?)\)", line).group(1))
+                elif "prune-stage-num-pruned-total" in line:
+                    count_over_fitting = int(re.search(r"\', (.*?)\)", line).group(1))
+            if is_error:
+                self.emit_error("[error] error detected in logs")
 
+        count_plausible = count_enumerations - count_over_fitting - count_invalid
         self.stats.patch_stats.plausible = count_plausible
         self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = space_size
+        self.stats.error_stats.is_error = is_error
+
         return self.stats
