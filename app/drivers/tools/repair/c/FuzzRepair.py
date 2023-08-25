@@ -134,7 +134,7 @@ class FuzzRepair(AbstractRepairTool):
         timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         repair_conf_path = self.generate_conf_file(bug_info)
-
+        self.emit_normal(f"running {self.name}")
         self.timestamp_log_start()
         repair_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h ".format(
