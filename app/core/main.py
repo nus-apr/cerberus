@@ -339,7 +339,7 @@ def main():
                         experiment_image_id = task.prepare(
                             benchmark, experiment_item, cpu
                         )
-                        tool_tag = task_profile[definitions.KEY_TOOL_TAG]
+                        tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
                         key = "-".join(
                             [
                                 benchmark.name,

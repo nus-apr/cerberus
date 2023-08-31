@@ -78,18 +78,6 @@ class AbstractTool(AbstractDriver):
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
-
-            self.stats.patches_stats.non_compilable
-            self.stats.patches_stats.plausible
-            self.stats.patches_stats.size
-            self.stats.patches_stats.enumerations
-            self.stats.patches_stats.generated
-
-            self.stats.time_stats.total_validation
-            self.stats.time_stats.total_build
-            self.stats.time_stats.timestamp_compilation
-            self.stats.time_stats.timestamp_validation
-            self.stats.time_stats.timestamp_plausible
         """
         return self.stats
 
@@ -166,6 +154,7 @@ class AbstractTool(AbstractDriver):
         return exit_code
 
     def process_status(self, status: int):
+        """Process the status of running a command"""
         if status != 0:
             self.stats.error_stats.is_error = True
             values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
@@ -191,7 +180,7 @@ class AbstractTool(AbstractDriver):
         return
 
     def check_tool_exists(self):
-        """Any pre-processing required for the repair"""
+        """Check that the tool is available either as an image or locally"""
         if values.use_container:
             if not self.hash_digest.startswith("sha256:"):
                 self.hash_digest = "sha256:" + self.hash_digest
@@ -259,6 +248,7 @@ class AbstractTool(AbstractDriver):
         return
 
     def update_experiment_status(self, status: str):
+        """Update the status of the experiment if any visualization is available"""
         ui.update_current_job(status)
 
     def post_process(self):
