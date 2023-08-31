@@ -30,7 +30,12 @@ class AbstractFuzzTool(AbstractTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            ?
+            self.stats.fuzzing_stats.executions
+            self.stats.fuzzing_stats.time_to_bug
+            self.stats.fuzzing_stats.total_branches
+            self.stats.fuzzing_stats.total_lines
+            self.stats.fuzzing_stats.branch_coverage
+            self.stats.fuzzing_stats.line_coverage
         """
         return self.stats
 
