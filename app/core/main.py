@@ -335,7 +335,17 @@ def main():
                                 iteration, bug_index, run_index + 1
                             )
                         )
-                        cpu = ",".join(map(str, range(values.cpus)))
+                        # cpu = ",".join(map(str, range(values.cpus)))
+                        cpu = ",".join(
+                            map(
+                                str,
+                                range(
+                                    container_profile.get(
+                                        definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                                    )
+                                ),
+                            )
+                        )
                         experiment_image_id = task.prepare(
                             benchmark, experiment_item, cpu
                         )
