@@ -152,8 +152,7 @@ class Cerberus(App[List[Result]]):
         now = int(time.time())
         to_del = []
 
-        try:
-            job_time_map_mutex.acquire(timeout=0.1)
+        if job_time_map_mutex.acquire(timeout=0.1):
             for (job_id, info) in job_time_map.items():
                 (start, limit, tool) = info
                 if now - start > limit:
@@ -178,9 +177,6 @@ class Cerberus(App[List[Result]]):
 
             for job_id in to_del:
                 del job_time_map[job_id]
-        except TimeoutError:
-            pass
-        finally:
             job_time_map_mutex.release()
 
     def prepare_default_run(self, loop, task_type):
@@ -411,7 +407,7 @@ class Cerberus(App[List[Result]]):
                         str(run),
                         task_config,
                     )
-            self.jobs_remaining_mutex.acquire()
+            self.jobs_remaining_mutex.acquire(blocking=True)
             self.jobs_remaining += total_jobs
             self.jobs_remaining_mutex.release()
 
@@ -493,7 +489,7 @@ class Cerberus(App[List[Result]]):
                                 iteration,
                                 str(run_index),
                             )
-        self.jobs_remaining_mutex.acquire()
+        self.jobs_remaining_mutex.acquire(blocking=True)
         self.jobs_remaining = values.runs * iteration
         self.jobs_remaining_mutex.release()
 
@@ -694,7 +690,7 @@ class Cerberus(App[List[Result]]):
                 )
             except Exception as e:
                 try:
-                    job_time_map_mutex.acquire()
+                    job_time_map_mutex.acquire(blocking=True)
                     del job_time_map[message.identifier]
                 except Exception as e:
                     pass
@@ -811,7 +807,7 @@ class Cerberus(App[List[Result]]):
         except Exception as e:
             self.debug_print(str(e))
 
-        self.jobs_remaining_mutex.acquire()
+        self.jobs_remaining_mutex.acquire(blocking=True)
         self.jobs_remaining -= 1
         self.jobs_remaining_mutex.release()
 
@@ -819,7 +815,7 @@ class Cerberus(App[List[Result]]):
             (message.key, message.status, message.directory_info)
         )
 
-        job_time_map_mutex.acquire()
+        job_time_map_mutex.acquire(blocking=True)
         if message.key in job_time_map:
             del job_time_map[message.key]
         job_time_map_mutex.release()
