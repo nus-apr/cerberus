@@ -155,8 +155,9 @@ class ConfigDataFactory:
                 tools_config_list.append(
                     ToolConfig(
                         name=tool_config_dict[ConfigFieldsEnum.NAME.value],
-                        params=tool_config_dict[ConfigFieldsEnum.PARAMS.value],
+                        params=tool_config_dict.get(ConfigFieldsEnum.PARAMS.value, ""),
                         tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
+                        image=tool_config_dict.get(ConfigFieldsEnum.IMAGE.value, ""),
                     )
                 )
 
