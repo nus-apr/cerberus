@@ -63,13 +63,13 @@ class TaskProcessor:
                     container_profile_id
                 )
                 for task_profile_id in tasks_chunk_config.task_profile_id_list:
-                    task_profile = copy.deepcopy(
-                        config.profiles.get_task_profile(task_profile_id)
-                    )
                     for tool_config in tasks_chunk_config.tools_config_list:
                         for (
                             benchmark_config
                         ) in tasks_chunk_config.benchmarks_config_list:
+                            task_profile = copy.deepcopy(
+                                config.profiles.get_task_profile(task_profile_id)
+                            )
                             setattr(
                                 task_profile,
                                 definitions.KEY_TOOL_PARAMS,
