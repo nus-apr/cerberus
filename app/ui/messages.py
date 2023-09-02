@@ -54,12 +54,14 @@ class JobFinish(Message):
         row_data,
         directory_info: Dict[str, str],
         results: ToolStats,
+        task_type: str,
     ):
         self.key = key
         self.status = status
         self.row_data = row_data
         self.directory_info = directory_info
         self.results = results
+        self.task_type = task_type
         super().__init__()
 
 
