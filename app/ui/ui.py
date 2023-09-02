@@ -719,6 +719,7 @@ class Cerberus(App[List[Result]]):
                         row_data,
                         dir_info["local"] if dir_info else {},
                         message.tool.stats,
+                        message.task_type,
                     )
                 )
             with job_condition:
@@ -760,7 +761,7 @@ class Cerberus(App[List[Result]]):
 
     @on(JobFinish)
     async def on_job_finish(self, message: JobFinish):
-        def update_table(key, id, table):
+        def update_table(key, id: str, table: DataTable):
             table.update_cell(
                 key,
                 Cerberus.COLUMNS[definitions.UI_STATUS][id],
@@ -769,7 +770,7 @@ class Cerberus(App[List[Result]]):
             )
             table.sort(Cerberus.COLUMNS["ID"][id])
             # TODO temporary
-            if values.task_type.get() != "fuzz":
+            if message.task_type != "fuzz":
                 table.update_cell(
                     key,
                     Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
