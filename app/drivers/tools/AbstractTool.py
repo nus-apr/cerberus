@@ -202,8 +202,8 @@ class AbstractTool(AbstractDriver):
                 image = container.pull_image(repo_name, tag_name)
                 if image is None:
                     utilities.error_exit(
-                        "\t[framework] {} does not provide a Docker image in Dockerhub".format(
-                            self.name
+                        "\t[framework] {} does not provide a Docker image {}:{} in Dockerhub".format(
+                            self.name, repo_name, tag_name
                         )
                     )
                 if values.secure_hash and not image.id.startswith(self.hash_digest):
@@ -216,8 +216,8 @@ class AbstractTool(AbstractDriver):
             else:
                 # Image may exist but need to be sure it is the latest one
                 emitter.information(
-                    "\t\t[framework] docker image found locally for {}".format(
-                        self.name
+                    "\t\t[framework] docker image {}:{} found locally for {}".format(
+                        repo_name, tag_name, self.name
                     )
                 )
                 # Get the local image
@@ -231,7 +231,9 @@ class AbstractTool(AbstractDriver):
 
                     if remote_image and local_image.id != remote_image.id:  # type: ignore
                         emitter.information(
-                            "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                            "\t[framework] docker image {}:{} is not the same as the one in the repository. Will have to rebuild".format(
+                                repo_name, tag_name
+                            )
                         )
                         if values.secure_hash and not remote_image.id.startswith(
                             self.hash_digest
