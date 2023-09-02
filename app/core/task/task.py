@@ -201,6 +201,7 @@ def create_running_container(
     cpu: str,
     container_config_info: Dict[str, Any],
     extra_volumes: Optional[Dict[str, Any]] = None,
+    tag: Optional[str] = None,
 ):
     image_name = image_name.lower()
     container_id = container.get_container_id(container_name)
@@ -230,9 +231,13 @@ def create_running_container(
         or values.rebuild_base
         or values.rebuild_all
     ):
+        dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+        if tag:
+            dockerfile_name += "-{}".format(tag)
+
         tmp_dockerfile = join(
             dir_info["local"]["setup"],
-            "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id),
+            dockerfile_name,
         )
         os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
         with open(tmp_dockerfile, "w") as dock_file:
@@ -409,6 +414,9 @@ def run(
             image_name = "{}-{}-{}-{}".format(
                 tool.name, benchmark.name, subject_name, bug_name
             )
+            if task_config_info[definitions.KEY_TOOL_TAG] != "":
+                image_name += "-{}".format(task_config_info[definitions.KEY_TOOL_TAG])
+
             container_name = tag_name
             if tool.image_name is None:
                 utilities.error_exit(
@@ -424,6 +432,7 @@ def run(
                 cpu,
                 container_config_info,
                 tool.bindings,
+                task_config_info[definitions.KEY_TOOL_TAG],
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")
