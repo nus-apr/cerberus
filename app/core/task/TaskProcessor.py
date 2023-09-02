@@ -135,6 +135,16 @@ class TaskProcessor:
                                     tool_config.name,
                                     tasks_chunk_config.task_config.task_type,
                                 )
+
+                                if tool_config.image != "":
+                                    if tool_config.tag == "":
+                                        emitter.warning(
+                                            "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
+                                        )
+                                        values.rebuild_all = True
+
+                                    tool.image_name = tool_config.image
+
                                 if not values.only_analyse:
                                     tool.check_tool_exists()
                                 benchmark.update_dir_info(dir_info)

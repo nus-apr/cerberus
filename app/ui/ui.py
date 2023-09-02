@@ -632,7 +632,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
             # give it more time so things can finish
-            timeout = timeout + 60.0 * 10
+            timeout = int(timeout + 60 * 10)
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
 
