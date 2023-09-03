@@ -24,7 +24,7 @@ def get_client():
         cached_client = docker.DockerClient(
             base_url=values.docker_host,
             version="1.41",
-            timeout=300
+            timeout=900
             # user_agent="Cerberus Agent",
             # use_ssh_client=True,
         )
