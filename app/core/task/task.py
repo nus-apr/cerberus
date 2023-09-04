@@ -471,6 +471,8 @@ def run(
 
         # update container stats
         if values.use_container:
+            if not container_id:
+                utilities.error_exit("Use container but ID is none?")
             tool.update_container_stats(container_id)
 
         if not values.only_instrument:

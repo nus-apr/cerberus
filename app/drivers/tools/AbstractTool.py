@@ -5,6 +5,7 @@ import shutil
 import time
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 
 from app.core import abstractions
@@ -15,6 +16,7 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import DirectoryInfo
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.AbstractDriver import AbstractDriver
@@ -58,7 +60,7 @@ class AbstractTool(AbstractDriver):
     stats: ToolStats
     bindings: Optional[Dict[str, Any]] = None
 
-    def __init__(self, tool_name):
+    def __init__(self, tool_name: str):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
@@ -73,7 +75,9 @@ class AbstractTool(AbstractDriver):
         self.use_gpu = super().get_config_value("use_gpu")
 
     @abc.abstractmethod
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> ToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -81,7 +85,7 @@ class AbstractTool(AbstractDriver):
         """
         return self.stats
 
-    def clean_up(self):
+    def clean_up(self) -> None:
         if self.container_id:
             container.remove_container(self.container_id)
         else:
@@ -89,16 +93,21 @@ class AbstractTool(AbstractDriver):
                 rm_command = "rm -rf " + self.dir_expr
                 execute_command(rm_command)
 
-    def update_info(self, container_id, instrument_only, dir_info):
+    def update_info(
+        self,
+        container_id: Optional[str],
+        instrument_only: bool,
+        dir_info: DirectoryInfo,
+    ) -> None:
         self.container_id = container_id
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
 
-    def update_container_stats(self, container_id):
+    def update_container_stats(self, container_id: str) -> None:
         container_stats = container.get_container_stats(container_id)
         self.stats.container_stats.load_container_stats(container_stats)
 
-    def update_dir_info(self, dir_info):
+    def update_dir_info(self, dir_info: DirectoryInfo):
         if self.container_id:
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
@@ -130,14 +139,14 @@ class AbstractTool(AbstractDriver):
         self.append_file(timestamp_txt, self.log_output_path)
 
     def run_command(
-        self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
+        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
     ):
         """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         if self.container_id:
             if not dir_path:
                 dir_path = "/experiment"
             exit_code, output = container.exec_command(
-                self.container_id, command_str, dir_path, env
+                self.container_id, command, dir_path, env
             )
             if output:
                 stdout, stderr = output
@@ -149,19 +158,19 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command_str += " >> {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command_str, env=env, directory=dir_path)
+            command += " >> {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command, env=env, directory=dir_path)
         return exit_code
 
     def exec_command(
-        self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
+        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
     ):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
             if not dir_path:
                 dir_path = "/experiment"
             exit_code, output = container.exec_command(
-                self.container_id, command_str, dir_path, env
+                self.container_id, command, dir_path, env
             )
             if output:
                 stdout, stderr = output
@@ -174,11 +183,11 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command_str += " >> {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command_str, env=env, directory=dir_path)
+            command += " >> {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command, env=env, directory=dir_path)
         return exit_code, None
 
-    def process_status(self, status: int):
+    def process_status(self, status: int) -> None:
         """Process the status of running a command"""
         if status != 0:
             self.stats.error_stats.is_error = True
@@ -199,12 +208,12 @@ class AbstractTool(AbstractDriver):
                 "\t\t\t[framework] {0} ended successfully".format(self.name)
             )
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Any pre-processing required for the repair"""
         # self.check_tool_exists()
         return
 
-    def check_tool_exists(self):
+    def check_tool_exists(self) -> None:
         """Check that the tool is available either as an image or locally"""
         if values.use_container:
             if not self.hash_digest.startswith("sha256:"):
@@ -274,11 +283,11 @@ class AbstractTool(AbstractDriver):
                 error_exit("{} not Found".format(self.name))
         return
 
-    def update_experiment_status(self, status: str):
+    def update_experiment_status(self, status: str) -> None:
         """Update the status of the experiment if any visualization is available"""
         ui.update_current_job(status)
 
-    def post_process(self):
+    def post_process(self) -> None:
         """Any post-processing required for the repair"""
         if self.container_id:
             container.stop_container(self.container_id)
@@ -286,11 +295,11 @@ class AbstractTool(AbstractDriver):
             self.clean_up()
         return
 
-    def print_stats(self):
+    def print_stats(self) -> None:
         """Print the statistics of the tool."""
         pass
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]):
         """Store all artifacts from the tool"""
         dir_results = dir_info["results"]
         dir_artifacts = dir_info["artifacts"]

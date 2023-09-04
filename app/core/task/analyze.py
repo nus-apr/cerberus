@@ -10,11 +10,12 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import DirectoryInfo
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 def run_analysis(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractAnalyzeTool,
     analysis_config_info: Dict[str, Any],

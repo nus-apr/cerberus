@@ -10,11 +10,12 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import DirectoryInfo
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
 def run_fuzz(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractFuzzTool,
     fuzz_config_info: Dict[str, Any],
