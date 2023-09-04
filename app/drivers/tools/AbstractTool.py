@@ -35,7 +35,7 @@ class AbstractTool(AbstractDriver):
     dir_inst = ""
     dir_setup = ""
     hash_digest = ""
-    container_id = None
+    container_id: Optional[str] = None
     is_instrument_only = False
     timestamp_fmt = "%a %d %b %Y %H:%M:%S %p"
     current_task_profile_id = values.current_task_profile_id
@@ -132,7 +132,7 @@ class AbstractTool(AbstractDriver):
     def run_command(
         self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
     ):
-        """executes the specified command at the given dir_path and save the output to log_file"""
+        """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         if self.container_id:
             if not dir_path:
                 dir_path = "/experiment"
@@ -152,6 +152,31 @@ class AbstractTool(AbstractDriver):
             command_str += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command_str, env=env, directory=dir_path)
         return exit_code
+
+    def exec_command(
+        self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
+    ):
+        """executes the specified command at the given dir_path and save the output to log_file"""
+        if self.container_id:
+            if not dir_path:
+                dir_path = "/experiment"
+            exit_code, output = container.exec_command(
+                self.container_id, command_str, dir_path, env
+            )
+            if output:
+                stdout, stderr = output
+                if "/dev/null" not in log_file_path:
+                    if stdout:
+                        self.append_file(stdout.decode("iso-8859-1"), log_file_path)
+                    if stderr:
+                        self.append_file(stderr.decode("iso-8859-1"), log_file_path)
+            return exit_code, output
+        else:
+            if not dir_path:
+                dir_path = self.dir_expr
+            command_str += " >> {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command_str, env=env, directory=dir_path)
+        return exit_code, None
 
     def process_status(self, status: int):
         """Process the status of running a command"""
