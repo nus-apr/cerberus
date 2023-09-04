@@ -2,7 +2,6 @@ import os
 from os.path import join
 
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
-from app.core import container
 
 
 class StudentFuzzer(AbstractFuzzTool):
@@ -18,16 +17,15 @@ class StudentFuzzer(AbstractFuzzTool):
         information required to be extracted are:
         """
 
-        r = self.list_dir("/home/student", regex = "*")
+        r = self.list_dir("/home/student", regex="*")
         self.emit_normal(f"saw files {r}")
 
         if f"/home/student/{self.nonce}.crash" in r:
-            command_str =  f"date -r {self.nonce}.crash +%s"
-            exit_code, output = container.exec_command(
-                self.container_id, command_str, "/home/student", dict()
-            )
+            command_str = f"date -r {self.nonce}.crash +%s"
+            exit_code, output = self.exec_command(command_str, "/home/student", dict())
             stdout, stderr = output
-            self.stats.fuzzing_stats.time_to_bug = (int(stdout) - self.stime)
+            if stdout:
+                self.stats.fuzzing_stats.time_to_bug = int(stdout) - self.stime
         else:
             self.stats.fuzzing_stats.time_to_bug = -1
 
@@ -44,15 +42,13 @@ class StudentFuzzer(AbstractFuzzTool):
             "bash -c 'cp -Rf {} /home/student/'".format(join(self.dir_expr, "."))
         )
 
-        command_str =  f"date +%s"
-        exit_code, output = container.exec_command(
-            self.container_id, command_str, "/home/student", dict()
-        )
+        command_str = f"date +%s"
+        exit_code, output = self.exec_command(command_str, "/home/student", dict())
         stdout, stderr = output
-        self.stime = int(stdout)
+        if stdout:
+            self.stime = int(stdout)
 
         self.timestamp_log_start()
-
 
         # @TODO replace when real timeouts are sorted out
         # repair_command = (
