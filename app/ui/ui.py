@@ -128,7 +128,7 @@ class Cerberus(App[List[Result]]):
             values.task_type.get("NAN"),
         )
 
-    def setup_cpu_allocation(self):
+    def setup_cpu_allocation(self) -> None:
         self.max_jobs = values.cpus
         self.free_jobs = values.cpus
 
@@ -136,7 +136,7 @@ class Cerberus(App[List[Result]]):
         for cpu in range(self.max_jobs):
             self.cpu_queue.put(cpu)
 
-    def setup_column_keys(self):
+    def setup_column_keys(self) -> None:
         for table in self.query(DataTable):
             column_keys = table.add_columns(*Cerberus.COLUMNS.keys())
             if not table.id:
@@ -179,7 +179,7 @@ class Cerberus(App[List[Result]]):
                 del job_time_map[job_id]
             job_time_map_mutex.release()
 
-    def prepare_default_run(self, loop, task_type):
+    def prepare_default_run(self, loop, task_type: str):
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
@@ -418,7 +418,7 @@ class Cerberus(App[List[Result]]):
             )
             self.debug_print("I got exception {}".format(e))
 
-    def change_table(self, new_id):
+    def change_table(self, new_id: str):
         if self.is_preparing:
             return
         self.debug_print("Changing table!")
@@ -634,11 +634,13 @@ class Cerberus(App[List[Result]]):
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
 
+            job_time_map_mutex.acquire(blocking=True)
             job_time_map[message.identifier] = (
                 start_time,
                 timeout,
                 message.tool,
             )
+            job_time_map_mutex.release()
 
             row_data = (
                 message.index,
