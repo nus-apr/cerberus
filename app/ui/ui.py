@@ -21,8 +21,8 @@ from textual.widget import Widget
 from textual.widgets import DataTable
 from textual.widgets import Footer
 from textual.widgets import Header
+from textual.widgets import RichLog
 from textual.widgets import Static
-from textual.widgets import TextLog
 from textual.widgets._data_table import ColumnKey
 
 from app.core import container
@@ -49,7 +49,7 @@ finished_subjects_id = "finished_subjects"
 error_subjects_id = "error_subjects"
 running_subjects_id = "running_subjects"
 
-log_map: Dict[str, TextLog] = {}
+log_map: Dict[str, RichLog] = {}
 job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
 job_time_map_mutex = threading.Lock()
 
@@ -536,7 +536,7 @@ class Cerberus(App[List[Result]]):
             key=key,
         )
 
-        log_map[key] = TextLog(highlight=True, markup=True, wrap=True, id=key + "_log")
+        log_map[key] = RichLog(highlight=True, markup=True, wrap=True, id=key + "_log")
         self.hide(log_map[key])
 
         self.post_message(JobMount(key))
@@ -898,7 +898,7 @@ class Cerberus(App[List[Result]]):
         yield error_subjects_table
         self.hide(error_subjects_table)
 
-        log_map["root"] = TextLog(highlight=True, markup=True, wrap=True, id="root_log")
+        log_map["root"] = RichLog(highlight=True, markup=True, wrap=True, id="root_log")
         log_map["root"].styles.border = ("heavy", "orange")
         yield log_map["root"]
         if not values.debug:
