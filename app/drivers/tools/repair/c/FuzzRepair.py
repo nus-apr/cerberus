@@ -199,11 +199,17 @@ class FuzzRepair(AbstractRepairTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             for line in log_lines:
                 if "patch-fuzzing-num-new-unique-patches" in line:
-                    count_enumerations = int(re.search(r"\', (.*?)\)", line).group(1))
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_enumerations = int(parsed_info.group(1))
                 elif "prune-stage-num-invalid-patches" in line:
-                    count_invalid = int(re.search(r"\', (.*?)\)", line).group(1))
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_invalid = int(parsed_info.group(1))
                 elif "prune-stage-num-pruned-total" in line:
-                    count_over_fitting = int(re.search(r"\', (.*?)\)", line).group(1))
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_over_fitting = int(parsed_info.group(1))
             if is_error:
                 self.emit_error("[error] error detected in logs")
 

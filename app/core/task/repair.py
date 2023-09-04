@@ -12,11 +12,12 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 def run_repair(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractRepairTool,
     repair_config_info: Dict[str, Any],
@@ -278,7 +279,7 @@ def repair_all(
         # give 5 min grace period for threads to finish
         wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
-        
+
         if tool_thread.is_alive():
             emitter.highlight(
                 "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
