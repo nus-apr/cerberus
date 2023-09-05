@@ -20,6 +20,23 @@ class EffFix(AbstractRepairTool):
         self.image_name = "rshariffdeen/efffix"
         super().__init__(self.name)
 
+    def rerun_configuration(self, config_script):
+        self.emit_normal("re-running configuration")
+        f1x_config_path = self.dir_expr + f"/{self.name}-config"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make distclean; rm -f CMakeCache.txt\n",
+                f"CC=f1x-cc CXX=f1x-cxx {config_script} {self.dir_expr}\n",
+            ],
+            f1x_config_path,
+        )
+        reconfig_command = "bash {}".format(f1x_config_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-config.log")
+        self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+
     def populate_config_file(self, bug_info, config_path, dir_pre):
         config_info: Dict[str, Any] = dict()
         bug_type = bug_info[self.key_bug_type]
@@ -76,6 +93,10 @@ class EffFix(AbstractRepairTool):
             self.run_command(f"mkdir {dir_pre}")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
+        config_script = bug_info.get(self.key_config_script, None)
+        if config_script:
+            config_script = join(self.dir_setup, config_script)
+            self.rerun_configuration(config_script)
         time = datetime.now()
         compile_list = bug_info.get(self.key_compile_programs, [])
         names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
