@@ -29,7 +29,7 @@ class EffFix(AbstractRepairTool):
                 "#!/bin/bash\n",
                 f"cd {dir_src}\n",
                 "make distclean; rm -f CMakeCache.txt\n",
-                f"CC=f1x-cc CXX=f1x-cxx {config_script} {self.dir_expr}\n",
+                f"{config_script} {self.dir_expr}\n",
             ],
             f1x_config_path,
         )
