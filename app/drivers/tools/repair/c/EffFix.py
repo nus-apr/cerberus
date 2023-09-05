@@ -110,6 +110,7 @@ class EffFix(AbstractRepairTool):
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
@@ -127,11 +128,13 @@ class EffFix(AbstractRepairTool):
         if subject_name in names_100:
             num_disjuncts = 100
 
-        time_budget = 20
+        budget_str = ""
+        if "budget" not in additional_tool_param:
+            budget_str = f"--budget {timeout_m}"
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h effFix "
-            f"--stage repair --disjuncts {num_disjuncts} --budget {time_budget} "
+            f"--stage repair --disjuncts {num_disjuncts} {budget_str} "
             f"{additional_tool_param} {config_path}"
         )
         status = self.run_command(
