@@ -245,7 +245,7 @@ class AbstractBenchmark(AbstractDriver):
             },
         }
 
-        container_name = "-".join([self.name, subject_name, bug_id])
+        container_name = "-".join([self.name, subject_name, bug_id]).lower()
         container_id = container.get_container_id(container_name, ignore_not_found=True)
         if container_id:
             container.stop_container(container_id)

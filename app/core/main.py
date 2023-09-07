@@ -8,6 +8,7 @@ from multiprocessing import set_start_method
 from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 
 import rich.traceback
 from rich import get_console
@@ -72,6 +73,50 @@ def bootstrap(arg_list: Namespace):
     config.print_configuration()
 
 
+def create_task_image_identifier(
+    benchmark: AbstractBenchmark,
+    tool: AbstractTool,
+    bug_name: str,
+    subject_name: str,
+    tag: Optional[str] = None,
+):
+    image_args = [tool.name, benchmark.name, subject_name, bug_name]
+
+    if tag and tag != "":
+        image_args.append(tag)
+
+    image_name = "-".join(image_args)
+    return image_name.lower()
+
+
+def create_bug_image_identifier(
+    benchmark: AbstractBenchmark, bug_name: str, subject_name: str
+):
+    return "-".join([benchmark.name, subject_name, bug_name]).lower()
+
+
+def create_task_identifier(
+    benchmark: AbstractBenchmark,
+    task_profile,
+    container_profile,
+    experiment_item,
+    tool: AbstractTool,
+    run_index: str,
+    tool_tag: str,
+):
+    return "-".join(
+        [
+            benchmark.name,
+            tool.name if tool_tag == "" else f"{tool.name}-{tool_tag}",
+            experiment_item[definitions.KEY_SUBJECT],
+            experiment_item[definitions.KEY_BUG_ID],
+            task_profile[definitions.KEY_ID],
+            container_profile[definitions.KEY_ID],
+            run_index,
+        ]
+    ).lower()
+
+
 iteration = 0
 
 
@@ -115,7 +160,7 @@ def run(
                 subject_name = str(experiment_item[definitions.KEY_SUBJECT])
                 if values.use_container:
                     values.job_identifier.set(
-                        "-".join([benchmark.name, subject_name, bug_name])
+                        create_bug_image_identifier(benchmark, subject_name, bug_name)
                     )
                 dir_info = task.generate_dir_info(
                     benchmark.name, subject_name, bug_name
@@ -131,12 +176,13 @@ def run(
                     continue
 
                 for tool in tool_list:
-                    image_args = [tool.name, benchmark.name, subject_name, bug_name]
-
-                    if task_profile[definitions.KEY_TOOL_TAG] != "":
-                        image_args.append(task_profile[definitions.KEY_TOOL_TAG])
-
-                    image_name = "-".join(image_args)
+                    image_name = create_task_image_identifier(
+                        benchmark,
+                        tool,
+                        bug_name,
+                        subject_name,
+                        task_profile[definitions.KEY_TOOL_TAG],
+                    )
 
                     experiment_image_id = task.prepare_experiment(
                         benchmark, experiment_item, cpu
@@ -157,18 +203,14 @@ def run(
                             )
                         )
                         tool_tag = task_profile[definitions.KEY_TOOL_TAG]
-                        key = "-".join(
-                            [
-                                benchmark.name,
-                                tool.name
-                                if tool_tag == ""
-                                else f"{tool.name}-{tool_tag}",
-                                experiment_item[definitions.KEY_SUBJECT],
-                                experiment_item[definitions.KEY_BUG_ID],
-                                task_profile[definitions.KEY_ID],
-                                container_profile[definitions.KEY_ID],
-                                str(run_index),
-                            ]
+                        key = create_task_identifier(
+                            benchmark,
+                            task_profile,
+                            container_profile,
+                            experiment_item,
+                            tool,
+                            str(run_index),
+                            tool_tag,
                         )
 
                         task.run(
@@ -267,12 +309,10 @@ def process_configs(
 
     if values.use_container:
         values.job_identifier.set(
-            "-".join(
-                [
-                    benchmark.name,
-                    experiment_item[definitions.KEY_SUBJECT],
-                    experiment_item[definitions.KEY_BUG_ID],
-                ]
+            create_bug_image_identifier(
+                benchmark,
+                experiment_item[definitions.KEY_SUBJECT],
+                experiment_item[definitions.KEY_BUG_ID],
             )
         )
 
@@ -353,6 +393,7 @@ def main():
                     experiment_image_id = task.prepare_experiment(
                         benchmark, experiment_item, cpu
                     )
+
                     tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
 
                     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
@@ -361,12 +402,13 @@ def main():
                         benchmark.name, subject_name, bug_name
                     )
 
-                    image_args = [tool.name, benchmark.name, subject_name, bug_name]
-
-                    if task_profile[definitions.KEY_TOOL_TAG] != "":
-                        image_args.append(task_profile[definitions.KEY_TOOL_TAG])
-
-                    image_name = "-".join(image_args)
+                    image_name = create_task_image_identifier(
+                        benchmark,
+                        tool,
+                        bug_name,
+                        subject_name,
+                        tool_tag,
+                    )
                     task.prepare_experiment_tool(
                         experiment_image_id,
                         tool,
@@ -383,18 +425,14 @@ def main():
                             )
                         )
 
-                        key = "-".join(
-                            [
-                                benchmark.name,
-                                tool.name
-                                if tool_tag == ""
-                                else f"{tool.name}-{tool_tag}",
-                                experiment_item[definitions.KEY_SUBJECT],
-                                experiment_item[definitions.KEY_BUG_ID],
-                                task_profile[definitions.KEY_ID],
-                                container_profile[definitions.KEY_ID],
-                                str(run_index),
-                            ]
+                        key = create_task_identifier(
+                            benchmark,
+                            task_profile,
+                            container_profile,
+                            experiment_item,
+                            tool,
+                            str(run_index),
+                            tool_tag,
                         )
 
                         if not values.only_setup:

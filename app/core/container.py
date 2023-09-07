@@ -33,6 +33,7 @@ def get_client():
 
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
+    emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
     try:
         image_list = client.images.list()
     except IOError as ex:

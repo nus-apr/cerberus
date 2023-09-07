@@ -357,6 +357,7 @@ def prepare_experiment_tool(
     tag: Optional[str] = None,
 ):
     if values.use_container:
+        emitter.information("\t\t[framework] preparing image {}".format(image_name))
         if (
             not container.image_exists(image_name)
             or values.rebuild_base

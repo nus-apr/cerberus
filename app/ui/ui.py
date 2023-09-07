@@ -395,7 +395,7 @@ class Cerberus(App[List[Result]]):
                     bug_index,
                 ),
             ) in enumerate(tasks):
-                image_name = self.create_task_image_identifier(
+                image_name = main.create_task_image_identifier(
                     benchmark,
                     tool,
                     str(experiment_item[definitions.KEY_BUG_ID]),
@@ -508,7 +508,9 @@ class Cerberus(App[List[Result]]):
         ) in tasks:
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-            job_identifier = "-".join([benchmark.name, subject_name, bug_name])
+            job_identifier = main.create_bug_image_identifier(
+                benchmark, subject_name, bug_name
+            )
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
             )
@@ -627,7 +629,7 @@ class Cerberus(App[List[Result]]):
             ),
         ) in tasks:
 
-            image_name = self.create_task_image_identifier(
+            image_name = main.create_task_image_identifier(
                 benchmark,
                 tool,
                 str(experiment_item[definitions.KEY_BUG_ID]),
@@ -701,7 +703,7 @@ class Cerberus(App[List[Result]]):
                     task_profile[definitions.KEY_TOOL_TAG] = values.tool_tag
                     for tool in tool_list:
                         iteration = iteration + 1
-                        image_name = self.create_task_image_identifier(
+                        image_name = main.create_task_image_identifier(
                             benchmark,
                             tool,
                             str(experiment_item[definitions.KEY_BUG_ID]),
@@ -728,22 +730,6 @@ class Cerberus(App[List[Result]]):
         self.jobs_remaining = values.runs * iteration
         self.jobs_remaining_mutex.release()
 
-    def create_task_image_identifier(
-        self,
-        benchmark: AbstractBenchmark,
-        tool: AbstractTool,
-        bug_name: str,
-        subject_name: str,
-        tag: Optional[str] = None,
-    ):
-        image_args = [tool.name, benchmark.name, subject_name, bug_name]
-
-        if tag and tag != "":
-            image_args.append(tag)
-
-        image_name = "-".join(image_args)
-        return image_name
-
     def construct_job(
         self,
         benchmark: AbstractBenchmark,
@@ -757,16 +743,14 @@ class Cerberus(App[List[Result]]):
         task_config: Optional[TaskConfig] = None,
     ):
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
-        key = "-".join(
-            [
-                benchmark.name,
-                tool.name if tool_tag == "" else f"{tool.name}-{tool_tag}",
-                experiment_item[definitions.KEY_SUBJECT],
-                experiment_item[definitions.KEY_BUG_ID],
-                task_profile[definitions.KEY_ID],
-                container_profile[definitions.KEY_ID],
-                run,
-            ]
+        key = main.create_task_identifier(
+            benchmark,
+            task_profile,
+            container_profile,
+            experiment_item,
+            tool,
+            run,
+            tool_tag,
         )
 
         _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
