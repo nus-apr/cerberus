@@ -46,6 +46,10 @@ class TaskProcessor:
                         for (
                             benchmark_config
                         ) in tasks_chunk_config.benchmarks_config_list:
+                            benchmark_name = benchmark_config.name
+                            benchmark_template = configuration.load_benchmark(
+                                benchmark_name
+                            )
                             task_profile = copy.deepcopy(
                                 config.profiles.get_task_profile(task_profile_id)
                             )
@@ -59,7 +63,6 @@ class TaskProcessor:
                                 definitions.KEY_TOOL_TAG,
                                 tool_config.tag,
                             )
-                            benchmark_name = benchmark_config.name
 
                             benchmark_subjects = (
                                 AbstractBenchmark.load_meta_file_static(
@@ -87,6 +90,26 @@ class TaskProcessor:
                                         bug_id_list.append(
                                             experiment_subject[definitions.KEY_ID]
                                         )
+
+                            values.only_analyse = (
+                                tasks_chunk_config.task_config.only_analyse
+                            )
+                            tool_template = configuration.load_tool(
+                                tool_config.name,
+                                tasks_chunk_config.task_config.task_type,
+                            )
+
+                            if tool_config.image != "":
+                                if tool_config.tag == "":
+                                    emitter.warning(
+                                        "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
+                                    )
+                                    values.rebuild_all = True
+
+                                tool_template.image_name = tool_config.image
+
+                            if not values.only_analyse:
+                                tool_template.check_tool_exists()
                             # filter skipped bug id
                             for bug_id in bug_id_list:
                                 if bug_id in bug_id_skip_list:
@@ -105,27 +128,9 @@ class TaskProcessor:
                                 values.use_container = (
                                     tasks_chunk_config.task_config.use_container
                                 )
-                                benchmark = configuration.load_benchmark(benchmark_name)
 
-                                values.only_analyse = (
-                                    tasks_chunk_config.task_config.only_analyse
-                                )
-                                tool = configuration.load_tool(
-                                    tool_config.name,
-                                    tasks_chunk_config.task_config.task_type,
-                                )
-
-                                if tool_config.image != "":
-                                    if tool_config.tag == "":
-                                        emitter.warning(
-                                            "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
-                                        )
-                                        values.rebuild_all = True
-
-                                    tool.image_name = tool_config.image
-
-                                if not values.only_analyse:
-                                    tool.check_tool_exists()
+                                benchmark = copy.deepcopy(benchmark_template)
+                                tool = copy.deepcopy(tool_template)
                                 benchmark.update_dir_info(dir_info)
 
                                 yield (
