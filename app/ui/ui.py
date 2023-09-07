@@ -873,11 +873,18 @@ class Cerberus(App[List[Result]]):
         if self.selected_subject is not None:
             self.hide(log_map[self.selected_subject])
 
-        if message.row_key.value and message.row_key.value in log_map:
+        if (
+            message
+            and message.row_key
+            and message.row_key.value
+            and message.row_key.value in log_map
+        ):
             self.selected_subject = message.row_key.value
             self.show(log_map[self.selected_subject])
             self.set_focus(log_map[self.selected_subject], scroll_visible=True)
             log_map[self.selected_subject].scroll_end(animate=False)
+        else:
+            self.debug_print("Info was not okay? {}".format(message.__dict__))
 
     def compose(self) -> ComposeResult:
         def create_table(id: str):

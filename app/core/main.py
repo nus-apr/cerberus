@@ -166,6 +166,9 @@ def main():
                 )
             tasks = config_obj.construct_task_list()
 
+        if tasks is None:
+            utilities.error_exit("Tasks were not assigned??")
+
         if values.use_parallel:
             info = sys.version_info
             if info.major < 3 or info.minor < 10:

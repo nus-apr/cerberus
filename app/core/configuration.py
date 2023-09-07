@@ -16,7 +16,6 @@ from app.core import utilities
 from app.core import values
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.TaskProcessor import TaskList
-from app.core.task.typing import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 

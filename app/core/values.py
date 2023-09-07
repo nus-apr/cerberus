@@ -14,12 +14,12 @@ from app.core.task.typing import TaskType
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
 
-dir_main = dirname(dirname(dirname(os.path.realpath(__file__))))
+dir_main: str = dirname(dirname(dirname(os.path.realpath(__file__))))
 dir_infra = join(dir_main, "infra")
 dir_app = join(dir_main, "app", "")
 dir_tool_drivers = join(dir_app, "drivers", "tools", "")
 dir_benchmark_drivers = join(dir_app, "drivers", "benchmarks", "")
-dir_benchmark = join(dir_main, "benchmark", "")
+dir_benchmark: str = join(dir_main, "benchmark", "")
 dir_log_base = join(dir_main, "logs")
 dir_output_base = join(dir_main, "output")
 dir_results = join(dir_main, "results")

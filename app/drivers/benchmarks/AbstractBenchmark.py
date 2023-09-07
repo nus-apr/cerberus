@@ -34,7 +34,6 @@ class AbstractBenchmark(AbstractDriver):
     dir_base_expr = ""
     dir_inst = ""
     dir_setup = ""
-    dir_benchmark = values.dir_benchmark
     log_dir_path = "None"
     log_deps_path = "None"
     log_deploy_path = "None"
@@ -61,6 +60,7 @@ class AbstractBenchmark(AbstractDriver):
     has_standard_name: bool = False
 
     def __init__(self):
+        self.dir_benchmark: str = values.dir_benchmark
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
         self.stats = BenchmarkStats()
         self.pre_built = False
