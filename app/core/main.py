@@ -184,7 +184,7 @@ def run(
 
 
 def get_task_profiles() -> Dict[str, Dict[str, Any]]:
-    emitter.normal("\t[framework] loading repair profile setup")
+    emitter.normal("\t[framework] loading repair task profiles")
     task_profiles = configuration.load_profiles(values.file_task_profiles)
     for task_profile_id in values.task_profile_id_list:
         if task_profile_id not in task_profiles:
@@ -193,7 +193,7 @@ def get_task_profiles() -> Dict[str, Dict[str, Any]]:
 
 
 def get_container_profiles() -> Dict[str, Dict[str, Any]]:
-    emitter.normal("\t[framework] loading container profile setup")
+    emitter.normal("\t[framework] loading container profiles")
     container_profiles = configuration.load_profiles(values.file_container_profiles)
     for container_profile_id in values.container_profile_id_list:
         if container_profile_id not in container_profiles:

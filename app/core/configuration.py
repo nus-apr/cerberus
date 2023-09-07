@@ -23,7 +23,7 @@ def load_profiles(profile_file_path: str) -> Dict[str, Dict[str, Any]]:
             json_data = json.load(conf_file)
     else:
         utilities.error_exit("Configuration file does not exist")
-    if not json_data is dict:
+    if type(json_data) is not dict:
         utilities.error_exit(
             "The collection of profiles should be in a dictionary where the id is the key"
         )

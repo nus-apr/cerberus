@@ -63,7 +63,7 @@ def generate_local_tool_dir_info(
     benchmark_name: str,
     subject_name: str,
     bug_name: str,
-    hash: hashlib._Hash,
+    hash: Any,
     tag_name: str,
 ):
     dir_name = f"{tag_name}-{hash.hexdigest()[:8]}"
