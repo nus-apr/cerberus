@@ -14,6 +14,7 @@ general_section_schema = {
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
+        ConfigFieldsEnum.CPUS.value: {"type": "number", "minimum": 1},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
@@ -32,7 +33,7 @@ task_profile_schema = {
     "type": "object",
     "properties": {
         ConfigFieldsEnum.PROFILE_ID.value: {"type": "string"},
-        ConfigFieldsEnum.TIMEOUT.value: {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FAULT_LOCATION.value: {"type": "string"},
         ConfigFieldsEnum.PASSING_TEST_RATIO.value: {
             "type": "number",

@@ -39,6 +39,24 @@ def escape_ansi(text: str):
     return result
 
 
+def create_output_directories():
+    dir_list = [
+        values.dir_logs,
+        values.dir_output_base,
+        values.dir_log_base,
+        values.dir_artifacts,
+        values.dir_results,
+        values.dir_experiments,
+        values.dir_summaries,
+        values.dir_summaries_tools,
+        values.dir_summaries_benchmarks,
+    ]
+
+    for dir_i in dir_list:
+        if not os.path.isdir(dir_i):
+            os.makedirs(dir_i)
+
+
 def execute_command(command: str, show_output=True, env=dict(), directory=None):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
