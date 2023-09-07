@@ -33,6 +33,7 @@ def get_client():
 
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
+    emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
     try:
         image_list = client.images.list()
     except IOError as ex:
@@ -105,7 +106,7 @@ def pull_image(image_name: str, tag_name: str):
     return image
 
 
-def build_image(dockerfile_path: str, image_name: str):
+def build_image(dockerfile_path: str, image_name: str) -> str:
     client = get_client()
     emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
@@ -191,7 +192,7 @@ def get_container(container_id: str):
     return container
 
 
-def get_container_id(container_name: str) -> Optional[str]:
+def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[str]:
     client = get_client()
     container_id = None
     try:
@@ -199,7 +200,8 @@ def get_container_id(container_name: str) -> Optional[str]:
     except docker.errors.NotFound as ex:  # type: ignore
         if values.debug:
             emitter.error(f"\t\t{ex}")
-        emitter.warning("\t\t[warning] unable to find container")
+        if not ignore_not_found:
+            emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] unable to find container: docker daemon error")
@@ -425,12 +427,12 @@ def start_container(container_id: str):
         )
 
 
-def stop_container(container_id: str):
+def stop_container(container_id: str, timeout=120):
     client = get_client()
     emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
-        container.stop(timeout=120)  # type: ignore
+        container.stop(timeout=timeout)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -446,6 +448,25 @@ def stop_container(container_id: str):
         emitter.warning(
             "\t\t\t[framework] unable to stop container: unhandled exception"
         )
+
+
+def kill_container(container_id: str):
+    client = get_client()
+    emitter.normal("\t\t\t[framework] stopping docker container")
+    try:
+        container = client.containers.get(container_id)
+        container.kill()  # type: ignore
+    except docker.errors.APIError as exp:  # type: ignore
+        emitter.warning(exp)
+        emitter.warning("\t\t\t[framework] unable to stop kill: docker daemon error")
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
+    except Exception as ex:
+        emitter.warning(ex)
+        emitter.warning("\t\t\t[framework] unable to stop kill: unhandled exception")
 
 
 def is_file(container_id: str, file_path: str):

@@ -12,7 +12,8 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -184,9 +185,9 @@ def repair_all(
             v_path_info,
             v_dir_info,
             v_repair_config_info,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
         ):
             """
             Pass over some fields as we are going into a new thread
@@ -226,13 +227,13 @@ def repair_all(
         def repair_wrapped(
             dir_info,
             experiment_info,
-            repair_tool,
+            repair_tool: AbstractRepairTool,
             repair_config_info,
-            container_id,
-            benchmark_name,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            container_id: Optional[str],
+            benchmark_name: str,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
             final_status,
         ):
             """
@@ -262,7 +263,7 @@ def repair_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
-                values.task_type.get("NA"),
+                values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for repair {} {} {}".format(

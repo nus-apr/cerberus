@@ -7,10 +7,6 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 class ManyBugs(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.bench_dir_path = os.path.abspath(
-            os.path.dirname(__file__) + "/../../benchmark/"
-        )
-        self.setup_dir_path = self.bench_dir_path
         super(ManyBugs, self).__init__()
 
     def deploy(self, bug_index, container_id):

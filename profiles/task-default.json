@@ -1,49 +1,49 @@
 {
   "TP1": {
     "id": "TP1",
-    "timeout": "1",
+    "timeout": 1,
     "fault_location": "auto",
     "passing_test_ratio": 1
   },
   "TP2": {
     "id": "TP2",
-    "timeout": "1",
+    "timeout": 1,
     "fault_location": "dev",
     "passing_test_ratio": 1
   },
   "TP3": {
     "id": "TP3",
-    "timeout": "1",
+    "timeout": 1,
     "fault_location": "dev",
     "passing_test_ratio": 0
   },
   "TP4": {
     "id": "TP4",
-    "timeout": "1",
+    "timeout": 1,
     "fault_location": "dev",
     "passing_test_ratio": 0.5
   },
   "TP5": {
     "id": "TP5",
-    "timeout": "2",
+    "timeout": 2,
     "fault_location": "auto",
     "passing_test_ratio": 1
   },
   "TP6": {
     "id": "TP6",
-    "timeout": "2",
+    "timeout": 2,
     "fault_location": "dev",
     "passing_test_ratio": 1
   },
   "TP7": {
     "id": "TP7",
-    "timeout": "2",
+    "timeout": 2,
     "fault_location": "dev",
     "passing_test_ratio": 0
   },
   "TP8": {
     "id": "TP8",
-    "timeout": "2",
+    "timeout": 2,
     "fault_location": "dev",
     "passing_test_ratio": 0.5
   }

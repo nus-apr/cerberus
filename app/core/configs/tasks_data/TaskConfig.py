@@ -7,12 +7,13 @@ from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.TaskProfile import TaskProfile
 from app.core.configs.tasks_data.TaskDefaultConfig import TaskDefaultConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
+from app.core.task.typing.TaskType import TaskType
 
 
 class TaskConfig(TaskDefaultConfig):
     def __init__(
         self,
-        task_type: str,
+        task_type: TaskType,
         compact_results: bool,
         dump_patches: bool,
         docker_host: str,
