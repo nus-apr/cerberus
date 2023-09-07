@@ -127,7 +127,7 @@ class Configurations:
         "parallel": False,
         "has-config-file": False,
         "all-cpu-count": 1,
-        "task-cpu-count": 1,
+        # "task-cpu-count": 1,
         "runs": 1,
         "bug-id-list": [],
         "bug-index-list": [],
@@ -368,7 +368,7 @@ class Configurations:
         benchmark: AbstractBenchmark = self.get_benchmark()
         task_profiles: Dict[str, Dict[str, Any]] = self.get_task_profiles()
         container_profiles: Dict[str, Dict[str, Any]] = self.get_container_profiles()
-        task_type = values.task_type.get()
+        task_type = self.task_type
 
         if not task_type:
             utilities.error_exit("No task type defined")
@@ -442,28 +442,27 @@ class Configurations:
 
     def get_tools(self) -> List[AbstractTool]:
         tool_list: List[AbstractTool] = []
-        if values.task_type.get() == "prepare":
+        if self.task_type == "prepare":
             return tool_list
         for tool_name in self.tool_list:
-            tool = load_tool(tool_name, values.task_type.get(None) or "boom")
+            tool = load_tool(tool_name, self.task_type)
             if not values.only_analyse:
                 tool.check_tool_exists()
             tool_list.append(tool)
         emitter.highlight(
-            f"\t[framework] {values.task_type.get()}-tool(s): "
+            f"\t[framework] {self.task_type}-tool(s): "
             + " ".join([x.name for x in tool_list])
         )
         return tool_list
 
     def get_benchmark(self) -> AbstractBenchmark:
         benchmark = load_benchmark(self.benchmark_name.lower())
-        emitter.highlight(
-            f"\t[framework] {values.task_type.get()}-benchmark: {benchmark.name}"
-        )
+        emitter.highlight(f"\t[framework] {self.task_type}-benchmark: {benchmark.name}")
         return benchmark
 
     def update_configuration(self):
         emitter.normal("\t[framework] updating configuration values")
+        self.task_type = self.__runtime_config_values["task-type"]
         values.task_type.set(self.__runtime_config_values["task-type"])
         values.only_setup = self.__runtime_config_values["only-setup"]
         if values.task_type.get() == "prepare":

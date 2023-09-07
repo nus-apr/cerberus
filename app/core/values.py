@@ -30,6 +30,10 @@ dir_scripts = join(dir_main, "scripts")
 dir_artifacts = join(dir_output_base, "artifacts")
 dir_output = ""
 dir_summaries = join(dir_main, "summaries")
+dir_summaries_benchmarks = join(dir_main, "summaries", "benchmarks")
+dir_summaries_tools = join(dir_main, "summaries", "tools")
+
+
 dir_backup = join(dir_main, "backup")
 dir_config = join(dir_main, "config")
 dir_dynamic = join(dir_main, "dynamic")
