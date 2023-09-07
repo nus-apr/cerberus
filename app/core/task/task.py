@@ -207,6 +207,7 @@ def create_running_container(
     extra_volumes: Optional[Dict[str, Any]] = None,
 ) -> str:
     image_name = image_name.lower()
+    emitter.information("Creating running container with image {}".format(image_name))
     container_id = container.get_container_id(container_name, ignore_not_found=True)
     if container_id:
         container.stop_container(container_id)
@@ -365,7 +366,7 @@ def prepare_experiment_tool(
                 bug_image_id, repair_tool, dir_info, image_name, tag
             )
         else:
-            return container.get_image(image_name)
+            return cast(str, container.get_image(image_name).id)
     return None
 
 

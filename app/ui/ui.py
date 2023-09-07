@@ -373,10 +373,9 @@ class Cerberus(App[List[Result]]):
                     self.tasks
                 )  # Sequentially prepares the benchmarks and tools, will be parallelized later on
 
-            images: Dict[str, str] = {}
             if values.use_container:
                 self.prepare_subjects(loop, tasks)
-                self.prepare_tool_subjects(loop, tasks, images)
+                self.prepare_tool_subjects(loop, tasks)
 
             self.hide(self.query_one(Static))
             if not values.debug:
@@ -396,9 +395,13 @@ class Cerberus(App[List[Result]]):
                     bug_index,
                 ),
             ) in enumerate(tasks):
-                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-                job_identifier = "-".join([benchmark.name, subject_name, bug_name])
+                image_name = self.create_task_image_identifier(
+                    benchmark,
+                    tool,
+                    str(experiment_item[definitions.KEY_BUG_ID]),
+                    str(experiment_item[definitions.KEY_BUG_ID]),
+                    task_profile.get(definitions.KEY_TOOL_TAG, None),
+                )
                 for run in range(task_config.runs):
                     total_jobs += 1
                     self.construct_job(
@@ -407,7 +410,7 @@ class Cerberus(App[List[Result]]):
                         task_profile,
                         container_profile,
                         experiment_item,
-                        images.get(job_identifier, None),
+                        image_name,
                         iteration,
                         str(run),
                         task_config,
@@ -536,7 +539,6 @@ class Cerberus(App[List[Result]]):
                 ],
             ]
         ],
-        images: Dict[str, str],
     ):
         self.query_one(Static).update("Cerberus is preparing the tool subject images.")
         complete_images: queue.Queue[
@@ -646,9 +648,7 @@ class Cerberus(App[List[Result]]):
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, image_name, success) = complete_images.get()
-            if success:
-                images[job_identifier] = image_name
-            else:
+            if not success:
                 emitter.warning("\t[warning] Failed building image {}".format(id))
 
     def change_table(self, new_id: str):
@@ -751,7 +751,7 @@ class Cerberus(App[List[Result]]):
         task_profile: Dict[str, Any],
         container_profile: Dict[str, Any],
         experiment_item,
-        experiment_image_id: Optional[str],
+        image_name: Optional[str],
         iteration: int,
         run: str,
         task_config: Optional[TaskConfig] = None,
@@ -805,7 +805,7 @@ class Cerberus(App[List[Result]]):
                 experiment_item,
                 task_profile,
                 container_profile,
-                experiment_image_id,
+                image_name,
                 key,
                 task_type,
                 task_config,
