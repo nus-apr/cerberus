@@ -37,16 +37,16 @@ class RewardRepairI(AbstractRepairTool):
             )
             + ".java"
         )
-    
+
         repair_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 main.py --task repair --bug_id {} --src_dir {} --buggy_file {} --buggy_loc {} --top_n_patches {} --output_folder {}'".format(  # currently supporting only defects4j
             timeout_h,
             self.bug_name.replace("-", "_"),
             join(self.dir_expr, "src"),
             join(file),
             bug_info[self.key_fix_lines][0],
-            200, #top_n_patches
-            join(self.dir_output)
-        )        
+            200,  # top_n_patches
+            join(self.dir_output),
+        )
         status = self.run_command(
             repair_command, self.log_output_path, "/repair/RewardRepair"
         )
@@ -57,7 +57,7 @@ class RewardRepairI(AbstractRepairTool):
             join(self.dir_expr, "src"),
             join(file),
             bug_info[self.key_fix_lines][0],
-            join(self.dir_output)
+            join(self.dir_output),
         )
 
         status = self.run_command(
@@ -98,7 +98,7 @@ class RewardRepairI(AbstractRepairTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-        
+
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
@@ -108,11 +108,15 @@ class RewardRepairI(AbstractRepairTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "").replace("Start Time: ", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "").replace("End Time: ", "")
-                
+            self.stats.time_stats.timestamp_start = (
+                log_lines[0].replace("\n", "").replace("Start Time: ", "")
+            )
+            self.stats.time_stats.timestamp_end = (
+                log_lines[-1].replace("\n", "").replace("End Time: ", "")
+            )
+
             if not self.stats.error_stats.is_error:
-                #TODO: Implement later
+                # TODO: Implement later
                 self.stats.patch_stats.generated = 500
                 self.stats.patch_stats.enumerations = 500
                 self.stats.patch_stats.plausible = 1

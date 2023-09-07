@@ -16,7 +16,7 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.AbstractDriver import AbstractDriver

@@ -5,6 +5,7 @@ import shutil
 from os.path import join
 from typing import Any
 from typing import cast
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -16,11 +17,12 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
 
 
 class AbstractBenchmark(AbstractDriver):
+    rebuilt_benchmarks: Dict[str, bool] = {}
     experiment_subjects: List[Any] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
@@ -32,7 +34,6 @@ class AbstractBenchmark(AbstractDriver):
     dir_base_expr = ""
     dir_inst = ""
     dir_setup = ""
-    dir_benchmark = values.dir_benchmark
     log_dir_path = "None"
     log_deps_path = "None"
     log_deploy_path = "None"
@@ -59,6 +60,7 @@ class AbstractBenchmark(AbstractDriver):
     has_standard_name: bool = False
 
     def __init__(self):
+        self.dir_benchmark: str = values.dir_benchmark
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
         self.stats = BenchmarkStats()
         self.pre_built = False
@@ -188,10 +190,18 @@ class AbstractBenchmark(AbstractDriver):
         return exit_code
 
     def build_benchmark_image(self):
-        if not container.image_exists(self.image_name):
-            emitter.warning(
-                f"\t[framework] benchmark environment not found for {self.image_name}"
-            )
+        if not container.image_exists(self.image_name) or (
+            values.rebuild_all and self.name not in AbstractBenchmark.rebuilt_benchmarks
+        ):
+            if not container.image_exists(self.image_name):
+                emitter.warning(
+                    f"\t[framework] benchmark environment not found for {self.image_name}"
+                )
+            if values.rebuild_all:
+                emitter.warning(
+                    f"\t[framework] rebuilding benchmark environment for {self.image_name}"
+                )
+                AbstractBenchmark.rebuilt_benchmarks[self.name] = True
             if self.has_standard_name or not container.pull_image(
                 self.image_name, "latest"
             ):
@@ -245,8 +255,8 @@ class AbstractBenchmark(AbstractDriver):
             },
         }
 
-        container_name = "{}-{}-{}".format(self.name, subject_name, bug_id)
-        container_id = container.get_container_id(container_name)
+        container_name = "-".join([self.name, subject_name, bug_id]).lower()
+        container_id = container.get_container_id(container_name, ignore_not_found=True)
         if container_id:
             container.stop_container(container_id)
             container.remove_container(container_id)

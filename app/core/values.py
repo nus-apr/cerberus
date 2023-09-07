@@ -9,16 +9,17 @@ from typing import List
 from typing import Optional
 
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.TaskType import TaskType
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
 
-dir_main = dirname(dirname(dirname(os.path.realpath(__file__))))
+dir_main: str = dirname(dirname(dirname(os.path.realpath(__file__))))
 dir_infra = join(dir_main, "infra")
 dir_app = join(dir_main, "app", "")
 dir_tool_drivers = join(dir_app, "drivers", "tools", "")
 dir_benchmark_drivers = join(dir_app, "drivers", "benchmarks", "")
-dir_benchmark = join(dir_main, "benchmark", "")
+dir_benchmark: str = join(dir_main, "benchmark", "")
 dir_log_base = join(dir_main, "logs")
 dir_output_base = join(dir_main, "output")
 dir_results = join(dir_main, "results")
@@ -29,6 +30,10 @@ dir_scripts = join(dir_main, "scripts")
 dir_artifacts = join(dir_output_base, "artifacts")
 dir_output = ""
 dir_summaries = join(dir_main, "summaries")
+dir_summaries_benchmarks = join(dir_main, "summaries", "benchmarks")
+dir_summaries_tools = join(dir_main, "summaries", "tools")
+
+
 dir_backup = join(dir_main, "backup")
 dir_config = join(dir_main, "config")
 dir_dynamic = join(dir_main, "dynamic")
@@ -39,30 +44,15 @@ file_last_log = dir_log_base + "/log-latest"
 file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
 file_stats_log = dir_log_base + "/log-stats"
-file_task_configuration = join(dir_main, "profiles", "task-default.json")
-file_container_configuration = join(dir_main, "profiles", "container-default.json")
+file_task_profiles = join(dir_main, "profiles", "task-default.json")
+file_container_profiles = join(dir_main, "profiles", "container-default.json")
 file_output_log = ""
 file_setup_log = ""
 file_instrument_log = ""
-
-
 data_path = "/data"
-tool_path = ""
-tool_params = ""
-tool_tag = ""
-tool_list: List[str] = []
 debug = False
-start_index = None
-end_index = None
 only_setup = False
 skip_setup = False
-bug_index_list: List[int] = []
-bug_id_list: List[str] = []
-skip_index_list: List[int] = []
-benchmark_name = ""
-task_profile_id_list: List[str] = []
-container_profile_id_list: List[str] = []
-subject_name: Optional[str] = None
 use_purge = False
 only_analyse = False
 only_test = False
@@ -80,7 +70,8 @@ ui_active = False
 use_parallel = False
 compact_results = False
 cpus = max(1, multiprocessing.cpu_count() - 2)
-task_type: ContextVar[str] = ContextVar("task_type", default="")
+# cpu_task = 1
+task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None)
 ui_max_width = 1000
 runs = 1
 use_latest_image = False
