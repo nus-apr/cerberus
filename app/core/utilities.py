@@ -48,6 +48,8 @@ def create_output_directories():
         values.dir_results,
         values.dir_experiments,
         values.dir_summaries,
+        values.dir_summaries_tools,
+        values.dir_summaries_benchmarks,
     ]
 
     for dir_i in dir_list:
