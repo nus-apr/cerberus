@@ -141,7 +141,7 @@ def run(
                     experiment_image_id = task.prepare_experiment(
                         benchmark, experiment_item, cpu
                     )
-                    task.prepare_experiment_tool(
+                    tool_experiment_image_id = task.prepare_experiment_tool(
                         experiment_image_id,
                         tool,
                         dir_info,
@@ -179,7 +179,7 @@ def run(
                             container_profile,
                             key,
                             cpu,
-                            experiment_image_id,
+                            tool_experiment_image_id,
                         )
 
 
@@ -367,7 +367,7 @@ def main():
                         image_args.append(task_profile[definitions.KEY_TOOL_TAG])
 
                     image_name = "-".join(image_args)
-                    task.prepare_experiment_tool(
+                    tool_experiment_image_id = task.prepare_experiment_tool(
                         experiment_image_id,
                         tool,
                         dir_info,
@@ -406,7 +406,7 @@ def main():
                                 container_profile,
                                 key,
                                 cpu,
-                                experiment_image_id,
+                                tool_experiment_image_id,
                             )
         else:
             if not parsed_args.task_type:

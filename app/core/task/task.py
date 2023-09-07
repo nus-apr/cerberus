@@ -334,7 +334,7 @@ def prepare_experiment(
         if not values.use_valkyrie:
             is_error = benchmark.setup_experiment(bug_index, None, values.only_test)
             if is_error:
-                return
+                return None
     else:
         experiment_image_id = (
             benchmark.get_exp_image(bug_index, values.only_test, cpu)
@@ -361,10 +361,10 @@ def prepare_experiment_tool(
             or values.rebuild_base
             or values.rebuild_all
         ):
-            prepare_tool_experiment_image(
+            return prepare_tool_experiment_image(
                 bug_image_id, repair_tool, dir_info, image_name, tag
             )
-    pass
+    return None
 
 
 def run(
