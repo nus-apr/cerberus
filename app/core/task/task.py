@@ -294,7 +294,7 @@ def prepare_tool_experiment_image(
     tag: Optional[str],
 ):
     dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
-    if tag:
+    if tag and tag != "":
         dockerfile_name += "-{}".format(tag)
 
     tmp_dockerfile = join(

@@ -57,7 +57,6 @@ class TaskProcessor:
         config: Config,
     ) -> TaskList:
         for tasks_chunk_config in config.tasks_configs_list:
-
             for container_profile_id in tasks_chunk_config.container_profile_id_list:
                 container_profile = config.profiles.get_container_profile(
                     container_profile_id

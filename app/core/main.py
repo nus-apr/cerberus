@@ -4,6 +4,7 @@ import sys
 import time
 import traceback
 from argparse import Namespace
+from copy import deepcopy
 from multiprocessing import set_start_method
 from typing import Any
 from typing import Dict
@@ -26,7 +27,9 @@ from app.core.configs.ConfigValidationSchemas import config_validation_schema
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configuration import Configurations
 from app.core.task import task
+from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskProcessor import TaskProcessor
+from app.core.task.typing import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
@@ -117,114 +120,65 @@ def create_task_identifier(
             container_profile[definitions.KEY_ID],
             run_index,
         ]
-    ).lower()
+    )
 
 
 iteration = 0
 
 
-def run(
+def construct_task_list(
     tool_list: List[AbstractTool],
     benchmark: AbstractBenchmark,
     task_profiles: Dict[str, Dict[str, Any]],
     container_profiles: Dict[str, Dict[str, Any]],
-):
-    global iteration
-    emitter.sub_title(f"Running {values.task_type.get()} task")
+    task_type: TaskType,
+) -> TaskList:
 
-    for task_profile in map(
+    task_config = TaskConfig(
+        task_type,
+        values.compact_results,
+        values.dump_patches,
+        values.docker_host,
+        values.only_analyse,
+        values.only_setup,
+        values.only_instrument,
+        values.only_setup,
+        values.rebuild_all,
+        values.rebuild_base,
+        values.use_cache,
+        values.use_container,
+        values.use_gpu,
+        values.use_purge,
+        values.cpus,
+        values.runs,
+    )
+    for task_profile_template in map(
         lambda task_profile_id: task_profiles[task_profile_id],
         values.task_profile_id_list,
     ):
+        task_profile = deepcopy(task_profile_template)
         task_profile[definitions.KEY_TOOL_PARAMS] = values.tool_params
         task_profile[definitions.KEY_TOOL_TAG] = values.tool_tag
-        for container_profile in map(
+        for container_profile_template in map(
             lambda container_profile_id: container_profiles[container_profile_id],
             values.container_profile_id_list,
         ):
-
-            values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
-            values.current_container_profile_id.set(
-                container_profile[definitions.KEY_ID]
-            )
+            container_profile = deepcopy(container_profile_template)
             for experiment_item in filter_experiment_list(benchmark):
                 bug_index = experiment_item[definitions.KEY_ID]
-                cpu = ",".join(
-                    map(
-                        str,
-                        range(
-                            container_profile.get(
-                                definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
-                            )
-                        ),
-                    )
-                )
-                bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-                subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-                if values.use_container:
-                    values.job_identifier.set(
-                        create_bug_image_identifier(benchmark, experiment_item)
-                    )
-                dir_info = task.generate_dir_info(
-                    benchmark.name, subject_name, bug_name
-                )
-                benchmark.update_dir_info(dir_info)
-                experiment_image_id = None
-                if values.only_setup:
-                    iteration = iteration + 1
-                    emitter.sub_sub_title(
-                        "Experiment #{} - Bug #{}".format(iteration, bug_index)
-                    )
-                    task.prepare_experiment(benchmark, experiment_item, cpu)
-                    continue
 
                 for tool in tool_list:
-                    image_name = create_task_image_identifier(
-                        benchmark,
-                        tool,
-                        experiment_item,
-                        task_profile[definitions.KEY_TOOL_TAG],
-                    )
-
-                    experiment_image_id = task.prepare_experiment(
-                        benchmark, experiment_item, cpu
-                    )
-                    task.prepare_experiment_tool(
-                        experiment_image_id,
-                        tool,
-                        dir_info,
-                        image_name,
-                        task_profile[definitions.KEY_TOOL_TAG],
-                    )
-
-                    for run_index in range(values.runs):
-                        iteration = iteration + 1
-                        emitter.sub_sub_title(
-                            "Experiment #{} - Bug #{} Run #{}".format(
-                                iteration, bug_index, run_index + 1
-                            )
-                        )
-                        tool_tag = task_profile[definitions.KEY_TOOL_TAG]
-                        key = create_task_identifier(
-                            benchmark,
-                            task_profile,
-                            container_profile,
-                            experiment_item,
-                            tool,
-                            str(run_index),
-                            tool_tag,
-                        )
-
-                        task.run(
-                            benchmark,
-                            tool,
+                    yield (
+                        task_config,
+                        (
+                            deepcopy(benchmark),
+                            deepcopy(tool),
                             experiment_item,
                             task_profile,
                             container_profile,
-                            key,
-                            cpu,
-                            image_name,
-                        )
+                            bug_index,
+                        ),
+                    )
 
 
 def get_task_profiles() -> Dict[str, Dict[str, Any]]:
@@ -338,131 +292,35 @@ def main():
             "Starting {} (Program Repair Framework) ".format(values.tool_name)
         )
 
+        tasks = None
         if parsed_args.config_file:
-            values.arg_pass = True
-            config_loader = ConfigDataLoader(
-                file_path=parsed_args.config_file,
-                validation_schema=config_validation_schema,
-            )
-            config_loader.load()
-            config_loader.validate()
-            config = ConfigDataFactory.create(
-                config_data_dict=config_loader.get_config_data()
-            )
+            config = process_config_file(parsed_args)
             tasks = TaskProcessor.execute(config)
-            values.debug = config.general.debug_mode
-            values.secure_hash = config.general.secure_hash
-            if config.general.parallel_mode:
-                info = sys.version_info
-                if info.major < 3 or info.minor < 10:
-                    utilities.error_exit(
-                        "Parallel mode is currently supported only for versions 3.10+"
-                    )
-                iteration = ui.setup_ui(tasks)
-            else:
-                # The tool and benchmark images are going to be created while enumerating
-                for iteration, (task_config, task_data) in enumerate(tasks):
-                    (
-                        benchmark,
-                        tool,
-                        experiment_item,
-                        task_profile,
-                        container_profile,
-                        bug_index,
-                    ) = task_data
-                    process_configs(
-                        task_config,
-                        benchmark,
-                        experiment_item,
-                        task_profile,
-                        container_profile,
-                    )
-
-                    cpu = ",".join(
-                        map(
-                            str,
-                            range(
-                                container_profile.get(
-                                    definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
-                                )
-                            ),
-                        )
-                    )
-                    experiment_image_id = task.prepare_experiment(
-                        benchmark, experiment_item, cpu
-                    )
-
-                    tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
-
-                    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-                    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-                    dir_info = task.generate_dir_info(
-                        benchmark.name, subject_name, bug_name
-                    )
-
-                    image_name = create_task_image_identifier(
-                        benchmark,
-                        tool,
-                        bug_name,
-                        subject_name,
-                        tool_tag,
-                    )
-                    task.prepare_experiment_tool(
-                        experiment_image_id,
-                        tool,
-                        dir_info,
-                        image_name,
-                        task_profile[definitions.KEY_TOOL_TAG],
-                    )
-
-                    for run_index in range(task_config.runs):
-                        iteration = iteration + 1
-                        emitter.sub_sub_title(
-                            "Experiment #{} - Bug #{} Run #{}".format(
-                                iteration, bug_index, run_index + 1
-                            )
-                        )
-
-                        key = create_task_identifier(
-                            benchmark,
-                            task_profile,
-                            container_profile,
-                            experiment_item,
-                            tool,
-                            str(run_index),
-                            tool_tag,
-                        )
-
-                        if not values.only_setup:
-                            task.run(
-                                benchmark,
-                                tool,
-                                experiment_item,
-                                task_profile,
-                                container_profile,
-                                key,
-                                cpu,
-                                image_name,
-                            )
+            # The tool and benchmark images are going to be created while enumerating
+            process_tasks(tasks)
         else:
             if not parsed_args.task_type:
                 utilities.error_exit(
                     "Configuration file was not passed. Please provide a task type!"
                 )
-            if parsed_args.parallel:
-                info = sys.version_info
-                if info.major < 3 or info.minor < 10:
-                    utilities.error_exit(
-                        "Parallel mode is currently supported only for versions 3.10+"
-                    )
-                iteration = ui.setup_ui()
-            else:
-                run(
-                    get_tools(),
-                    get_benchmark(),
-                    get_task_profiles(),
-                    get_container_profiles(),
+            tasks = construct_task_list(
+                get_tools(),
+                get_benchmark(),
+                get_task_profiles(),
+                get_container_profiles(),
+                parsed_args.task_type,
+            )
+
+        if values.use_parallel:
+            info = sys.version_info
+            if info.major < 3 or info.minor < 10:
+                utilities.error_exit(
+                    "Parallel mode is currently supported only for versions 3.10+"
                 )
+            iteration = ui.setup_ui(tasks)
+        else:
+            process_tasks(tasks)
+
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
@@ -479,3 +337,99 @@ def main():
         if not parsed_args.parallel:
             notification.end(total_duration, is_error)
         emitter.end(total_duration, iteration, is_error)
+
+
+def process_config_file(parsed_args):
+    values.arg_pass = True
+    config_loader = ConfigDataLoader(
+        file_path=parsed_args.config_file,
+        validation_schema=config_validation_schema,
+    )
+    config_loader.load()
+    config_loader.validate()
+    config = ConfigDataFactory.create(config_data_dict=config_loader.get_config_data())
+    values.debug = config.general.debug_mode
+    values.secure_hash = config.general.secure_hash
+    values.use_parallel = config.general.parallel_mode
+    return config
+
+
+def process_tasks(tasks: TaskList):
+    for iteration, (task_config, task_data) in enumerate(tasks):
+        (
+            benchmark,
+            tool,
+            experiment_item,
+            task_profile,
+            container_profile,
+            bug_index,
+        ) = task_data
+        process_configs(
+            task_config,
+            benchmark,
+            experiment_item,
+            task_profile,
+            container_profile,
+        )
+
+        cpu = ",".join(
+            map(
+                str,
+                range(
+                    container_profile.get(
+                        definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                    )
+                ),
+            )
+        )
+        experiment_image_id = task.prepare_experiment(benchmark, experiment_item, cpu)
+
+        tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+
+        bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+        subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+
+        image_name = create_task_image_identifier(
+            benchmark,
+            tool,
+            experiment_item,
+            tool_tag,
+        )
+        task.prepare_experiment_tool(
+            experiment_image_id,
+            tool,
+            dir_info,
+            image_name,
+            task_profile[definitions.KEY_TOOL_TAG],
+        )
+
+        for run_index in range(task_config.runs):
+            iteration = iteration + 1
+            emitter.sub_sub_title(
+                "Experiment #{} - Bug #{} Run #{}".format(
+                    iteration, bug_index, run_index + 1
+                )
+            )
+
+            key = create_task_identifier(
+                benchmark,
+                task_profile,
+                container_profile,
+                experiment_item,
+                tool,
+                str(run_index),
+                tool_tag,
+            )
+
+            if not values.only_setup:
+                task.run(
+                    benchmark,
+                    tool,
+                    experiment_item,
+                    task_profile,
+                    container_profile,
+                    key,
+                    cpu,
+                    image_name,
+                )
