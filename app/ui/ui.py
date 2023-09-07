@@ -11,6 +11,7 @@ from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Tuple
 
 from textual._on import on
@@ -317,6 +318,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
+        building: Set[str] = Set()
         for (
             task_config,
             (
@@ -331,6 +333,10 @@ class Cerberus(App[List[Result]]):
             job_identifier = main.create_bug_image_identifier(
                 benchmark, experiment_item
             )
+            if job_identifier in building:
+                continue
+
+            building.add(job_identifier)
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
             )
@@ -437,6 +443,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
+        building: Set[str] = Set()
         for (
             task_config,
             (
@@ -456,6 +463,10 @@ class Cerberus(App[List[Result]]):
                 task_profile.get(definitions.KEY_TOOL_TAG, None),
             )
 
+            if image_name in building:
+                continue
+
+            building.add(image_name)
             loop.run_in_executor(
                 None,
                 prepare_tool_subjects_job,
