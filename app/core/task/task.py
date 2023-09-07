@@ -364,6 +364,8 @@ def prepare_experiment_tool(
             return prepare_tool_experiment_image(
                 bug_image_id, repair_tool, dir_info, image_name, tag
             )
+        else:
+            return container.get_image(image_name)
     return None
 
 
