@@ -14,7 +14,6 @@ from typing import Optional
 import rich.traceback
 from rich import get_console
 
-from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
@@ -29,27 +28,10 @@ from app.core.configuration import Configurations
 from app.core.task import task
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskProcessor import TaskProcessor
-from app.core.task.typing import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
 from app.ui import ui
-
-
-def create_output_directories():
-    dir_list = [
-        values.dir_logs,
-        values.dir_output_base,
-        values.dir_log_base,
-        values.dir_artifacts,
-        values.dir_results,
-        values.dir_experiments,
-        values.dir_summaries,
-    ]
-
-    for dir_i in dir_list:
-        if not os.path.isdir(dir_i):
-            os.makedirs(dir_i)
 
 
 def timeout_handler(signum, frame):
@@ -74,6 +56,7 @@ def bootstrap(arg_list: Namespace):
     values.arg_pass = True
     config.update_configuration()
     config.print_configuration()
+    return config
 
 
 def create_task_image_identifier(
@@ -126,128 +109,6 @@ def create_task_identifier(
 iteration = 0
 
 
-def construct_task_list(
-    tool_list: List[AbstractTool],
-    benchmark: AbstractBenchmark,
-    task_profiles: Dict[str, Dict[str, Any]],
-    container_profiles: Dict[str, Dict[str, Any]],
-    task_type: TaskType,
-) -> TaskList:
-
-    task_config = TaskConfig(
-        task_type,
-        values.compact_results,
-        values.dump_patches,
-        values.docker_host,
-        values.only_analyse,
-        values.only_setup,
-        values.only_instrument,
-        values.only_setup,
-        values.rebuild_all,
-        values.rebuild_base,
-        values.use_cache,
-        values.use_container,
-        values.use_gpu,
-        values.use_purge,
-        values.cpus,
-        values.runs,
-    )
-    for task_profile_template in map(
-        lambda task_profile_id: task_profiles[task_profile_id],
-        values.task_profile_id_list,
-    ):
-        task_profile = deepcopy(task_profile_template)
-        task_profile[definitions.KEY_TOOL_PARAMS] = values.tool_params
-        task_profile[definitions.KEY_TOOL_TAG] = values.tool_tag
-        for container_profile_template in map(
-            lambda container_profile_id: container_profiles[container_profile_id],
-            values.container_profile_id_list,
-        ):
-            container_profile = deepcopy(container_profile_template)
-            for experiment_item in filter_experiment_list(benchmark):
-                bug_index = experiment_item[definitions.KEY_ID]
-
-                for tool in tool_list:
-                    yield (
-                        task_config,
-                        (
-                            deepcopy(benchmark),
-                            deepcopy(tool),
-                            experiment_item,
-                            task_profile,
-                            container_profile,
-                            bug_index,
-                        ),
-                    )
-
-
-def get_task_profiles() -> Dict[str, Dict[str, Any]]:
-    emitter.normal("\t[framework] loading repair task profiles")
-    task_profiles = configuration.load_profiles(values.file_task_profiles)
-    for task_profile_id in values.task_profile_id_list:
-        if task_profile_id not in task_profiles:
-            utilities.error_exit("invalid task profile id {}".format(task_profile_id))
-    return task_profiles
-
-
-def get_container_profiles() -> Dict[str, Dict[str, Any]]:
-    emitter.normal("\t[framework] loading container profiles")
-    container_profiles = configuration.load_profiles(values.file_container_profiles)
-    for container_profile_id in values.container_profile_id_list:
-        if container_profile_id not in container_profiles:
-            utilities.error_exit(
-                "invalid container profile id {}".format(container_profile_id)
-            )
-    return container_profiles
-
-
-def get_tools() -> List[AbstractTool]:
-    tool_list: List[AbstractTool] = []
-    if values.task_type.get() == "prepare":
-        return tool_list
-    for tool_name in values.tool_list:
-        tool = configuration.load_tool(tool_name, values.task_type.get(None) or "boom")
-        if not values.only_analyse:
-            tool.check_tool_exists()
-        tool_list.append(tool)
-    emitter.highlight(
-        f"\t[framework] {values.task_type.get()}-tool(s): "
-        + " ".join([x.name for x in tool_list])
-    )
-    return tool_list
-
-
-def get_benchmark() -> AbstractBenchmark:
-    benchmark = configuration.load_benchmark(values.benchmark_name.lower())
-    emitter.highlight(
-        f"\t[framework] {values.task_type.get()}-benchmark: {benchmark.name}"
-    )
-    return benchmark
-
-
-def filter_experiment_list(benchmark: AbstractBenchmark):
-    filtered_list = []
-    experiment_list = benchmark.get_list()
-    for bug_index in range(1, benchmark.size + 1):
-        experiment_item = experiment_list[bug_index - 1]
-        subject_name = experiment_item[definitions.KEY_SUBJECT]
-        bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-        if values.bug_id_list and bug_name not in values.bug_id_list:
-            continue
-        if values.bug_index_list and bug_index not in values.bug_index_list:
-            continue
-        if values.skip_index_list and str(bug_index) in values.skip_index_list:
-            continue
-        if values.start_index and bug_index < values.start_index:
-            continue
-        if values.subject_name and values.subject_name != subject_name:
-            continue
-        if values.end_index and bug_index > values.end_index:
-            break
-        filtered_list.append(experiment_item)
-    return filtered_list
-
-
 def process_configs(
     task_config: TaskConfig,
     benchmark: AbstractBenchmark,
@@ -283,10 +144,10 @@ def main():
     signal.signal(signal.SIGTERM, shutdown)
     set_start_method("spawn")
     start_time = time.time()
-    create_output_directories()
+    utilities.create_output_directories()
     logger.create_log_files()
     # TODO Do overwrite magic
-    bootstrap(parsed_args)
+    config_obj = bootstrap(parsed_args)
     try:
         emitter.title(
             "Starting {} (Program Repair Framework) ".format(values.tool_name)
@@ -303,13 +164,7 @@ def main():
                 utilities.error_exit(
                     "Configuration file was not passed. Please provide a task type!"
                 )
-            tasks = construct_task_list(
-                get_tools(),
-                get_benchmark(),
-                get_task_profiles(),
-                get_container_profiles(),
-                parsed_args.task_type,
-            )
+            tasks = config_obj.construct_task_list()
 
         if values.use_parallel:
             info = sys.version_info
@@ -351,6 +206,7 @@ def process_config_file(parsed_args):
     values.debug = config.general.debug_mode
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
+    values.cpus = config.general.cpus
     return config
 
 
@@ -422,14 +278,13 @@ def process_tasks(tasks: TaskList):
                 tool_tag,
             )
 
-            if not values.only_setup:
-                task.run(
-                    benchmark,
-                    tool,
-                    experiment_item,
-                    task_profile,
-                    container_profile,
-                    key,
-                    cpu,
-                    image_name,
-                )
+            task.run(
+                benchmark,
+                tool,
+                experiment_item,
+                task_profile,
+                container_profile,
+                key,
+                cpu,
+                image_name,
+            )

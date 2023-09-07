@@ -49,7 +49,7 @@
         "task-profiles": [
             {
                 "id": "TP1",
-                "timeout": "1",
+                "timeout": 1,
                 "fault-location": "auto",
                 "passing-test-ratio": 1
             }

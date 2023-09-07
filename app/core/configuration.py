@@ -4,14 +4,19 @@ import os
 import pathlib
 import sys
 from argparse import Namespace
+from copy import deepcopy
 from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.configs.tasks_data.TaskConfig import TaskConfig
+from app.core.task.TaskProcessor import TaskList
+from app.core.task.typing import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -110,6 +115,8 @@ class Configurations:
         "use-purge": False,
         "only-analyse": False,
         "only-setup": False,
+        "only-instrument": False,
+        "only-test": False,
         "rebuild-all": False,
         "rebuild-base": False,
         "compact-results": False,
@@ -120,7 +127,8 @@ class Configurations:
         "end-index": None,
         "parallel": False,
         "has-config-file": False,
-        "cpu-count": 1,
+        "all-cpu-count": 1,
+        "task-cpu-count": 1,
         "runs": 1,
         "bug-id-list": [],
         "bug-index-list": [],
@@ -187,18 +195,27 @@ class Configurations:
 
         if arg_list.cache:
             self.__runtime_config_values["use-cache"] = True
+
         if arg_list.purge:
             self.__runtime_config_values["use-purge"] = True
-        if arg_list.only_analyse:
-            self.__runtime_config_values["only-analyse"] = True
+
         if not arg_list.use_container or arg_list.use_local:
             self.__runtime_config_values["use-container"] = False
 
         if arg_list.data_dir:
             self.__runtime_config_values["dir-data"] = arg_list.data_dir
 
+        if arg_list.only_analyse:
+            self.__runtime_config_values["only-analyse"] = True
+
         if arg_list.only_setup:
             self.__runtime_config_values["only-setup"] = True
+
+        if arg_list.only_test:
+            self.__runtime_config_values["only-test"] = True
+
+        if arg_list.only_instrument:
+            self.__runtime_config_values["only-instrument"] = True
 
         if arg_list.use_latest_image:
             self.__runtime_config_values["use-latest-image"] = True
@@ -208,6 +225,7 @@ class Configurations:
 
         if arg_list.bug_index:
             self.__runtime_config_values["bug-index-list"] = [arg_list.bug_index]
+
         if arg_list.bug_index_list:
             self.__runtime_config_values["bug-index-list"] = list(
                 flat_map(
@@ -217,16 +235,22 @@ class Configurations:
             )
         if arg_list.runs:
             self.__runtime_config_values["runs"] = arg_list.runs
-        if arg_list.cpu_count:
-            self.__runtime_config_values["cpu-count"] = arg_list.cpu_count
+
+        if arg_list.all_cpu_count:
+            self.__runtime_config_values["all-cpu-count"] = arg_list.all_cpu_count
+
+        # if arg_list.task_cpu_count:
+        #    self.__runtime_config_values["task-cpu-count"] = arg_list.task_cpu_count
 
         if arg_list.bug_id:
             self.__runtime_config_values["bug-id-list"] = [arg_list.bug_id]
+
         if arg_list.bug_id_list:
             self.__runtime_config_values["bug-id-list"] = arg_list.bug_id_list
 
         if arg_list.start_index:
             self.__runtime_config_values["start-index"] = int(arg_list.start_index)
+
         if arg_list.end_index:
             self.__runtime_config_values["end-index"] = int(arg_list.end_index)
 
@@ -318,6 +342,127 @@ class Configurations:
             if config_value is not None:
                 emitter.configuration(config_key, config_value)
 
+    def filter_experiment_list(self, benchmark: AbstractBenchmark):
+        filtered_list = []
+        experiment_list = benchmark.get_list()
+        for bug_index in range(1, benchmark.size + 1):
+            experiment_item = experiment_list[bug_index - 1]
+            subject_name = experiment_item[definitions.KEY_SUBJECT]
+            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+            if self.bug_id_list and bug_name not in self.bug_id_list:
+                continue
+            if self.bug_index_list and bug_index not in self.bug_index_list:
+                continue
+            if self.skip_index_list and str(bug_index) in self.skip_index_list:
+                continue
+            if self.start_index and bug_index < self.start_index:
+                continue
+            if self.subject_name and self.subject_name != subject_name:
+                continue
+            if self.end_index and bug_index > self.end_index:
+                break
+            filtered_list.append(experiment_item)
+        return filtered_list
+
+    def construct_task_list(self) -> TaskList:
+        tool_list: List[AbstractTool] = self.get_tools()
+        benchmark: AbstractBenchmark = self.get_benchmark()
+        task_profiles: Dict[str, Dict[str, Any]] = self.get_task_profiles()
+        container_profiles: Dict[str, Dict[str, Any]] = self.get_container_profiles()
+        task_type = values.task_type.get()
+
+        if not task_type:
+            utilities.error_exit("No task type defined")
+
+        for task_profile_template in map(
+            lambda task_profile_id: task_profiles[task_profile_id],
+            self.task_profile_id_list,
+        ):
+            task_profile = deepcopy(task_profile_template)
+            task_profile[definitions.KEY_TOOL_PARAMS] = self.tool_params
+            task_profile[definitions.KEY_TOOL_TAG] = self.tool_tag
+            for container_profile_template in map(
+                lambda container_profile_id: container_profiles[container_profile_id],
+                self.container_profile_id_list,
+            ):
+                task_config = TaskConfig(
+                    task_type,
+                    values.compact_results,
+                    values.dump_patches,
+                    values.docker_host,
+                    values.only_analyse,
+                    values.only_setup,
+                    values.only_instrument,
+                    values.only_setup,
+                    values.rebuild_all,
+                    values.rebuild_base,
+                    values.use_cache,
+                    values.use_container,
+                    values.use_gpu,
+                    values.use_purge,
+                    container_profile_template[definitions.KEY_CONTAINER_CPU_COUNT],
+                    values.runs,
+                )
+
+                container_profile = deepcopy(container_profile_template)
+                for experiment_item in self.filter_experiment_list(benchmark):
+                    bug_index = experiment_item[definitions.KEY_ID]
+
+                    for tool in tool_list:
+                        yield (
+                            task_config,
+                            (
+                                deepcopy(benchmark),
+                                deepcopy(tool),
+                                experiment_item,
+                                task_profile,
+                                container_profile,
+                                bug_index,
+                            ),
+                        )
+
+    def get_task_profiles(self) -> Dict[str, Dict[str, Any]]:
+        emitter.normal("\t[framework] loading repair task profiles")
+        task_profiles = load_profiles(values.file_task_profiles)
+        for task_profile_id in self.task_profile_id_list:
+            if task_profile_id not in task_profiles:
+                utilities.error_exit(
+                    "invalid task profile id {}".format(task_profile_id)
+                )
+        return task_profiles
+
+    def get_container_profiles(self) -> Dict[str, Dict[str, Any]]:
+        emitter.normal("\t[framework] loading container profiles")
+        container_profiles = load_profiles(values.file_container_profiles)
+        for container_profile_id in self.container_profile_id_list:
+            if container_profile_id not in container_profiles:
+                utilities.error_exit(
+                    "invalid container profile id {}".format(container_profile_id)
+                )
+        return container_profiles
+
+    def get_tools(self) -> List[AbstractTool]:
+        tool_list: List[AbstractTool] = []
+        if values.task_type.get() == "prepare":
+            return tool_list
+        for tool_name in self.tool_list:
+            tool = load_tool(tool_name, values.task_type.get(None) or "boom")
+            if not values.only_analyse:
+                tool.check_tool_exists()
+            tool_list.append(tool)
+        emitter.highlight(
+            f"\t[framework] {values.task_type.get()}-tool(s): "
+            + " ".join([x.name for x in tool_list])
+        )
+        return tool_list
+
+    def get_benchmark(self) -> AbstractBenchmark:
+        benchmark = load_benchmark(self.benchmark_name.lower())
+        emitter.highlight(
+            f"\t[framework] {values.task_type.get()}-benchmark: {benchmark.name}"
+        )
+        return benchmark
+
     def update_configuration(self):
         emitter.normal("\t[framework] updating configuration values")
         values.task_type.set(self.__runtime_config_values["task-type"])
@@ -332,39 +477,45 @@ class Configurations:
                 emitter.error("[invalid] --tool/-tool-list is missing")
                 emitter.emit_help()
                 exit(1)
-        values.benchmark_name = self.__runtime_config_values["benchmark-name"]
-        values.subject_name = self.__runtime_config_values["subject-name"]
-        if values.subject_name:
-            emitter.normal(
-                "\t[framework] Running experiments for subject {}".format(
-                    values.subject_name
-                )
-            )
-        values.start_index = self.__runtime_config_values["start-index"]
-        values.end_index = self.__runtime_config_values["end-index"]
-        values.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
-        values.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
-        values.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        values.task_profile_id_list = self.__runtime_config_values[
-            "repair-profile-id-list"
-        ]
-        values.container_profile_id_list = self.__runtime_config_values[
-            "container-profile-id-list"
-        ]
+
         values.use_parallel = self.__runtime_config_values["parallel"]
         values.use_latest_image = self.__runtime_config_values["use-latest-image"]
 
+        self.benchmark_name = self.__runtime_config_values["benchmark-name"]
+        self.subject_name = self.__runtime_config_values["subject-name"]
+        if self.subject_name:
+            emitter.normal(
+                "\t[framework] Running experiments for subject {}".format(
+                    self.subject_name
+                )
+            )
+        self.start_index = self.__runtime_config_values["start-index"]
+        self.end_index = self.__runtime_config_values["end-index"]
+        self.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
+        self.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
+        self.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
+        self.task_profile_id_list = self.__runtime_config_values[
+            "repair-profile-id-list"
+        ]
+        self.container_profile_id_list = self.__runtime_config_values[
+            "container-profile-id-list"
+        ]
         if (
-            values.start_index is None
-            and values.end_index is None
-            and not values.bug_id_list is None
-            and not values.bug_index_list
-            and values.subject_name is None
+            self.start_index is None
+            and self.end_index is None
+            and not self.bug_id_list is None
+            and not self.bug_index_list
+            and self.subject_name is None
         ):
             emitter.warning(
                 "\t[framework][warning] experiment id is not specified, running all experiments"
             )
+        self.tool_list = self.__runtime_config_values["tool-list"]
+        self.tool_params = self.__runtime_config_values["tool-params"]
+        self.tool_tag = self.__runtime_config_values["tool-tag"]
 
+        values.only_test = self.__runtime_config_values["only-test"]
+        values.only_instrument = self.__runtime_config_values["only-instrument"]
         values.compact_results = self.__runtime_config_values["compact-results"]
         values.only_analyse = self.__runtime_config_values["only-analyse"]
         values.use_container = self.__runtime_config_values["use-container"]
@@ -378,19 +529,15 @@ class Configurations:
             1,
             min(
                 multiprocessing.cpu_count() - 2,
-                self.__runtime_config_values["cpu-count"],
+                self.__runtime_config_values["all-cpu-count"],
             ),
         )
-
+        # values.cpu_task = max(1,self.__runtime_config_values["task-cpu-count"])
         values.docker_host = self.__runtime_config_values.get(
             "docker-host", values.docker_host
         )
         values.rebuild_base = self.__runtime_config_values["rebuild-base"]
         values.debug = self.__runtime_config_values["is-debug"]
         values.secure_hash = self.__runtime_config_values["secure-hash"]
-        values.tool_list = self.__runtime_config_values["tool-list"]
-
-        values.tool_params = self.__runtime_config_values["tool-params"]
-        values.tool_tag = self.__runtime_config_values["tool-tag"]
 
         sys.setrecursionlimit(values.default_stack_size)

@@ -101,7 +101,7 @@ class Cerberus(App[List[Result]]):
         for (id, (task, tool)) in self.jobs.items():
             if not task.done():
                 if tool.container_id:
-                    container.stop_container(tool.container_id)
+                    container.kill_container(tool.container_id)
                 task.cancel()
                 self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
         self._return_value = self.finished_subjects
@@ -501,55 +501,6 @@ class Cerberus(App[List[Result]]):
     def action_show_error_subjects(self):
         self.change_table("#" + error_subjects_id)
 
-    def run_tasks(
-        self,
-        tool_list: List[AbstractTool],
-        benchmark: AbstractBenchmark,
-        task_profiles: Dict[str, Dict[str, Any]],
-        container_profiles: Dict[str, Dict[str, Any]],
-    ):
-        utilities.check_space()
-        iteration = 0
-        for container_profile in map(
-            lambda x: container_profiles[x], values.container_profile_id_list
-        ):
-            for task_profile in map(
-                lambda x: task_profiles[x], values.task_profile_id_list
-            ):
-                for experiment_item in main.filter_experiment_list(benchmark):
-                    bug_index = experiment_item[definitions.KEY_ID]
-
-                    # The experiment should be built at this point, hardcoded cpu should not be a problem
-                    task_profile[definitions.KEY_TOOL_PARAMS] = values.tool_params
-                    task_profile[definitions.KEY_TOOL_TAG] = values.tool_tag
-                    for tool in tool_list:
-                        iteration = iteration + 1
-                        image_name = main.create_task_image_identifier(
-                            benchmark,
-                            tool,
-                            experiment_item,
-                            task_profile.get(definitions.KEY_TOOL_TAG, None),
-                        )
-                        for run_index in range(values.runs):
-                            emitter.sub_sub_title(
-                                "Experiment #{} - Bug #{} Run #{} Tool {}".format(
-                                    iteration, bug_index, run_index, tool.name
-                                )
-                            )
-                            self.construct_job(
-                                benchmark,
-                                tool,
-                                task_profile,
-                                container_profile,
-                                experiment_item,
-                                image_name,
-                                iteration,
-                                str(run_index),
-                            )
-        self.jobs_remaining_mutex.acquire(blocking=True)
-        self.jobs_remaining = values.runs * iteration
-        self.jobs_remaining_mutex.release()
-
     def construct_job(
         self,
         benchmark: AbstractBenchmark,
@@ -612,6 +563,8 @@ class Cerberus(App[List[Result]]):
                 image_name,
                 key,
                 task_type,
+                run,
+                "N/A" if tool_tag == "" else tool_tag,
                 task_config,
             )
         )
@@ -703,12 +656,15 @@ class Cerberus(App[List[Result]]):
                 message.tool.name,
                 message.experiment_item[definitions.KEY_SUBJECT],
                 message.experiment_item[definitions.KEY_BUG_ID],
+                message.run,
+                message.tag,
                 message.task_profile[definitions.KEY_ID],
                 message.container_profile[definitions.KEY_ID],
                 start_date,
                 finish_date,
                 "Running",
                 "None",
+                "N/A",
             )
 
             running_row_key = self.query_one(

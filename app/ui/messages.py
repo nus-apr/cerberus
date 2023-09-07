@@ -29,6 +29,8 @@ class JobAllocate(Message):
         experiment_image_id: Optional[str],
         identifier: str,
         task_type: TaskType,
+        run: str,
+        tag: str,
         task_config: Optional[TaskConfig] = None,
     ) -> None:
         self.index = index
@@ -41,6 +43,8 @@ class JobAllocate(Message):
         self.identifier = identifier
         self.task_type = task_type
         self.task_config = task_config
+        self.run = run
+        self.tag = tag
         super().__init__()
 
 

@@ -45,25 +45,10 @@ file_container_profiles = join(dir_main, "profiles", "container-default.json")
 file_output_log = ""
 file_setup_log = ""
 file_instrument_log = ""
-
-
 data_path = "/data"
-tool_path = ""
-tool_params = ""
-tool_tag = ""
-tool_list: List[str] = []
 debug = False
-start_index = None
-end_index = None
 only_setup = False
 skip_setup = False
-bug_index_list: List[int] = []
-bug_id_list: List[str] = []
-skip_index_list: List[int] = []
-benchmark_name = ""
-task_profile_id_list: List[str] = []
-container_profile_id_list: List[str] = []
-subject_name: Optional[str] = None
 use_purge = False
 only_analyse = False
 only_test = False
@@ -81,6 +66,7 @@ ui_active = False
 use_parallel = False
 compact_results = False
 cpus = max(1, multiprocessing.cpu_count() - 2)
+# cpu_task = 1
 task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None)
 ui_max_width = 1000
 runs = 1

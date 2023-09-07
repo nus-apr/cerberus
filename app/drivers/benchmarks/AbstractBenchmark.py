@@ -5,6 +5,7 @@ import shutil
 from os.path import join
 from typing import Any
 from typing import cast
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -21,6 +22,7 @@ from app.drivers.AbstractDriver import AbstractDriver
 
 
 class AbstractBenchmark(AbstractDriver):
+    rebuilt_benchmarks: Dict[str, bool] = {}
     experiment_subjects: List[Any] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
@@ -188,10 +190,18 @@ class AbstractBenchmark(AbstractDriver):
         return exit_code
 
     def build_benchmark_image(self):
-        if not container.image_exists(self.image_name):
-            emitter.warning(
-                f"\t[framework] benchmark environment not found for {self.image_name}"
-            )
+        if not container.image_exists(self.image_name) or (
+            values.rebuild_all and self.name not in AbstractBenchmark.rebuilt_benchmarks
+        ):
+            if not container.image_exists(self.image_name):
+                emitter.warning(
+                    f"\t[framework] benchmark environment not found for {self.image_name}"
+                )
+            if values.rebuild_all:
+                emitter.warning(
+                    f"\t[framework] rebuilding benchmark environment for {self.image_name}"
+                )
+                AbstractBenchmark.rebuilt_benchmarks[self.name] = True
             if self.has_standard_name or not container.pull_image(
                 self.image_name, "latest"
             ):
