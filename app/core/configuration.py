@@ -15,7 +15,7 @@ from app.core import emitter
 from app.core import utilities
 from app.core import values
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
-from app.core.task.TaskProcessor import TaskList
+from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -235,8 +235,8 @@ class Configurations:
         if arg_list.runs:
             self.__runtime_config_values["runs"] = arg_list.runs
 
-        if arg_list.all_cpu_count:
-            self.__runtime_config_values["all-cpu-count"] = arg_list.all_cpu_count
+        if arg_list.cpu_count:
+            self.__runtime_config_values["all-cpu-count"] = arg_list.cpu_count
 
         # if arg_list.task_cpu_count:
         #    self.__runtime_config_values["task-cpu-count"] = arg_list.task_cpu_count

@@ -9,7 +9,7 @@ from typing import List
 from typing import Optional
 
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import TaskType
+from app.core.task.typing.TaskType import TaskType
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"

@@ -10,8 +10,8 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import DirectoryInfo
-from app.core.task.typing import TaskType
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 

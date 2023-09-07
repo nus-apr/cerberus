@@ -18,7 +18,7 @@ from app.core import writer
 from app.core.task import analyze
 from app.core.task import fuzz
 from app.core.task import repair
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
@@ -339,6 +339,11 @@ def prepare_experiment(
             if is_error:
                 return None
     else:
+        bug_name = str(bug_info[definitions.KEY_BUG_ID])
+        subject_name = str(bug_info[definitions.KEY_SUBJECT])
+        benchmark.update_dir_info(
+            generate_dir_info(benchmark.name, subject_name, bug_name)
+        )
         experiment_image_id = (
             benchmark.get_exp_image(bug_index, values.only_test, cpu)
             if values.use_container

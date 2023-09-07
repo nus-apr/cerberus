@@ -8,7 +8,7 @@ from app.core import emitter
 from app.core import values
 from app.core.configs.Config import Config
 from app.core.task import task
-from app.core.task.typing import TaskList
+from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 

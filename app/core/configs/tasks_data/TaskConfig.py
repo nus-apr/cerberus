@@ -7,7 +7,7 @@ from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.TaskProfile import TaskProfile
 from app.core.configs.tasks_data.TaskDefaultConfig import TaskDefaultConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
-from app.core.task.typing import TaskType
+from app.core.task.typing.TaskType import TaskType
 
 
 class TaskConfig(TaskDefaultConfig):

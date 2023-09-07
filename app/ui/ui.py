@@ -37,7 +37,7 @@ from app.core.task import task
 from app.core.task.stats import RepairToolStats
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import TaskType
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
