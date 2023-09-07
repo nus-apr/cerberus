@@ -350,7 +350,7 @@ class FuzzToolStats(ToolStats):
 
     def get_array(self):
         res = super(FuzzToolStats, self).get_array()
-        res["details"]["space"] = self.fuzzing_stats.get_array()
+        res["details"]["fuzz_stats"] = self.fuzzing_stats.get_array()
         return res
 
     def write(self, printer, prefix=""):
