@@ -90,8 +90,6 @@ class EffFix(AbstractRepairTool):
         clean_command = "rm /tmp/td_candidates/*; make clean"
         self.run_command(clean_command, dir_path=dir_src)
         dir_pre = join(self.dir_expr, "pre")
-        if not self.is_dir(dir_pre):
-            self.run_command(f"mkdir {dir_pre}")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
         config_script = bug_info.get(self.key_config_script, None)
@@ -111,18 +109,20 @@ class EffFix(AbstractRepairTool):
         analysis_command = (
             f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
         )
+        if self.is_dir(dir_pre):
+            self.emit_normal("found previous analysis with Infer")
+        else:
+            self.emit_normal("running pre-analysis with Infer")
+            log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
+            status = self.run_command(
+                analysis_command,
+                dir_path=dir_src,
+                log_file_path=log_analysis_path,
+            )
 
-        self.emit_normal("running pre-analysis with Infer")
-        log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
-        status = self.run_command(
-            analysis_command,
-            dir_path=dir_src,
-            log_file_path=log_analysis_path,
-        )
-
-        if int(status) != 0:
-            self.emit_error("pre-analysis failed")
-            return None
+            if int(status) != 0:
+                self.emit_error("pre-analysis failed")
+                return None
 
         self.emit_normal(
             "preparation took {} second(s)".format(
