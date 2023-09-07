@@ -20,22 +20,23 @@ class EffFix(AbstractRepairTool):
         self.image_name = "rshariffdeen/efffix"
         super().__init__(self.name)
 
-    def rerun_configuration(self, config_script):
-        self.emit_normal("re-running configuration")
-        f1x_config_path = self.dir_expr + f"/{self.name}-config"
+    def re_build(self, config_script, build_script):
+        self.emit_normal("re-building subject")
+        rebuild_script = self.dir_expr + f"/{self.name}-rebuild"
         dir_src = join(self.dir_expr, "src")
         self.write_file(
             [
                 "#!/bin/bash\n",
                 f"cd {dir_src}\n",
-                "make distclean; rm -f CMakeCache.txt\n",
+                "make clean; make distclean; rm -f CMakeCache.txt\n",
                 f"{config_script} {self.dir_expr}\n",
+                f"{build_script} {self.dir_expr}\n",
             ],
-            f1x_config_path,
+            rebuild_script,
         )
-        reconfig_command = "bash {}".format(f1x_config_path)
-        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-config.log")
-        self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+        rebuild_command = "bash {}".format(rebuild_script)
+        log_rebuild_path = join(self.dir_logs, f"{self.name}-re-build.log")
+        self.run_command(rebuild_command, log_file_path=log_rebuild_path)
 
     def populate_config_file(self, bug_info, config_path, dir_pre):
         config_info: Dict[str, Any] = dict()
@@ -94,9 +95,11 @@ class EffFix(AbstractRepairTool):
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
         config_script = bug_info.get(self.key_config_script, None)
-        if config_script:
+        build_script = bug_info.get(self.key_build_script, None)
+        if config_script and build_script:
             config_script = join(self.dir_setup, config_script)
-            self.rerun_configuration(config_script)
+            build_script = join(self.dir_setup, build_script)
+            self.re_build(config_script, build_script)
         time = datetime.now()
         compile_list = bug_info.get(self.key_compile_programs, [])
         names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
@@ -139,9 +142,6 @@ class EffFix(AbstractRepairTool):
         )
 
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
-        self.run_command(clean_command, dir_path=dir_src)
-
         names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
         names_50 = ["snort", "openssl-3"]
         subject_name = bug_info[self.key_subject]
