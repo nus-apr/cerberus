@@ -7,6 +7,7 @@ from textual.message import Message
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.stats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -27,15 +28,15 @@ class JobAllocate(Message):
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
-        task_type: str,
+        task_type: TaskType,
         task_config: Optional[TaskConfig] = None,
     ) -> None:
         self.index = index
         self.benchmark = benchmark
         self.tool = tool
         self.experiment_item = experiment_item
-        self.task_config_info = task_config_info
-        self.container_config_info = container_config_info
+        self.task_profile = task_config_info
+        self.container_profile = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
         self.task_type = task_type
@@ -54,7 +55,7 @@ class JobFinish(Message):
         row_data,
         directory_info: Dict[str, str],
         results: ToolStats,
-        task_type: str,
+        task_type: TaskType,
     ):
         self.key = key
         self.status = status

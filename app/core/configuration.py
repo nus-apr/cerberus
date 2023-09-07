@@ -7,6 +7,7 @@ from argparse import Namespace
 from os.path import join
 from typing import Any
 from typing import Dict
+from typing import List
 
 from app.core import emitter
 from app.core import utilities
@@ -15,13 +16,17 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-def load_configuration_details(config_file_path: str):
+def load_profiles(profile_file_path: str) -> Dict[str, Dict[str, Any]]:
     json_data = None
-    if os.path.isfile(config_file_path):
-        with open(config_file_path, "r") as conf_file:
+    if os.path.isfile(profile_file_path):
+        with open(profile_file_path, "r") as conf_file:
             json_data = json.load(conf_file)
     else:
         utilities.error_exit("Configuration file does not exist")
+    if not json_data is dict:
+        utilities.error_exit(
+            "The collection of profiles should be in a dictionary where the id is the key"
+        )
     return json_data
 
 

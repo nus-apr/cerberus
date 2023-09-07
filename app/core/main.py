@@ -78,26 +78,26 @@ iteration = 0
 def run(
     tool_list: List[AbstractTool],
     benchmark: AbstractBenchmark,
-    task_setup: Any,
-    container_setup: Any,
+    task_profiles: Dict[str, Dict[str, Any]],
+    container_profiles: Dict[str, Dict[str, Any]],
 ):
     global iteration
     emitter.sub_title(f"Running {values.task_type.get()} task")
 
-    for task_config_info in map(
-        lambda task_profile_id: task_setup[task_profile_id],
+    for task_profile in map(
+        lambda task_profile_id: task_profiles[task_profile_id],
         values.task_profile_id_list,
     ):
-        task_config_info[definitions.KEY_TOOL_PARAMS] = values.tool_params
-        task_config_info[definitions.KEY_TOOL_TAG] = values.tool_tag
-        for container_config_info in map(
-            lambda container_profile_id: container_setup[container_profile_id],
+        task_profile[definitions.KEY_TOOL_PARAMS] = values.tool_params
+        task_profile[definitions.KEY_TOOL_TAG] = values.tool_tag
+        for container_profile in map(
+            lambda container_profile_id: container_profiles[container_profile_id],
             values.container_profile_id_list,
         ):
 
-            values.current_task_profile_id.set(task_config_info[definitions.KEY_ID])
+            values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
             values.current_container_profile_id.set(
-                container_config_info[definitions.KEY_ID]
+                container_profile[definitions.KEY_ID]
             )
             for experiment_item in filter_experiment_list(benchmark):
                 bug_index = experiment_item[definitions.KEY_ID]
@@ -105,7 +105,7 @@ def run(
                     map(
                         str,
                         range(
-                            container_config_info.get(
+                            container_profile.get(
                                 definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
                             )
                         ),
@@ -127,11 +127,28 @@ def run(
                     emitter.sub_sub_title(
                         "Experiment #{} - Bug #{}".format(iteration, bug_index)
                     )
-                    task.prepare(benchmark, experiment_item, cpu)
+                    task.prepare_experiment(benchmark, experiment_item, cpu)
                     continue
 
                 for tool in tool_list:
-                    experiment_image_id = task.prepare(benchmark, experiment_item, cpu)
+                    image_args = [tool.name, benchmark.name, subject_name, bug_name]
+
+                    if task_profile[definitions.KEY_TOOL_TAG] != "":
+                        image_args.append(task_profile[definitions.KEY_TOOL_TAG])
+
+                    image_name = "-".join(image_args)
+
+                    experiment_image_id = task.prepare_experiment(
+                        benchmark, experiment_item, cpu
+                    )
+                    task.prepare_experiment_tool(
+                        experiment_image_id,
+                        tool,
+                        dir_info,
+                        image_name,
+                        task_profile[definitions.KEY_TOOL_TAG],
+                    )
+
                     for run_index in range(values.runs):
                         iteration = iteration + 1
                         emitter.sub_sub_title(
@@ -139,7 +156,7 @@ def run(
                                 iteration, bug_index, run_index + 1
                             )
                         )
-                        tool_tag = task_config_info[definitions.KEY_TOOL_TAG]
+                        tool_tag = task_profile[definitions.KEY_TOOL_TAG]
                         key = "-".join(
                             [
                                 benchmark.name,
@@ -148,8 +165,8 @@ def run(
                                 else f"{tool.name}-{tool_tag}",
                                 experiment_item[definitions.KEY_SUBJECT],
                                 experiment_item[definitions.KEY_BUG_ID],
-                                task_config_info[definitions.KEY_ID],
-                                container_config_info[definitions.KEY_ID],
+                                task_profile[definitions.KEY_ID],
+                                container_profile[definitions.KEY_ID],
                                 str(run_index),
                             ]
                         )
@@ -158,38 +175,32 @@ def run(
                             benchmark,
                             tool,
                             experiment_item,
-                            task_config_info,
-                            container_config_info,
+                            task_profile,
+                            container_profile,
                             key,
                             cpu,
                             experiment_image_id,
                         )
 
 
-def get_repair_setup() -> Any:
+def get_task_profiles() -> Dict[str, Dict[str, Any]]:
     emitter.normal("\t[framework] loading repair profile setup")
-    repair_setup = configuration.load_configuration_details(
-        values.file_task_configuration
-    )
-    for repair_profile_id in values.task_profile_id_list:
-        if repair_profile_id not in repair_setup:
-            utilities.error_exit(
-                "invalid repair profile id {}".format(repair_profile_id)
-            )
-    return repair_setup
+    task_profiles = configuration.load_profiles(values.file_task_profiles)
+    for task_profile_id in values.task_profile_id_list:
+        if task_profile_id not in task_profiles:
+            utilities.error_exit("invalid task profile id {}".format(task_profile_id))
+    return task_profiles
 
 
-def get_container_setup() -> Any:
+def get_container_profiles() -> Dict[str, Dict[str, Any]]:
     emitter.normal("\t[framework] loading container profile setup")
-    container_setup = configuration.load_configuration_details(
-        values.file_container_configuration
-    )
+    container_profiles = configuration.load_profiles(values.file_container_profiles)
     for container_profile_id in values.container_profile_id_list:
-        if container_profile_id not in container_setup:
+        if container_profile_id not in container_profiles:
             utilities.error_exit(
                 "invalid container profile id {}".format(container_profile_id)
             )
-    return container_setup
+    return container_profiles
 
 
 def get_tools() -> List[AbstractTool]:
@@ -197,7 +208,7 @@ def get_tools() -> List[AbstractTool]:
     if values.task_type.get() == "prepare":
         return tool_list
     for tool_name in values.tool_list:
-        tool = configuration.load_tool(tool_name, values.task_type.get())
+        tool = configuration.load_tool(tool_name, values.task_type.get(None) or "boom")
         if not values.only_analyse:
             tool.check_tool_exists()
         tool_list.append(tool)
@@ -328,6 +339,42 @@ def main():
                         task_profile,
                         container_profile,
                     )
+
+                    cpu = ",".join(
+                        map(
+                            str,
+                            range(
+                                container_profile.get(
+                                    definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                                )
+                            ),
+                        )
+                    )
+                    experiment_image_id = task.prepare_experiment(
+                        benchmark, experiment_item, cpu
+                    )
+                    tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+
+                    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+                    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+                    dir_info = task.generate_dir_info(
+                        benchmark.name, subject_name, bug_name
+                    )
+
+                    image_args = [tool.name, benchmark.name, subject_name, bug_name]
+
+                    if task_profile[definitions.KEY_TOOL_TAG] != "":
+                        image_args.append(task_profile[definitions.KEY_TOOL_TAG])
+
+                    image_name = "-".join(image_args)
+                    task.prepare_experiment_tool(
+                        experiment_image_id,
+                        tool,
+                        dir_info,
+                        image_name,
+                        task_profile[definitions.KEY_TOOL_TAG],
+                    )
+
                     for run_index in range(task_config.runs):
                         iteration = iteration + 1
                         emitter.sub_sub_title(
@@ -335,21 +382,7 @@ def main():
                                 iteration, bug_index, run_index + 1
                             )
                         )
-                        # cpu = ",".join(map(str, range(values.cpus)))
-                        cpu = ",".join(
-                            map(
-                                str,
-                                range(
-                                    container_profile.get(
-                                        definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
-                                    )
-                                ),
-                            )
-                        )
-                        experiment_image_id = task.prepare(
-                            benchmark, experiment_item, cpu
-                        )
-                        tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+
                         key = "-".join(
                             [
                                 benchmark.name,
@@ -391,8 +424,8 @@ def main():
                 run(
                     get_tools(),
                     get_benchmark(),
-                    get_repair_setup(),
-                    get_container_setup(),
+                    get_task_profiles(),
+                    get_container_profiles(),
                 )
     except (SystemExit, KeyboardInterrupt) as e:
         pass

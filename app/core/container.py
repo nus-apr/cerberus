@@ -105,7 +105,7 @@ def pull_image(image_name: str, tag_name: str):
     return image
 
 
-def build_image(dockerfile_path: str, image_name: str):
+def build_image(dockerfile_path: str, image_name: str) -> str:
     client = get_client()
     emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
@@ -191,7 +191,7 @@ def get_container(container_id: str):
     return container
 
 
-def get_container_id(container_name: str) -> Optional[str]:
+def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[str]:
     client = get_client()
     container_id = None
     try:
@@ -199,7 +199,8 @@ def get_container_id(container_name: str) -> Optional[str]:
     except docker.errors.NotFound as ex:  # type: ignore
         if values.debug:
             emitter.error(f"\t\t{ex}")
-        emitter.warning("\t\t[warning] unable to find container")
+        if not ignore_not_found:
+            emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] unable to find container: docker daemon error")

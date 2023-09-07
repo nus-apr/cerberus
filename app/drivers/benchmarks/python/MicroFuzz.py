@@ -31,7 +31,8 @@ class MicroFuzz(AbstractBenchmark):
         )
 
         self.run_command(
-            container_id, "cp -r {} {}".format(join(self.dir_expr, "base", "contest_utils.py"), root)
+            container_id,
+            "cp -r {} {}".format(join(self.dir_expr, "base", "contest_utils.py"), root),
         )
 
         return container_id

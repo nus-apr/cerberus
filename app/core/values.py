@@ -9,6 +9,7 @@ from typing import List
 from typing import Optional
 
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing import TaskType
 
 tool_name = "Cerberus"
 docker_host = "unix:///var/run/docker.sock"
@@ -39,8 +40,8 @@ file_last_log = dir_log_base + "/log-latest"
 file_command_log = dir_log_base + "/log-command"
 file_build_log = dir_log_base + "/log-build"
 file_stats_log = dir_log_base + "/log-stats"
-file_task_configuration = join(dir_main, "profiles", "task-default.json")
-file_container_configuration = join(dir_main, "profiles", "container-default.json")
+file_task_profiles = join(dir_main, "profiles", "task-default.json")
+file_container_profiles = join(dir_main, "profiles", "container-default.json")
 file_output_log = ""
 file_setup_log = ""
 file_instrument_log = ""
@@ -80,7 +81,7 @@ ui_active = False
 use_parallel = False
 compact_results = False
 cpus = max(1, multiprocessing.cpu_count() - 2)
-task_type: ContextVar[str] = ContextVar("task_type", default="")
+task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None)
 ui_max_width = 1000
 runs = 1
 use_latest_image = False
