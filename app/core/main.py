@@ -155,7 +155,6 @@ def main():
             config = process_config_file(parsed_args)
             tasks = TaskProcessor.execute(config)
             # The tool and benchmark images are going to be created while enumerating
-            process_tasks(tasks)
         else:
             if not parsed_args.task_type:
                 utilities.error_exit(
