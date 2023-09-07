@@ -83,7 +83,7 @@ class EffFix(AbstractRepairTool):
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
-        self.emit_normal(" preparing subject for repair with " + self.name)
+        self.emit_normal("preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
         dir_src = join(self.dir_expr, "src")
@@ -112,15 +112,20 @@ class EffFix(AbstractRepairTool):
             f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
         )
 
+        self.emit_normal("running pre-analysis with Infer")
         log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
-        self.run_command(
+        status = self.run_command(
             analysis_command,
             dir_path=dir_src,
             log_file_path=log_analysis_path,
         )
 
+        if int(status) != 0:
+            self.emit_error("pre-analysis failed")
+            return None
+
         self.emit_normal(
-            " preparation took {} second(s)".format(
+            "preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -128,6 +133,8 @@ class EffFix(AbstractRepairTool):
 
     def run_repair(self, bug_info, repair_config_info):
         config_path = self.prepare(bug_info)
+        if config_path is None:
+            return
         super(EffFix, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
