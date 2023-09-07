@@ -630,17 +630,17 @@ class Cerberus(App[List[Result]]):
         def job_allocated_job():
             values.task_type.set(message.task_type)
             cpus: List[int] = []
-            required_cpu_cores = min(
-                message.tool.cpu_usage,
-                message.task_config.max_cpu_count
-                if message.task_config
-                else float("inf"),
-                message.container_profile.get(
+
+            required_cpu_cores = -1
+            if message.task_config:
+                required_cpu_cores = message.task_config.max_cpu_count
+            else:
+                required_cpu_cores = message.container_profile.get(
                     definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
-                ),
-            )
+                )
+
             self.update_status(
-                message.identifier, "Waiting for {} CPU".format(required_cpu_cores)
+                message.identifier, "Waiting for {} CPU(s)".format(required_cpu_cores)
             )
             if message.task_config:
                 main.process_configs(
