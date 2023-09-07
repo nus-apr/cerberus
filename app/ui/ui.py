@@ -288,7 +288,7 @@ class Cerberus(App[List[Result]]):
         tool: AbstractTool,
         task_profile,
     ):
-        self.query_one(Static).update("Cerberus is preparing the subject images.")
+        self.query_one(Static).update("Cerberus is preparing the tool subject images.")
         complete_images: queue.Queue[Tuple[Any, bool]] = queue.Queue(0)
 
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
@@ -341,6 +341,9 @@ class Cerberus(App[List[Result]]):
 
         all_experiment_jobs = main.filter_experiment_list(benchmark)
         for experiment_item in all_experiment_jobs:
+            image = main.create_task_image_identifier(
+                benchmark, tool, experiment_item, task_profile[definitions.KEY_TOOL_TAG]
+            )
             loop.run_in_executor(
                 None,
                 default_run_tool_job,
@@ -348,6 +351,7 @@ class Cerberus(App[List[Result]]):
                 deepcopy(tool),
                 experiment_item,
                 task_profile,
+                image,
             )
             # benchmark.get_exp_image(experiment_item[definitions.KEY_ID], values.only_test, "1")
         while complete_images.qsize() != len(all_experiment_jobs):
@@ -398,8 +402,7 @@ class Cerberus(App[List[Result]]):
                 image_name = main.create_task_image_identifier(
                     benchmark,
                     tool,
-                    str(experiment_item[definitions.KEY_BUG_ID]),
-                    str(experiment_item[definitions.KEY_BUG_ID]),
+                    experiment_item,
                     task_profile.get(definitions.KEY_TOOL_TAG, None),
                 )
                 for run in range(task_config.runs):
@@ -506,10 +509,8 @@ class Cerberus(App[List[Result]]):
                 bug_index,
             ),
         ) in tasks:
-            bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-            subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             job_identifier = main.create_bug_image_identifier(
-                benchmark, subject_name, bug_name
+                benchmark, experiment_item
             )
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
@@ -632,8 +633,7 @@ class Cerberus(App[List[Result]]):
             image_name = main.create_task_image_identifier(
                 benchmark,
                 tool,
-                str(experiment_item[definitions.KEY_BUG_ID]),
-                str(experiment_item[definitions.KEY_SUBJECT]),
+                experiment_item,
                 task_profile.get(definitions.KEY_TOOL_TAG, None),
             )
 
@@ -651,7 +651,9 @@ class Cerberus(App[List[Result]]):
         while complete_images.qsize() != 0:
             (id, job_identifier, image_name, success) = complete_images.get()
             if not success:
-                emitter.warning("\t[warning] Failed building image {}".format(id))
+                emitter.warning(
+                    "\t[warning] Failed building image {}".format(image_name)
+                )
 
     def change_table(self, new_id: str):
         if self.is_preparing:
@@ -706,8 +708,7 @@ class Cerberus(App[List[Result]]):
                         image_name = main.create_task_image_identifier(
                             benchmark,
                             tool,
-                            str(experiment_item[definitions.KEY_BUG_ID]),
-                            str(experiment_item[definitions.KEY_BUG_ID]),
+                            experiment_item,
                             task_profile.get(definitions.KEY_TOOL_TAG, None),
                         )
                         for run_index in range(values.runs):

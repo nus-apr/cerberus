@@ -76,10 +76,11 @@ def bootstrap(arg_list: Namespace):
 def create_task_image_identifier(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
-    bug_name: str,
-    subject_name: str,
+    experiment_item: Dict[str, Any],
     tag: Optional[str] = None,
 ):
+    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
     image_args = [tool.name, benchmark.name, subject_name, bug_name]
 
     if tag and tag != "":
@@ -90,8 +91,10 @@ def create_task_image_identifier(
 
 
 def create_bug_image_identifier(
-    benchmark: AbstractBenchmark, bug_name: str, subject_name: str
+    benchmark: AbstractBenchmark, experiment_item: Dict[str, Any]
 ):
+    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
+    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
     return "-".join([benchmark.name, subject_name, bug_name]).lower()
 
 
@@ -160,7 +163,7 @@ def run(
                 subject_name = str(experiment_item[definitions.KEY_SUBJECT])
                 if values.use_container:
                     values.job_identifier.set(
-                        create_bug_image_identifier(benchmark, subject_name, bug_name)
+                        create_bug_image_identifier(benchmark, experiment_item)
                     )
                 dir_info = task.generate_dir_info(
                     benchmark.name, subject_name, bug_name
@@ -179,8 +182,7 @@ def run(
                     image_name = create_task_image_identifier(
                         benchmark,
                         tool,
-                        bug_name,
-                        subject_name,
+                        experiment_item,
                         task_profile[definitions.KEY_TOOL_TAG],
                     )
 
@@ -309,11 +311,7 @@ def process_configs(
 
     if values.use_container:
         values.job_identifier.set(
-            create_bug_image_identifier(
-                benchmark,
-                experiment_item[definitions.KEY_SUBJECT],
-                experiment_item[definitions.KEY_BUG_ID],
-            )
+            create_bug_image_identifier(benchmark, experiment_item)
         )
 
 
