@@ -102,7 +102,7 @@ class Cerberus(App[List[Result]]):
         for (id, (task, tool)) in self.jobs.items():
             if not task.done():
                 if tool.container_id:
-                    container.kill_container(tool.container_id)
+                    container.stop_container(tool.container_id)
                 task.cancel()
                 self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
         self._return_value = self.finished_subjects
@@ -169,7 +169,7 @@ class Cerberus(App[List[Result]]):
                             # Currently this kills the container and the tool gets a 137 status for the run command
                             # Possibly we can also track a "critical" section of the tool run
                             # as killing it outside of that specific moment does not seem sensible
-                            container.stop_container(tool.container_id)
+                            container.kill_container(tool.container_id)
                         else:
                             emitter.information(
                                 "Cannot kill a local process as I do not know the exact process id"

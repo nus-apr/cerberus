@@ -214,7 +214,7 @@ def create_running_container(
     )
     container_id = container.get_container_id(container_name, ignore_not_found=True)
     if container_id:
-        container.stop_container(container_id)
+        container.kill_container(container_id)
         container.remove_container(container_id)
 
     if not container.image_exists(image_name):
