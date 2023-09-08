@@ -458,7 +458,9 @@ def kill_container(container_id: str):
         container.kill()  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
-        emitter.warning("\t\t\t[framework] unable to stop kill: docker daemon error")
+        emitter.warning(
+            "\t\t\t[framework] unable to kill container: docker daemon error"
+        )
     except IOError as ex:
         emitter.error(ex)
         raise RuntimeError(
@@ -466,7 +468,9 @@ def kill_container(container_id: str):
         )
     except Exception as ex:
         emitter.warning(ex)
-        emitter.warning("\t\t\t[framework] unable to stop kill: unhandled exception")
+        emitter.warning(
+            "\t\t\t[framework] unable to kill container: unhandled exception"
+        )
 
 
 def is_file(container_id: str, file_path: str):
