@@ -318,7 +318,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = Set()
+        building: Set[str] = set()
         for (
             task_config,
             (
@@ -443,7 +443,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = Set()
+        building: Set[str] = set()
         for (
             task_config,
             (
