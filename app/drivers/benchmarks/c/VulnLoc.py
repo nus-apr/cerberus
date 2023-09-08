@@ -38,7 +38,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
         time = datetime.now()
-        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
+        command_str = "bash setup.sh"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
@@ -55,7 +55,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
         time = datetime.now()
-        command_str = "bash config.sh {}".format(self.base_dir_experiment)
+        command_str = "bash config.sh"
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
         )
@@ -72,7 +72,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
         time = datetime.now()
-        command_str = "bash build.sh {}".format(self.base_dir_experiment)
+        command_str = "bash build.sh"
 
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
@@ -90,7 +90,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
+        command_str = "bash test.sh 1"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -107,7 +107,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
+        command_str = "bash verify.sh 1"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -125,7 +125,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
         time = datetime.now()
-        command_str = "bash transform.sh {}".format(self.base_dir_experiment)
+        command_str = "bash transform.sh"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
