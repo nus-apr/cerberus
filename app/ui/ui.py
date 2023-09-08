@@ -340,7 +340,7 @@ class Cerberus(App[List[Result]]):
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
             )
-        while complete_images.qsize() != len(tasks):
+        while complete_images.qsize() != len(building):
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, success) = complete_images.get()
@@ -476,7 +476,7 @@ class Cerberus(App[List[Result]]):
                 task_profile,
                 image_name,
             )
-        while complete_images.qsize() != len(tasks):
+        while complete_images.qsize() != len(building):
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, image_name, success) = complete_images.get()
