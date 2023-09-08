@@ -313,7 +313,7 @@ class Cerberus(App[List[Result]]):
             finally:
                 self.cpu_queue.put(cpu, block=False)
             emitter.information(
-                "\t[framework] Finishing image check for {} {}".format(
+                "\t[framework] Finished image check for bug {} from subject {}".format(
                     bug_name, subject_name
                 )
             )
@@ -438,7 +438,7 @@ class Cerberus(App[List[Result]]):
             finally:
                 self.cpu_queue.put(cpu, block=False)
             emitter.information(
-                "\t[framework] Finishing image check for {} {}".format(
+                "\t[framework] Finished image check for {} {}".format(
                     bug_name, subject_name
                 )
             )
