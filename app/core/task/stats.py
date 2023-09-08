@@ -348,8 +348,8 @@ class FuzzToolStats(ToolStats):
         self.fuzzing_stats = FuzzerStats()
         super(FuzzToolStats, self).__init__()
 
-    def get_array(self):
-        res = super(FuzzToolStats, self).get_array()
+    def get_dict(self):
+        res = super(FuzzToolStats, self).get_dict()
         res["details"]["fuzz_stats"] = self.fuzzing_stats.get_dict()
         return res
 
