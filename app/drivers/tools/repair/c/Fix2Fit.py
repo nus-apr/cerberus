@@ -120,7 +120,7 @@ class Fix2Fit(AbstractRepairTool):
         if self.key_crash_cmd not in bug_info:
             self.error_exit("No Crash command provided")
         environment_vars = {
-            "SUBJECT_DIR": self.dir_setup,
+            "SUBJECT_DIR": self.dir_expr,
             "AFL_NO_AFFINITY": "",
             "BUGGY_FILE": abs_path_buggy_file,
             "TESTCASE": test_id_list,
@@ -140,7 +140,7 @@ class Fix2Fit(AbstractRepairTool):
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(
-            repair_command, self.log_output_path, self.dir_setup, env=environment_vars
+            repair_command, self.log_output_path, self.dir_expr, env=environment_vars
         )
 
         self.process_status(status)
@@ -148,7 +148,7 @@ class Fix2Fit(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        dir_patch = join(self.dir_setup, "patches")
+        dir_patch = join(self.dir_expr, "patches")
         self.run_command("mkdir /output")
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artifacts(dir_info)
@@ -262,6 +262,6 @@ class Fix2Fit(AbstractRepairTool):
                 "reported fail list: {0}".format(",".join(reported_failing_test))
             )
 
-        dir_patch = self.dir_setup + "/patches"
+        dir_patch = self.dir_expr + "/patches"
         self.stats.patch_stats.generated = len(self.list_dir(dir_patch))
         return self.stats
