@@ -53,9 +53,6 @@ class effFix(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
         time = datetime.now()
-        dir_pre = join(self.dir_expr, "pre")
-        if self.is_dir(dir_pre, container_id):
-            return True
         command_str = "bash config.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
@@ -73,9 +70,6 @@ class effFix(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
         time = datetime.now()
-        dir_pre = join(self.dir_expr, "pre")
-        if self.is_dir(dir_pre, container_id):
-            return True
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup

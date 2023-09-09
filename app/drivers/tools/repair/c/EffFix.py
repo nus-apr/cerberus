@@ -86,7 +86,6 @@ class EffFix(AbstractRepairTool):
         self.emit_normal("preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-
         dir_pre = join(self.dir_expr, "pre")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
@@ -94,15 +93,6 @@ class EffFix(AbstractRepairTool):
         if self.is_dir(dir_pre):
             self.emit_normal("found previous analysis with Infer")
         else:
-            dir_src = join(self.dir_expr, "src")
-            clean_command = "rm /tmp/td_candidates/*; make clean"
-            self.run_command(clean_command, dir_path=dir_src)
-            config_script = bug_info.get(self.key_config_script, None)
-            build_script = bug_info.get(self.key_build_script, None)
-            if config_script and build_script:
-                config_script = join(self.dir_setup, config_script)
-                build_script = join(self.dir_setup, build_script)
-                self.re_build(config_script, build_script)
             compile_list = bug_info.get(self.key_compile_programs, [])
             names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
             names_50 = ["snort", "openssl-3"]
