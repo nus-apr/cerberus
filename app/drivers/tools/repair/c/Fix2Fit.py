@@ -53,7 +53,7 @@ class Fix2Fit(AbstractRepairTool):
 
     def clean_subject(self):
         self.emit_normal(f"cleaning previous artifacts")
-        clean_script = self.dir_expr + f"{self.name}/-clean"
+        clean_script = self.dir_expr + f"{self.name}-clean"
         dir_src = join(self.dir_expr, "src")
         self.write_file(
             [
