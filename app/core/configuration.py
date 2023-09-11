@@ -392,7 +392,7 @@ class Configurations:
                     values.only_analyse,
                     values.only_setup,
                     values.only_instrument,
-                    values.only_setup,
+                    values.only_test,
                     values.rebuild_all,
                     values.rebuild_base,
                     values.use_cache,
