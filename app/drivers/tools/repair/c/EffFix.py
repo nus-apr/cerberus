@@ -88,6 +88,7 @@ class EffFix(AbstractRepairTool):
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
         dir_pre = join(self.dir_expr, "pre")
+        dir_src = join(self.dir_expr, "src")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
         time = datetime.now()
