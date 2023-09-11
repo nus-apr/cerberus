@@ -18,6 +18,7 @@ from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
+from app.drivers.tools.MockTool import MockTool
 
 
 def load_profiles(profile_file_path: str) -> Dict[str, Dict[str, Any]]:
@@ -442,6 +443,9 @@ class Configurations:
 
     def get_tools(self) -> List[AbstractTool]:
         tool_list: List[AbstractTool] = []
+        if self.task_type == "prepare":
+            return [MockTool()]
+
         for tool_name in self.tool_list:
             tool = load_tool(tool_name, self.task_type)
             if not values.only_analyse:
