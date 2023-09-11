@@ -82,6 +82,7 @@ class EffFix(AbstractRepairTool):
         self.write_file(content, config_path)
 
     def prepare(self, bug_info):
+        dir_src = join(self.dir_expr, "src")
         tool_dir = join(self.dir_expr, self.name)
         self.emit_normal("preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
