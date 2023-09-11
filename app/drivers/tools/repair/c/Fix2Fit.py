@@ -9,7 +9,7 @@ class Fix2Fit(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/fix2fit"
+        self.image_name = "yuntongzhang/fix2fit"
 
     def generate_test_driver(self, test_script):
         self.emit_normal(f"preparing test driver for {self.name}")
