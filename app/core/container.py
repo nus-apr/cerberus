@@ -450,17 +450,18 @@ def stop_container(container_id: str, timeout=120):
         )
 
 
-def kill_container(container_id: str):
+def kill_container(container_id: str, ignore_errors=False):
     client = get_client()
     emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
         container.kill()  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
-        emitter.warning(exp)
-        emitter.warning(
-            "\t\t\t[framework] unable to kill container: docker daemon error"
-        )
+        if not ignore_errors:
+            emitter.warning(exp)
+            emitter.warning(
+                "\t\t\t[framework] unable to kill container: docker daemon error"
+            )
     except IOError as ex:
         emitter.error(ex)
         raise RuntimeError(
