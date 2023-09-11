@@ -442,8 +442,6 @@ class Configurations:
 
     def get_tools(self) -> List[AbstractTool]:
         tool_list: List[AbstractTool] = []
-        if self.task_type == "prepare":
-            return tool_list
         for tool_name in self.tool_list:
             tool = load_tool(tool_name, self.task_type)
             if not values.only_analyse:
@@ -465,7 +463,7 @@ class Configurations:
         self.task_type = self.__runtime_config_values["task-type"]
         values.task_type.set(self.__runtime_config_values["task-type"])
         values.only_setup = self.__runtime_config_values["only-setup"]
-        if values.task_type.get() == "prepare":
+        if self.task_type == "prepare":
             values.only_setup = True
         if (
             not values.only_setup
