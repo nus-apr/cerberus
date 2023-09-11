@@ -331,6 +331,7 @@ def prepare_experiment(
     benchmark: AbstractBenchmark,
     bug_info: Dict[str, Any],
     cpu: str,
+    ignore_rebuild: bool = False,
 ):
     utilities.check_space()
     bug_index = bug_info[definitions.KEY_ID]
@@ -347,7 +348,7 @@ def prepare_experiment(
             generate_dir_info(benchmark.name, subject_name, bug_name)
         )
         experiment_image_id = (
-            benchmark.get_exp_image(bug_index, values.only_test, cpu)
+            benchmark.get_exp_image(bug_index, values.only_test, cpu, ignore_rebuild)
             if values.use_container
             else None
         )
