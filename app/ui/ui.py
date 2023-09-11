@@ -405,8 +405,9 @@ class Cerberus(App[List[Result]]):
                         bug_name, subject_name
                     )
                 )
+                # Ignore the rebuild as previously all bugs were prepared
                 experiment_image_id = task.prepare_experiment(
-                    benchmark, experiment_item, str(cpu)
+                    benchmark, experiment_item, str(cpu), ignore_rebuild=True
                 )
 
                 emitter.information(
