@@ -199,7 +199,11 @@ class Cerberus(App[List[Result]]):
 
             if values.use_container:
                 self.prepare_subjects(loop, tasks)
-                self.prepare_tool_subjects(loop, tasks)
+                if not values.only_setup:
+                    self.prepare_tool_subjects(loop, tasks)
+
+            if values.only_setup:
+                self.exit(self.finished_subjects)
 
             self.hide(self.query_one(Static))
             if not values.debug:
