@@ -10,6 +10,7 @@ from app.core.configs.Config import Config
 from app.core.task import task
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.MockTool import MockTool
 
 
 class TaskProcessor:
@@ -94,22 +95,32 @@ class TaskProcessor:
                             values.only_analyse = (
                                 tasks_chunk_config.task_config.only_analyse
                             )
-                            tool_template = configuration.load_tool(
-                                tool_config.name,
-                                tasks_chunk_config.task_config.task_type,
+                            values.only_setup = (
+                                tasks_chunk_config.task_config.only_setup
                             )
+                            values.only_instrument = (
+                                tasks_chunk_config.task_config.only_instrument
+                            )
+                            values.only_test = tasks_chunk_config.task_config.only_test
 
-                            if tool_config.image != "":
-                                if tool_config.tag == "":
-                                    emitter.warning(
-                                        "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
-                                    )
-                                    values.rebuild_all = True
+                            if tasks_chunk_config.task_config.task_type != "prepare":
+                                tool_template = configuration.load_tool(
+                                    tool_config.name,
+                                    tasks_chunk_config.task_config.task_type,
+                                )
+                                if tool_config.image != "":
+                                    if tool_config.tag == "":
+                                        emitter.warning(
+                                            "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
+                                        )
+                                        values.rebuild_all = True
 
-                                tool_template.image_name = tool_config.image
+                                    tool_template.image_name = tool_config.image
+                                if not tasks_chunk_config.task_config.only_analyse:
+                                    tool_template.check_tool_exists()
+                            else:
+                                tool_template = MockTool()
 
-                            if not values.only_analyse:
-                                tool_template.check_tool_exists()
                             # filter skipped bug id
                             for bug_id in bug_id_list:
                                 if bug_id in bug_id_skip_list:

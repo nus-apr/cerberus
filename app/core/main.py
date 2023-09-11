@@ -237,13 +237,22 @@ def process_tasks(tasks: TaskList):
                 ),
             )
         )
-        experiment_image_id = task.prepare_experiment(benchmark, experiment_item, cpu)
 
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
 
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+
+        if task_config.task_type == "prepare":
+            iteration = iteration + 1
+            emitter.sub_sub_title(
+                "Experiment #{} - Bug #{} Run #{}".format(iteration, bug_index, 1)
+            )
+            task.prepare_experiment(benchmark, experiment_item, cpu)
+            continue
+
+        experiment_image_id = task.prepare_experiment(benchmark, experiment_item, cpu)
 
         image_name = create_task_image_identifier(
             benchmark,
@@ -258,11 +267,7 @@ def process_tasks(tasks: TaskList):
             image_name,
             task_profile[definitions.KEY_TOOL_TAG],
         )
-
-        runs = task_config.runs
-        if task_config.task_type == "prepare":
-            runs = 1
-        for run_index in range(runs):
+        for run_index in range(task_config.runs):
             iteration = iteration + 1
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(
