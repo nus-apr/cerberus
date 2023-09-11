@@ -259,7 +259,10 @@ def process_tasks(tasks: TaskList):
             task_profile[definitions.KEY_TOOL_TAG],
         )
 
-        for run_index in range(task_config.runs):
+        runs = task_config.runs
+        if task_config.task_type == "prepare":
+            runs = 1
+        for run_index in range(runs):
             iteration = iteration + 1
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(

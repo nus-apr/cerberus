@@ -225,7 +225,11 @@ class Cerberus(App[List[Result]]):
                     experiment_item,
                     task_profile.get(definitions.KEY_TOOL_TAG, None),
                 )
-                for run in range(task_config.runs):
+                runs = task_config.runs
+                if task_config.task_type == "prepare":
+                    runs = 1
+
+                for run in range(runs):
                     total_jobs += 1
                     self.construct_job(
                         benchmark,
