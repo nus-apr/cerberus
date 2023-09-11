@@ -22,7 +22,9 @@ class StudentFuzzer(AbstractFuzzTool):
 
         if f"/home/student/{self.nonce}.crash" in r:
             command_str = f"date -r {self.nonce}.crash +%s"
-            exit_code, output = self.exec_command(command_str, dir_path="/home/student/")
+            exit_code, output = self.exec_command(
+                command_str, dir_path="/home/student/"
+            )
             stdout, stderr = output
             if stdout:
                 self.stats.fuzzing_stats.time_to_bug = int(stdout) - self.stime
@@ -50,10 +52,8 @@ class StudentFuzzer(AbstractFuzzTool):
 
         self.timestamp_log_start()
 
-        repair_command = (
-            "bash -c 'NONCE={} python3 student_fuzzer.py'".format(
-                self.nonce,
-            )
+        repair_command = "bash -c 'NONCE={} python3 student_fuzzer.py'".format(
+            self.nonce,
         )
 
         status = self.run_command(
