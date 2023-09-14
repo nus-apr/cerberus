@@ -14,7 +14,7 @@ general_section_schema = {
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
-        ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 1},
+        ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 2},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
