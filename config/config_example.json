@@ -20,7 +20,6 @@
             "use-container": true,
             "use-gpu": false,
             "use-purge": false,
-            "max-cpu-count": 4,
             "container-profiles-id-list": [
                 "CP1"
             ],

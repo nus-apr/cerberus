@@ -400,7 +400,6 @@ class Configurations:
                     values.use_container,
                     values.use_gpu,
                     values.use_purge,
-                    container_profile_template[definitions.KEY_CONTAINER_CPU_COUNT],
                     values.runs,
                 )
 

@@ -14,7 +14,7 @@ general_section_schema = {
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
-        ConfigFieldsEnum.CPUS.value: {"type": "number", "minimum": 1},
+        ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 1},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
@@ -183,7 +183,6 @@ task_default_schema = {
         ConfigFieldsEnum.USE_CONTAINER.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_GPU.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_PURGE.value: {"type": "boolean"},
-        ConfigFieldsEnum.MAX_CPU_COUNT.value: {"type": "integer", "minimum": 1},
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value: {
             "type": "array",
             "minItems": 1,
@@ -200,7 +199,6 @@ task_default_schema = {
         },
     },
     "required": [
-        ConfigFieldsEnum.MAX_CPU_COUNT.value,
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value,
         ConfigFieldsEnum.TASK_PROFILE_ID_LIST.value,
     ],
