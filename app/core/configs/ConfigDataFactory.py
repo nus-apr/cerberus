@@ -22,8 +22,11 @@ class ConfigDataFactory:
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
             debug_mode=general_config_dict[ConfigFieldsEnum.DEBUG_MODE.value],
             secure_hash=general_config_dict[ConfigFieldsEnum.SECURE_HASH.value],
-            cpus=general_config_dict.get(
-                ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+            cpus=max(
+                2,
+                general_config_dict.get(
+                    ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+                ),
             ),
         )
 
