@@ -7,7 +7,6 @@
     },
     "tasks": {
         "default": {
-            "max-cpu-count": 2,
             "container-profiles-id-list": [
                 "CP1"
             ],
