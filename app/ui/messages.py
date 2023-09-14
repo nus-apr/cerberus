@@ -31,7 +31,7 @@ class JobAllocate(Message):
         task_type: TaskType,
         run: str,
         tag: str,
-        task_config: Optional[TaskConfig] = None,
+        task_config: TaskConfig,
     ) -> None:
         self.index = index
         self.benchmark = benchmark

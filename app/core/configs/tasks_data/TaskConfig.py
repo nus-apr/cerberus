@@ -27,7 +27,6 @@ class TaskConfig(TaskDefaultConfig):
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
-        max_cpu_count: int,
         runs: int = 1,
     ):
 
@@ -45,7 +44,6 @@ class TaskConfig(TaskDefaultConfig):
             use_container,
             use_gpu,
             use_purge,
-            max_cpu_count,
             runs,
         )
 

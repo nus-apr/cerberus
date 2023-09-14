@@ -531,7 +531,7 @@ class Cerberus(App[List[Result]]):
         image_name: Optional[str],
         iteration: int,
         run: str,
-        task_config: Optional[TaskConfig] = None,
+        task_config: TaskConfig,
     ):
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
         key = main.create_task_identifier(
@@ -565,9 +565,7 @@ class Cerberus(App[List[Result]]):
         log_map[key] = RichLog(highlight=True, markup=True, wrap=True, id=key + "_log")
         self.hide(log_map[key])
 
-        task_type = (
-            values.task_type.get(None) if not task_config else task_config.task_type
-        )
+        task_type = task_config.task_type
         if not task_type:
             utilities.error_exit("Task type is unassigned!")
 
@@ -604,13 +602,9 @@ class Cerberus(App[List[Result]]):
             values.task_type.set(message.task_type)
             cpus: List[int] = []
 
-            required_cpu_cores = -1
-            if message.task_config:
-                required_cpu_cores = message.task_config.max_cpu_count
-            else:
-                required_cpu_cores = message.container_profile.get(
-                    definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
-                )
+            required_cpu_cores = message.container_profile.get(
+                definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
+            )
 
             self.update_status(
                 message.identifier, "Waiting for {} CPU(s)".format(required_cpu_cores)

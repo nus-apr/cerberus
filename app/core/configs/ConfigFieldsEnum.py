@@ -77,6 +77,5 @@ class ConfigFieldsEnum(Enum):
     USE_GPU = "use-gpu"
     USE_PURGE = "use-purge"
     SECURE_HASH = "secure-hash"
-    MAX_CPU_COUNT = "max-cpu-count"
     CONTAINER_PROFILE_ID_LIST = "container-profiles-id-list"
     TASK_PROFILE_ID_LIST = "task-profiles-id-list"
