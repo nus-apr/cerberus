@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from os.path import join
 
+from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -11,6 +12,7 @@ class FootPatch(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "rshariffdeen/footpatch"
         super().__init__(self.name)
 
     def prepare(self, bug_info):
@@ -60,11 +62,6 @@ class FootPatch(AbstractRepairTool):
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-
-        if self.use_container:
-            self.error_exit(
-                "unimplemented functionality: FootPatch docker support not implemented"
-            )
 
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
@@ -143,6 +140,7 @@ class FootPatch(AbstractRepairTool):
         if self.is_file(footpatch_log_path):
             log_lines = self.read_file(footpatch_log_path, encoding="iso-8859-1")
             for line in log_lines:
+                line = escape_ansi(line)
                 if "Patch routine" in line:
                     count_enumerations += 1
                 elif "Writing patches" in line:
