@@ -21,7 +21,9 @@ class FootPatch(AbstractRepairTool):
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
         dir_src = join(self.dir_expr, "src")
-        clean_command = "rm /tmp/td_candidates/*; make clean"
+        clean_command = "make clean"
+        if self.container_id:
+            clean_command = "rm -f /tmp/td_candidates/*; make clean;"
         self.run_command(clean_command, dir_path=dir_src)
 
         new_env = os.environ.copy()
