@@ -70,6 +70,7 @@ ui_active = False
 use_parallel = False
 compact_results = False
 cpus = max(1, multiprocessing.cpu_count() - 2)
+gpus: int = 0
 # cpu_task = 1
 task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None)
 ui_max_width = 1000

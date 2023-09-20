@@ -90,7 +90,7 @@ class AbstractTool(AbstractDriver):
             container.remove_container(self.container_id)
         else:
             if os.path.isdir(self.dir_expr):
-                rm_command = "rm -rf " + self.dir_expr
+                rm_command = "rm -rf {}".format(self.dir_expr)
                 execute_command(rm_command)
 
     def update_info(
