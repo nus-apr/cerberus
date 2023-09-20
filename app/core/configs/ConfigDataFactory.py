@@ -48,6 +48,9 @@ class ConfigDataFactory:
                     enable_network=container_profile_dict[
                         ConfigFieldsEnum.ENABLE_NETWORK.value
                     ],
+                    gpu_count=container_profile_dict.get(
+                        ConfigFieldsEnum.GPU_COUNT.value
+                    ),
                 )
             )
 

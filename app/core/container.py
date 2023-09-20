@@ -282,7 +282,12 @@ def build_container(
         if values.use_gpu:
             # This may not exist on older docker-py versions
             container_run_args["device_requests"] = [
-                docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])
+                docker.types.DeviceRequest(
+                    count=(container_config_dict or {}).get(
+                        definitions.KEY_CONTAINER_GPU_COUNT, -1
+                    ),
+                    capabilities=[["gpu"]],
+                )
             ]
 
         default_mem_limit = "32g"
