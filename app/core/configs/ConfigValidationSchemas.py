@@ -61,6 +61,7 @@ container_profile_schema = {
             "pattern": "^[1-9][0-9]*[gG]$",
         },
         ConfigFieldsEnum.ENABLE_NETWORK.value: {"type": "boolean"},
+        ConfigFieldsEnum.GPU_COUNT.value: {"type": "integer", "minimum": 0},
     },
     "required": [
         ConfigFieldsEnum.PROFILE_ID.value,

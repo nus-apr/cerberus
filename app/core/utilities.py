@@ -94,6 +94,21 @@ def error_exit(*arg_list: Any) -> NoReturn:
     )
 
 
+def get_gpu_count():
+    """
+    Get the number of gpus on the system. Uses nvidia-smi to obtain the number.
+    """
+    try:
+        return len(
+            subprocess.check_output(["nvidia-smi", "-L"])
+            .decode("utf-8")
+            .strip()
+            .split("\n")
+        )
+    except:
+        return 0
+
+
 def clean_files():
     # Remove other residual files stored in ./output/
     logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())

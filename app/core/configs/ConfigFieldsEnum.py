@@ -19,6 +19,7 @@ class ConfigFieldsEnum(Enum):
     PASSING_TEST_RATIO = "passing-test-ratio"
 
     CPU_COUNT = "cpu-count"
+    GPU_COUNT = "gpu-count"
     CPUS = "cpus"
     MEM_LIMIT = "mem-limit"
     ENABLE_NETWORK = "enable-network"
