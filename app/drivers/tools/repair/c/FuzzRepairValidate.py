@@ -153,7 +153,7 @@ class FuzzRepairValidate(AbstractRepairTool):
             )
         )
         validator_script = "/FuzzRepair/validation/run.py"
-        repair_command += f" python3 {validator_script} --conf={repair_conf_path} --bug-id={bug_id} --subject={subject}'"
+        repair_command += f" python3 {validator_script} --conf={repair_conf_path} --bug-id={bug_id} --subject={subject} {additional_tool_param}'"
 
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
 
