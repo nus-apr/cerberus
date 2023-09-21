@@ -1,7 +1,7 @@
 {
   "CP1": {
     "id": "CP1",
-    "cpu_count": 2,
+    "cpu_count": 8,
     "mem_limit": "16g",
     "enable_network": true
   },
