@@ -356,6 +356,10 @@ class Cerberus(App[List[Result]]):
             if job_identifier in building:
                 continue
 
+            main.process_configs(
+                task_config, benchmark, experiment_item, task_profile, container_profile
+            )
+
             building.add(job_identifier)
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
@@ -488,6 +492,9 @@ class Cerberus(App[List[Result]]):
             if image_name in building:
                 continue
 
+            main.process_configs(
+                task_config, benchmark, experiment_item, task_profile, container_profile
+            )
             building.add(image_name)
             loop.run_in_executor(
                 None,
