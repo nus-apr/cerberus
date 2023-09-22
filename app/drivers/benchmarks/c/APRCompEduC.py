@@ -37,7 +37,10 @@ class APRCompEduC(AbstractBenchmark):
         command_str = "bash build_subject"
 
         status = self.run_command(
-            container_id, command_str, self.log_build_path, self.dir_setup
+            container_id,
+            command_str,
+            self.log_build_path,
+            os.path.join(self.dir_expr, "src"),
         )
         self.emit_debug(
             "setup took {} second(s)".format((datetime.now() - time).total_seconds())
@@ -55,7 +58,10 @@ class APRCompEduC(AbstractBenchmark):
         failing_test_list = experiment_item[self.key_failing_tests]
         command_str = f"bash run_test {failing_test_list[0]}"
         status = self.run_command(
-            container_id, command_str, self.log_test_path, self.dir_setup
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_expr, "src"),
         )
         self.emit_debug(
             " Test took {} second(s)".format((datetime.now() - time).total_seconds())
