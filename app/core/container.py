@@ -286,7 +286,7 @@ def build_container(
             if docker.__version__ and semver.compare(docker.__version__, "4.3.0") >= 0:
                 container_run_args["device_requests"] = [
                     docker.types.DeviceRequest(
-                        deviceids=gpu,
+                        device_ids=gpu,
                         capabilities=[["gpu"]],
                     )
                 ]
