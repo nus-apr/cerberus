@@ -228,12 +228,23 @@ def process_tasks(tasks: TaskList):
             container_profile,
         )
 
-        cpu = ",".join(
+        cpu = list(
             map(
                 str,
                 range(
                     container_profile.get(
                         definitions.KEY_CONTAINER_CPU_COUNT, values.cpus
+                    )
+                ),
+            )
+        )
+
+        gpu = list(
+            map(
+                str,
+                range(
+                    container_profile.get(
+                        definitions.KEY_CONTAINER_GPU_COUNT, values.gpus
                     )
                 ),
             )
@@ -250,10 +261,12 @@ def process_tasks(tasks: TaskList):
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(iteration, bug_index, 1)
             )
-            task.prepare_experiment(benchmark, experiment_item, cpu)
+            task.prepare_experiment(benchmark, experiment_item, cpu, [])
             continue
 
-        experiment_image_id = task.prepare_experiment(benchmark, experiment_item, cpu)
+        experiment_image_id = task.prepare_experiment(
+            benchmark, experiment_item, cpu, []
+        )
 
         image_name = create_task_image_identifier(
             benchmark,
@@ -294,5 +307,6 @@ def process_tasks(tasks: TaskList):
                 container_profile,
                 key,
                 cpu,
+                gpu,
                 image_name,
             )

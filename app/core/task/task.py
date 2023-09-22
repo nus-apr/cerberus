@@ -6,6 +6,7 @@ from os.path import join
 from typing import Any
 from typing import cast
 from typing import Dict
+from typing import List
 from typing import Optional
 
 from app.core import container
@@ -204,7 +205,8 @@ def create_running_container(
     dir_info: DirectoryInfo,
     image_name: str,
     container_name: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     container_config_info: Dict[str, Any],
     extra_volumes: Optional[Dict[str, Any]] = None,
 ) -> str:
@@ -223,12 +225,12 @@ def create_running_container(
     volume_list = construct_container_volumes(dir_info, extra_volumes)
 
     extract_experiment_logs(
-        dir_info, image_name, container_name, cpu, container_config_info
+        dir_info, image_name, container_name, cpu, gpu, container_config_info
     )
 
     emitter.information("\t\t[framework] building main container for experiment")
     container_id = container.build_container(
-        container_name, volume_list, image_name, cpu, container_config_info
+        container_name, volume_list, image_name, cpu, gpu, container_config_info
     )
     if not container_id:
         utilities.error_exit("Container was not created successfully")
@@ -239,7 +241,8 @@ def extract_experiment_logs(
     dir_info: DirectoryInfo,
     image_name: str,
     container_name: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     container_config_info: Dict[str, Any],
 ):
     # Need to copy the logs from benchmark setup before instantiating the running container
@@ -251,7 +254,7 @@ def extract_experiment_logs(
 
     if not tmp_container_id:
         tmp_container_id = container.build_container(
-            container_name, dict(), image_name, cpu, container_config_info
+            container_name, dict(), image_name, cpu, gpu, container_config_info
         )
 
     if not tmp_container_id:
@@ -330,7 +333,8 @@ def prepare_tool_experiment_image(
 def prepare_experiment(
     benchmark: AbstractBenchmark,
     bug_info: Dict[str, Any],
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     ignore_rebuild: bool = False,
 ):
     utilities.check_space()
@@ -348,7 +352,9 @@ def prepare_experiment(
             generate_dir_info(benchmark.name, subject_name, bug_name)
         )
         experiment_image_id = (
-            benchmark.get_exp_image(bug_index, values.only_test, cpu, ignore_rebuild)
+            benchmark.get_exp_image(
+                bug_index, values.only_test, cpu, gpu, ignore_rebuild
+            )
             if values.use_container
             else None
         )
@@ -388,7 +394,8 @@ def run(
     task_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
     task_identifier: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     task_image: Optional[str] = None,
 ):
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
@@ -454,6 +461,7 @@ def run(
                 task_image,
                 task_identifier,
                 cpu,
+                gpu,
                 container_config_info,
                 tool.bindings,
             )

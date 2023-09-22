@@ -1,6 +1,7 @@
 import os
 from datetime import datetime
 from os.path import join
+from typing import List
 
 from app.core import container
 from app.drivers.benchmarks.java.Defects4J import Defects4J
@@ -25,13 +26,13 @@ class Defects4JI(Defects4J):
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu: str):
+    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(Defects4JI, self).setup_container(
-            bug_index, image_name, cpu
+            bug_index, image_name, cpu, gpu
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])

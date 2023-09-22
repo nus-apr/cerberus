@@ -95,8 +95,12 @@ class Cerberus(App[List[Result]]):
 
     async def _on_exit_app(self) -> None:
         values.ui_active = False
-        self.job_cancellation = True
-        self.free_jobs = 10000
+        self.jobs_cancelled = True
+
+        # Allow all processes to wake up and process that they are cancelled
+        self.free_cpus = 10000
+        self.free_gpus = 10000
+
         with job_condition:
             job_condition.notify_all()
         for (id, (task, tool)) in self.jobs.items():
@@ -109,14 +113,17 @@ class Cerberus(App[List[Result]]):
         return await super()._on_exit_app()
 
     def on_mount(self):
+
         self.selected_subject = None
+        self.finished_subjects: List[Result] = []
+
         self.jobs_remaining_mutex = threading.Lock()
         self.jobs_remaining = 0
-        self.finished_subjects: List[Result] = []
         self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
-        self.job_cancellation = False
 
-        self.setup_cpu_allocation()
+        self.jobs_cancelled = False
+
+        self.setup_resource_allocation()
 
         values.ui_active = True
 
@@ -130,13 +137,16 @@ class Cerberus(App[List[Result]]):
             loop,
         )
 
-    def setup_cpu_allocation(self) -> None:
-        self.max_jobs = values.cpus
-        self.free_jobs = values.cpus
+    def setup_resource_allocation(self) -> None:
+        self.free_cpus = values.cpus
+        self.free_gpus = values.gpus
 
-        self.cpu_queue: queue.Queue[int] = queue.Queue(self.max_jobs + 1)
-        for cpu in range(self.max_jobs):
-            self.cpu_queue.put(cpu)
+        self.gpu_queue: queue.Queue[str] = queue.Queue(values.gpus + 1)
+        self.cpu_queue: queue.Queue[str] = queue.Queue(values.cpus + 1)
+        for cpu in range(values.cpus):
+            self.cpu_queue.put(str(cpu))
+        for gpu in range(values.gpus):
+            self.gpu_queue.put(str(gpu))
 
     def setup_column_keys(self) -> None:
         for table in self.query(DataTable):
@@ -297,7 +307,9 @@ class Cerberus(App[List[Result]]):
                         bug_name, subject_name
                     )
                 )
-                task.prepare_experiment(benchmark, experiment_item, str(cpu))
+                task.prepare_experiment(
+                    benchmark, experiment_item, [str(cpu)], []
+                )  # Assuming no GPU is used for preparation
                 complete_images.put(
                     (
                         experiment_item[definitions.KEY_ID],
@@ -406,8 +418,9 @@ class Cerberus(App[List[Result]]):
                     )
                 )
                 # Ignore the rebuild as previously all bugs were prepared
+                # Assuming that no GPUs are needed for preparation
                 experiment_image_id = task.prepare_experiment(
-                    benchmark, experiment_item, str(cpu), ignore_rebuild=True
+                    benchmark, experiment_item, [str(cpu)], [], ignore_rebuild=True
                 )
 
                 emitter.information(
@@ -600,14 +613,21 @@ class Cerberus(App[List[Result]]):
 
         def job_allocated_job():
             values.task_type.set(message.task_type)
-            cpus: List[int] = []
+            cpus: List[str] = []
+            gpus: List[str] = []
 
             required_cpu_cores = message.container_profile.get(
                 definitions.KEY_CONTAINER_CPU_COUNT, message.tool.cpu_usage
             )
+            required_gpus = message.container_profile.get(
+                definitions.KEY_CONTAINER_GPU_COUNT, message.tool.gpu_usage
+            )
 
             self.update_status(
-                message.identifier, "Waiting for {} CPU(s)".format(required_cpu_cores)
+                message.identifier,
+                "Waiting for {} CPU core(s) and {} GPU(s)".format(
+                    required_cpu_cores, required_gpus
+                ),
             )
             if message.task_config:
                 main.process_configs(
@@ -619,21 +639,31 @@ class Cerberus(App[List[Result]]):
                 )
 
             with job_condition:
-                while self.free_jobs < required_cpu_cores:
+                while (
+                    self.free_cpus < required_cpu_cores
+                    or self.free_gpus < required_gpus
+                ):
                     job_condition.wait()
-                if self.job_cancellation:
+                if self.jobs_cancelled:
                     self.finished_subjects.append(
                         (message.identifier, TaskStatus.CANCELLED, {})
                     )
                     job_condition.notify(1)
                     return
-                emitter.debug("Getting {} CPU cores".format(required_cpu_cores))
-                self.free_jobs = self.free_jobs - required_cpu_cores
+                emitter.debug(
+                    "Getting {} CPU cores and {} GPUs".format(
+                        required_cpu_cores, required_gpus
+                    )
+                )
+                self.free_cpus = self.free_cpus - required_cpu_cores
+                self.free_gpus = self.free_gpus - required_gpus
                 for _ in range(required_cpu_cores):
                     cpus.append(self.cpu_queue.get(block=True, timeout=None))
+                for _ in range(required_cpu_cores):
+                    gpus.append(self.gpu_queue.get(block=True, timeout=None))
                 if (
-                    self.free_jobs > 0
-                ):  # Try to wake up another thread if there are more free CPUs
+                    self.free_cpus > 0
+                ):  # Try to wake up another thread if there are more free resources
                     job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
@@ -704,7 +734,6 @@ class Cerberus(App[List[Result]]):
             status = TaskStatus.SUCCESS
             dir_info = {}
             try:
-                cpu_set = ",".join(map(str, cpus))
                 dir_info = task.run(
                     message.benchmark,
                     message.tool,
@@ -712,7 +741,8 @@ class Cerberus(App[List[Result]]):
                     message.task_profile,
                     message.container_profile,
                     message.identifier,
-                    cpu_set,
+                    cpus,
+                    gpus,
                     message.experiment_image_id,
                 )
             except Exception as e:
@@ -749,7 +779,10 @@ class Cerberus(App[List[Result]]):
             with job_condition:
                 for cpu in cpus:
                     self.cpu_queue.put(cpu)
-                self.free_jobs += required_cpu_cores
+                for gpu in gpus:
+                    self.gpu_queue.put(gpu)
+                self.free_gpus += required_gpus
+                self.free_cpus += required_cpu_cores
                 emitter.debug(
                     "Putting back {} cores to the job queue".format(required_cpu_cores)
                 )

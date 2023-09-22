@@ -9,6 +9,7 @@ from typing import Tuple
 from typing import Union
 
 import docker  # type: ignore
+import semver
 
 from app.core import definitions
 from app.core import emitter
@@ -257,7 +258,8 @@ def build_container(
     container_name: str,
     volume_list,
     image_name: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
@@ -275,20 +277,21 @@ def build_container(
             "name": container_name,
             "volumes": volume_list,
             "privileged": True,
-            "cpuset_cpus": cpu,
+            "cpuset_cpus": ",".join(cpu),
             "tty": True,
         }
 
-        if values.use_gpu:
-            # This may not exist on older docker-py versions
-            container_run_args["device_requests"] = [
-                docker.types.DeviceRequest(
-                    count=(container_config_dict or {}).get(
-                        definitions.KEY_CONTAINER_GPU_COUNT, -1
-                    ),
-                    capabilities=[["gpu"]],
-                )
-            ]
+        if values.use_gpu and len(gpu) > 0:
+            # Check that the docker version has DeviceRequests
+            if docker.__version__ and semver.compare(docker.__version__, "4.3.0") >= 0:
+                container_run_args["device_requests"] = [
+                    docker.types.DeviceRequest(
+                        deviceids=gpu,
+                        capabilities=[["gpu"]],
+                    )
+                ]
+            else:  # Will get all gpus
+                container_run_args["runtime"] = "nvidia"
 
         default_mem_limit = "32g"
         if container_config_dict:
