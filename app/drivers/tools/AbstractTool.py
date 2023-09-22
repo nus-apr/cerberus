@@ -34,6 +34,7 @@ class AbstractTool(AbstractDriver):
     dir_expr = ""
     dir_base_expr = ""
     cpu_usage = 1
+    gpu_usage = 0
     dir_inst = ""
     dir_setup = ""
     hash_digest = ""
