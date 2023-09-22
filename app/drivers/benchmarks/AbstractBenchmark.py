@@ -367,7 +367,7 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def deploy(self, bug_index, container_id: Optional[str]):
         """Prepares the experiment, e.g. download or copy and synthesize an image for the bug from the benchmark"""
-        return
+        return False
 
     # @abc.abstractmethod
     # def deps(self, bug_index, container_id: Optional[str]):
@@ -377,22 +377,22 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def config(self, bug_index, container_id: Optional[str]):
         """Configure the bug from the benchmark, e.g. running the ./configure script for a C/C++ project"""
-        return
+        return False
 
     @abc.abstractmethod
     def build(self, bug_index, container_id: Optional[str]):
         """Builds the bug from the benchmark, e.g. invoking the make command for a C/C++ project or ant/mvn package/gradle build for a Java project"""
-        return
+        return False
 
     @abc.abstractmethod
     def test(self, bug_index, container_id: Optional[str]):
         """Runs a single test for a bug from the benchmark"""
-        return
+        return False
 
     @abc.abstractmethod
     def test_all(self, bug_index, container_id: Optional[str]):
         """Runs all tests for a bug in the benchmark"""
-        return
+        return False
 
     @abc.abstractmethod
     def save_artifacts(self, dir_info, container_id: Optional[str]):
