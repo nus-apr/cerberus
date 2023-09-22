@@ -1,5 +1,6 @@
 import os
 from os.path import join
+from typing import List
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -24,12 +25,14 @@ class Bears(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu: str):
+    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(Bears, self).setup_container(bug_index, image_name, cpu)
+        container_id = super(Bears, self).setup_container(
+            bug_index, image_name, cpu, gpu
+        )
 
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])

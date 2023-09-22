@@ -211,12 +211,17 @@ class AbstractBenchmark(AbstractDriver):
             emitter.success("\t\t[framework] pre-built benchmark environment found")
 
     def build_experiment_image(
-        self, bug_index: int, test_all: bool, exp_image_name: str, cpu: str
+        self,
+        bug_index: int,
+        test_all: bool,
+        exp_image_name: str,
+        cpu: List[str],
+        gpu: List[str],
     ):
         """
         Builds an image for an experiment
         """
-        container_id = self.setup_container(bug_index, self.image_name, cpu)
+        container_id = self.setup_container(bug_index, self.image_name, cpu, gpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if not container_id:
             self.error_exit("could not setup container correctly")
@@ -228,7 +233,9 @@ class AbstractBenchmark(AbstractDriver):
         if not values.debug:
             container.remove_container(container_id)
 
-    def setup_container(self, bug_index: int, image_name: str, cpu: str):
+    def setup_container(
+        self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]
+    ):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -261,7 +268,7 @@ class AbstractBenchmark(AbstractDriver):
             container.kill_container(container_id, ignore_errors=True)
             container.remove_container(container_id)
         container_id = container.build_container(
-            container_name, volume_list, image_name, cpu
+            container_name, volume_list, image_name, cpu, gpu
         )
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
@@ -339,7 +346,12 @@ class AbstractBenchmark(AbstractDriver):
         return False
 
     def get_exp_image(
-        self, bug_index: int, test_all: bool, cpu: str, ignore_rebuild: bool = False
+        self,
+        bug_index: int,
+        test_all: bool,
+        cpu: List[str],
+        gpu: List[str],
+        ignore_rebuild: bool = False,
     ):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
@@ -354,7 +366,7 @@ class AbstractBenchmark(AbstractDriver):
                 )
             )
             emitter.normal("\t\t\t[framework] preparing/building said experiment")
-            self.build_experiment_image(bug_index, test_all, exp_image_name, cpu)
+            self.build_experiment_image(bug_index, test_all, exp_image_name, cpu, gpu)
         else:
             emitter.success(
                 "\t\t[framework] pre-built experiment image found: {}".format(
