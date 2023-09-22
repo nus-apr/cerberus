@@ -30,7 +30,7 @@ class ExtractFix(AbstractBenchmark):
         return is_error
 
     def deploy(self, bug_index, container_id):
-        self.emit_normal("Downloading experiment subject")
+        self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_deploy_path = (
