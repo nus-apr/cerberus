@@ -36,7 +36,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
-        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
+        command_str = "bash setup.sh"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
@@ -49,7 +49,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_config_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
-        command_str = "bash config.sh {}".format(self.base_dir_experiment)
+        command_str = "bash config.sh"
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
         )
@@ -62,7 +62,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_build_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
-        command_str = "bash build.sh {}".format(self.base_dir_experiment)
+        command_str = "bash build.sh"
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
         )
@@ -75,7 +75,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
-        command_str = "bash test.sh {} 1".format(self.base_dir_experiment)
+        command_str = "bash test.sh 1"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -88,7 +88,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
-        command_str = "bash verify.sh {} 1".format(self.base_dir_experiment)
+        command_str = "bash verify.sh 1"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -101,7 +101,7 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
-        command_str = "bash transform.sh {}".format(self.base_dir_experiment)
+        command_str = "bash transform.sh"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
