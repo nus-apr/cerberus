@@ -1,5 +1,6 @@
 import os
 from os.path import join
+from typing import List
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -13,13 +14,15 @@ class Vul4J(AbstractBenchmark):
         self.image_name = "shark4ce/vul4j"
         super().__init__()
 
-    def setup_container(self, bug_index, image_name, cpu: str):
+    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
 
-        container_id = super(Vul4J, self).setup_container(bug_index, image_name, cpu)
+        container_id = super(Vul4J, self).setup_container(
+            bug_index, image_name, cpu, gpu
+        )
         return container_id
 
     def setup_experiment(self, bug_index, container_id, test_all):

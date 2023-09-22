@@ -1,5 +1,6 @@
 import os
 from os.path import join
+from typing import List
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -12,13 +13,13 @@ class Defects4J(AbstractBenchmark):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Defects4J, self).__init__()
 
-    def setup_container(self, bug_index, image_name, cpu: str):
+    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(Defects4J, self).setup_container(
-            bug_index, image_name, cpu
+            bug_index, image_name, cpu, gpu
         )
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)

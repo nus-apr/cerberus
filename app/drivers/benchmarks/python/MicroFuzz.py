@@ -15,13 +15,13 @@ class MicroFuzz(AbstractBenchmark):
         )
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu):
+    def setup_container(self, bug_index, image_name, cpu, gpu):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(MicroFuzz, self).setup_container(
-            bug_index, image_name, cpu
+            bug_index, image_name, cpu, gpu
         )
         root = self.dir_expr
 
