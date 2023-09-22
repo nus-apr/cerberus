@@ -6,3 +6,4 @@ slack_sdk
 discord
 cython
 jsonschema
+semver
