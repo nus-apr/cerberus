@@ -659,7 +659,7 @@ class Cerberus(App[List[Result]]):
                 self.free_gpus = self.free_gpus - required_gpus
                 for _ in range(required_cpu_cores):
                     cpus.append(self.cpu_queue.get(block=True, timeout=None))
-                for _ in range(required_cpu_cores):
+                for _ in range(required_gpus):
                     gpus.append(self.gpu_queue.get(block=True, timeout=None))
                 if (
                     self.free_cpus > 0
