@@ -17,7 +17,7 @@ class EffFix(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.image_name = "rshariffdeen/efffix"
+        self.image_name = "yuntongzhang/efffix:experiments"
         super().__init__(self.name)
 
     def re_build(self, config_script, build_script):
@@ -171,6 +171,9 @@ class EffFix(AbstractRepairTool):
         self.run_command(clean_command, dir_path=dir_src)
 
     def save_artifacts(self, dir_info):
+        # rm the infer directory, since it's too big
+        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single ;"
+        self.run_command(rm_cmd)
         super(EffFix, self).save_artifacts(dir_info)
         return
 
