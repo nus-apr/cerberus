@@ -290,8 +290,18 @@ def build_container(
                         capabilities=[["gpu"]],
                     )
                 ]
-            else:  # Will get all gpus
+            else:
                 container_run_args["runtime"] = "nvidia"
+
+            # Ensures that pytorch and tf will see only the required GPUs
+            # nvidia-smi does not visualize this change
+            # therefore other methods are needed
+            # For example
+            # python -c 'import torch; print(torch.cuda.device_count())'
+            container_run_args["environment"] = {
+                "NVIDIA_VISIBLE_DEVICES": ",".join(gpu),
+                "CUDA_VISIBLE_DEVICES": ",".join(gpu),
+            }
 
         default_mem_limit = "32g"
         if container_config_dict:
