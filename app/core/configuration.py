@@ -540,4 +540,7 @@ class Configurations:
         values.secure_hash = self.__runtime_config_values["secure-hash"]
 
         sys.setrecursionlimit(values.default_stack_size)
-        sys.set_int_max_str_digits(0)
+
+        # This function is valid after Python 3.11
+        if sys.version_info.major == 3 and sys.version_info.minor >= 11:
+            sys.set_int_max_str_digits(0)
