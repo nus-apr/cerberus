@@ -791,7 +791,9 @@ class Cerberus(App[List[Result]]):
                 self.free_gpus += required_gpus
                 self.free_cpus += required_cpu_cores
                 emitter.debug(
-                    "Putting back {} cores to the job queue".format(required_cpu_cores)
+                    "Putting back {} CPU cores and {} GPU cores to the job queue".format(
+                        required_cpu_cores, required_gpus
+                    )
                 )
                 job_condition.notify_all()
 
