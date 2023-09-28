@@ -1,35 +1,16 @@
 import copy
 import os
-from typing import Any
-from typing import Dict
-from typing import Iterable
 from typing import List
-from typing import Tuple
 
 from app.core import configuration
 from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.core.configs.Config import Config
-from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
+from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.drivers.tools.AbstractTool import AbstractTool
-
-
-TaskList = Iterable[
-    Tuple[
-        TaskConfig,
-        Tuple[
-            AbstractBenchmark,
-            AbstractTool,
-            Any,
-            Dict[str, Any],
-            Dict[str, Any],
-            str,
-        ],
-    ]
-]
+from app.drivers.tools.MockTool import MockTool
 
 
 class TaskProcessor:
@@ -57,19 +38,22 @@ class TaskProcessor:
         config: Config,
     ) -> TaskList:
         for tasks_chunk_config in config.tasks_configs_list:
-
             for container_profile_id in tasks_chunk_config.container_profile_id_list:
                 container_profile = config.profiles.get_container_profile(
                     container_profile_id
                 )
                 for task_profile_id in tasks_chunk_config.task_profile_id_list:
-                    task_profile = copy.deepcopy(
-                        config.profiles.get_task_profile(task_profile_id)
-                    )
                     for tool_config in tasks_chunk_config.tools_config_list:
                         for (
                             benchmark_config
                         ) in tasks_chunk_config.benchmarks_config_list:
+                            benchmark_name = benchmark_config.name
+                            benchmark_template = configuration.load_benchmark(
+                                benchmark_name
+                            )
+                            task_profile = copy.deepcopy(
+                                config.profiles.get_task_profile(task_profile_id)
+                            )
                             setattr(
                                 task_profile,
                                 definitions.KEY_TOOL_PARAMS,
@@ -80,7 +64,6 @@ class TaskProcessor:
                                 definitions.KEY_TOOL_TAG,
                                 tool_config.tag,
                             )
-                            benchmark_name = benchmark_config.name
 
                             benchmark_subjects = (
                                 AbstractBenchmark.load_meta_file_static(
@@ -108,6 +91,36 @@ class TaskProcessor:
                                         bug_id_list.append(
                                             experiment_subject[definitions.KEY_ID]
                                         )
+
+                            values.only_analyse = (
+                                tasks_chunk_config.task_config.only_analyse
+                            )
+                            values.only_setup = (
+                                tasks_chunk_config.task_config.only_setup
+                            )
+                            values.only_instrument = (
+                                tasks_chunk_config.task_config.only_instrument
+                            )
+                            values.only_test = tasks_chunk_config.task_config.only_test
+
+                            if tasks_chunk_config.task_config.task_type != "prepare":
+                                tool_template = configuration.load_tool(
+                                    tool_config.name,
+                                    tasks_chunk_config.task_config.task_type,
+                                )
+                                if tool_config.image != "":
+                                    if tool_config.tag == "":
+                                        emitter.warning(
+                                            "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
+                                        )
+                                        values.rebuild_all = True
+
+                                    tool_template.image_name = tool_config.image
+                                if not tasks_chunk_config.task_config.only_analyse:
+                                    tool_template.check_tool_exists()
+                            else:
+                                tool_template = MockTool()
+
                             # filter skipped bug id
                             for bug_id in bug_id_list:
                                 if bug_id in bug_id_skip_list:
@@ -126,17 +139,9 @@ class TaskProcessor:
                                 values.use_container = (
                                     tasks_chunk_config.task_config.use_container
                                 )
-                                benchmark = configuration.load_benchmark(benchmark_name)
 
-                                values.only_analyse = (
-                                    tasks_chunk_config.task_config.only_analyse
-                                )
-                                tool = configuration.load_tool(
-                                    tool_config.name,
-                                    tasks_chunk_config.task_config.task_type,
-                                )
-                                if not values.only_analyse:
-                                    tool.check_tool_exists()
+                                benchmark = copy.deepcopy(benchmark_template)
+                                tool = copy.deepcopy(tool_template)
                                 benchmark.update_dir_info(dir_info)
 
                                 yield (

@@ -1,6 +1,6 @@
 import os
-import shutil
 from datetime import datetime
+from os.path import join
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -71,7 +71,6 @@ class effFix(AbstractBenchmark):
         )
         time = datetime.now()
         command_str = "bash build.sh {}".format(self.base_dir_experiment)
-
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
         )

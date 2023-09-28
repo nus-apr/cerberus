@@ -76,3 +76,8 @@
 [submodule "benchmark/aprcompaijava"]
 	path = benchmark/aprcompaijava
 	url = https://github.com/APR-Comp/autocode-java.git
+[submodule "benchmark/vulnlocinstrumented"]
+	path = benchmark/vulnlocinstrumented
+	url = https://github.com/nus-apr/vulnloc-benchmark
+        branch = instrumented
+

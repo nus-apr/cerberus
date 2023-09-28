@@ -3,7 +3,8 @@
         "parallel": true,
         "enable_ui": false,
         "secure-hash": false,
-        "debug-mode": true
+        "debug-mode": true,
+        "cpus": 20
     },
     "tasks": {
         "default": {
@@ -20,7 +21,6 @@
             "use-container": true,
             "use-gpu": false,
             "use-purge": false,
-            "max-cpu-count": 4,
             "container-profiles-id-list": [
                 "CP1"
             ],
@@ -93,7 +93,7 @@
         "task-profiles": [
             {
                 "id": "TP1",
-                "timeout": "1",
+                "timeout": 1,
                 "fault-location": "auto",
                 "passing-test-ratio": 1
             }

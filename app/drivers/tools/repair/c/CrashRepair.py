@@ -5,20 +5,20 @@ from os.path import join
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
-class CRepair(AbstractRepairTool):
+class CrashRepair(AbstractRepairTool):
 
     error_messages = ["aborted", "core dumped", "runtime error", "segmentation fault"]
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/crepair:tool"
+        self.image_name = "rshariffdeen/crashrepair:tool"
 
     def generate_conf_file(self, bug_info):
-        repair_conf_path = join(self.dir_setup, "crepair", "repair.conf")
+        repair_conf_path = join(self.dir_setup, "crashrepair", "repair.conf")
         conf_content = []
         if self.key_exploit_list not in bug_info:
-            self.error_exit("CRepair requires a proof of concept")
+            self.error_exit("CrashRepair requires a proof of concept")
         poc_list = bug_info[self.key_exploit_list]
         poc_abs_list = [join(self.dir_setup, x) for x in poc_list]
 
@@ -27,17 +27,17 @@ class CRepair(AbstractRepairTool):
         conf_content.append("src_directory:src\n")
         conf_content.append("binary_path:{}\n".format(bug_info[self.key_bin_path]))
         conf_content.append(
-            "config_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(
+            "config_command:CC=crashrepair-cc CXX=crashrepair-cxx {}\n".format(
                 self.dir_setup + "/config.sh /experiment"
             )
         )
         conf_content.append(
-            "build_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(
+            "build_command:CC=crashrepair-cc CXX=crashrepair-cxx {}\n".format(
                 self.dir_setup + "/build.sh /experiment"
             )
         )
         if self.key_crash_cmd not in bug_info:
-            self.error_exit("CRepair requires a test input list")
+            self.error_exit("CrashRepair requires a test input list")
 
         conf_content.append("test_input_list:{}\n".format(bug_info[self.key_crash_cmd]))
         conf_content.append("poc_list:{}\n".format(",".join(poc_abs_list)))
@@ -45,16 +45,22 @@ class CRepair(AbstractRepairTool):
         return repair_conf_path
 
     def run_repair(self, bug_info, repair_config_info):
-        super(CRepair, self).run_repair(bug_info, repair_config_info)
+        super(CrashRepair, self).run_repair(bug_info, repair_config_info)
         timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_m = 60 * int(timeout_h)
+        timeout_validation = int(timeout_m * 0.75)
+        timeout_test = 30
         additional_tool_param = repair_config_info[self.key_tool_params]
-        # repair_conf_path = self.generate_conf_file(bug_info)
-        repair_conf_path = self.dir_setup + "/crepair/repair.conf"
+        patch_limit = 10
         bug_json_path = self.dir_expr + "/bug.json"
         self.timestamp_log_start()
         repair_command = (
             f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h "
-            f"crashrepair repair --no-fuzz {bug_json_path} {additional_tool_param}'"
+            f"crashrepair repair "
+            f"--patch-limit {patch_limit} "
+            f"--time-limit-minutes-validation {timeout_validation} "
+            f"--time-limit-seconds-test {timeout_test} "
+            f" {bug_json_path} {additional_tool_param} '"
         )
 
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
@@ -73,7 +79,13 @@ class CRepair(AbstractRepairTool):
         ]
         list_artifact_dirs = [self.dir_expr + "/" + x for x in ["analysis", "patches"]]
         list_artifact_files = [
-            self.dir_expr + "/" + x for x in ["candidates.json", "bug.json"]
+            self.dir_expr + "/" + x
+            for x in [
+                "candidates.json",
+                "bug.json",
+                "report.json",
+                "linter-summary.json",
+            ]
         ]
         for f in tool_log_files + list_artifact_files:
             copy_command = f"cp {f} {self.dir_output}"
@@ -81,7 +93,7 @@ class CRepair(AbstractRepairTool):
         for d in list_artifact_dirs:
             copy_command = f"cp -rf {d} {self.dir_output}"
             self.run_command(copy_command)
-        super(CRepair, self).save_artifacts(dir_info)
+        super(CrashRepair, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):

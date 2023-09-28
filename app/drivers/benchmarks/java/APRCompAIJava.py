@@ -1,5 +1,6 @@
 import os
 from os.path import join
+from typing import List
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -18,13 +19,13 @@ class APRCompAIJava(AbstractBenchmark):
         )
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu: str):
+    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(APRCompAIJava, self).setup_container(
-            bug_index, image_name, cpu
+            bug_index, image_name, cpu, gpu
         )
 
         self.run_command(
@@ -44,7 +45,9 @@ class APRCompAIJava(AbstractBenchmark):
     def build(self, bug_index, container_id):
         self.emit_normal("building experiment subject")
         status = self.run_command(
-            container_id, "mvn compile -DskipTests", dir_path=join(self.dir_expr, "src")
+            container_id,
+            "mvn compile test-compile",
+            dir_path=join(self.dir_expr, "src"),
         )
         return status == 0
 

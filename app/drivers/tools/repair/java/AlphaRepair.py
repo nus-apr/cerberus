@@ -38,17 +38,17 @@ class AlphaRepair(AbstractRepairTool):
             )
             + ".java"
         )
-    
+
         repair_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 main.py --task repair --bug_id {} --src_dir {} --buggy_file {} --buggy_loc {} --re_rank --beam_width {} --top_n_patches {} --output_folder {}'".format(  # currently supporting only defects4j
             timeout_h,
             self.bug_name,
             join(self.dir_expr, "src"),
             join(file),
             bug_info[self.key_fix_lines][0],
-            25, #beam_width
-            5000, #top_n_patches
-            join(self.dir_output, "patches")
-        )        
+            25,  # beam_width
+            5000,  # top_n_patches
+            join(self.dir_output, "patches"),
+        )
         status = self.run_command(
             repair_command, self.log_output_path, "/AlphaRepair/AlphaRepair"
         )
@@ -59,7 +59,7 @@ class AlphaRepair(AbstractRepairTool):
             join(self.dir_expr, "src"),
             join(file),
             bug_info[self.key_fix_lines][0],
-            join(self.dir_output, "patches")
+            join(self.dir_output, "patches"),
         )
 
         status = self.run_command(
@@ -100,7 +100,7 @@ class AlphaRepair(AbstractRepairTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-        
+
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
@@ -110,15 +110,19 @@ class AlphaRepair(AbstractRepairTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "").replace("Start Time: ", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "").replace("End Time: ", "")
-                
+            self.stats.time_stats.timestamp_start = (
+                log_lines[0].replace("\n", "").replace("Start Time: ", "")
+            )
+            self.stats.time_stats.timestamp_end = (
+                log_lines[-1].replace("\n", "").replace("End Time: ", "")
+            )
+
             if not self.stats.error_stats.is_error:
                 patch_space = 0
                 non_compilable = 0
                 plausible = 0
                 for line in log_lines:
-                    if "Patch Number :" in line: 
+                    if "Patch Number :" in line:
                         patch_space += 1
                     if "Compilation Failed" in line or "Syntax Error" in line:
                         non_compilable += 1

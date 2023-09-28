@@ -17,8 +17,26 @@ class EffFix(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.image_name = "rshariffdeen/efffix"
+        self.image_name = "yuntongzhang/efffix:experiments"
         super().__init__(self.name)
+
+    def re_build(self, config_script, build_script):
+        self.emit_normal("re-building subject")
+        rebuild_script = self.dir_expr + f"/{self.name}-rebuild"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make clean; make distclean; rm -f CMakeCache.txt\n",
+                f"{config_script} {self.dir_expr}\n",
+                f"{build_script} {self.dir_expr}\n",
+            ],
+            rebuild_script,
+        )
+        rebuild_command = "bash {}".format(rebuild_script)
+        log_rebuild_path = join(self.dir_logs, f"{self.name}-re-build.log")
+        self.run_command(rebuild_command, log_file_path=log_rebuild_path)
 
     def populate_config_file(self, bug_info, config_path, dir_pre):
         config_info: Dict[str, Any] = dict()
@@ -64,39 +82,43 @@ class EffFix(AbstractRepairTool):
         self.write_file(content, config_path)
 
     def prepare(self, bug_info):
+        dir_src = join(self.dir_expr, "src")
         tool_dir = join(self.dir_expr, self.name)
-        self.emit_normal(" preparing subject for repair with " + self.name)
+        self.emit_normal("preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        dir_src = join(self.dir_expr, "src")
-        clean_command = "rm /tmp/td_candidates/*; make clean"
-        self.run_command(clean_command, dir_path=dir_src)
         dir_pre = join(self.dir_expr, "pre")
-        if not self.is_dir(dir_pre):
-            self.run_command(f"mkdir {dir_pre}")
+        dir_src = join(self.dir_expr, "src")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
         time = datetime.now()
-        compile_list = bug_info.get(self.key_compile_programs, [])
-        names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
-        names_50 = ["snort", "openssl-3"]
-        subject_name = bug_info[self.key_subject]
-        num_disjuncts = 50
-        if subject_name in names_100:
-            num_disjuncts = 100
-        analysis_command = (
-            f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
-        )
+        if self.is_dir(dir_pre):
+            self.emit_normal("found previous analysis with Infer")
+        else:
+            compile_list = bug_info.get(self.key_compile_programs, [])
+            names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
+            names_50 = ["snort", "openssl-3"]
+            subject_name = bug_info[self.key_subject]
+            num_disjuncts = 50
+            if subject_name in names_100:
+                num_disjuncts = 100
+            analysis_command = (
+                f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
+            )
+            self.emit_normal("running pre-analysis with Infer")
+            log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
+            status = self.run_command(
+                analysis_command,
+                dir_path=dir_src,
+                log_file_path=log_analysis_path,
+            )
 
-        log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
-        self.run_command(
-            analysis_command,
-            dir_path=dir_src,
-            log_file_path=log_analysis_path,
-        )
+            if int(status) != 0:
+                self.emit_error("pre-analysis failed")
+                return None
 
         self.emit_normal(
-            " preparation took {} second(s)".format(
+            "preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -104,12 +126,15 @@ class EffFix(AbstractRepairTool):
 
     def run_repair(self, bug_info, repair_config_info):
         config_path = self.prepare(bug_info)
+        if config_path is None:
+            return
         super(EffFix, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
@@ -117,9 +142,6 @@ class EffFix(AbstractRepairTool):
         )
 
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
-        self.run_command(clean_command, dir_path=dir_src)
-
         names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
         names_50 = ["snort", "openssl-3"]
         subject_name = bug_info[self.key_subject]
@@ -127,11 +149,13 @@ class EffFix(AbstractRepairTool):
         if subject_name in names_100:
             num_disjuncts = 100
 
-        time_budget = 20
+        budget_str = ""
+        if "budget" not in additional_tool_param:
+            budget_str = f"--budget {timeout_m}"
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h effFix "
-            f"--stage repair --disjuncts {num_disjuncts} --budget {time_budget} "
+            f"--stage repair --disjuncts {num_disjuncts} {budget_str} "
             f"{additional_tool_param} {config_path}"
         )
         status = self.run_command(
@@ -147,6 +171,9 @@ class EffFix(AbstractRepairTool):
         self.run_command(clean_command, dir_path=dir_src)
 
     def save_artifacts(self, dir_info):
+        # rm the infer directory, since it's too big
+        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single ;"
+        self.run_command(rm_cmd)
         super(EffFix, self).save_artifacts(dir_info)
         return
 
