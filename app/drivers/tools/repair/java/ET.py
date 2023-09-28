@@ -17,12 +17,6 @@ class ET(AbstractRepairTool):
 
         print('!!! begin')
 
-        ret = self.run_command('bash -c "echo OKAY"', log_file_path='/root/workflow/log.txt')
-        self.process_status(ret)
-        self.timestamp_log_end()
-        return
-        #####
-
 
         """
             self.dir_logs - directory to store logs
@@ -31,13 +25,13 @@ class ET(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        workflow_path = Path('/root/workflow')
         repo_path = (Path(self.dir_expr) / 'src').resolve()
         setup_path = Path(self.dir_setup).resolve()
         #print(bug_info, repair_config_info, self.container_id)
         assert bug_info['language'] == 'java'
 
-        self.write_file(json.dumps({
+        self.write_json({
+            'id': int(bug_info['id']),
             'repo_path': str(repo_path),
             'setup_script_path': str(setup_path),
             'sp_src': bug_info['source_directory'],
@@ -54,9 +48,9 @@ class ET(AbstractRepairTool):
             'test_passed': bug_info['passing_test'],
             'test_failed': bug_info['failing_test'],
             'test_timeout': bug_info['test_timeout'],
-        }), str(workflow_path/'info.json'))
+        }, '/root/workflow/info.json')
 
-        ret = self.run_command('bash -c "/root/miniconda3/envs/py39/bin/python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
+        ret = self.run_command('bash -c "python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
 
         print(*self.read_file('/root/workflow/log.txt'), sep='')
 
@@ -81,6 +75,7 @@ class ET(AbstractRepairTool):
         self.run_command(f'cp -r /root/workflow/log.txt {self.dir_output}/')
         self.run_command(f'cp -r /root/workflow/fl {self.dir_output}/')
         self.run_command(f'cp -r /root/workflow/repair {self.dir_output}/')
+        self.run_command(f'cp -r /root/workflow/patches {self.dir_output}/')
         super().save_artifacts(dir_info)
         return
 
@@ -104,11 +99,21 @@ class ET(AbstractRepairTool):
         """
         self.emit_normal("reading output")
 
-        self.stats.patch_stats.generated = 0
-        self.stats.patch_stats.plausible = 0
-        self.stats.patch_stats.enumerations = 0
-        self.stats.patch_stats.size = 0
-        self.stats.patch_stats.non_compilable = 0
+        try:
+            stats = self.read_json('/root/workflow/repair/stats.json')
+        except Exception as e:
+            print('cannot read stats', repr(e))
+            stats = None
+
+        if not stats:
+            self.stats.error_stats.is_error = True
+            return
+
+        self.stats.patch_stats.size = stats['n_generated']
+        self.stats.patch_stats.enumerations = stats['n_validated']
+        self.stats.patch_stats.non_compilable = stats['n_validated'] - stats['n_compilable']
+        self.stats.patch_stats.plausible = stats['n_plausible']
+        self.stats.patch_stats.generated = stats['n_plausible']
 
         self.stats.error_stats.is_error = False
 
