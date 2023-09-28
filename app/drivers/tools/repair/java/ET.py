@@ -16,6 +16,7 @@ class ET(AbstractRepairTool):
         self.timestamp_log_start()
 
         print('!!! begin')
+        #return #####
 
 
         """
@@ -29,6 +30,26 @@ class ET(AbstractRepairTool):
         setup_path = Path(self.dir_setup).resolve()
         #print(bug_info, repair_config_info, self.container_id)
         assert bug_info['language'] == 'java'
+
+        assert len(bug_info['failing_test'])>0
+
+        # test list maybe `com.clz::mtd` or `com.clz`, let's make them into `com.clz`
+
+        test_failed = []
+        test_failed_set = set()
+        for t in bug_info['failing_test']:
+            t = t.partition('::')[0]
+            if t not in test_failed_set:
+                test_failed_set.add(t)
+                test_failed.append(t)
+
+        test_passed = []
+        test_passed_set = set()
+        for t in bug_info['passing_test']:
+            t = t.partition('::')[0]
+            if t not in test_failed_set and t not in test_passed_set:
+                test_passed_set.add(t)
+                test_passed.append(t)
 
         self.write_json({
             'id': int(bug_info['id']),
@@ -45,9 +66,10 @@ class ET(AbstractRepairTool):
                 *[str(Path(self.dir_expr)/s) for s in bug_info['dependencies']],
             ]),
             'lang_level': bug_info['java_version'],
-            'test_passed': bug_info['passing_test'],
-            'test_failed': bug_info['failing_test'],
+            'test_passed': test_passed,
+            'test_failed': test_failed,
             'test_timeout': bug_info['test_timeout'],
+            'test_sh_fn': bug_info['test_script'],
         }, '/root/workflow/info.json')
 
         ret = self.run_command('bash -c "python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
