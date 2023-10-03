@@ -10,6 +10,8 @@ class ET(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "et-dev"
+        #self.image_name = "xmcp/et:231004.1"
+        #self.hash_digest = "sha256:11641c10cebcb952a270250cc1fe68659c25ff43f413d08076a4021259b5ea74"
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
@@ -18,6 +20,8 @@ class ET(AbstractRepairTool):
         print('!!! begin')
         #return #####
 
+        assert bug_info['language']=='java'
+        assert len(bug_info['failing_test'])>0
 
         """
             self.dir_logs - directory to store logs
@@ -29,9 +33,6 @@ class ET(AbstractRepairTool):
         repo_path = (Path(self.dir_expr) / 'src').resolve()
         setup_path = Path(self.dir_setup).resolve()
         #print(bug_info, repair_config_info, self.container_id)
-        assert bug_info['language'] == 'java'
-
-        assert len(bug_info['failing_test'])>0
 
         # test list maybe `com.clz::mtd` or `com.clz`, let's make them into `com.clz`
 
@@ -55,6 +56,7 @@ class ET(AbstractRepairTool):
             'id': int(bug_info['id']),
             'repo_path': str(repo_path),
             'setup_script_path': str(setup_path),
+
             'sp_src': bug_info['source_directory'],
             'sp_test': bug_info['test_directory'],
             'tp_src': bug_info['class_directory'],
@@ -66,20 +68,23 @@ class ET(AbstractRepairTool):
                 *[str(Path(self.dir_expr)/s) for s in bug_info['dependencies']],
             ]),
             'lang_level': bug_info['java_version'],
+
             'test_passed': test_passed,
             'test_failed': test_failed,
             'test_timeout': bug_info['test_timeout'],
             'test_sh_fn': bug_info['test_script'],
+
+            'total_timeout_s': int(float(repair_config_info['timeout'])*3600),
+            'cpu_count': 4,
+            'gpu_count': 1,
         }, '/root/workflow/info.json')
 
         ret = self.run_command('bash -c "python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
 
-        print(*self.read_file('/root/workflow/log.txt'), sep='')
+        #print(*self.read_file('/root/workflow/log.txt'), sep='')
 
         self.process_status(ret)
         self.timestamp_log_end()
-
-        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
         print('!!! end')
 
