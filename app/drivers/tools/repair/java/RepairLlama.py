@@ -9,7 +9,7 @@ class RepairLlama(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(RepairLlama, self).__init__(self.name)
         self.image_name = "andre15silva/repairllama:latest"
-        self.hash_digest = ""
+        self.hash_digest = "sha256:84e6a0edc81b9edd08158c41a0ada00aa96ee9dbda699435c61f7f07669af513"
 
     def run_repair(self, bug_info, repair_config_info):
         super(RepairLlama, self).run_repair(bug_info, repair_config_info)
