@@ -470,7 +470,7 @@ def stop_container(container_id: str, timeout=120):
 
 def kill_container(container_id: str, ignore_errors=False):
     client = get_client()
-    emitter.normal("\t\t\t[framework] stopping docker container")
+    emitter.normal("\t\t\t[framework] killing docker container")
     try:
         container = client.containers.get(container_id)
         container.kill()  # type: ignore
