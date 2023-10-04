@@ -9,6 +9,7 @@ from typing import Tuple
 from typing import Union
 
 import docker  # type: ignore
+import semver
 
 from app.core import definitions
 from app.core import emitter
@@ -24,7 +25,7 @@ def get_client():
         cached_client = docker.DockerClient(
             base_url=values.docker_host,
             version="1.41",
-            timeout=300
+            timeout=900
             # user_agent="Cerberus Agent",
             # use_ssh_client=True,
         )
@@ -33,6 +34,7 @@ def get_client():
 
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
+    emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
     try:
         image_list = client.images.list()
     except IOError as ex:
@@ -105,7 +107,7 @@ def pull_image(image_name: str, tag_name: str):
     return image
 
 
-def build_image(dockerfile_path: str, image_name: str):
+def build_image(dockerfile_path: str, image_name: str) -> str:
     client = get_client()
     emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
@@ -127,6 +129,10 @@ def build_image(dockerfile_path: str, image_name: str):
                         emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in line["stream"]:
                         id = line["stream"].split(" ")[-1]
+            if id is None:
+                utilities.error_exit(
+                    "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
+                )
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
@@ -187,7 +193,7 @@ def get_container(container_id: str):
     return container
 
 
-def get_container_id(container_name: str) -> Optional[str]:
+def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[str]:
     client = get_client()
     container_id = None
     try:
@@ -195,7 +201,8 @@ def get_container_id(container_name: str) -> Optional[str]:
     except docker.errors.NotFound as ex:  # type: ignore
         if values.debug:
             emitter.error(f"\t\t{ex}")
-        emitter.warning("\t\t[warning] unable to find container")
+        if not ignore_not_found:
+            emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
         utilities.error_exit("[error] unable to find container: docker daemon error")
@@ -251,7 +258,8 @@ def build_container(
     container_name: str,
     volume_list,
     image_name: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
     container_config_dict: Optional[Dict[Any, Any]] = None,
 ) -> Optional[str]:
     client = get_client()
@@ -269,15 +277,31 @@ def build_container(
             "name": container_name,
             "volumes": volume_list,
             "privileged": True,
-            "cpuset_cpus": cpu,
+            "cpuset_cpus": ",".join(cpu),
             "tty": True,
         }
 
-        if values.use_gpu:
-            # This may not exist on older docker-py versions
-            container_run_args["device_requests"] = [
-                docker.types.DeviceRequest(count=-1, capabilities=[["gpu"]])
-            ]
+        if values.use_gpu and len(gpu) > 0:
+            # Check that the docker version has DeviceRequests
+            if docker.__version__ and semver.compare(docker.__version__, "4.3.0") >= 0:
+                container_run_args["device_requests"] = [
+                    docker.types.DeviceRequest(
+                        device_ids=gpu,
+                        capabilities=[["gpu"]],
+                    )
+                ]
+            else:
+                container_run_args["runtime"] = "nvidia"
+
+            # Ensures that pytorch and tf will see only the required GPUs
+            # nvidia-smi does not visualize this change
+            # therefore other methods are needed
+            # For example
+            # python -c 'import torch; print(torch.cuda.device_count())'
+            container_run_args["environment"] = {
+                "NVIDIA_VISIBLE_DEVICES": ",".join(gpu),
+                "CUDA_VISIBLE_DEVICES": ",".join(gpu),
+            }
 
         default_mem_limit = "32g"
         if container_config_dict:
@@ -421,12 +445,12 @@ def start_container(container_id: str):
         )
 
 
-def stop_container(container_id: str):
+def stop_container(container_id: str, timeout=120):
     client = get_client()
     emitter.normal("\t\t\t[framework] stopping docker container")
     try:
         container = client.containers.get(container_id)
-        container.stop(timeout=20)  # type: ignore
+        container.stop(timeout=timeout)  # type: ignore
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -441,6 +465,30 @@ def stop_container(container_id: str):
         emitter.warning(ex)
         emitter.warning(
             "\t\t\t[framework] unable to stop container: unhandled exception"
+        )
+
+
+def kill_container(container_id: str, ignore_errors=False):
+    client = get_client()
+    emitter.normal("\t\t\t[framework] stopping docker container")
+    try:
+        container = client.containers.get(container_id)
+        container.kill()  # type: ignore
+    except docker.errors.APIError as exp:  # type: ignore
+        if not ignore_errors:
+            emitter.warning(exp)
+            emitter.warning(
+                "\t\t\t[framework] unable to kill container: docker daemon error"
+            )
+    except IOError as ex:
+        emitter.error(ex)
+        raise RuntimeError(
+            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+        )
+    except Exception as ex:
+        emitter.warning(ex)
+        emitter.warning(
+            "\t\t\t[framework] unable to kill container: unhandled exception"
         )
 
 
@@ -466,8 +514,8 @@ def fix_permissions(container_id: str, dir_path: str):
 
 def list_dir(container_id: str, dir_path: str, regex=None):
     if not regex:
-        regex = ".*"
-    exist_command = 'find {} -regex "{}"'.format(dir_path, regex)
+        regex = "*"
+    exist_command = 'find {} -name "{}"'.format(dir_path, regex)
     _, output = exec_command(container_id, exist_command)
     file_list = []
     if output:
