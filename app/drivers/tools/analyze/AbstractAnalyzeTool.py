@@ -35,12 +35,12 @@ class AbstractAnalyzeTool(AbstractTool):
         """
         return self.stats
 
-    def run_analysis(self, bug_info, repair_config_info):
+    def run_analysis(self, bug_info, analysis_config_info):
         self.emit_normal("analysing experiment subject")
         utilities.check_space()
         self.pre_process()
         self.emit_normal("executing analysis command")
-        task_conf_id = repair_config_info[definitions.KEY_ID]
+        task_conf_id = analysis_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         self.log_output_path = join(
             self.dir_logs,
