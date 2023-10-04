@@ -40,6 +40,8 @@ KEY_CONTAINER_GPU_COUNT = "gpu_count"
 KEY_CONTAINER_MEM_LIMIT = "mem_limit"
 KEY_CONTAINER_ENABLE_NETWORK = "enable_network"
 KEY_ENABLED = "enabled"
+KEY_GPUS = "gpus"
+KEY_CPUS = "cpus"
 
 KEY_JAVA_VERSION = "java_version"
 KEY_BUILD_SYSTEM = "build_system"

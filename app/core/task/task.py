@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import os
 import time
@@ -391,7 +392,7 @@ def run(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
     bug_info: Dict[str, Any],
-    task_config_info: Dict[str, Any],
+    task_config_info_template: Dict[str, Any],
     container_config_info: Dict[str, Any],
     task_identifier: str,
     cpu: List[str],
@@ -400,6 +401,11 @@ def run(
 ):
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
+    task_config_info = copy.deepcopy(task_config_info_template)
+
+    task_config_info[definitions.KEY_GPUS] = gpu
+    task_config_info[definitions.KEY_CPUS] = cpu
+
     if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
         task_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
