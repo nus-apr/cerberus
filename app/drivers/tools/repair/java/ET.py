@@ -9,9 +9,9 @@ class ET(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "et-dev"
-        #self.image_name = "xmcp/et:231004.1"
-        #self.hash_digest = "sha256:11641c10cebcb952a270250cc1fe68659c25ff43f413d08076a4021259b5ea74"
+        #self.image_name = "et-dev"
+        self.image_name = "xmcp/et:231004.2"
+        self.hash_digest = "sha256:68d39f183fa7c5bbba4e55d3150f9e1ae1ec027c6034eee18801dd6b5d04b6ec"
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
@@ -75,8 +75,8 @@ class ET(AbstractRepairTool):
             'test_sh_fn': bug_info['test_script'],
 
             'total_timeout_s': int(float(repair_config_info['timeout'])*3600),
-            'cpu_count': 4,
-            'gpu_count': 1,
+            'cpu_count': len(repair_config_info['cpus']),
+            'gpu_count': len(repair_config_info['gpus']),
         }, '/root/workflow/info.json')
 
         ret = self.run_command('bash -c "python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
