@@ -1,5 +1,3 @@
-# [APRComp24] RepairCat - Functional Errors
-
 # Cerberus Framework
 
 ![Main View](doc/images/CerberusView.png)
