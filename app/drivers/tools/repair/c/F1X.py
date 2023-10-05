@@ -9,7 +9,7 @@ class F1X(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/f1x"
+        self.image_name = "mechtaev/f1x:aprcomp24"
 
     def rerun_configuration(self, config_script):
         self.emit_normal("re-running configuration")
