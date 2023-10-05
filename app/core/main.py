@@ -143,6 +143,7 @@ def main():
     start_time = time.time()
     utilities.create_output_directories()
     values.gpus = utilities.get_gpu_count()
+    
     logger.create_log_files()
     # TODO Do overwrite magic
     config_obj = bootstrap(parsed_args)
