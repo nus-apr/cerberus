@@ -28,6 +28,9 @@ class ARJA(AbstractRepairTool):
 
         classpath = f"{join(self.arja_home,'lib/*')}:{join(self.arja_home,'bin')}"
 
+        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_list = bug_info[self.key_failing_tests]
+
         dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
         dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
@@ -62,6 +65,10 @@ class ARJA(AbstractRepairTool):
             f"-Ddependences {list_deps_str} "
             f"-DpopulationSize {arja_default_population_size}"
         )
+
+        if not passing_test_list:
+            test_list_str = ",".join(failing_test_list)
+            arja_command += f" -Dtests {test_list_str}"
 
         status = self.run_command(
             arja_command,
@@ -109,7 +116,7 @@ class ARJA(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -130,7 +137,7 @@ class ARJA(AbstractRepairTool):
                 elif "failed tests: 0" in line:
                     count_plausible += 1
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [
                 x
                 for x in self.list_dir(
@@ -142,7 +149,7 @@ class ARJA(AbstractRepairTool):
                 if ".txt" in x
             ]
         )
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.plausible = count_plausible
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
 
         return self.stats

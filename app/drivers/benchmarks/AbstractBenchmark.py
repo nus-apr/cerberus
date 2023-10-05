@@ -5,6 +5,7 @@ import shutil
 from os.path import join
 from typing import Any
 from typing import cast
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -16,11 +17,12 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
 
 
 class AbstractBenchmark(AbstractDriver):
+    rebuilt_benchmarks: Dict[str, bool] = {}
     experiment_subjects: List[Any] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
@@ -32,7 +34,6 @@ class AbstractBenchmark(AbstractDriver):
     dir_base_expr = ""
     dir_inst = ""
     dir_setup = ""
-    dir_benchmark = values.dir_benchmark
     log_dir_path = "None"
     log_deps_path = "None"
     log_deploy_path = "None"
@@ -51,10 +52,15 @@ class AbstractBenchmark(AbstractDriver):
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
+    key_dir_class = definitions.KEY_CLASS_DIRECTORY
+    key_dir_source = definitions.KEY_SOURCE_DIRECTORY
+    key_dir_tests = definitions.KEY_TEST_DIRECTORY
+    key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_subject = definitions.KEY_SUBJECT
     has_standard_name: bool = False
 
     def __init__(self):
+        self.dir_benchmark: str = values.dir_benchmark
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
         self.stats = BenchmarkStats()
         self.pre_built = False
@@ -184,10 +190,18 @@ class AbstractBenchmark(AbstractDriver):
         return exit_code
 
     def build_benchmark_image(self):
-        if not container.image_exists(self.image_name):
-            emitter.warning(
-                f"\t[framework] benchmark environment not found for {self.image_name}"
-            )
+        if not container.image_exists(self.image_name) or (
+            values.rebuild_all and self.name not in AbstractBenchmark.rebuilt_benchmarks
+        ):
+            if not container.image_exists(self.image_name):
+                emitter.warning(
+                    f"\t[framework] benchmark environment not found for {self.image_name}"
+                )
+            if values.rebuild_all:
+                emitter.warning(
+                    f"\t[framework] rebuilding benchmark environment for {self.image_name}"
+                )
+                AbstractBenchmark.rebuilt_benchmarks[self.name] = True
             if self.has_standard_name or not container.pull_image(
                 self.image_name, "latest"
             ):
@@ -197,15 +211,20 @@ class AbstractBenchmark(AbstractDriver):
             emitter.success("\t\t[framework] pre-built benchmark environment found")
 
     def build_experiment_image(
-        self, bug_index: int, test_all: bool, exp_image_name: str, cpu: str
+        self,
+        bug_index: int,
+        test_all: bool,
+        exp_image_name: str,
+        cpu: List[str],
+        gpu: List[str],
     ):
         """
         Builds an image for an experiment
         """
-        container_id = self.setup_container(bug_index, self.image_name, cpu)
+        container_id = self.setup_container(bug_index, self.image_name, cpu, gpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
         if not container_id:
-            self.emit_error("could not setup container correctly")
+            self.error_exit("could not setup container correctly")
         if is_error:
             self.emit_error("setting up experiment failed")
         container_obj: Any = container.get_container(container_id)
@@ -214,7 +233,9 @@ class AbstractBenchmark(AbstractDriver):
         if not values.debug:
             container.remove_container(container_id)
 
-    def setup_container(self, bug_index: int, image_name: str, cpu: str):
+    def setup_container(
+        self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]
+    ):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -241,13 +262,13 @@ class AbstractBenchmark(AbstractDriver):
             },
         }
 
-        container_name = "{}-{}-{}".format(self.name, subject_name, bug_id)
-        container_id = container.get_container_id(container_name)
+        container_name = "-".join([self.name, subject_name, bug_id]).lower()
+        container_id = container.get_container_id(container_name, ignore_not_found=True)
         if container_id:
-            container.stop_container(container_id)
+            container.kill_container(container_id, ignore_errors=True)
             container.remove_container(container_id)
         container_id = container.build_container(
-            container_name, volume_list, image_name, cpu
+            container_name, volume_list, image_name, cpu, gpu
         )
         parent_dirs = join(*self.dir_setup.split("/")[:-2])
         mkdir_cmd = "mkdir -p {}".format(parent_dirs)
@@ -325,7 +346,12 @@ class AbstractBenchmark(AbstractDriver):
         return False
 
     def get_exp_image(
-        self, bug_index: int, test_all: bool, cpu: str, ignore_rebuild: bool = False
+        self,
+        bug_index: int,
+        test_all: bool,
+        cpu: List[str],
+        gpu: List[str],
+        ignore_rebuild: bool = False,
     ):
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
@@ -340,7 +366,7 @@ class AbstractBenchmark(AbstractDriver):
                 )
             )
             emitter.normal("\t\t\t[framework] preparing/building said experiment")
-            self.build_experiment_image(bug_index, test_all, exp_image_name, cpu)
+            self.build_experiment_image(bug_index, test_all, exp_image_name, cpu, gpu)
         else:
             emitter.success(
                 "\t\t[framework] pre-built experiment image found: {}".format(
@@ -353,7 +379,7 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def deploy(self, bug_index, container_id: Optional[str]):
         """Prepares the experiment, e.g. download or copy and synthesize an image for the bug from the benchmark"""
-        return
+        return False
 
     # @abc.abstractmethod
     # def deps(self, bug_index, container_id: Optional[str]):
@@ -363,22 +389,22 @@ class AbstractBenchmark(AbstractDriver):
     @abc.abstractmethod
     def config(self, bug_index, container_id: Optional[str]):
         """Configure the bug from the benchmark, e.g. running the ./configure script for a C/C++ project"""
-        return
+        return False
 
     @abc.abstractmethod
     def build(self, bug_index, container_id: Optional[str]):
         """Builds the bug from the benchmark, e.g. invoking the make command for a C/C++ project or ant/mvn package/gradle build for a Java project"""
-        return
+        return False
 
     @abc.abstractmethod
     def test(self, bug_index, container_id: Optional[str]):
         """Runs a single test for a bug from the benchmark"""
-        return
+        return False
 
     @abc.abstractmethod
     def test_all(self, bug_index, container_id: Optional[str]):
         """Runs all tests for a bug in the benchmark"""
-        return
+        return False
 
     @abc.abstractmethod
     def save_artifacts(self, dir_info, container_id: Optional[str]):

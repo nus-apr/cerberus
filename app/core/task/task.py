@@ -6,6 +6,7 @@ from os.path import join
 from typing import Any
 from typing import cast
 from typing import Dict
+from typing import List
 from typing import Optional
 
 from app.core import container
@@ -16,22 +17,24 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.task import analyze
+from app.core.task import fuzz
 from app.core.task import repair
-from app.core.task.typing import DirectoryInfo
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.plugins import valkyrie
 
 
 def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
-    dir_setup_local = dir_info["local"]["setup"]
-    dir_setup_container = dir_info["container"]["setup"]
-    dir_instrumentation_local = join(dir_setup_local, str(tool_name).lower())
-    dir_instrumentation_container = join(dir_setup_container, str(tool_name).lower())
-    dir_info["local"]["instrumentation"] = dir_instrumentation_local
-    dir_info["container"]["instrumentation"] = dir_instrumentation_container
+    dir_info["local"]["instrumentation"] = join(
+        dir_info["local"]["setup"], tool_name.lower()
+    )
+    dir_info["container"]["instrumentation"] = join(
+        dir_info["container"]["setup"], tool_name.lower()
+    )
     return dir_info
 
 
@@ -58,7 +61,11 @@ def generate_local_dir_info(benchmark_name: str, subject_name: str, bug_name: st
 
 
 def generate_local_tool_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str, hash, tag_name: str
+    benchmark_name: str,
+    subject_name: str,
+    bug_name: str,
+    hash: Any,
+    tag_name: str,
 ):
     dir_name = f"{tag_name}-{hash.hexdigest()[:8]}"
     base_info = generate_local_dir_info(benchmark_name, subject_name, bug_name)
@@ -122,14 +129,16 @@ def generate_dir_info(
     return dir_info
 
 
-def construct_job_summary(job_identifier, results_summary):
+def construct_job_summary(job_identifier: str, dir: str, results_summary: Any) -> str:
     json_f_name = f"experiment-summary-{job_identifier}.json"
-    summary_f_path = join(values.dir_summaries, json_f_name)
+    summary_f_path = join(dir, json_f_name)
     writer.write_as_json(results_summary, summary_f_path)
     return summary_f_path
 
 
-def collect_benchmark_result(bug_info, benchmark: AbstractBenchmark):
+def collect_benchmark_result(
+    bug_info: Dict[str, Any], benchmark: AbstractBenchmark
+) -> None:
     emitter.normal("\t\t[framework] collecting benchmark results")
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
@@ -140,7 +149,9 @@ def collect_benchmark_result(bug_info, benchmark: AbstractBenchmark):
     )
     benchmark.print_stats()
     logger.log_benchmark_stats(benchmark_tag_name, benchmark.stats)
-    construct_job_summary(benchmark_tag_name, benchmark.stats.get_array())
+    construct_job_summary(
+        benchmark_tag_name, values.dir_summaries_benchmarks, benchmark.stats.get_dict()
+    )
 
 
 def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: AbstractTool):
@@ -153,14 +164,14 @@ def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: Abstract
     tool.log_output_path = ""
     logger.log_tool_stats(task_tag_name, tool.stats)
     dir_info["local"]["summary"] = construct_job_summary(
-        task_tag_name, tool.stats.get_array()
+        task_tag_name, values.dir_summaries_tools, tool.stats.get_dict()
     )
-    patch_dir = join(dir_info["local"]["artifacts"], "patches")
     if values.use_valkyrie:
+        patch_dir = join(dir_info["local"]["artifacts"], "patches")
         valkyrie.analyse_output(patch_dir, tool.stats)
 
 
-def retrieve_results(archive_name, tool: AbstractTool):
+def retrieve_results(archive_name: str, tool: AbstractTool) -> bool:
     emitter.normal("\t\tretrieving results")
     archive_path = join(values.dir_main, "results", tool.name.lower(), archive_name)
     if os.path.isfile(archive_path):
@@ -174,7 +185,7 @@ def retrieve_results(archive_name, tool: AbstractTool):
         return False
 
 
-def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool):
+def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool) -> None:
     emitter.normal(
         "\t\t[framework] Saving artifacts from tool {} and cleaning up".format(
             tool.name
@@ -191,19 +202,75 @@ def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool):
 
 
 def create_running_container(
-    bug_image_id: str,
-    repair_tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
     container_name: str,
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
+    container_config_info: Dict[str, Any],
+    extra_volumes: Optional[Dict[str, Any]] = None,
+) -> str:
+    image_name = image_name.lower()
+    emitter.information(
+        "\t\t[framework] Creating running container with image {}".format(image_name)
+    )
+    container_id = container.get_container_id(container_name, ignore_not_found=True)
+    if container_id:
+        container.kill_container(container_id, ignore_errors=True)
+        container.remove_container(container_id)
+
+    if not container.image_exists(image_name):
+        utilities.error_exit("Image should be constructed by now!")
+
+    volume_list = construct_container_volumes(dir_info, extra_volumes)
+
+    extract_experiment_logs(
+        dir_info, image_name, container_name, cpu, gpu, container_config_info
+    )
+
+    emitter.information("\t\t[framework] building main container for experiment")
+    container_id = container.build_container(
+        container_name, volume_list, image_name, cpu, gpu, container_config_info
+    )
+    if not container_id:
+        utilities.error_exit("Container was not created successfully")
+    return container_id
+
+
+def extract_experiment_logs(
+    dir_info: DirectoryInfo,
+    image_name: str,
+    container_name: str,
+    cpu: List[str],
+    gpu: List[str],
     container_config_info: Dict[str, Any],
 ):
-    image_name = image_name.lower()
-    container_id = container.get_container_id(container_name)
-    if container_id:
-        container.stop_container(container_id)
-        container.remove_container(container_id)
+    # Need to copy the logs from benchmark setup before instantiating the running container
+    emitter.information(
+        "\t\t[framework] building temporary container for log extraction"
+    )
+
+    tmp_container_id = container.get_container_id(container_name, ignore_not_found=True)
+
+    if not tmp_container_id:
+        tmp_container_id = container.build_container(
+            container_name, dict(), image_name, cpu, gpu, container_config_info
+        )
+
+    if not tmp_container_id:
+        utilities.error_exit("Could not create temporary container")
+    else:
+        container.copy_file_from_container(
+            tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
+        )
+        if values.runs:
+            container.stop_container(tmp_container_id)
+            container.remove_container(tmp_container_id)
+
+
+def construct_container_volumes(
+    dir_info: DirectoryInfo, extra_volumes: Optional[Dict[str, Any]] = None
+):
     volume_list = {
         # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
         dir_info["local"]["logs"]: {"bind": "/logs", "mode": "rw"},
@@ -218,56 +285,57 @@ def create_running_container(
         },
         "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
-    if (
-        not container.image_exists(image_name)
-        or values.rebuild_base
-        or values.rebuild_all
-    ):
-        tmp_dockerfile = join(
-            dir_info["local"]["setup"],
-            "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id),
-        )
-        os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
-        with open(tmp_dockerfile, "w") as dock_file:
-            dock_file.write("FROM {}\n".format(repair_tool.image_name))
-            dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
-            dock_file.write(
-                "COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment")
-            )
-            dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
+
+    if extra_volumes:
+        volume_list.update(extra_volumes)
+    return volume_list
+
+
+def prepare_tool_experiment_image(
+    bug_image_id: str,
+    repair_tool: AbstractTool,
+    dir_info: DirectoryInfo,
+    image_name: str,
+    tag: Optional[str],
+):
+    dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+    if tag and tag != "":
+        dockerfile_name += "-{}".format(tag)
+
+    tmp_dockerfile = join(
+        dir_info["local"]["setup"],
+        dockerfile_name,
+    )
+    os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
+    with open(tmp_dockerfile, "w") as dock_file:
+        dock_file.write("FROM {}\n".format(repair_tool.image_name))
+        dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
+        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
+        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
+
+        if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
                 "RUN bash {0} || sudo bash {0} ; return 0".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
-        container.build_image(tmp_dockerfile, image_name)
-        os.remove(tmp_dockerfile)
-    # Need to copy the logs from benchmark setup before instantiating the running container
-    emitter.information(
-        "\t\t[framework] building temporary container for log extraction"
-    )
-    tmp_container_id = container.build_container(
-        container_name, dict(), image_name, cpu, container_config_info
-    )
-    if not tmp_container_id:
-        utilities.error_exit("Could not create temporary container")
-    else:
-        container.copy_file_from_container(
-            tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
-        )
-        container.stop_container(tmp_container_id)
-        container.remove_container(tmp_container_id)
-    emitter.information("\t\t[framework] building main container for experiment")
-    container_id = container.build_container(
-        container_name, volume_list, image_name, cpu, container_config_info
-    )
-    return container_id
+        if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
+            dock_file.write(
+                "RUN bash {0} || sudo bash {0} ; return 0".format(
+                    join(dir_info["container"]["setup"], "install_deps")
+                )
+            )
+    id = container.build_image(tmp_dockerfile, image_name)
+    os.remove(tmp_dockerfile)
+    return id
 
 
-def prepare(
+def prepare_experiment(
     benchmark: AbstractBenchmark,
     bug_info: Dict[str, Any],
-    cpu: str,
+    cpu: List[str],
+    gpu: List[str],
+    ignore_rebuild: bool = False,
 ):
     utilities.check_space()
     bug_index = bug_info[definitions.KEY_ID]
@@ -276,10 +344,17 @@ def prepare(
         if not values.use_valkyrie:
             is_error = benchmark.setup_experiment(bug_index, None, values.only_test)
             if is_error:
-                return
+                return None
     else:
+        bug_name = str(bug_info[definitions.KEY_BUG_ID])
+        subject_name = str(bug_info[definitions.KEY_SUBJECT])
+        benchmark.update_dir_info(
+            generate_dir_info(benchmark.name, subject_name, bug_name)
+        )
         experiment_image_id = (
-            benchmark.get_exp_image(bug_index, values.only_test, cpu)
+            benchmark.get_exp_image(
+                bug_index, values.only_test, cpu, gpu, ignore_rebuild
+            )
             if values.use_container
             else None
         )
@@ -290,147 +365,105 @@ def prepare(
     return experiment_image_id
 
 
+def prepare_experiment_tool(
+    bug_image_id: str,
+    repair_tool: AbstractTool,
+    dir_info: DirectoryInfo,
+    image_name: str,
+    tag: Optional[str] = None,
+):
+    if values.use_container:
+        emitter.information("\t\t[framework] preparing image {}".format(image_name))
+        if (
+            not container.image_exists(image_name)
+            or values.rebuild_base
+            or values.rebuild_all
+        ):
+            return prepare_tool_experiment_image(
+                bug_image_id, repair_tool, dir_info, image_name, tag
+            )
+        else:
+            return cast(str, container.get_image(image_name).id)
+    return None
+
+
 def run(
     benchmark: AbstractBenchmark,
     tool: AbstractTool,
     bug_info: Dict[str, Any],
     task_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
-    run_identifier: str,
-    cpu: str,
-    experiment_image_id: Optional[str],
+    task_identifier: str,
+    cpu: List[str],
+    gpu: List[str],
+    task_image: Optional[str] = None,
 ):
-    bug_index = bug_info[definitions.KEY_ID]
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
-    task_config_id = task_config_info[definitions.KEY_ID]
-    container_config_id = container_config_info[definitions.KEY_ID]
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     if definitions.KEY_CONFIG_TIMEOUT_TESTCASE in bug_info:
         task_config_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = bug_info[
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
-    tag_name = "-".join(
-        [
-            task_config_id,
-            container_config_id,
-            tool.name,
-            benchmark.name,
-            subject_name,
-            bug_name,
-        ]
-    )
 
     hash = hashlib.sha1()
     hash.update(str(time.time()).encode("utf-8"))
 
     dir_info = generate_tool_dir_info(
-        benchmark.name, subject_name, bug_name, hash, tag_name
+        benchmark.name, subject_name, bug_name, hash, task_identifier
     )
     benchmark.update_dir_info(dir_info)
-    emitter.highlight(
-        "\t\t[task profile] Identifier: " + str(task_config_info[definitions.KEY_ID])
-    )
-    emitter.highlight(
-        "\t\t[task profile] Timeout: "
-        + str(task_config_info[definitions.KEY_CONFIG_TIMEOUT])
-    )
-    emitter.highlight(
-        "\t\t[task profile] Fix-loc: "
-        + task_config_info[definitions.KEY_CONFIG_FIX_LOC]
-    )
-    emitter.highlight(
-        "\t\t[task profile] Test-suite ratio: "
-        + str(task_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    print_task_info(
+        task_config_info, container_config_info, bug_name, subject_name, dir_info
     )
 
-    if values.use_container:
-        emitter.highlight(
-            "\t\t[container profile] Identifier: "
-            + container_config_info[definitions.KEY_ID]
-        )
-
-        emitter.highlight(
-            "\t\t[container profile] CPU Count: "
-            + str(container_config_info[definitions.KEY_CONTAINER_CPU_COUNT])
-        )
-
-        emitter.highlight(
-            "\t\t[container profile] RAM Limit: "
-            + container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
-        )
-
-        emitter.highlight(
-            "\t\t[container profile] Enable Network: "
-            + str(container_config_info[definitions.KEY_CONTAINER_ENABLE_NETWORK])
-        )
-
-    emitter.highlight("\t\t[meta-data] Project: {}".format(subject_name))
-    emitter.highlight("\t\t[meta-data] Bug ID: {}".format(bug_name))
-    emitter.highlight(
-        "\t\t[meta-data] Logs directory: {}".format(dir_info["local"]["logs"])
-    )
-    emitter.highlight(
-        "\t\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
-    )
-    emitter.highlight(
-        "\t\t[meta-data] Summary directory: {}".format(values.dir_summaries)
-    )
-
-    container_id = None
     dir_info = update_dir_info(dir_info, tool.name)
     dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
+
+    container_id = None
     # emitter.information("directory is {}".format(dir_instr_local))
     if os.path.isdir(dir_instr_local):
-        emitter.warning(
+        emitter.information(
             "\t\t[framework] there is custom instrumentation for {}".format(tool.name)
         )
+
     if values.only_analyse:
         can_analyse_results = True
         if (
             not os.path.isdir(dir_result_local)
             or len(os.listdir(dir_result_local)) == 0
         ):
-            archive_name = (
-                "-".join(
-                    [
-                        task_config_id,
-                        container_config_id,
-                        benchmark.name,
-                        tool.name,
-                        subject_name,
-                        bug_name,
-                    ]
-                )
-                + ".tar.gz"
-            )
+            archive_name = task_identifier + ".tar.gz"
             can_analyse_results = retrieve_results(archive_name, tool)
         if can_analyse_results:
             collect_tool_result(dir_info, bug_info, tool)
     else:
-        dir_output_local = dir_info["local"]["artifacts"]
-        dir_logs_local = dir_info["local"]["logs"]
-        utilities.clean_artifacts(dir_output_local)
-        utilities.clean_artifacts(dir_logs_local)
+        utilities.clean_artifacts(dir_info["local"]["artifacts"])
+        utilities.clean_artifacts(dir_info["local"]["logs"])
         benchmark.update_dir_info(dir_info)
-        if values.use_container and experiment_image_id:
-            image_name = "{}-{}-{}-{}".format(
-                tool.name, benchmark.name, subject_name, bug_name
-            )
-            container_name = "{}-{}".format(container_config_id, image_name)
+
+        if values.use_container:
+
             if tool.image_name is None:
                 utilities.error_exit(
-                    "Repair tool does not have a Dockerfile: {}".format(tool.name)
+                    "Repair tool does not have a docker image name assigned: {}".format(
+                        tool.name
+                    )
+                )
+
+            if task_image is None:
+                utilities.error_exit(
+                    "No task image provided, though container mode is selected"
                 )
 
             container_id = create_running_container(
-                experiment_image_id,
-                tool,
                 dir_info,
-                image_name,
-                container_name,
+                task_image,
+                task_identifier,
                 cpu,
+                gpu,
                 container_config_info,
+                tool.bindings,
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")
@@ -455,11 +488,22 @@ def run(
                 container_id,
                 benchmark.name,
             )
+        elif task_type == "fuzz":
+            fuzz.fuzz_all(
+                dir_info,
+                bug_info,
+                cast(AbstractFuzzTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 
         # update container stats
         if values.use_container:
+            if not container_id:
+                utilities.error_exit("Use container but ID is none?")
             tool.update_container_stats(container_id)
 
         if not values.only_instrument:
@@ -472,3 +516,67 @@ def run(
                 utilities.clean_artifacts(dir_result)
 
     return dir_info
+
+
+def print_task_info(
+    task_config_info: Dict[str, Any],
+    container_config_info: Dict[str, Any],
+    bug_name: str,
+    subject_name: str,
+    dir_info: DirectoryInfo,
+):
+    emitter.highlight(
+        "\t\t[task profile] Identifier: {}".format(task_config_info[definitions.KEY_ID])
+    )
+    emitter.highlight(
+        "\t\t[task profile] Timeout: {}".format(
+            task_config_info[definitions.KEY_CONFIG_TIMEOUT]
+        )
+    )
+    emitter.highlight(
+        "\t\t[task profile] Fix-loc: {}".format(
+            task_config_info[definitions.KEY_CONFIG_FIX_LOC]
+        )
+    )
+    emitter.highlight(
+        "\t\t[task profile] Test-suite ratio: {}".format(
+            task_config_info[definitions.KEY_CONFIG_TEST_RATIO]
+        )
+    )
+
+    if values.use_container:
+        emitter.highlight(
+            "\t\t[container profile] Identifier: {}".format(
+                container_config_info[definitions.KEY_ID]
+            )
+        )
+
+        emitter.highlight(
+            "\t\t[container profile] CPU Count: {}".format(
+                container_config_info[definitions.KEY_CONTAINER_CPU_COUNT]
+            )
+        )
+
+        emitter.highlight(
+            "\t\t[container profile] RAM Limit: {}".format(
+                container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
+            )
+        )
+
+        emitter.highlight(
+            "\t\t[container profile] Enable Network: {}".format(
+                container_config_info[definitions.KEY_CONTAINER_ENABLE_NETWORK]
+            )
+        )
+
+    emitter.highlight("\t\t[meta-data] Project: {}".format(subject_name))
+    emitter.highlight("\t\t[meta-data] Bug ID: {}".format(bug_name))
+    emitter.highlight(
+        "\t\t[meta-data] Logs directory: {}".format(dir_info["local"]["logs"])
+    )
+    emitter.highlight(
+        "\t\t[meta-data] Output directory: {}".format(dir_info["local"]["artifacts"])
+    )
+    emitter.highlight(
+        "\t\t[meta-data] Summary directory: {}".format(values.dir_summaries)
+    )

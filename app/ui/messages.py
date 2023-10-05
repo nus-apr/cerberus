@@ -7,6 +7,7 @@ from textual.message import Message
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.stats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -23,23 +24,27 @@ class JobAllocate(Message):
         benchmark: AbstractBenchmark,
         tool: AbstractTool,
         experiment_item,
-        repair_config_info: Dict[str, Any],
+        task_config_info: Dict[str, Any],
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
         identifier: str,
-        task_type: str,
-        task_config: Optional[TaskConfig] = None,
+        task_type: TaskType,
+        run: str,
+        tag: str,
+        task_config: TaskConfig,
     ) -> None:
         self.index = index
         self.benchmark = benchmark
         self.tool = tool
         self.experiment_item = experiment_item
-        self.task_config_info = repair_config_info
-        self.container_config_info = container_config_info
+        self.task_profile = task_config_info
+        self.container_profile = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
         self.task_type = task_type
         self.task_config = task_config
+        self.run = run
+        self.tag = tag
         super().__init__()
 
 
@@ -52,14 +57,16 @@ class JobFinish(Message):
         key,
         status: TaskStatus,
         row_data,
-        dir_info: Dict[str, str],
-        res_info: ToolStats,
+        directory_info: Dict[str, str],
+        results: ToolStats,
+        task_type: TaskType,
     ):
         self.key = key
         self.status = status
         self.row_data = row_data
-        self.dir_info = dir_info
-        self.res_info = res_info
+        self.directory_info = directory_info
+        self.results = results
+        self.task_type = task_type
         super().__init__()
 
 

@@ -14,7 +14,7 @@ class TaskDefaultConfig:
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
-        max_cpu_count: int,
+        runs: int = 1,
     ):
 
         self.compact_results = compact_results
@@ -30,4 +30,4 @@ class TaskDefaultConfig:
         self.use_container = use_container
         self.use_gpu = use_gpu
         self.use_purge = use_purge
-        self.max_cpu_count = max_cpu_count
+        self.runs = runs

@@ -5650,13 +5650,13 @@ class Prophet(AbstractRepairTool):
                 continue
                 # timeline = int(line.split("]")[0].replace("[", "").strip())
             if "number of explored templates:" in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     line.split("number of explored templates: ")[-1]
                 )
             elif "Single building" in line and "failed as well!" in line:
-                self.stats.patches_stats.non_compilable += 1
+                self.stats.patch_stats.non_compilable += 1
             elif "different repair candidate" in line:
-                self.stats.patches_stats.size = int(
+                self.stats.patch_stats.size = int(
                     line.split(" different repair candidate")[0]
                     .replace("Total ", "")
                     .strip()
@@ -5678,7 +5678,7 @@ class Prophet(AbstractRepairTool):
                 #     self.stats.time_stats.timestamp_validation = int(
                 #         line.replace("[", "").replace("] Passed!", " ").strip()
                 #     )
-                self.stats.patches_stats.plausible += 1
+                self.stats.patch_stats.plausible += 1
             elif "Testing" in line:
                 pass
                 # if self.stats.time_stats.timestamp_plausible == 0:
@@ -5728,7 +5728,7 @@ class Prophet(AbstractRepairTool):
         if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
 
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             self.list_dir(
                 join(
                     self.dir_output,

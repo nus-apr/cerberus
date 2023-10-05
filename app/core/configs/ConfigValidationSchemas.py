@@ -14,6 +14,7 @@ general_section_schema = {
         ConfigFieldsEnum.UI_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.DEBUG_MODE.value: {"type": "boolean"},
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
+        ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 2},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
@@ -32,7 +33,7 @@ task_profile_schema = {
     "type": "object",
     "properties": {
         ConfigFieldsEnum.PROFILE_ID.value: {"type": "string"},
-        ConfigFieldsEnum.TIMEOUT.value: {"type": "string", "pattern": "^[1-9][0-9]*$"},
+        ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FAULT_LOCATION.value: {"type": "string"},
         ConfigFieldsEnum.PASSING_TEST_RATIO.value: {
             "type": "number",
@@ -60,6 +61,7 @@ container_profile_schema = {
             "pattern": "^[1-9][0-9]*[gG]$",
         },
         ConfigFieldsEnum.ENABLE_NETWORK.value: {"type": "boolean"},
+        ConfigFieldsEnum.GPU_COUNT.value: {"type": "integer", "minimum": 0},
     },
     "required": [
         ConfigFieldsEnum.PROFILE_ID.value,
@@ -182,7 +184,6 @@ task_default_schema = {
         ConfigFieldsEnum.USE_CONTAINER.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_GPU.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_PURGE.value: {"type": "boolean"},
-        ConfigFieldsEnum.MAX_CPU_COUNT.value: {"type": "integer", "minimum": 1},
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value: {
             "type": "array",
             "minItems": 1,
@@ -193,9 +194,12 @@ task_default_schema = {
             "minItems": 1,
             "items": {"type": "string"},
         },
+        ConfigFieldsEnum.RUNS.value: {
+            "type": "number",
+            "minimum": 1,
+        },
     },
     "required": [
-        ConfigFieldsEnum.MAX_CPU_COUNT.value,
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value,
         ConfigFieldsEnum.TASK_PROFILE_ID_LIST.value,
     ],
@@ -239,6 +243,8 @@ tool_config_schema = {
     "properties": {
         ConfigFieldsEnum.NAME.value: {"type": "string"},
         ConfigFieldsEnum.PARAMS.value: {"type": "string"},
+        ConfigFieldsEnum.TAG.value: {"type": "string"},
+        ConfigFieldsEnum.IMAGE.value: {"type": "string"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
     "additionalProperties": False,

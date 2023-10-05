@@ -10,11 +10,13 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 def run_analysis(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractAnalyzeTool,
     analysis_config_info: Dict[str, Any],
@@ -35,10 +37,9 @@ def run_analysis(
     test_timeout = int(
         analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    passing_test_list = []
-    if str(passing_id_list_str).replace(",", "").isnumeric():
-        passing_test_list = passing_id_list_str.split(",")
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
@@ -90,13 +91,13 @@ def analyze_all(
         def analyze_wrapped(
             dir_info,
             experiment_info,
-            repair_tool,
-            repair_config_info,
-            container_id,
-            benchmark_name,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            analyze_tool: AbstractAnalyzeTool,
+            analyze_config_info,
+            container_id: Optional[str],
+            benchmark_name: str,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
             final_status,
         ):
             """
@@ -108,8 +109,8 @@ def analyze_all(
             run_analysis(
                 dir_info,
                 experiment_info,
-                repair_tool,
-                repair_config_info,
+                analyze_tool,
+                analyze_config_info,
                 container_id,
                 benchmark_name,
             )
@@ -126,7 +127,7 @@ def analyze_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
-                values.task_type.get("NA"),
+                values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for analysis {} {} {}".format(

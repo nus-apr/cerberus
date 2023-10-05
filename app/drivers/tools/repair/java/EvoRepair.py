@@ -157,11 +157,11 @@ class EvoRepair(AbstractRepairTool):
         tool_out_dir = self.evorepair_home + "/output"
         exp_out_dir = f"{tool_out_dir}/{self.list_dir(tool_out_dir)[0]}"
         patch_out_dir = f"{exp_out_dir}/perfect-patches"
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [x for x in self.list_dir(patch_out_dir) if ".diff" in x]
         )
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.plausible = count_plausible
-        self.stats.patches_stats.non_compilable = count_non_compilable
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.non_compilable = count_non_compilable
 
         return self.stats

@@ -16,13 +16,13 @@ class Refactory(AbstractBenchmark):
         )
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu):
+    def setup_container(self, bug_index, image_name, cpu, gpu):
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
         container_id = super(Refactory, self).setup_container(
-            bug_index, image_name, cpu
+            bug_index, image_name, cpu, gpu
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
 
@@ -50,6 +50,16 @@ class Refactory(AbstractBenchmark):
         self.run_command(
             container_id,
             "cp -r {} {}".format(
+                join(
+                    self.dir_expr, "base", experiment_item[self.key_subject], "correct"
+                ),
+                join(root, "code"),
+            ),
+        )
+
+        self.run_command(
+            container_id,
+            "cp -r {} {}".format(
                 join(self.dir_setup, "reference.py"), join(root, "code", "reference")
             ),
         )
@@ -65,6 +75,10 @@ class Refactory(AbstractBenchmark):
                 join(self.dir_setup, experiment_item["source_file"]),
                 join(root, "code", "wrong"),
             ),
+        )
+
+        self.run_command(
+            container_id, "bash -c 'cp -r {}/* {}'".format(self.dir_setup, root)
         )
 
         return container_id

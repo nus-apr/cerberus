@@ -12,11 +12,13 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 def run_repair(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractRepairTool,
     repair_config_info: Dict[str, Any],
@@ -37,10 +39,10 @@ def run_repair(
     test_timeout = int(
         repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    passing_test_list = []
-    if str(passing_id_list_str).replace(",", "").isnumeric():
-        passing_test_list = passing_id_list_str.split(",")
+
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
@@ -149,11 +151,11 @@ def repair_all(
 
     final_status = [TaskStatus.NONE]
 
-    passing_id_list_str = experiment_info.get(definitions.KEY_PASSING_TEST, "")
-    passing_test_list = []
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
+
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
-    if str(passing_id_list_str).replace(",", "").isnumeric():
-        passing_test_list = passing_id_list_str.split(",")
     failing_test_list = str(
         experiment_info.get(definitions.KEY_FAILING_TEST, "")
     ).split(",")
@@ -183,9 +185,9 @@ def repair_all(
             v_path_info,
             v_dir_info,
             v_repair_config_info,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
         ):
             """
             Pass over some fields as we are going into a new thread
@@ -225,13 +227,13 @@ def repair_all(
         def repair_wrapped(
             dir_info,
             experiment_info,
-            repair_tool,
+            repair_tool: AbstractRepairTool,
             repair_config_info,
-            container_id,
-            benchmark_name,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            container_id: Optional[str],
+            benchmark_name: str,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
             final_status,
         ):
             """
@@ -261,7 +263,7 @@ def repair_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
-                values.task_type.get("NA"),
+                values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for repair {} {} {}".format(
@@ -275,7 +277,10 @@ def repair_all(
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
+        # give 5 min grace period for threads to finish
+        wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
+
         if tool_thread.is_alive():
             emitter.highlight(
                 "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(

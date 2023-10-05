@@ -5,6 +5,7 @@ from os.path import join
 from typing import Any
 from typing import Dict
 
+from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -18,6 +19,7 @@ class SAVER(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "rshariffdeen/saver"
         super().__init__(self.name)
 
     def populate_config_file(self, bug_info, config_path):
@@ -120,11 +122,6 @@ class SAVER(AbstractRepairTool):
             ),
         )
 
-        if self.use_container:
-            self.error_exit(
-                "unimplemented functionality: SAVER docker support not implemented"
-            )
-
         self.timestamp_log_start()
         saver_command = "timeout -k 5m {0}h infer saver --error-report {1} ".format(
             str(timeout_h), config_path
@@ -176,6 +173,7 @@ class SAVER(AbstractRepairTool):
         count_enumerations = 0
         count_candidates = 0
         for line in log_lines:
+            line = escape_ansi(line)
             if "of the total solutions found" in line:
                 count_enumerations = int(line.split(": ")[-1])
             elif "opeartion space" in line:
@@ -183,15 +181,15 @@ class SAVER(AbstractRepairTool):
                 if str(space_size).isnumeric():
                     count_candidates += int(space_size)
             elif "CONVERTING FAILS" in line:
-                self.stats.patches_stats.plausible = 0
+                self.stats.patch_stats.plausible = 0
             elif "ERROR:" in line:
                 is_error = True
         if is_error:
             self.emit_error("[error] error detected in logs")
 
-        self.stats.patches_stats.plausible = count_enumerations
-        self.stats.patches_stats.enumerations = count_enumerations
-        self.stats.patches_stats.size = count_candidates
-        self.stats.patches_stats.generated = 0
+        self.stats.patch_stats.plausible = count_enumerations
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = count_candidates
+        self.stats.patch_stats.generated = 0
         self.stats.error_stats.is_error = is_error
         return self.stats

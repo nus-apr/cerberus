@@ -123,6 +123,12 @@ def parse_args():
         default="",
     )
     optional.add_argument(
+        definitions.ARG_TOOL_TAG,
+        "-tt",
+        help="append identifier to the tool name",
+        default="",
+    )
+    optional.add_argument(
         definitions.ARG_TOOL_LIST,
         nargs="+",
         help="list of the repair/analysis tool {"
@@ -165,6 +171,20 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_SETUP_ONLY,
         help="only setup the experiment",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_INSTRUMENT_ONLY,
+        help="only instrument the experiment",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_RUN_TESTS_ONLY,
+        help="only run the tests of the experiment",
         action="store_true",
         default=False,
     )
@@ -225,11 +245,18 @@ def parse_args():
     )
 
     optional.add_argument(
-        definitions.ARG_CPU_COUNT,
+        definitions.ARG_ALL_CPU_COUNT,
         help="max amount of CPU cores which can be used by Cerberus",
         type=int,
         default=max(1, multiprocessing.cpu_count() - 2),
     )
+
+    # optional.add_argument(
+    #     definitions.ARG_TASK_CPU_COUNT,
+    #     help="max amount of CPU cores which can be used by Cerberus per task",
+    #     type=int,
+    #     default=1,
+    # )
 
     optional.add_argument(
         definitions.ARG_USE_GPU,

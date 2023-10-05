@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -14,6 +15,9 @@ class ITSP(AbstractBenchmark):
 
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
+        self.run_command(
+            container_id, "cp -rf {} {}/src".format(self.dir_setup, self.dir_expr)
+        )
         return True
 
     def config(self, bug_index, container_id):
@@ -22,11 +26,39 @@ class ITSP(AbstractBenchmark):
 
     def build(self, bug_index, container_id):
         self.emit_normal("building experiment subject")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_build_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
+        )
+        time = datetime.now()
+        command_str = "bash build_subject"
+
+        status = self.run_command(
+            container_id, command_str, self.log_build_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
+        )
+        time = datetime.now()
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = f"bash run_test {failing_test_list[0]}"
+        status = self.run_command(
+            container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        self.emit_debug(
+            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status != 0
 
     def verify(self, bug_index, container_id):
         self.emit_normal("verify dev patch and test-oracle")

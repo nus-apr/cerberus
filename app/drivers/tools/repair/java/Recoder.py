@@ -108,7 +108,7 @@ class Recoder(AbstractRepairTool):
         self.emit_normal("reading output")
 
         # count number of patch files
-        self.stats.patches_stats.generated = 1
+        self.stats.patch_stats.generated = 1
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -126,9 +126,9 @@ class Recoder(AbstractRepairTool):
             self.run_command(
                 "cp /root/Repair/patches/{}patch.txt /output/".format(self.bug_name)
             )
-            self.stats.patches_stats.generated = 1
-            self.stats.patches_stats.enumerations = 1
-            self.stats.patches_stats.plausible = 1
-            self.stats.patches_stats.non_compilable = 0
+            self.stats.patch_stats.generated = 1
+            self.stats.patch_stats.enumerations = 1
+            self.stats.patch_stats.plausible = 1
+            self.stats.patch_stats.non_compilable = 0
 
         return self.stats

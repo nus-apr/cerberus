@@ -26,11 +26,8 @@ class Verifix(AbstractRepairTool):
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
             timeout_h,
             "true" if self.is_debug else "false",
-            join(
-                self.dir_setup,
-                bug_info[self.key_fix_file].replace("buggy", "correct"),
-            ),
-            join(self.dir_setup, bug_info[self.key_fix_file]),
+            join(self.dir_expr, "src", "Main.c"),
+            join(self.dir_expr, "src", bug_info[self.key_fix_file]),
             join(self.dir_expr, "base", "test"),
         )
         status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")
@@ -71,7 +68,7 @@ class Verifix(AbstractRepairTool):
 
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patches_stats.generated = len(
+        self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
 
@@ -88,7 +85,7 @@ class Verifix(AbstractRepairTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
         if not self.stats.error_stats.is_error:
-            self.stats.patches_stats.plausible = 1
-            self.stats.patches_stats.enumerations = 1
+            self.stats.patch_stats.plausible = 1
+            self.stats.patch_stats.enumerations = 1
 
         return self.stats

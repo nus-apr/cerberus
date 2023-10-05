@@ -9,9 +9,85 @@ class Fix2Fit(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/fix2fit"
+        self.image_name = "yuntongzhang/fix2fit"
+
+    def generate_test_driver(self, test_script):
+        self.emit_normal(f"preparing test driver for {self.name}")
+        test_driver_path = self.dir_expr + f"/{self.name}-test"
+        self.write_file(
+            ["#!/bin/bash\n", "bash {0} $@".format(test_script)],
+            test_driver_path,
+        )
+        permission_command = "chmod +x {}".format(test_driver_path)
+        self.run_command(permission_command)
+        return test_driver_path
+
+    def generate_build_driver(self, build_script):
+        self.emit_normal(f"preparing build driver for {self.name}")
+        build_driver_path = self.dir_expr + f"/{self.name}-build"
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"CC=f1x-cc CXX=f1x-cxx {build_script}\n",
+            ],
+            build_driver_path,
+        )
+        permission_command = "chmod +x {}".format(build_driver_path)
+        self.run_command(permission_command)
+        return build_driver_path
+
+    def generate_config_driver(self, config_script):
+        self.emit_normal(f"preparing config driver for {self.name}")
+        config_driver_path = self.dir_expr + f"/{self.name}-config"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"CC=f1x-cc CXX=f1x-cxx {config_script} {self.dir_expr}\n",
+            ],
+            config_driver_path,
+        )
+        permission_command = "chmod +x {}".format(config_driver_path)
+        self.run_command(permission_command)
+        return config_driver_path
+
+    def clean_subject(self):
+        self.emit_normal(f"cleaning previous artifacts")
+        clean_script = self.dir_expr + f"{self.name}-clean"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make distclean; rm -f CMakeCache.txt\n",
+                'find . -name "*.cache" | xargs rm -rf\n',
+            ],
+            clean_script,
+        )
+        clean_command = "bash {}".format(clean_script)
+        log_clean_path = join(self.dir_logs, f"{self.name}-clean.log")
+        self.run_command(clean_command, log_file_path=log_clean_path)
 
     def run_repair(self, bug_info, repair_config_info):
+        config_script = bug_info.get(self.key_config_script, None)
+        build_script = bug_info.get(self.key_build_script, None)
+        test_script = bug_info.get(self.key_test_script, None)
+
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        if not build_script:
+            self.error_exit(f"{self.name} requires a build script as input")
+        if not test_script:
+            self.error_exit(f"{self.name} requires a test script as input")
+
+        config_script_path = join(self.dir_setup, config_script)
+        test_script_path = join(self.dir_setup, test_script)
+        build_script_path = join(self.dir_setup, build_script)
+
+        config_driver = self.generate_config_driver(config_script_path)
+        build_driver = self.generate_build_driver(build_script_path)
+        test_driver = self.generate_test_driver(test_script_path)
+        self.clean_subject()
         super(Fix2Fit, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
@@ -23,14 +99,13 @@ class Fix2Fit(AbstractRepairTool):
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         abs_path_binary = join(self.dir_expr, "src", bug_info[self.key_bin_path])
-        test_id_list = " ".join(bug_info[self.key_failing_tests]) + " "
-        if bug_info[self.key_passing_tests]:
-            filtered_list = self.filter_tests(
-                bug_info[self.key_passing_tests],
-                bug_info[self.key_subject],
-                bug_id,
-            )
-            for test_id in filtered_list:
+        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_list = bug_info[self.key_failing_tests]
+        test_id_list = ""
+        for test_id in failing_test_list:
+            test_id_list += test_id + " "
+        if passing_test_list:
+            for test_id in passing_test_list:
                 test_id_list += test_id + " "
 
         abs_path_buggy_file = join(
@@ -42,14 +117,16 @@ class Fix2Fit(AbstractRepairTool):
         )
 
         self.timestamp_log_start()
+        if self.key_crash_cmd not in bug_info:
+            self.error_exit("No Crash command provided")
         environment_vars = {
-            "SUBJECT_DIR": self.dir_setup,
+            "SUBJECT_DIR": self.dir_expr,
             "AFL_NO_AFFINITY": "",
             "BUGGY_FILE": abs_path_buggy_file,
             "TESTCASE": test_id_list,
-            "CONFIG": "{}/fix2fit/config-driver".format(self.dir_setup),
-            "BUILD": "{}/fix2fit/build-driver".format(self.dir_setup),
-            "DRIVER": "{}/fix2fit/test-driver".format(self.dir_setup),
+            "CONFIG": config_driver,
+            "BUILD": build_driver,
+            "DRIVER": test_driver,
             "BINARY": abs_path_binary,
             "T_TIMEOUT": "{}000".format(
                 repair_config_info[self.key_config_timeout_test]
@@ -57,255 +134,25 @@ class Fix2Fit(AbstractRepairTool):
             "TIMEOUT": "{}h; ".format(repair_config_info[self.key_timeout]),
             "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
-        # repair_command = "bash -c 'export SUBJECT_DIR={}; ".format(self.dir_setup)
-        # repair_command += "export AFL_NO_AFFINITY='';"
-        # repair_command += "export BUGGY_FILE={}; ".format(abs_path_buggy_file)
-        # repair_command += 'export TESTCASE="{}"; '.format(test_id_list)
-        # repair_command += "export CONFIG={}/fix2fit/config-driver; ".format(self.dir_setup)
-        # repair_command += "export BUILD={}/fix2fit/build-driver; ".format(self.dir_setup)
-        # repair_command += "export DRIVER={}/fix2fit/test-driver; ".format(self.dir_setup)
-        # repair_command += "export BINARY={}; ".format(abs_path_binary)
-        # repair_command += "export T_TIMEOUT={}000; ".format(config_info[self.key_timeout_TESTCASE])
-        # repair_command += "export TIMEOUT={}h; ".format(config_info[self.key_timeout])
-        # repair_command += 'export BINARY_INPUT="{}"; '.format(bug_info[self.key_crash_cmd])
+
         repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
             str(repair_config_info[self.key_timeout])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(
-            repair_command, self.log_output_path, self.dir_setup, env=environment_vars
+            repair_command, self.log_output_path, self.dir_expr, env=environment_vars
         )
 
         self.process_status(status)
-
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-        dir_patch = join(self.dir_setup, "patches")
+        dir_patch = join(self.dir_expr, "patches")
         self.run_command("mkdir /output")
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artifacts(dir_info)
         return
-
-    def filter_tests(self, test_id_list, subject, bug_id):
-        filtered_list = []
-        filter_list = []
-        if str(subject).lower() == "python":
-            filter_list = [87, 172, 209, 222, 226]
-            if bug_id == "69372":
-                filter_list.extend([240, 322, 323, 324])
-            elif bug_id == "69935":
-                filter_list.extend([240, 322, 323, 324])
-            elif bug_id == "69935":
-                filter_list.extend([240, 322, 323, 324])
-
-        elif str(subject).lower() == "php":
-            filter_list = []
-            if bug_id == "5bb0a44e06":
-                filter_list.extend([5553, 6548, 9563, 280, 3471])
-            elif bug_id == "0927309852":
-                filter_list.extend([7384, 7440, 7551, 7511, 7527, 7639, 9563, 7780])
-            elif bug_id == "1e91069eb4":
-                filter_list.extend(
-                    [404, 6633, 6777, 7049, 7612, 8695, 8766, 1597, 3908, 6948]
-                )
-            elif bug_id == "1f49902999":
-                filter_list.extend(
-                    [
-                        5553,
-                        6110,
-                        6472,
-                        6475,
-                        6478,
-                        6485,
-                        6489,
-                        6494,
-                        6501,
-                        6503,
-                        6507,
-                        6853,
-                        7165,
-                        9563,
-                        3471,
-                        10638,
-                    ]
-                )
-            elif bug_id == "b84967d3e2":
-                filter_list.extend([5553, 9563, 3471, 10638])
-            elif bug_id == "1d984a7ffd":
-                filter_list.extend([3339, 5553, 9563, 3471, 10638])
-            elif bug_id == "6e74d95f34":
-                filter_list.extend([5553, 9563, 3471, 10638, 2298])
-            elif bug_id == "8deb11c0c3":
-                filter_list.extend(
-                    [404, 6633, 6777, 7049, 7615, 8695, 8766, 1597, 6948]
-                )
-            elif bug_id == "2adf58cfcf":
-                filter_list.extend(
-                    [3836, 4037, 5553, 5797, 5806, 9563, 280, 3471, 10638]
-                )
-            elif bug_id == "3acdca4703":
-                filter_list.extend(
-                    [3836, 4037, 5553, 5797, 5806, 9563, 3471, 7527, 10638, 6512]
-                )
-            elif bug_id == "5a8c917c37":
-                filter_list.extend(
-                    [3836, 4037, 5553, 5797, 5806, 9563, 3471, 5137, 6336, 9617, 10638]
-                )
-            elif bug_id == "2e25ec9eb7":
-                filter_list.extend(
-                    [3836, 4037, 5553, 5797, 5806, 9563, 10569, 280, 3471, 10638]
-                )
-            elif bug_id == "77ed819430":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471, 10638])
-            elif bug_id == "efcb9a71cd":
-                filter_list.extend(
-                    [404, 6633, 6777, 7049, 8695, 8766, 303, 1778, 3908, 6948]
-                )
-            elif bug_id == "09b990f499":
-                filter_list.extend(
-                    [3836, 4037, 5553, 5797, 5806, 9563, 3471, 7237, 7357, 10638]
-                )
-            elif bug_id == "821d7169d9":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471])
-            elif bug_id == "daecb2c0f4":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471])
-            elif bug_id == "964f44a280":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471])
-            elif bug_id == "1056c57fa9":
-                filter_list.extend([3836, 4037, 5553, 5797, 5806, 9563, 3471])
-            elif bug_id == "05c5c8958e":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 3575, 6219])
-            elif bug_id == "d4ae4e79db":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 3575, 6219])
-            elif bug_id == "b5f15ef561":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
-            elif bug_id == "2e5d5e5ac6":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
-            elif bug_id == "9b86852d6e":
-                filter_list.extend(
-                    [
-                        3940,
-                        4144,
-                        5912,
-                        5921,
-                        9787,
-                        9834,
-                        10578,
-                        10976,
-                        11133,
-                        11135,
-                        3575,
-                        6219,
-                    ]
-                )
-            elif bug_id == "c1e510aea8":
-                filter_list.extend([3940, 4144, 5912, 5921, 6648, 9787, 6219, 3575])
-            elif bug_id == "fb37f3b20d":
-                filter_list.extend(
-                    [3940, 4144, 5912, 5921, 9787, 9834, 3575, 4149, 6219, 6648]
-                )
-            elif bug_id == "13ba2da5f6":
-                filter_list.extend(
-                    [
-                        3940,
-                        4144,
-                        5912,
-                        5921,
-                        6028,
-                        6061,
-                        6072,
-                        9787,
-                        9834,
-                        3442,
-                        3575,
-                        6219,
-                        2238,
-                        9787,
-                        10578,
-                    ]
-                )
-            elif bug_id == "3c7a573a2c":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834])
-            elif bug_id == "bc810a443d":
-                filter_list.extend(
-                    [3940, 4144, 5912, 5921, 9787, 9834, 10160, 11381, 11682, 11713]
-                )
-            elif bug_id == "d3b20b4058":
-                filter_list.extend(
-                    [3940, 4144, 5912, 5921, 9787, 3575, 6219, 7561, 7642]
-                )
-            elif bug_id == "f330c8ab4e":
-                filter_list.extend(
-                    [3940, 4144, 5912, 5921, 9787, 3575, 6219, 7561, 7642]
-                )
-            elif bug_id == "b548293b99":
-                filter_list.extend([418, 7062, 7333, 8997, 9069, 7232, 9267])
-            elif bug_id == "db0888dfc1":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 9834, 3575, 6219])
-            elif bug_id == "dfa08dc325":
-                filter_list.extend([3940, 4144, 5912, 5921, 9787, 3442, 3575, 6219])
-            elif bug_id == "52c36e60c4":
-                filter_list.extend(
-                    [3940, 4144, 5912, 5921, 9787, 9834, 2400, 3390, 3431, 3443]
-                )
-            elif bug_id == "acaf9c5227":
-                filter_list.extend(
-                    [3958, 4162, 5936, 5945, 9824, 3593, 6245, 6247, 6681]
-                )
-            elif bug_id == "6672171672":
-                filter_list.extend([3958, 4162, 5936, 5945, 9824, 9871, 3593, 6245])
-            elif bug_id == "34fe62619d":
-                filter_list.extend([325, 418, 963, 7200, 7471, 9145, 9216, 7370, 9437])
-            elif bug_id == "cdc512afb3":
-                filter_list.extend(
-                    [4017, 4221, 6004, 6013, 9983, 10030, 2472, 3465, 3506, 3518, 3524]
-                )
-            elif bug_id == "d4f05fbffc":
-                filter_list.extend([4017, 4221, 6004, 6013, 9983, 3650, 6314])
-            elif bug_id == "efc94f3115":
-                filter_list.extend(
-                    [4017, 4221, 6004, 6013, 9983, 10030, 3650, 5572, 6052, 6314, 5332]
-                )
-            elif bug_id == "7337a901b7":
-                filter_list.extend([4017, 4221, 6004, 6013, 9983, 3650, 6314])
-            elif bug_id == "8d520d6296":
-                filter_list.extend(
-                    [
-                        8747,
-                        10578,
-                        10807,
-                        10976,
-                        11074,
-                        11076,
-                        11078,
-                        11085,
-                        11086,
-                        11091,
-                        11096,
-                        11098,
-                        11103,
-                        11117,
-                        11121,
-                        11133,
-                        11135,
-                        11150,
-                        11163,
-                        6679,
-                        8073,
-                        8140,
-                        9707,
-                    ]
-                )
-        elif str(subject).lower() == "gmp":
-            filter_list = [34]
-
-        for t_id in test_id_list:
-            if int(t_id) not in filter_list:
-                filtered_list.append(t_id)
-
-        return filtered_list
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
@@ -347,7 +194,7 @@ class Fix2Fit(AbstractRepairTool):
                         .split(", ")
                     )
                 elif "search space size: " in line:
-                    self.stats.patches_stats.size = int(
+                    self.stats.patch_stats.size = int(
                         line.split("search space size: ")[-1].strip()
                     )
 
@@ -356,31 +203,31 @@ class Fix2Fit(AbstractRepairTool):
         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
         for line in log_lines:
             if "search space size: " in line:
-                self.stats.patches_stats.size = int(
+                self.stats.patch_stats.size = int(
                     line.split("search space size: ")[-1].strip()
                 )
             elif "candidates evaluated: " in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     line.split("candidates evaluated: ")[-1].strip()
                 )
             elif "exploration progress: " in line:
-                self.stats.patches_stats.enumerations = int(
+                self.stats.patch_stats.enumerations = int(
                     int(
                         line.split("exploration progress: ")[-1]
                         .strip()
                         .replace("%", "")
                     )
                     / 100
-                    * self.stats.patches_stats.size
+                    * self.stats.patch_stats.size
                 )
             elif "plausible patches: " in line:
-                self.stats.patches_stats.plausible = int(
+                self.stats.patch_stats.plausible = int(
                     line.split("plausible patches: ")[-1].strip()
                 )
             elif "partition size: " in line:
-                self.stats.patches_stats.plausible = (
+                self.stats.patch_stats.plausible = (
                     int(line.split("partition size: ")[-1].strip())
-                    + self.stats.patches_stats.plausible
+                    + self.stats.patch_stats.plausible
                 )
             elif "patches successfully generated" in line:
                 is_timeout = False
@@ -415,6 +262,6 @@ class Fix2Fit(AbstractRepairTool):
                 "reported fail list: {0}".format(",".join(reported_failing_test))
             )
 
-        dir_patch = self.dir_setup + "/patches"
-        self.stats.patches_stats.generated = len(self.list_dir(dir_patch))
+        dir_patch = self.dir_expr + "/patches"
+        self.stats.patch_stats.generated = len(self.list_dir(dir_patch))
         return self.stats

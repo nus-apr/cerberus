@@ -2,7 +2,9 @@
     "general": {
         "parallel": true,
         "enable_ui": false,
-        "debug-mode": true
+        "secure-hash": false,
+        "debug-mode": true,
+        "cpus": 20
     },
     "tasks": {
         "default": {
@@ -19,7 +21,6 @@
             "use-container": true,
             "use-gpu": false,
             "use-purge": false,
-            "max-cpu-count": 4,
             "container-profiles-id-list": [
                 "CP1"
             ],
@@ -64,6 +65,7 @@
             },
             {
                 "type": "repair",
+                "runs": 2,
                 "benchmarks":[
                     {
                         "name": "refactory",
@@ -91,7 +93,7 @@
         "task-profiles": [
             {
                 "id": "TP1",
-                "timeout": "1",
+                "timeout": 1,
                 "fault-location": "auto",
                 "passing-test-ratio": 1
             }

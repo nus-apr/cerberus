@@ -58,12 +58,19 @@ def store_logs():
         store_log_file(log_f)
 
 
+def track_job(txt):
+    job = values.job_identifier.get("NAN")
+    if job != "NAN":
+        return job + "    " + txt
+    return txt
+
+
 def build(message):
-    _logger_build.info(message)
+    _logger_build.info(track_job(message))
 
 
 def information(message):
-    _logger_main.info(message)
+    _logger_main.info(track_job(message))
 
 
 def trace(message, info):
@@ -73,110 +80,57 @@ def trace(message, info):
 def command(message):
     message = str(message).strip().replace("[command]", "")
     message = "[COMMAND]: {}\n".format(message)
-    _logger_main.info(message)
-    _logger_command.info(message)
+    _logger_main.info(track_job(message))
+    _logger_command.info(track_job(message))
 
 
 def docker_command(message):
     message = str(message).strip().replace("[command]", "")
     message = "[DOCKER-COMMAND]: {}\n".format(message)
-    _logger_main.info(message)
-    _logger_command.info(message)
+    _logger_main.info(track_job(message))
+    _logger_command.info(track_job(message))
 
 
 def data(message, info):
-    _logger_main.info(message, info)
+    _logger_main.info(track_job(message), info)
 
 
 def debug(message):
     message = str(message).strip()
-    _logger_main.debug(message)
+    _logger_main.debug(track_job(message))
 
 
 def error(message):
-    _logger_main.error(message)
-    _logger_error.error(message)
+    _logger_main.error(track_job(message))
+    _logger_error.error(track_job(message))
 
 
 def note(message):
-    _logger_main.info(message)
+    _logger_main.info(track_job(message))
 
 
 def configuration(message):
     message = str(message).strip().lower().replace("[config]", "")
     message = "[CONFIGURATION]: {}\n".format(message)
-    _logger_main.info(message)
+    _logger_main.info(track_job(message))
 
 
 def output(message):
     message = str(message).strip()
     message = "[OUTPUT]: {}".format(message)
-    _logger_main.info(message)
+    _logger_main.info(track_job(message))
 
 
 def warning(message):
     message = str(message).strip().lower().replace("[warning]", "")
-    _logger_main.warning(message)
+    _logger_main.warning(track_job(message))
 
 
 def log_tool_stats(task_tag_name, tool_stats: ToolStats):
 
     with open(values.file_stats_log, "a") as log_file:
         log_file.write("\nexperiment: {0}\n".format(task_tag_name))
-        log_file.write(
-            "\t\t search space size: {0}\n".format(tool_stats.patches_stats.size)
-        )
-        log_file.write(
-            "\t\t count enumerations: {0}\n".format(
-                tool_stats.patches_stats.enumerations
-            )
-        )
-        log_file.write(
-            "\t\t count plausible patches: {0}\n".format(
-                tool_stats.patches_stats.plausible
-            )
-        )
-        log_file.write(
-            "\t\t count generated: {0}\n".format(tool_stats.patches_stats.generated)
-        )
-        log_file.write(
-            "\t\t count non-compiling patches: {0}\n".format(
-                tool_stats.patches_stats.non_compilable
-            )
-        )
-        log_file.write(
-            "\t\t count implausible patches: {0}\n".format(
-                tool_stats.patches_stats.get_implausible()
-            )
-        )
-        log_file.write(
-            "\t\t time build: {0} seconds\n".format(tool_stats.time_stats.total_build)
-        )
-        log_file.write(
-            "\t\t time validation: {0} seconds\n".format(
-                tool_stats.time_stats.total_validation
-            )
-        )
-        log_file.write(
-            "\t\t time duration: {0} seconds\n".format(
-                tool_stats.time_stats.get_duration()
-            )
-        )
-        log_file.write(
-            "\t\t latency compilation: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_compilation()
-            )
-        )
-        log_file.write(
-            "\t\t latency validation: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_validation()
-            )
-        )
-        log_file.write(
-            "\t\t latency plausible: {0} seconds\n".format(
-                tool_stats.time_stats.get_latency_plausible()
-            )
-        )
+        tool_stats.write(log_file.write, "\t\t")
 
 
 def log_benchmark_stats(benchmark_tag, benchmark_stats: BenchmarkStats):
