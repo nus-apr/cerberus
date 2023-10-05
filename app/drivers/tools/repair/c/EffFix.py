@@ -1,10 +1,10 @@
 import os
-import re
 from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
 
+from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -17,8 +17,26 @@ class EffFix(AbstractRepairTool):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        self.image_name = "rshariffdeen/efffix"
+        self.image_name = "yuntongzhang/efffix:experiments"
         super().__init__(self.name)
+
+    def re_build(self, config_script, build_script):
+        self.emit_normal("re-building subject")
+        rebuild_script = self.dir_expr + f"/{self.name}-rebuild"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make clean; make distclean; rm -f CMakeCache.txt\n",
+                f"{config_script} {self.dir_expr}\n",
+                f"{build_script} {self.dir_expr}\n",
+            ],
+            rebuild_script,
+        )
+        rebuild_command = "bash {}".format(rebuild_script)
+        log_rebuild_path = join(self.dir_logs, f"{self.name}-re-build.log")
+        self.run_command(rebuild_command, log_file_path=log_rebuild_path)
 
     def populate_config_file(self, bug_info, config_path, dir_pre):
         config_info: Dict[str, Any] = dict()
@@ -64,39 +82,43 @@ class EffFix(AbstractRepairTool):
         self.write_file(content, config_path)
 
     def prepare(self, bug_info):
+        dir_src = join(self.dir_expr, "src")
         tool_dir = join(self.dir_expr, self.name)
-        self.emit_normal(" preparing subject for repair with " + self.name)
+        self.emit_normal("preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
-        dir_src = join(self.dir_expr, "src")
-        clean_command = "rm /tmp/td_candidates/*; make clean"
-        self.run_command(clean_command, dir_path=dir_src)
         dir_pre = join(self.dir_expr, "pre")
-        if not self.is_dir(dir_pre):
-            self.run_command(f"mkdir {dir_pre}")
+        dir_src = join(self.dir_expr, "src")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         self.populate_config_file(bug_info, config_path, dir_pre)
         time = datetime.now()
-        compile_list = bug_info.get(self.key_compile_programs, [])
-        names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
-        names_50 = ["snort", "openssl-3"]
-        subject_name = bug_info[self.key_subject]
-        num_disjuncts = 50
-        if subject_name in names_100:
-            num_disjuncts = 100
-        analysis_command = (
-            f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
-        )
+        if self.is_dir(dir_pre):
+            self.emit_normal("found previous analysis with Infer")
+        else:
+            compile_list = bug_info.get(self.key_compile_programs, [])
+            names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
+            names_50 = ["snort", "openssl-3"]
+            subject_name = bug_info[self.key_subject]
+            num_disjuncts = 50
+            if subject_name in names_100:
+                num_disjuncts = 100
+            analysis_command = (
+                f"effFix --stage pre --disjuncts {num_disjuncts} {config_path}"
+            )
+            self.emit_normal("running pre-analysis with Infer")
+            log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
+            status = self.run_command(
+                analysis_command,
+                dir_path=dir_src,
+                log_file_path=log_analysis_path,
+            )
 
-        log_analysis_path = join(self.dir_logs, "efffix-pre-output.log")
-        self.run_command(
-            analysis_command,
-            dir_path=dir_src,
-            log_file_path=log_analysis_path,
-        )
+            if int(status) != 0:
+                self.emit_error("pre-analysis failed")
+                return None
 
         self.emit_normal(
-            " preparation took {} second(s)".format(
+            "preparation took {} second(s)".format(
                 (datetime.now() - time).total_seconds()
             )
         )
@@ -104,12 +126,15 @@ class EffFix(AbstractRepairTool):
 
     def run_repair(self, bug_info, repair_config_info):
         config_path = self.prepare(bug_info)
+        if config_path is None:
+            return
         super(EffFix, self).run_repair(bug_info, repair_config_info)
         if self.is_instrument_only:
             return
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
@@ -117,9 +142,6 @@ class EffFix(AbstractRepairTool):
         )
 
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
-        self.run_command(clean_command, dir_path=dir_src)
-
         names_100 = ["swoole", "x264", "p11-kit", "openssl-1"]
         names_50 = ["snort", "openssl-3"]
         subject_name = bug_info[self.key_subject]
@@ -127,10 +149,13 @@ class EffFix(AbstractRepairTool):
         if subject_name in names_100:
             num_disjuncts = 100
 
+        budget_str = ""
+        if "budget" not in additional_tool_param:
+            budget_str = f"--budget {timeout_m}"
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h effFix "
-            f"--stage repair --disjuncts {num_disjuncts} --budget 20 "
+            f"--stage repair --disjuncts {num_disjuncts} {budget_str} "
             f"{additional_tool_param} {config_path}"
         )
         status = self.run_command(
@@ -146,56 +171,56 @@ class EffFix(AbstractRepairTool):
         self.run_command(clean_command, dir_path=dir_src)
 
     def save_artifacts(self, dir_info):
+        # rm the infer directory, since it's too big
+        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single ;"
+        self.run_command(rm_cmd)
         super(EffFix, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        self.emit_normal("reading output")
-        dir_results = join(self.dir_expr, "result")
-        regex = re.compile("(.*-output.log$)")
-        regex = re.compile("(.*-output.log$)")
-        for _, _, files in os.walk(dir_results):
-            for file in files:
-                if regex.match(file) and self.name in file:
-                    self.log_output_path = dir_results + "/" + file
-                    break
+        json_report = join(self.dir_output, "result.json")
+        dir_patch = join(self.dir_output, "final-patches")
+        list_patches = self.list_dir(dir_patch, regex="*.patch")
+        count_enumerations = 0
+        count_plausible = 0
+        space_size = 0
+        self.stats.patch_stats.generated = len(list_patches)
+        is_error = False
 
+        self.emit_normal("reading stdout log")
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
             return self.stats
 
         self.emit_highlight(" Log File: " + self.log_output_path)
-        is_error = False
-
-        # count number of patch files
-        dir_patch = join(self.dir_expr, "final-patches")
-        list_patches = self.list_dir(dir_patch, regex="*.patch")
-
-        efffix_std_out = self.log_output_path
-        log_lines = self.read_file(efffix_std_out, encoding="iso-8859-1")
-        self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-        self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
-
-        count_enumerations = 0
-        count_plausible = 0
-        count_candidates = 0
-
-        if self.is_file(efffix_std_out):
-            log_lines = self.read_file(efffix_std_out, encoding="iso-8859-1")
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
+        self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
+        if self.is_file(json_report):
+            self.emit_normal("reading result.json")
+            result_info = self.read_json(json_report, encoding="iso-8859-1")
+            space_size = result_info["stats"]["total_search_space"]
+            count_enumerations = result_info["stats"]["total_num_patches"]
+            count_plausible = result_info["stats"][
+                "total_num_locally_plausible_patches"
+            ]
+        else:
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             for line in log_lines:
-                if "Patch routine" in line:
+                if "Adding new patch" in line:
                     count_enumerations += 1
-                elif "Writing patches" in line:
+                elif "Plausible Patch:" in line:
                     count_plausible += 1
-                elif "Filtered candidates:" in line:
-                    count_candidates += int(line.split(": ")[-1])
+                elif "search space size: " in line:
+                    size_str = escape_ansi(
+                        line.split("search space size: ")[-1].strip()
+                    )
+                    space_size = int(size_str)
             if is_error:
                 self.emit_error("[error] error detected in logs")
 
-        self.stats.patch_stats.enumerations = count_enumerations
         self.stats.patch_stats.plausible = count_plausible
-        self.stats.patch_stats.size = count_candidates
-        self.stats.patch_stats.generated = len(list_patches)
+        self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = space_size
         self.stats.error_stats.is_error = is_error
-
         return self.stats

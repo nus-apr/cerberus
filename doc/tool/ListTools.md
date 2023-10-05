@@ -7,8 +7,8 @@
 
 | #  | Tool  | Language | Repository                                         | Commit id |
 |----|-------| -------- |----------------------------------------------------|-----------|
-| 1  | Infer | C/C++    | <https://github.com/facebook/infer>             | -         |
-| 2  | Pulse | C/C++    |  <https://github.com/facebook/infer>             | -         |
+| 1  | Infer | C/C++    | <https://github.com/facebook/infer>                | -         |
+| 2  | Pulse | C/C++    | <https://github.com/facebook/infer>                | -         |
 | 3  | SAVER | C/C++    | <https://github.com/kupl/SAVER_public>             | e7eca63   |
 
 
@@ -20,7 +20,7 @@
 
 | # | Tool       | Language | Repository                                         | Commit id |
 |---|------------|----------|----------------------------------------------------| --------  |
-| 1 | Infer | Java     | <https://github.com/facebook/infer>             | -         |
+| 1 | Infer      | Java     | <https://github.com/facebook/infer>                | -         |
 | 2 | Hippodrome | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
 
 
@@ -56,18 +56,19 @@
 <summary>Java</summary>
 <br>
 
-| #  | Tool       | Language | Repository                                         | Commit id |
-|----|------------| -------- |----------------------------------------------------| --------  |
-| 1  | Hippodrome | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
-| 2  | SequenceR  | Java     | <https://github.com/KTH/sequencer>                 | 3bd0cd4   |
-| 3  | ARJA       | Java     | <https://github.com/yyxhdy/arja>                   | e795032   |
-| 4  | Cardumen   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 5  | jMutRepair | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 6  | jKali      | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 7  | jGenProg   | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
-| 8  | Nopol      | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
-| 9  | Recorder   | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
-| 10 | TBar       | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
+| #  | Tool        | Language | Repository                                         | Commit id |
+|----|-------------| -------- |----------------------------------------------------| --------  |
+| 1  | Hippodrome  | Java     | <https://github.com/verse-lab/hippodrome>          | 012f291   |
+| 2  | SequenceR   | Java     | <https://github.com/KTH/sequencer>                 | 3bd0cd4   |
+| 3  | ARJA        | Java     | <https://github.com/yyxhdy/arja>                   | e795032   |
+| 4  | Cardumen    | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 5  | jMutRepair  | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 6  | jKali       | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 7  | jGenProg    | Java     | <https://github.com/SpoonLabs/Astor>               | f11f0b8   |
+| 8  | Nopol       | Java     | <https://github.com/SpoonLabs/nopol>               | 8cb3676   |
+| 9  | Recorder    | Java     | <https://github.com/pkuzqh/Recoder>                | 6f463f9   |
+| 10 | TBar        | Java     | <https://github.com/TruX-DTF/TBar>                 | 3cc7552   |
+| 11 | AlphaRepair | Java     | N/A                                                | N/A       |
 
 
 </details>

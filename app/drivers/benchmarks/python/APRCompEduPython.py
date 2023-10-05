@@ -5,13 +5,13 @@ from app.core import abstractions
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
-class Refactory(AbstractBenchmark):
+class APRCompEduPython(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(Refactory, self).__init__()
+        super(APRCompEduPython, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(Refactory, self).setup_experiment(
+        is_error = super(APRCompEduPython, self).setup_experiment(
             bug_index, container_id, test_all
         )
         return is_error
@@ -21,7 +21,7 @@ class Refactory(AbstractBenchmark):
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
         """
-        container_id = super(Refactory, self).setup_container(
+        container_id = super(APRCompEduPython, self).setup_container(
             bug_index, image_name, cpu, gpu
         )
         experiment_item = self.experiment_subjects[bug_index - 1]
@@ -116,4 +116,4 @@ class Refactory(AbstractBenchmark):
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(Refactory, self).save_artifacts(dir_info, container_id)
+        super(APRCompEduPython, self).save_artifacts(dir_info, container_id)

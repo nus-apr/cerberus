@@ -8,8 +8,12 @@ def read_json(file_path: str):
     json_data = None
     if os.path.isfile(file_path):
         with open(file_path, "r") as in_file:
-            content = in_file.readline()
-            json_data = json.loads(content)
+            content = in_file.readlines()
+            if len(content) > 1:
+                content_str = " ".join([l.strip().replace("\n", "") for l in content])
+            else:
+                content_str = content[0]
+            json_data = json.loads(content_str)
     return json_data
 
 

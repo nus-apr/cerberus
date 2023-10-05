@@ -4,13 +4,15 @@ from datetime import datetime
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
-class ITSP(AbstractBenchmark):
+class APRCompEduC(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(ITSP, self).__init__()
+        super(APRCompEduC, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(ITSP, self).setup_experiment(bug_index, container_id, test_all)
+        is_error = super(APRCompEduC, self).setup_experiment(
+            bug_index, container_id, test_all
+        )
         return is_error
 
     def deploy(self, bug_index, container_id):
@@ -35,7 +37,10 @@ class ITSP(AbstractBenchmark):
         command_str = "bash build_subject"
 
         status = self.run_command(
-            container_id, command_str, self.log_build_path, self.dir_setup
+            container_id,
+            command_str,
+            self.log_build_path,
+            os.path.join(self.dir_expr, "src"),
         )
         self.emit_debug(
             "setup took {} second(s)".format((datetime.now() - time).total_seconds())
@@ -53,7 +58,10 @@ class ITSP(AbstractBenchmark):
         failing_test_list = experiment_item[self.key_failing_tests]
         command_str = f"bash run_test {failing_test_list[0]}"
         status = self.run_command(
-            container_id, command_str, self.log_test_path, self.dir_setup
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_expr, "src"),
         )
         self.emit_debug(
             " Test took {} second(s)".format((datetime.now() - time).total_seconds())
@@ -77,4 +85,4 @@ class ITSP(AbstractBenchmark):
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(ITSP, self).save_artifacts(dir_info, container_id)
+        super(APRCompEduC, self).save_artifacts(dir_info, container_id)
