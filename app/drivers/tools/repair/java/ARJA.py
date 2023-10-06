@@ -28,6 +28,9 @@ class ARJA(AbstractRepairTool):
 
         classpath = f"{join(self.arja_home,'lib/*')}:{join(self.arja_home,'bin')}"
 
+        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_list = bug_info[self.key_failing_tests]
+
         dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
         dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
@@ -62,6 +65,10 @@ class ARJA(AbstractRepairTool):
             f"-Ddependences {list_deps_str} "
             f"-DpopulationSize {arja_default_population_size}"
         )
+
+        if not passing_test_list:
+            test_list_str = ",".join(failing_test_list)
+            arja_command += f" -Dtests {test_list_str}"
 
         status = self.run_command(
             arja_command,

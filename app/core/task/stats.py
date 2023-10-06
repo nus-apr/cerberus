@@ -74,7 +74,7 @@ class TimeStats:
             )
         return self.__latency_plausible
 
-    def get_array(self):
+    def get_dict(self):
         summary = {
             "total duration": self.get_duration(),
             "build time": self.total_build,
@@ -92,16 +92,13 @@ class PatchStats:
     __implausible = None
 
     def get_implausible(self):
-        if self.__implausible is None:
-            self.__implausible = (
-                self.enumerations - self.plausible - self.non_compilable
-            )
+        self.__implausible = self.enumerations - self.plausible - self.non_compilable
         return self.__implausible
 
     def get_exploration_ratio(self):
         return (self.enumerations / self.size) * 100
 
-    def get_array(self):
+    def get_dict(self):
         summary = {
             "search space": self.size,
             "enumerations": self.enumerations,
@@ -121,7 +118,7 @@ class FuzzerStats:
     total_branches: int = 0
     executions: int = 0
 
-    def get_array(self):
+    def get_dict(self):
         summary = {
             "time to bug": self.time_to_bug,
             "line coverage": self.line_coverage,
@@ -199,7 +196,7 @@ class ContainerStats:
             self.total_tx_bytes,
         ) = ContainerStats.compute_network_usage(container_stats)
 
-    def get_array(self):
+    def get_dict(self):
 
         return {
             "mem_usage": f"{self.mem_usage_gb} GiB",
@@ -226,12 +223,12 @@ class ToolStats:
         self.container_stats = ContainerStats()
         self.error_stats = ErrorStats()
 
-    def get_array(self):
+    def get_dict(self):
         return {
             "status": str(values.experiment_status.get(TaskStatus.NONE)),
             "details": {
-                "time": self.time_stats.get_array(),
-                "container": self.container_stats.get_array(),
+                "time": self.time_stats.get_dict(),
+                "container": self.container_stats.get_dict(),
             },
         }
 
@@ -275,9 +272,9 @@ class RepairToolStats(ToolStats):
         self.patch_stats = PatchStats()
         super(RepairToolStats, self).__init__()
 
-    def get_array(self):
-        res = super(RepairToolStats, self).get_array()
-        res["details"]["space"] = self.patch_stats.get_array()
+    def get_dict(self):
+        res = super(RepairToolStats, self).get_dict()
+        res["details"]["space"] = self.patch_stats.get_dict()
         return res
 
     def write(self, printer, prefix=""):
@@ -313,9 +310,9 @@ class AnalysisToolStats(ToolStats):
         self.patch_stats = PatchStats()
         super(AnalysisToolStats, self).__init__()
 
-    def get_array(self):
-        res = super(AnalysisToolStats, self).get_array()
-        res["details"]["space"] = self.patch_stats.get_array()
+    def get_dict(self):
+        res = super(AnalysisToolStats, self).get_dict()
+        res["details"]["space"] = self.patch_stats.get_dict()
         return res
 
     def write(self, printer, prefix=""):
@@ -351,9 +348,9 @@ class FuzzToolStats(ToolStats):
         self.fuzzing_stats = FuzzerStats()
         super(FuzzToolStats, self).__init__()
 
-    def get_array(self):
-        res = super(FuzzToolStats, self).get_array()
-        res["details"]["space"] = self.fuzzing_stats.get_array()
+    def get_dict(self):
+        res = super(FuzzToolStats, self).get_dict()
+        res["details"]["fuzz_stats"] = self.fuzzing_stats.get_dict()
         return res
 
     def write(self, printer, prefix=""):
@@ -401,7 +398,7 @@ class BenchmarkStats:
         self.error_stats = ErrorStats()
         self.container_stats = ContainerStats()
 
-    def get_array(self):
+    def get_dict(self):
         summary_general = {
             "deployed": "OK" if self.deployed else "FAILED",
             "configured": "OK" if self.configured else "FAILED",
@@ -416,7 +413,7 @@ class BenchmarkStats:
 
         summary = {
             "general": summary_general,
-            "container": self.container_stats.get_array(),
+            "container": self.container_stats.get_dict(),
         }
 
         return summary

@@ -12,6 +12,7 @@ venv
 archive
 results
 .scode
+benchmark/microfuzz
 benchmark/**/patches
 benchmark/**/location.txt
 benchmark/**/original.txt
@@ -20,3 +21,6 @@ benchmark/**/fix2fit/*-driver
 benchmark/**/compile_commands.json
 benchmark/**/f1x-*
 summaries/**
+tags
+tags.lock
+.venv

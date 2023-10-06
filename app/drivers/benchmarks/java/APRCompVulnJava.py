@@ -1,34 +1,62 @@
 import os
 from datetime import datetime
+from os.path import join
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
-class VulnLoc(AbstractBenchmark):
+class APRCompVulnJava(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
-        super(VulnLoc, self).__init__()
+        super(APRCompVulnJava, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(VulnLoc, self).setup_experiment(
-            bug_index, container_id, test_all
-        )
+        if not container_id:
+            self.error_exit(
+                "unimplemented functionality: this benchmark only runs on docker"
+            )
 
+        is_error = True
+        if self.install_deps(bug_index, container_id):
+            is_error = super(APRCompVulnJava, self).setup_experiment(
+                bug_index, container_id, test_all
+            )
         if not is_error:
             if self.verify(bug_index, container_id):
-                self.emit_success("[benchmark] verified successfully")
-            else:
-                self.emit_error("[benchmark] verification failed")
-                is_error = True
-            if not self.use_valkyrie:
-                self.emit_normal("skipping transformation")
-            else:
+                self.emit_success("verified successfully")
                 if self.transform(bug_index, container_id):
-                    self.emit_success("[benchmark] transformation successful")
+                    self.emit_success("transformation successful")
+                    if self.compress_dependencies(container_id, bug_index):
+                        self.emit_success("dependencies compressed successfully")
+                    else:
+                        self.emit_error("dependency compression failed")
+                        is_error = True
                 else:
-                    self.emit_error("[benchmark] transformation failed")
+                    self.emit_error("transformation failed")
                     is_error = True
+            else:
+                self.emit_error("verification failed")
+                is_error = True
         return is_error
+
+    def install_deps(self, bug_index, container_id):
+        self.emit_normal("installing experiment dependencies")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_deps_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-deps.log"
+        )
+        time = datetime.now()
+        command_str = "bash install_deps"
+        status = self.run_command(
+            container_id, command_str, self.log_deps_path, self.dir_setup
+        )
+        self.emit_debug(
+            "installing dependencies took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        return status == 0
 
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
@@ -38,7 +66,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
         time = datetime.now()
-        command_str = "bash setup.sh"
+        command_str = "bash setup_subject"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
@@ -55,7 +83,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
         )
         time = datetime.now()
-        command_str = "bash config.sh"
+        command_str = "bash config_subject"
         status = self.run_command(
             container_id, command_str, self.log_config_path, self.dir_setup
         )
@@ -72,7 +100,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
         time = datetime.now()
-        command_str = "bash build.sh"
+        command_str = "bash build_subject"
 
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
@@ -82,20 +110,41 @@ class VulnLoc(AbstractBenchmark):
         )
         return status == 0
 
+    def compress_dependencies(self, container_id, bug_index):
+        self.emit_normal("compressing experiment dependencies")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_compress_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-compress.log"
+        )
+        time = datetime.now()
+        command_str = f"bash compress_deps"
+        status = self.run_command(
+            container_id, command_str, self.log_compress_path, self.dir_setup
+        )
+        self.emit_debug(
+            " compression took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+
+        return status == 0
+
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
+        fail_test_list = experiment_item[self.key_failing_tests]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        command_str = "bash test.sh 1"
+        command_str = f"bash run_test {fail_test_list[0]}"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            " test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status != 0
 
@@ -107,7 +156,7 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        command_str = "bash verify.sh 1"
+        command_str = "bash verify_dev"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -118,14 +167,14 @@ class VulnLoc(AbstractBenchmark):
         return status == 0
 
     def transform(self, bug_index, container_id):
-        self.emit_normal("transform fix-file")
+        self.emit_normal("transforming source code")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
         time = datetime.now()
-        command_str = "bash transform.sh"
+        command_str = "echo 'transformation complete'"
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
@@ -145,4 +194,4 @@ class VulnLoc(AbstractBenchmark):
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
-        super(VulnLoc, self).save_artifacts(dir_info, container_id)
+        super(APRCompVulnJava, self).save_artifacts(dir_info, container_id)

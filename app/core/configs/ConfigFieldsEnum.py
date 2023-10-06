@@ -19,6 +19,8 @@ class ConfigFieldsEnum(Enum):
     PASSING_TEST_RATIO = "passing-test-ratio"
 
     CPU_COUNT = "cpu-count"
+    GPU_COUNT = "gpu-count"
+    CPUS = "cpus"
     MEM_LIMIT = "mem-limit"
     ENABLE_NETWORK = "enable-network"
 
@@ -58,6 +60,7 @@ class ConfigFieldsEnum(Enum):
     TOOLS = "tools"
     PARAMS = "params"
     TAG = "tag"
+    IMAGE = "image"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"
@@ -75,6 +78,5 @@ class ConfigFieldsEnum(Enum):
     USE_GPU = "use-gpu"
     USE_PURGE = "use-purge"
     SECURE_HASH = "secure-hash"
-    MAX_CPU_COUNT = "max-cpu-count"
     CONTAINER_PROFILE_ID_LIST = "container-profiles-id-list"
     TASK_PROFILE_ID_LIST = "task-profiles-id-list"

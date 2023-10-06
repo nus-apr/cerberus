@@ -1,3 +1,4 @@
+import multiprocessing
 from typing import List
 
 from app.core import values
@@ -21,6 +22,12 @@ class ConfigDataFactory:
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
             debug_mode=general_config_dict[ConfigFieldsEnum.DEBUG_MODE.value],
             secure_hash=general_config_dict[ConfigFieldsEnum.SECURE_HASH.value],
+            cpus=max(
+                2,
+                general_config_dict.get(
+                    ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+                ),
+            ),
         )
 
     @staticmethod
@@ -41,6 +48,9 @@ class ConfigDataFactory:
                     enable_network=container_profile_dict[
                         ConfigFieldsEnum.ENABLE_NETWORK.value
                     ],
+                    gpu_count=container_profile_dict.get(
+                        ConfigFieldsEnum.GPU_COUNT.value, 0
+                    ),
                 )
             )
 
@@ -123,9 +133,6 @@ class ConfigDataFactory:
                 use_purge=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.USE_PURGE.value, values.use_purge
                 ),
-                max_cpu_count=tasks_chunk_config_dict.get(
-                    ConfigFieldsEnum.MAX_CPU_COUNT.value, 1
-                ),
                 runs=tasks_chunk_config_dict.get(ConfigFieldsEnum.RUNS.value, 1),
             )
 
@@ -155,8 +162,9 @@ class ConfigDataFactory:
                 tools_config_list.append(
                     ToolConfig(
                         name=tool_config_dict[ConfigFieldsEnum.NAME.value],
-                        params=tool_config_dict[ConfigFieldsEnum.PARAMS.value],
+                        params=tool_config_dict.get(ConfigFieldsEnum.PARAMS.value, ""),
                         tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
+                        image=tool_config_dict.get(ConfigFieldsEnum.IMAGE.value, ""),
                     )
                 )
 

@@ -2,6 +2,9 @@ import abc
 import os
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
 from app.core import definitions
 from app.core import utilities
@@ -34,7 +37,9 @@ class AbstractRepairTool(AbstractTool):
         super().__init__(tool_name)
 
     @abc.abstractmethod
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -54,13 +59,13 @@ class AbstractRepairTool(AbstractTool):
         """
         return self.stats
 
-    def instrument(self, bug_info):
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
         """instrumentation for the experiment as needed by the tool"""
         if not self.is_file(join(self.dir_inst, "instrument.sh")):
             return
         self.emit_normal("running instrumentation script")
         bug_id = bug_info[definitions.KEY_BUG_ID]
-        task_conf_id = str(values.current_task_profile_id.get("NA"))
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
         buggy_file = bug_info.get(definitions.KEY_FIX_FILE, "")
         self.log_instrument_path = join(
             self.dir_logs,
@@ -82,7 +87,9 @@ class AbstractRepairTool(AbstractTool):
             )
         return
 
-    def run_repair(self, bug_info, repair_config_info):
+    def run_repair(
+        self, bug_info: Dict[str, Any], repair_config_info: Dict[str, Any]
+    ) -> None:
         self.emit_normal("repairing experiment subject")
         utilities.check_space()
         self.pre_process()
@@ -97,7 +104,7 @@ class AbstractRepairTool(AbstractTool):
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
 
-    def print_stats(self):
+    def print_stats(self) -> None:
 
         self.stats.write(self.emit_highlight, "\t")
 

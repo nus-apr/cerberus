@@ -26,11 +26,8 @@ class Verifix(AbstractRepairTool):
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {}".format(
             timeout_h,
             "true" if self.is_debug else "false",
-            join(
-                self.dir_setup,
-                bug_info[self.key_fix_file].replace("buggy", "correct"),
-            ),
-            join(self.dir_setup, bug_info[self.key_fix_file]),
+            join(self.dir_expr, "src", "Main.c"),
+            join(self.dir_expr, "src", bug_info[self.key_fix_file]),
             join(self.dir_expr, "base", "test"),
         )
         status = self.run_command(vulnfix_command, self.log_output_path, "/Verifix")

@@ -1,4 +1,5 @@
 import os
+import re
 from os.path import join
 
 from app.core.utilities import escape_ansi
@@ -11,6 +12,62 @@ class FuzzRepair(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "rshariffdeen/fuzzrepair:tool"
         self.bug_id = ""
+
+    def transform_source(self, source_file_list):
+        self.emit_normal("applying transformations for source files")
+        script_path = self.dir_expr + f"/{self.name}-transform"
+        if not source_file_list:
+            return
+        source_list_str = " ".join([f"'{s}'" for s in source_file_list])
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"file_list=({source_list_str})\n",
+                f"cd $LIBPATCH_DIR/rewriter\n",
+                'for t in "${file_list[@]}"\n',
+                "do\n",
+                "./rewritecond $t -o $t\n",
+                "ret=$?\n",
+                "if [[ ret -eq 1 ]]\n",
+                "then\n",
+                "exit 128\n",
+                "fi\n" "done\n",
+            ],
+            script_path,
+        )
+        reconfig_command = "bash {}".format(script_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-transform.log")
+        status = self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+        if status != 0:
+            self.error_exit("transforming subject failed")
+
+    def rerun_configuration(self, config_script, build_script, cc, cxx):
+        self.emit_normal("re-building subject with fuzzrepair compilers")
+        script_path = self.dir_expr + f"/{self.name}-rebuild"
+        dir_src = join(self.dir_expr, "src")
+        content_list = [
+            "#!/bin/bash\n",
+            f"cd {dir_src}\n",
+            "make distclean; rm -f CMakeCache.txt\n",
+            f"CC={cc} CXX={cxx} {config_script} {self.dir_base_expr}\n",
+            f"cd {dir_src}\n",
+        ]
+
+        if cc == "fuzzrepair-cc":
+            content_list.append(
+                f'CC={cc} CXX={cxx} CFLAGS="-Wno-error -fPIC" CPPFLAGS=$CFLAGS CXXFLAGS=$CFLAGS {build_script} {self.dir_base_expr}\n'
+            )
+        else:
+            content_list.append(
+                f"CC={cc} CXX={cxx} bear {build_script} {self.dir_base_expr}\n"
+            )
+        content_list.append('sed -i "s/-I/-isystem/g" compile_commands.json\n')
+        self.write_file(content_list, script_path)
+        reconfig_command = "bash {}".format(script_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-build.log")
+        status = self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+        if status != 0:
+            self.error_exit("rebuilding subject failed")
 
     def generate_conf_file(self, bug_info):
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
@@ -46,12 +103,38 @@ class FuzzRepair(AbstractRepairTool):
         return repair_conf_path
 
     def run_repair(self, bug_info, repair_config_info):
+        config_script = bug_info.get(self.key_config_script, None)
+        build_script = bug_info.get(self.key_build_script, None)
+
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        if not build_script:
+            self.error_exit(f"{self.name} requires a build script as input")
+
+        config_script_path = join(self.dir_setup, config_script)
+        build_script_path = join(self.dir_setup, build_script)
+        fix_file = bug_info[self.key_fix_file]
+        dir_src = join(self.dir_expr, "src")
+        if isinstance(fix_file, list):
+            transform_file_list = [f"{dir_src}/{f}" for f in fix_file]
+        elif isinstance(fix_file, str):
+            transform_file_list = [f"{dir_src}/{fix_file}"]
+
         super(FuzzRepair, self).run_repair(bug_info, repair_config_info)
+        if not bug_info[self.key_benchmark] == "vulnloc":
+            self.rerun_configuration(
+                config_script_path, build_script_path, "clang", "clang++"
+            )
+            self.transform_source(transform_file_list)
+            self.rerun_configuration(
+                config_script_path, build_script_path, "fuzzrepair-cc", "fuzzrepair-cxx"
+            )
+
         timeout_h = str(repair_config_info[self.key_timeout])
         timeout_m = str(int(float(timeout_h) * 60))
         additional_tool_param = repair_config_info[self.key_tool_params]
         repair_conf_path = self.generate_conf_file(bug_info)
-        # repair_conf_path = self.dir_setup + "/crepair/repair.conf"
+        self.emit_normal(f"running {self.name}")
         self.timestamp_log_start()
         repair_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h ".format(
@@ -71,61 +154,70 @@ class FuzzRepair(AbstractRepairTool):
 
     def save_artifacts(self, dir_info):
         tool_log_dir = "/FuzzRepair/logs/"
-        tool_log_files = [
-            "{}/{}".format(tool_log_dir, f)
-            for f in self.list_dir(tool_log_dir)
-            if "log-" in f
-        ]
-        for log_file in tool_log_files:
-            copy_command = "cp -rf {} {}".format(log_file, self.dir_output)
-            self.run_command(copy_command)
-        tool_artifact_dir = "/FuzzRepair/output/"
-        tool_artifact_files = [
-            "{}/{}".format(tool_artifact_dir, f)
-            for f in self.list_dir(tool_artifact_dir)
-        ]
-        for a_file in tool_artifact_files:
-            copy_command = "cp -rf {} {}".format(a_file, self.dir_output)
-            self.run_command(copy_command)
-        self.run_command(
-            "cp -rf /FuzzRepair/output/{} {}".format(self.bug_id, self.dir_output)
-        )
+        copy_command = "cp -rf {} {}".format(tool_log_dir, self.dir_output)
+        self.run_command(copy_command)
+        tool_artifact_dir = "/FuzzRepair/output/{}".format(self.bug_id)
+        copy_command = "cp -rf {} {}".format(tool_artifact_dir, self.dir_output)
+        self.run_command(copy_command)
         super(FuzzRepair, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
-        self.emit_normal("reading output")
-
-        count_plausible = 0
+        json_report = join(self.dir_output, self.bug_id, "final-result")
+        dir_patch = join(self.dir_output, self.bug_id, "plausible-patches")
+        list_patches = self.list_dir(dir_patch, regex="*.patch")
         count_enumerations = 0
+        count_over_fitting = 0
+        count_invalid = 0
+        space_size = 0
+        self.stats.patch_stats.generated = len(list_patches)
+        is_error = False
 
-        # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patch_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
-        # extract information from output log
+        self.emit_normal("reading stdout log")
         if not self.log_output_path or not self.is_file(self.log_output_path):
             self.emit_warning("no output log file found")
             return self.stats
 
-        self.emit_highlight(f"output log file: {self.log_output_path}")
+        self.emit_highlight(" Log File: " + self.log_output_path)
+        log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+        self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].strip())
+        self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].strip())
+        if self.is_file(json_report):
+            self.emit_normal("reading result.json")
+            result_info = self.read_json(json_report, encoding="iso-8859-1")
+            count_enumerations = int(
+                result_info["agg-stats"]["patch-fuzzing-num-new-unique-patches"]
+            )
+            count_invalid = int(
+                result_info["agg-stats"]["prune-stage-num-invalid-patches"]
+            )
+            count_over_fitting = int(
+                result_info["agg-stats"]["prune-stage-num-pruned-total"]
+            )
 
-        if self.is_file(self.log_output_path):
+        else:
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = escape_ansi(log_lines[0].rstrip())
-            self.stats.time_stats.timestamp_end = escape_ansi(log_lines[-1].rstrip())
-
             for line in log_lines:
-                if "Generating patch" in line:
-                    count_plausible += 1
-                    count_enumerations += 1
-                elif "Runtime Error" in line:
-                    self.stats.error_stats.is_error = True
-                elif "statistics" in line:
-                    is_timeout = False
+                if "patch-fuzzing-num-new-unique-patches" in line:
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_enumerations = int(parsed_info.group(1))
+                elif "prune-stage-num-invalid-patches" in line:
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_invalid = int(parsed_info.group(1))
+                elif "prune-stage-num-pruned-total" in line:
+                    parsed_info = re.search(r"\', (.*?)\)", line)
+                    if parsed_info:
+                        count_over_fitting = int(parsed_info.group(1))
+            if is_error:
+                self.emit_error("[error] error detected in logs")
 
+        count_plausible = count_enumerations - count_over_fitting - count_invalid
         self.stats.patch_stats.plausible = count_plausible
+        self.stats.patch_stats.non_compilable = count_invalid
         self.stats.patch_stats.enumerations = count_enumerations
+        self.stats.patch_stats.size = space_size
+        self.stats.error_stats.is_error = is_error
+
         return self.stats
