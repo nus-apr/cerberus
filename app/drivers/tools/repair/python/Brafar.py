@@ -9,11 +9,11 @@ class Brafar(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "linnaxie/brafar-python"
-        self.hash_digest = "sha256:21b84cf9eef12b69616bcb9ee33d49fc24b780ce9463524058b3fddf58e76163"
+        self.hash_digest = "sha256:bcd4a6029e242260e2efa50abc61e14338512586c0f10ede0ec2a466e9226c7a"
 
     def run_repair(self, bug_info, repair_config_info):
+        # print(self.dir_expr)
         super(Brafar, self).run_repair(bug_info, repair_config_info)
-
         self.timestamp_log_start()
         status = self.run_command(
             "timeout -k 5m {}h python3 run.py -d {} -q src -s 100 {}".format(
@@ -36,7 +36,8 @@ class Brafar(AbstractRepairTool):
         The parent method should be invoked at last to archive the results
         """
         self.run_command("mkdir /output")
-        self.run_command("bash -c 'cp {}/src/*.csv /output/'".format(self.dir_expr))
+        self.run_command("mkdir /output/patches")
+        self.run_command("bash -c 'cp {}src/*.diff /output/patches'".format(self.dir_expr))
         super(Brafar, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -60,19 +61,4 @@ class Brafar(AbstractRepairTool):
         self.emit_normal("reading output")
 
         # extract information from output log
-        if not self.log_output_path or not self.is_file(self.log_output_path):
-            self.emit_warning("no output log file found")
-            return self.stats
-
-        self.emit_highlight(f"output log file: {self.log_output_path}")
-
-        if self.is_file(self.log_output_path):
-            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
-
-            for line in log_lines:
-                if line.startswith("fail"):
-                    self.stats.error_stats.is_error = True
-
         return self.stats
