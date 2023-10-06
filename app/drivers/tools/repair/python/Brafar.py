@@ -12,7 +12,6 @@ class Brafar(AbstractRepairTool):
         self.hash_digest = "sha256:bcd4a6029e242260e2efa50abc61e14338512586c0f10ede0ec2a466e9226c7a"
 
     def run_repair(self, bug_info, repair_config_info):
-        # print(self.dir_expr)
         super(Brafar, self).run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
         status = self.run_command(
