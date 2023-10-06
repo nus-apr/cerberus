@@ -1,5 +1,3 @@
-# [APRComp24] RepairCat
-
 # Cerberus Framework
 
 ![Main View](doc/images/CerberusView.png)
