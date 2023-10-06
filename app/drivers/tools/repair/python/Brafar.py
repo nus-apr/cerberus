@@ -1,6 +1,6 @@
 import os
 from os.path import join
-
+from app.core import container
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -9,15 +9,16 @@ class Brafar(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "linnaxie/brafar-python"
-        self.hash_digest = "sha256:bcd4a6029e242260e2efa50abc61e14338512586c0f10ede0ec2a466e9226c7a"
+        self.hash_digest = "sha256:190cb9cea70bca70c4c7354a9463e03067188af8fe4ce92843a0e713d1afaeb7"
 
     def run_repair(self, bug_info, repair_config_info):
         super(Brafar, self).run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
         status = self.run_command(
-            "timeout -k 5m {}h python3 run.py -d {} -q src -s 100 {}".format(
+            "timeout -k 5m {}h python3 run.py -d {} -q src -s 100 -o {} {}".format(
                 repair_config_info[self.key_timeout],
                 self.dir_expr,
+                "/output/patches",
                 repair_config_info[self.key_tool_params],
             ),
             self.log_output_path,
@@ -34,9 +35,9 @@ class Brafar(AbstractRepairTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        self.run_command("mkdir /output")
-        self.run_command("mkdir /output/patches")
-        self.run_command("bash -c 'cp {}src/*.diff /output/patches'".format(self.dir_expr))
+        # self.run_command("mkdir /output")
+        # self.run_command("mkdir /output/patches")
+        # self.run_command("bash -c 'cp {}/src/*.diff /output/patches'".format(self.dir_expr))
         super(Brafar, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
