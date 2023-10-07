@@ -11,7 +11,9 @@ class Brafar(AbstractRepairTool):
         self.image_name = "linnaxie/brafar-python"
         self.hash_digest = "sha256:e9a2c6ed1ca1ed635a465d94a93b0fda9d883156cfbc0c102f99655559e3a3d7"
 
+
     def run_repair(self, bug_info, repair_config_info):
+        # print(self.dir_expr)
         super(Brafar, self).run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
         status = self.run_command(
@@ -38,6 +40,7 @@ class Brafar(AbstractRepairTool):
         # self.run_command("mkdir /output")
         # self.run_command("mkdir /output/patches")
         # self.run_command("bash -c 'cp {}/src/*.diff /output/patches'".format(self.dir_expr))
+
         super(Brafar, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
