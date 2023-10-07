@@ -9,7 +9,9 @@ class APRER(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(APRER, self).__init__(self.name)
         self.image_name = "yeyehe/aprer:latest"
-        self.hash_digest = "7d5a41b7a9eb8ec744551752e57bc210b6bd39149990a15e0fb77e95526c100f"
+        self.hash_digest = (
+            "7d5a41b7a9eb8ec744551752e57bc210b6bd39149990a15e0fb77e95526c100f"
+        )
 
     def run_repair(self, bug_info, repair_config_info):
         super(APRER, self).run_repair(bug_info, repair_config_info)
@@ -28,7 +30,7 @@ class APRER(AbstractRepairTool):
         patch_directory = join(self.dir_output, "patches")
 
         # execute repair tool
-        #example : python3 start.py apache-commons-lang/bug-1/src/src/main/java apache-commons-lang/bug-1/src/src/test  apache-commons-lang/bug-1/src/target/classes apache-commons-lang/bug-1/src/target/test-classes org.apache.commons.lang3.RandomStringUtilsTest org.apache.commons.lang3.ValidateTest ./output
+        # example : python3 start.py apache-commons-lang/bug-1/src/src/main/java apache-commons-lang/bug-1/src/src/test  apache-commons-lang/bug-1/src/target/classes apache-commons-lang/bug-1/src/target/test-classes org.apache.commons.lang3.RandomStringUtilsTest org.apache.commons.lang3.ValidateTest ./output
         command = (
             f"python3 start.py "
             f"--dir_java_src {dir_java_src} "

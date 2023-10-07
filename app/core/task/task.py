@@ -265,7 +265,7 @@ def extract_experiment_logs(
             tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
         )
         if values.runs:
-            container.stop_container(tmp_container_id)
+            container.stop_container(tmp_container_id, 5)
             container.remove_container(tmp_container_id)
 
 
@@ -313,6 +313,9 @@ def prepare_tool_experiment_image(
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
+        # We assume that the container will always have the bash command available
+        # This line is included against some issues with the container lifetime
+        dock_file.write("CMD /bin/bash")
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(

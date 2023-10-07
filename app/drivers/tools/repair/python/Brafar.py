@@ -1,5 +1,6 @@
 import os
 from os.path import join
+
 from app.core import container
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -9,8 +10,9 @@ class Brafar(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "linnaxie/brafar-python"
-        self.hash_digest = "sha256:e9a2c6ed1ca1ed635a465d94a93b0fda9d883156cfbc0c102f99655559e3a3d7"
-
+        self.hash_digest = (
+            "sha256:e9a2c6ed1ca1ed635a465d94a93b0fda9d883156cfbc0c102f99655559e3a3d7"
+        )
 
     def run_repair(self, bug_info, repair_config_info):
         # print(self.dir_expr)

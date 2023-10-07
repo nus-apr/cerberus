@@ -10,40 +10,58 @@ class FAVOR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.dir_root = '/FAVOR/'
+        self.dir_root = "/FAVOR/"
         self.image_name = "dongqa/favor:latest"
-        self.hash_digest = "sha256:ad25ba1952883ce48d1023e4c0812fdbc6ba575b08c01baae87013d7729d81bf"
+        self.hash_digest = (
+            "sha256:ad25ba1952883ce48d1023e4c0812fdbc6ba575b08c01baae87013d7729d81bf"
+        )
 
     def prepare_for_repair(self, buggy_filepath, buggy_loc, test_case_path):
         # removing comments from source file and extracting the buggy function execute path
-        buggy_loc_strs = ' '.join(map(str, buggy_loc))
+        buggy_loc_strs = " ".join(map(str, buggy_loc))
         buggy_loc_command = f"--bug_loc {buggy_loc_strs}"
         self.emit_normal("preparing for repairing phase")
-        prepare_command = "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && " \
-                          "conda activate favor && cd {} && python3 preparing.py --buggy_filepath {} {} --test_case_path {} >> {}'".format(
-                            self.dir_root, buggy_filepath, buggy_loc_command, test_case_path, self.log_output_path)
+        prepare_command = (
+            "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && "
+            "conda activate favor && cd {} && python3 preparing.py --buggy_filepath {} {} --test_case_path {} >> {}'".format(
+                self.dir_root,
+                buggy_filepath,
+                buggy_loc_command,
+                test_case_path,
+                self.log_output_path,
+            )
+        )
 
-        status = self.run_command(prepare_command, log_file_path=self.log_output_path, dir_path=self.dir_root)
+        status = self.run_command(
+            prepare_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
         self.process_status(status)
 
     def run_repair(self, bug_info, repair_config_info):
         """
-             self.dir_logs - directory to store logs
-             self.dir_setup - directory to access setup scripts
-             self.dir_expr - directory for experiment
-             self.dir_output - directory to store artifacts/output
-         """
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
+        """
         super(FAVOR, self).run_repair(bug_info, repair_config_info)
-        buggy_loc = bug_info.get('line_numbers')
-        buggy_filename = bug_info.get('source_file')
-        buggy_filename = re.search(r'[^/]+\.(c|cpp)$', buggy_filename).group() if re.search(r'[^/]+\.(c|cpp)$',
-                                                                                         buggy_filename) else None
-        test_case = bug_info[self.key_exploit_list][0] if len(bug_info[self.key_exploit_list]) != 0 else 'none'
+        buggy_loc = bug_info.get("line_numbers")
+        buggy_filename = bug_info.get("source_file")
+        buggy_filename = (
+            re.search(r"[^/]+\.(c|cpp)$", buggy_filename).group()
+            if re.search(r"[^/]+\.(c|cpp)$", buggy_filename)
+            else None
+        )
+        test_case = (
+            bug_info[self.key_exploit_list][0]
+            if len(bug_info[self.key_exploit_list]) != 0
+            else "none"
+        )
         test_case_path = os.path.join(self.dir_expr, test_case)
         if buggy_filename is None:
-            self.emit_error('FAVOR could only fix C/C++ vulnerabilities')
+            self.emit_error("FAVOR could only fix C/C++ vulnerabilities")
 
-        buggy_file_path = os.path.join(self.dir_setup, 'valkyrie/', buggy_filename)
+        buggy_file_path = os.path.join(self.dir_setup, "valkyrie/", buggy_filename)
 
         if not self.is_file(buggy_file_path):
             self.error_exit("buggy source file not found")
@@ -55,9 +73,12 @@ class FAVOR(AbstractRepairTool):
         self.prepare_for_repair(buggy_file_path, buggy_loc, test_case_path)
         self.timestamp_log_start()
         timeout_h = str(repair_config_info[self.key_timeout])
-        favor_command = "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && cd {} && conda activate favor " \
-                        "&& timeout -k 5m {}h sh ./favor.sh >> {}'".format(self.dir_root, timeout_h,
-                                                                           self.log_output_path)
+        favor_command = (
+            "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && cd {} && conda activate favor "
+            "&& timeout -k 5m {}h sh ./favor.sh >> {}'".format(
+                self.dir_root, timeout_h, self.log_output_path
+            )
+        )
 
         status = self.run_command(
             favor_command,
@@ -75,16 +96,15 @@ class FAVOR(AbstractRepairTool):
         The parent method should be invoked at last to archive the results
         """
         generate_command = "python3 generate_patch.py"
-        status = self.run_command(generate_command,
-                                  log_file_path=self.log_output_path,
-                                  dir_path=self.dir_root)
+        status = self.run_command(
+            generate_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
         self.process_status(status)
-        patch_dir = join(self.dir_output, 'patches')
-        copy_command = "cp  {}/patches/*.patch {}".format(
-            self.dir_root, patch_dir)
-        status = self.run_command(copy_command,
-                                  log_file_path=self.log_output_path,
-                                  dir_path=self.dir_root)
+        patch_dir = join(self.dir_output, "patches")
+        copy_command = "cp  {}/patches/*.patch {}".format(self.dir_root, patch_dir)
+        status = self.run_command(
+            copy_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
         self.process_status(status)
         super(FAVOR, self).save_artifacts(dir_info)
         return
