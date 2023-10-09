@@ -11,7 +11,7 @@ class ET(AbstractRepairTool):
         super().__init__(self.name)
         #self.image_name = "et-dev"
         self.image_name = "xmcp/et:231004.2"
-        self.hash_digest = "sha256:68d39f183fa7c5bbba4e55d3150f9e1ae1ec027c6034eee18801dd6b5d04b6ec"
+        self.hash_digest = "sha256:78351cfb9bafad82d61bc594719f22f4f596ad52da669bc98bd856ef640e7c27"
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
