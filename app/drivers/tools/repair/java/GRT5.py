@@ -11,7 +11,7 @@ class GRT5(AbstractRepairTool):
         super().__init__(self.name)
         #self.image_name = "grt5-dev"
         self.image_name = "xmcp/grt5:231004.1"
-        self.hash_digest = "sha256:e900657c34545bd5320aacaef6c299f80b782449c86ae447c66984837af63b1e"
+        self.hash_digest = "sha256:3e8f4ddfe76fdc106d883369a3aa3d7529fed972c3683c573c8d432aa2eada4c"
 
     def run_repair(self, bug_info, repair_config_info):
         super().run_repair(bug_info, repair_config_info)
