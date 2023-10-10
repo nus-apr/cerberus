@@ -1,1 +1,42 @@
+import os
+from os.path import join
 
+from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
+
+
+class Darjeeling(AbstractRepairTool):
+    def __init__(self):
+        self.name = os.path.basename(__file__)[:-3].lower()
+        super(Darjeeling, self).__init__(self.name)
+        self.image_name = ""
+        self.hash_digest = ""
+
+    def run_repair(self, bug_info, repair_config_info):
+        super(Darjeeling, self).run_repair(bug_info, repair_config_info)
+        """
+            self.dir_logs - directory to store logs
+            self.dir_setup - directory to access setup scripts
+            self.dir_expr - directory for experiment
+            self.dir_output - directory to store artifacts/output
+        """
+        dir_c_src = join(self.dir_expr, "src", bug_info["source_directory"])
+        fix_file = join(self.dir_expr, "src", bug_info["fix_file"])
+        bug_id = join(self.dir_expr, "src", bug_info["bug_id"])
+        passing_test_list = join(self.dir_expr, "src", bug_info["passing_tests"])
+        failing_test_list = join(self.dir_expr, "src", bug_info["failing_tests"])
+        patch_directory = join(self.dir_output, "patches")
+
+        # execute repair tool
+        command = (
+            f"python3 prepare.py "
+            f"--dir_c_src {dir_c_src} "
+            f"--fix_file {fix_file} "
+            f"--bug_id {bug_id} "
+            f"--passing_test_list {passing_test_list} "
+            f"--failing_test_list {failing_test_list} "
+            f"--patch_directory {patch_directory}"
+        )
+        self.timestamp_log_start()
+        status = self.run_command(command, log_file_path=self.log_output_path)
+        self.process_status(status)
+        self.timestamp_log_end()
