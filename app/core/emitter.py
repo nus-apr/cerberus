@@ -116,7 +116,7 @@ def docker_command(message):
 
 def debug(message):
     if values.debug:
-        prefix = "\t\t(debug) "
+        prefix = "\t\t[debug] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
