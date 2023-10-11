@@ -45,7 +45,9 @@ class APRCompAIJava(AbstractBenchmark):
     def build(self, bug_index, container_id):
         self.emit_normal("building experiment subject")
         status = self.run_command(
-            container_id, "mvn compile -DskipTests", dir_path=join(self.dir_expr, "src")
+            container_id,
+            "mvn compile test-compile",
+            dir_path=join(self.dir_expr, "src"),
         )
         return status == 0
 
