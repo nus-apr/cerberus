@@ -15,6 +15,7 @@ class RepairCAT(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "jiang719/repaircat-functional-java:first-pr"
         self.bug_name = ""
+        self.hash_digest = "sha256:61525170e030"
     
     def run_repair(self, bug_info, repair_config_info):
         super(RepairCAT, self).run_repair(bug_info, repair_config_info)
