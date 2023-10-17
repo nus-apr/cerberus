@@ -363,6 +363,8 @@ def exec_command(
         container = client.containers.get(container_id)
         command = command.encode().decode("ascii", "ignore")
         print_command = "({}) {}".format(workdir, command)
+        if env:
+            print_command += f""" ({' '.join(f"{k}={v}" for k, v in env.items())})"""
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(  # type: ignore
             command,
