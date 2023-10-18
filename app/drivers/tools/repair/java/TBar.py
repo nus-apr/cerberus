@@ -107,6 +107,28 @@ class TBar(AbstractRepairTool):
 
         self.run_command(symlink_command)
 
+        failed_tests_file = join(
+            self.tbar_root_dir,
+            "FailedTestCases/",
+            f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
+        )
+
+        # FIXME: this does not accomodate subjects outside of defects4j
+        if self.run_command(f"test -f {failed_tests_file}") != 0:
+            self.error_exit(
+                f"{failed_tests_file} does not exist in FailedTestCases/;"
+                " Most likely, cerberus's bug_id of this bug is wrong; check metadata."
+            )
+
+        failed_tests_file_copy = join(
+            self.tbar_root_dir,
+            "FailedTestCases/",
+            f"{bug_id_str}.txt",
+        )
+
+        # actually, this is needed for non-maven projects, but do it anyway
+        self.run_command(f"ln -s {failed_tests_file} {failed_tests_file_copy}")
+
         fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
         fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
 
