@@ -103,7 +103,6 @@ class Configurations:
     __slack_config_file = open(join(values.dir_config, "slack.json"))
     __discord_config_file = open(join(values.dir_config, "discord.json"))
     __default_config_values: Dict[str, Any] = {
-        "stack-size": 15000,
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
