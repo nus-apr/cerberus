@@ -275,8 +275,16 @@ def build_container(
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
 
+        is_network_enabled = True
+        if container_config_dict:
+            is_network_enabled = container_config_dict.get(
+                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+            )
+
         container_run_args = {
             "detach": True,
+            "network_disabled": not is_network_enabled,
+            "entrypoint": "/bin/bash",
             "name": container_name,
             "volumes": volume_list,
             "privileged": True,
