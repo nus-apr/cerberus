@@ -267,8 +267,8 @@ def build_container(
 ) -> Optional[str]:
     client = get_client()
     emitter.normal("\t\t[framework] building docker container: ")
-    emitter.normal("\t\t\t container image {}".format(image_name))
-    emitter.normal("\t\t\t container name {}".format(container_name))
+    emitter.normal("\t\t\t container image: {}".format(image_name))
+    emitter.normal("\t\t\t container name: {}".format(container_name))
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
