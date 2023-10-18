@@ -43,7 +43,7 @@ def image_exists(image_name: str, tag_name="latest"):
     except IOError as ex:
         emitter.error(ex)
         raise RuntimeError(
-            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+            "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
         )
     for image in image_list:
         tag_list = image.tags  # type: ignore
