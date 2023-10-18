@@ -1,5 +1,6 @@
 import os
-from os.path import basename, join
+from os.path import basename
+from os.path import join
 
 from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -113,12 +114,9 @@ class TBar(AbstractRepairTool):
             f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
         )
 
-        # FIXME: this does not accomodate subjects outside of defects4j
-        if self.run_command(f"test -f {failed_tests_file}") != 0:
-            self.error_exit(
-                f"{failed_tests_file} does not exist in FailedTestCases/;"
-                " Most likely, cerberus's bug_id of this bug is wrong; check metadata."
-            )
+        self.emit_debug("I am looking for {}".format(failed_tests_file))
+        fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
+        fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
 
         failed_tests_file_copy = join(
             self.tbar_root_dir,
@@ -126,13 +124,20 @@ class TBar(AbstractRepairTool):
             f"{bug_id_str}.txt",
         )
 
-        # actually, this is needed for non-maven projects, but do it anyway
-        self.run_command(f"ln -s {failed_tests_file} {failed_tests_file_copy}")
-
-        fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
-        fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
-
-        if run_fl:
+        # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
+        test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
+        if test_failed_tests_file != 0:
+            self.emit_warning(
+                f"{failed_tests_file} does not exist in FailedTestCases/;"
+                "Will try to find if there is a hardcoded suspiciousness file"
+            )
+            test_fl_data = self.run_command(f"test -f {fl_data}")
+            if self.run_command(f"test -f {fl_data}") != 0:
+                self.error_exit(
+                    "Could not find a suspiciousness file. Unsupported state"
+                )
+            self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
+        elif run_fl:
             cmd = (
                 f"java -cp 'target/classes:target/dependency/*' "
                 f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
@@ -144,6 +149,8 @@ class TBar(AbstractRepairTool):
                 env=env,
                 log_file_path=self.log_output_path,
             )
+        # actually, this is needed for non-maven projects, but do it anyway
+        self.run_command(f"ln -s {failed_tests_file} {failed_tests_file_copy}")
 
         if not self.is_file(fl_data):
             if run_fl:
@@ -232,9 +239,7 @@ class TBar(AbstractRepairTool):
         dir_output_fix_patterns = join(
             self.tbar_root_dir, "OUTPUT", "FixPatterns", "TBar"
         )
-        list_output_fix_pattern_tbar_dir = self.list_dir(
-            dir_output_fix_patterns
-        )
+        list_output_fix_pattern_tbar_dir = self.list_dir(dir_output_fix_patterns)
         for dir_name in list_output_fix_pattern_tbar_dir:
             dir_fixed_bugs = join(dir_name, "FixedBugs")
             dir_fixed_bugs_ids_str = self.list_dir(dir_fixed_bugs)
@@ -258,15 +263,9 @@ class TBar(AbstractRepairTool):
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
         if self.is_file(self.log_output_path):
-            log_lines = self.read_file(
-                self.log_output_path, encoding="iso-8859-1"
-            )
-            self.stats.time_stats.timestamp_start = log_lines[0].replace(
-                "\n", ""
-            )
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace(
-                "\n", ""
-            )
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
                 if "Patch Candidate" in line:
