@@ -21,7 +21,7 @@ cached_client = None
 
 def get_client():
     """
-    Utility method to track all client usages
+    Utility method to track all client usages.
     """
     global cached_client
     if not cached_client:
