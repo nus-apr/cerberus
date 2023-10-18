@@ -207,6 +207,7 @@ def process_config_file(parsed_args):
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
     values.cpus = config.general.cpus
+    values.gpus = config.general.gpus
     return config
 
 
