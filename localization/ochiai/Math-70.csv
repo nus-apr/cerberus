@@ -1,0 +1,9 @@
+org.apache.commons.math.analysis.solvers.BisectionSolver,72,1
+org.apache.commons.math.analysis.solvers.BisectionSolver,66,0.707
+org.apache.commons.math.analysis.solvers.BisectionSolver,79,0.5
+org.apache.commons.math.analysis.solvers.BisectionSolver,80,0.5
+org.apache.commons.math.analysis.solvers.BisectionSolver,85,0.5
+org.apache.commons.math.analysis.solvers.BisectionSolver,86,0.5
+org.apache.commons.math.analysis.solvers.BisectionSolver,87,0.5
+org.apache.commons.math.analysis.solvers.BisectionSolver,88,0.5
+org.apache.commons.math.analysis.solvers.UnivariateRealSolverUtils,223,0.378

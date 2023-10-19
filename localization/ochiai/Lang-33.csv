@@ -1,0 +1,14 @@
+org.apache.commons.lang3.ArrayUtils,4536,0.15
+org.apache.commons.lang3.text.ExtendedMessageFormat,150,0.15
+org.apache.commons.lang3.text.ExtendedMessageFormat,151,0.15
+org.apache.commons.lang3.text.ExtendedMessageFormat,152,0.15
+org.apache.commons.lang3.time.DateUtils,1689,0.149
+org.apache.commons.lang3.math.Fraction,634,0.118
+org.apache.commons.lang3.math.Fraction,638,0.118
+org.apache.commons.lang3.math.Fraction,652,0.118
+org.apache.commons.lang3.math.Fraction,653,0.118
+org.apache.commons.lang3.math.Fraction,656,0.118
+org.apache.commons.lang3.time.DateUtils,1651,0.116
+org.apache.commons.lang3.reflect.MemberUtils,59,0.11
+org.apache.commons.lang3.time.DateUtils,1652,0.106
+org.apache.commons.lang3.time.DateUtils,1654,0.106
