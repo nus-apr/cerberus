@@ -230,8 +230,19 @@ def create_running_container(
     )
 
     emitter.information("\t\t[framework] building main container for experiment")
+    is_network_enabled = True
+    if container_config_info:
+        is_network_enabled = container_config_info.get(
+            definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+        )
     container_id = container.build_container(
-        container_name, volume_list, image_name, cpu, gpu, container_config_info
+        container_name,
+        volume_list,
+        image_name,
+        cpu,
+        gpu,
+        container_config_info,
+        not is_network_enabled,
     )
     if not container_id:
         utilities.error_exit("Container was not created successfully")

@@ -264,6 +264,7 @@ def build_container(
     cpu: List[str],
     gpu: List[str],
     container_config_dict: Optional[Dict[Any, Any]] = None,
+    disable_network: bool = False,
 ) -> Optional[str]:
     client = get_client()
     emitter.normal("\t\t[framework] building docker container: ")
@@ -275,15 +276,8 @@ def build_container(
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
 
-        is_network_enabled = True
-        if container_config_dict:
-            is_network_enabled = container_config_dict.get(
-                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
-            )
-
         container_run_args = {
             "detach": True,
-            "network_disabled": not is_network_enabled,
             "entrypoint": "/bin/bash",
             "name": container_name,
             "volumes": volume_list,
@@ -291,6 +285,10 @@ def build_container(
             "cpuset_cpus": ",".join(cpu),
             "tty": True,
         }
+
+        if disable_network:
+            container_run_args["network_mode"] = None
+            container_run_args["network_disabled"] = False
 
         if values.use_gpu and len(gpu) > 0:
             # Check that the docker version has DeviceRequests
@@ -320,11 +318,6 @@ def build_container(
                 definitions.KEY_CONTAINER_MEM_LIMIT, default_mem_limit
             )
 
-            if not container_config_dict.get(
-                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
-            ):
-                container_run_args["network_mode"] = None
-                container_run_args["network_disabled"] = False
         else:
             container_run_args["mem_limit"] = default_mem_limit
 
