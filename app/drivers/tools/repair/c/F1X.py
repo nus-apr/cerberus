@@ -68,8 +68,8 @@ class F1X(AbstractRepairTool):
 
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        fix_file = bug_info[self.key_fix_file]
-        fix_location = bug_info[self.key_fix_loc]
+        fix_file = bug_info.get(self.key_fix_file, None)
+        fix_location = bug_info.get(self.key_fix_loc, None)
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         timeout = str(repair_config_info[self.key_timeout])
@@ -88,9 +88,11 @@ class F1X(AbstractRepairTool):
             for test_id in passing_test_list:
                 test_id_list += test_id + " "
 
-        abs_path_buggy_file = join(
-            self.dir_expr, "src", fix_location if fix_location else fix_file
-        )
+        abs_path_buggy_file = None
+        if fix_location or fix_file:
+            abs_path_buggy_file = join(
+                self.dir_expr, "src", fix_location if fix_location else fix_file
+            )
         dir_patch = f"{self.dir_output}/patches"
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")
@@ -98,7 +100,8 @@ class F1X(AbstractRepairTool):
         self.timestamp_log_start()
 
         repair_command = "timeout -k 5m {}h f1x ".format(str(timeout))
-        repair_command += " -f {0} ".format(abs_path_buggy_file)
+        if abs_path_buggy_file:
+            repair_command += " -f {0} ".format(abs_path_buggy_file)
         repair_command += " -t {0} ".format(test_id_list)
         repair_command += " -T 15000"
         repair_command += " --output-top 5"
