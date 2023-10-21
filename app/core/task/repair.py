@@ -25,15 +25,21 @@ def run_repair(
     container_id: Optional[str],
     benchmark_name: str,
 ):
-    fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = list(
-        map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
-    )
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
+    fix_source_file = ""
+    fix_line_numbers = []
     if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+        fix_line_numbers = list(
+            map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
+        )
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
+    elif repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
+        if definitions.KEY_FIX_FILE in experiment_info:
+            del experiment_info[definitions.KEY_FIX_FILE]
+
+    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
