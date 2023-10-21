@@ -326,17 +326,17 @@ def prepare_tool_experiment_image(
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
         # We assume that the container will always have the bash command available
         # This line is included against some issues with the container lifetime
-        dock_file.write("CMD /bin/bash")
+        dock_file.write("CMD /bin/bash\n")
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0".format(
+                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
         if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0".format(
+                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
                     join(dir_info["container"]["setup"], "install_deps")
                 )
             )
