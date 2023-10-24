@@ -1,5 +1,4 @@
 import os
-import json
 from pathlib import Path
 
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -17,7 +16,7 @@ class ET(AbstractRepairTool):
         super(ET, self).run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
 
-        print('!!! begin')
+        #print('!!! begin')
         #return #####
 
         assert bug_info['language']=='java'
@@ -86,7 +85,7 @@ class ET(AbstractRepairTool):
         self.process_status(ret)
         self.timestamp_log_end()
 
-        print('!!! end')
+        #print('!!! end')
 
     def save_artifacts(self, dir_info):
         """

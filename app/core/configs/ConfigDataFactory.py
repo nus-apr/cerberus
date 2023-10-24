@@ -1,6 +1,7 @@
 import multiprocessing
 from typing import List
 
+from app.core import utilities
 from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.ConfigFieldsEnum import ConfigFieldsEnum
@@ -26,6 +27,12 @@ class ConfigDataFactory:
                 2,
                 general_config_dict.get(
                     ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+                ),
+            ),
+            gpus=max(
+                0,
+                general_config_dict.get(
+                    ConfigFieldsEnum.GPUS.value, utilities.get_gpu_count()
                 ),
             ),
         )

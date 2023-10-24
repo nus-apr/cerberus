@@ -103,10 +103,6 @@ class Configurations:
     __slack_config_file = open(join(values.dir_config, "slack.json"))
     __discord_config_file = open(join(values.dir_config, "discord.json"))
     __default_config_values: Dict[str, Any] = {
-        "depth": 3,
-        "iteration-limit": 1,
-        "patch-rank-limit": 5,
-        "stack-size": 15000,
         "use-cache": False,
         "use-gpu": False,
         "use-container": True,
@@ -128,6 +124,7 @@ class Configurations:
         "parallel": False,
         "has-config-file": False,
         "all-cpu-count": 1,
+        "all-gpu-count": 0,
         # "task-cpu-count": 1,
         "runs": 1,
         "bug-id-list": [],
@@ -238,6 +235,9 @@ class Configurations:
 
         if arg_list.cpu_count:
             self.__runtime_config_values["all-cpu-count"] = arg_list.cpu_count
+
+        if arg_list.gpu_count:
+            self.__runtime_config_values["all-gpu-count"] = arg_list.gpu_count
 
         # if arg_list.task_cpu_count:
         #    self.__runtime_config_values["task-cpu-count"] = arg_list.task_cpu_count
@@ -531,6 +531,13 @@ class Configurations:
                 self.__runtime_config_values["all-cpu-count"],
             ),
         )
+        values.gpus = max(
+            0,
+            min(
+                utilities.get_gpu_count(), self.__runtime_config_values["all-gpu-count"]
+            ),
+        )
+
         # values.cpu_task = max(1,self.__runtime_config_values["task-cpu-count"])
         values.docker_host = self.__runtime_config_values.get(
             "docker-host", values.docker_host

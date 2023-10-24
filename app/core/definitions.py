@@ -50,6 +50,7 @@ KEY_TEST_ALL_CMD = "test_all_cmd"
 KEY_FAILING_MODULE_DIRECTORY = "failing_module"
 
 ARG_ALL_CPU_COUNT = "--cpu-count"
+ARG_ALL_GPU_COUNT = "--gpu-count"
 ARG_TASK_CPU_COUNT = "--task-cpu-count"
 ARG_USE_GPU = "--use-gpu"
 ARG_CACHE = "--cache"

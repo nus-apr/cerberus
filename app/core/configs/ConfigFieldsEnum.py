@@ -20,6 +20,7 @@ class ConfigFieldsEnum(Enum):
 
     CPU_COUNT = "cpu-count"
     GPU_COUNT = "gpu-count"
+    GPUS = "gpus"
     CPUS = "cpus"
     MEM_LIMIT = "mem-limit"
     ENABLE_NETWORK = "enable-network"

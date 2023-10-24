@@ -2,6 +2,7 @@ import os
 from os.path import basename
 from os.path import join
 
+from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -46,32 +47,30 @@ class TBar(AbstractRepairTool):
             dir_path=join(self.dir_expr, "src"),
         )
 
-        # prepare the required parameters
-        parameters = self.create_parameters(bug_info)
-
-        command = (
-            'mvn compile exec:java -Dexec.mainClass="edu.lu.uni.serval.tbar.main.Main"'
-        )
-        args = (
-            "FAILING_TESTS='{}' ".format(" ".join(bug_info[self.key_failing_tests]))
-            + "CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
-            + "TEST_CLASS_DIRECTORY={} ".format(bug_info[self.key_dir_class])
-            + "SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_source])
-            + "TEST_SOURCE_DIRECTORY={} ".format(bug_info[self.key_dir_tests])
+        env = dict(
+            FAILING_TESTS=(" ".join(bug_info[self.key_failing_tests])),
+            CLASS_DIRECTORY=f"{bug_info[self.key_dir_class]}/",
+            TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
+            SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
+            TEST_SOURCE_DIRECTORY=f"{bug_info[self.key_dir_tests]}/",
         )
 
         # start running
         self.timestamp_log_start()
+
+        run_fl = repair_config_info[definitions.KEY_CONFIG_FIX_LOC] != "dev"
+        parameters = self.create_parameters(bug_info, run_fl, env)
+
         tbar_command = (
-            "bash -c '{4} timeout -k 5m {0}h {1} -Dexec.args=\"{2} {3}\"'".format(
-                timeout_h, command, parameters, additional_tool_param, args
-            )
+            f"timeout -k 10s {timeout_h}h java -cp 'target/classes:target/dependency/*'"
+            f" edu.lu.uni.serval.tbar.main.Main {parameters} {additional_tool_param}"
         )
 
         status = self.run_command(
             tbar_command,
             log_file_path=self.log_output_path,
             dir_path=self.tbar_root_dir,
+            env=env,
         )
 
         self.process_status(status)
@@ -79,7 +78,7 @@ class TBar(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def create_parameters(self, experiment_info):
+    def create_parameters(self, experiment_info, run_fl, env):
         """
         Formats of execution cmds:
             * ./PerfectFLTBarRunner.sh <Bug_Data_Path> <Bug_ID> <defects4j_Home> <Generate_All_Possible_Patches_Bool>
@@ -106,15 +105,60 @@ class TBar(AbstractRepairTool):
         symlink_command = "ln -s {0} {1}".format(
             bug_data_path_real, bug_data_path_symlink
         )
+
         self.run_command(symlink_command)
-        fl_data = join(
-            self.tbar_root_dir, "SuspiciousCodePositions", bug_id_str, "Ochiai.txt"
+
+        failed_tests_file = join(
+            self.tbar_root_dir,
+            "FailedTestCases/",
+            f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
         )
 
-        if not self.is_file(fl_data):
-            self.error_exit(
-                "There is no fault localization data. This is currently unsupported"
+        self.emit_debug("I am looking for {}".format(failed_tests_file))
+        fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
+        fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
+
+        failed_tests_file_copy = join(
+            self.tbar_root_dir,
+            "FailedTestCases/",
+            f"{bug_id_str}.txt",
+        )
+
+        # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
+        test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
+        if test_failed_tests_file != 0:
+            self.emit_warning(
+                f"{failed_tests_file} does not exist in FailedTestCases/;"
+                "Will try to find if there is a hardcoded suspiciousness file"
             )
+            test_fl_data = self.run_command(f"test -f {fl_data}")
+            if self.run_command(f"test -f {fl_data}") != 0:
+                self.error_exit(
+                    "Could not find a suspiciousness file. Unsupported state"
+                )
+            self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
+        elif run_fl:
+            cmd = (
+                f"java -cp 'target/classes:target/dependency/*' "
+                f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
+                f" {self.dir_expr} {bug_id_str}"
+            )
+            self.run_command(
+                cmd,
+                dir_path=self.tbar_root_dir,
+                env=env,
+                log_file_path=self.log_output_path,
+            )
+        # actually, this is needed for non-maven projects, but do it anyway
+        self.run_command(f"ln -s {failed_tests_file} {failed_tests_file_copy}")
+
+        if not self.is_file(fl_data):
+            if run_fl:
+                msg = f"Fault localization did not generate expected file: {fl_data}"
+            else:
+                msg = f"Fault localization not provided; expected {fl_data}"
+            self.error_exit(msg)
+
             # emitter.debug("Making 'weak' fault Localization")
             # self.run_command(
             #     "mkdir -p {}".format(

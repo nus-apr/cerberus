@@ -202,7 +202,7 @@ class AbstractTool(AbstractDriver):
             )
             if (status == 137 or status == 124) and self.container_id:
                 # Due to the container being killed, we restart it to be able to pull out the analysis info
-                container.stop_container(self.container_id)
+                container.stop_container(self.container_id, 5)
                 container.start_container(self.container_id)
 
         else:
@@ -218,7 +218,23 @@ class AbstractTool(AbstractDriver):
 
     def check_tool_exists(self) -> None:
         """Check that the tool is available either as an image or locally"""
+
+        def get_digest(image):
+            return "".join(
+                next(iter(image.attrs.get("RepoDigests", [])), "@").split("@")[1:]
+            )
+
         if values.use_container:
+            if values.secure_hash:
+                emitter.debug(
+                    "\t[framework] will check whether the final image that is locally available aligns has a hash digest,starting with {}".format(
+                        self.hash_digest
+                    )
+                )
+                if self.hash_digest == "":
+                    emitter.warning(
+                        "\t[framework] hash is not set. Will pass without checks"
+                    )
             if not self.hash_digest.startswith("sha256:"):
                 self.hash_digest = "sha256:" + self.hash_digest
             if self.image_name is None:
@@ -243,7 +259,12 @@ class AbstractTool(AbstractDriver):
                             self.name, repo_name, tag_name
                         )
                     )
-                if values.secure_hash and not image.id.startswith(self.hash_digest):
+
+                image_hash_digest = get_digest(image)
+
+                if values.secure_hash and not image_hash_digest.startswith(
+                    self.hash_digest
+                ):
                     utilities.error_exit(
                         "\t[framework] pulled an image for {} whose hash did start with the prefix in the driver. aborting".format(
                             self.name
@@ -259,26 +280,46 @@ class AbstractTool(AbstractDriver):
                 )
                 # Get the local image
                 local_image = container.get_image(repo_name, tag_name)
+                local_image_hash_digest = get_digest(local_image)
+
                 # Then try pulling. If it is the same one we are quick
                 # If not we have to wait but it is safer than getting stale results.
                 # In theory this has a supply chain vulnerability but we can assume
                 # That the storage is safe
                 if values.use_latest_image:
                     remote_image = container.pull_image(repo_name, tag_name)
+                    remote_image_hash_digest = get_digest(remote_image)
 
-                    if remote_image and local_image.id != remote_image.id:  # type: ignore
+                    if remote_image and remote_image_hash_digest != local_image_hash_digest:  # type: ignore
                         emitter.information(
                             "\t[framework] docker image {}:{} is not the same as the one in the repository. Will have to rebuild".format(
                                 repo_name, tag_name
                             )
                         )
-                        if values.secure_hash and not remote_image.id.startswith(
-                            self.hash_digest
+                        values.rebuild_all = True
+                        if (
+                            values.secure_hash
+                            and not remote_image_hash_digest.startswith(
+                                self.hash_digest
+                            )
                         ):
                             utilities.error_exit(
                                 "\t[framework] secure mode is enabled. aborting"
                             )
-                        values.rebuild_all = True
+                else:
+                    emitter.debug(
+                        "\t[framework] checking local image {}".format(
+                            local_image_hash_digest
+                        )
+                    )
+                    if values.secure_hash and not local_image_hash_digest.startswith(
+                        self.hash_digest
+                    ):
+                        utilities.error_exit(
+                            "\t[framework] local image for {} hash a which does not align with the one in the driver. aborting".format(
+                                self.name
+                            )
+                        )
 
         else:
             local_path = shutil.which(self.name.lower())

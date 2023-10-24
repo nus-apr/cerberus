@@ -4,6 +4,7 @@ from argparse import HelpFormatter
 from operator import attrgetter
 
 from app.core import definitions
+from app.core import utilities
 from app.core import values
 
 
@@ -249,6 +250,13 @@ def parse_args():
         help="max amount of CPU cores which can be used by Cerberus",
         type=int,
         default=max(1, multiprocessing.cpu_count() - 2),
+    )
+
+    optional.add_argument(
+        definitions.ARG_ALL_GPU_COUNT,
+        help="max amount of GPU cores which can be used by Cerberus",
+        type=int,
+        default=max(0, utilities.get_gpu_count()),
     )
 
     # optional.add_argument(
