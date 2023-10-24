@@ -130,7 +130,9 @@ def generate_dir_info(
     return dir_info
 
 
-def construct_job_summary(job_identifier: str, dir: str, results_summary: Any) -> str:
+def construct_job_summary(
+    job_identifier: str, dir: str, results_summary: Dict[str, Any]
+) -> str:
     json_f_name = f"experiment-summary-{job_identifier}.json"
     summary_f_path = join(dir, json_f_name)
     writer.write_as_json(results_summary, summary_f_path)
@@ -381,13 +383,15 @@ def prepare_experiment(
 
 
 def prepare_experiment_tool(
-    bug_image_id: str,
+    bug_image_id: Optional[str],
     repair_tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
     tag: Optional[str] = None,
 ):
     if values.use_container:
+        if not bug_image_id:
+            utilities.error_exit("Bug image id not provided")
         emitter.information("\t\t[framework] preparing image {}".format(image_name))
         if (
             not container.image_exists(image_name)
