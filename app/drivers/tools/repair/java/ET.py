@@ -9,8 +9,8 @@ class ET(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         #self.image_name = "et-dev"
-        self.image_name = "xmcp/et:231024.2"
-        self.hash_digest = "sha256:208b8feeb1697042e0c9e89a18f9210a64b23ed510b9c248704cc3cd0fd9bd00"
+        self.image_name = "xmcp/et:231024.3"
+        self.hash_digest = "sha256:76644b641521cd0d3917c2bb1e5e99d7d5b9c54fef3f070c85455c5f7f0acd61"
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
