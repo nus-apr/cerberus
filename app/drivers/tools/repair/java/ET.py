@@ -10,8 +10,8 @@ class ET(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         #self.image_name = "et-dev"
-        self.image_name = "xmcp/et:231004.2"
-        self.hash_digest = "sha256:78351cfb9bafad82d61bc594719f22f4f596ad52da669bc98bd856ef640e7c27"
+        self.image_name = "xmcp/et:231024.1"
+        self.hash_digest = "sha256:4a93fdf3c934368e6768a322cd362fbcc9ecd53340632692e242075a0d8aa17d"
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
@@ -75,8 +75,8 @@ class ET(AbstractRepairTool):
             'test_sh_fn': bug_info['test_script'],
 
             'total_timeout_s': int(float(repair_config_info['timeout'])*3600),
-            'cpu_count': len(repair_config_info['cpus']),
-            'gpu_count': len(repair_config_info['gpus']),
+            'cpus': repair_config_info['cpus'],
+            'gpus': repair_config_info['gpus'],
         }, '/root/workflow/info.json')
 
         ret = self.run_command('bash -c "python3 /root/workflow/main.py"', log_file_path='/root/workflow/log.txt')
@@ -140,7 +140,7 @@ class ET(AbstractRepairTool):
         self.stats.patch_stats.enumerations = stats['n_validated']
         self.stats.patch_stats.non_compilable = stats['n_validated'] - stats['n_compilable']
         self.stats.patch_stats.plausible = stats['n_plausible']
-        self.stats.patch_stats.generated = stats['n_plausible']
+        self.stats.patch_stats.generated = min(5, stats['n_plausible'])
 
         self.stats.error_stats.is_error = False
 
