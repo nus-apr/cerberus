@@ -324,9 +324,9 @@ def prepare_tool_experiment_image(
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-        # We assume that the container will always have the bash command available
+        # We assume that the container will always have the sh command available
         # This line is included against some issues with the container lifetime
-        dock_file.write("CMD /bin/bash\n")
+        dock_file.write("CMD /bin/sh\n")
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
