@@ -130,11 +130,13 @@ class AbstractTool(AbstractDriver):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_end = timestamp_txt
 
     def timestamp_log_start(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}\n"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_start = timestamp_txt
 
     def timestamp_log_end(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
