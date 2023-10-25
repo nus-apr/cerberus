@@ -113,7 +113,8 @@ class F1X(AbstractRepairTool):
             repair_command += " -v "
 
         dry_command = repair_command + " --disable-dteq"
-        self.run_command(dry_command, self.log_output_path, self.dir_expr)
+        dir_src = join(self.dir_expr, "src")
+        self.run_command(dry_command, self.log_output_path, dir_src)
         all_command = (
             repair_command
             + " --enable-assignment --disable-dteq --enable-validation  -a -o {}  ".format(
@@ -122,7 +123,7 @@ class F1X(AbstractRepairTool):
         )
         if additional_tool_param:
             all_command = all_command + " " + additional_tool_param
-        status = self.run_command(all_command, self.log_output_path, self.dir_expr)
+        status = self.run_command(all_command, self.log_output_path, dir_src)
 
         self.process_status(status)
         self.emit_highlight("log file: {0}".format(self.log_output_path))
