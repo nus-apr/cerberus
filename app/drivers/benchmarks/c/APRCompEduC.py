@@ -40,7 +40,7 @@ class APRCompEduC(AbstractBenchmark):
             container_id,
             command_str,
             self.log_build_path,
-            os.path.join(self.dir_expr, "src"),
+            os.path.join(self.dir_setup),
         )
         self.emit_debug(
             "setup took {} second(s)".format((datetime.now() - time).total_seconds())
@@ -61,7 +61,7 @@ class APRCompEduC(AbstractBenchmark):
             container_id,
             command_str,
             self.log_test_path,
-            os.path.join(self.dir_expr, "src"),
+            os.path.join(self.dir_setup),
         )
         self.emit_debug(
             " Test took {} second(s)".format((datetime.now() - time).total_seconds())
