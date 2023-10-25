@@ -36,7 +36,6 @@ class AbstractRepairTool(AbstractTool):
         self.stats = RepairToolStats()
         super().__init__(tool_name)
 
-    @abc.abstractmethod
     def analyse_output(
         self, dir_info, bug_id: str, fail_list: List[str]
     ) -> RepairToolStats:
@@ -57,6 +56,14 @@ class AbstractRepairTool(AbstractTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
+        patch_dir = join(
+            self.dir_output,
+            "patch-valid" if self.use_valkyrie else "patches",
+        )
+
+        if self.is_dir(patch_dir):
+            self.stats.patch_stats.generated = len(self.list_dir(patch_dir))
+
         return self.stats
 
     def instrument(self, bug_info: Dict[str, Any]) -> None:
