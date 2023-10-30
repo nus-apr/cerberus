@@ -218,7 +218,7 @@ class AbstractTool(AbstractDriver):
         # self.check_tool_exists()
         return
 
-    def check_tool_exists(self) -> None:
+    def check_tool_exists(self, tag_name_default="latest") -> None:
         """Check that the tool is available either as an image or locally"""
 
         def get_digest(image):
@@ -247,7 +247,7 @@ class AbstractTool(AbstractDriver):
                 repo_name, tag_name = self.image_name.split(":")
             else:
                 repo_name = self.image_name
-                tag_name = "latest"
+                tag_name = tag_name_default
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
                     "\t[framework] docker image {}:{} not found in local docker registry".format(
