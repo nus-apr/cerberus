@@ -6,6 +6,7 @@ import traceback
 from asyncio import AbstractEventLoop
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
+from os.path import join
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -33,9 +34,11 @@ from app.core import emitter
 from app.core import main
 from app.core import utilities
 from app.core import values
+from app.core import writer
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
 from app.core.task.stats import RepairToolStats
+from app.core.task.stats import ToolStats
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.TaskType import TaskType
@@ -58,7 +61,7 @@ job_time_map_mutex = threading.Lock()
 
 job_condition = threading.Condition()
 
-Result = Tuple[str, TaskStatus, Dict[str, str]]
+Result = Tuple[str, TaskStatus, Dict[str, str], ToolStats]
 
 
 class Cerberus(App[List[Result]]):
@@ -103,17 +106,18 @@ class Cerberus(App[List[Result]]):
 
         with job_condition:
             job_condition.notify_all()
-        for (id, (task, tool)) in self.jobs.items():
+        for id, (task, tool) in self.jobs.items():
             if not task.done():
                 if tool.container_id:
                     container.stop_container(tool.container_id)
                 task.cancel()
-                self.finished_subjects.append((id, TaskStatus.CANCELLED, {}))
+                self.finished_subjects.append(
+                    (id, TaskStatus.CANCELLED, {}, ToolStats())
+                )
         self._return_value = self.finished_subjects
         return await super()._on_exit_app()
 
     def on_mount(self):
-
         self.selected_subject = None
         self.finished_subjects: List[Result] = []
 
@@ -155,7 +159,7 @@ class Cerberus(App[List[Result]]):
                 utilities.error_exit(
                     "CustomDataTable does not have ID. This should not happen"
                 )
-            for (column_name, column_key) in zip(Cerberus.COLUMNS.keys(), column_keys):
+            for column_name, column_key in zip(Cerberus.COLUMNS.keys(), column_keys):
                 Cerberus.COLUMNS[column_name][table.id] = column_key
 
     def _on_idle(self) -> None:
@@ -165,7 +169,7 @@ class Cerberus(App[List[Result]]):
         to_del = []
 
         if job_time_map_mutex.acquire(timeout=0.1):
-            for (job_id, info) in job_time_map.items():
+            for job_id, info in job_time_map.items():
                 (start, limit, tool) = info
                 if now - start > limit:
                     if not self.jobs[job_id][0].done():
@@ -286,6 +290,7 @@ class Cerberus(App[List[Result]]):
     ):
         self.query_one(Static).update("Cerberus is preparing the subject images.")
         complete_images: queue.Queue[Tuple[str, str, bool]] = queue.Queue(0)
+
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_subjects_job(
             benchmark: AbstractBenchmark, experiment_item, job_identifier
@@ -396,6 +401,7 @@ class Cerberus(App[List[Result]]):
         complete_images: queue.Queue[
             Tuple[str, str, Optional[str], bool]
         ] = queue.Queue(0)
+
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_tool_subjects_job(
             benchmark: AbstractBenchmark,
@@ -432,6 +438,7 @@ class Cerberus(App[List[Result]]):
                         bug_name, subject_name, tool.name
                     )
                 )
+
                 tool_experiment_image_id = task.prepare_experiment_tool(
                     experiment_image_id,
                     tool,
@@ -481,7 +488,6 @@ class Cerberus(App[List[Result]]):
                 bug_index,
             ),
         ) in tasks:
-
             image_name = main.create_task_image_identifier(
                 benchmark,
                 tool,
@@ -600,7 +606,7 @@ class Cerberus(App[List[Result]]):
                 container_profile,
                 image_name,
                 key,
-                task_type,
+                cast(TaskType, task_type),
                 run,
                 "N/A" if tool_tag == "" else tool_tag,
                 task_config,
@@ -619,7 +625,7 @@ class Cerberus(App[List[Result]]):
         loop = asyncio.get_running_loop()
 
         def job_allocated_job():
-            values.task_type.set(message.task_type)
+            values.task_type.set(cast(TaskType, message.task_type))
             cpus: List[str] = []
             gpus: List[str] = []
 
@@ -653,7 +659,7 @@ class Cerberus(App[List[Result]]):
                     job_condition.wait()
                 if self.jobs_cancelled:
                     self.finished_subjects.append(
-                        (message.identifier, TaskStatus.CANCELLED, {})
+                        (message.identifier, TaskStatus.CANCELLED, {}, ToolStats())
                     )
                     job_condition.notify(1)
                     return
@@ -780,7 +786,7 @@ class Cerberus(App[List[Result]]):
                         row_data,
                         dir_info["local"] if dir_info else {},
                         message.tool.stats,
-                        message.task_type,
+                        cast(TaskType, message.task_type),
                     )
                 )
             with job_condition:
@@ -882,7 +888,7 @@ class Cerberus(App[List[Result]]):
         self.jobs_remaining_mutex.release()
 
         self.finished_subjects.append(
-            (message.key, message.status, message.directory_info)
+            (message.key, message.status, message.directory_info, message.results)
         )
 
         job_time_map_mutex.acquire(blocking=True)
@@ -1021,7 +1027,7 @@ def setup_ui(tasks: Optional[TaskList] = None):
     return len(experiment_results) if experiment_results else 0
 
 
-def print_results(experiment_results):
+def print_results(experiment_results: Optional[List[Result]]):
     values.ui_active = False
     emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:
@@ -1040,7 +1046,10 @@ def print_results(experiment_results):
                 )
             )
         )
-        for experiment, status, dir_info in experiment_results:
+
+        summary_map = {}
+        for experiment, status, dir_info, tool_stats in experiment_results:
+            summary_map[experiment] = tool_stats.get_dict()
             emitter.information(
                 "\t[framework] Experiment {} has final status {}\n\tlogs directory {}\n\tresults directory {}\n\tsummary file {}\n".format(
                     experiment,
@@ -1050,3 +1059,15 @@ def print_results(experiment_results):
                     dir_info.get("summary", "N/A"),
                 )
             )
+
+        aggregation_file = join(
+            values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
+        )
+
+        emitter.information(
+            "\t[framework] Inserting an aggregation of the data at {}".format(
+                aggregation_file
+            )
+        )
+
+        writer.write_as_json(summary_map, aggregation_file)

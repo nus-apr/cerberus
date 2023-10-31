@@ -130,11 +130,13 @@ class AbstractTool(AbstractDriver):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_end = timestamp_txt
 
     def timestamp_log_start(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}\n"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_start = timestamp_txt
 
     def timestamp_log_end(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
@@ -216,7 +218,7 @@ class AbstractTool(AbstractDriver):
         # self.check_tool_exists()
         return
 
-    def check_tool_exists(self) -> None:
+    def check_tool_exists(self, tag_name_default="latest") -> None:
         """Check that the tool is available either as an image or locally"""
 
         def get_digest(image):
@@ -245,7 +247,7 @@ class AbstractTool(AbstractDriver):
                 repo_name, tag_name = self.image_name.split(":")
             else:
                 repo_name = self.image_name
-                tag_name = "latest"
+                tag_name = tag_name_default
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
                     "\t[framework] docker image {}:{} not found in local docker registry".format(

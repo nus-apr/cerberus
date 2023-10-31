@@ -1,4 +1,5 @@
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Optional
 
@@ -41,7 +42,7 @@ class JobAllocate(Message):
         self.container_profile = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
-        self.task_type = task_type
+        self.task_type = cast(TaskType, task_type)
         self.task_config = task_config
         self.run = run
         self.tag = tag
@@ -66,7 +67,7 @@ class JobFinish(Message):
         self.row_data = row_data
         self.directory_info = directory_info
         self.results = results
-        self.task_type = task_type
+        self.task_type = cast(TaskType, task_type)
         super().__init__()
 
 
