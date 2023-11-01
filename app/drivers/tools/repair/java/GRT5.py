@@ -9,15 +9,17 @@ class GRT5(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        #self.image_name = "grt5-dev"
+        # self.image_name = "grt5-dev"
         self.image_name = "xmcp/grt5:231029.1"
-        self.hash_digest = "sha256:a77d4e8a6d71cc41b7bda2b7e258e8956de0163789d6fbd730a983f75e8f2f21"
+        self.hash_digest = (
+            "sha256:a77d4e8a6d71cc41b7bda2b7e258e8956de0163789d6fbd730a983f75e8f2f21"
+        )
 
     def run_repair(self, bug_info, repair_config_info):
         super().run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
 
-        #print("!!! begin")
+        # print("!!! begin")
         # return #####
 
         assert bug_info["language"] == "java"
@@ -27,13 +29,12 @@ class GRT5(AbstractRepairTool):
         setup_path = Path(self.dir_setup).resolve()
         # print(bug_info, repair_config_info, self.container_id)
 
-
         # test list maybe `com.clz::mtd` or `com.clz`, let's make them into `com.clz`
 
         test_failed = []
         test_failed_set = set()
-        for t in bug_info['failing_test']:
-            t = t.partition('::')[0]
+        for t in bug_info["failing_test"]:
+            t = t.partition("::")[0]
         for t in bug_info["failing_test"]:
             t = t.partition("::")[0]
             if t not in test_failed_set:
@@ -48,32 +49,39 @@ class GRT5(AbstractRepairTool):
                 test_passed_set.add(t)
                 test_passed.append(t)
 
-        self.write_json({
-            'id': int(bug_info['id']),
-            'repo_path': str(repo_path),
-            'setup_script_path': str(setup_path),
-
-            'sp_src': bug_info['source_directory'],
-            'sp_test': bug_info['test_directory'],
-            'tp_src': bug_info['class_directory'],
-            'tp_test': bug_info['test_class_directory'],
-            'cp_compile': ':'.join([str(Path(self.dir_expr)/s) for s in bug_info['dependencies']]),
-            'cp_test': ':'.join([
-                str(repo_path/bug_info['class_directory']),
-                str(repo_path/bug_info['test_class_directory']),
-                *[str(Path(self.dir_expr)/s) for s in bug_info['dependencies']],
-            ]),
-            'lang_level': bug_info['java_version'],
-
-            'test_passed': test_passed,
-            'test_failed': test_failed,
-            'test_timeout': bug_info['test_timeout'],
-            'test_sh_fn': bug_info['test_script'],
-
-            'total_timeout_s': int(float(repair_config_info['timeout'])*3600),
-            'cpus': repair_config_info['cpus'],
-            'gpus': repair_config_info['gpus'],
-        }, '/root/workflow/info.json')
+        self.write_json(
+            {
+                "id": int(bug_info["id"]),
+                "repo_path": str(repo_path),
+                "setup_script_path": str(setup_path),
+                "sp_src": bug_info["source_directory"],
+                "sp_test": bug_info["test_directory"],
+                "tp_src": bug_info["class_directory"],
+                "tp_test": bug_info["test_class_directory"],
+                "cp_compile": ":".join(
+                    [str(Path(self.dir_expr) / s) for s in bug_info["dependencies"]]
+                ),
+                "cp_test": ":".join(
+                    [
+                        str(repo_path / bug_info["class_directory"]),
+                        str(repo_path / bug_info["test_class_directory"]),
+                        *[
+                            str(Path(self.dir_expr) / s)
+                            for s in bug_info["dependencies"]
+                        ],
+                    ]
+                ),
+                "lang_level": bug_info["java_version"],
+                "test_passed": test_passed,
+                "test_failed": test_failed,
+                "test_timeout": bug_info["test_timeout"],
+                "test_sh_fn": bug_info["test_script"],
+                "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
+                "cpus": repair_config_info["cpus"],
+                "gpus": repair_config_info["gpus"],
+            },
+            "/root/workflow/info.json",
+        )
 
         ret = self.run_command(
             'bash -c "python3 /root/workflow/main.py"',
@@ -82,11 +90,10 @@ class GRT5(AbstractRepairTool):
 
         # print(*self.read_file('/root/workflow/log.txt'), sep='')
 
-
         self.process_status(ret)
         self.timestamp_log_end()
 
-        #print("!!! end")
+        # print("!!! end")
 
     def save_artifacts(self, dir_info):
         """
@@ -132,14 +139,14 @@ class GRT5(AbstractRepairTool):
         if not stats:
             self.stats.error_stats.is_error = True
             return
-          
+
         self.stats.patch_stats.size = stats["n_generated"]
         self.stats.patch_stats.enumerations = stats["n_validated"]
         self.stats.patch_stats.non_compilable = (
             stats["n_validated"] - stats["n_compilable"]
         )
         self.stats.patch_stats.plausible = stats["n_plausible"]
-        self.stats.patch_stats.generated = min(5,stats["n_plausible"])
+        self.stats.patch_stats.generated = min(5, stats["n_plausible"])
 
         self.stats.error_stats.is_error = False
 
