@@ -16,14 +16,16 @@ class FAVOR(AbstractRepairTool):
             "sha256:765ba38e429af4cc75e39d70ead10837697321bea2dbb36c3b14be88184a4b93"
         )
 
-    def prepare_for_repair(self, buggy_filepath, buggy_loc, test_case_path, binary_path, crash_command):
+    def prepare_for_repair(
+        self, buggy_filepath, buggy_loc, test_case_path, binary_path, crash_command
+    ):
         # removing comments from source file and extracting the buggy function execute path
         # buggy_loc_strs = " ".join(map(str, buggy_loc))
         buggy_loc_command = f"--bug_loc 0"
         buggy_filepath_command = f"--buggy_filepath {buggy_filepath}"
         binary_path_command = f"--binary_path {binary_path}"
         test_case_path_command = f"--test_case_path {test_case_path}"
-        crash_command = f"--crash_command \"{crash_command}\" "
+        crash_command = f'--crash_command "{crash_command}" '
         self.emit_normal("prepare for repair phase")
         prepare_command = (
             "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && "
@@ -57,9 +59,11 @@ class FAVOR(AbstractRepairTool):
         subject = bug_info.get("subject")
         bug_id = bug_info.get("bug_id")
         test_case_path = os.path.join(self.dir_setup, test_case[0])
-        buggy_file_path = os.path.join(self.dir_expr, f'src', bug_info.get('source_file'))
-        binary_path = os.path.join(self.dir_expr, f'src', bug_info.get("binary_path"))
-        crash_command = bug_info.get('crash_input').replace('$POC', test_case_path)
+        buggy_file_path = os.path.join(
+            self.dir_expr, f"src", bug_info.get("source_file")
+        )
+        binary_path = os.path.join(self.dir_expr, f"src", bug_info.get("binary_path"))
+        crash_command = bug_info.get("crash_input").replace("$POC", test_case_path)
 
         if not self.is_file(buggy_file_path):
             self.error_exit("buggy source file not found")
@@ -68,15 +72,23 @@ class FAVOR(AbstractRepairTool):
             # if buggy_loc is not provided, favor will employ another vulnerability localization tool to get relevant locs.
             buggy_loc = 0
 
-        clean_script = os.path.join(self.dir_setup, f'clean_subject')
-        config_script = os.path.join(self.dir_setup, bug_info.get('config_script'))
-        build_script = os.path.join(self.dir_setup, bug_info.get('build_script'))
+        clean_script = os.path.join(self.dir_setup, f"clean_subject")
+        config_script = os.path.join(self.dir_setup, bug_info.get("config_script"))
+        build_script = os.path.join(self.dir_setup, bug_info.get("build_script"))
 
-        self.run_command(clean_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
-        self.run_command(config_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
-        self.run_command(build_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
+        self.run_command(
+            clean_script, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
+        self.run_command(
+            config_script, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
+        self.run_command(
+            build_script, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
 
-        self.prepare_for_repair(buggy_file_path, buggy_loc,  test_case_path, binary_path, crash_command)
+        self.prepare_for_repair(
+            buggy_file_path, buggy_loc, test_case_path, binary_path, crash_command
+        )
         self.timestamp_log_start()
         self.emit_normal("running repair phase")
         timeout_h = str(repair_config_info[self.key_timeout])
@@ -94,7 +106,9 @@ class FAVOR(AbstractRepairTool):
         )
         self.process_status(status)
         self.emit_normal("generate patches")
-        generate_command = f"python3 generate_patch.py --buggy_filepath {buggy_file_path}"
+        generate_command = (
+            f"python3 generate_patch.py --buggy_filepath {buggy_file_path}"
+        )
         status = self.run_command(
             generate_command, log_file_path=self.log_output_path, dir_path=self.dir_root
         )
@@ -105,6 +119,7 @@ class FAVOR(AbstractRepairTool):
         status = self.run_command(copy_command)
         self.process_status(status)
         self.timestamp_log_end()
+
     def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
