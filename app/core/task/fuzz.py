@@ -10,11 +10,13 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
 def run_fuzz(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractFuzzTool,
     fuzz_config_info: Dict[str, Any],
@@ -59,36 +61,36 @@ def fuzz_all(
         )
     else:
 
-        def analyze_wrapped(
+        def fuzz_wrapped(
             dir_info,
             experiment_info,
-            repair_tool,
-            repair_config_info,
-            container_id,
-            benchmark_name,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            fuzz_tool: AbstractFuzzTool,
+            fuzz_config_info,
+            container_id: Optional[str],
+            benchmark_name: str,
+            fuzz_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
             final_status,
         ):
             """
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(fuzz_profile_id)
             values.job_identifier.set(job_identifier)
             run_fuzz(
                 dir_info,
                 experiment_info,
-                repair_tool,
-                repair_config_info,
+                fuzz_tool,
+                fuzz_config_info,
                 container_id,
                 benchmark_name,
             )
             final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
 
         tool_thread = threading.Thread(
-            target=analyze_wrapped,
+            target=fuzz_wrapped,
             args=(
                 dir_info,
                 experiment_info,
@@ -98,7 +100,7 @@ def fuzz_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
-                values.task_type.get("NA"),
+                values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for fuzzing {} {} {}".format(

@@ -4,6 +4,7 @@ from argparse import HelpFormatter
 from operator import attrgetter
 
 from app.core import definitions
+from app.core import utilities
 from app.core import values
 
 
@@ -176,6 +177,20 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_INSTRUMENT_ONLY,
+        help="only instrument the experiment",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_RUN_TESTS_ONLY,
+        help="only run the tests of the experiment",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
         definitions.ARG_USE_CONTAINER,
         help="use containers for experiments",
         dest="use_container",
@@ -231,11 +246,25 @@ def parse_args():
     )
 
     optional.add_argument(
-        definitions.ARG_CPU_COUNT,
+        definitions.ARG_ALL_CPU_COUNT,
         help="max amount of CPU cores which can be used by Cerberus",
         type=int,
         default=max(1, multiprocessing.cpu_count() - 2),
     )
+
+    optional.add_argument(
+        definitions.ARG_ALL_GPU_COUNT,
+        help="max amount of GPU cores which can be used by Cerberus",
+        type=int,
+        default=max(0, utilities.get_gpu_count()),
+    )
+
+    # optional.add_argument(
+    #     definitions.ARG_TASK_CPU_COUNT,
+    #     help="max amount of CPU cores which can be used by Cerberus per task",
+    #     type=int,
+    #     default=1,
+    # )
 
     optional.add_argument(
         definitions.ARG_USE_GPU,

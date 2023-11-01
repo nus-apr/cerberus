@@ -5,6 +5,7 @@ import shutil
 import time
 from typing import Any
 from typing import Dict
+from typing import List
 from typing import Optional
 
 from app.core import abstractions
@@ -15,6 +16,7 @@ from app.core import utilities
 from app.core import values
 from app.core.task.stats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import error_exit
 from app.core.utilities import execute_command
 from app.drivers.AbstractDriver import AbstractDriver
@@ -32,10 +34,11 @@ class AbstractTool(AbstractDriver):
     dir_expr = ""
     dir_base_expr = ""
     cpu_usage = 1
+    gpu_usage = 0
     dir_inst = ""
     dir_setup = ""
     hash_digest = ""
-    container_id = None
+    container_id: Optional[str] = None
     is_instrument_only = False
     timestamp_fmt = "%a %d %b %Y %H:%M:%S %p"
     current_task_profile_id = values.current_task_profile_id
@@ -55,10 +58,12 @@ class AbstractTool(AbstractDriver):
     key_build_script = definitions.KEY_BUILD_SCRIPT
     key_config_script = definitions.KEY_CONFIG_SCRIPT
     key_test_script = definitions.KEY_TEST_SCRIPT
+    key_gpus = definitions.KEY_GPUS
+    key_cpus = definitions.KEY_CPUS
     stats: ToolStats
     bindings: Optional[Dict[str, Any]] = None
 
-    def __init__(self, tool_name):
+    def __init__(self, tool_name: str):
         """add initialization commands to all tools here"""
         super().__init__()
         self.name = tool_name
@@ -73,44 +78,39 @@ class AbstractTool(AbstractDriver):
         self.use_gpu = super().get_config_value("use_gpu")
 
     @abc.abstractmethod
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> ToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
-
-            self.stats.patches_stats.non_compilable
-            self.stats.patches_stats.plausible
-            self.stats.patches_stats.size
-            self.stats.patches_stats.enumerations
-            self.stats.patches_stats.generated
-
-            self.stats.time_stats.total_validation
-            self.stats.time_stats.total_build
-            self.stats.time_stats.timestamp_compilation
-            self.stats.time_stats.timestamp_validation
-            self.stats.time_stats.timestamp_plausible
         """
         return self.stats
 
-    def clean_up(self):
+    def clean_up(self) -> None:
         if self.container_id:
             container.remove_container(self.container_id)
         else:
             if os.path.isdir(self.dir_expr):
-                rm_command = "rm -rf " + self.dir_expr
+                rm_command = "rm -rf {}".format(self.dir_expr)
                 execute_command(rm_command)
 
-    def update_info(self, container_id, instrument_only, dir_info):
+    def update_info(
+        self,
+        container_id: Optional[str],
+        instrument_only: bool,
+        dir_info: DirectoryInfo,
+    ) -> None:
         self.container_id = container_id
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
 
-    def update_container_stats(self, container_id):
+    def update_container_stats(self, container_id: str) -> None:
         container_stats = container.get_container_stats(container_id)
         self.stats.container_stats.load_container_stats(container_stats)
 
-    def update_dir_info(self, dir_info):
+    def update_dir_info(self, dir_info: DirectoryInfo):
         if self.container_id:
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
@@ -130,11 +130,13 @@ class AbstractTool(AbstractDriver):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_end = timestamp_txt
 
     def timestamp_log_start(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}\n"
         self.append_file(timestamp_txt, self.log_output_path)
+        self.stats.time_stats.timestamp_start = timestamp_txt
 
     def timestamp_log_end(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
@@ -142,14 +144,14 @@ class AbstractTool(AbstractDriver):
         self.append_file(timestamp_txt, self.log_output_path)
 
     def run_command(
-        self, command_str, log_file_path="/dev/null", dir_path=None, env=dict()
+        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
     ):
-        """executes the specified command at the given dir_path and save the output to log_file"""
+        """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         if self.container_id:
             if not dir_path:
                 dir_path = "/experiment"
             exit_code, output = container.exec_command(
-                self.container_id, command_str, dir_path, env
+                self.container_id, command, dir_path, env
             )
             if output:
                 stdout, stderr = output
@@ -161,11 +163,37 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command_str += " >> {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command_str, env=env, directory=dir_path)
+            command += " >> {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command, env=env, directory=dir_path)
         return exit_code
 
-    def process_status(self, status: int):
+    def exec_command(
+        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
+    ):
+        """executes the specified command at the given dir_path and save the output to log_file"""
+        if self.container_id:
+            if not dir_path:
+                dir_path = "/experiment"
+            exit_code, output = container.exec_command(
+                self.container_id, command, dir_path, env
+            )
+            if output:
+                stdout, stderr = output
+                if "/dev/null" not in log_file_path:
+                    if stdout:
+                        self.append_file(stdout.decode("iso-8859-1"), log_file_path)
+                    if stderr:
+                        self.append_file(stderr.decode("iso-8859-1"), log_file_path)
+            return exit_code, output
+        else:
+            if not dir_path:
+                dir_path = self.dir_expr
+            command += " >> {0} 2>&1".format(log_file_path)
+            exit_code = execute_command(command, env=env, directory=dir_path)
+        return exit_code, None
+
+    def process_status(self, status: int) -> None:
+        """Process the status of running a command"""
         if status != 0:
             self.stats.error_stats.is_error = True
             values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
@@ -176,7 +204,7 @@ class AbstractTool(AbstractDriver):
             )
             if (status == 137 or status == 124) and self.container_id:
                 # Due to the container being killed, we restart it to be able to pull out the analysis info
-                container.stop_container(self.container_id)
+                container.stop_container(self.container_id, 5)
                 container.start_container(self.container_id)
 
         else:
@@ -185,14 +213,30 @@ class AbstractTool(AbstractDriver):
                 "\t\t\t[framework] {0} ended successfully".format(self.name)
             )
 
-    def pre_process(self):
+    def pre_process(self) -> None:
         """Any pre-processing required for the repair"""
         # self.check_tool_exists()
         return
 
-    def check_tool_exists(self):
-        """Any pre-processing required for the repair"""
+    def check_tool_exists(self, tag_name_default="latest") -> None:
+        """Check that the tool is available either as an image or locally"""
+
+        def get_digest(image):
+            return "".join(
+                next(iter(image.attrs.get("RepoDigests", [])), "@").split("@")[1:]
+            )
+
         if values.use_container:
+            if values.secure_hash:
+                emitter.debug(
+                    "\t[framework] will check whether the final image that is locally available aligns has a hash digest,starting with {}".format(
+                        self.hash_digest
+                    )
+                )
+                if self.hash_digest == "":
+                    emitter.warning(
+                        "\t[framework] hash is not set. Will pass without checks"
+                    )
             if not self.hash_digest.startswith("sha256:"):
                 self.hash_digest = "sha256:" + self.hash_digest
             if self.image_name is None:
@@ -203,7 +247,7 @@ class AbstractTool(AbstractDriver):
                 repo_name, tag_name = self.image_name.split(":")
             else:
                 repo_name = self.image_name
-                tag_name = "latest"
+                tag_name = tag_name_default
             if not container.image_exists(repo_name, tag_name):
                 emitter.warning(
                     "\t[framework] docker image {}:{} not found in local docker registry".format(
@@ -213,11 +257,16 @@ class AbstractTool(AbstractDriver):
                 image = container.pull_image(repo_name, tag_name)
                 if image is None:
                     utilities.error_exit(
-                        "\t[framework] {} does not provide a Docker image in Dockerhub".format(
-                            self.name
+                        "\t[framework] {} does not provide a Docker image {}:{} in Dockerhub".format(
+                            self.name, repo_name, tag_name
                         )
                     )
-                if values.secure_hash and not image.id.startswith(self.hash_digest):
+
+                image_hash_digest = get_digest(image)
+
+                if values.secure_hash and not image_hash_digest.startswith(
+                    self.hash_digest
+                ):
                     utilities.error_exit(
                         "\t[framework] pulled an image for {} whose hash did start with the prefix in the driver. aborting".format(
                             self.name
@@ -227,30 +276,52 @@ class AbstractTool(AbstractDriver):
             else:
                 # Image may exist but need to be sure it is the latest one
                 emitter.information(
-                    "\t\t[framework] docker image found locally for {}".format(
-                        self.name
+                    "\t\t[framework] docker image {}:{} found locally for {}".format(
+                        repo_name, tag_name, self.name
                     )
                 )
                 # Get the local image
                 local_image = container.get_image(repo_name, tag_name)
+                local_image_hash_digest = get_digest(local_image)
+
                 # Then try pulling. If it is the same one we are quick
                 # If not we have to wait but it is safer than getting stale results.
                 # In theory this has a supply chain vulnerability but we can assume
                 # That the storage is safe
                 if values.use_latest_image:
                     remote_image = container.pull_image(repo_name, tag_name)
+                    remote_image_hash_digest = get_digest(remote_image)
 
-                    if remote_image and local_image.id != remote_image.id:  # type: ignore
+                    if remote_image and remote_image_hash_digest != local_image_hash_digest:  # type: ignore
                         emitter.information(
-                            "\t[framework] docker image is not the same as the one in the repository. Will have to rebuild"
+                            "\t[framework] docker image {}:{} is not the same as the one in the repository. Will have to rebuild".format(
+                                repo_name, tag_name
+                            )
                         )
-                        if values.secure_hash and not remote_image.id.startswith(
-                            self.hash_digest
+                        values.rebuild_all = True
+                        if (
+                            values.secure_hash
+                            and not remote_image_hash_digest.startswith(
+                                self.hash_digest
+                            )
                         ):
                             utilities.error_exit(
                                 "\t[framework] secure mode is enabled. aborting"
                             )
-                        values.rebuild_all = True
+                else:
+                    emitter.debug(
+                        "\t[framework] checking local image {}".format(
+                            local_image_hash_digest
+                        )
+                    )
+                    if values.secure_hash and not local_image_hash_digest.startswith(
+                        self.hash_digest
+                    ):
+                        utilities.error_exit(
+                            "\t[framework] local image for {} hash a which does not align with the one in the driver. aborting".format(
+                                self.name
+                            )
+                        )
 
         else:
             local_path = shutil.which(self.name.lower())
@@ -258,10 +329,11 @@ class AbstractTool(AbstractDriver):
                 error_exit("{} not Found".format(self.name))
         return
 
-    def update_experiment_status(self, status: str):
+    def update_experiment_status(self, status: str) -> None:
+        """Update the status of the experiment if any visualization is available"""
         ui.update_current_job(status)
 
-    def post_process(self):
+    def post_process(self) -> None:
         """Any post-processing required for the repair"""
         if self.container_id:
             container.stop_container(self.container_id)
@@ -269,11 +341,11 @@ class AbstractTool(AbstractDriver):
             self.clean_up()
         return
 
-    def print_stats(self):
+    def print_stats(self) -> None:
         """Print the statistics of the tool."""
         pass
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]):
         """Store all artifacts from the tool"""
         dir_results = dir_info["results"]
         dir_artifacts = dir_info["artifacts"]

@@ -1,4 +1,5 @@
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Optional
 
@@ -7,12 +8,13 @@ from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.TaskProfile import TaskProfile
 from app.core.configs.tasks_data.TaskDefaultConfig import TaskDefaultConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
+from app.core.task.typing.TaskType import TaskType
 
 
 class TaskConfig(TaskDefaultConfig):
     def __init__(
         self,
-        task_type: str,
+        task_type: TaskType,
         compact_results: bool,
         dump_patches: bool,
         docker_host: str,
@@ -26,7 +28,6 @@ class TaskConfig(TaskDefaultConfig):
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
-        max_cpu_count: int,
         runs: int = 1,
     ):
 
@@ -44,11 +45,10 @@ class TaskConfig(TaskDefaultConfig):
             use_container,
             use_gpu,
             use_purge,
-            max_cpu_count,
             runs,
         )
 
-        self.task_type = task_type
+        self.task_type = cast(TaskType, task_type)
         self.task_profile: Optional[TaskProfile] = None
         self.container_profile: Optional[ContainerProfile] = None
         self.bug_id: Optional[str] = None

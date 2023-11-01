@@ -1,0 +1,14 @@
+org.apache.commons.math3.genetics.ListPopulation,209,0.707
+org.apache.commons.math3.genetics.ListPopulation,112,0.707
+org.apache.commons.math3.genetics.ListPopulation,113,0.707
+org.apache.commons.math3.genetics.ListPopulation,108,0.577
+org.apache.commons.math3.genetics.BinaryChromosome,73,0.302
+org.apache.commons.math3.genetics.BinaryChromosome,74,0.302
+org.apache.commons.math3.genetics.BinaryChromosome,75,0.302
+org.apache.commons.math3.genetics.BinaryChromosome,77,0.302
+org.apache.commons.math3.genetics.BinaryChromosome,64,0.277
+org.apache.commons.math3.genetics.BinaryChromosome,58,0.267
+org.apache.commons.math3.genetics.BinaryChromosome,59,0.267
+org.apache.commons.math3.genetics.BinaryChromosome,63,0.267
+org.apache.commons.math3.genetics.GeneticAlgorithm,104,0.25
+

@@ -10,27 +10,34 @@ from app.core import parallel
 from app.core import utilities
 from app.core import values
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 def run_analysis(
-    dir_info: Dict[str, Dict[str, str]],
+    dir_info: DirectoryInfo,
     experiment_info,
     tool: AbstractAnalyzeTool,
     analysis_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
-    fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = [
-        str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
-    ]
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
+
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
+    fix_line_numbers = []
     if analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+        fix_line_numbers = [
+            str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
+        ]
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
+    elif analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
+        if definitions.KEY_FIX_FILE in experiment_info:
+            del experiment_info[definitions.KEY_FIX_FILE]
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
+    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     test_ratio = float(analysis_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
         analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
@@ -89,13 +96,13 @@ def analyze_all(
         def analyze_wrapped(
             dir_info,
             experiment_info,
-            repair_tool,
-            repair_config_info,
-            container_id,
-            benchmark_name,
-            repair_profile_id,
-            job_identifier,
-            task_type,
+            analyze_tool: AbstractAnalyzeTool,
+            analyze_config_info,
+            container_id: Optional[str],
+            benchmark_name: str,
+            repair_profile_id: str,
+            job_identifier: str,
+            task_type: TaskType,
             final_status,
         ):
             """
@@ -107,8 +114,8 @@ def analyze_all(
             run_analysis(
                 dir_info,
                 experiment_info,
-                repair_tool,
-                repair_config_info,
+                analyze_tool,
+                analyze_config_info,
                 container_id,
                 benchmark_name,
             )
@@ -125,7 +132,7 @@ def analyze_all(
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
-                values.task_type.get("NA"),
+                values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for analysis {} {} {}".format(
