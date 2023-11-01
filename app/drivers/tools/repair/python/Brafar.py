@@ -11,7 +11,7 @@ class Brafar(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "linnaxie/brafar-python"
         self.hash_digest = (
-            "sha256:4a1a001e6d0f645ebe4c09602604e7b83bfad1b3d648897ea40da81582f267a1"
+            "sha256:0696fd92a2c918a59c2e51ee1e6f2e00ee260d50fa25b8db3ef41389f356afd2"
         )
 
     def run_repair(self, bug_info, repair_config_info):
