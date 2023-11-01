@@ -13,25 +13,30 @@ class FAVOR(AbstractRepairTool):
         self.dir_root = "/FAVOR/"
         self.image_name = "dongqa/favor:latest"
         self.hash_digest = (
-            "sha256:ad25ba1952883ce48d1023e4c0812fdbc6ba575b08c01baae87013d7729d81bf"
+            "sha256:765ba38e429af4cc75e39d70ead10837697321bea2dbb36c3b14be88184a4b93"
         )
 
-    def prepare_for_repair(self, buggy_filepath, buggy_loc, test_case_path):
+    def prepare_for_repair(self, buggy_filepath, buggy_loc, test_case_path, binary_path, crash_command):
         # removing comments from source file and extracting the buggy function execute path
-        buggy_loc_strs = " ".join(map(str, buggy_loc))
-        buggy_loc_command = f"--bug_loc {buggy_loc_strs}"
-        self.emit_normal("preparing for repairing phase")
+        # buggy_loc_strs = " ".join(map(str, buggy_loc))
+        buggy_loc_command = f"--bug_loc 0"
+        buggy_filepath_command = f"--buggy_filepath {buggy_filepath}"
+        binary_path_command = f"--binary_path {binary_path}"
+        test_case_path_command = f"--test_case_path {test_case_path}"
+        crash_command = f"--crash_command \"{crash_command}\" "
+        self.emit_normal("prepare for repair phase")
         prepare_command = (
             "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && "
-            "conda activate favor && cd {} && python3 preparing.py --buggy_filepath {} {} --test_case_path {} >> {}'".format(
+            "conda activate favor && cd {} && python3 preparing.py {} {} {} {} {}>> {}'".format(
                 self.dir_root,
-                buggy_filepath,
+                buggy_filepath_command,
                 buggy_loc_command,
-                test_case_path,
+                test_case_path_command,
+                binary_path_command,
+                crash_command,
                 self.log_output_path,
             )
         )
-
         status = self.run_command(
             prepare_command, log_file_path=self.log_output_path, dir_path=self.dir_root
         )
@@ -44,24 +49,17 @@ class FAVOR(AbstractRepairTool):
         self.dir_expr - directory for experiment
         self.dir_output - directory to store artifacts/output
         """
+
         super(FAVOR, self).run_repair(bug_info, repair_config_info)
         buggy_loc = bug_info.get("line_numbers")
-        buggy_filename = bug_info.get("source_file")
-        buggy_filename = (
-            re.search(r"[^/]+\.(c|cpp)$", buggy_filename).group()
-            if re.search(r"[^/]+\.(c|cpp)$", buggy_filename)
-            else None
-        )
-        test_case = (
-            bug_info[self.key_exploit_list][0]
-            if len(bug_info[self.key_exploit_list]) != 0
-            else "none"
-        )
-        test_case_path = os.path.join(self.dir_expr, test_case)
-        if buggy_filename is None:
-            self.emit_error("FAVOR could only fix C/C++ vulnerabilities")
-
-        buggy_file_path = os.path.join(self.dir_setup, "valkyrie/", buggy_filename)
+        test_case = bug_info.get("exploit_file_list")
+        benchmark = bug_info.get("benchmark")
+        subject = bug_info.get("subject")
+        bug_id = bug_info.get("bug_id")
+        test_case_path = os.path.join(self.dir_setup, test_case[0])
+        buggy_file_path = os.path.join(self.dir_expr, f'src', bug_info.get('source_file'))
+        binary_path = os.path.join(self.dir_expr, f'src', bug_info.get("binary_path"))
+        crash_command = bug_info.get('crash_input').replace('$POC', test_case_path)
 
         if not self.is_file(buggy_file_path):
             self.error_exit("buggy source file not found")
@@ -70,8 +68,17 @@ class FAVOR(AbstractRepairTool):
             # if buggy_loc is not provided, favor will employ another vulnerability localization tool to get relevant locs.
             buggy_loc = 0
 
-        self.prepare_for_repair(buggy_file_path, buggy_loc, test_case_path)
+        clean_script = os.path.join(self.dir_setup, f'clean_subject')
+        config_script = os.path.join(self.dir_setup, bug_info.get('config_script'))
+        build_script = os.path.join(self.dir_setup, bug_info.get('build_script'))
+
+        self.run_command(clean_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
+        self.run_command(config_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
+        self.run_command(build_script, log_file_path=self.log_output_path, dir_path=self.dir_root)
+
+        self.prepare_for_repair(buggy_file_path, buggy_loc,  test_case_path, binary_path, crash_command)
         self.timestamp_log_start()
+        self.emit_normal("running repair phase")
         timeout_h = str(repair_config_info[self.key_timeout])
         favor_command = (
             "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && cd {} && conda activate favor "
@@ -86,8 +93,18 @@ class FAVOR(AbstractRepairTool):
             dir_path=self.dir_root,
         )
         self.process_status(status)
+        self.emit_normal("generate patches")
+        generate_command = f"python3 generate_patch.py --buggy_filepath {buggy_file_path}"
+        status = self.run_command(
+            generate_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        )
+        self.process_status(status)
+        # patch_dir = join(self.dir_output, "patches")
+        # self.run_command("mkdir {}".format(patch_dir))
+        copy_command = "cp -r /FAVOR/patches/ {}".format(self.dir_output)
+        status = self.run_command(copy_command)
+        self.process_status(status)
         self.timestamp_log_end()
-
     def save_artifacts(self, dir_info):
         """
         Save useful artifacts from the repair execution
@@ -95,67 +112,69 @@ class FAVOR(AbstractRepairTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        generate_command = "python3 generate_patch.py"
-        status = self.run_command(
-            generate_command, log_file_path=self.log_output_path, dir_path=self.dir_root
-        )
-        self.process_status(status)
-        patch_dir = join(self.dir_output, "patches")
-        copy_command = "cp  {}/patches/*.patch {}".format(self.dir_root, patch_dir)
-        status = self.run_command(
-            copy_command, log_file_path=self.log_output_path, dir_path=self.dir_root
-        )
-        self.process_status(status)
+        # self.emit_normal("prepare for repairing phase")
+        # buggy_file_path = os.path.join(self.dir_expr, f'src', bug_info.get('source_file'))
+        # generate_command = f"python3 generate_patch.py --buggy_filepath {buggy_file_path}"
+        # status = self.run_command(
+        #     generate_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        # )
+        # self.process_status(status)
+        # patch_dir = join(self.dir_output, "patches")
+        # self.run_command("mkdir {}".format(patch_dir))
+        # copy_command = "cp  {}patches/*.patch {}".format(self.dir_root, patch_dir)
+        # status = self.run_command(
+        #     copy_command, log_file_path=self.log_output_path, dir_path=self.dir_root
+        # )
+        # self.process_status(status)
         super(FAVOR, self).save_artifacts(dir_info)
-        return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
-        """
-        analyse tool output and collect information
-        output of the tool is logged at self.log_output_path
-        information required to be extracted are:
-
-            self.stats.patches_stats.non_compilable
-            self.stats.patches_stats.plausible
-            self.stats.patches_stats.size
-            self.stats.patches_stats.enumerations
-            self.stats.patches_stats.generated
-
-            self.stats.time_stats.total_validation
-            self.stats.time_stats.total_build
-            self.stats.time_stats.timestamp_compilation
-            self.stats.time_stats.timestamp_validation
-            self.stats.time_stats.timestamp_plausible
-        """
-        self.emit_normal("reading output")
-
-        is_error = False
-        count_plausible = 0
-        count_enumerations = 0
-
-        # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
-        self.stats.patch_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
-        )
-
-        # extract information from output log
-        if not self.log_output_path or not self.is_file(self.log_output_path):
-            self.emit_warning("no output log file found")
-            return self.stats
-
-        self.emit_highlight(f"output log file: {self.log_output_path}")
-        if self.is_file(self.log_output_path):
-            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
-
-            for line in log_lines:
-                if "Generating patch" in line:
-                    count_plausible += 1
-                    count_enumerations += 1
-
-        self.stats.patch_stats.plausible = count_plausible
-        self.stats.patch_stats.enumerations = count_enumerations
-        self.stats.error_stats.is_error = is_error
-        return self.stats
+    # def analyse_output(self, dir_info, bug_id, fail_list):
+    #     """
+    #     analyse tool output and collect information
+    #     output of the tool is logged at self.log_output_path
+    #     information required to be extracted are:
+    #
+    #         self.stats.patches_stats.non_compilable
+    #         self.stats.patches_stats.plausible
+    #         self.stats.patches_stats.size
+    #         self.stats.patches_stats.enumerations
+    #         self.stats.patches_stats.generated
+    #
+    #         self.stats.time_stats.total_validation
+    #         self.stats.time_stats.total_build
+    #         self.stats.time_stats.timestamp_compilation
+    #         self.stats.time_stats.timestamp_validation
+    #         self.stats.time_stats.timestamp_plausible
+    #     """
+    #     self.emit_normal("reading output")
+    #
+    #     is_error = False
+    #     count_plausible = 0
+    #     count_enumerations = 0
+    #
+    #     # count number of patch files
+    #     list_output_dir = self.list_dir(self.dir_output)
+    #     self.stats.patch_stats.generated = len(
+    #         [name for name in list_output_dir if ".patch" in name]
+    #     )
+    #
+    #     # extract information from output log
+    #     if not self.log_output_path or not self.is_file(self.log_output_path):
+    #         self.emit_warning("no output log file found")
+    #         return self.stats
+    #
+    #     self.emit_highlight(f"output log file: {self.log_output_path}")
+    #     if self.is_file(self.log_output_path):
+    #         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+    #         self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
+    #         self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
+    #
+    #         for line in log_lines:
+    #             if "Generating patch" in line:
+    #                 count_plausible += 1
+    #                 count_enumerations += 1
+    #
+    #     self.stats.patch_stats.plausible = count_plausible
+    #     self.stats.patch_stats.enumerations = count_enumerations
+    #     self.stats.error_stats.is_error = is_error
+    #     return self.stats
