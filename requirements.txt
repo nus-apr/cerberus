@@ -1,7 +1,7 @@
 docker
 more_itertools
 pre-commit
-textual[syntax]==0.40.0
+textual[syntax]==0.41.0
 slack_sdk
 discord
 cython
