@@ -6,6 +6,7 @@ class GeneralConfig:
         debug_mode: bool,
         secure_hash: bool,
         cpus: int,
+        gpus: int,
     ):
 
         # validate config
@@ -14,6 +15,7 @@ class GeneralConfig:
         self.debug_mode = debug_mode
         self.secure_hash = secure_hash
         self.cpus = cpus
+        self.gpus = gpus
 
     def __str__(self):
         return (

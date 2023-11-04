@@ -1,4 +1,3 @@
-import json
 import os
 from pathlib import Path
 
@@ -10,16 +9,16 @@ class ET(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # self.image_name = "et-dev"
-        self.image_name = "xmcp/et:231004.2"
+        self.image_name = "xmcp/et:231024.3"
         self.hash_digest = (
-            "sha256:78351cfb9bafad82d61bc594719f22f4f596ad52da669bc98bd856ef640e7c27"
+            "sha256:76644b641521cd0d3917c2bb1e5e99d7d5b9c54fef3f070c85455c5f7f0acd61"
         )
 
     def run_repair(self, bug_info, repair_config_info):
         super(ET, self).run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
 
-        print("!!! begin")
+        # print('!!! begin')
         # return #####
 
         assert bug_info["language"] == "java"
@@ -82,8 +81,8 @@ class ET(AbstractRepairTool):
                 "test_timeout": bug_info["test_timeout"],
                 "test_sh_fn": bug_info["test_script"],
                 "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
-                "cpu_count": len(repair_config_info["cpus"]),
-                "gpu_count": len(repair_config_info["gpus"]),
+                "cpus": repair_config_info["cpus"],
+                "gpus": repair_config_info["gpus"],
             },
             "/root/workflow/info.json",
         )
@@ -98,7 +97,7 @@ class ET(AbstractRepairTool):
         self.process_status(ret)
         self.timestamp_log_end()
 
-        print("!!! end")
+        # print('!!! end')
 
     def save_artifacts(self, dir_info):
         """
@@ -154,7 +153,7 @@ class ET(AbstractRepairTool):
             stats["n_validated"] - stats["n_compilable"]
         )
         self.stats.patch_stats.plausible = stats["n_plausible"]
-        self.stats.patch_stats.generated = stats["n_plausible"]
+        self.stats.patch_stats.generated = min(5, stats["n_plausible"])
 
         self.stats.error_stats.is_error = False
 
