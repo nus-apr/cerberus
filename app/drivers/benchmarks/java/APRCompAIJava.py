@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 from os.path import join
 from typing import List
 
@@ -53,10 +54,34 @@ class APRCompAIJava(AbstractBenchmark):
 
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
-        status = self.run_command(
-            container_id, "mvn test", dir_path=join(self.dir_expr, "src")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = f"bash {experiment_item['test_script']} {failing_test_list[0].replace('::','#')}"
+        time = datetime.now()
+        failing_status = self.run_command(
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_setup),
         )
-        return status != 0
+
+        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_status = 0
+        if len(passing_test_list) != 0:
+            command_str = f"bash {experiment_item['test_script']} {passing_test_list[0].replace('::','#')}"
+            passing_status = self.run_command(
+                container_id,
+                command_str,
+                self.log_test_path,
+                os.path.join(self.dir_setup),
+            )
+        else:
+            self.emit_warning("No passing test provided")
+
+        self.emit_debug(
+            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return failing_status != 0 and passing_status == 0
 
     def clean(self, exp_dir_path, container_id):
         self.emit_normal("removing experiment subject")
