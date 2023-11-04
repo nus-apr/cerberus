@@ -69,7 +69,7 @@ def create_task_image_identifier(
     if tag and tag != "":
         image_args.append(tag)
 
-    image_name = "-".join(image_args)
+    image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
     return image_name.lower()
 
 
@@ -78,7 +78,9 @@ def create_bug_image_identifier(
 ):
     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    return "-".join([benchmark.name, subject_name, bug_name]).lower()
+    return "-".join(
+        map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
+    ).lower()
 
 
 def create_task_identifier(
@@ -174,7 +176,7 @@ def main():
                 )
             iteration = ui.setup_ui(tasks)
         else:
-            emitter.information("[framework] starting processing of tasks")
+            emitter.information("\t\t[framework] starting processing of tasks")
             process_tasks(tasks)
 
     except (SystemExit, KeyboardInterrupt) as e:
