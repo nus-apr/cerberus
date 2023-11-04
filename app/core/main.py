@@ -174,6 +174,7 @@ def main():
                 )
             iteration = ui.setup_ui(tasks)
         else:
+            emitter.information("[framework] starting processing of tasks")
             process_tasks(tasks)
 
     except (SystemExit, KeyboardInterrupt) as e:
