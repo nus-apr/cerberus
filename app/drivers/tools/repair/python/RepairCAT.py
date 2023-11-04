@@ -13,9 +13,9 @@ class RepairCAT(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "jiang719/repaircat-autocode-python:first-pr"
+        self.image_name = "jiang719/repaircat-autocode-python:second-pr"
         self.bug_name = ""
-        self.hash_digest = "sha256:25a11b348fdb"
+        self.hash_digest = "sha256:48894e7d2897"
 
     def run_repair(self, bug_info, repair_config_info):
         super(RepairCAT, self).run_repair(bug_info, repair_config_info)
