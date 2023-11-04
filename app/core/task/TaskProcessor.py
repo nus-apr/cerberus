@@ -114,8 +114,12 @@ class TaskProcessor:
                                             "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
                                         )
                                         values.rebuild_all = True
+                                        tool_template.image_name = tool_config.image
+                                    else:
+                                        tool_template.image_name = (
+                                            tool_config.image + ":" + tool_config.tag
+                                        )
 
-                                    tool_template.image_name = tool_config.image
                                 if not tasks_chunk_config.task_config.only_analyse:
                                     tool_template.check_tool_exists()
                             else:

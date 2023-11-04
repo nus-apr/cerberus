@@ -10,16 +10,16 @@ class GRT5(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # self.image_name = "grt5-dev"
-        self.image_name = "xmcp/grt5:231004.1"
+        self.image_name = "xmcp/grt5:231029.1"
         self.hash_digest = (
-            "sha256:3e8f4ddfe76fdc106d883369a3aa3d7529fed972c3683c573c8d432aa2eada4c"
+            "sha256:a77d4e8a6d71cc41b7bda2b7e258e8956de0163789d6fbd730a983f75e8f2f21"
         )
 
     def run_repair(self, bug_info, repair_config_info):
         super().run_repair(bug_info, repair_config_info)
         self.timestamp_log_start()
 
-        print("!!! begin")
+        # print("!!! begin")
         # return #####
 
         assert bug_info["language"] == "java"
@@ -33,6 +33,8 @@ class GRT5(AbstractRepairTool):
 
         test_failed = []
         test_failed_set = set()
+        for t in bug_info["failing_test"]:
+            t = t.partition("::")[0]
         for t in bug_info["failing_test"]:
             t = t.partition("::")[0]
             if t not in test_failed_set:
@@ -75,8 +77,8 @@ class GRT5(AbstractRepairTool):
                 "test_timeout": bug_info["test_timeout"],
                 "test_sh_fn": bug_info["test_script"],
                 "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
-                "cpu_count": len(repair_config_info["cpus"]),
-                "gpu_count": len(repair_config_info["gpus"]),
+                "cpus": repair_config_info["cpus"],
+                "gpus": repair_config_info["gpus"],
             },
             "/root/workflow/info.json",
         )
@@ -91,7 +93,7 @@ class GRT5(AbstractRepairTool):
         self.process_status(ret)
         self.timestamp_log_end()
 
-        print("!!! end")
+        # print("!!! end")
 
     def save_artifacts(self, dir_info):
         """
@@ -144,7 +146,7 @@ class GRT5(AbstractRepairTool):
             stats["n_validated"] - stats["n_compilable"]
         )
         self.stats.patch_stats.plausible = stats["n_plausible"]
-        self.stats.patch_stats.generated = stats["n_plausible"]
+        self.stats.patch_stats.generated = min(5, stats["n_plausible"])
 
         self.stats.error_stats.is_error = False
 

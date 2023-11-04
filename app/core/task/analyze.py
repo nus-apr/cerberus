@@ -23,16 +23,21 @@ def run_analysis(
     container_id: Optional[str],
     benchmark_name: str,
 ):
-    fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    fix_line_numbers = [
-        str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
-    ]
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
+
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
+    fix_line_numbers = []
     if analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+        fix_line_numbers = [
+            str(x) for x in experiment_info.get(definitions.KEY_FIX_LINES, [])
+        ]
         fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
+    elif analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
+        if definitions.KEY_FIX_FILE in experiment_info:
+            del experiment_info[definitions.KEY_FIX_FILE]
     experiment_info[definitions.KEY_FIX_LOC] = fix_location
+    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
     test_ratio = float(analysis_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
         analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)

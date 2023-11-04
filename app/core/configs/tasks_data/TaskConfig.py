@@ -1,4 +1,5 @@
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Optional
 
@@ -47,7 +48,7 @@ class TaskConfig(TaskDefaultConfig):
             runs,
         )
 
-        self.task_type = task_type
+        self.task_type = cast(TaskType, task_type)
         self.task_profile: Optional[TaskProfile] = None
         self.container_profile: Optional[ContainerProfile] = None
         self.bug_id: Optional[str] = None

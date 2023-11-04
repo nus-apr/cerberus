@@ -133,20 +133,35 @@ class APRCompVulnJava(AbstractBenchmark):
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        fail_test_list = experiment_item[self.key_failing_tests]
         bug_id = str(experiment_item[self.key_bug_id])
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        command_str = f"bash run_test {fail_test_list[0]}"
-        status = self.run_command(
-            container_id, command_str, self.log_test_path, self.dir_setup
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = f"bash run_test {failing_test_list[0]}"
+        failing_status = self.run_command(
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_setup),
         )
+
+        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_status = 0
+        if len(passing_test_list) != 0:
+            command_str = f"bash run_test {passing_test_list[0]}"
+            passing_status = self.run_command(
+                container_id,
+                command_str,
+                self.log_test_path,
+                os.path.join(self.dir_setup),
+            )
+
         self.emit_debug(
-            " test took {} second(s)".format((datetime.now() - time).total_seconds())
+            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
-        return status != 0
+        return failing_status != 0 and passing_status == 0
 
     def verify(self, bug_index, container_id):
         self.emit_normal("verify dev patch and test-oracle")

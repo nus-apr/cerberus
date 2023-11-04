@@ -20,6 +20,9 @@ cached_client = None
 
 
 def get_client():
+    """
+    Utility method to track all client usages.
+    """
     global cached_client
     if not cached_client:
         cached_client = docker.DockerClient(
@@ -40,7 +43,7 @@ def image_exists(image_name: str, tag_name="latest"):
     except IOError as ex:
         emitter.error(ex)
         raise RuntimeError(
-            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
+            "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
         )
     for image in image_list:
         tag_list = image.tags  # type: ignore
@@ -261,11 +264,12 @@ def build_container(
     cpu: List[str],
     gpu: List[str],
     container_config_dict: Optional[Dict[Any, Any]] = None,
+    disable_network: bool = False,
 ) -> Optional[str]:
     client = get_client()
     emitter.normal("\t\t[framework] building docker container: ")
-    emitter.normal("\t\t\t container image {}".format(image_name))
-    emitter.normal("\t\t\t container name {}".format(container_name))
+    emitter.normal("\t\t\t container image: {}".format(image_name))
+    emitter.normal("\t\t\t container name: {}".format(container_name))
     try:
         for local_dir_path in volume_list:
             if local_dir_path == "/var/run/docker.sock":
@@ -274,12 +278,17 @@ def build_container(
 
         container_run_args = {
             "detach": True,
+            "entrypoint": "/bin/bash",
             "name": container_name,
             "volumes": volume_list,
             "privileged": True,
             "cpuset_cpus": ",".join(cpu),
             "tty": True,
         }
+
+        if disable_network:
+            container_run_args["network_mode"] = None
+            container_run_args["network_disabled"] = False
 
         if values.use_gpu and len(gpu) > 0:
             # Check that the docker version has DeviceRequests
@@ -309,11 +318,6 @@ def build_container(
                 definitions.KEY_CONTAINER_MEM_LIMIT, default_mem_limit
             )
 
-            if not container_config_dict.get(
-                definitions.KEY_CONTAINER_ENABLE_NETWORK, True
-            ):
-                container_run_args["network_mode"] = None
-                container_run_args["network_disabled"] = False
         else:
             container_run_args["mem_limit"] = default_mem_limit
 
@@ -363,6 +367,8 @@ def exec_command(
         container = client.containers.get(container_id)
         command = command.encode().decode("ascii", "ignore")
         print_command = "({}) {}".format(workdir, command)
+        if env:
+            print_command += f""" ({' '.join(f"{k}={v}" for k, v in env.items())})"""
         emitter.docker_command(print_command)
         exit_code, output = container.exec_run(  # type: ignore
             command,

@@ -13,10 +13,10 @@ class RepairCAT(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "jiang719/repaircat-functional-java:second-pr"
+        self.image_name = "jiang719/repaircat-autocode-python:second-pr"
         self.bug_name = ""
-        self.hash_digest = "sha256:05025c95ffc3"
-    
+        self.hash_digest = "sha256:48894e7d2897"
+
     def run_repair(self, bug_info, repair_config_info):
         super(RepairCAT, self).run_repair(bug_info, repair_config_info)
         """
@@ -25,6 +25,7 @@ class RepairCAT(AbstractRepairTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
+
         timeout_h = str(repair_config_info[self.key_timeout])
 
         self.bug_name = bug_info[self.key_bug_id]
@@ -39,10 +40,10 @@ class RepairCAT(AbstractRepairTool):
         bug_info_encoded = base64.b64encode(json.dumps(bug_info).encode()).decode()
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
 
-        cmd = f"bash -c 'cd /home/repaircat-functional-java/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        cmd = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
 
         status = self.run_command(
-            cmd, self.log_output_path, dir_path="/home/repaircat-functional-java/"
+            cmd, self.log_output_path, dir_path="/home/repaircat-autocode-python/"
         )
 
         self.run_command(f"cp /home/result.json {self.dir_output}/result.json")

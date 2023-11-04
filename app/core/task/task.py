@@ -130,7 +130,9 @@ def generate_dir_info(
     return dir_info
 
 
-def construct_job_summary(job_identifier: str, dir: str, results_summary: Any) -> str:
+def construct_job_summary(
+    job_identifier: str, dir: str, results_summary: Dict[str, Any]
+) -> str:
     json_f_name = f"experiment-summary-{job_identifier}.json"
     summary_f_path = join(dir, json_f_name)
     writer.write_as_json(results_summary, summary_f_path)
@@ -230,8 +232,19 @@ def create_running_container(
     )
 
     emitter.information("\t\t[framework] building main container for experiment")
+    is_network_enabled = True
+    if container_config_info:
+        is_network_enabled = container_config_info.get(
+            definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+        )
     container_id = container.build_container(
-        container_name, volume_list, image_name, cpu, gpu, container_config_info
+        container_name,
+        volume_list,
+        image_name,
+        cpu,
+        gpu,
+        container_config_info,
+        not is_network_enabled,
     )
     if not container_id:
         utilities.error_exit("Container was not created successfully")
@@ -313,22 +326,22 @@ def prepare_tool_experiment_image(
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-        # We assume that the container will always have the bash command available
-        # This line is included against some issues with the container lifetime
-        dock_file.write("CMD /bin/bash")
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0".format(
+                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
         if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0".format(
+                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
                     join(dir_info["container"]["setup"], "install_deps")
                 )
             )
+        # We assume that the container will always have the sh command available
+        # This line is included against some issues with the container lifetime
+        dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
     id = container.build_image(tmp_dockerfile, image_name)
     os.remove(tmp_dockerfile)
     return id
@@ -370,13 +383,15 @@ def prepare_experiment(
 
 
 def prepare_experiment_tool(
-    bug_image_id: str,
+    bug_image_id: Optional[str],
     repair_tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
     tag: Optional[str] = None,
 ):
     if values.use_container:
+        if not bug_image_id:
+            utilities.error_exit("Bug image id not provided")
         emitter.information("\t\t[framework] preparing image {}".format(image_name))
         if (
             not container.image_exists(image_name)
