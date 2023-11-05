@@ -161,7 +161,7 @@ class APRCompFuncJava(AbstractBenchmark):
             )
 
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return failing_status != 0 and passing_status == 0
 
