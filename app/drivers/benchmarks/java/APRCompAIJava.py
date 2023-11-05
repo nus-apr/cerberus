@@ -79,7 +79,7 @@ class APRCompAIJava(AbstractBenchmark):
             self.emit_warning("No passing test provided")
 
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return failing_status != 0 and passing_status == 0
 
