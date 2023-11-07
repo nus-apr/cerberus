@@ -10,7 +10,7 @@ class APRER(AbstractRepairTool):
         super(APRER, self).__init__(self.name)
         self.image_name = "yeyehe/aprerupdate:latest"
         self.hash_digest = (
-            "sha256:5c01dae6d3c1d809c80725e5f6285434454bb70c2a9576e8e4"
+            "sha256:3d6436ea60fd29c28c65fb57479b94c666128a9d4f1c559f8cbfe01905669891"
         )
 
     def run_repair(self, bug_info, repair_config_info):
