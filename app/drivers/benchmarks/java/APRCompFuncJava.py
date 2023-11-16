@@ -157,8 +157,9 @@ class APRCompFuncJava(AbstractBenchmark):
 
         passing_test_list = experiment_item[self.key_passing_tests]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash run_test {passing_test_list[0]} {test_timeout}"
+        if passing_test_list:
+            passing_test_str = ",".join(passing_test_list)
+            command_str = f"bash run_test {passing_test_str} {300}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
