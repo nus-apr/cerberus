@@ -163,7 +163,12 @@ class Cerberus(App[List[Result]]):
                 Cerberus.COLUMNS[column_name][table.id] = column_key
 
     def _on_idle(self) -> None:
-        super()._on_idle()
+        try:
+            super()._on_idle()
+        except Exception as e:
+            self.debug_print("The inner idle handler failed...")
+            self.debug_print(e)
+            pass
         # self.debug_print("Idle")
         now = int(time.time())
         to_del = []
