@@ -47,7 +47,7 @@ def get_client():
                 continue
             for image_tag in tag_list:
                 image_map[image_tag] = image
-
+        emitter.debug("Image map: {}".format(image_map))
     return cached_client
 
 
@@ -63,7 +63,7 @@ def get_image(image_name: str, tag_name="latest"):
     client = get_client()
     if f"{image_name}:{tag_name}" not in image_map:
         return None
-    return image_map[image_name][1]
+    return image_map[f"{image_name}:{tag_name}"]
 
 
 def pull_image(image_name: str, tag_name: str):
@@ -108,7 +108,7 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                 tag=image_name,
                 dockerfile=dockerfilename,
                 decode=True,
-                rm=True,
+                rm=not values.debug,
             )
             id = None
             for line in logs:
@@ -123,10 +123,9 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                     "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
                 )
             image = client.images.get(image_name)
-            if image.tags:
-                image_map[image_name] = (image.tags[1:], image)
-            else:
-                image_map[image_name] = ([], image)
+            if ":" not in image_name:
+                image_name += ":latest"
+            image_map[image_name] = image
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
