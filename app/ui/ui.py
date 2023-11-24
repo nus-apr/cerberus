@@ -31,6 +31,7 @@ from textual.widgets._data_table import ColumnKey
 from app.core import container
 from app.core import definitions
 from app.core import emitter
+from app.core import logger
 from app.core import main
 from app.core import utilities
 from app.core import values
@@ -1001,6 +1002,7 @@ class Cerberus(App[List[Result]]):
 
     def debug_print(self, text: Any):
         if values.debug or self.is_preparing:
+            logger.debug(str(text))
             log_map["root"].write(text, width=values.ui_max_width, expand=True)
 
 
