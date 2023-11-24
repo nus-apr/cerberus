@@ -17,13 +17,15 @@ from app.core import utilities
 from app.core import values
 
 cached_client = None
+image_map = {}
 
 
 def get_client():
     """
-    Utility method to track all client usages.
+    Utility method to track all client usages. Pulls the images at the current state to allow for less network calls.
     """
     global cached_client
+    global image_map
     if not cached_client:
         cached_client = docker.DockerClient(
             base_url=values.docker_host,
@@ -32,53 +34,41 @@ def get_client():
             # user_agent="Cerberus Agent",
             # use_ssh_client=True,
         )
+        try:
+            image_cache = cached_client.images.list()
+        except IOError as ex:
+            emitter.error(ex)
+            raise RuntimeError(
+                "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
+            )
+        for image in image_cache:
+            tag_list = image.tags
+            if not tag_list:
+                continue
+            image_name = tag_list[0].split(":")[0]
+            tags = tag_list[1:]
+            image_map[image_name] = (tags, image)
+
     return cached_client
 
 
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
     emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
-    try:
-        image_list = client.images.list()
-    except IOError as ex:
-        emitter.error(ex)
-        raise RuntimeError(
-            "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
-        )
-    for image in image_list:
-        tag_list = image.tags  # type: ignore
-        if not tag_list:
-            continue
-        if image_name != tag_list[0].split(":")[0]:
-            continue
-        for tag in tag_list:
-            _, tag_id = tag.split(":")
-            if tag_name == tag_id:
-                return True
-    return False
+    if image_name not in image_map:
+        return False
+    if tag_name not in image_map[image_name][0]:
+        return False
+    return True
 
 
 def get_image(image_name: str, tag_name="latest"):
     client = get_client()
-    try:
-        image_list = client.images.list()
-    except IOError as ex:
-        emitter.error(ex)
-        raise RuntimeError(
-            "[error] docker connection unsuccessful. Check if Docker is running or there is a connection to the specified host."
-        )
-
-    for image in image_list:
-        tag_list = image.tags  # type: ignore
-        if not tag_list:
-            continue
-        if image_name != tag_list[0].split(":")[0]:
-            continue
-        for tag in tag_list:
-            _, tag_id = tag.split(":")
-            if tag_name == tag_id:
-                return image
-    return None
+    if image_name not in image_map:
+        return None
+    if tag_name not in image_map[image_name][0]:
+        return None
+    return image_map[image_name][1]
 
 
 def pull_image(image_name: str, tag_name: str):
@@ -94,6 +84,7 @@ def pull_image(image_name: str, tag_name: str):
             for sub_line in line["status"].split("\n"):
                 emitter.build("[docker-api] {}".format(sub_line))
         image = client.images.pull(repository=image_name, tag=tag_name)
+        image_map[image_name] = (image.tags[1:], image)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(
             "\t[docker-api][warning] unable to pull image: docker daemon error"
@@ -136,6 +127,8 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                 utilities.error_exit(
                     "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
                 )
+            image = client.images.get(image_name)
+            image_map[image_name] = (image.tags[1:], image)
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
