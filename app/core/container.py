@@ -46,8 +46,7 @@ def get_client():
             if not tag_list:
                 continue
             for image_tag in tag_list:
-                image_name, tag = image_tag.split(":")
-                image_map[image_name] = ([tag], image)
+                image_map[image_tag] = image
 
     return cached_client
 
@@ -55,18 +54,14 @@ def get_client():
 def image_exists(image_name: str, tag_name="latest"):
     client = get_client()
     emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
-    if image_name not in image_map:
-        return False
-    if tag_name not in image_map[image_name][0]:
+    if f"{image_name}:{tag_name}" not in image_map:
         return False
     return True
 
 
 def get_image(image_name: str, tag_name="latest"):
     client = get_client()
-    if image_name not in image_map:
-        return None
-    if tag_name not in image_map[image_name][0]:
+    if f"{image_name}:{tag_name}" not in image_map:
         return None
     return image_map[image_name][1]
 
