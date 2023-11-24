@@ -45,9 +45,9 @@ def get_client():
             tag_list = image.tags
             if not tag_list:
                 continue
-            image_name = tag_list[0].split(":")[0]
-            tags = tag_list[1:]
-            image_map[image_name] = (tags, image)
+            for image_tag in tag_list:
+                image_name, tag = image_tag.split(":")
+                image_map[image_name] = ([tag], image)
 
     return cached_client
 
@@ -128,7 +128,10 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                     "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
                 )
             image = client.images.get(image_name)
-            image_map[image_name] = (image.tags[1:], image)
+            if image.tags:
+                image_map[image_name] = (image.tags[1:], image)
+            else:
+                image_map[image_name] = ([], image)
             return id
         except docker.errors.BuildError as ex:  # type: ignore
             emitter.error(ex)
