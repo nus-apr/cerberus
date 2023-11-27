@@ -9,7 +9,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 CUR_DIR = os.path.abspath(__file__)[: os.path.abspath(__file__).rindex("/") + 1]
 
 
-class RepairCAT(AbstractRepairTool):
+class RepairCATPython(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
@@ -18,7 +18,7 @@ class RepairCAT(AbstractRepairTool):
         self.hash_digest = "sha256:48894e7d2897"
 
     def run_repair(self, bug_info, repair_config_info):
-        super(RepairCAT, self).run_repair(bug_info, repair_config_info)
+        super(RepairCATPython, self).run_repair(bug_info, repair_config_info)
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
