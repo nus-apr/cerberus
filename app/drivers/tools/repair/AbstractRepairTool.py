@@ -56,13 +56,9 @@ class AbstractRepairTool(AbstractTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-        patch_dir = join(
-            self.dir_output,
-            "patch-valid" if self.use_valkyrie else "patches",
-        )
 
-        if self.is_dir(patch_dir):
-            self.stats.patch_stats.generated = len(self.list_dir(patch_dir))
+        if self.is_dir(self.dir_patch):
+            self.stats.patch_stats.generated = len(self.list_dir(self.dir_patch))
 
         return self.stats
 
@@ -104,6 +100,10 @@ class AbstractRepairTool(AbstractTool):
         self.emit_normal("executing repair command")
         task_conf_id = repair_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        self.dir_patch = join(
+            self.dir_output,
+            "patch-valid" if self.use_valkyrie else "patches",
+        )
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
