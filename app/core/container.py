@@ -278,7 +278,7 @@ def build_container(
 
         if disable_network:
             container_run_args["network_mode"] = None
-            container_run_args["network_disabled"] = False
+            container_run_args["network_disabled"] = True
 
         if values.use_gpu and len(gpu) > 0:
             # Check that the docker version has DeviceRequests
