@@ -583,6 +583,12 @@ def print_task_info(
         )
 
         emitter.highlight(
+            "\t\t[container profile] GPU Count: {}".format(
+                container_config_info[definitions.KEY_CONTAINER_GPU_COUNT]
+            )
+        )
+
+        emitter.highlight(
             "\t\t[container profile] RAM Limit: {}".format(
                 container_config_info[definitions.KEY_CONTAINER_MEM_LIMIT]
             )
