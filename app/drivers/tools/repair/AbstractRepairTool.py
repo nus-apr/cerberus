@@ -107,6 +107,8 @@ class AbstractRepairTool(AbstractTool):
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
+        self.stats.bug_info = bug_info
+        self.stats.config_info = repair_config_info
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return

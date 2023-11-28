@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Any
+from typing import Dict
 
 from app.core import emitter
 from app.core import values
@@ -267,6 +269,8 @@ class ToolStats:
 
 class RepairToolStats(ToolStats):
     patch_stats: PatchStats
+    bug_info: Dict[str, Any]
+    config_info: Dict[str, Any]
 
     def __init__(self):
         self.patch_stats = PatchStats()
@@ -275,6 +279,10 @@ class RepairToolStats(ToolStats):
     def get_dict(self):
         res = super(RepairToolStats, self).get_dict()
         res["details"]["space"] = self.patch_stats.get_dict()
+        if "info" not in res:
+            res["info"] = dict()
+        res["info"]["bug-info"] = self.bug_info
+        res["info"]["config-info"] = self.config_info
         return res
 
     def write(self, printer, prefix=""):
