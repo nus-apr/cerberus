@@ -86,15 +86,18 @@ class TimeStats:
 
 
 class PatchStats:
-    non_compilable: int = 0
-    plausible: int = 0
-    generated: int = 0
-    size: int = 0
-    enumerations: int = 0
-    __implausible = None
+    non_compilable: int = -1
+    plausible: int = -1
+    generated: int = -1
+    size: int = -1
+    enumerations: int = -1
+    __implausible: int = -1
 
     def get_implausible(self):
-        self.__implausible = self.enumerations - self.plausible - self.non_compilable
+        if self.enumerations:
+            self.__implausible = (
+                self.enumerations - self.plausible - self.non_compilable
+            )
         return self.__implausible
 
     def get_exploration_ratio(self):
