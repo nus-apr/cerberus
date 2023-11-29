@@ -109,13 +109,19 @@ class TaskProcessor:
                                     tasks_chunk_config.task_config.task_type,
                                 )
                                 if tool_config.image != "":
+                                    emitter.information(
+                                        "[framework] configuration has an extra image name"
+                                    )
                                     if tool_config.tag == "":
                                         emitter.warning(
-                                            "[framework] tool configuration had an image but no tag, therefore rebuilding everything"
+                                            "[framework] tool configuration has a new image type image but no tag, therefore rebuilding everything"
                                         )
                                         values.rebuild_all = True
                                         tool_template.image_name = tool_config.image
                                     else:
+                                        emitter.information(
+                                            "[framework] configuration has an extra image tag as well, using that"
+                                        )
                                         tool_template.image_name = (
                                             tool_config.image + ":" + tool_config.tag
                                         )
@@ -138,7 +144,10 @@ class TaskProcessor:
                                     experiment_item[definitions.KEY_SUBJECT]
                                 )
                                 dir_info = task.generate_dir_info(
-                                    benchmark_name, subject_name, bug_name
+                                    benchmark_name,
+                                    subject_name,
+                                    bug_name,
+                                    tool_config.tag,
                                 )
                                 values.use_container = (
                                     tasks_chunk_config.task_config.use_container

@@ -299,7 +299,7 @@ class Cerberus(App[List[Result]]):
 
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_subjects_job(
-            benchmark: AbstractBenchmark, experiment_item, job_identifier
+            benchmark: AbstractBenchmark, experiment_item, job_identifier: str, tag: str
         ):
             cpu = self.cpu_queue.get(block=True, timeout=None)
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
@@ -310,7 +310,9 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+            dir_info = task.generate_dir_info(
+                benchmark.name, subject_name, bug_name, tag
+            )
             benchmark.update_dir_info(dir_info)
             try:
                 emitter.information(
@@ -319,7 +321,7 @@ class Cerberus(App[List[Result]]):
                     )
                 )
                 task.prepare_experiment(
-                    benchmark, experiment_item, [str(cpu)], []
+                    benchmark, experiment_item, [str(cpu)], [], tag
                 )  # Assuming no GPU is used for preparation
                 complete_images.put(
                     (
@@ -373,7 +375,12 @@ class Cerberus(App[List[Result]]):
 
             image_list.add(job_identifier)
             loop.run_in_executor(
-                None, prepare_subjects_job, benchmark, experiment_item, job_identifier
+                None,
+                prepare_subjects_job,
+                benchmark,
+                experiment_item,
+                job_identifier,
+                task_profile.get(definitions.KEY_TOOL_TAG, ""),
             )
         while complete_images.qsize() != len(image_list):
             self.query_one(Static).update(
@@ -432,7 +439,12 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+            dir_info = task.generate_dir_info(
+                benchmark.name,
+                subject_name,
+                bug_name,
+                task_profile.get(definitions.KEY_TOOL_TAG, ""),
+            )
             benchmark.update_dir_info(dir_info)
             try:
                 emitter.information(
@@ -443,7 +455,12 @@ class Cerberus(App[List[Result]]):
                 # Ignore the rebuild as previously all bugs were prepared
                 # Assuming that no GPUs are needed for preparation
                 experiment_image_id = task.prepare_experiment(
-                    benchmark, experiment_item, [str(cpu)], [], ignore_rebuild=True
+                    benchmark,
+                    experiment_item,
+                    [str(cpu)],
+                    [],
+                    task_profile.get(definitions.KEY_TOOL_TAG, ""),
+                    ignore_rebuild=True,
                 )
 
                 emitter.information(
