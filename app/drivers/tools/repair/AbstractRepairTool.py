@@ -107,7 +107,20 @@ class AbstractRepairTool(AbstractTool):
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
-        self.stats.bug_info = bug_info
+        filtered_bug_info = dict()
+        interested_keys = [
+            self.key_id,
+            self.key_bug_id,
+            self.key_subject,
+            self.key_benchmark,
+            self.key_passing_tests,
+            definitions.KEY_COUNT_NEG,
+            definitions.KEY_COUNT_POS,
+        ]
+        for k in interested_keys:
+            filtered_bug_info[k] = bug_info[k]
+        repair_config_info["container-id"] = self.container_id
+        self.stats.bug_info = filtered_bug_info
         self.stats.config_info = repair_config_info
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
