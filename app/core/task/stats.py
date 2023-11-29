@@ -94,7 +94,7 @@ class PatchStats:
     __implausible: int = -1
 
     def get_implausible(self):
-        if self.enumerations:
+        if self.enumerations > 0:
             self.__implausible = (
                 self.enumerations - self.plausible - self.non_compilable
             )
