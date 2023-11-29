@@ -113,7 +113,6 @@ class AbstractRepairTool(AbstractTool):
             self.key_bug_id,
             self.key_subject,
             self.key_benchmark,
-            self.key_passing_tests,
             definitions.KEY_COUNT_NEG,
             definitions.KEY_COUNT_POS,
         ]
