@@ -349,7 +349,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = set()
+        image_list: Set[str] = set()
         for (
             task_config,
             (
@@ -364,18 +364,23 @@ class Cerberus(App[List[Result]]):
             job_identifier = main.create_bug_image_identifier(
                 benchmark, experiment_item
             )
-            if job_identifier in building:
+            if job_identifier in image_list:
                 continue
 
             main.process_configs(
                 task_config, benchmark, experiment_item, task_profile, container_profile
             )
 
-            building.add(job_identifier)
+            image_list.add(job_identifier)
             loop.run_in_executor(
                 None, prepare_subjects_job, benchmark, experiment_item, job_identifier
             )
-        while complete_images.qsize() != len(building):
+        while complete_images.qsize() != len(image_list):
+            self.query_one(Static).update(
+                "Cerberus is preparing the subject images ({} out of {} complete).".format(
+                    complete_images.qsize(), len(image_list)
+                )
+            )
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, success) = complete_images.get()
@@ -403,7 +408,9 @@ class Cerberus(App[List[Result]]):
             ]
         ],
     ):
-        self.query_one(Static).update("Cerberus is preparing the tool subject images.")
+        self.query_one(Static).update(
+            "Cerberus is preparing the specialised subject images."
+        )
         complete_images: queue.Queue[
             Tuple[str, str, Optional[str], bool]
         ] = queue.Queue(0)
@@ -482,7 +489,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = set()
+        image_list: Set[str] = set()
         for (
             task_config,
             (
@@ -501,13 +508,13 @@ class Cerberus(App[List[Result]]):
                 task_profile.get(definitions.KEY_TOOL_TAG, None),
             )
 
-            if image_name in building:
+            if image_name in image_list:
                 continue
 
             main.process_configs(
                 task_config, benchmark, experiment_item, task_profile, container_profile
             )
-            building.add(image_name)
+            image_list.add(image_name)
             loop.run_in_executor(
                 None,
                 prepare_tool_subjects_job,
@@ -517,7 +524,12 @@ class Cerberus(App[List[Result]]):
                 task_profile,
                 image_name,
             )
-        while complete_images.qsize() != len(building):
+        while complete_images.qsize() != len(image_list):
+            self.query_one(Static).update(
+                "Cerberus is preparing the specialised subject images ({} out of {} complete).".format(
+                    complete_images.qsize(), len(image_list)
+                )
+            )
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, image_name, success) = complete_images.get()
@@ -1071,7 +1083,7 @@ def print_results(experiment_results: Optional[List[Result]]):
             values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
         )
         summary_map["filename"] = aggregation_file
-        summary_map["dir-info"] = dir_info
+        summary_map["dir-info"] = list(map(lambda x: x[2], experiment_results))
 
         emitter.information(
             "\t[framework] Inserting an aggregation of the data at {}".format(
