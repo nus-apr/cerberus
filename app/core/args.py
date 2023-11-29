@@ -273,6 +273,10 @@ def parse_args():
         default=False,
     )
 
+    optional.add_argument(
+        definitions.ARG_SPECIAL_META, help="Special metadata file", default=""
+    )
+
     optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")
     optional.add_argument(
         definitions.ARG_BUG_ID_LIST,

@@ -77,6 +77,7 @@ ui_max_width = 1000
 runs = 1
 use_latest_image = False
 secure_hash = False
+special_meta = ""
 
 default_valkyrie_patch_limit = 200000
 default_stack_size = 600000

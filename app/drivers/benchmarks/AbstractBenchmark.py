@@ -153,7 +153,15 @@ class AbstractBenchmark(AbstractDriver):
             utilities.error_exit("Meta file path not set")
         if not os.path.isfile(cast(str, self.meta_file)):
             utilities.error_exit("Meta file does not exist")
-        with open(cast(str, self.meta_file), "r") as in_file:
+
+        meta_file_loc = self.meta_file
+
+        if values.special_meta:
+            meta_file_loc = values.special_meta
+            if not os.path.exists(meta_file_loc):
+                utilities.error_exit("Special meta file path is incorrect")
+
+        with open(meta_file_loc, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
                 self.experiment_subjects = json_data
