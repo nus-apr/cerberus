@@ -20,6 +20,7 @@ from app.core import writer
 from app.core.task import analyze
 from app.core.task import fuzz
 from app.core.task import repair
+from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -515,6 +516,15 @@ def run(
             )
         elif task_type == "fuzz":
             fuzz.fuzz_all(
+                dir_info,
+                bug_info,
+                cast(AbstractFuzzTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "validate":
+            validate.validate_all(
                 dir_info,
                 bug_info,
                 cast(AbstractFuzzTool, tool),
