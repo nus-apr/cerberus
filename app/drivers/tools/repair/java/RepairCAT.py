@@ -40,7 +40,7 @@ class RepairCAT(AbstractRepairTool):
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
 
         cmd = f"bash -c 'cd /home/repaircat-functional-java/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
-
+        self.timestamp_log_start()
         status = self.run_command(
             cmd, self.log_output_path, dir_path="/home/repaircat-functional-java/"
         )
