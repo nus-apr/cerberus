@@ -1067,6 +1067,9 @@ def print_results(experiment_results: Optional[List[Result]]):
         )
 
         summary_map = {}
+        aggregation_file = join(
+            values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
+        )
         for experiment, status, dir_info, tool_stats in experiment_results:
             summary_map[experiment] = tool_stats.get_dict()
             emitter.information(
@@ -1078,12 +1081,8 @@ def print_results(experiment_results: Optional[List[Result]]):
                     dir_info.get("summary", "N/A"),
                 )
             )
-
-        aggregation_file = join(
-            values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
-        )
-        summary_map["filename"] = aggregation_file
-        summary_map["dir-info"] = list(map(lambda x: x[2], experiment_results))
+            summary_map[experiment]["filename"] = aggregation_file
+            summary_map[experiment]["dir-info"] = dir_info
 
         emitter.information(
             "\t[framework] Inserting an aggregation of the data at {}".format(
