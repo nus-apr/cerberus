@@ -1070,6 +1070,8 @@ def print_results(experiment_results: Optional[List[Result]]):
         aggregation_file = join(
             values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
         )
+        summary_map["filename"] = aggregation_file
+        summary_map["dir-info"] = dir_info
 
         emitter.information(
             "\t[framework] Inserting an aggregation of the data at {}".format(
