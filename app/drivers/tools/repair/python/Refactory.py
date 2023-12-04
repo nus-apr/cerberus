@@ -15,10 +15,10 @@ class Refactory(AbstractRepairTool):
 
         self.timestamp_log_start()
         status = self.run_command(
-            "timeout -k 5m {}h /home/huyang/conda/bin/python3 run.py -d {} -q src -s 100 {}".format(
+            "timeout -k 5m {}h /home/huyang/conda/bin/python3 run.py -d {} -q src {}".format(
                 repair_config_info[self.key_timeout],
                 self.dir_expr,
-                repair_config_info[self.key_tool_params] or "-o -m -b",
+                repair_config_info[self.key_tool_params] or "-s 100 -o -m -b",
             ),
             self.log_output_path,
             dir_path="/home/huyang/refactory",
