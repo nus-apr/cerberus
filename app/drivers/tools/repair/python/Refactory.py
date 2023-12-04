@@ -14,11 +14,12 @@ class Refactory(AbstractRepairTool):
         super(Refactory, self).run_repair(bug_info, repair_config_info)
 
         self.timestamp_log_start()
+        self.run_command(f"mkdir -p {join(self.dir_output,'patches')}")
         status = self.run_command(
             "timeout -k 5m {}h /home/huyang/conda/bin/python3 run.py -d {} -q src -output {} {}".format(
                 repair_config_info[self.key_timeout],
                 self.dir_expr,
-                self.dir_output,
+                join(self.dir_output, "patches"),
                 repair_config_info[self.key_tool_params] or "-s 100 -o -m -b",
             ),
             self.log_output_path,
