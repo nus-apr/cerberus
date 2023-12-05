@@ -43,7 +43,7 @@ class AbstractBenchmark(AbstractDriver):
     size = 0
     list_artifact_dirs: List[str] = []
     list_artifact_files: List[str] = []
-    base_dir_experiment = "/experiment/"
+    base_dir_experiment = values.container_base_experiment
     key_bug_id = definitions.KEY_BUG_ID
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
@@ -111,7 +111,7 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
             self.dir_setup = dir_info["container"]["setup"]
-            self.dir_base_expr = "/experiment/"
+            self.dir_base_expr = values.container_base_experiment
 
     def get_list(self) -> List[Any]:
         return self.experiment_subjects

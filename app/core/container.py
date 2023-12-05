@@ -274,6 +274,7 @@ def build_container(
             "privileged": True,
             "cpuset_cpus": ",".join(cpu),
             "tty": True,
+            "environment": {"EXPERIMENT_DIR": values.container_base_experiment},
         }
 
         if disable_network:
@@ -297,10 +298,8 @@ def build_container(
             # therefore other methods are needed
             # For example
             # python -c 'import torch; print(torch.cuda.device_count())'
-            container_run_args["environment"] = {
-                "NVIDIA_VISIBLE_DEVICES": ",".join(gpu),
-                "CUDA_VISIBLE_DEVICES": ",".join(gpu),
-            }
+            container_run_args["environment"]["NVIDIA_VISIBLE_DEVICES"] = ",".join(gpu)
+            container_run_args["environment"]["CUDA_VISIBLE_DEVICES"] = ",".join(gpu)
 
         default_mem_limit = "32g"
         if container_config_dict:
