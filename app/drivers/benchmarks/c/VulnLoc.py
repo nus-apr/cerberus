@@ -123,7 +123,8 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        command_str = "bash verify.sh 1"
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = "bash verify.sh {}".format(failing_test_list[0])
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )
