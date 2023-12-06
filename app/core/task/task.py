@@ -607,7 +607,7 @@ def print_task_info(
     )
     emitter.highlight(
         "\t\t[task profile] Patch-Dir: {}".format(
-            task_config_info[definitions.KEY_CONFIG_PATCH_DIR]
+            task_config_info.get(definitions.KEY_CONFIG_PATCH_DIR, None)
         )
     )
     emitter.highlight(

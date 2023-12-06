@@ -32,7 +32,8 @@ def run_repair(
     fix_line_numbers = []
 
     dir_local_patch = dir_info["local"]["patches"]
-    if repair_config_info[definitions.KEY_CONFIG_PATCH_DIR] == "setup":
+    config_patch_dir = repair_config_info.get(definitions.KEY_CONFIG_PATCH_DIR, None)
+    if config_patch_dir == "setup":
         if not os.path.isdir(dir_local_patch):
             os.makedirs(dir_local_patch)
     else:
