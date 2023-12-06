@@ -70,6 +70,9 @@ class ConfigDataFactory:
                 TaskProfile(
                     profile_id=task_profile_dict[ConfigFieldsEnum.PROFILE_ID.value],
                     timeout=task_profile_dict[ConfigFieldsEnum.TIMEOUT.value],
+                    patch_directory=task_profile_dict.get(
+                        ConfigFieldsEnum.PATCH_DIRECTORY.value, None
+                    ),
                     fault_location=task_profile_dict[
                         ConfigFieldsEnum.FAULT_LOCATION.value
                     ],
