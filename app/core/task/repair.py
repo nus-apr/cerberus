@@ -29,7 +29,9 @@ def run_repair(
     fix_location = None
     fix_source_file = ""
     fix_line_numbers = []
-    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
+        fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+    elif repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
         fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
         fix_line_numbers = list(
             map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
