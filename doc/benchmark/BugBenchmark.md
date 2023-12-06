@@ -1,4 +1,5 @@
 # Bug Benchmark Interface
+
 The following document describes the interface of the AbstractBenchmark class - the order of the methods defined represnts the order in which they are ran by Cerberus
 
 ```py
