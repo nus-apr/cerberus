@@ -47,11 +47,18 @@ def generate_local_dir_info(
     dir_path = join(benchmark_name, subject_name, bug_name, "")
     dir_exp_local = join(values.dir_experiments, dir_path)
     dir_setup_local = join(values.dir_benchmark, dir_path)
+    dir_patches_local = join(dir_setup_local, "patches")
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
     dir_logs_local = join(values.dir_logs, dir_path)
     dir_artifact_local = join(values.dir_artifacts, dir_path)
-    for directory in [dir_exp_local, dir_setup_local, dir_aux_local, dir_base_local]:
+    for directory in [
+        dir_exp_local,
+        dir_setup_local,
+        dir_aux_local,
+        dir_base_local,
+        dir_patches_local,
+    ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
 
@@ -68,6 +75,7 @@ def generate_local_dir_info(
         "setup": dir_setup_local,
         "base": dir_base_local,
         "aux": dir_aux_local,
+        "patches": dir_patches_local,
     }
 
 
@@ -593,8 +601,13 @@ def print_task_info(
         )
     )
     emitter.highlight(
-        "\t\t[task profile] Fix-loc: {}".format(
+        "\t\t[task profile] Fix-Loc: {}".format(
             task_config_info[definitions.KEY_CONFIG_FIX_LOC]
+        )
+    )
+    emitter.highlight(
+        "\t\t[task profile] Patch-Dir: {}".format(
+            task_config_info[definitions.KEY_CONFIG_PATCH_DIR]
         )
     )
     emitter.highlight(

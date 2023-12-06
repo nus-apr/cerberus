@@ -1,14 +1,15 @@
 import abc
 import os
+import shutil
 from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core import values
 from app.core.task.stats import RepairToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -24,6 +25,7 @@ class AbstractRepairTool(AbstractTool):
     key_fix_loc = definitions.KEY_FIX_LOC
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
+    key_java_version = definitions.KEY_JAVA_VERSION
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
@@ -123,6 +125,30 @@ class AbstractRepairTool(AbstractTool):
         self.stats.config_info = repair_config_info
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
+        return
+
+    def save_artifacts(self, dir_info):
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+        base_dir_patches = dir_info["patches"]
+        if os.path.isdir(base_dir_patches):
+            dir_patches = join(base_dir_patches, self.name)
+            if os.path.isdir(dir_patches):
+                shutil.rmtree(dir_patches)
+            if self.container_id:
+                container.copy_file_from_container(
+                    self.container_id, self.dir_patch, dir_patches
+                )
+            else:
+                if self.dir_patch != "":
+                    save_command = "cp -rf {} {};".format(self.dir_patch, dir_patches)
+                    utilities.execute_command(save_command)
+
+        super().save_artifacts(dir_info)
         return
 
     def print_stats(self) -> None:
