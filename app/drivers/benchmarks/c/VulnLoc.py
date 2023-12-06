@@ -91,7 +91,7 @@ class VulnLoc(AbstractBenchmark):
         )
         time = datetime.now()
         failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash run_test {failing_test_list[0]}"
+        command_str = f"bash test.sh {failing_test_list[0]}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -102,7 +102,7 @@ class VulnLoc(AbstractBenchmark):
         passing_test_list = experiment_item[self.key_passing_tests]
         passing_status = 0
         if len(passing_test_list) != 0:
-            command_str = f"bash run_test {passing_test_list[0]}"
+            command_str = f"bash test.sh {passing_test_list[0]}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
