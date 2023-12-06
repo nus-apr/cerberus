@@ -1,6 +1,7 @@
 import os
 from os.path import join
 
+from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -23,10 +24,21 @@ class Verifix(AbstractRepairTool):
         self.run_command(f"mkdir -p {join(self.dir_output,'patches')}")
         # start running
         self.timestamp_log_start()
+
+        if definitions.KEY_REFERENCE_FILE not in bug_info:
+            self.error_exit("No reference file provided in the metadata")
+
+        if self.key_fix_file not in bug_info:
+            self.error_exit("No target file found in the metadata")
+
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {} -output {}".format(
             timeout_h,
             "true" if self.is_debug else "false",
-            join(self.dir_expr, "src", "Main.c"),
+            join(
+                self.dir_expr,
+                "src",
+                bug_info.get(definitions.KEY_REFERENCE_FILE, "Main.c"),
+            ),
             join(self.dir_expr, "src", bug_info[self.key_fix_file]),
             join(self.dir_expr, "base", "test"),
             join(self.dir_output, "patches"),
