@@ -943,7 +943,8 @@ class Cerberus(App[List[Result]]):
     async def write_message(self, message: Write):
         if message.identifier in log_map:
             log_map[message.identifier].write(
-                f"{time.strftime('%b %d %H:%M:%S')} {message.text}",
+                message.text,
+                # f"{time.strftime('%b %d %H:%M:%S')} {message.text}",
                 shrink=False,
                 width=values.ui_max_width,
                 scroll_end=(self.selected_subject == message.identifier),
@@ -1033,7 +1034,8 @@ class Cerberus(App[List[Result]]):
         if values.debug or self.is_preparing:
             logger.debug(str(text))
             log_map["root"].write(
-                f"{time.strftime('%b %d %H:%M:%S')} {text}",
+                text,
+                # f"{time.strftime('%b %d %H:%M:%S')} {text}",
                 width=values.ui_max_width,
                 expand=True,
             )
