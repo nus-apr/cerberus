@@ -12,60 +12,67 @@ class Valkyrie(AbstractValidateTool):
         self.image_name = "rshariffdeen/valkyrie"
         self.id = ""
 
+    def populate_config_file(self, bug_info):
+        self.dir_patch = join(self.dir_output, "patches")
+        self.emit_normal("generating config file")
+        config_path = join(self.dir_expr, f"{self.name}.config")
+        conf_content = list()
+        dir_src = f"{self.dir_expr}/src"
+        conf_content.append(f"source_dir:{dir_src}\n")
+        conf_content.append(f"patch_dir:{self.dir_setup}/patches\n")
+        conf_content.append(
+            f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
+        )
+        conf_content.append(
+            f"test_id_list:{','.join(bug_info[self.key_failing_tests])}\n"
+        )
+        conf_content.append(
+            f"build_script:{self.dir_setup}/{bug_info[self.key_build_script]}\n"
+        )
+        conf_content.append(
+            f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
+        )
+        if bug_info.get(self.key_pvt_test_script, None):
+            pvt_script = f"{self.dir_setup}/{bug_info[self.key_pvt_test_script]}"
+            conf_content.append(f"pvt_test_script:{pvt_script}\n")
+        if bug_info.get(self.key_adv_test_script, None):
+            adv_script = f"{self.dir_setup}/{bug_info[self.key_adv_test_script]}"
+            conf_content.append(f"adv_test_script:{adv_script}\n")
+        conf_content.append(f"output_dir:{self.dir_output}\n")
+        conf_content.append("patch_mode:compile\n")
+        self.write_file(conf_content, config_path)
+        return config_path
+
     def run_validation(self, bug_info, validate_config_info):
+        conf_path = self.populate_config_file(bug_info)
         super(Valkyrie, self).run_validation(bug_info, validate_config_info)
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
         timeout = str(validate_config_info[self.key_timeout])
-        patch_categories = [
-            "incorrect",
-            "invalid",
-            "failure-fixing",
-            "plausible",
-            "correct",
-            "high_quality",
-        ]
-        dir_patch = join(self.dir_output, "patches")
-        mkdir_command = (
-            f"mkdir -p {dir_patch}/" + "{" + ",".join(patch_categories) + "}"
-        )
-        self.run_command(mkdir_command, self.log_output_path, "/")
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-        conf_path = join(self.dir_expr, "cpr", "repair.conf")
-        timeout_m = str(float(timeout) * 60)
-        test_id_list = ",".join(bug_info[self.key_failing_tests])
-        seed_id_list = ",".join(bug_info[self.key_passing_tests])
 
+        timeout_m = str(float(timeout) * 60)
         additional_tool_param = validate_config_info[self.key_tool_params]
         self.timestamp_log_start()
-        cpr_command = (
-            "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h cpr --conf=".format(
+        validate_command = (
+            "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h valkyrie --conf=".format(
                 timeout
             )
             + conf_path
-            + " "
+            + " --only-validate "
+            + additional_tool_param
+            + "'"
         )
-        cpr_command += " --seed-id-list=" + seed_id_list + " "
-        cpr_command += " --test-id-list=" + test_id_list + " "
-        cpr_command += "{0} --time-duration={1}' >> {2} 2>&1 ".format(
-            additional_tool_param, str(timeout_m), self.log_output_path
-        )
-        status = self.run_command(cpr_command, self.log_output_path)
 
+        status = self.run_command(validate_command, self.log_output_path)
         self.process_status(status)
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
-
-    def save_artifacts(self, dir_info):
-        dir_patch = join(self.dir_output, "patches")
-        self.run_command("cp -rf /CPR/output/{} {}".format(self.id, dir_patch))
-        super(Valkyrie, self).save_artifacts(dir_info)
-        return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
@@ -89,25 +96,8 @@ class Valkyrie(AbstractValidateTool):
         is_timeout = True
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
-            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
-                if "|P|=" in line:
-                    self.stats.patch_stats.plausible = int(
-                        line.split("|P|=")[-1]
-                        .strip()
-                        .replace("^[[0m", "")
-                        .split(":")[0]
-                    )
-                elif "number of concrete patches explored" in line:
-                    count_enumerations = int(
-                        line.split("number of concrete patches explored: ")[-1]
-                        .strip()
-                        .split("\x1b")[0]
-                        .split(".0")[0]
-                    )
-                    self.stats.patch_stats.enumerations = count_enumerations
-                elif "Runtime Error" in line:
+                if "Runtime Error" in line:
                     self.stats.error_stats.is_error = True
                 elif "statistics" in line:
                     is_timeout = False
