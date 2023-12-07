@@ -8,7 +8,7 @@ In order to add a new benchmark to the framework, the following requirements sho
 
 ## Adding a Driver
 
-Create a new file in `app/core/drivers/benchmarks/<language of benchmark>` with the Benchmark name (i.e. `NewBenchmark.py`) that contains the following code:
+Create a new file in `app/drivers/benchmarks/<language of benchmark>` with the Benchmark name (i.e. `NewBenchmark.py`) that contains the following code:
 
 ```py
 import shutil
