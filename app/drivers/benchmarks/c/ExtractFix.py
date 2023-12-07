@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
@@ -75,11 +76,31 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
-        command_str = "bash test.sh 1"
-        status = self.run_command(
-            container_id, command_str, self.log_test_path, self.dir_setup
+        time = datetime.now()
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = f"bash test.sh {failing_test_list[0]}"
+        failing_status = self.run_command(
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_setup),
         )
-        return status != 0
+
+        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_status = 0
+        if len(passing_test_list) != 0:
+            command_str = f"bash test.sh {passing_test_list[0]}"
+            passing_status = self.run_command(
+                container_id,
+                command_str,
+                self.log_test_path,
+                os.path.join(self.dir_setup),
+            )
+
+        self.emit_debug(
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return failing_status != 0 and passing_status == 0
 
     def verify(self, bug_index, container_id):
         self.emit_normal("verify dev patch and test-oracle")
@@ -88,9 +109,15 @@ class ExtractFix(AbstractBenchmark):
         self.log_test_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
-        command_str = "bash verify.sh 1"
+        time = datetime.now()
+        failing_test_list = experiment_item[self.key_failing_tests]
+        command_str = "bash verify.sh {}".format(failing_test_list[0])
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
+        )
+
+        self.emit_debug(
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
