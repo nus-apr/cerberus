@@ -208,10 +208,10 @@ resource-limits:
         bug_id = str(bug_info[self.key_bug_id])
         docker_tag_id = (
             f"{self.name}-"
-            f"{benchmark_name}"
+            f"{benchmark_name.replace('-', '_')}"
             f"-{subject_name.replace('-', '_')}"
-            f"-{bug_id.lower()}"
-        )
+            f"-{bug_id.replace('-', '_')}"
+        ).lower()
         test_list = bug_info.get(self.key_passing_tests) + bug_info.get(
             self.key_failing_tests
         )
