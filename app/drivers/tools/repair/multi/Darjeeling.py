@@ -293,8 +293,6 @@ resource-limits:
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
-            self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
             for line in log_lines:
                 if "evaluated candidate" in line:
                     self.stats.patch_stats.enumerations += 1
