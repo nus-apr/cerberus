@@ -33,18 +33,24 @@ class LLMR(AbstractRepairTool):
         )
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
-        file = bug_info[self.key_fix_file]
+        file = ""
+        if self.key_fix_file in bug_info:
+            file = bug_info[self.key_fix_file]
+            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
+                file = f"src/main/java/{file.replace('.', '/')}.java"
+            self.emit_debug("LLMR will work on file {}".format(file))
 
-        if bug_info[self.key_language] == "java" and not file.endswith(".java"):
-            file = f"src/main/java/{file.replace('.', '/')}.java"
+        fl = ""
 
-        self.emit_debug("LLMR will work on file {}".format(file))
+        if repair_config_info["fault_location"] == "auto":
+            fl = "-do-fl"
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py -model {model} -file {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {tests} {debug} {language}".format(
             timeout_h=timeout_h,
             patch_count=5,
+            project_path=join(self.dir_expr, "src"),
             build_script="-build {}".format(
                 join(self.dir_setup, bug_info[self.key_build_script])
             )
@@ -55,7 +61,7 @@ class LLMR(AbstractRepairTool):
             else "",
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
-            file=file,
+            file="-file {}".format(file) if file else "",
             model=model,
             tests="-tests {}".format(tests) if tests != "" else " ",
             debug="-d" if self.is_debug else "",
@@ -72,6 +78,7 @@ class LLMR(AbstractRepairTool):
             language="-lang {}".format(bug_info[self.key_language])
             if self.key_language in bug_info
             else "",
+            fl=fl,
         )
         status = self.run_command(
             llmr_command, self.log_output_path, join(self.dir_expr, "src")
