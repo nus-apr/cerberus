@@ -6,9 +6,9 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core import values
 from app.core.task.stats import ValidateToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -35,6 +35,31 @@ class AbstractValidateTool(AbstractTool):
     def __init__(self, tool_name):
         self.stats = ValidateToolStats()
         super().__init__(tool_name)
+
+    def save_artifacts(self, dir_info):
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+        base_dir_patches = dir_info["patches"]
+        if os.path.isdir(base_dir_patches):
+            dir_patches = join(base_dir_patches, self.name)
+            if os.path.isdir(dir_patches):
+                if self.container_id:
+                    container.copy_file_from_container(
+                        self.container_id, self.dir_output, f"{dir_patches}/{self.name}"
+                    )
+                else:
+                    if self.dir_patch != "":
+                        save_command = "cp -rf {} {};".format(
+                            self.dir_patch, f"{dir_patches}/{self.name}"
+                        )
+                        utilities.execute_command(save_command)
+
+        super().save_artifacts(dir_info)
+        return
 
     def analyse_output(
         self, dir_info, bug_id: str, fail_list: List[str]
