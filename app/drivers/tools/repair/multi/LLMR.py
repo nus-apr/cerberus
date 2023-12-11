@@ -119,7 +119,7 @@ class LLMR(AbstractRepairTool):
         self.emit_normal("reading output")
 
         # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
+        list_output_dir = self.list_dir(self.dir_patch)
         self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
@@ -137,9 +137,5 @@ class LLMR(AbstractRepairTool):
             for line in log_lines:
                 if re.match("Patch .* is Plausible", line):
                     self.stats.patch_stats.plausible += 1
-
-        self.stats.patch_stats.generated = len(
-            self.list_dir(self.dir_output, "patched_*")
-        )
 
         return self.stats
