@@ -103,7 +103,9 @@ class ExtractFix(AbstractRepairTool):
             "api_specific"
             if experiment_info[self.key_bug_id] == "CVE-2016-3186"
             or experiment_info[self.key_bug_id] == "gnubug-25003"
-            else ExtractFix.bug_conversion_table[experiment_info[self.key_bug_type]]
+            else ExtractFix.bug_conversion_table.get(
+                experiment_info[self.key_bug_type], ""
+            )
         )
 
         if bug_type == "-b ":
