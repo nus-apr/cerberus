@@ -12,9 +12,13 @@ from app.core import logger
 from app.core import values
 from app.ui import ui
 
-stty_info = os.popen("stty size", "r")
-rows, columns = tuple(map(int, stty_info.read().split()))
-stty_info.close()
+try:
+    stty_info = os.popen("stty size", "r")
+    rows, columns = tuple(map(int, stty_info.read().split()))
+    stty_info.close()
+except Exception as e:
+    rows, columns = 200, 100
+    rich.print("Could not get terminal size: {}".format(e))
 
 
 class COLOR(Enum):
