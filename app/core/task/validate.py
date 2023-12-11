@@ -1,5 +1,7 @@
+import os
 import threading
 import time
+from os.path import join
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -12,51 +14,35 @@ from app.core import values
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.task.typing.TaskType import TaskType
-from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 
 
-def run_analysis(
+def run_validate(
     dir_info: DirectoryInfo,
     experiment_info,
-    tool: AbstractAnalyzeTool,
-    analysis_config_info: Dict[str, Any],
+    tool: AbstractValidateTool,
+    validate_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
-
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
-    fix_location = None
-    fix_line_numbers = []
-    if analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
-        fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-    elif analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
-        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-        fix_line_numbers = list(
-            map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
-        )
-        fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
-    elif analysis_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
-        if definitions.KEY_FIX_FILE in experiment_info:
-            del experiment_info[definitions.KEY_FIX_FILE]
-    experiment_info[definitions.KEY_FIX_LOC] = fix_location
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
-    test_ratio = float(analysis_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
-        analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
+        validate_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
+
     passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
     if isinstance(passing_test_list, str):
         passing_test_list = passing_test_list.split(",")
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
-    pass_test_count = int(len(passing_test_list) * test_ratio)
-    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
+
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
-        tool.run_analysis(experiment_info, analysis_config_info)
+        tool.run_validation(experiment_info, validate_config_info)
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
             values.experiment_status.set(TaskStatus.SUCCESS)
     except Exception as ex:
@@ -64,11 +50,11 @@ def run_analysis(
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
 
 
-def analyze_all(
+def validate_all(
     dir_info: Any,
     experiment_info: Dict[str, Any],
-    analyze_tool: AbstractAnalyzeTool,
-    analysis_config_info,
+    validate_tool: AbstractValidateTool,
+    validate_config_info,
     container_id: Optional[str],
     benchmark_name: str,
 ):
@@ -76,33 +62,39 @@ def analyze_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
-    time_duration = float(analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    time_duration = float(validate_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
 
     final_status = [TaskStatus.NONE]
 
-    if values.use_valkyrie:
-        values.running_tool = True
+    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
+    if isinstance(passing_test_list, str):
+        passing_test_list = passing_test_list.split(",")
+
+    failing_test_list = str(
+        experiment_info.get(definitions.KEY_FAILING_TEST, "")
+    ).split(",")
 
     if values.ui_active:
-        run_analysis(
+        run_validate(
             dir_info,
             experiment_info,
-            analyze_tool,
-            analysis_config_info,
+            validate_tool,
+            validate_config_info,
             container_id,
             benchmark_name,
         )
     else:
 
-        def analyze_wrapped(
+        def validate_wrapped(
             dir_info,
             experiment_info,
-            analyze_tool: AbstractAnalyzeTool,
-            analyze_config_info,
+            validate_tool: AbstractValidateTool,
+            validate_config_info,
             container_id: Optional[str],
             benchmark_name: str,
-            repair_profile_id: str,
+            validate_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
             final_status,
@@ -111,25 +103,25 @@ def analyze_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(validate_profile_id)
             values.job_identifier.set(job_identifier)
-            run_analysis(
+            run_validate(
                 dir_info,
                 experiment_info,
-                analyze_tool,
-                analyze_config_info,
+                validate_tool,
+                validate_config_info,
                 container_id,
                 benchmark_name,
             )
             final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
 
         tool_thread = threading.Thread(
-            target=analyze_wrapped,
+            target=validate_wrapped,
             args=(
                 dir_info,
                 experiment_info,
-                analyze_tool,
-                analysis_config_info,
+                validate_tool,
+                validate_config_info,
                 container_id,
                 benchmark_name,
                 values.current_task_profile_id.get("NA"),
@@ -137,24 +129,25 @@ def analyze_all(
                 values.task_type.get(None),
                 final_status,
             ),
-            name="Wrapper thread for analysis {} {} {}".format(
-                analyze_tool.name, benchmark_name, container_id
+            name="Wrapper thread for validation {} {} {}".format(
+                validate_tool.name, benchmark_name, container_id
             ),
         )
         tool_thread.start()
 
-        if not tool_thread:
-            utilities.error_exit(
-                "\t\t[framework] tool thread was not created somehow??"
-            )
+        if tool_thread is None:
+            utilities.error_exit("Thread was not created")
         wait_time = 5.0
         if time.time() <= total_timeout:
             wait_time = total_timeout - time.time()
+        # give 5 min grace period for threads to finish
+        wait_time = wait_time + 60.0 * 5
         tool_thread.join(wait_time)
+
         if tool_thread.is_alive():
             emitter.highlight(
-                "\t\t\t[framework] thread for {} is not done, setting event to kill thread.".format(
-                    analyze_tool.name
+                "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
+                    validate_tool.name
                 )
             )
             event = threading.Event()
@@ -165,8 +158,8 @@ def analyze_all(
             # the loop before finally stopping.
         else:
             emitter.highlight(
-                "\t\t\t[framework] thread for {} has already finished.".format(
-                    analyze_tool.name
+                "\t\t\t[framework] {}: thread has already finished.".format(
+                    validate_tool.name
                 )
             )
 
@@ -174,17 +167,3 @@ def analyze_all(
         # to verify thread shutdown.
         tool_thread.join()
         values.experiment_status.set(final_status[0])
-        # if tool.log_output_path:
-        #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
-        #     utilities.execute_command(timestamp_command)
-
-    values.running_tool = False
-    if values.use_valkyrie:
-        emitter.normal("\t\t\twaiting for validation pool")
-        parallel.wait_validation()
-        emitter.normal("\t\t\twaiting for consumer pool")
-        if consume_thread:
-            consume_thread.join()
-    # for t in tool_list:
-    #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + t.log_output_path
-    #     utilities.execute_command(timestamp_command)

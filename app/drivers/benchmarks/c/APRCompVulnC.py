@@ -117,7 +117,7 @@ class APRCompVulnC(AbstractBenchmark):
             container_id, command_str, self.log_test_path, self.dir_setup
         )
         self.emit_debug(
-            "test took {} second(s)".format((datetime.now() - time).total_seconds())
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status != 0
 

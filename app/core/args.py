@@ -28,10 +28,10 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_TASK_TYPE,
         "-task",
-        help="type of task to run {analyze, prepare, repair, fuzz}",
+        help="type of task to run {analyze, fuzz, prepare, repair, validate}",
         default=None,
         required=False,
-        choices=["analyze", "prepare", "repair", "fuzz"],
+        choices=["analyze", "fuzz", "prepare", "repair", "validate"],
         metavar="task_type",
     )
     optional.add_argument(
@@ -271,6 +271,10 @@ def parse_args():
         help="allow gpu usage",
         action="store_true",
         default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_SPECIAL_META, help="Special metadata file", default=""
     )
 
     optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")

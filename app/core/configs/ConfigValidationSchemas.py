@@ -41,6 +41,7 @@ task_profile_schema = {
             "minimum": 0,
             "maximum": 1,
         },
+        ConfigFieldsEnum.PATCH_DIRECTORY.value: {"type": "string"},
     },
     "required": [
         ConfigFieldsEnum.PROFILE_ID.value,

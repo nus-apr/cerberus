@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Any
+from typing import Dict
 
 from app.core import emitter
 from app.core import values
@@ -84,29 +86,45 @@ class TimeStats:
 
 
 class PatchStats:
-    non_compilable: int = 0
-    plausible: int = 0
-    generated: int = 0
-    size: int = 0
-    enumerations: int = 0
-    __implausible = None
+    non_compilable: int = -1
+    plausible: int = -1
+    generated: int = -1
+    size: int = -1
+    enumerations: int = -1
+    correct: int = -1
+    high_quality: int = -1
+    __implausible: int = -1
 
     def get_implausible(self):
-        self.__implausible = self.enumerations - self.plausible - self.non_compilable
+        if self.__implausible == -1 and self.enumerations > 0:
+            self.__implausible = (
+                self.enumerations - self.plausible - self.non_compilable
+            )
         return self.__implausible
 
     def get_exploration_ratio(self):
         return (self.enumerations / self.size) * 100
 
-    def get_dict(self):
-        summary = {
-            "search space": self.size,
-            "enumerations": self.enumerations,
-            "non-compilable": self.non_compilable,
-            "plausible": self.plausible,
-            "implausible": self.get_implausible(),
-            "generated": self.generated,
-        }
+    def get_dict(self, is_validate=False):
+        if is_validate:
+            summary = {
+                "search space": self.size,
+                "enumerations": self.enumerations,
+                "invalid": self.non_compilable,
+                "incorrect": self.__implausible,
+                "plausible": self.plausible,
+                "correct": self.correct,
+                "high_quality": self.high_quality,
+            }
+        else:
+            summary = {
+                "search space": self.size,
+                "enumerations": self.enumerations,
+                "non-compilable": self.non_compilable,
+                "plausible": self.plausible,
+                "implausible": self.get_implausible(),
+                "generated": self.generated,
+            }
         return summary
 
 
@@ -267,6 +285,8 @@ class ToolStats:
 
 class RepairToolStats(ToolStats):
     patch_stats: PatchStats
+    bug_info: Dict[str, Any]
+    config_info: Dict[str, Any]
 
     def __init__(self):
         self.patch_stats = PatchStats()
@@ -275,6 +295,10 @@ class RepairToolStats(ToolStats):
     def get_dict(self):
         res = super(RepairToolStats, self).get_dict()
         res["details"]["space"] = self.patch_stats.get_dict()
+        if "info" not in res:
+            res["info"] = dict()
+        res["info"]["bug-info"] = self.bug_info
+        res["info"]["config-info"] = self.config_info
         return res
 
     def write(self, printer, prefix=""):
@@ -301,6 +325,52 @@ class RepairToolStats(ToolStats):
             )
         )
         super(RepairToolStats, self).write(printer, prefix)
+
+
+class ValidateToolStats(ToolStats):
+    patch_stats: PatchStats
+    bug_info: Dict[str, Any]
+    config_info: Dict[str, Any]
+
+    def __init__(self):
+        self.patch_stats = PatchStats()
+        super(ValidateToolStats, self).__init__()
+
+    def get_dict(self):
+        res = super(ValidateToolStats, self).get_dict()
+        res["details"]["space"] = self.patch_stats.get_dict()
+        if "info" not in res:
+            res["info"] = dict()
+        res["info"]["bug-info"] = self.bug_info
+        res["info"]["config-info"] = self.config_info
+        return res
+
+    def write(self, printer, prefix=""):
+        printer("{1} search space size: {0}\n".format(self.patch_stats.size, prefix))
+        printer(
+            "{1} count enumerations: {0}\n".format(
+                self.patch_stats.enumerations, prefix
+            )
+        )
+        printer(
+            "{1} count invalid patches: {0}\n".format(
+                self.patch_stats.non_compilable, prefix
+            )
+        )
+
+        printer(
+            "{1} count incorrect patches: {0}\n".format(
+                self.patch_stats.get_implausible(), prefix
+            )
+        )
+
+        printer(
+            "{1} count plausible patches: {0}\n".format(
+                self.patch_stats.plausible, prefix
+            )
+        )
+
+        super(ValidateToolStats, self).write(printer, prefix)
 
 
 class AnalysisToolStats(ToolStats):

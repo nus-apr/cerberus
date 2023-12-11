@@ -17,7 +17,7 @@ class Infer(AbstractAnalyzeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "yuntongzhang/infer:latest"
+        self.image_name = "yuntongzhang/infer:facebook"
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
@@ -56,13 +56,11 @@ class Infer(AbstractAnalyzeTool):
 
         self.timestamp_log_start()
         dir_src = join(self.dir_expr, "src")
-        compile_list = bug_info.get(self.key_compile_programs, [])
-        saver_command = "timeout -k 5m {0}h infer analyze {1} -- make -j20 {2}".format(
-            str(timeout_h), additional_tool_param, " ".join(compile_list)
-        )
+        # add --keep-going to not abort when having runtime errors
+        analysis_command = "infer analyze {} --keep-going".format(additional_tool_param)
 
         status = self.run_command(
-            saver_command, dir_path=dir_src, log_file_path=self.log_output_path
+            analysis_command, dir_path=dir_src, log_file_path=self.log_output_path
         )
         if status != 0:
             self.emit_error("infer analyze command returned non-zero exit")
@@ -74,8 +72,12 @@ class Infer(AbstractAnalyzeTool):
 
     def save_artifacts(self, dir_info):
         infer_output = join(self.dir_expr, "src", "infer-out")
-        copy_command = "cp -rf {} {}".format(infer_output, self.dir_output)
-        self.run_command(copy_command)
+        infer_report_json = join(infer_output, "report.json")
+        infer_report_txt = join(infer_output, "report.txt")
+        copy_command_json = "cp -f {} {}".format(infer_report_json, self.dir_output)
+        copy_command_txt = "cp -f {} {}".format(infer_report_txt, self.dir_output)
+        self.run_command(copy_command_json)
+        self.run_command(copy_command_txt)
         super(Infer, self).save_artifacts(dir_info)
         return
 

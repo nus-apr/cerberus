@@ -1,88 +1,232 @@
 import os
+from datetime import datetime
 from os.path import join
-from typing import List
 
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
-"""
-NOT YET IMPLEMENTED FULLY
-"""
-
 
 class BugsDotJar(AbstractBenchmark):
-
-    log_instrument_path = None
-
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(BugsDotJar, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
-        is_error = super(BugsDotJar, self).setup_experiment(
-            bug_index, container_id, test_all
-        )
+        if not container_id:
+            self.error_exit(
+                "unimplemented functionality: this benchmark only runs on docker"
+            )
+
+        is_error = True
+        if self.install_deps(bug_index, container_id):
+            is_error = super(BugsDotJar, self).setup_experiment(
+                bug_index, container_id, test_all
+            )
         if not is_error:
-            if self.instrument(bug_index, container_id):
-                self.emit_success("[benchmark] instrumentation successful")
+            if self.verify(bug_index, container_id):
+                self.emit_success("verified successfully")
+                if self.transform(bug_index, container_id):
+                    self.emit_success("transformation successful")
+                    if self.compress_dependencies(container_id, bug_index):
+                        self.emit_success("dependencies compressed successfully")
+                        if self.clean(bug_index, container_id):
+                            self.emit_success("clean up successful")
+                        else:
+                            self.emit_error("clean up failed")
+                            is_error = True
+                    else:
+                        self.emit_error("dependency compression failed")
+                        is_error = True
+                else:
+                    self.emit_error("transformation failed")
+                    is_error = True
             else:
-                self.emit_error("[benchmark] instrumentation failed")
+                self.emit_error("verification failed")
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
-        """
-        Setup the container for the experiment by constructing volumes,
-        which point to certain folders in the project
-        """
-        container_id = super(BugsDotJar, self).setup_container(
-            bug_index, image_name, cpu, gpu
-        )
-
+    def install_deps(self, bug_index, container_id):
+        self.emit_normal("installing experiment dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
-
-        self.run_command(
-            container_id,
-            "git clone --branch {} https://github.com/bugs-dot-jar/{} {}".format(
-                experiment_item["branch"],
-                experiment_item["subject"],
-                join(self.dir_expr, "src"),
-            ),
+        self.log_deps_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-deps.log"
         )
-
-        return container_id
+        time = datetime.now()
+        command_str = "bash install_deps"
+        status = self.run_command(
+            container_id, command_str, self.log_deps_path, self.dir_setup
+        )
+        self.emit_debug(
+            "installing dependencies took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        return status == 0
 
     def deploy(self, bug_index, container_id):
         self.emit_normal("downloading experiment subject")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_deploy_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
+        )
+        time = datetime.now()
+        command_str = f"bash setup_subject"
+        status = self.run_command(
+            container_id, command_str, self.log_deploy_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def config(self, bug_index, container_id):
         self.emit_normal("configuring experiment subject")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_config_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-config.log"
+        )
+        time = datetime.now()
+        command_str = "bash config_subject"
+        status = self.run_command(
+            container_id, command_str, self.log_config_path, self.dir_setup
+        )
+        self.emit_debug(
+            "config took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def build(self, bug_index, container_id):
         self.emit_normal("building experiment subject")
-        status = self.run_command(
-            container_id, "mvn compile -DskipTests", dir_path=join(self.dir_expr, "src")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_build_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
+        time = datetime.now()
+        command_str = "bash build_subject"
+
+        status = self.run_command(
+            container_id, command_str, self.log_build_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
+
+    def compress_dependencies(self, container_id, bug_index):
+        self.emit_normal("compressing experiment dependencies")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_compress_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-compress.log"
+        )
+        time = datetime.now()
+        dir_classes = join(self.dir_expr, "src", experiment_item[self.key_dir_class])
+        dir_target = "/".join(dir_classes.split("/")[:-1])
+        command_str = f"bash compress_deps {dir_target}"
+        status = self.run_command(
+            container_id, command_str, self.log_compress_path, self.dir_setup
+        )
+        self.emit_debug(
+            " compression took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+
         return status == 0
 
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
-        status = self.run_command(
-            container_id, "mvn test", dir_path=join(self.dir_expr, "src")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
-        return status != 0
+        time = datetime.now()
+        failing_test_list = experiment_item[self.key_failing_tests]
+        test_timeout = experiment_item[self.key_test_timeout]
+        command_str = f"bash run_test {failing_test_list[0]} {test_timeout}"
+        failing_status = self.run_command(
+            container_id,
+            command_str,
+            self.log_test_path,
+            os.path.join(self.dir_setup),
+        )
 
-    def instrument(self, bug_index, container_id):
-        self.emit_normal("instrumenting assertions")
-        return True
+        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_status = 0
+        if passing_test_list:
+            passing_test_str = ",".join(passing_test_list)
+            command_str = f"bash run_test {passing_test_str} {300}"
+            passing_status = self.run_command(
+                container_id,
+                command_str,
+                self.log_test_path,
+                os.path.join(self.dir_setup),
+            )
 
-    def clean(self, exp_dir_path, container_id):
-        self.emit_normal("removing experiment subject")
-        command_str = "rm -rf " + exp_dir_path
-        self.run_command(container_id, command_str)
-        return
+        self.emit_debug(
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return failing_status != 0 and passing_status == 0
+
+    def verify(self, bug_index, container_id):
+        self.emit_normal("verify dev patch and test-oracle")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_verify_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
+        )
+        time = datetime.now()
+        failing_test_list = experiment_item[self.key_failing_tests]
+        test_timeout = experiment_item[self.key_test_timeout]
+        command_str = f"bash verify_dev {failing_test_list[0]} {test_timeout}"
+        status = self.run_command(
+            container_id, command_str, self.log_verify_path, self.dir_setup
+        )
+
+        self.emit_debug(
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
+
+    def transform(self, bug_index, container_id):
+        self.emit_normal("transforming source code")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_test_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
+        )
+        time = datetime.now()
+        command_str = "echo 'transformation complete'"
+        status = self.run_command(
+            container_id, command_str, self.log_test_path, self.dir_setup
+        )
+        self.emit_debug(
+            "transform took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        return status == 0
+
+    def clean(self, bug_index, container_id):
+        self.emit_normal("cleaning up source code")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_clean_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-clean.log"
+        )
+        time = datetime.now()
+        command_str = f"bash clean_subject"
+        status = self.run_command(
+            container_id, command_str, self.log_clean_path, self.dir_setup
+        )
+        self.emit_debug(
+            "clean up took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory

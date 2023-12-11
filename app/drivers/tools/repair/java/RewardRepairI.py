@@ -3,7 +3,8 @@ import os
 import time
 from os.path import join
 
-from app.core import definitions, values
+from app.core import definitions
+from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -34,7 +35,7 @@ class RewardRepairI(AbstractRepairTool):
 
         tool_dir = "/repair/RewardRepair"
 
-        if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+        if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
             if len(bug_info[self.key_fix_lines]) == 0:
                 self.error_exit("no line number to fix")
 

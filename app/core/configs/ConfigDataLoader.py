@@ -28,4 +28,6 @@ class ConfigDataLoader:
             raise ValueError("Config is not valid.")
 
     def get_config_data(self):
+        if self.config_data is None:
+            raise ValueError("Config data is not loaded.")
         return self.config_data

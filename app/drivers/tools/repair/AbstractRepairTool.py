@@ -1,14 +1,15 @@
 import abc
 import os
+import shutil
 from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core import values
 from app.core.task.stats import RepairToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -24,6 +25,7 @@ class AbstractRepairTool(AbstractTool):
     key_fix_loc = definitions.KEY_FIX_LOC
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
+    key_java_version = definitions.KEY_JAVA_VERSION
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
@@ -56,13 +58,9 @@ class AbstractRepairTool(AbstractTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-        patch_dir = join(
-            self.dir_output,
-            "patch-valid" if self.use_valkyrie else "patches",
-        )
 
-        if self.is_dir(patch_dir):
-            self.stats.patch_stats.generated = len(self.list_dir(patch_dir))
+        if self.is_dir(self.dir_patch):
+            self.stats.patch_stats.generated = len(self.list_dir(self.dir_patch))
 
         return self.stats
 
@@ -104,11 +102,53 @@ class AbstractRepairTool(AbstractTool):
         self.emit_normal("executing repair command")
         task_conf_id = repair_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
+        self.dir_patch = join(
+            self.dir_output,
+            "patch-valid" if self.use_valkyrie else "patches",
+        )
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
+        filtered_bug_info = dict()
+        interested_keys = [
+            self.key_id,
+            self.key_bug_id,
+            self.key_subject,
+            self.key_benchmark,
+            definitions.KEY_COUNT_NEG,
+            definitions.KEY_COUNT_POS,
+        ]
+        for k in interested_keys:
+            filtered_bug_info[k] = bug_info[k]
+        repair_config_info["container-id"] = self.container_id
+        self.stats.bug_info = filtered_bug_info
+        self.stats.config_info = repair_config_info
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
+        return
+
+    def save_artifacts(self, dir_info):
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+        base_dir_patches = dir_info["patches"]
+        if os.path.isdir(base_dir_patches):
+            dir_patches = join(base_dir_patches, self.name)
+            if os.path.isdir(dir_patches):
+                shutil.rmtree(dir_patches)
+            if self.container_id:
+                container.copy_file_from_container(
+                    self.container_id, self.dir_patch, dir_patches
+                )
+            else:
+                if self.dir_patch != "":
+                    save_command = "cp -rf {} {};".format(self.dir_patch, dir_patches)
+                    utilities.execute_command(save_command)
+
+        super().save_artifacts(dir_info)
         return
 
     def print_stats(self) -> None:

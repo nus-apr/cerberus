@@ -1,4 +1,5 @@
 import os
+import shutil
 import threading
 import time
 from os.path import join
@@ -29,7 +30,19 @@ def run_repair(
     fix_location = None
     fix_source_file = ""
     fix_line_numbers = []
-    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "dev":
+
+    dir_local_patch = dir_info["local"]["patches"]
+    config_patch_dir = repair_config_info.get(definitions.KEY_CONFIG_PATCH_DIR, None)
+    if config_patch_dir == "setup":
+        if not os.path.isdir(dir_local_patch):
+            os.makedirs(dir_local_patch)
+    else:
+        if os.path.isdir(dir_local_patch):
+            shutil.rmtree(dir_local_patch)
+
+    if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
+        fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+    elif repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
         fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
         fix_line_numbers = list(
             map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))

@@ -5,6 +5,7 @@ import traceback
 from argparse import Namespace
 from multiprocessing import set_start_method
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import Optional
 
@@ -25,6 +26,7 @@ from app.core.configuration import Configurations
 from app.core.task import task
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskProcessor import TaskProcessor
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
@@ -69,7 +71,7 @@ def create_task_image_identifier(
     if tag and tag != "":
         image_args.append(tag)
 
-    image_name = "-".join(image_args)
+    image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
     return image_name.lower()
 
 
@@ -78,7 +80,9 @@ def create_bug_image_identifier(
 ):
     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    return "-".join([benchmark.name, subject_name, bug_name]).lower()
+    return "-".join(
+        map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
+    ).lower()
 
 
 def create_task_identifier(
@@ -117,7 +121,7 @@ def process_configs(
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
             setattr(values, k, v)
-    values.task_type.set(task_config.task_type)
+    values.task_type.set(cast(TaskType, task_config.task_type))
     values.current_container_profile_id.set(container_profile[definitions.KEY_ID])
     values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
 
@@ -174,7 +178,7 @@ def main():
                 )
             iteration = ui.setup_ui(tasks)
         else:
-            emitter.information("[framework] starting processing of tasks")
+            emitter.information("\t\t[framework] starting processing of tasks")
             process_tasks(tasks)
 
     except (SystemExit, KeyboardInterrupt) as e:
@@ -256,18 +260,23 @@ def process_tasks(tasks: TaskList):
 
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+        dir_info = task.generate_dir_info(
+            benchmark.name,
+            subject_name,
+            bug_name,
+            task_profile.get(definitions.KEY_TOOL_TAG, ""),
+        )
 
         if task_config.task_type == "prepare":
             iteration = iteration + 1
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(iteration, bug_index, 1)
             )
-            task.prepare_experiment(benchmark, experiment_item, cpus, [])
+            task.prepare_experiment(benchmark, experiment_item, cpus, [], tag=tool_tag)
             continue
 
         experiment_image_id = task.prepare_experiment(
-            benchmark, experiment_item, cpus, []
+            benchmark, experiment_item, cpus, [], tool_tag
         )
 
         image_name = create_task_image_identifier(
@@ -281,7 +290,7 @@ def process_tasks(tasks: TaskList):
             tool,
             dir_info,
             image_name,
-            task_profile[definitions.KEY_TOOL_TAG],
+            task_profile.get(definitions.KEY_TOOL_TAG, ""),
         )
         for run_index in range(task_config.runs):
             iteration = iteration + 1

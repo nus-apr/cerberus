@@ -14,11 +14,13 @@ class Refactory(AbstractRepairTool):
         super(Refactory, self).run_repair(bug_info, repair_config_info)
 
         self.timestamp_log_start()
+        self.run_command(f"mkdir -p {join(self.dir_output,'patches')}")
         status = self.run_command(
-            "timeout -k 5m {}h /home/huyang/conda/bin/python3 run.py -d {} -q src -s 100 {}".format(
+            "timeout -k 5m {}h /home/huyang/conda/bin/python3 run.py -d {} -q src -output {} {}".format(
                 repair_config_info[self.key_timeout],
                 self.dir_expr,
-                repair_config_info[self.key_tool_params] or "-o -m -b",
+                join(self.dir_output, "patches"),
+                repair_config_info[self.key_tool_params] or "-s 100 -o -m -b",
             ),
             self.log_output_path,
             dir_path="/home/huyang/refactory",
@@ -67,8 +69,6 @@ class Refactory(AbstractRepairTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
                 if line.startswith("fail"):

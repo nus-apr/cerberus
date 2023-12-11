@@ -133,6 +133,7 @@ class Configurations:
         "tool-list": [],
         "tool-params": "",
         "tool-tag": "",
+        "special-meta": "",
         "directories": {"data": "/data"},
         "repair-profile-id-list": ["TP1"],
         "container-profile-id-list": ["CP1"],
@@ -261,6 +262,9 @@ class Configurations:
 
         if arg_list.compact_results:
             self.__runtime_config_values["compact-results"] = arg_list.compact_results
+
+        if arg_list.special_meta:
+            self.__runtime_config_values["special-meta"] = arg_list.special_meta
 
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
@@ -524,6 +528,8 @@ class Configurations:
         values.use_purge = self.__runtime_config_values["use-purge"]
         values.runs = max(1, self.__runtime_config_values["runs"])
         values.use_cache = self.__runtime_config_values["use-cache"]
+        values.special_meta = self.__runtime_config_values["special-meta"]
+
         values.cpus = max(
             1,
             min(

@@ -1,12 +1,14 @@
 # Add New Bug Benchmark
-In order to add a new benchmark to the framework, the following requirements should be met
 
-* Benchmark Driver: python class than extends AbstractTool to facilitate standardization of interfaces
+In order to add a new benchmark to the framework, the following requirements should be met:
+
+* Benchmark Driver: a Python class than extends AbstractBenchmark to facilitate standardization of interfaces
 * Benchmark Image: a Dockerfile describing how to construct the benchmark container
 * Benchmark metadata file: A Json file containing an array of objects with the following features
 
 ## Adding a Driver
-Create a new file in `app/benchmarks` with the Benchmark name (i.e. NewBenchmark.py) that contains the following code:
+
+Create a new file in `app/drivers/benchmarks/<language of benchmark>` with the Benchmark name (i.e. `NewBenchmark.py`) that contains the following code:
 
 ```py
 import shutil
@@ -73,3 +75,153 @@ class NewBenchmark(AbstractBenchmark):
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Defects4J, self).save_artefacts(dir_info, container_id)
 ```
+
+## Benchmark folder
+
+Create a new folder in `benchmarks` with the benchmark name in lowercase (i.e. `newbenchmark`). The folder should contain the following files:
+
+* Dockerfile, describing how the benchmark image is constructed
+* meta-data.json containing information about every experiment
+* Optional - folders for every subject and subfolders for every bug
+* Optional - base folder which contains files common to all projects (test cases, images, etc.).
+
+Below is an example tree structure of a benchmark with accompanying example Dockerfile and meta-data.json structure.
+
+### File structure
+
+```bash
+newbenchmark
+├── base
+├── Dockerfile
+├── meta-data.json
+├── subject-a
+│   ├── 1
+│   └── 2
+└── subject-b
+    └── 1
+```
+
+Below we provide an example Dockerfile for a Python oriented benchmark.
+
+## Example Dockerfile
+
+```dockerfile
+FROM ubuntu:20.04
+LABEL maintainer="Dev <dev@nus-apr.com>"
+
+RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
+RUN apt-get install python3 python3-pip -y
+RUN pip3 install pytest pytest-timeout
+```
+
+## Example metadata
+
+The metadata file has a couple of mandatory fields, which Cerberus directly utilises to automatically find files or execute certain operations. Below an example file is provided for multiple bigs and an example file structure. We allow any fields in the `meta-data.json` file, which can be utilised by the driver and subsequently the tool with some already standardized for the different languages:
+
+* Mandatory:
+  * `id` - numeric identifier, used by Cerberus, the command line arguments --bug-index and --bug-index-list check for it
+  * `subject` - name of the specific program which will be repaired
+  * `bug_id` - sub-identifier allowing for identifying different bugs for the same subject
+  * `line_numbers` - perfect fault localization information, can be empty
+  * `bug_type` - a textual description of the type of bug, e.g. `Test Failure`, `Null Pointer Dereferencing` - used by some repair tools as a parameter for repair patterns or instrumentation
+  * `test_timeout` - default time (in minutes) needed for the execution of a test
+  information
+* Common but not mandatory:
+  * `source_file` - The specific file containing the bug
+  * `failing_test` - A string or a list containing test identifiers for tests which fail
+  * `passing_test` -  A string or a list containing test identifiers for tests which pass
+  * `count_pos` - The amount of tests in `failing_test`
+  * `count_neg` - The amount of tests in `passing_test`
+  * `config_script` - A path to the name of the configuration script. The path is relative to the directory of the bug, e.g. `subject-a/1`
+  * `build_script` - A path to the configuration script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
+  * `clean_script`  - A path to the clean-up script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
+  * `build_script`  - A path to the build script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
+  * `test_script` - A path to the test script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`. The script should be able to accept the keyword `all` to allow for execution of all tests or the identifier for test. This can be benchmark specific but a preferable standard can be either a file path to indicate input files or name of a test method `file::method`.
+  * `language` - The language of the subject. `multi` if there is more than one
+  * `crash_input` - command to execute the binary. `$POC` represents where the input should be passed
+  * `exploit_file_list` - a list of crashing inputs. Similar to `failing_test`
+* Java:
+  * `dependencies` - specific dependencies of the project.
+  * `source_directory` - the location of the .java files for the project. Path is relative to the root of the project.
+  * `class_directory` - the location of generated .class files for the project. Path is relative to the root of the project.
+  * `test_directory`  - the location of .java files for the tests. Path is relative to the root of the project.
+  * `test_class_directory` - the location of generated .class files for the tests. Path is relative to the root of the project.
+  * `java_version` - The specific Java version used by the bug, e.g. 8, 11, 14
+  * `build_system` - The specific build system for the bug, e.g. Maven, Gradle, Ant
+* Python:
+  * `test_framework` - The name of the test framework being used.
+* C/C++:
+  * `binary_path` - location of the binary to be executed. The path is relative to the root folder of the bug
+
+
+```json
+[{
+        "id": 1,
+        "subject": "subject-a",
+        "bug_id": "1",
+        "line_numbers": [],
+        "language": "",
+        "bug_type": "Test Failure",
+        "failing_test": [
+            "Test Identifier",
+        ],
+        "passing_test": [
+            "Test Identifier"
+        ],
+        "count_neg": 1,
+        "count_pos": 1,
+        "config_script": "config_subject",
+        "build_script": "build_subject",
+        "clean_script": "clean_subject",
+        "test_script": "test_subject",
+        "test_timeout": 5,
+    },
+    {
+        "id": 2,
+        "subject": "subject-a",
+        "bug_id": "2",
+        "line_numbers": [],
+        "language": "",
+        "bug_type": "Test Failure",
+        "failing_test": [
+            "Test Identifier",
+        ],
+        "passing_test": [
+            "Test Identifier"
+        ],
+        "count_neg": 1,
+        "count_pos": 1,
+        "config_script": "config_subject",
+        "build_script": "build_subject",
+        "clean_script": "clean_subject",
+        "test_script": "test_subject",
+        "test_timeout": 5,
+    },
+    {
+        "id": 3,
+        "subject": "subject-b",
+        "bug_id": "1",
+        "line_numbers": [],
+        "language": "",
+        "bug_type": "Test Failure",
+        "failing_test": [
+            "Test Identifier",
+        ],
+        "passing_test": [
+            "Test Identifier"
+        ],
+        "count_neg": 1,
+        "count_pos": 1,
+        "config_script": "config_subject",
+        "build_script": "build_subject",
+        "clean_script": "clean_subject",
+        "test_script": "test_subject",
+        "test_timeout": 5,
+    }
+]
+```
+
+## Tool Instrumentation
+
+
+To allow for tool specific instrumentation, one can construct a folder inside of the bug folder with the name of the tool as the folder name. For example, we would like to add instrumentation for bug 1 in subject-a for the CPR tool. To do this, one can create the folder `newbenchmark/subject-a/1/cpr` with a file named `instrument.sh` to execute any extra steps before the tool is executed on the buggy program.

@@ -28,6 +28,11 @@ class APRCompFuncJava(AbstractBenchmark):
                     self.emit_success("transformation successful")
                     if self.compress_dependencies(container_id, bug_index):
                         self.emit_success("dependencies compressed successfully")
+                        if self.clean(bug_index, container_id):
+                            self.emit_success("clean up successful")
+                        else:
+                            self.emit_error("clean up failed")
+                            is_error = True
                     else:
                         self.emit_error("dependency compression failed")
                         is_error = True
@@ -66,7 +71,7 @@ class APRCompFuncJava(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
         time = datetime.now()
-        command_str = "bash setup_subject"
+        command_str = f"bash setup_subject {experiment_item[self.key_commit_fix]}"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
@@ -141,7 +146,8 @@ class APRCompFuncJava(AbstractBenchmark):
         )
         time = datetime.now()
         failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash run_test {failing_test_list[0]}"
+        test_timeout = experiment_item[self.key_test_timeout]
+        command_str = f"bash run_test {failing_test_list[0]} {test_timeout}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -151,8 +157,9 @@ class APRCompFuncJava(AbstractBenchmark):
 
         passing_test_list = experiment_item[self.key_passing_tests]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash run_test {passing_test_list[0]}"
+        if passing_test_list:
+            passing_test_str = ",".join(passing_test_list)
+            command_str = f"bash run_test {passing_test_str} {300}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
@@ -161,7 +168,7 @@ class APRCompFuncJava(AbstractBenchmark):
             )
 
         self.emit_debug(
-            " Test took {} second(s)".format((datetime.now() - time).total_seconds())
+            "Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return failing_status != 0 and passing_status == 0
 
@@ -174,7 +181,8 @@ class APRCompFuncJava(AbstractBenchmark):
         )
         time = datetime.now()
         failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash verify_dev {failing_test_list[0]}"
+        test_timeout = experiment_item[self.key_test_timeout]
+        command_str = f"bash verify_dev {failing_test_list[0]} {test_timeout}"
         status = self.run_command(
             container_id, command_str, self.log_verify_path, self.dir_setup
         )
@@ -192,7 +200,7 @@ class APRCompFuncJava(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-transform.log"
         )
         time = datetime.now()
-        command_str = "echo 'transformation complete'"
+        command_str = f"bash transform_subject"
         status = self.run_command(
             container_id, command_str, self.log_transform_path, self.dir_setup
         )
@@ -203,11 +211,22 @@ class APRCompFuncJava(AbstractBenchmark):
         )
         return status == 0
 
-    def clean(self, exp_dir_path, container_id):
-        self.emit_normal("removing experiment subject")
-        command_str = "rm -rf " + exp_dir_path
-        self.run_command(container_id, command_str)
-        return
+    def clean(self, bug_index, container_id):
+        self.emit_normal("cleaning up source code")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_clean_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-clean.log"
+        )
+        time = datetime.now()
+        command_str = f"bash clean_subject"
+        status = self.run_command(
+            container_id, command_str, self.log_clean_path, self.dir_setup
+        )
+        self.emit_debug(
+            "clean up took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory

@@ -31,6 +31,7 @@ from textual.widgets._data_table import ColumnKey
 from app.core import container
 from app.core import definitions
 from app.core import emitter
+from app.core import logger
 from app.core import main
 from app.core import utilities
 from app.core import values
@@ -163,7 +164,12 @@ class Cerberus(App[List[Result]]):
                 Cerberus.COLUMNS[column_name][table.id] = column_key
 
     def _on_idle(self) -> None:
-        super()._on_idle()
+        try:
+            super()._on_idle()
+        except Exception as e:
+            self.debug_print("The inner idle handler failed...")
+            self.debug_print(e)
+            pass
         # self.debug_print("Idle")
         now = int(time.time())
         to_del = []
@@ -293,7 +299,7 @@ class Cerberus(App[List[Result]]):
 
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_subjects_job(
-            benchmark: AbstractBenchmark, experiment_item, job_identifier
+            benchmark: AbstractBenchmark, experiment_item, job_identifier: str, tag: str
         ):
             cpu = self.cpu_queue.get(block=True, timeout=None)
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
@@ -304,7 +310,9 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+            dir_info = task.generate_dir_info(
+                benchmark.name, subject_name, bug_name, tag
+            )
             benchmark.update_dir_info(dir_info)
             try:
                 emitter.information(
@@ -313,7 +321,7 @@ class Cerberus(App[List[Result]]):
                     )
                 )
                 task.prepare_experiment(
-                    benchmark, experiment_item, [str(cpu)], []
+                    benchmark, experiment_item, [str(cpu)], [], tag
                 )  # Assuming no GPU is used for preparation
                 complete_images.put(
                     (
@@ -343,7 +351,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = set()
+        image_list: Set[str] = set()
         for (
             task_config,
             (
@@ -358,18 +366,28 @@ class Cerberus(App[List[Result]]):
             job_identifier = main.create_bug_image_identifier(
                 benchmark, experiment_item
             )
-            if job_identifier in building:
+            if job_identifier in image_list:
                 continue
 
             main.process_configs(
                 task_config, benchmark, experiment_item, task_profile, container_profile
             )
 
-            building.add(job_identifier)
+            image_list.add(job_identifier)
             loop.run_in_executor(
-                None, prepare_subjects_job, benchmark, experiment_item, job_identifier
+                None,
+                prepare_subjects_job,
+                benchmark,
+                experiment_item,
+                job_identifier,
+                task_profile.get(definitions.KEY_TOOL_TAG, ""),
             )
-        while complete_images.qsize() != len(building):
+        while complete_images.qsize() != len(image_list):
+            self.query_one(Static).update(
+                "Cerberus is preparing the subject images ({} out of {} complete).".format(
+                    complete_images.qsize(), len(image_list)
+                )
+            )
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, success) = complete_images.get()
@@ -397,7 +415,9 @@ class Cerberus(App[List[Result]]):
             ]
         ],
     ):
-        self.query_one(Static).update("Cerberus is preparing the tool subject images.")
+        self.query_one(Static).update(
+            "Cerberus is preparing the specialised subject images."
+        )
         complete_images: queue.Queue[
             Tuple[str, str, Optional[str], bool]
         ] = queue.Queue(0)
@@ -419,7 +439,12 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(benchmark.name, subject_name, bug_name)
+            dir_info = task.generate_dir_info(
+                benchmark.name,
+                subject_name,
+                bug_name,
+                task_profile.get(definitions.KEY_TOOL_TAG, ""),
+            )
             benchmark.update_dir_info(dir_info)
             try:
                 emitter.information(
@@ -430,7 +455,12 @@ class Cerberus(App[List[Result]]):
                 # Ignore the rebuild as previously all bugs were prepared
                 # Assuming that no GPUs are needed for preparation
                 experiment_image_id = task.prepare_experiment(
-                    benchmark, experiment_item, [str(cpu)], [], ignore_rebuild=True
+                    benchmark,
+                    experiment_item,
+                    [str(cpu)],
+                    [],
+                    task_profile.get(definitions.KEY_TOOL_TAG, ""),
+                    ignore_rebuild=True,
                 )
 
                 emitter.information(
@@ -476,7 +506,7 @@ class Cerberus(App[List[Result]]):
                 )
             )
 
-        building: Set[str] = set()
+        image_list: Set[str] = set()
         for (
             task_config,
             (
@@ -495,13 +525,13 @@ class Cerberus(App[List[Result]]):
                 task_profile.get(definitions.KEY_TOOL_TAG, None),
             )
 
-            if image_name in building:
+            if image_name in image_list:
                 continue
 
             main.process_configs(
                 task_config, benchmark, experiment_item, task_profile, container_profile
             )
-            building.add(image_name)
+            image_list.add(image_name)
             loop.run_in_executor(
                 None,
                 prepare_tool_subjects_job,
@@ -511,7 +541,12 @@ class Cerberus(App[List[Result]]):
                 task_profile,
                 image_name,
             )
-        while complete_images.qsize() != len(building):
+        while complete_images.qsize() != len(image_list):
+            self.query_one(Static).update(
+                "Cerberus is preparing the specialised subject images ({} out of {} complete).".format(
+                    complete_images.qsize(), len(image_list)
+                )
+            )
             pass
         while complete_images.qsize() != 0:
             (id, job_identifier, image_name, success) = complete_images.get()
@@ -909,6 +944,7 @@ class Cerberus(App[List[Result]]):
         if message.identifier in log_map:
             log_map[message.identifier].write(
                 message.text,
+                # f"{time.strftime('%b %d %H:%M:%S')} {message.text}",
                 shrink=False,
                 width=values.ui_max_width,
                 scroll_end=(self.selected_subject == message.identifier),
@@ -996,7 +1032,13 @@ class Cerberus(App[List[Result]]):
 
     def debug_print(self, text: Any):
         if values.debug or self.is_preparing:
-            log_map["root"].write(text, width=values.ui_max_width, expand=True)
+            logger.debug(str(text))
+            log_map["root"].write(
+                text,
+                # f"{time.strftime('%b %d %H:%M:%S')} {text}",
+                width=values.ui_max_width,
+                expand=True,
+            )
 
 
 app: Cerberus
@@ -1048,6 +1090,9 @@ def print_results(experiment_results: Optional[List[Result]]):
         )
 
         summary_map = {}
+        aggregation_file = join(
+            values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
+        )
         for experiment, status, dir_info, tool_stats in experiment_results:
             summary_map[experiment] = tool_stats.get_dict()
             emitter.information(
@@ -1059,10 +1104,8 @@ def print_results(experiment_results: Optional[List[Result]]):
                     dir_info.get("summary", "N/A"),
                 )
             )
-
-        aggregation_file = join(
-            values.dir_summaries, "aggregated_summary_{}.json".format(time.time())
-        )
+            summary_map[experiment]["filename"] = aggregation_file
+            summary_map[experiment]["dir-info"] = dir_info
 
         emitter.information(
             "\t[framework] Inserting an aggregation of the data at {}".format(

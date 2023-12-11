@@ -68,10 +68,11 @@ class Brafar(AbstractRepairTool):
 
         self.emit_highlight(f"output log file: {self.log_output_path}")
 
+        if self.is_dir(self.dir_patch):
+            self.stats.patch_stats.generated = len(self.list_dir(self.dir_patch)) - 1
+
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
             self.stats.patch_stats.enumerations = 1
 
             for line in log_lines:

@@ -2,92 +2,136 @@
   "CP1": {
     "id": "CP1",
     "cpu_count": 2,
-    "mem_limit": "16g",
+    "gpu_count": 0,
+    "mem_limit":"16g",
     "enable_network": true
   },
   "CP2": {
     "id": "CP2",
     "cpu_count": 2,
-    "mem_limit": "32g",
+    "gpu_count": 0,
+    "mem_limit":"32g",
     "enable_network": true
   },
   "CP3": {
     "id": "CP3",
     "cpu_count": 2,
-    "mem_limit": "64g",
+    "gpu_count": 0,
+    "mem_limit":"64g",
     "enable_network": true
   },
 
   "CP4": {
     "id": "CP4",
     "cpu_count": 4,
-    "mem_limit": "16g",
+    "gpu_count": 0,
+    "mem_limit":"16g",
     "enable_network": true
   },
   "CP5": {
     "id": "CP5",
     "cpu_count": 4,
-    "mem_limit": "32g",
+    "gpu_count": 0,
+    "mem_limit":"32g",
     "enable_network": true
   },
   "CP6": {
     "id": "CP6",
     "cpu_count": 4,
-    "mem_limit": "64g",
+    "gpu_count": 0,
+    "mem_limit":"64g",
     "enable_network": true
   },
   "CP7": {
     "id": "CP7",
     "cpu_count": 8,
-    "mem_limit": "16g",
+    "gpu_count": 0,
+    "mem_limit":"16g",
     "enable_network": true
   },
   "CP8": {
     "id": "CP8",
     "cpu_count": 8,
-    "mem_limit": "32g",
+    "gpu_count": 0,
+    "mem_limit":"32g",
     "enable_network": true
   },
   "CP9": {
     "id": "CP9",
     "cpu_count": 8,
-    "mem_limit": "64g",
+    "gpu_count": 0,
+    "mem_limit":"64g",
     "enable_network": true
   },
   "CP10": {
     "id": "CP10",
     "cpu_count": 16,
-    "mem_limit": "16g",
+    "gpu_count": 0,
+    "mem_limit":"16g",
     "enable_network": true
   },
   "CP11": {
     "id": "CP11",
     "cpu_count": 16,
-    "mem_limit": "32g",
+    "gpu_count": 0,
+    "mem_limit":"32g",
     "enable_network": true
   },
   "CP12": {
     "id": "CP12",
     "cpu_count": 16,
-    "mem_limit": "64g",
+    "gpu_count": 0,
+    "mem_limit":"64g",
     "enable_network": true
   },
   "CP13": {
     "id": "CP13",
     "cpu_count": 32,
-    "mem_limit": "16g",
+    "gpu_count": 0,
+    "mem_limit":"16g",
     "enable_network": true
   },
   "CP14": {
     "id": "CP14",
     "cpu_count": 32,
-    "mem_limit": "32g",
+    "gpu_count": 0,
+    "mem_limit":"32g",
     "enable_network": true
   },
   "CP15": {
     "id": "CP15",
     "cpu_count": 32,
-    "mem_limit": "64g",
+    "gpu_count": 0,
+    "mem_limit":"64g",
+    "enable_network": true
+  },
+
+  "GP1": {
+    "id": "GP1",
+    "cpu_count": 2,
+    "gpu_count": 1,
+    "mem_limit":"8g",
+    "enable_network": true
+  },
+    "GP2": {
+    "id": "GP2",
+    "cpu_count": 4,
+    "gpu_count": 2,
+    "mem_limit":"16g",
+    "enable_network": true
+  },
+  "GP3": {
+    "id": "GP3",
+    "cpu_count": 8,
+    "gpu_count": 4,
+    "mem_limit":"32g",
+    "enable_network": true
+  },
+  "GP4": {
+    "id": "GP4",
+    "cpu_count": 16,
+    "gpu_count": 8,
+    "mem_limit":"64g",
     "enable_network": true
   }
 }

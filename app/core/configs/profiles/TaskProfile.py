@@ -9,9 +9,11 @@ class TaskProfile(AbstractProfile):
         fault_location: str,
         passing_test_ratio: float,
         test_timeout: int = 10,
+        patch_directory: str = "",
     ):
         super().__init__(profile_id)
         self.timeout = timeout
         self.fault_location = fault_location
         self.passing_test_ratio = passing_test_ratio
         self.test_timeout = test_timeout
+        self.patch_directory = patch_directory

@@ -43,7 +43,7 @@ class AbstractBenchmark(AbstractDriver):
     size = 0
     list_artifact_dirs: List[str] = []
     list_artifact_files: List[str] = []
-    base_dir_experiment = "/experiment/"
+    base_dir_experiment = values.container_base_experiment
     key_bug_id = definitions.KEY_BUG_ID
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
@@ -56,6 +56,9 @@ class AbstractBenchmark(AbstractDriver):
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
+    key_commit_buggy = definitions.KEY_COMMIT_BUGGY
+    key_commit_fix = definitions.KEY_COMMIT_FIX
+    key_test_timeout = definitions.KEY_TEST_TIMEOUT
     key_subject = definitions.KEY_SUBJECT
     has_standard_name: bool = False
 
@@ -108,7 +111,7 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
             self.dir_setup = dir_info["container"]["setup"]
-            self.dir_base_expr = "/experiment/"
+            self.dir_base_expr = values.container_base_experiment
 
     def get_list(self) -> List[Any]:
         return self.experiment_subjects
@@ -150,7 +153,15 @@ class AbstractBenchmark(AbstractDriver):
             utilities.error_exit("Meta file path not set")
         if not os.path.isfile(cast(str, self.meta_file)):
             utilities.error_exit("Meta file does not exist")
-        with open(cast(str, self.meta_file), "r") as in_file:
+
+        meta_file_loc = self.meta_file
+
+        if values.special_meta:
+            meta_file_loc = values.special_meta
+            if not os.path.exists(meta_file_loc):
+                utilities.error_exit("Special meta file path is incorrect")
+
+        with open(meta_file_loc, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
                 self.experiment_subjects = json_data

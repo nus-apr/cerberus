@@ -58,7 +58,7 @@ class TBar(AbstractRepairTool):
         # start running
         self.timestamp_log_start()
 
-        run_fl = repair_config_info[definitions.KEY_CONFIG_FIX_LOC] != "dev"
+        run_fl = repair_config_info[definitions.KEY_CONFIG_FIX_LOC] != "line"
         parameters = self.create_parameters(bug_info, run_fl, env)
 
         tbar_command = (

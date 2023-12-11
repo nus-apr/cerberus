@@ -20,12 +20,14 @@ from app.core import writer
 from app.core.task import analyze
 from app.core.task import fuzz
 from app.core.task import repair
+from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
+from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 from app.plugins import valkyrie
 
 
@@ -39,17 +41,32 @@ def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
     return dir_info
 
 
-def generate_local_dir_info(benchmark_name: str, subject_name: str, bug_name: str):
+def generate_local_dir_info(
+    benchmark_name: str, subject_name: str, bug_name: str, tag: str
+):
     dir_path = join(benchmark_name, subject_name, bug_name, "")
     dir_exp_local = join(values.dir_experiments, dir_path)
-    dir_setup_local = join(values.dir_main, "benchmark", dir_path)
+    dir_setup_local = join(values.dir_benchmark, dir_path)
+    dir_patches_local = join(dir_setup_local, "patches")
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
     dir_logs_local = join(values.dir_logs, dir_path)
     dir_artifact_local = join(values.dir_artifacts, dir_path)
-    for directory in [dir_exp_local, dir_setup_local, dir_aux_local, dir_base_local]:
+    for directory in [
+        dir_exp_local,
+        dir_setup_local,
+        dir_aux_local,
+        dir_base_local,
+        dir_patches_local,
+    ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
+
+    if tag:  # Allow for the usage of custom setup folders
+        dir_path_extended = join(benchmark_name, subject_name, f"{bug_name}-{tag}", "")
+        dir_setup_extended = join(values.dir_benchmark, dir_path_extended)
+        if os.path.exists(dir_setup_extended):
+            dir_setup_local = dir_setup_extended
 
     return {
         "logs": dir_logs_local,
@@ -58,6 +75,7 @@ def generate_local_dir_info(benchmark_name: str, subject_name: str, bug_name: st
         "setup": dir_setup_local,
         "base": dir_base_local,
         "aux": dir_aux_local,
+        "patches": dir_patches_local,
     }
 
 
@@ -66,10 +84,11 @@ def generate_local_tool_dir_info(
     subject_name: str,
     bug_name: str,
     hash: Any,
-    tag_name: str,
+    task_identifier: str,
+    tag: str,
 ):
-    dir_name = f"{tag_name}-{hash.hexdigest()[:8]}"
-    base_info = generate_local_dir_info(benchmark_name, subject_name, bug_name)
+    dir_name = f"{task_identifier}-{hash.hexdigest()[:8]}"
+    base_info = generate_local_dir_info(benchmark_name, subject_name, bug_name, tag)
 
     dir_result_local = join(values.dir_results, dir_name)
     dir_log_local = join(values.dir_logs, dir_name)
@@ -105,11 +124,16 @@ def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name
 
 
 def generate_tool_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str, hash, tag_name: str
+    benchmark_name: str,
+    subject_name: str,
+    bug_name: str,
+    hash,
+    task_identifier: str,
+    tag: str,
 ) -> DirectoryInfo:
     dir_info: DirectoryInfo = {
         "local": generate_local_tool_dir_info(
-            benchmark_name, subject_name, bug_name, hash, tag_name
+            benchmark_name, subject_name, bug_name, hash, task_identifier, tag
         ),
         "container": generate_container_dir_info(
             benchmark_name, subject_name, bug_name
@@ -119,10 +143,10 @@ def generate_tool_dir_info(
 
 
 def generate_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str
+    benchmark_name: str, subject_name: str, bug_name: str, tag: str
 ) -> DirectoryInfo:
     dir_info: DirectoryInfo = {
-        "local": generate_local_dir_info(benchmark_name, subject_name, bug_name),
+        "local": generate_local_dir_info(benchmark_name, subject_name, bug_name, tag),
         "container": generate_container_dir_info(
             benchmark_name, subject_name, bug_name
         ),
@@ -326,6 +350,7 @@ def prepare_tool_experiment_image(
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
+        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
@@ -352,6 +377,7 @@ def prepare_experiment(
     bug_info: Dict[str, Any],
     cpu: List[str],
     gpu: List[str],
+    tag: str,
     ignore_rebuild: bool = False,
 ):
     utilities.check_space()
@@ -366,7 +392,7 @@ def prepare_experiment(
         bug_name = str(bug_info[definitions.KEY_BUG_ID])
         subject_name = str(bug_info[definitions.KEY_SUBJECT])
         benchmark.update_dir_info(
-            generate_dir_info(benchmark.name, subject_name, bug_name)
+            generate_dir_info(benchmark.name, subject_name, bug_name, tag)
         )
         experiment_image_id = (
             benchmark.get_exp_image(
@@ -402,7 +428,10 @@ def prepare_experiment_tool(
                 bug_image_id, repair_tool, dir_info, image_name, tag
             )
         else:
-            return cast(str, container.get_image(image_name).id)
+            img = container.get_image(image_name)
+            if not img:
+                utilities.error_exit("Image exists yet was not found??")
+            return cast(str, img.id)
     return None
 
 
@@ -433,7 +462,12 @@ def run(
     hash.update(str(time.time()).encode("utf-8"))
 
     dir_info = generate_tool_dir_info(
-        benchmark.name, subject_name, bug_name, hash, task_identifier
+        benchmark.name,
+        subject_name,
+        bug_name,
+        hash,
+        task_identifier,
+        task_config_info.get(definitions.KEY_TOOL_TAG, ""),
     )
     benchmark.update_dir_info(dir_info)
     print_task_info(
@@ -521,6 +555,15 @@ def run(
                 container_id,
                 benchmark.name,
             )
+        elif task_type == "validate":
+            validate.validate_all(
+                dir_info,
+                bug_info,
+                cast(AbstractValidateTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 
@@ -558,8 +601,13 @@ def print_task_info(
         )
     )
     emitter.highlight(
-        "\t\t[task profile] Fix-loc: {}".format(
+        "\t\t[task profile] Fix-Loc: {}".format(
             task_config_info[definitions.KEY_CONFIG_FIX_LOC]
+        )
+    )
+    emitter.highlight(
+        "\t\t[task profile] Patch-Dir: {}".format(
+            task_config_info.get(definitions.KEY_CONFIG_PATCH_DIR, None)
         )
     )
     emitter.highlight(
@@ -578,6 +626,12 @@ def print_task_info(
         emitter.highlight(
             "\t\t[container profile] CPU Count: {}".format(
                 container_config_info[definitions.KEY_CONTAINER_CPU_COUNT]
+            )
+        )
+
+        emitter.highlight(
+            "\t\t[container profile] GPU Count: {}".format(
+                container_config_info[definitions.KEY_CONTAINER_GPU_COUNT]
             )
         )
 

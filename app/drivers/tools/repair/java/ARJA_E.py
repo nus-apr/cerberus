@@ -8,7 +8,6 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class ARJA_E(AbstractRepairTool):
 
     arja_e_home = "/opt/arja"
-
     d4j_env = {"TZ": "America/Los_Angeles"}
 
     def __init__(self):
@@ -51,6 +50,7 @@ class ARJA_E(AbstractRepairTool):
         max_generations = 0x7FFFFFFF // (arja_default_population_size + 1)
 
         test_timeout = 30000
+        java_version = bug_info[self.key_java_version]
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
         # generate patches
         self.timestamp_log_start()
@@ -60,6 +60,7 @@ class ARJA_E(AbstractRepairTool):
             f"-DbinJavaDir {dir_java_bin} "
             f"-DbinTestDir {dir_test_bin} "
             "-DdiffFormat true "
+            f" -DsrcVersion={java_version} "
             f"-DexternalProjRoot {self.arja_e_home}/external "
             f"-DwaitTime {test_timeout} "
             f"-DmaxGenerations {max_generations} "
