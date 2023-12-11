@@ -19,6 +19,8 @@ class Valkyrie(AbstractValidateTool):
         conf_content = list()
         dir_src = f"{self.dir_expr}/src"
         conf_content.append(f"source_dir:{dir_src}\n")
+        if bug_info.get(self.key_fix_file, None):
+            conf_content.append(f"source_file:{bug_info.get(self.key_fix_file)}\n")
         conf_content.append(f"patch_dir:{self.dir_setup}/patches\n")
         conf_content.append(
             f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
@@ -26,9 +28,12 @@ class Valkyrie(AbstractValidateTool):
         conf_content.append(
             f"test_id_list:{','.join(bug_info[self.key_failing_tests])}\n"
         )
-        conf_content.append(
-            f"build_script:{self.dir_setup}/{bug_info[self.key_build_script]}\n"
-        )
+        build_script = bug_info[self.key_build_script]
+        abs_path_b_script = f"{self.dir_setup}/{build_script}"
+        if build_script:
+            conf_content.append(f"build_script:{abs_path_b_script}\n")
+        else:
+            conf_content.append(f'build_script:-c "exit 0"\n')
         conf_content.append(
             f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
         )
