@@ -202,6 +202,12 @@ class TBar(AbstractRepairTool):
         tbar_logs_dir = join(self.tbar_root_dir, "logs")
         self.run_command("cp -r {0} {1}".format(tbar_logs_dir, self.dir_logs))
 
+        self.run_command(f"mkdir -p {self.dir_patch}")
+        self.run_command(
+            "cp -r $(find /output/TBar | grep .txt) {}".format(self.dir_patch),
+            dir_path=self.dir_output,
+        )
+
         # tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
         # self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
 
