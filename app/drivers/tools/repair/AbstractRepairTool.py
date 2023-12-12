@@ -141,11 +141,11 @@ class AbstractRepairTool(AbstractTool):
                 shutil.rmtree(dir_patches)
             if self.container_id:
                 container.copy_file_from_container(
-                    self.container_id, self.dir_output, dir_patches
+                    self.container_id, self.dir_patch, dir_patches
                 )
             else:
                 if self.dir_patch != "":
-                    save_command = "cp -rf {} {};".format(self.dir_output, dir_patches)
+                    save_command = "cp -rf {} {};".format(self.dir_patch, dir_patches)
                     utilities.execute_command(save_command)
 
         super().save_artifacts(dir_info)
