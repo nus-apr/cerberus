@@ -1,5 +1,6 @@
 import abc
 import os
+import shutil
 from datetime import datetime
 from os.path import join
 from typing import Any
@@ -47,16 +48,18 @@ class AbstractValidateTool(AbstractTool):
         if os.path.isdir(base_dir_patches):
             dir_patches = join(base_dir_patches, self.name)
             if os.path.isdir(dir_patches):
-                if self.container_id:
-                    container.copy_file_from_container(
-                        self.container_id, self.dir_output, f"{dir_patches}/{self.name}"
+                shutil.rmtree(dir_patches)
+            os.makedirs(dir_patches)
+            if self.container_id:
+                container.copy_file_from_container(
+                    self.container_id, self.dir_output, f"{dir_patches}"
+                )
+            else:
+                if self.dir_patch != "":
+                    save_command = "cp -rf {} {};".format(
+                        self.dir_patch, f"{dir_patches}"
                     )
-                else:
-                    if self.dir_patch != "":
-                        save_command = "cp -rf {} {};".format(
-                            self.dir_patch, f"{dir_patches}/{self.name}"
-                        )
-                        utilities.execute_command(save_command)
+                    utilities.execute_command(save_command)
 
         super().save_artifacts(dir_info)
         return
