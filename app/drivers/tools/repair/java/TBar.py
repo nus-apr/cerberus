@@ -204,7 +204,9 @@ class TBar(AbstractRepairTool):
 
         self.run_command(f"mkdir -p {self.dir_patch}")
         self.run_command(
-            "cp -r $(find /output/TBar | grep .txt) {}".format(self.dir_patch),
+            "bash -c 'cp -r $(find /output/TBar | grep .txt) {}'".format(
+                self.dir_patch
+            ),
             dir_path=self.dir_output,
         )
 
