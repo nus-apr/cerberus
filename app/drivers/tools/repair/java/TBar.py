@@ -49,6 +49,7 @@ class TBar(AbstractRepairTool):
 
         env = dict(
             FAILING_TESTS=(" ".join(bug_info[self.key_failing_tests])),
+            PASSING_TESTS=(" ".join(bug_info[self.key_passing_tests])),
             CLASS_DIRECTORY=f"{bug_info[self.key_dir_class]}/",
             TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
@@ -126,9 +127,9 @@ class TBar(AbstractRepairTool):
 
         # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
         test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
-        if test_failed_tests_file != 0:
+        if test_failed_tests_file != 0 and not run_fl:
             self.emit_warning(
-                f"{failed_tests_file} does not exist in FailedTestCases/;"
+                f"{failed_tests_file} does not exist in FailedTestCases/ directory."
                 "Will try to find if there is a hardcoded suspiciousness file"
             )
             test_fl_data = self.run_command(f"test -f {fl_data}")
