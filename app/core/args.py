@@ -28,12 +28,22 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_TASK_TYPE,
         "-task",
-        help="type of task to run {analyze, fuzz, prepare, repair, validate}",
+        help="type of task to run {" + ",".join(values.get_task_types()) + "}",
         default=None,
         required=False,
-        choices=["analyze", "fuzz", "prepare", "repair", "validate"],
+        choices=values.get_task_types(),
         metavar="task_type",
     )
+
+    optional.add_argument(
+        definitions.ARG_TOOL_NAME,
+        "-t",
+        help="name of the repair/analysis tool\n\n"
+        + ", ".join(values.get_list_tools()),
+        choices=values.get_list_tools(),
+        metavar="TOOL",
+    )
+
     optional.add_argument(
         definitions.ARG_CONFIG_FILE, "-c", type=str, help="Path to the JSON config file"
     )
@@ -88,14 +98,6 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_DOCKER_HOST,
         help="custom URL for the docker server which will host the containers",
-    )
-    optional.add_argument(
-        definitions.ARG_TOOL_NAME,
-        "-t",
-        help="name of the repair/analysis tool\n\n"
-        + ", ".join(values.get_list_tools()),
-        choices=values.get_list_tools(),
-        metavar="TOOL",
     )
 
     # TODO: Group list of tools based on type
