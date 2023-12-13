@@ -140,7 +140,7 @@ class TBar(AbstractRepairTool):
                 )
             self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
         elif run_fl:
-            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str}"
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,experiment_info[self.key_build_script])}"
 
             # cmd = (
             #    f"java -cp 'target/classes:target/dependency/*' "
