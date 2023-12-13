@@ -10,12 +10,12 @@ from typing import List
 from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core.task.stats import ValidateToolStats
+from app.core.task.stats import LocalizeToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
-class AbstractValidateTool(AbstractTool):
+class AbstractLocalizeTool(AbstractTool):
 
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
@@ -31,10 +31,10 @@ class AbstractValidateTool(AbstractTool):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
-    stats: ValidateToolStats
+    stats: LocalizeToolStats
 
     def __init__(self, tool_name):
-        self.stats = ValidateToolStats()
+        self.stats = LocalizeToolStats()
         super().__init__(tool_name)
 
     def save_artifacts(self, dir_info):
@@ -44,18 +44,20 @@ class AbstractValidateTool(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        base_dir_patches = dir_info["patches"]
-        if os.path.isdir(base_dir_patches):
-            dir_patches = join(base_dir_patches, self.name)
-            if os.path.isdir(dir_patches):
-                shutil.rmtree(dir_patches)
-            os.makedirs(dir_patches)
+        base_dir_localization = dir_info["localization"]
+        if os.path.isdir(base_dir_localization):
+            dir_localization = join(base_dir_localization, self.name)
+            if os.path.isdir(dir_localization):
+                shutil.rmtree(dir_localization)
+            os.makedirs(dir_localization)
             if self.container_id:
                 container.copy_file_from_container(
-                    self.container_id, self.dir_output, f"{dir_patches}"
+                    self.container_id, self.dir_output, f"{dir_localization}"
                 )
             else:
-                save_command = "cp -rf {} {};".format(self.dir_output, f"{dir_patches}")
+                save_command = "cp -rf {} {};".format(
+                    self.dir_output, f"{dir_localization}"
+                )
                 utilities.execute_command(save_command)
 
         super().save_artifacts(dir_info)
@@ -63,40 +65,31 @@ class AbstractValidateTool(AbstractTool):
 
     def analyse_output(
         self, dir_info, bug_id: str, fail_list: List[str]
-    ) -> ValidateToolStats:
+    ) -> LocalizeToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
 
-            self.stats.patches_stats.non_compilable
-            self.stats.patches_stats.plausible
-            self.stats.patches_stats.size
-            self.stats.patches_stats.enumerations
-            self.stats.patches_stats.generated
+            self.stats.fix_loc_stats.plausible
+            self.stats.fix_loc_stats.size
+            self.stats.fix_loc_stats.enumerations
+            self.stats.fix_loc_stats.generated
 
-            self.stats.time_stats.total_validation
-            self.stats.time_stats.total_build
-            self.stats.time_stats.timestamp_compilation
-            self.stats.time_stats.timestamp_validation
-            self.stats.time_stats.timestamp_plausible
         """
-
-        if self.is_dir(self.dir_patch):
-            self.stats.patch_stats.size = len(self.list_dir(self.dir_patch))
 
         return self.stats
 
-    def run_validation(
-        self, bug_info: Dict[str, Any], validate_config_info: Dict[str, Any]
+    def run_localization(
+        self, bug_info: Dict[str, Any], localization_config_info: Dict[str, Any]
     ) -> None:
-        self.emit_normal("validating experiment subject")
+        self.emit_normal("running fix localization on subject")
         utilities.check_space()
         self.pre_process()
-        self.emit_normal("executing validate command")
-        task_conf_id = validate_config_info[definitions.KEY_ID]
+        self.emit_normal("executing localization command")
+        task_conf_id = localization_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        self.dir_patch = join(self.dir_output, "patches")
+        self.dir_localization = join(self.dir_output, "localization")
         log_file_name = "{}-{}-{}-output.log".format(
             task_conf_id, self.name.lower(), bug_id
         )
@@ -111,9 +104,9 @@ class AbstractValidateTool(AbstractTool):
         ]
         for k in interested_keys:
             filtered_bug_info[k] = bug_info[k]
-        validate_config_info["container-id"] = self.container_id
+        localization_config_info["container-id"] = self.container_id
         self.stats.bug_info = filtered_bug_info
-        self.stats.config_info = validate_config_info
+        self.stats.config_info = localization_config_info
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
         self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
         return
@@ -122,19 +115,19 @@ class AbstractValidateTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("validate-tool", self.name, message)
+        super().emit_normal("localize-tool", self.name, message)
 
     def emit_warning(self, message):
-        super().emit_warning("validate-tool", self.name, message)
+        super().emit_warning("localize-tool", self.name, message)
 
     def emit_error(self, message):
-        super().emit_error("validate-tool", self.name, message)
+        super().emit_error("localize-tool", self.name, message)
 
     def emit_highlight(self, message):
-        super().emit_highlight("validate-tool", self.name, message)
+        super().emit_highlight("localize-tool", self.name, message)
 
     def emit_success(self, message):
-        super().emit_success("validate-tool", self.name, message)
+        super().emit_success("localize-tool", self.name, message)
 
     def emit_debug(self, message):
-        super().emit_debug("validate-tool", self.name, message)
+        super().emit_debug("localize-tool", self.name, message)
