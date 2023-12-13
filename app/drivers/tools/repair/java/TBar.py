@@ -55,6 +55,7 @@ class TBar(AbstractRepairTool):
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
             TEST_SOURCE_DIRECTORY=f"{bug_info[self.key_dir_tests]}/",
             JAVA_HOME=f"/usr/lib/jvm/java-{bug_info['java_version']}-openjdk-amd64/",
+            BUILD_SCRIPT=join(self.dir_setup, bug_info[self.key_build_script]),
         )
 
         # start running
