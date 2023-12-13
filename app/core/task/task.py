@@ -19,7 +19,9 @@ from app.core import values
 from app.core import writer
 from app.core.task import analyze
 from app.core.task import fuzz
+from app.core.task import localize
 from app.core.task import repair
+from app.core.task import select
 from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -47,7 +49,13 @@ def generate_local_dir_info(
     dir_path = join(benchmark_name, subject_name, bug_name, "")
     dir_exp_local = join(values.dir_experiments, dir_path)
     dir_setup_local = join(values.dir_benchmark, dir_path)
+
+    dir_bugs_local = join(dir_setup_local, "bugs")
+    dir_localization_local = join(dir_setup_local, "localization")
     dir_patches_local = join(dir_setup_local, "patches")
+    dir_validation_local = join(dir_setup_local, "validation")
+    dir_selection_local = join(dir_setup_local, "selection")
+
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
     dir_logs_local = join(values.dir_logs, dir_path)
@@ -57,7 +65,11 @@ def generate_local_dir_info(
         dir_setup_local,
         dir_aux_local,
         dir_base_local,
+        dir_bugs_local,
         dir_patches_local,
+        dir_localization_local,
+        dir_validation_local,
+        dir_selection_local,
     ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
@@ -76,6 +88,10 @@ def generate_local_dir_info(
         "base": dir_base_local,
         "aux": dir_aux_local,
         "patches": dir_patches_local,
+        "localization": dir_localization_local,
+        "selection": dir_selection_local,
+        "validation": dir_validation_local,
+        "bugs": dir_bugs_local,
     }
 
 
@@ -557,6 +573,24 @@ def run(
             )
         elif task_type == "validate":
             validate.validate_all(
+                dir_info,
+                bug_info,
+                cast(AbstractValidateTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "localize":
+            localize.localize_all(
+                dir_info,
+                bug_info,
+                cast(AbstractValidateTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "select":
+            select.select_all(
                 dir_info,
                 bug_info,
                 cast(AbstractValidateTool, tool),

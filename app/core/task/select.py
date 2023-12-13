@@ -14,13 +14,13 @@ from app.core import values
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.task.typing.TaskType import TaskType
-from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
+from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
 
 
-def run_localize(
+def run_selection(
     dir_info: DirectoryInfo,
     experiment_info,
-    tool: AbstractLocalizeTool,
+    tool: AbstractSelectTool,
     validate_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
@@ -42,7 +42,7 @@ def run_localize(
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
-        tool.run_localization(experiment_info, validate_config_info)
+        tool.run_selection(experiment_info, validate_config_info)
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
             values.experiment_status.set(TaskStatus.SUCCESS)
     except Exception as ex:
@@ -50,10 +50,10 @@ def run_localize(
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
 
 
-def localize_all(
+def select_all(
     dir_info: Any,
     experiment_info: Dict[str, Any],
-    validate_tool: AbstractLocalizeTool,
+    select_tool: AbstractSelectTool,
     validate_config_info,
     container_id: Optional[str],
     benchmark_name: str,
@@ -77,10 +77,10 @@ def localize_all(
     ).split(",")
 
     if values.ui_active:
-        run_localize(
+        run_selection(
             dir_info,
             experiment_info,
-            validate_tool,
+            select_tool,
             validate_config_info,
             container_id,
             benchmark_name,
@@ -90,7 +90,7 @@ def localize_all(
         def validate_wrapped(
             dir_info,
             experiment_info,
-            validate_tool: AbstractLocalizeTool,
+            validate_tool: AbstractSelectTool,
             validate_config_info,
             container_id: Optional[str],
             benchmark_name: str,
@@ -105,7 +105,7 @@ def localize_all(
             values.task_type.set(task_type)
             values.current_task_profile_id.set(validate_profile_id)
             values.job_identifier.set(job_identifier)
-            run_localize(
+            run_selection(
                 dir_info,
                 experiment_info,
                 validate_tool,
@@ -120,7 +120,7 @@ def localize_all(
             args=(
                 dir_info,
                 experiment_info,
-                validate_tool,
+                select_tool,
                 validate_config_info,
                 container_id,
                 benchmark_name,
@@ -130,7 +130,7 @@ def localize_all(
                 final_status,
             ),
             name="Wrapper thread for validation {} {} {}".format(
-                validate_tool.name, benchmark_name, container_id
+                select_tool.name, benchmark_name, container_id
             ),
         )
         tool_thread.start()
@@ -147,7 +147,7 @@ def localize_all(
         if tool_thread.is_alive():
             emitter.highlight(
                 "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
-                    validate_tool.name
+                    select_tool.name
                 )
             )
             event = threading.Event()
@@ -159,7 +159,7 @@ def localize_all(
         else:
             emitter.highlight(
                 "\t\t\t[framework] {}: thread has already finished.".format(
-                    validate_tool.name
+                    select_tool.name
                 )
             )
 
