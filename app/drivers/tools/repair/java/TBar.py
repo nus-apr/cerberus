@@ -54,6 +54,7 @@ class TBar(AbstractRepairTool):
             TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
             TEST_SOURCE_DIRECTORY=f"{bug_info[self.key_dir_tests]}/",
+            JAVA_HOME=f"/usr/lib/jvm/java-{bug_info['java_version']}-openjdk-amd64/",
         )
 
         # start running
@@ -139,11 +140,14 @@ class TBar(AbstractRepairTool):
                 )
             self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
         elif run_fl:
-            cmd = (
-                f"java -cp 'target/classes:target/dependency/*' "
-                f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
-                f" {self.dir_expr} {bug_id_str}"
-            )
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str}"
+
+            # cmd = (
+            #    f"java -cp 'target/classes:target/dependency/*' "
+            #    f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
+            #    f" {self.dir_expr} {bug_id_str}"
+            # )
+
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
