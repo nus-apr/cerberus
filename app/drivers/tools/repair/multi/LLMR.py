@@ -28,9 +28,9 @@ class LLMR(AbstractRepairTool):
         if model == "":
             model = "gpt-4"
 
-        tests = ",".join(
-            [*bug_info[self.key_failing_tests], *bug_info[self.key_passing_tests]]
-        )
+        passing_tests = ",".join(bug_info[self.key_passing_tests])
+        failing_tests = ",".join(bug_info[self.key_failing_tests])
+
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
         file = ""
@@ -47,7 +47,7 @@ class LLMR(AbstractRepairTool):
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -63,7 +63,15 @@ class LLMR(AbstractRepairTool):
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
             file="-file {}".format(file) if file else "",
             model=model,
-            tests="-tests {}".format(tests) if tests != "" else " ",
+            passing_tests="-passing-tests {}".format(passing_tests)
+            if passing_tests != ""
+            else " ",
+            failing_tests="-failing-tests {}".format(failing_tests)
+            if failing_tests != ""
+            else " ",
+            binary_path="-binary-loc {}".format(bug_info[self.key_bin_path])
+            if self.key_bin_path in bug_info
+            else " ",
             debug="-d" if self.is_debug else "",
             reference_file="-reference {}".format(
                 bug_info[definitions.KEY_REFERENCE_FILE]

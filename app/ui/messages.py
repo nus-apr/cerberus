@@ -6,7 +6,7 @@ from typing import Optional
 from textual.message import Message
 
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
-from app.core.task.stats import ToolStats
+from app.core.task.stats.ToolStats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark

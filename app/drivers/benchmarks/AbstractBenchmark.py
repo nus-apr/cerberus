@@ -15,7 +15,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.task.stats import BenchmarkStats
+from app.core.task.stats.BenchmarkStats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
@@ -234,15 +234,16 @@ class AbstractBenchmark(AbstractDriver):
         """
         container_id = self.setup_container(bug_index, self.image_name, cpu, gpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
-        if not container_id:
-            self.error_exit("could not setup container correctly")
         if is_error:
             self.emit_error("setting up experiment failed")
-        container_obj: Any = container.get_container(container_id)
-        container_obj.commit(exp_image_name)
-        container.stop_container(container_id, 5)
-        if not values.debug:
-            container.remove_container(container_id)
+        if not container_id:
+            self.error_exit("could not setup container correctly")
+        else:
+            container_obj: Any = container.get_container(container_id)
+            container_obj.commit(exp_image_name)
+            container.stop_container(container_id, 5)
+            if not values.debug:
+                container.remove_container(container_id)
 
     def setup_container(
         self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]

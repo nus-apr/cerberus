@@ -10,7 +10,7 @@ from typing import List
 from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core.task.stats import LocalizeToolStats
+from app.core.task.stats.LocalizeToolStats import LocalizeToolStats
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 

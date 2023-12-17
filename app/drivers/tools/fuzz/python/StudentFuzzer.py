@@ -52,13 +52,11 @@ class StudentFuzzer(AbstractFuzzTool):
 
         self.timestamp_log_start()
 
-        repair_command = "bash -c 'NONCE={} python3 student_fuzzer.py'".format(
+        fuzz_command = "bash -c 'NONCE={} python3 student_fuzzer.py'".format(
             self.nonce,
         )
 
-        status = self.run_command(
-            repair_command, self.log_output_path, "/home/student/"
-        )
+        status = self.run_command(fuzz_command, self.log_output_path, "/home/student/")
 
         self.process_status(status)
 

@@ -7,7 +7,7 @@ from os.path import join
 from app.core import definitions
 from app.core import emitter
 from app.core import values
-from app.core.task import stats
+from app.core.task.stats.ToolStats import ToolStats
 
 processed_count = 0
 
@@ -72,7 +72,7 @@ def compute_latency_valkyrie(start_time_str, tend):
     return duration
 
 
-def analyse_output(patch_dir, tool_stats: stats.ToolStats):
+def analyse_output(patch_dir, tool_stats: ToolStats):
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.list_consumed)

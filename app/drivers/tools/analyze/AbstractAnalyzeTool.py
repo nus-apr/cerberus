@@ -3,7 +3,7 @@ from os.path import join
 
 from app.core import definitions
 from app.core import utilities
-from app.core.task.stats import AnalysisToolStats
+from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
 from app.drivers.tools.AbstractTool import AbstractTool
 
 

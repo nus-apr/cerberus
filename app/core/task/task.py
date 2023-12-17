@@ -28,7 +28,9 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
+from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
+from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 from app.plugins import valkyrie
 
@@ -584,7 +586,7 @@ def run(
             localize.localize_all(
                 dir_info,
                 bug_info,
-                cast(AbstractValidateTool, tool),
+                cast(AbstractLocalizeTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,
@@ -593,11 +595,13 @@ def run(
             select.select_all(
                 dir_info,
                 bug_info,
-                cast(AbstractValidateTool, tool),
+                cast(AbstractSelectTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,
             )
+        elif task_type == "composite":
+            pass
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 

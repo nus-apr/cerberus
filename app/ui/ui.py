@@ -15,7 +15,7 @@ from typing import Optional
 from typing import Set
 from typing import Tuple
 
-from textual._on import on
+from textual import on
 from textual.app import App
 from textual.app import ComposeResult
 from textual.events import Key
@@ -38,8 +38,8 @@ from app.core import values
 from app.core import writer
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task import task
-from app.core.task.stats import RepairToolStats
-from app.core.task.stats import ToolStats
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.stats.ToolStats import ToolStats
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.TaskType import TaskType
@@ -1028,7 +1028,7 @@ class Cerberus(App[List[Result]]):
     def action_toggle_dark(self) -> None:
         """Toggle dark mode."""
         self.dark: Reactive[bool]
-        self.dark = not self.dark
+        self.dark = not self.dark  # type: ignore
 
     def debug_print(self, text: Any):
         if values.debug or self.is_preparing:
