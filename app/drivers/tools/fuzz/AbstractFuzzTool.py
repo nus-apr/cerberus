@@ -72,7 +72,7 @@ class AbstractFuzzTool(AbstractTool):
         utilities.check_space()
         self.pre_process()
         self.instrument(bug_info)
-        self.emit_normal("executing repair command")
+        self.emit_normal("executing fuzz command")
         task_conf_id = fuzzer_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
         log_file_name = "{}-{}-{}-output.log".format(
