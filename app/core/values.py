@@ -154,7 +154,8 @@ apr_max_limit = {
 def get_task_types():
     tool_dir = f"{dir_tool_drivers}"
     return sorted(
-        list(
+        ["prepare"]
+        + list(
             l.lower()
             for l in filter(
                 lambda x: "__" not in x
