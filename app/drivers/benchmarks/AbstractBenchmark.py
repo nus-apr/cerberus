@@ -58,7 +58,7 @@ class AbstractBenchmark(AbstractDriver):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_commit_buggy = definitions.KEY_COMMIT_BUGGY
     key_commit_fix = definitions.KEY_COMMIT_FIX
-    key_commit_checkout = definitions.KEY_COMMIT_FIX
+    key_commit_checkout = definitions.KEY_COMMIT_CHECKOUT
     key_test_timeout = definitions.KEY_TEST_TIMEOUT
     key_subject = definitions.KEY_SUBJECT
     has_standard_name: bool = False
