@@ -54,9 +54,10 @@ class TBar(AbstractRepairTool):
             TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
             TEST_SOURCE_DIRECTORY=f"{bug_info[self.key_dir_tests]}/",
-            JAVA_HOME=f"/usr/lib/jvm/java-{bug_info['java_version']}-openjdk-amd64/",
-            BUILD_SCRIPT=join(self.dir_setup, bug_info[self.key_build_script]),
+            JAVA_HOME=f"/usr/lib/jvm/java-{bug_info.get('java_version',8)}-openjdk-amd64/",
         )
+        if self.key_build_script in bug_info:
+            env["BUILD_SCRIPT"] = join(self.dir_setup, bug_info[self.key_build_script])
 
         # start running
         self.timestamp_log_start()
