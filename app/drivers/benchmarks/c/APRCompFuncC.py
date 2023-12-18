@@ -60,7 +60,7 @@ class APRCompFuncC(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
         time = datetime.now()
-        command_str = "bash setup_subject"
+        command_str = f"bash setup_subject {experiment_item[self.key_commit_checkout]}"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
         )
