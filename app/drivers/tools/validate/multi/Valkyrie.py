@@ -13,7 +13,6 @@ class Valkyrie(AbstractValidateTool):
         self.id = ""
 
     def populate_config_file(self, bug_info):
-        self.dir_patch = join(self.dir_output, "patches")
         self.emit_normal("generating config file")
         config_path = join(self.dir_expr, f"{self.name}.config")
         conf_content = list()
@@ -49,8 +48,8 @@ class Valkyrie(AbstractValidateTool):
         return config_path
 
     def run_validation(self, bug_info, validate_config_info):
-        conf_path = self.populate_config_file(bug_info)
         super(Valkyrie, self).run_validation(bug_info, validate_config_info)
+        conf_path = self.populate_config_file(bug_info)
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
