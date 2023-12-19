@@ -27,7 +27,13 @@ class RepairCATPython(AbstractRepairTool):
         """
 
         timeout_h = str(repair_config_info[self.key_timeout])
-
+        failing_test = bug_info[self.key_failing_tests]
+        passing_test = bug_info[self.key_passing_tests]
+        # expected format for test-ids
+        prefixed_failing_test = [f"test_{x}.py" for x in failing_test]
+        prefixed_passing_test = [f"test_{x}.py" for x in passing_test]
+        bug_info[self.key_failing_tests] = prefixed_failing_test
+        bug_info[self.key_passing_tests] = prefixed_passing_test
         self.bug_name = bug_info[self.key_bug_id]
 
         tool_info = {
@@ -39,6 +45,10 @@ class RepairCATPython(AbstractRepairTool):
         }
         bug_info_encoded = base64.b64encode(json.dumps(bug_info).encode()).decode()
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
+        # expected name for test-oracle
+        self.run_command(
+            f"cp {self.dir_setup}/{bug_info[self.key_test_script]} {self.dir_setup}/run_test"
+        )
 
         cmd = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
         self.timestamp_log_start()

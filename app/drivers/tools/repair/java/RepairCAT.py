@@ -36,8 +36,14 @@ class RepairCAT(AbstractRepairTool):
             "dir_output": self.dir_output,
             "key_test_script": self.key_test_script,
         }
+
         bug_info_encoded = base64.b64encode(json.dumps(bug_info).encode()).decode()
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
+
+        # expected name for test-oracle
+        self.run_command(
+            f"cp {self.dir_setup}/{bug_info[self.key_test_script]} {self.dir_setup}/run_test"
+        )
 
         cmd = f"bash -c 'cd /home/repaircat-functional-java/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
         self.timestamp_log_start()
