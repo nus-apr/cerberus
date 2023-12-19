@@ -10,7 +10,7 @@ class LLMR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "mirchevmp/llmr"
+        self.image_name = "test-2"
 
     def run_repair(self, bug_info, repair_config_info):
         super(LLMR, self).run_repair(bug_info, repair_config_info)
@@ -42,7 +42,10 @@ class LLMR(AbstractRepairTool):
 
         fl = ""
 
-        if repair_config_info["fault_location"] == "auto":
+        if (
+            repair_config_info["fault_location"] == "auto"
+            or repair_config_info["fault_location"] == "file"
+        ):
             fl = "-do-fl"
 
         # start running
