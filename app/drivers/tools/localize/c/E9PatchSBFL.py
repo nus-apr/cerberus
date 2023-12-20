@@ -33,17 +33,16 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.emit_normal("Instrumenting binary")
 
-        lines = len(
-            self.read_file(
-                join(self.dir_expr, "src", bug_info[self.key_fix_file]),
-                encoding="iso-8859-1",
+        if self.key_localization in bug_info:
+            self.run_command(
+                f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_localization][0][self.key_fix_file])} $(cat  {join(self.dir_expr,'src',bug_info[self.key_localization][0][self.key_fix_file])} | wc -l ) >> /sbfl/lines.txt'",
+                dir_path="/sbfl",
             )
-        )
-
-        self.run_command(
-            f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_fix_file])} {lines} > /sbfl/lines.txt'",
-            dir_path="/sbfl",
-        )
+        else:
+            self.run_command(
+                f"bash -c 'for x in $(find {join(self.dir_expr,'src')} | grep -E \".*\\.(c|cpp|hpp|h)$\"); do python3 /sbfl/dump_lines.py $x $(cat $x | wc -l ) >> /sbfl/lines.txt ; done'",
+                dir_path="/sbfl",
+            )
 
         localize_command = f"python3 ./instrument.py {join(self.dir_expr,'src',bug_info[self.key_bin_path])} /sbfl/lines.txt"
 
