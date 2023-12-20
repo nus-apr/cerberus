@@ -10,7 +10,7 @@ class LLMR(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "test-2"
+        self.image_name = "mirchevmp/llmr"
 
     def run_repair(self, bug_info, repair_config_info):
         super(LLMR, self).run_repair(bug_info, repair_config_info)
