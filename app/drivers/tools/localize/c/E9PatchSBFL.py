@@ -33,9 +33,9 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.emit_normal("Instrumenting binary")
 
-        if self.key_localization in bug_info:
+        if self.key_fix_file in bug_info:
             self.run_command(
-                f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_localization][0][self.key_fix_file])} $(cat  {join(self.dir_expr,'src',bug_info[self.key_localization][0][self.key_fix_file])} | wc -l ) >> /sbfl/lines.txt'",
+                f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_fix_file])} $(cat  {join(self.dir_expr,'src',bug_info[self.key_localization][0][self.key_fix_file])} | wc -l ) >> /sbfl/lines.txt'",
                 dir_path="/sbfl",
             )
         else:
