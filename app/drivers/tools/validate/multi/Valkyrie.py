@@ -33,9 +33,16 @@ class Valkyrie(AbstractValidateTool):
             conf_content.append(f"build_script:{abs_path_b_script}\n")
         else:
             conf_content.append(f'build_script:-c "exit 0"\n')
-        conf_content.append(
-            f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
-        )
+
+        public_test_script = bug_info.get(self.key_pub_test_script, None)
+        if public_test_script:
+            conf_content.append(
+                f"pub_test_script:{self.dir_setup}/{public_test_script}\n"
+            )
+        else:
+            conf_content.append(
+                f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
+            )
         if bug_info.get(self.key_pvt_test_script, None):
             pvt_script = f"{self.dir_setup}/{bug_info[self.key_pvt_test_script]}"
             conf_content.append(f"pvt_test_script:{pvt_script}\n")
