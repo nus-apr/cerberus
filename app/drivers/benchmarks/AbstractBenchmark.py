@@ -45,6 +45,7 @@ class AbstractBenchmark(AbstractDriver):
     list_artifact_files: List[str] = []
     base_dir_experiment = values.container_base_experiment
     key_bug_id = definitions.KEY_BUG_ID
+    key_fix_file = definitions.KEY_FIX_FILE
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
