@@ -18,6 +18,13 @@ class APRCompAIJava(AbstractBenchmark):
         is_error = super(APRCompAIJava, self).setup_experiment(
             bug_index, container_id, test_all
         )
+        if not is_error:
+            if self.verify(bug_index, container_id):
+                self.emit_success("verified successfully")
+            else:
+                self.emit_error("verification failed")
+                is_error = True
+
         return is_error
 
     def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
@@ -88,6 +95,24 @@ class APRCompAIJava(AbstractBenchmark):
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
+
+    def verify(self, bug_index, container_id):
+        self.emit_normal("verify dev patch and test-oracle")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_verify_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
+        )
+        time = datetime.now()
+        command_str = f"bash verify_dev"
+        status = self.run_command(
+            container_id, command_str, self.log_verify_path, self.dir_setup
+        )
+
+        self.emit_debug(
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def save_artifacts(self, dir_info, container_id):
         self.list_artifact_dirs = []  # path should be relative to experiment directory
