@@ -26,7 +26,7 @@ class AbstractDriver:
     def emit_debug(self, abstraction, concrete, message):
         emitter.debug(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def get_config_value(self, config_name):
+    def get_config_value(self, config_name: str):
         config_val = getattr(values, config_name)  # Same as someClass = foo.Class3
         return config_val
 

@@ -132,18 +132,18 @@ class AbstractTool(AbstractDriver):
     def timestamp_log(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}"
-        self.append_file(timestamp_txt, self.log_output_path)
+        self.append_file([timestamp_txt], self.log_output_path)
 
     def timestamp_log_start(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}\n"
-        self.append_file(timestamp_txt, self.log_output_path)
+        self.append_file([timestamp_txt], self.log_output_path)
         self.stats.time_stats.timestamp_start = timestamp_txt
 
     def timestamp_log_end(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"\n{time_now}"
-        self.append_file(timestamp_txt, self.log_output_path)
+        self.append_file([timestamp_txt], self.log_output_path)
         self.stats.time_stats.timestamp_end = timestamp_txt
 
     def run_command(
@@ -160,9 +160,9 @@ class AbstractTool(AbstractDriver):
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
                     if stdout:
-                        self.append_file(stdout.decode("iso-8859-1"), log_file_path)
+                        self.append_file([stdout.decode("iso-8859-1")], log_file_path)
                     if stderr:
-                        self.append_file(stderr.decode("iso-8859-1"), log_file_path)
+                        self.append_file([stderr.decode("iso-8859-1")], log_file_path)
         else:
             if not dir_path:
                 dir_path = self.dir_expr
@@ -184,9 +184,9 @@ class AbstractTool(AbstractDriver):
                 stdout, stderr = output
                 if "/dev/null" not in log_file_path:
                     if stdout:
-                        self.append_file(stdout.decode("iso-8859-1"), log_file_path)
+                        self.append_file([stdout.decode("iso-8859-1")], log_file_path)
                     if stderr:
-                        self.append_file(stderr.decode("iso-8859-1"), log_file_path)
+                        self.append_file([stderr.decode("iso-8859-1")], log_file_path)
             return exit_code, output
         else:
             if not dir_path:
@@ -374,28 +374,28 @@ class AbstractTool(AbstractDriver):
 
             execute_command(save_command)
 
-    def read_file(self, file_path, encoding="utf-8"):
+    def read_file(self, file_path: str, encoding="utf-8"):
         return abstractions.read_file(self.container_id, file_path, encoding)
 
-    def read_json(self, file_path, encoding="utf-8"):
+    def read_json(self, file_path: str, encoding="utf-8"):
         return abstractions.read_json(self.container_id, file_path, encoding)
 
-    def append_file(self, content, file_path):
+    def append_file(self, content: List[str], file_path: str):
         return abstractions.append_file(self.container_id, content, file_path)
 
-    def write_file(self, content, file_path):
+    def write_file(self, content: List[str], file_path: str):
         return abstractions.write_file(self.container_id, content, file_path)
 
-    def write_json(self, data, file_path):
+    def write_json(self, data, file_path: str):
         return abstractions.write_json(self.container_id, data, file_path)
 
-    def list_dir(self, dir_path, regex=None):
+    def list_dir(self, dir_path: str, regex=None):
         return abstractions.list_dir(self.container_id, dir_path, regex)
 
-    def is_dir(self, dir_path):
+    def is_dir(self, dir_path: str):
         return abstractions.is_dir(self.container_id, dir_path)
 
-    def is_file(self, file_path):
+    def is_file(self, file_path: str):
         return abstractions.is_file(self.container_id, file_path)
 
     def get_output_log_path(self):
