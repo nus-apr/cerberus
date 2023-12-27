@@ -39,14 +39,21 @@ class LLMR(AbstractRepairTool):
             if bug_info[self.key_language] == "java" and not file.endswith(".java"):
                 file = f"src/main/java/{file.replace('.', '/')}.java"
             self.emit_debug("LLMR will work on file {}".format(file))
-
         fl = ""
 
-        if (
-            repair_config_info["fault_location"] == "auto"
-            or repair_config_info["fault_location"] == "file"
-        ):
+        if repair_config_info["fault_location"] == "auto":
             fl = "-do-fl"
+        elif repair_config_info["fault_location"] == "line":
+            fl_info = list(
+                map(
+                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1",
+                    bug_info[self.key_fix_lines],
+                )
+            )
+            self.emit_debug(f"File localization info: {fl_info}")
+            fl_path = join(self.dir_output, "fl_data.txt")
+            self.write_file(fl_info, fl_path)
+            fl = f"-fl-data {fl_path}"
 
         # start running
         self.timestamp_log_start()
