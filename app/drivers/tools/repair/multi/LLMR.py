@@ -46,7 +46,7 @@ class LLMR(AbstractRepairTool):
         elif repair_config_info["fault_location"] == "line":
             fl_info = list(
                 map(
-                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1",
+                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1\n",
                     bug_info[self.key_fix_lines],
                 )
             )
