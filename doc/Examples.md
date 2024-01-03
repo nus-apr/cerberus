@@ -27,10 +27,14 @@ Now let us batch more bugs - the first two bugs, the fifth bug and then from the
 Let's assume that we want to run the experiments locally, only thing that needs to be added is the --local and one can ensure that prophet is locally accessible.
 
 ```bash
-   cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --conf=C4
+   cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --task-profile=TP4
 ```
 
-The experiment can also be ran with a different configuration profile.
+```bash
+   cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --container-profile=CP4
+```
+
+The experiment can also be ran with a different task or configuration profiles.
 
 ```bash
    cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --setup-only
@@ -45,7 +49,7 @@ Or until the setup stage only.
 Or until the instrumentation stage only.
 
 ```bash
-   cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --rebuild-exp
+   cerberus -task repair --tool=prophet --benchmark=vulnloc --bug-index=4 --rebuild-base
 ```
 
 If needed one can also rebuild the experiment image.
