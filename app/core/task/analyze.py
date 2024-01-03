@@ -102,7 +102,7 @@ def analyze_all(
             analyze_config_info,
             container_id: Optional[str],
             benchmark_name: str,
-            repair_profile_id: str,
+            task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
             final_status,
@@ -111,7 +111,7 @@ def analyze_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
             run_analysis(
                 dir_info,
