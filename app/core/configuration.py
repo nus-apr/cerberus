@@ -135,7 +135,7 @@ class Configurations:
         "tool-tag": "",
         "special-meta": "",
         "directories": {"data": "/data"},
-        "repair-profile-id-list": ["TP1"],
+        "task-profile-id-list": ["TP1"],
         "container-profile-id-list": ["CP1"],
         "use-latest-image": False,
     }
@@ -269,10 +269,10 @@ class Configurations:
         if arg_list.use_gpu:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
-        if arg_list.repair_profile_id_list:
+        if arg_list.task_profile_id_list:
             self.__runtime_config_values[
-                "repair-profile-id-list"
-            ] = arg_list.repair_profile_id_list
+                "task-profile-id-list"
+            ] = arg_list.task_profile_id_list
 
         if arg_list.container_profile_id_list:
             self.__runtime_config_values[
@@ -497,9 +497,7 @@ class Configurations:
         self.bug_index_list = self.__runtime_config_values.get("bug-index-list", [])
         self.skip_index_list = self.__runtime_config_values.get("skip-index-list", [])
         self.bug_id_list = self.__runtime_config_values.get("bug-id-list", [])
-        self.task_profile_id_list = self.__runtime_config_values[
-            "repair-profile-id-list"
-        ]
+        self.task_profile_id_list = self.__runtime_config_values["task-profile-id-list"]
         self.container_profile_id_list = self.__runtime_config_values[
             "container-profile-id-list"
         ]

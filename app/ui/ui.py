@@ -76,7 +76,7 @@ class Cerberus(App[List[Result]]):
         "Bug ID": {},
         "Run": {},
         "Tag": {},
-        definitions.UI_REPAIR_PROFILE: {},
+        definitions.UI_TASK_PROFILE: {},
         definitions.UI_CONTAINER_PROFILE: {},
         definitions.UI_STARTED_AT: {},
         definitions.UI_SHOULD_FINISH: {},

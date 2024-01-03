@@ -225,9 +225,9 @@ def parse_args():
     )
 
     optional.add_argument(
-        definitions.ARG_REPAIR_PROFILE_ID_LIST,
-        help="multiple list of repair configuration profiles",
-        dest="repair_profile_id_list",
+        definitions.ARG_TASK_PROFILE_ID_LIST,
+        help="multiple list of task configuration profiles",
+        dest="task_profile_id_list",
         nargs="+",
         default=[],
     )

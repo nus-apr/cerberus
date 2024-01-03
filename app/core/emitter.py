@@ -322,7 +322,7 @@ def emit_help():
     )
     write(
         "\t"
-        + definitions.ARG_REPAIR_PROFILE_ID_LIST.ljust(max_length)
+        + definitions.ARG_TASK_PROFILE_ID_LIST.ljust(max_length)
         + "\t| "
         + "specify a different profile using config ID",
         COLOR.WHITE,

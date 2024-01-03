@@ -204,7 +204,7 @@ def repair_all(
             v_path_info,
             v_dir_info,
             v_repair_config_info,
-            repair_profile_id: str,
+            task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
         ):
@@ -212,7 +212,7 @@ def repair_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
             parallel.consume_patches(v_path_info, v_dir_info, v_repair_config_info)
 
@@ -250,7 +250,7 @@ def repair_all(
             repair_config_info,
             container_id: Optional[str],
             benchmark_name: str,
-            repair_profile_id: str,
+            task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
             final_status,
@@ -259,7 +259,7 @@ def repair_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
             run_repair(
                 dir_info,
