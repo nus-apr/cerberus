@@ -25,7 +25,6 @@ class RepairCAT(AbstractRepairTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-        timeout_h = str(repair_config_info[self.key_timeout])
 
         self.bug_name = bug_info[self.key_bug_id]
 
@@ -45,10 +44,15 @@ class RepairCAT(AbstractRepairTool):
             f"cp {self.dir_setup}/{bug_info[self.key_test_script]} {self.dir_setup}/run_test"
         )
 
-        cmd = f"bash -c 'cd /home/repaircat-functional-java/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        command = f"bash -c 'cd /home/repaircat-functional-java/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        timeout_h = str(repair_config_info[self.key_timeout])
+        repair_command = f"timeout -k 5m {timeout_h}h {command} "
+
         self.timestamp_log_start()
         status = self.run_command(
-            cmd, self.log_output_path, dir_path="/home/repaircat-functional-java/"
+            repair_command,
+            self.log_output_path,
+            dir_path="/home/repaircat-functional-java/",
         )
 
         self.run_command(f"cp /home/result.json {self.dir_output}/result.json")

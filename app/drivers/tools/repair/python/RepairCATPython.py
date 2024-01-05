@@ -26,14 +26,6 @@ class RepairCATPython(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
-        failing_test = bug_info[self.key_failing_tests]
-        passing_test = bug_info[self.key_passing_tests]
-        # expected format for test-ids
-        prefixed_failing_test = [f"test_{x}.py" for x in failing_test]
-        prefixed_passing_test = [f"test_{x}.py" for x in passing_test]
-        bug_info[self.key_failing_tests] = prefixed_failing_test
-        bug_info[self.key_passing_tests] = prefixed_passing_test
         self.bug_name = bug_info[self.key_bug_id]
 
         tool_info = {
@@ -49,11 +41,14 @@ class RepairCATPython(AbstractRepairTool):
         self.run_command(
             f"cp {self.dir_setup}/{bug_info[self.key_test_script]} {self.dir_setup}/run_test"
         )
-
-        cmd = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        timeout_h = str(repair_config_info[self.key_timeout])
+        repair_command = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        repair_command = f"timeout -k 5m {timeout_h}h {repair_command} "
         self.timestamp_log_start()
         status = self.run_command(
-            cmd, self.log_output_path, dir_path="/home/repaircat-autocode-python/"
+            repair_command,
+            self.log_output_path,
+            dir_path="/home/repaircat-autocode-python/",
         )
 
         self.run_command(f"cp /home/result.json {self.dir_output}/result.json")
