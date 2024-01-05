@@ -69,6 +69,8 @@ def load_tool(tool_name: str, tool_type: str) -> AbstractTool:
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
+    if benchmark_name is None:
+        utilities.error_exit("No benchmark name is specified")
     emitter.normal("\t[framework] loading benchmark {}".format(benchmark_name))
     # class_file_path = values.dir_benchmark_drivers + benchmark_name + ".py"
 
