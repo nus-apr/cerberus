@@ -264,6 +264,13 @@ composite_sequence_schema = {
         ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},
         ConfigFieldsEnum.ORCHESTRATOR.value: {"type": "string"},
     },
+    "anyOf": [
+        ConfigFieldsEnum.FUZZ.value,
+        ConfigFieldsEnum.ANALYZE.value,
+        ConfigFieldsEnum.LOCALIZE.value,
+        ConfigFieldsEnum.REPAIR.value,
+        ConfigFieldsEnum.SELECT.value,
+    ],
     "required": [ConfigFieldsEnum.ORCHESTRATOR.value],
     "additionalProperties": False,
 }
