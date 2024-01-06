@@ -8,13 +8,6 @@ class APRCompFuncC(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(APRCompFuncC, self).__init__()
-        for experiment_item in self.experiment_subjects:
-            passing_list = experiment_item[self.key_passing_tests]
-            failing_list = experiment_item[self.key_failing_tests]
-            passing_list_str = [f"{x}" for x in passing_list]
-            failing_list_str = [f"{x}" for x in failing_list]
-            experiment_item[self.key_passing_tests] = passing_list_str
-            experiment_item[self.key_failing_tests] = failing_list_str
 
     def setup_experiment(self, bug_index, container_id, test_all):
         if not container_id:

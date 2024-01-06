@@ -178,7 +178,7 @@ class AbstractBenchmark(AbstractDriver):
         with open(meta_file_loc, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
-                self.experiment_subjects = json_data
+                self.experiment_subjects = AbstractBenchmark.process_metadata(json_data)
                 self.size = len(json_data)
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
