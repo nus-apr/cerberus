@@ -126,12 +126,23 @@ class AbstractBenchmark(AbstractDriver):
         with open(meta_file_path, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
-                return json_data
+                return AbstractBenchmark.process_metadata(json_data)
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit(
                     "Could not load meta-data from {}".format(meta_file_path)
                 )
+
+    @staticmethod
+    def process_metadata(data):
+        for experiment_item in data:
+            passing_list = experiment_item[AbstractBenchmark.key_passing_tests]
+            failing_list = experiment_item[AbstractBenchmark.key_failing_tests]
+            passing_list_str = [f"{x}" for x in passing_list]
+            failing_list_str = [f"{x}" for x in failing_list]
+            experiment_item[AbstractBenchmark.key_passing_tests] = passing_list_str
+            experiment_item[AbstractBenchmark.key_failing_tests] = failing_list_str
+        return data
 
     @staticmethod
     def check_benchmark_folder(name):
