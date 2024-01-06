@@ -62,6 +62,7 @@ class AbstractBenchmark(AbstractDriver):
     key_commit_checkout = definitions.KEY_COMMIT_CHECKOUT
     key_test_timeout = definitions.KEY_TEST_TIMEOUT
     key_subject = definitions.KEY_SUBJECT
+    key_language = definitions.KEY_LANGUAGE
     has_standard_name: bool = False
 
     def __init__(self):

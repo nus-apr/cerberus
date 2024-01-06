@@ -6,6 +6,10 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class Vul4J(AbstractBenchmark):
+    """
+    Track status of benchmark here
+    https://github.com/tuhh-softsec/vul4j/blob/main/STATUS.md
+    """
 
     log_instrument_path = None
 
@@ -148,23 +152,18 @@ class Vul4J(AbstractBenchmark):
         set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
             experiment_item[self.key_java_version]
         )
-        command_str = "bash -c '{0} {1}'".format(
-            set_java_home_cmd, experiment_item[self.key_test_all_cmd]
+
+        command_str = "bash -c '{1} {0}'".format(
+            experiment_item[self.key_test_all_cmd], set_java_home_cmd
         )
         status = self.run_command(
-            container_id, command_str, self.log_test_path, join(self.dir_expr, "src")
+            container_id,
+            command_str,
+            self.log_test_path,
+            join(self.dir_expr, "src"),
         )
 
-        if status != 0:
-            command_str = "bash -c '{0}'".format(experiment_item[self.key_test_all_cmd])
-            status = self.run_command(
-                container_id,
-                command_str,
-                self.log_test_path,
-                join(self.dir_expr, "src"),
-            )
-
-        return status == 0
+        return status != 0
 
     def clean(self, exp_dir_path, container_id):
         self.emit_normal("removing experiment subject")
