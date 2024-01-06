@@ -16,11 +16,11 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractRepairTool(AbstractTool):
-
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
     key_fix_file = definitions.KEY_FIX_FILE
+    key_fix_file_list = definitions.KEY_FIX_FILE_LIST
     key_fix_lines = definitions.KEY_FIX_LINES
     key_fix_loc = definitions.KEY_FIX_LOC
     key_failing_tests = definitions.KEY_FAILING_TEST
@@ -152,7 +152,6 @@ class AbstractRepairTool(AbstractTool):
         return
 
     def print_stats(self) -> None:
-
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
