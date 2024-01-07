@@ -143,6 +143,8 @@ resource-limits:
         elif p_lang.lower() == "python":
             test_cases_str = ""
             for t in test_list:
+                if ".py" not in t:
+                    t = f"{t}.py"
                 test_cases_str += f"    - {t}\n"
             config_content = self.CONFIG_PYTHON_TEMPLATE.format(
                 test_script=t_script,
