@@ -877,7 +877,7 @@ class Cerberus(App[List[Result]]):
             )
             table.sort(Cerberus.COLUMNS["ID"][id])
             # TODO temporary
-            if message.task_type != "fuzz":
+            if message.task_type == "repair":
                 table.update_cell(
                     key,
                     Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
