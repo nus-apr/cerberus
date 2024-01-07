@@ -2,6 +2,7 @@ import os
 import shutil
 import threading
 import time
+import traceback
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -77,6 +78,7 @@ def run_repair(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmark_name):
@@ -131,7 +133,7 @@ def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmar
     else:
         copy_command = "cp -rf {} {}".format(test_suite_path, dir_output_local)
         file_list = list()
-        for (dir_path, _, file_names) in os.walk(test_suite_path):
+        for dir_path, _, file_names in os.walk(test_suite_path):
             file_list += [os.path.join(dir_path, file) for file in file_names]
 
         for binary_file in file_list:

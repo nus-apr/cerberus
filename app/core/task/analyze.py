@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -23,7 +24,6 @@ def run_analysis(
     container_id: Optional[str],
     benchmark_name: str,
 ):
-
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     fix_location = None
     fix_line_numbers = []
@@ -62,6 +62,7 @@ def run_analysis(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def analyze_all(

@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import traceback
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -48,6 +49,7 @@ def run_localize(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def localize_all(

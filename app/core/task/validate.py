@@ -1,6 +1,7 @@
 import os
 import threading
 import time
+import traceback
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -38,7 +39,6 @@ def run_validate(
         passing_test_list = passing_test_list.split(",")
     failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
     if isinstance(failing_test_list, str):
-
         failing_test_list = failing_test_list.split(",")
     if validate_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
         fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
@@ -66,6 +66,7 @@ def run_validate(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def validate_all(
