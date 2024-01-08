@@ -1,5 +1,6 @@
 import copy
 import os
+from typing import cast
 from typing import List
 
 from app.core import configuration
@@ -7,9 +8,11 @@ from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.core.configs.Config import Config
+from app.core.configs.tasks_data.CompositeTaskConfig import CompositeTaskConfig
 from app.core.task import task
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.MockTool import MockTool
 
 
@@ -103,7 +106,21 @@ class TaskProcessor:
                             )
                             values.only_test = tasks_chunk_config.task_config.only_test
 
-                            if tasks_chunk_config.task_config.task_type != "prepare":
+                            if tasks_chunk_config.task_config.task_type == "prepare":
+                                tool_template = cast(AbstractTool, MockTool())
+                            elif (
+                                tasks_chunk_config.task_config.task_type == "composite"
+                            ):
+                                composite_task = cast(
+                                    CompositeTaskConfig, tasks_chunk_config.task_config
+                                )
+                                tool_template = configuration.load_tool(
+                                    tool_config.name,
+                                    tasks_chunk_config.task_config.task_type,
+                                )
+                                tool_template.setup_workflow(composite_task.composite_sequence)  # type: ignore
+
+                            else:
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
                                     tasks_chunk_config.task_config.task_type,
@@ -128,8 +145,6 @@ class TaskProcessor:
 
                                 if not tasks_chunk_config.task_config.only_analyse:
                                     tool_template.check_tool_exists()
-                            else:
-                                tool_template = MockTool()
 
                             # filter skipped bug id
                             for bug_id in bug_id_list:
