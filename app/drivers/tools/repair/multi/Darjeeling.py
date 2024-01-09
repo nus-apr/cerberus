@@ -46,7 +46,7 @@ program:
 resource-limits:
   candidates: 100000
 seed: 0
-threads: 1
+threads: 3
 transformations:
   schemas:
   - type: delete-statement
@@ -58,7 +58,7 @@ version: 1.0
     CONFIG_PYTHON_TEMPLATE = """
 version: '1.0'
 seed: 0
-threads: 1
+threads: 3
 localization:
   type: spectrum
   metric: tarantula
@@ -167,8 +167,8 @@ resource-limits:
             [
                 f"FROM {docker_image_tag}\n",
                 "USER root\n",
-                "RUN apt update; apt install -y make g++\n",
-                "RUN pip3 install coverage pytest pytest-cov\n",
+                "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
+                "RUN pip3 install coverage pytest pytest-cov gcovr\n",
                 f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
                 "WORKDIR /experiment\n",
                 'ENTRYPOINT ["/bin/sh", "-c"]\n',
