@@ -18,6 +18,7 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.task import analyze
+from app.core.task import composite
 from app.core.task import fuzz
 from app.core.task import localize
 from app.core.task import repair
@@ -27,6 +28,7 @@ from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
+from app.drivers.tools.composite.AbstractCompositeTool import AbstractCompositeTool
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -462,6 +464,7 @@ def run(
     task_identifier: str,
     cpu: List[str],
     gpu: List[str],
+    run_index: int,
     task_image: Optional[str] = None,
 ):
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
@@ -519,7 +522,6 @@ def run(
         benchmark.update_dir_info(dir_info)
 
         if values.use_container:
-
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a docker image name assigned: {}".format(
@@ -601,7 +603,16 @@ def run(
                 benchmark.name,
             )
         elif task_type == "composite":
-            pass
+            composite.composite_run_all(
+                dir_info,
+                bug_info,
+                cast(AbstractCompositeTool, tool),
+                task_config_info,
+                container_config_info,
+                container_id,
+                benchmark,
+                run_index,
+            )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 

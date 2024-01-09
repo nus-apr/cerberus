@@ -117,7 +117,7 @@ def process_configs(
     task_profile: Dict[str, Any],
     container_profile: Dict[str, Any],
 ):
-    for (k, v) in task_config.__dict__.items():
+    for k, v in task_config.__dict__.items():
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
             setattr(values, k, v)
@@ -319,5 +319,6 @@ def process_tasks(tasks: TaskList):
                 key,
                 cpus,
                 gpus,
+                run_index,
                 image_name,
             )

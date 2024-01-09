@@ -52,6 +52,7 @@ KEY_CONTAINER_ENABLE_NETWORK = "enable_network"
 KEY_ENABLED = "enabled"
 KEY_GPUS = "gpus"
 KEY_CPUS = "cpus"
+KEY_COMPOSITE_SEQUENCE = "composite_sequence"
 
 KEY_JAVA_VERSION = "java_version"
 KEY_BUILD_SYSTEM = "build_system"

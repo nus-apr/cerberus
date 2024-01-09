@@ -105,21 +105,15 @@ class TaskProcessor:
                                 tasks_chunk_config.task_config.only_instrument
                             )
                             values.only_test = tasks_chunk_config.task_config.only_test
-
                             if tasks_chunk_config.task_config.task_type == "prepare":
                                 tool_template = cast(AbstractTool, MockTool())
                             elif (
                                 tasks_chunk_config.task_config.task_type == "composite"
                             ):
-                                composite_task = cast(
-                                    CompositeTaskConfig, tasks_chunk_config.task_config
-                                )
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
                                     tasks_chunk_config.task_config.task_type,
                                 )
-                                tool_template.setup_workflow(composite_task.composite_sequence)  # type: ignore
-
                             else:
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
@@ -152,6 +146,20 @@ class TaskProcessor:
                                     continue
 
                                 experiment_item = benchmark_subjects[int(bug_id) - 1]
+
+                                if (
+                                    tasks_chunk_config.task_config.task_type
+                                    == "composite"
+                                ):
+                                    composite_task = cast(
+                                        CompositeTaskConfig,
+                                        tasks_chunk_config.task_config,
+                                    )
+                                    setattr(
+                                        task_profile,
+                                        definitions.KEY_COMPOSITE_SEQUENCE,
+                                        composite_task.composite_sequence,
+                                    )
 
                                 bug_index = experiment_item[definitions.KEY_ID]
                                 bug_name = str(experiment_item[definitions.KEY_BUG_ID])

@@ -21,10 +21,12 @@ def run_composite(
     experiment_info,
     tool: AbstractCompositeTool,
     composite_config_info: Dict[str, Any],
+    container_config_info: Dict[str, Any],
     container_id: Optional[str],
-    benchmark_name: str,
+    benchmark: Any,
+    run_index: int,
 ):
-    experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
+    experiment_info[definitions.KEY_BENCHMARK] = benchmark.name
     fix_location = None
     fix_line_numbers = []
     if composite_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
@@ -56,7 +58,14 @@ def run_composite(
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
-        tool.run_composite(dir_info, experiment_info, composite_config_info)
+        tool.run_composite(
+            dir_info,
+            benchmark,
+            experiment_info,
+            composite_config_info,
+            container_config_info,
+            run_index,
+        )
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
             values.experiment_status.set(TaskStatus.SUCCESS)
     except Exception as ex:
@@ -70,8 +79,10 @@ def composite_run_all(
     experiment_info: Dict[str, Any],
     composite_tool: AbstractCompositeTool,
     composite_config_info,
+    container_config_info,
     container_id: Optional[str],
-    benchmark_name: str,
+    benchmark: Any,
+    run_index: int,
 ):
     consume_thread = None
     tool_thread = None
@@ -91,8 +102,10 @@ def composite_run_all(
             experiment_info,
             composite_tool,
             composite_config_info,
+            container_config_info,
             container_id,
-            benchmark_name,
+            benchmark,
+            run_index,
         )
     else:
 
@@ -100,9 +113,11 @@ def composite_run_all(
             dir_info,
             experiment_info,
             analyze_tool: AbstractCompositeTool,
-            analyze_config_info,
+            composite_config_info,
+            container_config_info,
             container_id: Optional[str],
-            benchmark_name: str,
+            benchmark: str,
+            run_index: int,
             task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
@@ -118,9 +133,11 @@ def composite_run_all(
                 dir_info,
                 experiment_info,
                 analyze_tool,
-                analyze_config_info,
+                composite_config_info,
+                container_config_info,
                 container_id,
-                benchmark_name,
+                benchmark,
+                run_index,
             )
             final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
 
@@ -131,15 +148,17 @@ def composite_run_all(
                 experiment_info,
                 composite_tool,
                 composite_config_info,
+                container_config_info,
                 container_id,
-                benchmark_name,
+                benchmark,
+                run_index,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
                 values.task_type.get(None),
                 final_status,
             ),
             name="Wrapper thread for analysis {} {} {}".format(
-                composite_tool.name, benchmark_name, container_id
+                composite_tool.name, benchmark.name, container_id
             ),
         )
         tool_thread.start()
