@@ -6,7 +6,6 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class ARJA_E(AbstractRepairTool):
-
     arja_e_home = "/opt/arja"
     d4j_env = {"TZ": "America/Los_Angeles"}
 
@@ -51,6 +50,7 @@ class ARJA_E(AbstractRepairTool):
 
         test_timeout = 30000
         java_version = bug_info[self.key_java_version]
+        dir_localization = f"{self.dir_output}/localization"
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
         # generate patches
         self.timestamp_log_start()
@@ -67,7 +67,8 @@ class ARJA_E(AbstractRepairTool):
             f"-DpatchOutputRoot {self.dir_output}/patches "
             f"-Ddependences {list_deps_str} "
             f"-DmaxTime {repair_timeout} "
-            f"-DpopulationSize {arja_default_population_size}"
+            f"-DpopulationSize {arja_default_population_size} "
+            f"-DgzoltarDataDir {dir_localization} "
         )
 
         if not passing_test_list:
