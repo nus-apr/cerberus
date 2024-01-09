@@ -49,8 +49,8 @@ class Hippodrome(AbstractRepairTool):
         The parent method should be invoked at last to archive the results
         """
 
-        self.run_command("mkdir -p /output/", "/dev/null", "/")
-        self.run_command("cp -rf {} /output/".format(self.dir_expr))
+        self.run_command("mkdir -p {}/".format(self.dir_output), "/dev/null", "/")
+        self.run_command("cp -rf {} {}/".format(self.dir_expr, self.dir_output))
         super().save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):

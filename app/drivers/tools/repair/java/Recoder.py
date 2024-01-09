@@ -124,7 +124,9 @@ class Recoder(AbstractRepairTool):
 
         if not self.stats.error_stats.is_error:
             self.run_command(
-                "cp /root/Repair/patches/{}patch.txt /output/".format(self.bug_name)
+                "cp /root/Repair/patches/{}patch.txt {}/".format(
+                    self.bug_name, self.dir_output
+                )
             )
             self.stats.patch_stats.generated = 1
             self.stats.patch_stats.enumerations = 1
