@@ -84,6 +84,7 @@ class AbstractCompositeTool(AbstractTool):
         composite_config_info: Dict[str, Any],
         container_config_info: Dict[str, Any],
         run_index: int,
+        hash: str,
     ) -> None:
         self.emit_normal("validating experiment subject")
         utilities.check_space()

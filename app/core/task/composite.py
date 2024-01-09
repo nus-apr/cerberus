@@ -25,6 +25,7 @@ def run_composite(
     container_id: Optional[str],
     benchmark: Any,
     run_index: int,
+    hash: str,
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark.name
     fix_location = None
@@ -65,6 +66,7 @@ def run_composite(
             composite_config_info,
             container_config_info,
             run_index,
+            hash,
         )
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
             values.experiment_status.set(TaskStatus.SUCCESS)
@@ -83,6 +85,7 @@ def composite_run_all(
     container_id: Optional[str],
     benchmark: Any,
     run_index: int,
+    hash: str,
 ):
     consume_thread = None
     tool_thread = None
@@ -106,6 +109,7 @@ def composite_run_all(
             container_id,
             benchmark,
             run_index,
+            hash,
         )
     else:
 
@@ -122,6 +126,7 @@ def composite_run_all(
             job_identifier: str,
             task_type: TaskType,
             final_status,
+            hash: str,
         ):
             """
             Pass over some fields as we are going into a new thread
@@ -138,6 +143,7 @@ def composite_run_all(
                 container_id,
                 benchmark,
                 run_index,
+                hash,
             )
             final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
 
@@ -156,6 +162,7 @@ def composite_run_all(
                 values.job_identifier.get("NA"),
                 values.task_type.get(None),
                 final_status,
+                hash,
             ),
             name="Wrapper thread for analysis {} {} {}".format(
                 composite_tool.name, benchmark.name, container_id

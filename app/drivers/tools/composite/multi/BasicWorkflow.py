@@ -38,6 +38,7 @@ class BasicWorkflow(AbstractCompositeTool):
         composite_config_info,
         container_config_info,
         run_index,
+        hash: str,
     ):
         super(BasicWorkflow, self).run_composite(
             dir_info,
@@ -46,6 +47,7 @@ class BasicWorkflow(AbstractCompositeTool):
             composite_config_info,
             container_config_info,
             run_index,
+            hash,
         )
         """
             self.dir_logs - directory to store logs
