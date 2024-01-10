@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import os
+import shutil
 import time
 from os.path import dirname
 from os.path import join
@@ -431,6 +432,7 @@ def prepare_experiment(
 def prepare_experiment_tool(
     bug_image_id: Optional[str],
     repair_tool: AbstractTool,
+    task_profile: Dict[str, Any],
     dir_info: DirectoryInfo,
     image_name: str,
     tag: Optional[str] = None,
@@ -452,6 +454,15 @@ def prepare_experiment_tool(
             if not img:
                 utilities.error_exit("Image exists yet was not found??")
             return cast(str, img.id)
+
+    dir_local_patch = dir_info["local"]["patches"]
+    config_patch_dir = task_profile.get(definitions.KEY_CONFIG_PATCH_DIR, None)
+    if config_patch_dir == "setup":
+        if not os.path.isdir(dir_local_patch):
+            os.makedirs(dir_local_patch)
+    else:
+        if os.path.isdir(dir_local_patch):
+            shutil.rmtree(dir_local_patch)
     return None
 
 
