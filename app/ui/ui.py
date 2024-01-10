@@ -472,6 +472,7 @@ class Cerberus(App[List[Result]]):
                 tool_experiment_image_id = task.prepare_experiment_tool(
                     experiment_image_id,
                     tool,
+                    task_profile,
                     dir_info,
                     job_identifier,
                     task_profile[definitions.KEY_TOOL_TAG],

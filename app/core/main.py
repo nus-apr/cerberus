@@ -264,7 +264,7 @@ def process_tasks(tasks: TaskList):
             benchmark.name,
             subject_name,
             bug_name,
-            task_profile.get(definitions.KEY_TOOL_TAG, ""),
+            tool_tag,
         )
 
         if task_config.task_type == "prepare":
@@ -288,9 +288,10 @@ def process_tasks(tasks: TaskList):
         task.prepare_experiment_tool(
             experiment_image_id,
             tool,
+            task_profile,
             dir_info,
             image_name,
-            task_profile.get(definitions.KEY_TOOL_TAG, ""),
+            tool_tag,
         )
         for run_index in range(task_config.runs):
             iteration = iteration + 1
