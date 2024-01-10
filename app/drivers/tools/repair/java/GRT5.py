@@ -23,7 +23,7 @@ class GRT5(AbstractRepairTool):
         # return #####
 
         assert bug_info["language"] == "java"
-        assert len(bug_info["failing_test"]) > 0
+        assert len(bug_info[self.key_failing_tests]) > 0
 
         repo_path = (Path(self.dir_expr) / "src").resolve()
         setup_path = Path(self.dir_setup).resolve()
@@ -33,9 +33,9 @@ class GRT5(AbstractRepairTool):
 
         test_failed = []
         test_failed_set = set()
-        for t in bug_info["failing_test"]:
+        for t in bug_info[self.key_failing_tests]:
             t = t.partition("::")[0]
-        for t in bug_info["failing_test"]:
+        for t in bug_info[self.key_failing_tests]:
             t = t.partition("::")[0]
             if t not in test_failed_set:
                 test_failed_set.add(t)
@@ -43,7 +43,7 @@ class GRT5(AbstractRepairTool):
 
         test_passed = []
         test_passed_set = set()
-        for t in bug_info["passing_test"]:
+        for t in bug_info[self.key_passing_tests]:
             t = t.partition("::")[0]
             if t not in test_failed_set and t not in test_passed_set:
                 test_passed_set.add(t)
@@ -56,14 +56,14 @@ class GRT5(AbstractRepairTool):
                 "setup_script_path": str(setup_path),
                 "sp_src": bug_info["source_directory"],
                 "sp_test": bug_info["test_directory"],
-                "tp_src": bug_info["class_directory"],
-                "tp_test": bug_info["test_class_directory"],
+                "tp_src": bug_info[self.key_dir_class],
+                "tp_test": bug_info[self.key_dir_test_class],
                 "cp_compile": ":".join(
                     [str(Path(self.dir_expr) / s) for s in bug_info["dependencies"]]
                 ),
                 "cp_test": ":".join(
                     [
-                        str(repo_path / bug_info["class_directory"]),
+                        str(repo_path / bug_info[self.key_dir_class]),
                         str(repo_path / bug_info["test_class_directory"]),
                         *[
                             str(Path(self.dir_expr) / s)
@@ -77,8 +77,8 @@ class GRT5(AbstractRepairTool):
                 "test_timeout": bug_info["test_timeout"],
                 "test_sh_fn": bug_info["test_script"],
                 "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
-                "cpus": repair_config_info["cpus"],
-                "gpus": repair_config_info["gpus"],
+                "cpus": repair_config_info[self.key_cpus],
+                "gpus": repair_config_info[self.key_gpus],
             },
             "/root/workflow/info.json",
         )

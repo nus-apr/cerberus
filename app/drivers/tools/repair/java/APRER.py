@@ -27,8 +27,8 @@ class APRER(AbstractRepairTool):
 
         dir_java_src = bug_info["source_directory"]
         dir_test_src = bug_info["test_directory"]
-        f_test_list = bug_info["failing_test"]
-        p_test_list = bug_info["passing_test"]
+        f_test_list = bug_info[self.key_failing_tests]
+        p_test_list = bug_info[self.key_passing_tests]
 
         print(dir_java_src)
         print(dir_test_src)
