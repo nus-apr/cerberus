@@ -137,8 +137,6 @@ def parse_args():
         help="list of the repair/analysis tool {"
         + ", ".join(values.get_list_tools())
         + "}",
-        choices=values.get_list_tools(),
-        metavar="",
     )
     optional.add_argument(
         definitions.ARG_REBUILD_ALL_IMAGES,
