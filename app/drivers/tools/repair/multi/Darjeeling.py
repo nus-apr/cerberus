@@ -29,6 +29,8 @@ program:
     - command: ./{build_script}
       directory: {dir_setup}
     steps-for-coverage:
+    - command: make clean
+      directory: {dir_src}
     - command: CFLAGS="--coverage " CXXFLAGS="--coverage "  LDFLAGS="--coverage " ./{config_script}
       directory: {dir_setup}
     - command: CFLAGS="--coverage " CXXFLAGS="--coverage " LDFLAGS="--coverage " ./{build_script}
