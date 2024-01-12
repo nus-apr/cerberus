@@ -1,3 +1,4 @@
+import multiprocessing
 import signal
 import sys
 import time
@@ -117,7 +118,7 @@ def process_configs(
     task_profile: Dict[str, Any],
     container_profile: Dict[str, Any],
 ):
-    for (k, v) in task_config.__dict__.items():
+    for k, v in task_config.__dict__.items():
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
             setattr(values, k, v)
@@ -211,8 +212,8 @@ def process_config_file(parsed_args):
     values.debug = config.general.debug_mode
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
-    values.cpus = config.general.cpus
-    values.gpus = config.general.gpus
+    values.cpus = min(multiprocessing.cpu_count() - 2, config.general.cpus)
+    values.gpus = min(utilities.get_gpu_count(), config.general.gpus)
     return config
 
 
