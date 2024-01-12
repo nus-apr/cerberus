@@ -792,6 +792,7 @@ class Cerberus(App[List[Result]]):
                     message.identifier,
                     cpus,
                     gpus,
+                    str(message.run),
                     message.experiment_image_id,
                 )
             except Exception as e:

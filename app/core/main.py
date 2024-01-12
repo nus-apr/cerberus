@@ -211,7 +211,7 @@ def process_config_file(parsed_args):
     values.debug = config.general.debug_mode
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
-    values.cpus = config.general.cpus
+    values.cpus = min(multiprocessing.cpu_count() - 2, config.general.cpus)
     values.gpus = config.general.gpus
     return config
 
@@ -320,6 +320,6 @@ def process_tasks(tasks: TaskList):
                 key,
                 cpus,
                 gpus,
-                run_index,
+                str(run_index),
                 image_name,
             )
