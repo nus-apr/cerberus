@@ -371,6 +371,17 @@ def prepare_tool_experiment_image(
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
 
+        if repair_tool.name.lower() in ["et", "grt5"]:
+            pom_file = f"{dir_info['container']['experiment']}/src/pom.xml"
+            dock_file.write(
+                "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
+                "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
+                "-Dmaven.compiler.useIncrementalCompilation=false "
+                "-Dmaven.compiler.failOnError=true -Dsurefire.skipAfterFailureCount=1 "
+                "compiler:compile surefire:test "
+                f"-Drat.skip=true -f {pom_file}; return 0\n"
+            )
+
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
                 "RUN bash {0} || sudo bash {0} ; return 0\n".format(
@@ -530,7 +541,6 @@ def run(
         benchmark.update_dir_info(dir_info)
 
         if values.use_container:
-
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a docker image name assigned: {}".format(
