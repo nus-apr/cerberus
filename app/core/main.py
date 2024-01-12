@@ -1,3 +1,4 @@
+import multiprocessing
 import signal
 import sys
 import time
@@ -212,7 +213,7 @@ def process_config_file(parsed_args):
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
     values.cpus = min(multiprocessing.cpu_count() - 2, config.general.cpus)
-    values.gpus = config.general.gpus
+    values.gpus = min(utilities.get_gpu_count(), config.general.gpus)
     return config
 
 
