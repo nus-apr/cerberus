@@ -2,6 +2,7 @@ import os
 import re
 from os.path import join
 
+from app.core import container
 from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -114,6 +115,11 @@ class LLMR(AbstractRepairTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
+        # remove traces that are not necessary
+        remove_command = (
+            f"rm -rf {self.dir_output}/failing_traces {self.dir_output}/passing_traces "
+        )
+        self.exec_command(remove_command)
         super().save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
