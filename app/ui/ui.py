@@ -475,6 +475,7 @@ class Cerberus(App[List[Result]]):
                     task_profile,
                     dir_info,
                     job_identifier,
+                    experiment_item,
                     task_profile[definitions.KEY_TOOL_TAG],
                 )
                 complete_images.put(

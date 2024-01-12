@@ -292,6 +292,7 @@ def process_tasks(tasks: TaskList):
             task_profile,
             dir_info,
             image_name,
+            experiment_item,
             tool_tag,
         )
         for run_index in range(task_config.runs):

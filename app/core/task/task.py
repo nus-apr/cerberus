@@ -353,6 +353,7 @@ def prepare_tool_experiment_image(
     repair_tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
+    bug_info: Dict[str, Any],
     tag: Optional[str],
 ):
     dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
@@ -372,7 +373,7 @@ def prepare_tool_experiment_image(
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
 
         if repair_tool.name.lower() in ["et", "grt5"]:
-            pom_file = f"{dir_info['container']['experiment']}/src/pom.xml"
+            pom_file = f"{dir_info['container']['experiment']}/src/{os.path.dirname(os.path.dirname(os.path.dirname(bug_info[definitions.KEY_SOURCE_DIRECTORY]))) or '.' }/pom.xml"
             dock_file.write(
                 "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
                 "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
@@ -444,6 +445,7 @@ def prepare_experiment_tool(
     task_profile: Dict[str, Any],
     dir_info: DirectoryInfo,
     image_name: str,
+    bug_info: Dict[str, Any],
     tag: Optional[str] = None,
 ):
     if values.use_container:
@@ -456,7 +458,7 @@ def prepare_experiment_tool(
             or values.rebuild_all
         ):
             return prepare_tool_experiment_image(
-                bug_image_id, repair_tool, dir_info, image_name, tag
+                bug_image_id, repair_tool, dir_info, image_name, bug_info, tag
             )
         else:
             img = container.get_image(image_name)
