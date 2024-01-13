@@ -19,9 +19,9 @@ class Valkyrie(AbstractValidateTool):
         dir_src = f"{self.dir_expr}/src"
         conf_content.append(f"source_dir:{dir_src}\n")
         if bug_info.get(self.key_language, "").lower() in ["c"]:
-            conf_content.append(
-                f"config_script:{bug_info.get(self.key_config_script)}\n"
-            )
+            config_script = bug_info[self.key_config_script]
+            abs_path_c_script = f"{self.dir_setup}/{config_script}"
+            conf_content.append(f"config_script:{abs_path_c_script}\n")
         if bug_info.get(self.key_fix_file, None):
             conf_content.append(f"source_file:{bug_info.get(self.key_fix_file)}\n")
         conf_content.append(f"patch_dir:{self.dir_setup}/patches\n")
