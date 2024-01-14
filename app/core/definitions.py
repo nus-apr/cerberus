@@ -115,3 +115,5 @@ UI_SHOULD_FINISH = "Should finish by"
 UI_STATUS = "Status"
 UI_PLAUSIBLE_PATCHES = "Plausible Patches"
 UI_DURATION = "Duration"
+
+GROUP_NAME = "cerberus"
