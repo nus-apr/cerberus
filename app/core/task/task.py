@@ -375,9 +375,9 @@ def prepare_tool_experiment_image(
         src_dir = bug_info[definitions.KEY_SOURCE_DIRECTORY]
         if str(src_dir)[-1] == "/":
             src_dir = src_dir[:-1]
-            pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
+        pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
+        pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
         if repair_tool.name.lower() in ["et", "grt5"]:
-            pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
             dock_file.write(
                 "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
                 "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
@@ -394,7 +394,6 @@ def prepare_tool_experiment_image(
             "arja_e",
             "tbar",
         ]:
-            pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
             dock_file.write(
                 "RUN mvn clean compile test "
                 f"-Drat.skip=true -f {pom_file}; return 0\n"
