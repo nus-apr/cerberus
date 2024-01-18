@@ -15,7 +15,6 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractValidateTool(AbstractTool):
-
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST

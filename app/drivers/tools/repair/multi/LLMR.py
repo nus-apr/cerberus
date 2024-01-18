@@ -2,7 +2,6 @@ import os
 import re
 from os.path import join
 
-from app.core import container
 from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
