@@ -55,6 +55,12 @@ def generate_local_dir_info(
     dir_exp_local = join(values.dir_experiments, dir_path)
     dir_setup_local = join(values.dir_benchmark, dir_path)
 
+    if tag:  # Allow for the usage of custom setup folders
+        dir_path_extended = join(benchmark_name, subject_name, f"{bug_name}-{tag}", "")
+        dir_setup_extended = join(values.dir_benchmark, dir_path_extended)
+        if os.path.exists(dir_setup_extended):
+            dir_setup_local = dir_setup_extended
+
     dir_bugs_local = join(dir_setup_local, "bugs")
     dir_localization_local = join(dir_setup_local, "localization")
     dir_patches_local = join(dir_setup_local, "patches")
@@ -78,12 +84,6 @@ def generate_local_dir_info(
     ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
-
-    if tag:  # Allow for the usage of custom setup folders
-        dir_path_extended = join(benchmark_name, subject_name, f"{bug_name}-{tag}", "")
-        dir_setup_extended = join(values.dir_benchmark, dir_path_extended)
-        if os.path.exists(dir_setup_extended):
-            dir_setup_local = dir_setup_extended
 
     return {
         "logs": dir_logs_local,
