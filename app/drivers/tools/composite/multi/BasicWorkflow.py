@@ -5,6 +5,9 @@ from multiprocessing.pool import ThreadPool
 from os.path import join
 from queue import Queue
 from typing import Any
+from typing import cast
+from typing import Dict
+from typing import List
 from typing import Set
 from typing import Union
 
@@ -26,8 +29,11 @@ from app.core.task import select
 from app.core.task import task
 from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.composite.AbstractCompositeTool import AbstractCompositeTool
+from app.drivers.tools.MockTool import MockTool
 
 
 class BasicWorkflow(AbstractCompositeTool):
@@ -36,7 +42,8 @@ class BasicWorkflow(AbstractCompositeTool):
         super().__init__(self.name)
         # preferably change to a container with the dependencies ready to reduce setup time
         self.image_name = "ubuntu:20.04"
-        self.process_count = 10
+        self.process_count = 12
+        self.event_processor_count = 4
         self.exit_message = "quit"
 
     def run_composite(
@@ -46,8 +53,8 @@ class BasicWorkflow(AbstractCompositeTool):
         bug_info,  # Entry from  meta-data.json
         composite_config_info,  # Task Profile
         container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
-        hash: str,  # Substring of hash, to be used for unique locations
+        run_index: str,  # Specific iteration of the workflow run
+        hash: Any,  # Hash, to be used for unique locations
     ):
         super(BasicWorkflow, self).run_composite(
             dir_info,
@@ -56,7 +63,7 @@ class BasicWorkflow(AbstractCompositeTool):
             composite_config_info,
             container_config_info,
             run_index,
-            hash,
+            hash.hexdigest()[:8],
         )
         """
             self.dir_logs - directory to store logs
@@ -77,18 +84,30 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_normal("setting up workflow")
         self.emit_debug(composite_sequence)
 
-        root_dir = join(values.dir_main, "composite_workspace", "run-{}".format(hash))
+        root_dir = join(
+            values.dir_main,
+            "composite_workspace",
+            "run-{}".format(hash.hexdigest()[:8]),
+        )
         os.makedirs(root_dir, exist_ok=True)
         self.root_dir = root_dir
-        task_mappings = self.make_task_mappings(root_dir)
+
+        self.task_mappings = self.make_task_mappings(root_dir)
+        self.bug_info = bug_info
+
+        tool_map: Dict[TaskType, List[AbstractTool]] = {}
 
         for task_type, tools in composite_sequence.items():
+            tool_map[task_type] = []
             for tool_name in tools:
-                tool = configuration.load_tool(tool_name, task_type)
+                if tool_name == "mock":
+                    tool = cast(AbstractTool, MockTool())
+                else:
+                    tool = configuration.load_tool(tool_name, task_type)
 
                 self.emit_debug(tool.bindings)
                 tool.bindings = tool.bindings or {}
-                tool.bindings.update(task_mappings[task_type])
+                tool.bindings.update(self.task_mappings[task_type])
                 self.emit_debug(tool.bindings)
 
                 tool.check_tool_exists()
@@ -113,6 +132,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     image_name,
                     tool_tag,
                 )
+                tool_map[task_type].append(tool)
                 # key = create_task_identifier(
                 #    benchmark,
                 #    composite_config_info,
@@ -132,6 +152,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 #    key,
                 #    composite_config_info[self.key_cpus],
                 #    composite_config_info[self.key_gpus],
+                #    run_index,
                 #    image_name,
                 # )
         self.emit_highlight("Done with setup!")
@@ -140,8 +161,48 @@ class BasicWorkflow(AbstractCompositeTool):
         watcher_handle = self.pool.apply_async(self.watcher)
 
         self.emit_highlight("Preparing workers")
-        for _ in range(9):
+        for _ in range(self.event_processor_count):
             self.pool.apply_async(self.event_worker)
+
+        if "analyze" in tool_map:
+            for tool in tool_map["analyze"]:
+                self.pool.apply_async(
+                    self.run_analysis,
+                    [
+                        dir_info,
+                        benchmark,
+                        bug_info,
+                        composite_config_info,
+                        container_config_info,
+                        run_index,
+                        hash,
+                        tool,
+                    ],
+                )
+        elif "fuzz" in tool_map:
+            for tool in tool_map["fuzz"]:
+                if tool == "aflplusplus":
+                    os.makedirs(join(self.root_dir, "default"))
+                    os.makedirs(join(self.root_dir, "default", "crashes"))
+                    os.makedirs(join(self.root_dir, "default", "queue"))
+                self.pool.apply_async(
+                    self.run_fuzz,
+                    [
+                        dir_info,
+                        benchmark,
+                        bug_info,
+                        composite_config_info,
+                        container_config_info,
+                        run_index,
+                        hash,
+                        tool,
+                    ],
+                )
+        else:
+            self.observer.stop()
+            for _ in range(self.event_processor_count):
+                self.message_queue.put("exit")
+            self.emit_error("No supported starter for the process")
 
         watcher_handle.wait()
         self.pool.terminate()
@@ -154,6 +215,94 @@ class BasicWorkflow(AbstractCompositeTool):
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
+
+    def run_analysis(
+        self,
+        dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
+        bug_info,  # Entry from  meta-data.json
+        composite_config_info,  # Task Profile
+        container_config_info,  # Container Profile
+        run_index,  # Specific iteration of the workflow run
+        hash: Any,  # Hash, to be used for unique locations
+        tool: AbstractTool,
+    ):
+        values.task_type.set("analyze")
+        tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
+        image_name = create_task_image_identifier(
+            benchmark,
+            tool,
+            bug_info,
+            tool_tag,
+        )
+
+        key = create_task_identifier(
+            benchmark,
+            composite_config_info,
+            container_config_info,
+            bug_info,
+            tool,
+            str(run_index),
+            tool_tag,
+        )
+
+        task.run(
+            benchmark,
+            tool,
+            bug_info,
+            composite_config_info,
+            container_config_info,
+            key,
+            composite_config_info[self.key_cpus],
+            composite_config_info[self.key_gpus],
+            run_index,
+            image_name,
+            hash,
+        )
+
+    def run_fuzz(
+        self,
+        dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
+        bug_info,  # Entry from  meta-data.json
+        composite_config_info,  # Task Profile
+        container_config_info,  # Container Profile
+        run_index,  # Specific iteration of the workflow run
+        hash: Any,  # Hash, to be used for unique locations
+        tool: AbstractTool,
+    ):
+        values.task_type.set("fuzz")
+        tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
+        image_name = create_task_image_identifier(
+            benchmark,
+            tool,
+            bug_info,
+            tool_tag,
+        )
+
+        key = create_task_identifier(
+            benchmark,
+            composite_config_info,
+            container_config_info,
+            bug_info,
+            tool,
+            str(run_index),
+            tool_tag,
+        )
+
+        task.run(
+            benchmark,
+            tool,
+            bug_info,
+            composite_config_info,
+            container_config_info,
+            key,
+            composite_config_info[self.key_cpus],
+            composite_config_info[self.key_gpus],
+            run_index,
+            image_name,
+            hash,
+        )
 
     class FileCreationHandler(FileSystemEventHandler):
         def __init__(self, q: Queue):
@@ -205,6 +354,55 @@ class BasicWorkflow(AbstractCompositeTool):
             for _ in range(self.process_count):
                 self.emit_debug("Time to die")
                 self.message_queue.put(self.exit_message)
+
+        if (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["repair"].keys())[0]]
+            )
+            == list(self.task_mappings["repair"].keys())[0]
+        ):
+            self.emit_highlight("Repair update")
+            pass
+        elif (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["analyze"].keys())[0]]
+            )
+            == list(self.task_mappings["analyze"].keys())[0]
+        ):
+            self.emit_highlight("Analyze Update")
+            pass
+        elif (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["fuzz"].keys())[0]]
+            )
+            == list(self.task_mappings["fuzz"].keys())[0]
+        ):
+            self.emit_highlight("Fuzz Update")
+            pass
+        elif (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["validate"].keys())[0]]
+            )
+            == list(self.task_mappings["validate"].keys())[0]
+        ):
+            self.emit_highlight("Validate Update")
+            pass
+        elif (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["select"].keys())[0]]
+            )
+            == list(self.task_mappings["select"].keys())[0]
+        ):
+            self.emit_highlight("Select Update")
+            pass
+        elif (
+            os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["localize"].keys())[0]]
+            )
+            == list(self.task_mappings["localize"].keys())[0]
+        ):
+            self.emit_highlight("Select Update")
+            pass
         # meta_data_fpath = event.src_path
         # crash_folder = os.path.dirname(event.src_path)
         # hash = os.path.basename(crash_folder)
@@ -267,19 +465,16 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def make_task_mappings(self, root_dir):
         task_mappings = {
-            "fuzz": {join(root_dir, "fuzzing"): {"bind": "/fuzz-output", "mode": "rw"}},
-            "repair": {
-                join(root_dir, "repair"): {"bind": "/repair-output", "mode": "rw"}
-            },
-            "analyze": {
-                join(root_dir, "analyze"): {"bind": "/analyze-output", "mode": "rw"}
-            },
-            "select": {
-                join(root_dir, "select"): {"bind": "/select-output", "mode": "rw"}
-            },
-            "localize": {
-                join(root_dir, "localize"): {"bind": "/localize-output", "mode": "rw"}
-            },
+            "fuzz": {join(root_dir, "fuzzing"): {"bind": "/output", "mode": "rw"}},
+            "repair": {join(root_dir, "repair"): {"bind": "/output", "mode": "rw"}},
+            "analyze": {join(root_dir, "analyze"): {"bind": "/output", "mode": "rw"}},
+            "select": {join(root_dir, "select"): {"bind": "/output", "mode": "rw"}},
+            "validate": {join(root_dir, "validate"): {"bind": "/output", "mode": "rw"}},
+            "localize": {join(root_dir, "localize"): {"bind": "/output", "mode": "rw"}},
         }
+        self.emit_debug(task_mappings)
+        for task in task_mappings.values():
+            for key in task.keys():
+                os.makedirs(key, exist_ok=True)
 
         return task_mappings

@@ -83,7 +83,7 @@ class AbstractCompositeTool(AbstractTool):
         bug_info: Dict[str, Any],
         composite_config_info: Dict[str, Any],
         container_config_info: Dict[str, Any],
-        run_index: int,
+        run_index: str,
         hash: str,
     ) -> None:
         self.emit_normal("validating experiment subject")

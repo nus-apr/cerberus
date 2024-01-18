@@ -24,8 +24,8 @@ def run_composite(
     container_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark: Any,
-    run_index: int,
-    hash: str,
+    run_index: str,
+    hash: Any,
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark.name
     fix_location = None
@@ -84,8 +84,8 @@ def composite_run_all(
     container_config_info,
     container_id: Optional[str],
     benchmark: Any,
-    run_index: int,
-    hash: str,
+    run_index: str,
+    hash: Any,
 ):
     consume_thread = None
     tool_thread = None
@@ -121,12 +121,12 @@ def composite_run_all(
             container_config_info,
             container_id: Optional[str],
             benchmark: str,
-            run_index: int,
+            run_index: str,
             task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
             final_status,
-            hash: str,
+            hash: Any,
         ):
             """
             Pass over some fields as we are going into a new thread

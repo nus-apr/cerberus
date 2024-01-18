@@ -507,8 +507,9 @@ def run(
     task_identifier: str,
     cpu: List[str],
     gpu: List[str],
-    run_index: int,
+    run_index: str,
     task_image: Optional[str] = None,
+    hash: Any = None,
 ):
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
@@ -522,8 +523,9 @@ def run(
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
 
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode("utf-8"))
+    if hash is None:
+        hash = hashlib.sha1()
+        hash.update(str(time.time()).encode("utf-8"))
 
     dir_info = generate_tool_dir_info(
         benchmark.name,
@@ -655,7 +657,7 @@ def run(
                 container_id,
                 benchmark,
                 run_index,
-                hash.hexdigest()[:8],
+                hash,
             )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
