@@ -13,7 +13,7 @@ class JoernSBFL(AbstractLocalizeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "joern-sbfl-crash-analysis:latest"
+        self.image_name = "wolffdy/joern-sbfl-crash-analysis:latest"
         self.id = ""
 
     def run_localization(self, bug_info : Dict[str, Any], localization_config_info  : Dict[str, Any]):
