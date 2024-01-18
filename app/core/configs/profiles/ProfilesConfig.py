@@ -1,4 +1,4 @@
-from typing import List
+from typing import cast
 from typing import Sequence
 
 from app.core.configs.profiles.AbstractProfile import AbstractProfile
@@ -12,7 +12,6 @@ class ProfilesConfig:
         container_profiles_list: Sequence[ContainerProfile],
         task_profiles_list: Sequence[TaskProfile],
     ):
-
         self.container_profiles_list = container_profiles_list
         self.task_profiles_list = task_profiles_list
 
@@ -28,9 +27,13 @@ class ProfilesConfig:
             raise ValueError(err)
 
     def get_container_profile(self, profile_id: str) -> ContainerProfile:
-        return ProfilesConfig.get_profile_by_id(
-            profile_id, self.container_profiles_list
+        return cast(
+            ContainerProfile,
+            ProfilesConfig.get_profile_by_id(profile_id, self.container_profiles_list),
         )
 
     def get_task_profile(self, profile_id: str) -> TaskProfile:
-        return ProfilesConfig.get_profile_by_id(profile_id, self.task_profiles_list)
+        return cast(
+            TaskProfile,
+            ProfilesConfig.get_profile_by_id(profile_id, self.task_profiles_list),
+        )

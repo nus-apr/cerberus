@@ -17,7 +17,8 @@ class Infer(AbstractAnalyzeTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "yuntongzhang/infer:facebook"
+        # the version in ubuntu-18 as better compatibility with the VulnLoc benchmark
+        self.image_name = "yuntongzhang/infer:facebook-ubuntu-18"
 
     def prepare(self, bug_info):
         tool_dir = join(self.dir_expr, self.name)
@@ -30,11 +31,11 @@ class Infer(AbstractAnalyzeTool):
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
-        compile_list = bug_info.get(self.key_compile_programs, [])
+        # this build command is for the VulnLoc benchmark;
+        # to support other benchmarks, look at the meta-data.json file in VulnLoc
+        build_cmd = bug_info.get(self.key_build_command, "")
         log_compile_path = join(self.dir_logs, "infer-compile-output.log")
-        compile_command = "infer -j 20 -g capture -- make -j20 {}".format(
-            " ".join(compile_list)
-        )
+        compile_command = "infer capture -- {}".format(build_cmd)
 
         self.emit_normal("compiling subject with ")
         status = self.run_command(

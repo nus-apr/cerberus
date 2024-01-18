@@ -13,12 +13,17 @@ class Valkyrie(AbstractValidateTool):
         self.id = ""
 
     def populate_config_file(self, bug_info):
-        self.dir_patch = join(self.dir_output, "patches")
         self.emit_normal("generating config file")
         config_path = join(self.dir_expr, f"{self.name}.config")
         conf_content = list()
         dir_src = f"{self.dir_expr}/src"
         conf_content.append(f"source_dir:{dir_src}\n")
+        if bug_info.get(self.key_language, "").lower() in ["c"]:
+            config_script = bug_info[self.key_config_script]
+            abs_path_c_script = f"{self.dir_setup}/{config_script}"
+            conf_content.append(f"config_script:{abs_path_c_script}\n")
+        if bug_info.get(self.key_fix_file, None):
+            conf_content.append(f"source_file:{bug_info.get(self.key_fix_file)}\n")
         conf_content.append(f"patch_dir:{self.dir_setup}/patches\n")
         conf_content.append(
             f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
@@ -26,12 +31,22 @@ class Valkyrie(AbstractValidateTool):
         conf_content.append(
             f"test_id_list:{','.join(bug_info[self.key_failing_tests])}\n"
         )
-        conf_content.append(
-            f"build_script:{self.dir_setup}/{bug_info[self.key_build_script]}\n"
-        )
-        conf_content.append(
-            f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
-        )
+        build_script = bug_info[self.key_build_script]
+        abs_path_b_script = f"{self.dir_setup}/{build_script}"
+        if build_script:
+            conf_content.append(f"build_script:{abs_path_b_script}\n")
+        else:
+            conf_content.append(f'build_script:-c "exit 0"\n')
+
+        public_test_script = bug_info.get(self.key_pub_test_script, None)
+        if public_test_script:
+            conf_content.append(
+                f"pub_test_script:{self.dir_setup}/{public_test_script}\n"
+            )
+        else:
+            conf_content.append(
+                f"pub_test_script:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
+            )
         if bug_info.get(self.key_pvt_test_script, None):
             pvt_script = f"{self.dir_setup}/{bug_info[self.key_pvt_test_script]}"
             conf_content.append(f"pvt_test_script:{pvt_script}\n")

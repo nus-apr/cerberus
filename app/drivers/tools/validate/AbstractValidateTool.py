@@ -1,21 +1,20 @@
 import abc
 import os
+import shutil
 from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import container
 from app.core import definitions
 from app.core import utilities
-from app.core import values
-from app.core.task.stats import ValidateToolStats
-from app.core.utilities import error_exit
+from app.core.task.stats.ValidateToolStats import ValidateToolStats
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractValidateTool(AbstractTool):
-
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
@@ -31,10 +30,39 @@ class AbstractValidateTool(AbstractTool):
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
     stats: ValidateToolStats
+    dir_patch: str
+    dir_validation: str
 
     def __init__(self, tool_name):
         self.stats = ValidateToolStats()
         super().__init__(tool_name)
+
+    def save_artifacts(self, dir_info):
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+        base_dir_validate = dir_info["validation"]
+        if os.path.isdir(base_dir_validate):
+            dir_validation = join(base_dir_validate, self.name)
+            self.dir_validation = dir_validation
+            if os.path.isdir(dir_validation):
+                shutil.rmtree(dir_validation)
+            os.makedirs(dir_validation)
+            if self.container_id:
+                container.copy_file_from_container(
+                    self.container_id, self.dir_output, f"{dir_validation}"
+                )
+            else:
+                save_command = "cp -rf {} {};".format(
+                    self.dir_output, f"{dir_validation}"
+                )
+                utilities.execute_command(save_command)
+
+        super().save_artifacts(dir_info)
+        return
 
     def analyse_output(
         self, dir_info, bug_id: str, fail_list: List[str]

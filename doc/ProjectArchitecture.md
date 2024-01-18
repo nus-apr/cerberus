@@ -5,6 +5,7 @@
 The benchmark folder contains all possible benchmarks which can be dynamically instantiated when Cerberus is started. A benchmark is stored locally or can be set as a github submodule. (Check [how to add a benchmark](benchmark/AddBenchmark.md)) for more information.
 
 ## App
+
 This is the root directory of the project. It contains all code for the project.
 
 ### Core

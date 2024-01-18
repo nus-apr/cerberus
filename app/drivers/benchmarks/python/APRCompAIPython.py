@@ -14,6 +14,12 @@ class APRCompAIPython(AbstractBenchmark):
         is_error = super(APRCompAIPython, self).setup_experiment(
             bug_index, container_id, test_all
         )
+        if not is_error:
+            if self.verify(bug_index, container_id):
+                self.emit_success("verified successfully")
+            else:
+                self.emit_error("verification failed")
+                is_error = True
         return is_error
 
     def deploy(self, bug_index, container_id):
@@ -30,6 +36,24 @@ class APRCompAIPython(AbstractBenchmark):
         )
         self.emit_debug(
             "setup took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
+
+    def verify(self, bug_index, container_id):
+        self.emit_normal("verify dev patch and test-oracle")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_verify_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
+        )
+        time = datetime.now()
+        command_str = f"bash verify_dev"
+        status = self.run_command(
+            container_id, command_str, self.log_verify_path, self.dir_setup
+        )
+
+        self.emit_debug(
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
@@ -73,10 +97,6 @@ class APRCompAIPython(AbstractBenchmark):
             "Test took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return failing_status != 0 and passing_status == 0
-
-    def verify(self, bug_index, container_id):
-        self.emit_normal("verify dev patch and test-oracle")
-        return True
 
     def transform(self, bug_index, container_id):
         self.emit_normal("transform fix-file")

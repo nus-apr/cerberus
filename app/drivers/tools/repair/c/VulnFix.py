@@ -9,7 +9,7 @@ class VulnFix(AbstractRepairTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
-        self.image_name = "yuntongzhang/vulnfix:latest"
+        self.image_name = "yuntongzhang/vulnfix:latest-manual"
         self.cpu_usage = 1
 
     def run_repair(self, bug_info, repair_config_info):

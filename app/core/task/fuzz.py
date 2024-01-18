@@ -1,5 +1,6 @@
 import threading
 import time
+import traceback
 from typing import Any
 from typing import Dict
 from typing import Optional
@@ -32,6 +33,7 @@ def run_fuzz(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def fuzz_all(

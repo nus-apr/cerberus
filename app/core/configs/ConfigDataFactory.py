@@ -25,21 +25,26 @@ class ConfigDataFactory:
             secure_hash=general_config_dict[ConfigFieldsEnum.SECURE_HASH.value],
             cpus=max(
                 2,
-                general_config_dict.get(
-                    ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+                min(
+                    multiprocessing.cpu_count() - 2,
+                    general_config_dict.get(
+                        ConfigFieldsEnum.CPUS.value, multiprocessing.cpu_count() - 2
+                    ),
                 ),
             ),
             gpus=max(
                 0,
-                general_config_dict.get(
-                    ConfigFieldsEnum.GPUS.value, utilities.get_gpu_count()
+                min(
+                    utilities.get_gpu_count(),
+                    general_config_dict.get(
+                        ConfigFieldsEnum.GPUS.value, utilities.get_gpu_count()
+                    ),
                 ),
             ),
         )
 
     @staticmethod
     def _create_profiles_config(profiles_config_dict: dict) -> ProfilesConfig:
-
         # load container profiles
         container_profiles_list = []
         for container_profile_dict in profiles_config_dict[
@@ -99,7 +104,6 @@ class ConfigDataFactory:
         for tasks_chunk_config_dict in tasks_data_config_dict[
             ConfigFieldsEnum.TASKS_CHUNKS.value
         ]:
-
             # overwrite task config if necessary
             tasks_chunk_config_dict = {**task_default_config, **tasks_chunk_config_dict}
             task_config = TaskConfig(

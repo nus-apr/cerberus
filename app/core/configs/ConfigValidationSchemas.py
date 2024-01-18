@@ -252,6 +252,29 @@ tool_config_schema = {
     "additionalProperties": False,
 }
 
+composite_sequence_schema = {
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Composite Sequence",
+    "type": "object",
+    "properties": {
+        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.ORCHESTRATOR.value: {"type": "string"},
+    },
+    "anyOf": [
+        ConfigFieldsEnum.FUZZ.value,
+        ConfigFieldsEnum.ANALYZE.value,
+        ConfigFieldsEnum.LOCALIZE.value,
+        ConfigFieldsEnum.REPAIR.value,
+        ConfigFieldsEnum.SELECT.value,
+    ],
+    "required": [ConfigFieldsEnum.ORCHESTRATOR.value],
+    "additionalProperties": False,
+}
+
 
 tasks_chunks_schema = {
     "$schema": "http://json-schema.org/draft-07/schema#",
@@ -260,6 +283,7 @@ tasks_chunks_schema = {
     "properties": {
         **cast(Dict[str, Any], task_default_schema["properties"]),
         ConfigFieldsEnum.TYPE.value: {"type": "string"},
+        ConfigFieldsEnum.COMPOSITE_SEQUENCE.value: composite_sequence_schema,
         ConfigFieldsEnum.BENCHMARKS.value: {
             "type": "array",
             "minItems": 1,

@@ -26,8 +26,6 @@ class RepairCATPython(AbstractRepairTool):
             self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
-
         self.bug_name = bug_info[self.key_bug_id]
 
         tool_info = {
@@ -39,11 +37,18 @@ class RepairCATPython(AbstractRepairTool):
         }
         bug_info_encoded = base64.b64encode(json.dumps(bug_info).encode()).decode()
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
-
-        cmd = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        # expected name for test-oracle
+        self.run_command(
+            f"cp {self.dir_setup}/{bug_info[self.key_test_script]} {self.dir_setup}/run_test"
+        )
+        timeout_h = str(repair_config_info[self.key_timeout])
+        repair_command = f"bash -c 'cd /home/repaircat-autocode-python/api && python repair.py {bug_info_encoded} {tool_info_encoded}'"
+        repair_command = f"timeout -k 5m {timeout_h}h {repair_command} "
         self.timestamp_log_start()
         status = self.run_command(
-            cmd, self.log_output_path, dir_path="/home/repaircat-autocode-python/"
+            repair_command,
+            self.log_output_path,
+            dir_path="/home/repaircat-autocode-python/",
         )
 
         self.run_command(f"cp /home/result.json {self.dir_output}/result.json")

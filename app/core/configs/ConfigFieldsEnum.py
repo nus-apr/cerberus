@@ -52,6 +52,15 @@ class ConfigFieldsEnum(Enum):
     NAME = "name"
     TYPE = "type"
 
+    # composite fields
+    COMPOSITE_SEQUENCE = "composite-sequence"
+    FUZZ = "fuzz"
+    ANALYZE = "analyze"
+    LOCALIZE = "localize"
+    REPAIR = "repair"
+    SELECT = "select"
+    ORCHESTRATOR = "orchestrator"
+
     # benchmarks
     BENCHMARKS = "benchmarks"
     BUG_ID_LIST = "bug-id-list"

@@ -21,48 +21,40 @@ class APRER(AbstractRepairTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-       
 
-        
-        
-        project_dir = self.dir_expr+'src'
+        project_dir = self.dir_expr + "src"
         print(project_dir)
 
-        dir_java_src =  bug_info["source_directory"]
-        dir_test_src =  bug_info["test_directory"]       
+        dir_java_src = bug_info["source_directory"]
+        dir_test_src = bug_info["test_directory"]
         f_test_list = bug_info["failing_test"]
         p_test_list = bug_info["passing_test"]
-        
+
         print(dir_java_src)
         print(dir_test_src)
 
-        failing_test_list=''
-        passing_test_list=''
+        failing_test_list = ""
+        passing_test_list = ""
         for ft in f_test_list:
-            if '::' in ft:
-                tmp=ft.split('::')[0]
+            if "::" in ft:
+                tmp = ft.split("::")[0]
                 if tmp not in failing_test_list:
-                    failing_test_list+=tmp+','
+                    failing_test_list += tmp + ","
             else:
-                failing_test_list+=ft+','
-                
+                failing_test_list += ft + ","
+
         for pt in p_test_list:
             print(pt)
-            if '::' in pt:
-                tmp=pt.split('::')[0]
+            if "::" in pt:
+                tmp = pt.split("::")[0]
                 if tmp not in passing_test_list:
-                    passing_test_list+=tmp+','
+                    passing_test_list += tmp + ","
             else:
-                passing_test_list+=pt+','
-                
-        
+                passing_test_list += pt + ","
+
         patch_directory = self.dir_output
         setup_scripts = self.dir_setup
 
-        
-
-      
-      
         # execute repair tool
         command = (
             f"python3.8 start.py "
@@ -71,14 +63,16 @@ class APRER(AbstractRepairTool):
             f" {dir_test_src} "
             f" {failing_test_list} "
             f" {passing_test_list} "
-            f" {patch_directory} "   
-            f" {setup_scripts} " 
+            f" {patch_directory} "
+            f" {setup_scripts} "
         )
-        
+        timeout_h = str(repair_config_info[self.key_timeout])
+        repair_command = f"timeout -k 5m {timeout_h}h {command} "
+
         print(command)
-        
+
         self.timestamp_log_start()
-        status = self.run_command(command,log_file_path=self.log_output_path)
+        status = self.run_command(repair_command, log_file_path=self.log_output_path)
         self.process_status(status)
         self.timestamp_log_end()
 
@@ -108,34 +102,22 @@ class APRER(AbstractRepairTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-        
+
         self.emit_normal("reading output")
 
-
-        list_output_dir = self.list_dir(self.dir_output+'/generated')
+        list_output_dir = self.list_dir(self.dir_output + "/generated")
         self.stats.patch_stats.size = len(
             [name for name in list_output_dir if ".patch" in name]
         )
-        
-        
-        list_output_dir = self.list_dir(self.dir_output+'/generated')
+
+        list_output_dir = self.list_dir(self.dir_output + "/generated")
         self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
-        
-        list_output_dir = self.list_dir(self.dir_output+'/candidate')
+
+        list_output_dir = self.list_dir(self.dir_output + "/candidate")
         self.stats.patch_stats.plausible = len(
             [name for name in list_output_dir if ".patch" in name]
         )
-        
-                
-                
-                
-        return self.stats 
 
-        
-
-       
-
-        
-    
+        return self.stats

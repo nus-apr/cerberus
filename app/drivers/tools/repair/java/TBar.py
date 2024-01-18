@@ -49,11 +49,15 @@ class TBar(AbstractRepairTool):
 
         env = dict(
             FAILING_TESTS=(" ".join(bug_info[self.key_failing_tests])),
+            PASSING_TESTS=(" ".join(bug_info[self.key_passing_tests])),
             CLASS_DIRECTORY=f"{bug_info[self.key_dir_class]}/",
             TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",
             TEST_SOURCE_DIRECTORY=f"{bug_info[self.key_dir_tests]}/",
+            JAVA_HOME=f"/usr/lib/jvm/java-{bug_info.get('java_version',8)}-openjdk-amd64/",
         )
+        if self.key_build_script in bug_info:
+            env["BUILD_SCRIPT"] = join(self.dir_setup, bug_info[self.key_build_script])
 
         # start running
         self.timestamp_log_start()
@@ -126,9 +130,9 @@ class TBar(AbstractRepairTool):
 
         # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
         test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
-        if test_failed_tests_file != 0:
+        if test_failed_tests_file != 0 and not run_fl:
             self.emit_warning(
-                f"{failed_tests_file} does not exist in FailedTestCases/;"
+                f"{failed_tests_file} does not exist in FailedTestCases/ directory."
                 "Will try to find if there is a hardcoded suspiciousness file"
             )
             test_fl_data = self.run_command(f"test -f {fl_data}")
@@ -138,11 +142,14 @@ class TBar(AbstractRepairTool):
                 )
             self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
         elif run_fl:
-            cmd = (
-                f"java -cp 'target/classes:target/dependency/*' "
-                f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
-                f" {self.dir_expr} {bug_id_str}"
-            )
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,experiment_info[self.key_build_script])}"
+
+            # cmd = (
+            #    f"java -cp 'target/classes:target/dependency/*' "
+            #    f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
+            #    f" {self.dir_expr} {bug_id_str}"
+            # )
+
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
@@ -200,6 +207,14 @@ class TBar(AbstractRepairTool):
 
         tbar_logs_dir = join(self.tbar_root_dir, "logs")
         self.run_command("cp -r {0} {1}".format(tbar_logs_dir, self.dir_logs))
+
+        self.run_command(f"mkdir -p {self.dir_patch}")
+        self.run_command(
+            "bash -c 'cp -r $(find /output/TBar | grep .txt) {}'".format(
+                self.dir_patch
+            ),
+            dir_path=self.dir_output,
+        )
 
         # tbar_patches_dir = join(self.tbar_root_dir, "OUTPUT")
         # self.run_command("cp -r {0} {1}".format(tbar_patches_dir, self.dir_output))
@@ -264,8 +279,6 @@ class TBar(AbstractRepairTool):
 
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
-            self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
-            self.stats.time_stats.timestamp_end = log_lines[-1].replace("\n", "")
 
             for line in log_lines:
                 if "Patch Candidate" in line:

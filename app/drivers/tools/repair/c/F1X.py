@@ -70,6 +70,7 @@ class F1X(AbstractRepairTool):
         bug_id = str(bug_info[self.key_bug_id])
         fix_file = bug_info.get(self.key_fix_file, None)
         fix_location = bug_info.get(self.key_fix_loc, None)
+        fix_file_list = bug_info.get(self.key_fix_file_list, None)
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         timeout = str(repair_config_info[self.key_timeout])
@@ -83,16 +84,21 @@ class F1X(AbstractRepairTool):
         test_driver_path = join(self.dir_expr, "f1x-test")
         test_id_list = ""
         for test_id in failing_test_list:
-            test_id_list += test_id + " "
+            test_id_list += str(test_id) + " "
         if passing_test_list:
             for test_id in passing_test_list:
-                test_id_list += test_id + " "
+                test_id_list += str(test_id) + " "
 
         abs_path_buggy_file = None
         if fix_location or fix_file:
             abs_path_buggy_file = join(
                 self.dir_expr, "src", fix_location if fix_location else fix_file
             )
+        elif fix_file_list:
+            abs_path_buggy_file = ",".join(
+                f"{self.dir_expr}/src/{f}" for f in fix_file_list
+            )
+
         dir_patch = f"{self.dir_output}/patches"
         mkdir_command = "mkdir -p " + dir_patch
         self.run_command(mkdir_command, self.log_output_path, "/")

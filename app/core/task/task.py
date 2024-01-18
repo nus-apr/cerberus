@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import os
+import shutil
 import time
 from os.path import dirname
 from os.path import join
@@ -19,14 +20,18 @@ from app.core import values
 from app.core import writer
 from app.core.task import analyze
 from app.core.task import fuzz
+from app.core.task import localize
 from app.core.task import repair
+from app.core.task import select
 from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
+from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
+from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 from app.plugins import valkyrie
 
@@ -47,7 +52,13 @@ def generate_local_dir_info(
     dir_path = join(benchmark_name, subject_name, bug_name, "")
     dir_exp_local = join(values.dir_experiments, dir_path)
     dir_setup_local = join(values.dir_benchmark, dir_path)
+
+    dir_bugs_local = join(dir_setup_local, "bugs")
+    dir_localization_local = join(dir_setup_local, "localization")
     dir_patches_local = join(dir_setup_local, "patches")
+    dir_validation_local = join(dir_setup_local, "validation")
+    dir_selection_local = join(dir_setup_local, "selection")
+
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
     dir_logs_local = join(values.dir_logs, dir_path)
@@ -57,7 +68,11 @@ def generate_local_dir_info(
         dir_setup_local,
         dir_aux_local,
         dir_base_local,
+        dir_bugs_local,
         dir_patches_local,
+        dir_localization_local,
+        dir_validation_local,
+        dir_selection_local,
     ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
@@ -76,6 +91,10 @@ def generate_local_dir_info(
         "base": dir_base_local,
         "aux": dir_aux_local,
         "patches": dir_patches_local,
+        "localization": dir_localization_local,
+        "selection": dir_selection_local,
+        "validation": dir_validation_local,
+        "bugs": dir_bugs_local,
     }
 
 
@@ -334,6 +353,7 @@ def prepare_tool_experiment_image(
     repair_tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
+    bug_info: Dict[str, Any],
     tag: Optional[str],
 ):
     dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
@@ -352,15 +372,45 @@ def prepare_tool_experiment_image(
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
 
+        src_dir = bug_info.get(
+            definitions.KEY_SOURCE_DIRECTORY,
+            join(dir_info["container"]["experiment"], "src"),
+        )
+        if str(src_dir)[-1] == "/":
+            src_dir = src_dir[:-1]
+        pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
+        pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
+        if repair_tool.name.lower() in ["et", "grt5"]:
+            dock_file.write(
+                "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
+                "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
+                "-Dmaven.compiler.useIncrementalCompilation=false "
+                "-Dmaven.compiler.failOnError=true -Dsurefire.skipAfterFailureCount=1 "
+                "compiler:compile surefire:test "
+                f"-Drat.skip=true -f {pom_file}; return 0\n"
+            )
+        elif repair_tool.name.lower() in [
+            "aprer",
+            "repaircat",
+            "repairllama",
+            "arja",
+            "arja_e",
+            "tbar",
+        ]:
+            dock_file.write(
+                "RUN mvn clean compile test "
+                f"-Drat.skip=true -f {pom_file}; return 0\n"
+            )
+
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
+                "RUN bash {0} || sudo bash {0} \n".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
         if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
+                "RUN bash {0} || sudo bash {0} \n".format(
                     join(dir_info["container"]["setup"], "install_deps")
                 )
             )
@@ -411,8 +461,10 @@ def prepare_experiment(
 def prepare_experiment_tool(
     bug_image_id: Optional[str],
     repair_tool: AbstractTool,
+    task_profile: Dict[str, Any],
     dir_info: DirectoryInfo,
     image_name: str,
+    bug_info: Dict[str, Any],
     tag: Optional[str] = None,
 ):
     if values.use_container:
@@ -425,13 +477,22 @@ def prepare_experiment_tool(
             or values.rebuild_all
         ):
             return prepare_tool_experiment_image(
-                bug_image_id, repair_tool, dir_info, image_name, tag
+                bug_image_id, repair_tool, dir_info, image_name, bug_info, tag
             )
         else:
             img = container.get_image(image_name)
             if not img:
                 utilities.error_exit("Image exists yet was not found??")
             return cast(str, img.id)
+
+    dir_local_patch = dir_info["local"]["patches"]
+    config_patch_dir = task_profile.get(definitions.KEY_CONFIG_PATCH_DIR, None)
+    if config_patch_dir == "setup":
+        if not os.path.isdir(dir_local_patch):
+            os.makedirs(dir_local_patch)
+    else:
+        if os.path.isdir(dir_local_patch):
+            shutil.rmtree(dir_local_patch)
     return None
 
 
@@ -501,7 +562,6 @@ def run(
         benchmark.update_dir_info(dir_info)
 
         if values.use_container:
-
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a docker image name assigned: {}".format(
@@ -564,6 +624,26 @@ def run(
                 container_id,
                 benchmark.name,
             )
+        elif task_type == "localize":
+            localize.localize_all(
+                dir_info,
+                bug_info,
+                cast(AbstractLocalizeTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "select":
+            select.select_all(
+                dir_info,
+                bug_info,
+                cast(AbstractSelectTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "composite":
+            pass
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
 

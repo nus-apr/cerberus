@@ -87,8 +87,12 @@ class ET(AbstractRepairTool):
             "/root/workflow/info.json",
         )
 
+        timeout_h = str(repair_config_info[self.key_timeout])
+        command = 'bash -c "python3 /root/workflow/main.py"'
+        repair_command = f"timeout -k 5m {timeout_h}h {command} "
+
         ret = self.run_command(
-            'bash -c "python3 /root/workflow/main.py"',
+            repair_command,
             log_file_path="/root/workflow/log.txt",
         )
 

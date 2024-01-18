@@ -7,8 +7,8 @@ from os.path import join
 from shutil import copyfile
 
 from app.core import values
-from app.core.task.stats import BenchmarkStats
-from app.core.task.stats import ToolStats
+from app.core.task.stats.BenchmarkStats import BenchmarkStats
+from app.core.task.stats.ToolStats import ToolStats
 
 _logger_error: Logger
 _logger_command: Logger

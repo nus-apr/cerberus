@@ -22,26 +22,27 @@ class APRCompFuncJava(AbstractBenchmark):
                 bug_index, container_id, test_all
             )
         if not is_error:
-            if self.verify(bug_index, container_id):
-                self.emit_success("verified successfully")
-                if self.transform(bug_index, container_id):
-                    self.emit_success("transformation successful")
-                    if self.compress_dependencies(container_id, bug_index):
-                        self.emit_success("dependencies compressed successfully")
+            if self.compress_dependencies(container_id, bug_index):
+                self.emit_success("dependencies compressed successfully")
+                if self.verify(bug_index, container_id):
+                    self.emit_success("verified successfully")
+                    if self.transform(bug_index, container_id):
+                        self.emit_success("transformation successful")
                         if self.clean(bug_index, container_id):
                             self.emit_success("clean up successful")
                         else:
                             self.emit_error("clean up failed")
                             is_error = True
                     else:
-                        self.emit_error("dependency compression failed")
+                        self.emit_error("transformation failed")
                         is_error = True
                 else:
-                    self.emit_error("transformation failed")
+                    self.emit_error("verification failed")
                     is_error = True
             else:
-                self.emit_error("verification failed")
+                self.emit_error("dependency compression failed")
                 is_error = True
+
         return is_error
 
     def install_deps(self, bug_index, container_id):

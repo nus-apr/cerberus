@@ -2,6 +2,7 @@ import os
 import shutil
 import threading
 import time
+import traceback
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -30,15 +31,6 @@ def run_repair(
     fix_location = None
     fix_source_file = ""
     fix_line_numbers = []
-
-    dir_local_patch = dir_info["local"]["patches"]
-    config_patch_dir = repair_config_info.get(definitions.KEY_CONFIG_PATCH_DIR, None)
-    if config_patch_dir == "setup":
-        if not os.path.isdir(dir_local_patch):
-            os.makedirs(dir_local_patch)
-    else:
-        if os.path.isdir(dir_local_patch):
-            shutil.rmtree(dir_local_patch)
 
     if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
         fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
@@ -77,6 +69,7 @@ def run_repair(
     except Exception as ex:
         values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
         emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
 
 
 def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmark_name):
@@ -131,7 +124,7 @@ def setup_for_valkyrie(dir_info, container_id: Optional[str], bug_info, benchmar
     else:
         copy_command = "cp -rf {} {}".format(test_suite_path, dir_output_local)
         file_list = list()
-        for (dir_path, _, file_names) in os.walk(test_suite_path):
+        for dir_path, _, file_names in os.walk(test_suite_path):
             file_list += [os.path.join(dir_path, file) for file in file_names]
 
         for binary_file in file_list:
@@ -204,7 +197,7 @@ def repair_all(
             v_path_info,
             v_dir_info,
             v_repair_config_info,
-            repair_profile_id: str,
+            task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
         ):
@@ -212,7 +205,7 @@ def repair_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
             parallel.consume_patches(v_path_info, v_dir_info, v_repair_config_info)
 
@@ -250,7 +243,7 @@ def repair_all(
             repair_config_info,
             container_id: Optional[str],
             benchmark_name: str,
-            repair_profile_id: str,
+            task_profile_id: str,
             job_identifier: str,
             task_type: TaskType,
             final_status,
@@ -259,7 +252,7 @@ def repair_all(
             Pass over some fields as we are going into a new thread
             """
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(repair_profile_id)
+            values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
             run_repair(
                 dir_info,

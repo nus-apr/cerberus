@@ -6,13 +6,19 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 class APRCompEduC(AbstractBenchmark):
     def __init__(self):
-        self.name = os.path.basename(__file__)[:-3].lower()
+        self.name = str(os.path.basename(__file__)[:-3]).lower()
         super(APRCompEduC, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
         is_error = super(APRCompEduC, self).setup_experiment(
             bug_index, container_id, test_all
         )
+        if not is_error:
+            if self.verify(bug_index, container_id):
+                self.emit_success("verified successfully")
+            else:
+                self.emit_error("verification failed")
+                is_error = True
         return is_error
 
     def deploy(self, bug_index, container_id):
@@ -82,7 +88,22 @@ class APRCompEduC(AbstractBenchmark):
 
     def verify(self, bug_index, container_id):
         self.emit_normal("verify dev patch and test-oracle")
-        return True
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
+        self.log_verify_path = (
+            self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
+        )
+        time = datetime.now()
+        fix_file = str(experiment_item[self.key_fix_file])
+        command_str = f"bash verify_dev {fix_file}"
+        status = self.run_command(
+            container_id, command_str, self.log_verify_path, self.dir_setup
+        )
+
+        self.emit_debug(
+            "verify took {} second(s)".format((datetime.now() - time).total_seconds())
+        )
+        return status == 0
 
     def transform(self, bug_index, container_id):
         self.emit_normal("transform fix-file")

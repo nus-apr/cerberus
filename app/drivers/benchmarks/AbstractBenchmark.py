@@ -15,7 +15,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
-from app.core.task.stats import BenchmarkStats
+from app.core.task.stats.BenchmarkStats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.AbstractDriver import AbstractDriver
@@ -45,6 +45,7 @@ class AbstractBenchmark(AbstractDriver):
     list_artifact_files: List[str] = []
     base_dir_experiment = values.container_base_experiment
     key_bug_id = definitions.KEY_BUG_ID
+    key_fix_file = definitions.KEY_FIX_FILE
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
@@ -58,8 +59,10 @@ class AbstractBenchmark(AbstractDriver):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_commit_buggy = definitions.KEY_COMMIT_BUGGY
     key_commit_fix = definitions.KEY_COMMIT_FIX
+    key_commit_checkout = definitions.KEY_COMMIT_CHECKOUT
     key_test_timeout = definitions.KEY_TEST_TIMEOUT
     key_subject = definitions.KEY_SUBJECT
+    key_language = definitions.KEY_LANGUAGE
     has_standard_name: bool = False
 
     def __init__(self):
@@ -123,12 +126,23 @@ class AbstractBenchmark(AbstractDriver):
         with open(meta_file_path, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
-                return json_data
+                return AbstractBenchmark.process_metadata(json_data)
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
                 utilities.error_exit(
                     "Could not load meta-data from {}".format(meta_file_path)
                 )
+
+    @staticmethod
+    def process_metadata(data):
+        for experiment_item in data:
+            passing_list = experiment_item[AbstractBenchmark.key_passing_tests]
+            failing_list = experiment_item[AbstractBenchmark.key_failing_tests]
+            passing_list_str = [f"{x}" for x in passing_list]
+            failing_list_str = [f"{x}" for x in failing_list]
+            experiment_item[AbstractBenchmark.key_passing_tests] = passing_list_str
+            experiment_item[AbstractBenchmark.key_failing_tests] = failing_list_str
+        return data
 
     @staticmethod
     def check_benchmark_folder(name):
@@ -164,7 +178,7 @@ class AbstractBenchmark(AbstractDriver):
         with open(meta_file_loc, "r") as in_file:
             json_data = json.load(in_file)
             if json_data:
-                self.experiment_subjects = json_data
+                self.experiment_subjects = AbstractBenchmark.process_metadata(json_data)
                 self.size = len(json_data)
             else:
                 values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
@@ -234,15 +248,16 @@ class AbstractBenchmark(AbstractDriver):
         """
         container_id = self.setup_container(bug_index, self.image_name, cpu, gpu)
         is_error = self.setup_experiment(bug_index, container_id, test_all)
-        if not container_id:
-            self.error_exit("could not setup container correctly")
         if is_error:
             self.emit_error("setting up experiment failed")
-        container_obj: Any = container.get_container(container_id)
-        container_obj.commit(exp_image_name)
-        container.stop_container(container_id, 5)
-        if not values.debug:
-            container.remove_container(container_id)
+        if not container_id:
+            self.error_exit("could not setup container correctly")
+        else:
+            container_obj: Any = container.get_container(container_id)
+            container_obj.commit(exp_image_name)
+            container.stop_container(container_id, 5)
+            if not values.debug:
+                container.remove_container(container_id)
 
     def setup_container(
         self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]

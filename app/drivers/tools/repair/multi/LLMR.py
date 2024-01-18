@@ -28,23 +28,39 @@ class LLMR(AbstractRepairTool):
         if model == "":
             model = "gpt-4"
 
-        tests = ",".join(
-            [*bug_info[self.key_failing_tests], *bug_info[self.key_passing_tests]]
-        )
+        passing_tests = ",".join(bug_info[self.key_passing_tests])
+        failing_tests = ",".join(bug_info[self.key_failing_tests])
+
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
-        file = bug_info[self.key_fix_file]
+        file = ""
+        if self.key_fix_file in bug_info:
+            file = bug_info[self.key_fix_file]
+            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
+                file = f"src/main/java/{file.replace('.', '/')}.java"
+            self.emit_debug("LLMR will work on file {}".format(file))
+        fl = ""
 
-        if bug_info[self.key_language] == "java" and not file.endswith(".java"):
-            file = f"src/main/java/{file.replace('.', '/')}.java"
-
-        self.emit_debug("LLMR will work on file {}".format(file))
+        if repair_config_info["fault_location"] == "auto":
+            fl = "-do-fl"
+        elif repair_config_info["fault_location"] == "line":
+            fl_info = list(
+                map(
+                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1\n",
+                    bug_info[self.key_fix_lines],
+                )
+            )
+            self.emit_debug(f"File localization info: {fl_info}")
+            fl_path = join(self.dir_output, "fl_data.txt")
+            self.write_file(fl_info, fl_path)
+            fl = f"-fl-data {fl_path}"
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py -model {model} -file {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
             timeout_h=timeout_h,
             patch_count=5,
+            project_path=join(self.dir_expr, "src"),
             build_script="-build {}".format(
                 join(self.dir_setup, bug_info[self.key_build_script])
             )
@@ -55,9 +71,17 @@ class LLMR(AbstractRepairTool):
             else "",
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
-            file=file,
+            file="-file {}".format(file) if file else "",
             model=model,
-            tests="-tests {}".format(tests) if tests != "" else " ",
+            passing_tests="-passing-tests {}".format(passing_tests)
+            if passing_tests != ""
+            else " ",
+            failing_tests="-failing-tests {}".format(failing_tests)
+            if failing_tests != ""
+            else " ",
+            binary_path="-binary-loc {}".format(bug_info[self.key_bin_path])
+            if self.key_bin_path in bug_info
+            else " ",
             debug="-d" if self.is_debug else "",
             reference_file="-reference {}".format(
                 bug_info[definitions.KEY_REFERENCE_FILE]
@@ -72,6 +96,7 @@ class LLMR(AbstractRepairTool):
             language="-lang {}".format(bug_info[self.key_language])
             if self.key_language in bug_info
             else "",
+            fl=fl,
         )
         status = self.run_command(
             llmr_command, self.log_output_path, join(self.dir_expr, "src")
@@ -89,6 +114,11 @@ class LLMR(AbstractRepairTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
+        # remove traces that are not necessary
+        remove_command = (
+            f"rm -rf {self.dir_output}/failing_traces {self.dir_output}/passing_traces "
+        )
+        self.exec_command(remove_command)
         super().save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):
@@ -112,7 +142,7 @@ class LLMR(AbstractRepairTool):
         self.emit_normal("reading output")
 
         # count number of patch files
-        list_output_dir = self.list_dir(self.dir_output)
+        list_output_dir = self.list_dir(self.dir_patch)
         self.stats.patch_stats.generated = len(
             [name for name in list_output_dir if ".patch" in name]
         )
@@ -130,9 +160,5 @@ class LLMR(AbstractRepairTool):
             for line in log_lines:
                 if re.match("Patch .* is Plausible", line):
                     self.stats.patch_stats.plausible += 1
-
-        self.stats.patch_stats.generated = len(
-            self.list_dir(self.dir_output, "patched_*")
-        )
 
         return self.stats

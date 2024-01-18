@@ -7,7 +7,6 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Darjeeling(AbstractRepairTool):
-
     CONFIG_C_TEMPLATE = """
 algorithm:
   type: exhaustive
@@ -30,6 +29,8 @@ program:
     - command: ./{build_script}
       directory: {dir_setup}
     steps-for-coverage:
+    - command: make clean
+      directory: {dir_src}
     - command: CFLAGS="--coverage " CXXFLAGS="--coverage "  LDFLAGS="--coverage " ./{config_script}
       directory: {dir_setup}
     - command: CFLAGS="--coverage " CXXFLAGS="--coverage " LDFLAGS="--coverage " ./{build_script}
@@ -47,7 +48,7 @@ program:
 resource-limits:
   candidates: 100000
 seed: 0
-threads: 1
+threads: 3
 transformations:
   schemas:
   - type: delete-statement
@@ -59,7 +60,7 @@ version: 1.0
     CONFIG_PYTHON_TEMPLATE = """
 version: '1.0'
 seed: 0
-threads: 1
+threads: 3
 localization:
   type: spectrum
   metric: tarantula
@@ -144,6 +145,8 @@ resource-limits:
         elif p_lang.lower() == "python":
             test_cases_str = ""
             for t in test_list:
+                if ".py" not in t:
+                    t = f"{t}.py"
                 test_cases_str += f"    - {t}\n"
             config_content = self.CONFIG_PYTHON_TEMPLATE.format(
                 test_script=t_script,
@@ -166,10 +169,12 @@ resource-limits:
             [
                 f"FROM {docker_image_tag}\n",
                 "USER root\n",
-                "RUN apt update; apt install -y make g++\n",
-                "RUN pip3 install coverage pytest pytest-cov\n",
+                "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
+                "RUN pip3 install coverage pytest pytest-cov gcovr\n",
                 f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
                 "WORKDIR /experiment\n",
+                'ENTRYPOINT ["/bin/sh", "-c"]\n',
+                'CMD ["bash"]',
             ],
             dockerfile_path,
         )
@@ -206,19 +211,17 @@ resource-limits:
         benchmark_name = bug_info.get(self.key_benchmark)
         subject_name = bug_info.get(self.key_subject)
         bug_id = str(bug_info[self.key_bug_id])
-        docker_tag_id = (
-            f"{self.name}-"
-            f"{benchmark_name.replace('-', '_')}"
-            f"-{subject_name.replace('-', '_')}"
-            f"-{bug_id.replace('-', '_')}"
-        ).lower()
+        docker_tag_id = (f"{benchmark_name}" f"-{subject_name}" f"-{bug_id}").lower()
         test_list = bug_info.get(self.key_passing_tests) + bug_info.get(
             self.key_failing_tests
         )
         self.build_runtime_docker_image(docker_tag_id)
         fix_files = []
-        if self.key_fix_file in bug_info:
+        if self.key_fix_file_list in bug_info:
+            fix_files = bug_info[self.key_fix_file_list]
+        elif self.key_fix_file in bug_info:
             fix_files = [bug_info[self.key_fix_file]]
+
         self.generate_repair_config(
             c_script=config_script,
             b_script=build_script,

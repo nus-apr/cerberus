@@ -36,7 +36,10 @@ class RepairLlama(AbstractRepairTool):
             f"--dir_test_bin {dir_test_bin} "
             f"--patch_directory {patch_directory}"
         )
+
+        timeout_h = str(repair_config_info[self.key_timeout])
+        repair_command = f"timeout -k 5m {timeout_h}h {command} "
         self.timestamp_log_start()
-        status = self.run_command(command, log_file_path=self.log_output_path)
+        status = self.run_command(repair_command, log_file_path=self.log_output_path)
         self.process_status(status)
         self.timestamp_log_end()

@@ -1,7 +1,7 @@
 import os
 from typing import List
 
-from app.core.task.stats import ToolStats
+from app.core.task.stats.ToolStats import ToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.AbstractTool import AbstractTool
 

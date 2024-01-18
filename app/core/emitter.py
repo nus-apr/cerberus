@@ -12,9 +12,13 @@ from app.core import logger
 from app.core import values
 from app.ui import ui
 
-stty_info = os.popen("stty size", "r")
-rows, columns = tuple(map(int, stty_info.read().split()))
-stty_info.close()
+try:
+    stty_info = os.popen("stty size", "r")
+    rows, columns = tuple(map(int, stty_info.read().split()))
+    stty_info.close()
+except Exception as e:
+    rows, columns = 200, 100
+    rich.print("Could not get terminal size: {}".format(e))
 
 
 class COLOR(Enum):
@@ -318,7 +322,7 @@ def emit_help():
     )
     write(
         "\t"
-        + definitions.ARG_REPAIR_PROFILE_ID_LIST.ljust(max_length)
+        + definitions.ARG_TASK_PROFILE_ID_LIST.ljust(max_length)
         + "\t| "
         + "specify a different profile using config ID",
         COLOR.WHITE,
