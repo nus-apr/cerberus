@@ -63,10 +63,12 @@ class LLMR(AbstractRepairTool):
             fl_path = join(self.dir_output, "fl_data.txt")
             self.write_file(fl_info, fl_path)
             fl = f"-fl-data {fl_path}"
+        elif repair_config_info["fault_location"] == "file":
+            fl = "-file {}".format(file) if file else ""
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -80,7 +82,6 @@ class LLMR(AbstractRepairTool):
             else "",
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
-            file="-file {}".format(file) if file else "",
             model=model,
             passing_tests="-passing-tests {}".format(passing_tests)
             if passing_tests != ""
