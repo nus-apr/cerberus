@@ -1,10 +1,10 @@
+import json
 import os
 import re
+from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
-from os.path import join
-import json
 
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 
@@ -16,7 +16,9 @@ class JoernSBFL(AbstractLocalizeTool):
         self.image_name = "wolffdy/joern-sbfl-crash-analysis:latest"
         self.id = ""
 
-    def run_localization(self, bug_info : Dict[str, Any], localization_config_info  : Dict[str, Any]):
+    def run_localization(
+        self, bug_info: Dict[str, Any], localization_config_info: Dict[str, Any]
+    ):
         super(JoernSBFL, self).run_localization(bug_info, localization_config_info)
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
