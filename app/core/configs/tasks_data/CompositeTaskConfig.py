@@ -1,19 +1,24 @@
 from typing import Any
 from typing import cast
 from typing import Dict
+from typing import List
 from typing import Optional
+from typing import Tuple
+from typing import Union
 
 from app.core.configs.general.GeneralConfig import GeneralConfig
 from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.TaskProfile import TaskProfile
-from app.core.configs.tasks_data.TaskDefaultConfig import TaskDefaultConfig
+from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
+from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.TaskType import TaskType
 
 
-class TaskConfig(TaskDefaultConfig):
+class CompositeTaskConfig(TaskConfig):
     def __init__(
         self,
+        composite_sequence: CompositeSequence,
         task_type: TaskType,
         compact_results: bool,
         dump_patches: bool,
@@ -29,9 +34,9 @@ class TaskConfig(TaskDefaultConfig):
         use_gpu: bool,
         use_purge: bool,
         runs: int = 1,
-        **kwargs
     ):
         super().__init__(
+            task_type,
             compact_results,
             dump_patches,
             docker_host,
@@ -48,15 +53,4 @@ class TaskConfig(TaskDefaultConfig):
             runs,
         )
 
-        if any(kwargs):
-            print("Dictionary is not empty, please check whether this is okay behavior")
-            print(kwargs)
-
-        self.task_type = cast(TaskType, task_type)
-        self.task_profile: Optional[TaskProfile] = None
-        self.container_profile: Optional[ContainerProfile] = None
-        self.bug_id: Optional[str] = None
-        self.benchmark_name: Optional[str] = None
-        self.tool_config: Optional[ToolConfig] = None
-        self.general_config: Optional[GeneralConfig] = None
-        self.experiment_info: Dict[str, Any] = {}
+        self.composite_sequence = composite_sequence

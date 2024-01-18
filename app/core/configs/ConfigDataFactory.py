@@ -1,5 +1,7 @@
 import multiprocessing
+from typing import cast
 from typing import List
+from typing import Type
 
 from app.core import utilities
 from app.core import values
@@ -10,6 +12,7 @@ from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.ProfilesConfig import ProfilesConfig
 from app.core.configs.profiles.TaskProfile import TaskProfile
 from app.core.configs.tasks_data.BenchmarkConfig import BenchmarkConfig
+from app.core.configs.tasks_data.CompositeTaskConfig import CompositeTaskConfig
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configs.tasks_data.TasksChunksConfig import TasksChunksConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
@@ -106,7 +109,16 @@ class ConfigDataFactory:
         ]:
             # overwrite task config if necessary
             tasks_chunk_config_dict = {**task_default_config, **tasks_chunk_config_dict}
-            task_config = TaskConfig(
+
+            task_constructor = TaskConfig
+
+            if tasks_chunk_config_dict[ConfigFieldsEnum.TYPE.value] == "composite":
+                task_constructor = cast(Type[TaskConfig], CompositeTaskConfig)
+
+            task_config = task_constructor(
+                composite_sequence=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.COMPOSITE_SEQUENCE.value, {}
+                ),
                 task_type=tasks_chunk_config_dict[ConfigFieldsEnum.TYPE.value],
                 compact_results=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.COMPACT_RESULTS.value, values.compact_results

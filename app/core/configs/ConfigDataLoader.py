@@ -25,6 +25,7 @@ class ConfigDataLoader:
         if len(errors) != 0:
             for error in errors:
                 print(error.message)
+                print(error.path)
             raise ValueError("Config is not valid.")
 
     def get_config_data(self):
