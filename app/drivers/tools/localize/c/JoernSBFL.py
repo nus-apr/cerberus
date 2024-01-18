@@ -39,9 +39,11 @@ class JoernSBFL(AbstractLocalizeTool):
         self.run_command(
             f"""bash -c '{os.path.join(self.dir_setup, bug_info["build_script"])}'""",
         )
-        self.run_command(
-            f"""echo 'nameserver 8.8.8.8' > /etc/resolv.conf""",
-        )
+        # For using with network disabled, <<does not work>> but will work if this
+        #   command is run manually in the container
+        # self.run_command(
+        #     f"""echo 'nameserver 8.8.8.8' > /etc/resolv.conf""",
+        # )
 
         self.timestamp_log_start()
 
