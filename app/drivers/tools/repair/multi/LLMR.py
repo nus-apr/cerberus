@@ -57,7 +57,7 @@ class LLMR(AbstractRepairTool):
                     file = f"src/main/java/{file.replace('.', '/')}.java"
                 locations = location[self.key_fix_lines]
                 for line in locations:
-                    fl_info.append(f"{file}::{line},1")
+                    fl_info.append(f"{file}::{line},1\n")
 
             self.emit_debug(f"File localization info: {fl_info}")
             fl_path = join(self.dir_output, "fl_data.txt")
