@@ -22,7 +22,7 @@ class ET(AbstractRepairTool):
         # return #####
 
         assert bug_info["language"] == "java"
-        assert len(bug_info["failing_test"]) > 0
+        assert len(bug_info[self.key_failing_tests]) > 0
 
         """
             self.dir_logs - directory to store logs
@@ -39,7 +39,7 @@ class ET(AbstractRepairTool):
 
         test_failed = []
         test_failed_set = set()
-        for t in bug_info["failing_test"]:
+        for t in bug_info[self.key_failing_tests]:
             t = t.partition("::")[0]
             if t not in test_failed_set:
                 test_failed_set.add(t)
@@ -47,7 +47,7 @@ class ET(AbstractRepairTool):
 
         test_passed = []
         test_passed_set = set()
-        for t in bug_info["passing_test"]:
+        for t in bug_info[self.key_passing_tests]:
             t = t.partition("::")[0]
             if t not in test_failed_set and t not in test_passed_set:
                 test_passed_set.add(t)

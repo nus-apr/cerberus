@@ -22,8 +22,8 @@ class Darjeeling(AbstractRepairTool):
         dir_c_src = join(self.dir_expr, "src", bug_info["source_directory"])
         fix_file = join(self.dir_expr, "src", bug_info["fix_file"])
         bug_id = join(self.dir_expr, "src", bug_info["bug_id"])
-        passing_test_list = join(self.dir_expr, "src", bug_info["passing_tests"])
-        failing_test_list = join(self.dir_expr, "src", bug_info["failing_tests"])
+        passing_test_list = join(self.dir_expr, "src", bug_info[self.key_passing_tests])
+        failing_test_list = join(self.dir_expr, "src", bug_info[self.key_failing_tests])
         patch_directory = join(self.dir_output, "patches")
 
         # execute repair tool
