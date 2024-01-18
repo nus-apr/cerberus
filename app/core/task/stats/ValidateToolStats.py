@@ -12,6 +12,8 @@ class ValidateToolStats(ToolStats):
 
     def __init__(self):
         self.patch_stats = PatchStats()
+        self.bug_info = {}
+        self.config_info = {}
         super(ValidateToolStats, self).__init__()
 
     def get_dict(self):

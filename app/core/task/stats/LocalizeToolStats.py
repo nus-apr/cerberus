@@ -36,6 +36,8 @@ class LocalizeToolStats(ToolStats):
 
     def __init__(self):
         self.fix_loc_stats = FixLocStats()
+        self.bug_info = {}
+        self.config_info = {}
         super(LocalizeToolStats, self).__init__()
 
     def get_dict(self):

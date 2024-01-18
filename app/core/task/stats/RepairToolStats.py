@@ -16,6 +16,8 @@ class RepairToolStats(ToolStats):
 
     def __init__(self):
         self.patch_stats = PatchStats()
+        self.bug_info = {}
+        self.config_info = {}
         super(RepairToolStats, self).__init__()
 
     def get_dict(self):

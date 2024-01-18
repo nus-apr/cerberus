@@ -30,6 +30,8 @@ class SelectToolStats(ToolStats):
 
     def __init__(self):
         self.patch_stats = SelectionStats()
+        self.bug_info = {}
+        self.config_info = {}
         super(SelectToolStats, self).__init__()
 
     def get_dict(self):
