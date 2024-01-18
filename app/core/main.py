@@ -1,3 +1,4 @@
+import getpass
 import multiprocessing
 import signal
 import sys
@@ -149,6 +150,15 @@ def main():
     utilities.create_output_directories()
     values.gpus = utilities.get_gpu_count()
     logger.create_log_files()
+
+    return_code, (output, _) = utilities.run_command(
+        f"groups {getpass.getuser()} | grep {definitions.GROUP_NAME}"
+    )
+    if return_code != 0 or not output or output.decode() == "":
+        utilities.error_exit(
+            f"User {getpass.getuser()} is not part of {definitions.GROUP_NAME} group or group does not exist. Please this is setup correctly"
+        )
+
     # TODO Do overwrite magic
     config_obj = bootstrap(parsed_args)
     try:

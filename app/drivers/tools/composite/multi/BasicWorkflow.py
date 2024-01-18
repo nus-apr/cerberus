@@ -181,12 +181,23 @@ class BasicWorkflow(AbstractCompositeTool):
                 )
         elif "fuzz" in tool_map:
             for tool in tool_map["fuzz"]:
-                if tool == "aflplusplus":
-                    os.makedirs(join(self.root_dir, "default"))
-                    os.makedirs(join(self.root_dir, "default", "crashes"))
-                    os.makedirs(join(self.root_dir, "default", "queue"))
                 self.pool.apply_async(
                     self.run_fuzz,
+                    [
+                        dir_info,
+                        benchmark,
+                        bug_info,
+                        composite_config_info,
+                        container_config_info,
+                        run_index,
+                        hash,
+                        tool,
+                    ],
+                )
+        elif "repair" in tool_map:
+            for tool in tool_map["repair"]:
+                self.pool.apply_async(
+                    self.run_repair,
                     [
                         dir_info,
                         benchmark,
@@ -228,6 +239,50 @@ class BasicWorkflow(AbstractCompositeTool):
         tool: AbstractTool,
     ):
         values.task_type.set("analyze")
+        tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
+        image_name = create_task_image_identifier(
+            benchmark,
+            tool,
+            bug_info,
+            tool_tag,
+        )
+
+        key = create_task_identifier(
+            benchmark,
+            composite_config_info,
+            container_config_info,
+            bug_info,
+            tool,
+            str(run_index),
+            tool_tag,
+        )
+
+        task.run(
+            benchmark,
+            tool,
+            bug_info,
+            composite_config_info,
+            container_config_info,
+            key,
+            composite_config_info[self.key_cpus],
+            composite_config_info[self.key_gpus],
+            run_index,
+            image_name,
+            hash,
+        )
+
+    def run_repair(
+        self,
+        dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
+        bug_info,  # Entry from  meta-data.json
+        composite_config_info,  # Task Profile
+        container_config_info,  # Container Profile
+        run_index,  # Specific iteration of the workflow run
+        hash: Any,  # Hash, to be used for unique locations
+        tool: AbstractTool,
+    ):
+        values.task_type.set("repair")
         tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
         image_name = create_task_image_identifier(
             benchmark,

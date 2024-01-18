@@ -80,6 +80,29 @@ def execute_command(command: str, show_output=True, env=dict(), directory=None):
     return int(process.returncode)
 
 
+def run_command(command: str, show_output=True, env=dict(), directory=None):
+    # Print executed command and execute it in console
+    command = command.encode().decode("ascii", "ignore")
+    if not directory:
+        directory = os.getcwd()
+        print_command = command
+    else:
+        print_command = "[{}] {}".format(directory, command)
+    emitter.command(print_command)
+    command = "{{ {} ;}} 2> {}".format(command, values.file_error_log)
+    if not show_output:
+        command += " > /dev/null"
+    # print(command)
+    new_env = os.environ.copy()
+    new_env.update(env)
+    process = subprocess.Popen(
+        [command], stdout=subprocess.PIPE, shell=True, env=new_env, cwd=directory
+    )
+    (output, error) = process.communicate()
+    # out is the output of the command, and err is the exit value
+    return int(process.returncode), (output, error)
+
+
 def error_exit(*arg_list: Any) -> NoReturn:
     emitter.error(f"Task {values.task_type.get()} failed")
     notification.error_exit()

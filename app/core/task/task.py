@@ -404,6 +404,28 @@ def prepare_tool_experiment_image(
                 f"-Drat.skip=true -f {pom_file}; return 0\n"
             )
 
+        res, (output, error) = utilities.run_command(
+            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+        )
+        if not output or output.decode() == "":
+            utilities.error_exit(
+                f"Cannot the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+            )
+
+        group_id = output.decode().strip()
+
+        emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
+
+        # Create a special group to ensure that files are accessible
+        dock_file.write(
+            f"RUN bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}'\n"
+        )
+
+        # Make all user's primary group to be our special group
+        dock_file.write(
+            f'RUN bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "  \n'
+        )
+
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
                 "RUN bash {0} || sudo bash {0} \n".format(
