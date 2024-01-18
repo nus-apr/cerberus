@@ -36,8 +36,10 @@ class Refactory(AbstractRepairTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        self.run_command("mkdir /output")
-        self.run_command("bash -c 'cp {}/src/*.csv /output/'".format(self.dir_expr))
+        self.run_command("mkdir {}".format(self.dir_output))
+        self.run_command(
+            "bash -c 'cp {}/src/*.csv {}/'".format(self.dir_expr, self.dir_output)
+        )
         super(Refactory, self).save_artifacts(dir_info)
 
     def analyse_output(self, dir_info, bug_id, fail_list):

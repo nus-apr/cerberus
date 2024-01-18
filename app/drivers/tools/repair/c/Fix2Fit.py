@@ -149,7 +149,7 @@ class Fix2Fit(AbstractRepairTool):
 
     def save_artifacts(self, dir_info):
         dir_patch = join(self.dir_expr, "patches")
-        self.run_command("mkdir /output")
+        self.run_command("mkdir {}".format(self.dir_output))
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artifacts(dir_info)
         return

@@ -96,7 +96,6 @@ class Angelix(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info):
-
         # dir_artifact = dir_info["artifact"]
         # execute_command("rm /tmp/find_dir")
         # dir_patch = join(self.dir_expr, "patches")
@@ -107,7 +106,7 @@ class Angelix(AbstractRepairTool):
         #
         # dir_patch_local = dir_output + "/patches"
         if self.container_id:
-            container.fix_permissions(self.container_id, "/output")
+            container.fix_permissions(self.container_id, self.dir_output)
         # if os.path.isdir(dir_patch_local):
         #     output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".patch" in f]
         #     for f in output_patch_list:
