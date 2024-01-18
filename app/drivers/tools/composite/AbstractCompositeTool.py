@@ -14,6 +14,7 @@ from app.core.task.stats.CompositeToolStats import CompositeToolStats
 from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import error_exit
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -29,6 +30,8 @@ class AbstractCompositeTool(AbstractTool):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
+    key_composite_sequence = definitions.KEY_COMPOSITE_SEQUENCE
+
     stats: CompositeToolStats
 
     def __init__(self, tool_name):
@@ -73,15 +76,14 @@ class AbstractCompositeTool(AbstractTool):
 
         return self.stats
 
-    @abc.abstractmethod
-    def setup_workflow(self, composite_sequence: CompositeSequence):
-        pass
-
     def run_composite(
         self,
         dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
         bug_info: Dict[str, Any],
         composite_config_info: Dict[str, Any],
+        container_config_info: Dict[str, Any],
+        run_index: int,
     ) -> None:
         self.emit_normal("validating experiment subject")
         utilities.check_space()

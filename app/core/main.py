@@ -322,5 +322,6 @@ def process_tasks(tasks: TaskList):
                 key,
                 cpus,
                 gpus,
+                run_index,
                 image_name,
             )
