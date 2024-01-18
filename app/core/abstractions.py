@@ -2,8 +2,8 @@ import json
 import os
 import pathlib
 from typing import Any
-from typing import List
 from typing import Optional
+from typing import Sequence
 
 from app.core import container
 
@@ -26,7 +26,7 @@ def read_json(container_id: Optional[str], file_path: str, encoding="utf-8"):
     return json_data
 
 
-def append_file(container_id: Optional[str], content: List[str], file_path: str):
+def append_file(container_id: Optional[str], content: Sequence[str], file_path: str):
     if container_id:
         container.append_file(container_id, file_path, content)
     else:
@@ -35,7 +35,7 @@ def append_file(container_id: Optional[str], content: List[str], file_path: str)
                 f.write(line)
 
 
-def write_file(container_id: Optional[str], content: List[str], file_path: str):
+def write_file(container_id: Optional[str], content: Sequence[str], file_path: str):
     if container_id:
         container.write_file(container_id, file_path, content)
     else:

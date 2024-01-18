@@ -6,7 +6,7 @@ from app.core.task.stats.ToolStats import ToolStats
 
 class CompositeStats:
     def get_dict(self):
-        summary = {}
+        summary: Dict[Any, Any] = {}
         return summary
 
 

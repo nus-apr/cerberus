@@ -80,8 +80,9 @@ class Brafar(AbstractRepairTool):
                     self.stats.error_stats.is_error = True
                 if line.startswith("The repair result is:"):
                     if "True" in line:
-                        self.stats.patch_stats.plausible = 1
+                        self.stats.patch_stats.plausible += 1
                     elif "False" in line:
-                        self.stats.patch_stats.implausible = 1
+                        self.stats.patch_stats.generated += 1
+                        self.stats.patch_stats.enumerations += 1
 
         return self.stats

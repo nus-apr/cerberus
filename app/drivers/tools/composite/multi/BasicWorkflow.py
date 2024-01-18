@@ -612,6 +612,9 @@ class BasicWorkflow(AbstractCompositeTool):
                 if self.observer.is_alive():
                     self.observer.stop()
                 break
+            elif isinstance(event, str):
+                self.emit_debug(f"Got string {event}. Why?")
+                continue
             if self.pre_process_event(event):
                 # self.emit_debug("Got message {}".format(event))
                 try:

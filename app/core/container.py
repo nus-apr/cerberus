@@ -5,6 +5,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 from typing import Tuple
 from typing import Union
 
@@ -536,7 +537,7 @@ def copy_file_to_container(container_id: str, from_path: str, to_path: str):
     utilities.execute_command(copy_command)
 
 
-def write_file(container_id: str, file_path: str, content: List[str]):
+def write_file(container_id: str, file_path: str, content: Sequence[str]):
     tmp_file_path = os.path.join(
         "/tmp", "write-file-{}".format(random.randint(0, 1000000))
     )
@@ -564,7 +565,7 @@ def read_file(container_id: str, file_path: str, encoding="utf-8"):
     return file_content
 
 
-def append_file(container_id: str, file_path: str, content: List[str]):
+def append_file(container_id: str, file_path: str, content: Sequence[str]):
     tmp_file_path = os.path.join(
         "/tmp", "append-file-{}".format(random.randint(0, 1000000))
     )

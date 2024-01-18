@@ -7,6 +7,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
 
 from app.core import abstractions
 from app.core import container
@@ -380,10 +381,10 @@ class AbstractTool(AbstractDriver):
     def read_json(self, file_path: str, encoding="utf-8"):
         return abstractions.read_json(self.container_id, file_path, encoding)
 
-    def append_file(self, content: List[str], file_path: str):
+    def append_file(self, content: Sequence[str], file_path: str):
         return abstractions.append_file(self.container_id, content, file_path)
 
-    def write_file(self, content: List[str], file_path: str):
+    def write_file(self, content: Sequence[str], file_path: str):
         return abstractions.write_file(self.container_id, content, file_path)
 
     def write_json(self, data, file_path: str):

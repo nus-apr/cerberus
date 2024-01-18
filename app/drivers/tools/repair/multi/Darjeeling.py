@@ -158,7 +158,7 @@ resource-limits:
             )
         else:
             self.error_exit(f"unsupported programming language {p_lang}")
-        self.write_file(config_content, config_file_path)
+        self.write_file([config_content], config_file_path)
         return config_file_path
 
     def generate_runtime_dockerfile(self, docker_image_tag):

@@ -8,7 +8,6 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class EvoRepair(AbstractRepairTool):
-
     evorepair_home = "/opt/EvoRepair"
 
     def __init__(self):
@@ -54,7 +53,7 @@ class EvoRepair(AbstractRepairTool):
         localize_config["fix-locations"] = [bug_info[self.key_fix_loc]]
         config_object["localization"] = localize_config
 
-        self.write_file(json.dumps(config_object), repair_config_path)
+        self.write_file([json.dumps(config_object)], repair_config_path)
         return repair_config_path
 
     def run_repair(self, bug_info, repair_config_info):
