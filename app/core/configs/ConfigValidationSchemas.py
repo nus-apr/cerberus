@@ -259,6 +259,10 @@ composite_sequence_schema = {
     "properties": {
         ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": {"type": "string"}},
         ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.CRASH_ANALYZE.value: {
+            "type": "array",
+            "items": {"type": "string"},
+        },
         ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": {"type": "string"}},
         ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": {"type": "string"}},
         ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},

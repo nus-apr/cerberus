@@ -16,7 +16,6 @@ class AFLPlusPlus(AbstractFuzzTool):
         output of the tool is logged at self.log_output_path
         information required to be extracted are:
         """
-
         return self.stats
 
     def run_fuzz(self, bug_info, fuzz_config_info):

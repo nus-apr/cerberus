@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ConfigFieldsEnum(Enum):
-
     # general section
     GENERAL = "general"
     UI_MODE = "enable_ui"
@@ -56,6 +55,7 @@ class ConfigFieldsEnum(Enum):
     COMPOSITE_SEQUENCE = "composite-sequence"
     FUZZ = "fuzz"
     ANALYZE = "analyze"
+    CRASH_ANALYZE = "crash-analyze"
     LOCALIZE = "localize"
     REPAIR = "repair"
     SELECT = "select"
