@@ -372,7 +372,10 @@ def prepare_tool_experiment_image(
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
         dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
 
-        src_dir = bug_info[definitions.KEY_SOURCE_DIRECTORY]
+        src_dir = bug_info.get(
+            definitions.KEY_SOURCE_DIRECTORY,
+            join(dir_info["container"]["experiment"], "src"),
+        )
         if str(src_dir)[-1] == "/":
             src_dir = src_dir[:-1]
         pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
@@ -401,13 +404,13 @@ def prepare_tool_experiment_image(
 
         if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
+                "RUN bash {0} || sudo bash {0} \n".format(
                     join(dir_info["container"]["setup"], "deps.sh")
                 )
             )
         if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
             dock_file.write(
-                "RUN bash {0} || sudo bash {0} ; return 0\n".format(
+                "RUN bash {0} || sudo bash {0} \n".format(
                     join(dir_info["container"]["setup"], "install_deps")
                 )
             )
