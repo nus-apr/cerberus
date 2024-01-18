@@ -8,7 +8,7 @@ class Jazzer(AbstractFuzzTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "jazzer"
+        self.image_name = "crhf2docker/jazzer"
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
