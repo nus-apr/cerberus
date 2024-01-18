@@ -655,6 +655,7 @@ def run(
                 container_id,
                 benchmark,
                 run_index,
+                hash.hexdigest()[:8],
             )
         else:
             utilities.error_exit(f"Unknown task type: {task_type}")
