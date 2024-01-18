@@ -58,6 +58,9 @@ class AbstractTool(AbstractDriver):
     key_build_script = definitions.KEY_BUILD_SCRIPT
     key_config_script = definitions.KEY_CONFIG_SCRIPT
     key_test_script = definitions.KEY_TEST_SCRIPT
+    key_pub_test_script = definitions.KEY_PUB_TEST_SCRIPT
+    key_pvt_test_script = definitions.KEY_PVT_TEST_SCRIPT
+    key_adv_test_script = definitions.KEY_ADV_TEST_SCRIPT
     key_gpus = definitions.KEY_GPUS
     key_cpus = definitions.KEY_CPUS
     stats: ToolStats
@@ -129,8 +132,7 @@ class AbstractTool(AbstractDriver):
     def timestamp_log(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"{time_now}"
-        self.append_file(timestamp_txt, self.log_output_path)
-        self.stats.time_stats.timestamp_end = timestamp_txt
+        self.append_file([timestamp_txt], self.log_output_path)
 
     def timestamp_log_start(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
@@ -141,7 +143,8 @@ class AbstractTool(AbstractDriver):
     def timestamp_log_end(self):
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")
         timestamp_txt = f"\n{time_now}"
-        self.append_file(timestamp_txt, self.log_output_path)
+        self.append_file([timestamp_txt], self.log_output_path)
+        self.stats.time_stats.timestamp_end = timestamp_txt
 
     def run_command(
         self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
