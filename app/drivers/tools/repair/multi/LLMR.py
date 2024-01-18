@@ -34,8 +34,8 @@ class LLMR(AbstractRepairTool):
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
         file = ""
-        if self.key_fix_file in bug_info:
-            file = bug_info[self.key_fix_file]
+        if self.key_localization in bug_info:
+            file = bug_info[self.key_localization][0][self.key_fix_file]
             if bug_info[self.key_language] == "java" and not file.endswith(".java"):
                 file = f"src/main/java/{file.replace('.', '/')}.java"
             self.emit_debug("LLMR will work on file {}".format(file))

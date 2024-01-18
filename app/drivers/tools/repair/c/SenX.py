@@ -22,7 +22,7 @@ class SenX(AbstractRepairTool):
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
         task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info[self.key_fix_file]
+        buggy_file = bug_info[self.key_localization][0][self.key_fix_file]
         self.log_instrument_path = join(
             self.dir_logs,
             "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),

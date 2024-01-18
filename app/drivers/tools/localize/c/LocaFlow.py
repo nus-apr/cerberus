@@ -19,8 +19,14 @@ class Valkyrie(AbstractLocalizeTool):
         conf_content = list()
         dir_src = f"{self.dir_expr}/src"
         conf_content.append(f"source_dir:{dir_src}\n")
-        if bug_info.get(self.key_fix_file, None):
-            conf_content.append(f"source_file:{bug_info.get(self.key_fix_file)}\n")
+        if bug_info.get(self.key_localization, None):
+            localization = bug_info[self.key_localization]
+            if len(localization) > 1:
+                self.error_exit("Multiple localization not supported")
+            else:
+                conf_content.append(
+                    f"source_file:{localization[0][self.key_fix_file]}\n"
+                )
         conf_content.append(
             f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
         )

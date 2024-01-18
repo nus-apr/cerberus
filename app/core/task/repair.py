@@ -28,24 +28,23 @@ def run_repair(
     benchmark_name: str,
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
-    fix_location = None
-    fix_source_file = ""
-    fix_line_numbers = []
 
     if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
-        fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+        for localization_entry in experiment_info[definitions.KEY_LOCALIZATION]:
+            del localization_entry[definitions.KEY_CONFIG_FIX_LOC]
     elif repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
-        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-        fix_line_numbers = list(
-            map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
-        )
-        fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
+        for localization_entry in experiment_info[definitions.KEY_LOCALIZATION]:
+            fix_source_file = str(localization_entry.get(definitions.KEY_FIX_FILE, ""))
+            fix_line_numbers = list(
+                map(str, localization_entry.get(definitions.KEY_FIX_LINES, []))
+            )
+            localization_entry[definitions.KEY_FIX_FILE] = "{}:{}".format(
+                fix_source_file, ",".join(fix_line_numbers)
+            )
     elif repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
-        if definitions.KEY_FIX_FILE in experiment_info:
-            del experiment_info[definitions.KEY_FIX_FILE]
+        if definitions.KEY_LOCALIZATION in experiment_info:
+            del experiment_info[definitions.KEY_LOCALIZATION]
 
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
-    experiment_info[definitions.KEY_FIX_LOC] = fix_location
     test_ratio = float(repair_config_info[definitions.KEY_CONFIG_TEST_RATIO])
     test_timeout = int(
         repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
@@ -177,9 +176,13 @@ def repair_all(
         failing_test_list
         + passing_test_list[: int(len(passing_test_list) * test_ratio)]
     )
-    fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
 
     if values.use_valkyrie:
+        fix_source_file = str(
+            experiment_info.get(definitions.KEY_LOCALIZATION, [{}])[0].get(
+                definitions.KEY_FIX_FILE, ""
+            )
+        )
         valkyrie_setup_info = setup_for_valkyrie(
             dir_info, container_id, experiment_info, benchmark_name
         )

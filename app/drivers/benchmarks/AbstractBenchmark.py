@@ -46,6 +46,7 @@ class AbstractBenchmark(AbstractDriver):
     base_dir_experiment = values.container_base_experiment
     key_bug_id = definitions.KEY_BUG_ID
     key_fix_file = definitions.KEY_FIX_FILE
+    key_localization = definitions.KEY_LOCALIZATION
     key_failing_tests = definitions.KEY_FAILING_TEST
     key_passing_tests = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
@@ -145,7 +146,7 @@ class AbstractBenchmark(AbstractDriver):
         return data
 
     @staticmethod
-    def check_benchmark_folder(name):
+    def check_benchmark_folder(name: str):
         if len(os.listdir(join(values.dir_benchmark, name))) == 0:
             emitter.information(
                 "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."

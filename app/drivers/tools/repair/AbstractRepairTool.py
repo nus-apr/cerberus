@@ -71,7 +71,9 @@ class AbstractRepairTool(AbstractTool):
         self.emit_normal("running instrumentation script")
         bug_id = bug_info[definitions.KEY_BUG_ID]
         task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info.get(definitions.KEY_FIX_FILE, "")
+        buggy_file = bug_info.get(self.key_localization, [{}])[0].get(
+            definitions.KEY_FIX_FILE, ""
+        )
         self.log_instrument_path = join(
             self.dir_logs,
             "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),

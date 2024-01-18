@@ -68,9 +68,13 @@ class F1X(AbstractRepairTool):
 
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        fix_file = bug_info.get(self.key_fix_file, None)
-        fix_location = bug_info.get(self.key_fix_loc, None)
-        fix_file_list = bug_info.get(self.key_fix_file_list, None)
+        fix_file = bug_info.get(self.key_localization, [{}])[0].get(
+            self.key_fix_file, None
+        )
+        fix_location = bug_info.get(self.key_localization, [{}])[0].get(
+            self.key_fix_loc, None
+        )
+        fix_file_list = list(filter(lambda x : x is not None, map(lambda x: x.get(self.key_fix_file,None) , bug_info.get(self.key_localization, [{}]))))
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         timeout = str(repair_config_info[self.key_timeout])

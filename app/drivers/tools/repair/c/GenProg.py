@@ -20,9 +20,9 @@ class GenProg(AbstractRepairTool):
         passing_test_list = bug_info[self.key_passing_tests]
         failing_test_list = bug_info[self.key_failing_tests]
         bug_id = str(bug_info[self.key_bug_id])
-        self.fix_file = bug_info[self.key_fix_file]
+        self.fix_file = bug_info[self.key_localization][0][self.key_fix_file]
 
-        fix_location = bug_info[self.key_fix_lines][0]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_lines][0]
         timeout = str(repair_config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,

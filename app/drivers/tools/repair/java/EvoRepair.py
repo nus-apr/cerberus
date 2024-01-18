@@ -51,7 +51,9 @@ class EvoRepair(AbstractRepairTool):
         config_object["build"] = build_config
 
         localize_config = dict()
-        localize_config["fix-locations"] = [bug_info[self.key_fix_loc]]
+        localize_config["fix-locations"] = list(
+            map(lambda x: x[self.key_fix_loc], bug_info[self.key_localization])
+        )
         config_object["localization"] = localize_config
 
         self.write_file(json.dumps(config_object), repair_config_path)

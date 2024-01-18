@@ -36,15 +36,21 @@ class RewardRepairI(AbstractRepairTool):
         tool_dir = "/repair/RewardRepair"
 
         if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
-            if len(bug_info[self.key_fix_lines]) == 0:
+            if (
+                self.key_localization in bug_info
+                or len(bug_info[self.key_localization]) == 0
+            ):
                 self.error_exit("no line number to fix")
 
-            locations = [
-                (
-                    bug_info[self.key_fix_file].replace(".", "/"),
-                    bug_info[self.key_fix_lines][0],
+            locations = list(
+                map(
+                    lambda x: (
+                        x[self.key_fix_file].replace(".", "/"),
+                        x[self.key_fix_lines][0],
+                    ),
+                    bug_info[self.key_localization],
                 )
-            ]
+            )
         else:
             fl_file = join(self.dir_fl, f"{bug_info[self.key_bug_id]}.csv")
             if not os.path.isfile(fl_file):

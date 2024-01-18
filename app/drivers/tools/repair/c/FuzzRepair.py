@@ -91,7 +91,9 @@ class FuzzRepair(AbstractRepairTool):
 
         conf_content.append("exploit_command:{}\n".format(crash_cmd))
         conf_content.append(
-            "fix_file:{}\n".format(bug_info[self.key_fix_file]).replace("//", "/")
+            "fix_file:{}\n".format(
+                bug_info[self.key_localization][0][self.key_fix_file]
+            ).replace("//", "/")
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
 
@@ -113,12 +115,15 @@ class FuzzRepair(AbstractRepairTool):
 
         config_script_path = join(self.dir_setup, config_script)
         build_script_path = join(self.dir_setup, build_script)
-        fix_file = bug_info[self.key_fix_file]
+        fix_file = bug_info[self.key_localization][0][self.key_fix_file]
         dir_src = join(self.dir_expr, "src")
+        transform_file_list = []
         if isinstance(fix_file, list):
             transform_file_list = [f"{dir_src}/{f}" for f in fix_file]
         elif isinstance(fix_file, str):
             transform_file_list = [f"{dir_src}/{fix_file}"]
+        else:
+            self.error_exit("fix file is not a list or string")
 
         super(FuzzRepair, self).run_repair(bug_info, repair_config_info)
         if not bug_info[self.key_benchmark] == "vulnloc":

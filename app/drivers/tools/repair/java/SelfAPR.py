@@ -26,14 +26,19 @@ class SelfAPR(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
-        if len(bug_info[self.key_fix_lines]) == 0:
+        if (
+            self.key_localization not in bug_info
+            or len(bug_info[self.key_localization]) == 0
+        ):
             self.error_exit("no line number to fix")
+
+        localization_target = bug_info[self.key_localization][0]
 
         self.bug_name = bug_info[self.key_bug_id]
         file = (
             join(
                 bug_info[self.key_dir_source],
-                bug_info[self.key_fix_file].replace(".", "/"),
+                localization_target[self.key_fix_file].replace(".", "/"),
             )
             + ".java"
         )
@@ -43,7 +48,7 @@ class SelfAPR(AbstractRepairTool):
             self.bug_name.replace("-", "_"),
             join(self.dir_expr, "src"),
             join(file),
-            bug_info[self.key_fix_lines][0],
+            localization_target[self.key_fix_lines][0],
             50,  # top_n_patches
             join(self.dir_output),
         )
@@ -56,7 +61,7 @@ class SelfAPR(AbstractRepairTool):
             self.bug_name.replace("-", "_"),
             join(self.dir_expr, "src"),
             join(file),
-            bug_info[self.key_fix_lines][0],
+            localization_target[self.key_fix_lines][0],
             join(self.dir_output),
         )
 

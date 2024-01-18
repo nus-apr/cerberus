@@ -93,7 +93,7 @@ class Fix2Fit(AbstractRepairTool):
             return
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
-        fix_location = bug_info[self.key_fix_file]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_file]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),

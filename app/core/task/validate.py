@@ -26,9 +26,6 @@ def run_validate(
     container_id: Optional[str],
     benchmark_name: str,
 ):
-    fix_location = None
-    fix_source_file = ""
-    fix_line_numbers = []
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     test_timeout = int(
         validate_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
@@ -41,19 +38,20 @@ def run_validate(
     if isinstance(failing_test_list, str):
         failing_test_list = failing_test_list.split(",")
     if validate_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
-        fix_location = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
+        for localization_entry in experiment_info[definitions.KEY_LOCALIZATION]:
+            del localization_entry[definitions.KEY_CONFIG_FIX_LOC]
     elif validate_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
-        fix_source_file = str(experiment_info.get(definitions.KEY_FIX_FILE, ""))
-        fix_line_numbers = list(
-            map(str, experiment_info.get(definitions.KEY_FIX_LINES, []))
-        )
-        fix_location = "{}:{}".format(fix_source_file, ",".join(fix_line_numbers))
+        for localization_entry in experiment_info[definitions.KEY_LOCALIZATION]:
+            fix_source_file = str(localization_entry.get(definitions.KEY_FIX_FILE, ""))
+            fix_line_numbers = list(
+                map(str, localization_entry.get(definitions.KEY_FIX_LINES, []))
+            )
+            localization_entry[definitions.KEY_FIX_FILE] = "{}:{}".format(
+                fix_source_file, ",".join(fix_line_numbers)
+            )
     elif validate_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto":
-        if definitions.KEY_FIX_FILE in experiment_info:
-            del experiment_info[definitions.KEY_FIX_FILE]
-
-    experiment_info[definitions.KEY_FIX_LINES] = fix_line_numbers
-    experiment_info[definitions.KEY_FIX_LOC] = fix_location
+        if definitions.KEY_LOCALIZATION in experiment_info:
+            del experiment_info[definitions.KEY_LOCALIZATION]
 
     experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
