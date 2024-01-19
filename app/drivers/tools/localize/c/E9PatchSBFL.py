@@ -78,6 +78,9 @@ class E9PatchSBFL(AbstractLocalizeTool):
             f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces}"
         )
 
+        self.run_command("rm -rf {}".format(dir_failing_traces))
+        self.run_command("rm -rf {}".format(dir_passing_traces))
+
         self.process_status(status)
 
         self.timestamp_log_end()

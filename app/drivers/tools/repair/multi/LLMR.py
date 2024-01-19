@@ -23,28 +23,15 @@ class LLMR(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
         # Any communication based model works
-        model = repair_config_info.get(self.key_tool_params, "gpt-4")
-
-        if model == "":
-            model = "gpt-4"
+        model = repair_config_info.get("model", "gpt-4")
+        params = repair_config_info.get(self.key_tool_params, "")
 
         passing_tests = ",".join(bug_info[self.key_passing_tests])
         failing_tests = ",".join(bug_info[self.key_failing_tests])
 
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
-        file = ""
-        if self.key_localization in bug_info:
-            file = bug_info[self.key_localization][0][self.key_fix_file]
-            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
-                file = f"src/main/java/{file.replace('.', '/')}.java"
-            self.emit_debug("LLMR will work on file {}".format(file))
-        fl = ""
-
-        if repair_config_info["fault_location"] == "auto" or (
-            repair_config_info["fault_location"] == "dev"
-            and self.key_localization not in bug_info
-        ):
+        if self.key_localization not in bug_info:
             fl = "-do-fl"
         elif repair_config_info["fault_location"] == "line" or (
             repair_config_info["fault_location"] == "dev"
@@ -64,11 +51,32 @@ class LLMR(AbstractRepairTool):
             self.write_file(fl_info, fl_path)
             fl = f"-fl-data {fl_path}"
         elif repair_config_info["fault_location"] == "file":
+            file = bug_info[self.key_localization][0][self.key_fix_file]
+            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
+                file = f"src/main/java/{file.replace('.', '/')}.java"
+            self.emit_debug("LLMR will work on file {}".format(file))
             fl = "-file {}".format(file) if file else ""
+
+        language = (
+            "-lang {}".format(bug_info[self.key_language])
+            if self.key_language in bug_info
+            else ""
+        )
+
+        bug_description = (
+            "-description {}".format(join(self.dir_setup, bug_info["bug_description"]))
+            if "bug_description" in bug_info
+            else ""
+        )
+        reference_file = (
+            "-reference {}".format(bug_info[definitions.KEY_REFERENCE_FILE])
+            if definitions.KEY_REFERENCE_FILE in bug_info
+            else ""
+        )
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language} {params}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -93,20 +101,11 @@ class LLMR(AbstractRepairTool):
             if self.key_bin_path in bug_info
             else " ",
             debug="-d" if self.is_debug else "",
-            reference_file="-reference {}".format(
-                bug_info[definitions.KEY_REFERENCE_FILE]
-            )
-            if definitions.KEY_REFERENCE_FILE in bug_info
-            else "",
-            bug_description="-description {}".format(
-                join(self.dir_setup, bug_info["bug_description"])
-            )
-            if "bug_description" in bug_info
-            else "",
-            language="-lang {}".format(bug_info[self.key_language])
-            if self.key_language in bug_info
-            else "",
+            reference_file=reference_file,
+            bug_description=bug_description,
+            language=language,
             fl=fl,
+            params=params,
         )
         status = self.run_command(
             llmr_command, self.log_output_path, join(self.dir_expr, "src")

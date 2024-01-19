@@ -56,6 +56,13 @@ class JoernSBFL(AbstractLocalizeTool):
         bug_info["test_dir_abspath"] = self.dir_setup
         self.write_json(bug_info, os.path.join(self.dir_expr, "meta-data.json"))
 
+        self.run_command(
+            "python3 /opt/crash_analysis.py {}".format(
+                os.path.join(self.dir_expr, "meta-data.json")
+            ),
+            dir_path="/opt/",
+        )
+
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 

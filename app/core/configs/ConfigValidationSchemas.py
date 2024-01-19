@@ -257,15 +257,15 @@ composite_sequence_schema = {
     "title": "Composite Sequence",
     "type": "object",
     "properties": {
-        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.CRASH_ANALYZE.value: {
             "type": "array",
-            "items": {"type": "string"},
+            "items": tool_config_schema,
         },
-        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},
+        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": tool_config_schema},
     },
     "additionalProperties": False,
 }
