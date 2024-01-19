@@ -208,20 +208,24 @@ resource-limits:
         if not test_script:
             self.error_exit(f"{self.name} requires a test script as input")
 
-        benchmark_name = bug_info.get(self.key_benchmark)
-        subject_name = bug_info.get(self.key_subject)
+        benchmark_name = bug_info.get(self.key_benchmark, "BENCHMARK")
+        subject_name = bug_info.get(self.key_subject, "SUBJECT")
         bug_id = str(bug_info[self.key_bug_id])
-        docker_tag_id = (f"{benchmark_name}" f"-{subject_name}" f"-{bug_id}").lower()
-        test_list = bug_info.get(self.key_passing_tests) + bug_info.get(
-            self.key_failing_tests
+        docker_tag_id = (
+            f"{self.name}-"
+            f"{benchmark_name.replace('-', '_')}"
+            f"-{subject_name.replace('-', '_')}"
+            f"-{bug_id.replace('-', '_')}"
+        ).lower()
+        test_list = bug_info.get(self.key_passing_tests, []) + bug_info.get(
+            self.key_failing_tests, []
         )
         self.build_runtime_docker_image(docker_tag_id)
         fix_files = []
-        if self.key_fix_file_list in bug_info:
-            fix_files = bug_info[self.key_fix_file_list]
-        elif self.key_fix_file in bug_info:
-            fix_files = [bug_info[self.key_fix_file]]
-
+        if self.key_localization in bug_info:
+            fix_files = list(
+                map(lambda x: x[self.key_fix_file], bug_info[self.key_localization])
+            )
         self.generate_repair_config(
             c_script=config_script,
             b_script=build_script,

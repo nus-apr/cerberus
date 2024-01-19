@@ -27,14 +27,19 @@ class Recoder(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
-        if len(bug_info[self.key_fix_lines]) == 0:
+        if (
+            self.key_localization not in bug_info
+            or len(bug_info[self.key_localization]) == 0
+        ):
             self.error_exit("no line number to fix")
+
+        localization_target = bug_info[self.key_localization][0]
 
         self.bug_name = bug_info[self.key_bug_id]
         file = (
             join(
                 bug_info[self.key_dir_source],
-                bug_info[self.key_fix_file].replace(".", "/"),
+                localization_target[self.key_fix_file].replace(".", "/"),
             )
             + ".java"
         )
@@ -42,17 +47,17 @@ class Recoder(AbstractRepairTool):
             recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {} --use_gpu'".format(  # currently supporting only defects4j
                 timeout_h,
                 self.bug_name,
-                bug_info[self.key_fix_file],
+                localization_target[self.key_fix_file],
                 join(self.dir_expr, "src", file),
-                bug_info[self.key_fix_lines][0],
+                localization_target[self.key_fix_lines][0],
             )
         else:
             recorder_command = "bash -c 'export PATH=$PATH:/root/defects4j/framework/bin && timeout -k 5m {}h python3 inference.py --bug_id {} --class_name {} --buggy_file {} --buggy_line {}'".format(  # currently supporting only defects4j
                 timeout_h,
                 self.bug_name,
-                bug_info[self.key_fix_file],
+                localization_target[self.key_fix_file],
                 join(self.dir_expr, "src", file),
-                bug_info[self.key_fix_lines][0],
+                localization_target[self.key_fix_lines][0],
             )
         status = self.run_command(
             recorder_command, self.log_output_path, "/root/Repair/"

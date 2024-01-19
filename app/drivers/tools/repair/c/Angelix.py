@@ -22,9 +22,9 @@ class Angelix(AbstractRepairTool):
             return
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        source_file = str(bug_info[self.key_fix_file])
-        fix_line_number_list = bug_info[self.key_fix_lines]
-        fix_location = bug_info[self.key_fix_loc]
+        source_file = str(bug_info[self.key_localization][0][self.key_fix_file])
+        fix_line_number_list = bug_info[self.key_localization][0][self.key_fix_lines]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_loc]
         timeout = str(repair_config_info[self.key_timeout])
         failing_test_list = bug_info[self.key_failing_tests]
         passing_test_list = bug_info[self.key_passing_tests]
@@ -130,7 +130,7 @@ class Angelix(AbstractRepairTool):
         self.emit_normal(" instrumenting for " + self.name)
         bug_id = bug_info[self.key_bug_id]
         task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info[self.key_fix_file]
+        buggy_file = bug_info[self.key_localization][0][self.key_fix_file]
         self.log_instrument_path = (
             self.dir_logs
             + "/"

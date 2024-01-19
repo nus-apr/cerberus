@@ -21,7 +21,7 @@ class SequenceR(AbstractRepairTool):
 
         timeout_h = str(repair_config_info[self.key_timeout])
 
-        # The zimin/sequencer container has a bug which can only be found after be found after a removal
+        # The zimin/sequencer container has a bug which can only be found after a removal
         # of a /dev/null pipe in sequencer-predict
         self.run_command(
             "sed -i '183s/1\\s*-\\s*/~/' ./onmt/modules/global_attention.py",
@@ -29,18 +29,23 @@ class SequenceR(AbstractRepairTool):
             "/SequenceR/src/lib/OpenNMT-py",
         )
 
-        if bug_info[self.key_fix_file] == "" or len(bug_info[self.key_fix_lines]) < 1:
+        if (
+            self.key_localization not in bug_info
+            or len(bug_info[self.key_localization]) < 1
+        ):
             self.update_experiment_status("No fault localization info given")
             self.error_exit(
                 "Cannot apply SequenceR on an experiment with no given buggy file or line"
             )
+
+        localization_target = bug_info[self.key_localization][0]
 
         # generate patches
         self.timestamp_log_start()
         file = (
             join(
                 bug_info[self.key_dir_source],
-                bug_info[self.key_fix_file].replace(".", "/"),
+                localization_target[self.key_fix_file].replace(".", "/"),
             )
             + ".java"
         )  # construct the file's path
@@ -51,7 +56,7 @@ class SequenceR(AbstractRepairTool):
         sequencer_command = "timeout -k 5m {}h ./sequencer-predict.sh --model=/SequenceR/model/model.pt --buggy_file={} --buggy_line={} --beam_size=100 --output={}".format(
             timeout_h,
             join(self.dir_expr, "src", file),
-            bug_info[self.key_fix_lines][0],
+            localization_target[self.key_fix_lines][0],
             join(self.dir_output, "patches"),
         )
         status = self.run_command(

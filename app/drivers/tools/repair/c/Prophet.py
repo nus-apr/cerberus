@@ -20,7 +20,7 @@ class Prophet(AbstractRepairTool):
             return
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        self.file = bug_info[self.key_fix_file]
+        self.file = bug_info[self.key_localization][0][self.key_fix_file]
         revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
         self.generate_revlog(bug_info, revlog_file, bug_id)
         timeout = str(repair_config_info[self.key_timeout])
@@ -64,7 +64,7 @@ class Prophet(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def generate_localization(self, bug_info, localization_file, dir_setup):
-        fix_location = bug_info[self.key_fix_loc]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_loc]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
             source_file, line_number = fix_location.split(":")

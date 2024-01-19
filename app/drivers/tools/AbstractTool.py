@@ -52,6 +52,10 @@ class AbstractTool(AbstractDriver):
     key_tool_params = definitions.KEY_TOOL_PARAMS
     key_timeout = definitions.KEY_CONFIG_TIMEOUT
     key_source = definitions.KEY_SOURCE
+    key_fix_file = definitions.KEY_FIX_FILE
+    key_fix_lines = definitions.KEY_FIX_LINES
+    key_fix_loc = definitions.KEY_FIX_LOC
+    key_localization = definitions.KEY_LOCALIZATION
     key_sink = definitions.KEY_SINK
     key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
     key_build_command = definitions.KEY_BUILD_COMMAND

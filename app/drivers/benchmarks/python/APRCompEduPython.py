@@ -143,7 +143,7 @@ class APRCompEduPython(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        fix_file = experiment_item[self.key_fix_file]
+        fix_file = experiment_item[self.key_localization][0][self.key_fix_file]
         command_str = f"bash verify_dev {fix_file}"
         status = self.run_command(
             container_id, command_str, self.log_verify_path, self.dir_setup

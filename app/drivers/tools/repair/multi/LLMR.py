@@ -34,30 +34,41 @@ class LLMR(AbstractRepairTool):
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
         file = ""
-        if self.key_fix_file in bug_info:
-            file = bug_info[self.key_fix_file]
+        if self.key_localization in bug_info:
+            file = bug_info[self.key_localization][0][self.key_fix_file]
             if bug_info[self.key_language] == "java" and not file.endswith(".java"):
                 file = f"src/main/java/{file.replace('.', '/')}.java"
             self.emit_debug("LLMR will work on file {}".format(file))
         fl = ""
 
-        if repair_config_info["fault_location"] == "auto":
+        if repair_config_info["fault_location"] == "auto" or (
+            repair_config_info["fault_location"] == "dev"
+            and self.key_localization not in bug_info
+        ):
             fl = "-do-fl"
-        elif repair_config_info["fault_location"] == "line":
-            fl_info = list(
-                map(
-                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1\n",
-                    bug_info[self.key_fix_lines],
-                )
-            )
+        elif repair_config_info["fault_location"] == "line" or (
+            repair_config_info["fault_location"] == "dev"
+            and self.key_localization in bug_info
+        ):
+            fl_info = []
+            for location in bug_info[self.key_localization]:
+                file = location[self.key_fix_file]
+                if bug_info[self.key_language] == "java" and not file.endswith(".java"):
+                    file = f"src/main/java/{file.replace('.', '/')}.java"
+                locations = location[self.key_fix_lines]
+                for line in locations:
+                    fl_info.append(f"{file}::{line},1\n")
+
             self.emit_debug(f"File localization info: {fl_info}")
             fl_path = join(self.dir_output, "fl_data.txt")
             self.write_file(fl_info, fl_path)
             fl = f"-fl-data {fl_path}"
+        elif repair_config_info["fault_location"] == "file":
+            fl = "-file {}".format(file) if file else ""
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -71,7 +82,6 @@ class LLMR(AbstractRepairTool):
             else "",
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
-            file="-file {}".format(file) if file else "",
             model=model,
             passing_tests="-passing-tests {}".format(passing_tests)
             if passing_tests != ""

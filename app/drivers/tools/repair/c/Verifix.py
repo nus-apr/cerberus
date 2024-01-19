@@ -28,8 +28,8 @@ class Verifix(AbstractRepairTool):
         if definitions.KEY_REFERENCE_FILE not in bug_info:
             self.error_exit("No reference file provided in the metadata")
 
-        if self.key_fix_file not in bug_info:
-            self.error_exit("No target file found in the metadata")
+        if self.key_localization not in bug_info:
+            self.error_exit("No localization in metadata")
 
         vulnfix_command = "timeout -k 5m {}h python3 -m main -m repair -tool verifix -debug {} -pc {} -pi {} -tc {} -output {}".format(
             timeout_h,
@@ -39,7 +39,11 @@ class Verifix(AbstractRepairTool):
                 "src",
                 bug_info.get(definitions.KEY_REFERENCE_FILE, "Main.c"),
             ),
-            join(self.dir_expr, "src", bug_info[self.key_fix_file]),
+            join(
+                self.dir_expr,
+                "src",
+                bug_info[self.key_localization][0][self.key_fix_file],
+            ),
             join(self.dir_expr, "base", "test"),
             join(self.dir_output, "patches"),
         )
