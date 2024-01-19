@@ -84,9 +84,11 @@ class Prophet(AbstractRepairTool):
             ):
                 if self.is_file(default_localization_file):
                     self.write_file(
-                        map(
-                            lambda line: line + "\n",
-                            self.read_file(default_localization_file),
+                        list(
+                            map(
+                                lambda line: line + "\n",
+                                self.read_file(default_localization_file),
+                            )
                         ),
                         localization_file,
                     )
@@ -110,7 +112,7 @@ class Prophet(AbstractRepairTool):
 
         test_config.append("Regression Cases: Tot 0\n")
 
-        self.write_file(map(lambda line: line + "\n", test_config), revlog_file)
+        self.write_file(list(map(lambda line: line + "\n", test_config)), revlog_file)
 
     def save_artifacts(self, dir_info):
         dir_patch = join(self.dir_expr, "patches")
