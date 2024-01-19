@@ -126,6 +126,14 @@ class TaskProcessor:
                                             tool_config.image + ":" + tool_config.tag
                                         )
 
+                                    if tool_config.hash_digest != "":
+                                        emitter.information(
+                                            "[framework] configuration provides an secure has to verify, using that"
+                                        )
+                                        tool_template.hash_digest = (
+                                            tool_config.hash_digest
+                                        )
+
                                 if not tasks_chunk_config.task_config.only_analyse:
                                     tool_template.check_tool_exists()
                             else:

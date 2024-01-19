@@ -2,7 +2,6 @@ from enum import Enum
 
 
 class ConfigFieldsEnum(Enum):
-
     # general section
     GENERAL = "general"
     UI_MODE = "enable_ui"
@@ -72,6 +71,7 @@ class ConfigFieldsEnum(Enum):
     PARAMS = "params"
     TAG = "tag"
     IMAGE = "image"
+    HASH_DIGEST = "hash_digest"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"
