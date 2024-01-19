@@ -47,6 +47,9 @@ from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.composite.AbstractCompositeTool import AbstractCompositeTool
+from app.drivers.tools.composite.multi.basic.FileCreationHandler import (
+    FileCreationHandler,
+)
 from app.drivers.tools.MockTool import MockTool
 
 
@@ -71,6 +74,12 @@ class BasicWorkflow(AbstractCompositeTool):
         run_index: str,  # Specific iteration of the workflow run
         hash: Any,  # Hash, to be used for unique locations
     ):
+        """
+        Entry point for the workflow.
+        The function parses the composite sequence proivded in the composite_config_info
+        and then starts an "initial tool" - fuzzer, localizer, repair tool, in that order of preference.
+        Currently the system does not terminate a lot of things and this is left as a TODO
+        """
         super(BasicWorkflow, self).run_composite(
             dir_info,
             benchmark,
@@ -93,6 +102,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.observed: Set[Any] = set()
 
         self.emit_debug(composite_config_info)
+        composite_config_info[self.key_make_metadata] = True
         composite_sequence = composite_config_info[self.key_composite_sequence]
         tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
 
@@ -116,12 +126,15 @@ class BasicWorkflow(AbstractCompositeTool):
             self.tool_map[task_type] = []
             for tool_info in tools:
                 tool_name = tool_info["name"]
-                tool_params = tool_info.get("params", "")
-                # tool_tag = tool_info[""]
+                tool_params = tool_info.get(self.key_tool_params, "")
+                # tool_tag = tool_info.get(definitions.KEY_TOOL_TAG, "")
+                real_type = tool_info.get(
+                    "type", task_type
+                )  # override the type when in "special" (crash-analyze) types
                 if tool_name == "mock":
                     tool = cast(AbstractTool, MockTool())
                 else:
-                    tool = configuration.load_tool(tool_name, task_type)
+                    tool = configuration.load_tool(tool_name, real_type)
 
                 self.emit_debug(tool.bindings)
                 tool.bindings = tool.bindings or {}
@@ -171,25 +184,18 @@ class BasicWorkflow(AbstractCompositeTool):
             hash,
         )
 
-        if "analyze" in self.tool_map:
-            for tool, params in self.tool_map["analyze"]:
-                self.pool.apply_async(
-                    self.run,
-                    ["analyze", *self.get_args(tool, new_params=params)],
-                )
-        elif "fuzz" in self.tool_map:
-            for tool, params in self.tool_map["fuzz"]:
-                self.pool.apply_async(
-                    self.run,
-                    ["fuzz", *self.get_args(tool, new_params=params)],
-                )
-        elif "repair" in self.tool_map:
-            for tool, params in self.tool_map["repair"]:
-                self.pool.apply_async(
-                    self.run,
-                    ["repair", *self.get_args(tool, new_params=params)],
-                )
-        else:
+        found_starter = False
+        for starter in ["analyze", "fuzz", "repair"]:
+            if starter in self.tool_map:
+                found_starter = True
+                for tool, params in self.tool_map[cast(CompsiteTaskType, starter)]:
+                    self.pool.apply_async(
+                        self.run,
+                        [starter, *self.get_args(tool, new_params=params)],
+                    )
+                break
+
+        if not found_starter:
             self.observer.stop()
             for _ in range(self.event_processor_count):
                 self.message_queue.put("exit")
@@ -219,9 +225,13 @@ class BasicWorkflow(AbstractCompositeTool):
         hash: Any,  # Hash, to be used for unique locations
         tool: AbstractTool,
     ):
+        """
+        Common entry point for a subtask, we take the original task tag to not create new images.
+        This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
+        """
         try:
             values.task_type.set(task_type)
-            tool_tag = composite_config_info.get(definitions.ARG_TOOL_TAG, "")
+            tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
             original_tool_tag = composite_config_info.get("original-tag", "")
             image_name = create_task_image_identifier(
                 benchmark,
@@ -257,17 +267,8 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_warning(e)
             traceback.print_exc()
 
-    class FileCreationHandler(FileSystemEventHandler):
-        def __init__(self, q: Queue):
-            # print("Initializing")
-            self.q = q
-
-        def on_created(self, event: FileSystemEvent):
-            # print("Created!")
-            self.q.put(event)
-
     def watcher(self):
-        event_handler = BasicWorkflow.FileCreationHandler(self.message_queue)
+        event_handler = FileCreationHandler(self.message_queue)
         self.emit_highlight("Observing {}".format(self.root_dir))
         self.observer.schedule(event_handler, self.root_dir, recursive=True)
         self.observer.start()
@@ -297,6 +298,9 @@ class BasicWorkflow(AbstractCompositeTool):
         return False
 
     def filter_event(self, event: FileSystemEvent):
+        """
+        Exclude commonly known files which are not a signal for an interesting change
+        """
         if basename(event.src_path) in [
             "README.txt",
             "fuzz_bitmap",
@@ -365,6 +369,14 @@ class BasicWorkflow(AbstractCompositeTool):
             pass
         elif (
             os.path.commonprefix(
+                [event.src_path, list(self.task_mappings["crash-analyze"].keys())[0]]
+            )
+            == list(self.task_mappings["crash-analyze"].keys())[0]
+        ):
+            self.emit_debug("Ignoring crash analysis update")
+            pass
+        elif (
+            os.path.commonprefix(
                 [event.src_path, list(self.task_mappings["localize"].keys())[0]]
             )
             == list(self.task_mappings["localize"].keys())[0]
@@ -373,41 +385,11 @@ class BasicWorkflow(AbstractCompositeTool):
                 not dirname(event.src_path).endswith("failing_tests")
                 and not dirname(event.src_path).endswith("passing_tests")
                 and not event.is_directory
+                and basename(event.src_path) == "meta-data.json"
             ):
                 self.emit_highlight("Localize Update")
                 self.emit_highlight(event)
                 self.pool.apply_async(self.on_localization_created, [event])
-        # meta_data_fpath = event.src_path
-        # crash_folder = os.path.dirname(event.src_path)
-        # hash = os.path.basename(crash_folder)
-        # meta_data_fpath = os.path.abspath(meta_data_fpath)
-
-        # with open(meta_data_fpath) as f:
-        #     c = f.read()
-
-        # md = json.loads(c)[0]
-
-        # subject = md["subject"]
-        # bug_id = md["bug_id"]
-
-        # tool = os.getenv("TOOL")
-
-        # cerberus_input_dir = f"cerberus/benchmark/vulnloc/{subject}/{bug_id}-{hash}"
-        # cerberus_outpt_dir = f"cerberus-vulnloc-out/{subject}-{bug_id}"
-
-        # shutil.copytree(f"vulnloc-benchmark/{subject}/{bug_id}", cerberus_input_dir)
-
-        # tests_dir = f"{cerberus_input_dir}/tests"
-        # os.makedirs(tests_dir, exist_ok=True)
-
-        # shutil.copytree(f"{crash_folder}/crashes", tests_dir, dirs_exist_ok=True)
-        # shutil.copytree(f"{crash_folder}/non-crashes", tests_dir, dirs_exist_ok=True)
-
-        # os.makedirs(cerberus_outpt_dir, exist_ok=True)
-        # os.makedirs("cerberus/e2e_logs", exist_ok=True)
-        # print(f"~~~~~ Starting CERBERUS ({tool}) on {hash} ~~~~~")
-
-        # cerb_str_cmd = f"./bin/cerberus --task-type repair --benchmark vulnloc --tool {tool} --special-meta {meta_data_fpath} --bug-index=1 --tool-tag {hash} --debug &> e2e_logs/cerberus_{hash}.log"
 
     def event_worker(self):
         while True:
@@ -451,6 +433,8 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
             shutil.copytree(base_setup, enhanced_setup)
+            os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
+            os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
 
             crashing_tests = []
             for crashing_input in os.listdir(crash_dir):
@@ -462,6 +446,10 @@ class BasicWorkflow(AbstractCompositeTool):
                     shutil.copy(
                         join(crash_dir, crashing_input),
                         join(enhanced_setup, "tests", ""),
+                    )
+                    shutil.copy(
+                        join(crash_dir, crashing_input),
+                        join(enhanced_setup, "crashing_tests", ""),
                     )
 
             benign_tests = []
@@ -475,6 +463,10 @@ class BasicWorkflow(AbstractCompositeTool):
                         join(benign_dir, benign_input),
                         join(enhanced_setup, "tests", ""),
                     )
+                    shutil.copy(
+                        join(benign_dir, benign_input),
+                        join(enhanced_setup, "benign_tests", ""),
+                    )
 
             new_testcases = (
                 crashing_tests + benign_tests + os.listdir(join(base_setup, "tests"))
@@ -487,6 +479,14 @@ class BasicWorkflow(AbstractCompositeTool):
             new_bug_info[self.key_exploit_list] = list(
                 set(new_bug_info[self.key_exploit_list] + new_testcases)
             )
+
+            new_bug_info[self.key_exploit_inputs] = [
+                {"format": "raw", "dir": "crashing_tests"}
+            ]
+            new_bug_info[self.key_benign_inputs] = [
+                {"format": "raw", "dir": "benign_tests"}
+            ]
+            new_bug_info["test_dir_abspath"] = self.dir_setup
 
             new_bug_info[self.key_passing_tests] = (
                 benign_tests + new_bug_info[self.key_passing_tests]
@@ -566,37 +566,11 @@ class BasicWorkflow(AbstractCompositeTool):
             shutil.copytree(base_setup, enhanced_setup)
 
             self.emit_debug("Copying")
-            file_grouping: Dict[str, List[str]] = {}
 
             new_bug_info = deepcopy(self.bug_info)
 
-            if event.src_path.endswith(".csv"):
-                with open(event.src_path) as csv_file:
-                    for line in csv.DictReader(
-                        csv_file, fieldnames=["file", "probability"]
-                    ):
-                        path = line["file"]
-                        file, line_number = path.split(":")
-                        if file not in file_grouping:
-                            file_grouping[file] = []
-                        file_grouping[file].append(line_number)
-
-                self.emit_debug("Parsed CSV")
-
-                localization_info = []
-                for file, lines in file_grouping.items():
-                    localization_info.append(
-                        {
-                            definitions.KEY_FIX_FILE: file,
-                            definitions.KEY_FIX_LINES: lines,
-                        }
-                    )
-
-                self.emit_debug(localization_info)
-                new_bug_info[definitions.KEY_LOCALIZATION] = localization_info
-            if basename(event.src_path) == "meta-data.json":
-                bug_info_extension = reader.read_json(event.src_path)
-                new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+            bug_info_extension = reader.read_json(event.src_path)
+            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
 
             if "repair" in self.tool_map:
                 for tool, params in self.tool_map["repair"]:
@@ -636,6 +610,10 @@ class BasicWorkflow(AbstractCompositeTool):
         new_tag: Optional[str] = None,
         new_params: Optional[str] = None,
     ):
+        """
+        Construct the arguments for the run function from the proto_args.
+        Certain arguments are replaceable.
+        """
         (
             dir_info,
             benchmark,
@@ -654,9 +632,9 @@ class BasicWorkflow(AbstractCompositeTool):
 
         composite_config_info_new = deepcopy(composite_config_info)
         if "original-tag" not in composite_config_info_new:
-            composite_config_info_new["original-tag"] = composite_config_info_new[
-                definitions.KEY_TOOL_TAG
-            ]
+            composite_config_info_new["original-tag"] = composite_config_info_new.get(
+                definitions.KEY_TOOL_TAG, ""
+            )
 
         del composite_config_info_new["container-id"]
 
@@ -677,14 +655,23 @@ class BasicWorkflow(AbstractCompositeTool):
             tool,
         )
 
-    def make_task_mappings(self, root_dir):
-        task_mappings = {
+    def make_task_mappings(
+        self, root_dir: str
+    ) -> Dict[CompsiteTaskType, Dict[str, Dict[str, str]]]:
+        """
+        Create the mappings for each task type.
+        When the tool is created we add this mapping to allow for a common output directory
+        """
+        task_mappings: Dict[CompsiteTaskType, Dict[str, Dict[str, str]]] = {
             "fuzz": {join(root_dir, "fuzzing"): {"bind": "/output", "mode": "rw"}},
             "repair": {join(root_dir, "repair"): {"bind": "/output", "mode": "rw"}},
             "analyze": {join(root_dir, "analyze"): {"bind": "/output", "mode": "rw"}},
             "select": {join(root_dir, "select"): {"bind": "/output", "mode": "rw"}},
             "validate": {join(root_dir, "validate"): {"bind": "/output", "mode": "rw"}},
             "localize": {join(root_dir, "localize"): {"bind": "/output", "mode": "rw"}},
+            "crash-analyze": {
+                join(root_dir, "crash-analyze"): {"bind": "/output", "mode": "rw"}
+            },
         }
         self.emit_debug(task_mappings)
         for task in task_mappings.values():

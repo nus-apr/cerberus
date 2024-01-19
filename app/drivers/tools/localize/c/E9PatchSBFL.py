@@ -1,7 +1,10 @@
 import os
 import re
 from os.path import join
+from typing import Dict
+from typing import List
 
+from app.core import definitions
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 
 
@@ -84,6 +87,34 @@ class E9PatchSBFL(AbstractLocalizeTool):
         self.process_status(status)
 
         self.timestamp_log_end()
+
+        if localization_config_info.get(self.key_make_metadata, False) and self.is_file(
+            join(self.dir_output, "ochiai.csv")
+        ):
+            lines = self.read_file(join(self.dir_output, "ochiai.csv"))
+            import csv
+
+            localization_info = []
+            for line in csv.DictReader(lines, fieldnames=["line", "probability"]):
+                path = line["file"]
+                probability = line["probability"]
+                file, line_number = path.split(":")
+                localization_info.append(
+                    {
+                        definitions.KEY_FIX_FILE: file,
+                        definitions.KEY_SCORE: probability,
+                        definitions.KEY_FIX_LINES: [line_number],
+                    }
+                )
+
+            new_metadata = {
+                "generator": "e9patchsbfl",
+                "confidence": "1",
+                "localization": localization_info,
+            }
+
+            self.write_json(new_metadata, join(self.dir_output, "meta-data.json"))
+
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def analyse_output(self, dir_info, bug_id, fail_list):
