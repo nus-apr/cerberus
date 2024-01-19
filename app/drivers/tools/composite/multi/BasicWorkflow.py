@@ -151,28 +151,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     tool_tag,
                 )
                 self.tool_map[task_type].append((tool, tool_params))
-                # key = create_task_identifier(
-                #    benchmark,
-                #    composite_config_info,
-                #    container_config_info,
-                #    bug_info,
-                #    tool,
-                #    str(run_index),
-                #    tool_tag,
-                # )
 
-                # task.run(
-                #    benchmark,
-                #    tool,
-                #    bug_info,
-                #    composite_config_info,
-                #    container_config_info,
-                #    key,
-                #    composite_config_info[self.key_cpus],
-                #    composite_config_info[self.key_gpus],
-                #    run_index,
-                #    image_name,
-                # )
         self.emit_highlight("Done with setup!")
 
         self.emit_highlight("Preparing watcher")
@@ -195,20 +174,20 @@ class BasicWorkflow(AbstractCompositeTool):
         if "analyze" in self.tool_map:
             for tool, params in self.tool_map["analyze"]:
                 self.pool.apply_async(
-                    self.run_analysis,
-                    self.get_args(tool, new_params=params),
+                    self.run,
+                    ["analyze", *self.get_args(tool, new_params=params)],
                 )
         elif "fuzz" in self.tool_map:
             for tool, params in self.tool_map["fuzz"]:
                 self.pool.apply_async(
-                    self.run_fuzz,
-                    self.get_args(tool, new_params=params),
+                    self.run,
+                    ["fuzz", *self.get_args(tool, new_params=params)],
                 )
         elif "repair" in self.tool_map:
             for tool, params in self.tool_map["repair"]:
                 self.pool.apply_async(
-                    self.run_repair,
-                    self.get_args(tool, new_params=params),
+                    self.run,
+                    ["repair", *self.get_args(tool, new_params=params)],
                 )
         else:
             self.observer.stop()
@@ -228,53 +207,9 @@ class BasicWorkflow(AbstractCompositeTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def run_analysis(
+    def run(
         self,
-        dir_info: DirectoryInfo,
-        benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
-        hash: Any,  # Hash, to be used for unique locations
-        tool: AbstractTool,
-    ):
-        values.task_type.set("analyze")
-        tool_tag = composite_config_info.get(definitions.ARG_TOOL_TAG, "")
-        original_tool_tag = composite_config_info.get("original-tag", "")
-        image_name = create_task_image_identifier(
-            benchmark,
-            tool,
-            bug_info,
-            original_tool_tag,
-        )
-
-        key = create_task_identifier(
-            benchmark,
-            composite_config_info,
-            container_config_info,
-            bug_info,
-            tool,
-            str(run_index),
-            tool_tag,
-        )
-
-        task.run(
-            benchmark,
-            tool,
-            bug_info,
-            composite_config_info,
-            container_config_info,
-            key,
-            composite_config_info[self.key_cpus],
-            composite_config_info[self.key_gpus],
-            run_index,
-            image_name,
-            hash,
-        )
-
-    def run_repair(
-        self,
+        task_type: TaskType,
         dir_info: DirectoryInfo,
         benchmark: AbstractBenchmark,
         bug_info,  # Entry from  meta-data.json
@@ -285,7 +220,7 @@ class BasicWorkflow(AbstractCompositeTool):
         tool: AbstractTool,
     ):
         try:
-            values.task_type.set("repair")
+            values.task_type.set(task_type)
             tool_tag = composite_config_info.get(definitions.ARG_TOOL_TAG, "")
             original_tool_tag = composite_config_info.get("original-tag", "")
             image_name = create_task_image_identifier(
@@ -305,145 +240,6 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool_tag,
             )
 
-            task.run(
-                benchmark,
-                tool,
-                bug_info,
-                composite_config_info,
-                container_config_info,
-                key,
-                composite_config_info[self.key_cpus],
-                composite_config_info[self.key_gpus],
-                run_index,
-                image_name,
-                hash,
-            )
-        except Exception as e:
-            self.emit_warning(e)
-            traceback.print_exc()
-
-    def run_fuzz(
-        self,
-        dir_info: DirectoryInfo,
-        benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
-        hash: Any,  # Hash, to be used for unique locations
-        tool: AbstractTool,
-    ):
-        values.task_type.set("fuzz")
-        tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
-        image_name = create_task_image_identifier(
-            benchmark,
-            tool,
-            bug_info,
-            tool_tag,
-        )
-
-        key = create_task_identifier(
-            benchmark,
-            composite_config_info,
-            container_config_info,
-            bug_info,
-            tool,
-            str(run_index),
-            tool_tag,
-        )
-
-        task.run(
-            benchmark,
-            tool,
-            bug_info,
-            composite_config_info,
-            container_config_info,
-            key,
-            composite_config_info[self.key_cpus],
-            composite_config_info[self.key_gpus],
-            run_index,
-            image_name,
-            hash,
-        )
-
-    def run_crash_analysis(
-        self,
-        dir_info: DirectoryInfo,
-        benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
-        hash: Any,  # Hash, to be used for unique locations
-        tool: AbstractTool,
-    ):
-        values.task_type.set("analyze")
-        tool_tag = composite_config_info.get(definitions.ARG_TOOL_TAG, "")
-        original_tool_tag = composite_config_info.get("original-tag", "")
-        image_name = create_task_image_identifier(
-            benchmark,
-            tool,
-            bug_info,
-            original_tool_tag,
-        )
-
-        key = create_task_identifier(
-            benchmark,
-            composite_config_info,
-            container_config_info,
-            bug_info,
-            tool,
-            str(run_index),
-            tool_tag,
-        )
-
-        task.run(
-            benchmark,
-            tool,
-            bug_info,
-            composite_config_info,
-            container_config_info,
-            key,
-            composite_config_info[self.key_cpus],
-            composite_config_info[self.key_gpus],
-            run_index,
-            image_name,
-            hash,
-        )
-
-    def run_localize(
-        self,
-        dir_info: DirectoryInfo,
-        benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
-        hash: Any,  # Hash, to be used for unique locations
-        tool: AbstractTool,
-    ):
-        values.task_type.set("localize")
-
-        tool_tag = composite_config_info.get(definitions.ARG_TOOL_TAG, "")
-        original_tool_tag = composite_config_info.get("original-tag", "")
-        image_name = create_task_image_identifier(
-            benchmark,
-            tool,
-            bug_info,
-            original_tool_tag,
-        )
-
-        key = create_task_identifier(
-            benchmark,
-            composite_config_info,
-            container_config_info,
-            bug_info,
-            tool,
-            str(run_index),
-            tool_tag,
-        )
-
-        try:
             task.run(
                 benchmark,
                 tool,
@@ -495,7 +291,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
             # self.emit_debug("Is new file? {}".format(new_file))
             if new_file:
-                time.sleep(1)  # HACK: make sure file is written to
+                time.sleep(0.5)  # HACK: make sure file is written to
                 return True
         # self.emit_debug("Filtered {}".format(event))
         return False
@@ -513,7 +309,7 @@ class BasicWorkflow(AbstractCompositeTool):
             ".fuzzer_stats_tmp",
         ]:
             return False
-        if ".state" in event.src_path:
+        if ".state" in event.src_path or ".trace" in event.src_path:
             return False
         return True
 
@@ -712,30 +508,39 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("starting crash analyzer")
                 for tool, params in self.tool_map["crash-analyze"]:
                     self.pool.apply_async(
-                        self.run_crash_analysis,
-                        self.get_args(
-                            tool, new_bug_info, subtask_hash, subtask_tag, params
-                        ),
+                        self.run,
+                        [
+                            "analyze",
+                            *self.get_args(
+                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                            ),
+                        ],
                     )
             elif "localize" in self.tool_map:
                 self.emit_debug("starting localizer")
                 for tool, params in self.tool_map["localize"]:
                     self.emit_debug(f"tool! {tool.name}")
                     self.pool.apply_async(
-                        self.run_localize,
-                        self.get_args(
-                            tool, new_bug_info, subtask_hash, subtask_tag, params
-                        ),
+                        self.run,
+                        [
+                            "localize",
+                            *self.get_args(
+                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                            ),
+                        ],
                     )
 
             elif "repair" in self.tool_map:
                 self.emit_debug("starting repair")
                 for tool, params in self.tool_map["repair"]:
                     self.pool.apply_async(
-                        self.run_repair,
-                        self.get_args(
-                            tool, new_bug_info, subtask_hash, subtask_tag, params
-                        ),
+                        self.run,
+                        [
+                            "repair",
+                            *self.get_args(
+                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                            ),
+                        ],
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -770,7 +575,6 @@ class BasicWorkflow(AbstractCompositeTool):
                     for line in csv.DictReader(
                         csv_file, fieldnames=["file", "probability"]
                     ):
-                        self.emit_debug(f"LINE IS {line}")
                         path = line["file"]
                         file, line_number = path.split(":")
                         if file not in file_grouping:
@@ -780,14 +584,15 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("Parsed CSV")
 
                 localization_info = []
-                for file, probabilities in file_grouping.items():
+                for file, lines in file_grouping.items():
                     localization_info.append(
                         {
                             definitions.KEY_FIX_FILE: file,
-                            definitions.KEY_FIX_LINES: probabilities,
+                            definitions.KEY_FIX_LINES: lines,
                         }
                     )
 
+                self.emit_debug(localization_info)
                 new_bug_info[definitions.KEY_LOCALIZATION] = localization_info
             if basename(event.src_path) == "meta-data.json":
                 bug_info_extension = reader.read_json(event.src_path)
@@ -796,10 +601,13 @@ class BasicWorkflow(AbstractCompositeTool):
             if "repair" in self.tool_map:
                 for tool, params in self.tool_map["repair"]:
                     self.pool.apply_async(
-                        self.run_repair,
-                        self.get_args(
-                            tool, new_bug_info, subtask_hash, subtask_tag, params
-                        ),
+                        self.run,
+                        [
+                            "repair",
+                            *self.get_args(
+                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                            ),
+                        ],
                     )
         except Exception as e:
             self.emit_warning(e)
