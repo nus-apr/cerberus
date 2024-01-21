@@ -193,9 +193,9 @@ def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[st
     try:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
-        if values.debug:
-            emitter.error(f"\t\t[debug] {ex}")
         if not ignore_not_found:
+            if values.debug:
+                emitter.error(f"\t\t[debug] {ex}")
             emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
