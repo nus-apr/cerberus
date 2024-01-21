@@ -27,7 +27,15 @@ class Infer(AbstractAnalyzeTool):
 
         self.emit_normal("preparing subject for analysis")
         dir_src = join(self.dir_expr, "src")
-        clean_command = "make clean"
+        env = {}
+        if bug_info.get(self.key_language, "") == "java":
+            env["JAVA_HOME"] = "/usr/lib/jvm/java-{}-openjdk-amd64".format(
+                bug_info.get("java_version", 8)
+            )
+            if int(bug_info.get("java_version", 8)) == 8:
+                self.run_command(f"update-java-alternatives -s java-1.8.0-openjdk-amd64")
+        
+        clean_command = bug_info.get(self.key_clean_command, "make clean")
         self.run_command(clean_command, dir_path=dir_src)
 
         time = datetime.now()
@@ -37,9 +45,14 @@ class Infer(AbstractAnalyzeTool):
         log_compile_path = join(self.dir_logs, "infer-compile-output.log")
         compile_command = "infer capture -- {}".format(build_cmd)
 
+        if bug_info.get(self.key_language, "") == "java":
+            compile_command = "infer capture --java-version {} -- {}".format(
+                bug_info.get("java_version", 8), build_cmd
+            )
+
         self.emit_normal("compiling subject with ")
         status = self.run_command(
-            compile_command, dir_path=dir_src, log_file_path=log_compile_path
+            compile_command, dir_path=dir_src, log_file_path=log_compile_path, env=env
         )
         if status != 0:
             self.emit_error("infer capture command returned non-zero exit")

@@ -54,6 +54,7 @@ class AbstractTool(AbstractDriver):
     key_sink = definitions.KEY_SINK
     key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
     key_build_command = definitions.KEY_BUILD_COMMAND
+    key_clean_command = definitions.KEY_CLEAN_COMMAND
     key_config_command = definitions.KEY_CONFIG_COMMAND
     key_build_script = definitions.KEY_BUILD_SCRIPT
     key_config_script = definitions.KEY_CONFIG_SCRIPT
