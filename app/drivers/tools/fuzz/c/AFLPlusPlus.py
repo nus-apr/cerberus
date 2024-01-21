@@ -31,12 +31,33 @@ class AFLPlusPlus(AbstractFuzzTool):
 
         initial_corpus = join(self.dir_setup, self.name, "initial-corpus")
 
-        fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none -x {dict} {additional_params} -- {binary} {binary_input}'".format(
+        dictionary = ""
+        if self.is_file(join(self.dir_setup, self.name, "autodict.dict")):
+            dictionary = "-x {}".format(
+                join(self.dir_setup, self.name, "autodict.dict")
+            )
+
+        self.run_command("mkdir {}".format(initial_corpus))
+
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, "benign_tests"),
+                initial_corpus,
+            )
+        )
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, "crashing_tests"),
+                initial_corpus,
+            )
+        )
+
+        fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
             timeout=timeout,
             additional_params=bug_info.get(self.key_tool_params, ""),
             input_folder=initial_corpus,
             output_folder=self.dir_output,
-            dict=join(self.dir_setup, self.name, "autodict.dict"),
+            dict=dictionary,
             binary=join(self.dir_expr, "src", bug_info[self.key_bin_path]),
             binary_input=bug_info[self.key_crash_cmd].replace("$POC", "@@"),
         )
