@@ -249,7 +249,7 @@ tool_config_schema = {
         ConfigFieldsEnum.IMAGE.value: {"type": "string"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 composite_sequence_schema = {
