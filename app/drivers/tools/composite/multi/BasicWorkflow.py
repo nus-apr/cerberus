@@ -54,6 +54,9 @@ from app.drivers.tools.MockTool import MockTool
 
 
 class BasicWorkflow(AbstractCompositeTool):
+    key_task_tag: str = "task_tag"
+    key_image_tag: str = "image_tag"
+
     def __init__(self):
         self.name = basename(__file__)[:-3].lower()
         super().__init__(self.name)
@@ -104,7 +107,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_debug(composite_config_info)
         composite_config_info[self.key_make_metadata] = True
         composite_sequence = composite_config_info[self.key_composite_sequence]
-        tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
+        root_tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
 
         self.emit_normal("setting up workflow")
         self.emit_debug(composite_sequence)
@@ -120,14 +123,26 @@ class BasicWorkflow(AbstractCompositeTool):
         self.task_mappings = self.make_task_mappings(root_dir)
         self.bug_info = bug_info
 
-        self.tool_map: Dict[CompsiteTaskType, List[Tuple[AbstractTool, str]]] = {}
+        self.tool_map: Dict[
+            CompsiteTaskType, List[Tuple[AbstractTool, str, str, str]]
+        ] = {}
 
         for task_type, tools in composite_sequence.items():
             self.tool_map[task_type] = []
             for tool_info in tools:
+                tag_fragments = []
+                if root_tool_tag:
+                    tag_fragments.append(root_tool_tag)
+
                 tool_name = tool_info["name"]
                 tool_params = tool_info.get(self.key_tool_params, "")
-                # tool_tag = tool_info.get(definitions.KEY_TOOL_TAG, "")
+
+                extra_tool_tag = tool_info.get(definitions.KEY_TOOL_TAG, "")
+                if extra_tool_tag:
+                    tag_fragments.append(extra_tool_tag)
+
+                tool_tag = "-".join(tag_fragments)
+
                 real_type = tool_info.get(
                     "type", task_type
                 )  # override the type when in "special" (crash-analyze) types
@@ -161,9 +176,12 @@ class BasicWorkflow(AbstractCompositeTool):
                     composite_config_info,
                     dir_info,
                     image_name,
+                    bug_info,
                     tool_tag,
                 )
-                self.tool_map[task_type].append((tool, tool_params))
+                self.tool_map[task_type].append(
+                    (tool, tool_params, tool_tag, real_type)
+                )
 
         self.emit_highlight("Done with setup!")
 
@@ -188,10 +206,17 @@ class BasicWorkflow(AbstractCompositeTool):
         for starter in ["analyze", "fuzz", "repair"]:
             if starter in self.tool_map:
                 found_starter = True
-                for tool, params in self.tool_map[cast(CompsiteTaskType, starter)]:
+                for tool, params, tag, _ in self.tool_map[
+                    cast(CompsiteTaskType, starter)
+                ]:
                     self.pool.apply_async(
                         self.run,
-                        [starter, *self.get_args(tool, new_params=params)],
+                        [
+                            starter,
+                            *self.get_args(
+                                tool, tag, new_params=params, new_task_tag=tag
+                            ),
+                        ],
                     )
                 break
 
@@ -231,13 +256,13 @@ class BasicWorkflow(AbstractCompositeTool):
         """
         try:
             values.task_type.set(task_type)
-            tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
-            original_tool_tag = composite_config_info.get("original-tag", "")
+            tool_tag = composite_config_info.get(self.key_task_tag, "")
+            image_tag = composite_config_info.get(self.key_image_tag, "")
             image_name = create_task_image_identifier(
                 benchmark,
                 tool,
                 bug_info,
-                original_tool_tag,
+                image_tag,
             )
 
             key = create_task_identifier(
@@ -262,6 +287,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 run_index,
                 image_name,
                 hash,
+                tool_tag,
             )
         except Exception as e:
             self.emit_warning(e)
@@ -373,7 +399,7 @@ class BasicWorkflow(AbstractCompositeTool):
             )
             == list(self.task_mappings["crash-analyze"].keys())[0]
         ):
-            self.emit_debug("Ignoring crash analysis update")
+            # self.emit_debug("Ignoring crash analysis update")
             pass
         elif (
             os.path.commonprefix(
@@ -506,39 +532,57 @@ class BasicWorkflow(AbstractCompositeTool):
 
             if "crash-analyze" in self.tool_map:
                 self.emit_debug("starting crash analyzer")
-                for tool, params in self.tool_map["crash-analyze"]:
+                for tool, params, tag, type in self.tool_map["crash-analyze"]:
+                    self.emit_debug("with params {}".format(params))
                     self.pool.apply_async(
                         self.run,
                         [
-                            "analyze",
+                            type,
                             *self.get_args(
-                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                                (5 / 60.0),  # Run for 5 minutes
                             ),
                         ],
+                        callback=self.on_crash_analysis_finished,
                     )
             elif "localize" in self.tool_map:
                 self.emit_debug("starting localizer")
-                for tool, params in self.tool_map["localize"]:
+                for tool, params, tag, type in self.tool_map["localize"]:
                     self.emit_debug(f"tool! {tool.name}")
                     self.pool.apply_async(
                         self.run,
                         [
                             "localize",
                             *self.get_args(
-                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
                             ),
                         ],
                     )
 
             elif "repair" in self.tool_map:
                 self.emit_debug("starting repair")
-                for tool, params in self.tool_map["repair"]:
+                for tool, params, tag, type in self.tool_map["repair"]:
                     self.pool.apply_async(
                         self.run,
                         [
                             "repair",
                             *self.get_args(
-                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
                             ),
                         ],
                     )
@@ -573,16 +617,156 @@ class BasicWorkflow(AbstractCompositeTool):
             new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
 
             if "repair" in self.tool_map:
-                for tool, params in self.tool_map["repair"]:
+                for tool, params, tag, type in self.tool_map["repair"]:
                     self.pool.apply_async(
                         self.run,
                         [
                             "repair",
                             *self.get_args(
-                                tool, new_bug_info, subtask_hash, subtask_tag, params
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
                             ),
                         ],
                     )
+        except Exception as e:
+            self.emit_warning(e)
+            traceback.print_exc()
+        pass
+
+    def on_crash_analysis_finished(self, res):
+        try:
+            base_dir = join(
+                list(self.task_mappings["crash-analyze"].keys())[0], "default"
+            )
+            crash_dir = join(base_dir, "crashes")
+            benign_dir = join(base_dir, "queue")
+
+            subtask_hash = hashlib.sha1()
+            subtask_hash.update(str(time.time()).encode("utf-8"))
+            subtask_tag = subtask_hash.hexdigest()[:8]
+
+            base_setup = self.proto_args[0]["local"]["setup"]
+            self.emit_debug(f"Base setup dir is {base_setup}")
+            enhanced_setup = join(
+                dirname(os.path.normpath(base_setup)),
+                f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+            )
+            self.emit_debug(f"New setup dir is {enhanced_setup}")
+
+            shutil.copytree(base_setup, enhanced_setup)
+            os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
+            os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
+
+            crashing_tests = []
+            for crashing_input in os.listdir(crash_dir):
+                if (
+                    os.path.isfile(join(crash_dir, crashing_input))
+                    and crashing_input != "README.txt"
+                ):
+                    crashing_tests.append(crashing_input)
+                    shutil.copy(
+                        join(crash_dir, crashing_input),
+                        join(enhanced_setup, "tests", ""),
+                    )
+                    shutil.copy(
+                        join(crash_dir, crashing_input),
+                        join(enhanced_setup, "crashing_tests", ""),
+                    )
+
+            benign_tests = []
+            for benign_input in os.listdir(benign_dir):
+                if (
+                    os.path.isfile(join(benign_dir, benign_input))
+                    and benign_input != "README.txt"
+                ):
+                    benign_tests.append(benign_input)
+                    shutil.copy(
+                        join(benign_dir, benign_input),
+                        join(enhanced_setup, "tests", ""),
+                    )
+                    shutil.copy(
+                        join(benign_dir, benign_input),
+                        join(enhanced_setup, "benign_tests", ""),
+                    )
+
+            new_testcases = (
+                crashing_tests + benign_tests + os.listdir(join(base_setup, "tests"))
+            )
+
+            self.emit_debug(f"New testcases are {new_testcases}")
+
+            new_bug_info = deepcopy(self.bug_info)
+
+            new_bug_info[self.key_exploit_list] = list(
+                set(new_bug_info[self.key_exploit_list] + new_testcases)
+            )
+
+            new_bug_info[self.key_exploit_inputs] = [
+                {"format": "raw", "dir": "crashing_tests"}
+            ]
+            new_bug_info[self.key_benign_inputs] = [
+                {"format": "raw", "dir": "benign_tests"}
+            ]
+            new_bug_info["test_dir_abspath"] = self.dir_setup
+
+            new_bug_info[self.key_passing_tests] = (
+                benign_tests + new_bug_info[self.key_passing_tests]
+            )
+
+            new_bug_info[self.key_failing_tests] = (
+                crashing_tests + new_bug_info[self.key_failing_tests]
+            )
+
+            writer.write_as_json(
+                new_bug_info,
+                join(
+                    list(self.task_mappings["fuzz"].keys())[0],
+                    f"meta-data-{subtask_tag}.json",
+                ),
+            )
+
+            if "localize" in self.tool_map:
+                self.emit_debug("starting localizer")
+                for tool, params, tag, type in self.tool_map["localize"]:
+                    self.pool.apply_async(
+                        self.run,
+                        [
+                            "localize",
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                            ),
+                        ],
+                    )
+
+            elif "repair" in self.tool_map:
+                self.emit_debug("starting repair")
+                for tool, params, tag, type in self.tool_map["repair"]:
+                    self.pool.apply_async(
+                        self.run,
+                        [
+                            "repair",
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                            ),
+                        ],
+                    )
+            else:
+                self.emit_debug("What do I do??")
+
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
@@ -605,10 +789,12 @@ class BasicWorkflow(AbstractCompositeTool):
     def get_args(
         self,
         tool: AbstractTool,
+        image_tag: str,
         new_bug_info: Optional[Dict[str, Any]] = None,
         new_hash: Optional[Any] = None,
-        new_tag: Optional[str] = None,
+        new_task_tag: Optional[str] = None,
         new_params: Optional[str] = None,
+        new_timeout: Optional[float] = None,
     ):
         """
         Construct the arguments for the run function from the proto_args.
@@ -631,18 +817,20 @@ class BasicWorkflow(AbstractCompositeTool):
             hash = new_hash
 
         composite_config_info_new = deepcopy(composite_config_info)
-        if "original-tag" not in composite_config_info_new:
-            composite_config_info_new["original-tag"] = composite_config_info_new.get(
-                definitions.KEY_TOOL_TAG, ""
-            )
 
         del composite_config_info_new["container-id"]
 
-        if new_tag:
-            composite_config_info_new[definitions.KEY_TOOL_TAG] = new_tag
+        if image_tag:
+            composite_config_info_new[self.key_image_tag] = image_tag
+
+        if new_task_tag:
+            composite_config_info_new[self.key_task_tag] = new_task_tag
 
         if new_params:
             composite_config_info_new[definitions.KEY_TOOL_PARAMS] = new_params
+
+        if new_timeout is not None:
+            composite_config_info_new[self.key_timeout] = new_timeout
 
         return (
             dir_info,

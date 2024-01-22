@@ -68,6 +68,8 @@ class AbstractTool(AbstractDriver):
     key_pub_test_script = definitions.KEY_PUB_TEST_SCRIPT
     key_pvt_test_script = definitions.KEY_PVT_TEST_SCRIPT
     key_adv_test_script = definitions.KEY_ADV_TEST_SCRIPT
+    key_failing_tests = definitions.KEY_FAILING_TEST
+    key_passing_tests = definitions.KEY_PASSING_TEST
     key_make_metadata = definitions.KEY_MAKE_METADATA
     key_gpus = definitions.KEY_GPUS
     key_cpus = definitions.KEY_CPUS
