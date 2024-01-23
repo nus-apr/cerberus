@@ -24,12 +24,12 @@ class ZAP(AbstractFuzzTool):
         self.emit_normal("executing fuzz command")
 
         timeout = int(float(fuzz_config_info[self.key_timeout]) * 60)
-       
+
         self.timestamp_log_start()
 
         initial_corpus = join(self.dir_setup, self.name, "initial-corpus")
-        
-        fuzz_command =  f"/zap/zap-full-scan.py -t http://127.0.0.1:8080/ -m {timeout}"  # timeout is the number of mins # timeout is the number of mins 
+
+        fuzz_command = f"/zap/zap-full-scan.py -t http://127.0.0.1:8080/ -m {timeout}"  # timeout is the number of mins # timeout is the number of mins
 
         status = self.run_command(
             fuzz_command, self.log_output_path, join(self.dir_expr, "src")
