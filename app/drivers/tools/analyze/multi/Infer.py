@@ -42,6 +42,11 @@ class Infer(AbstractAnalyzeTool):
         # this build command is for the VulnLoc benchmark;
         # to support other benchmarks, look at the meta-data.json file in VulnLoc
         build_cmd = bug_info.get(self.key_build_command, "")
+        config_cmd = bug_info.get(self.key_config_command, "")
+        if config_cmd:
+            infer_command = f"infer capture -- {config_cmd}"
+            self.run_command(infer_command, dir_path=dir_src)
+
         log_compile_path = join(self.dir_logs, "infer-compile-output.log")
         compile_command = "infer capture -- {}".format(build_cmd)
 
