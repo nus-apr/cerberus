@@ -443,7 +443,11 @@ def start_container(container_id: str):
 
 def stop_container(container_id: str, timeout=120):
     client = get_client()
-    emitter.normal("\t\t\t[framework] stopping docker container")
+    emitter.normal(
+        "\t\t\t[framework] stopping docker container {}".format(
+            " " if values.debug else container_id
+        )
+    )
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=timeout)  # type: ignore
