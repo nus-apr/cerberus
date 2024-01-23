@@ -135,6 +135,9 @@ class BasicWorkflow(AbstractCompositeTool):
                     tag_fragments.append(root_tool_tag)
 
                 tool_name = tool_info["name"]
+                if tool_info.get("ignore", False):
+                    self.emit_debug(f"Skip {tool_name}")
+                    continue
                 tool_params = tool_info.get(self.key_tool_params, "")
 
                 extra_tool_tag = tool_info.get(definitions.KEY_TOOL_TAG, "")
