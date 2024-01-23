@@ -642,11 +642,9 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_crash_analysis_finished(self, res):
         try:
-            base_dir = join(
-                list(self.task_mappings["crash-analyze"].keys())[0], "default"
-            )
-            crash_dir = join(base_dir, "crashes")
-            benign_dir = join(base_dir, "queue")
+            base_dir = list(self.task_mappings["crash-analyze"].keys())[0]
+            benign_dir = join(base_dir, "benign_tests")
+            crash_dir = join(base_dir, "crashing_tests")
 
             subtask_hash = hashlib.sha1()
             subtask_hash.update(str(time.time()).encode("utf-8"))
@@ -666,35 +664,27 @@ class BasicWorkflow(AbstractCompositeTool):
 
             crashing_tests = []
             for crashing_input in os.listdir(crash_dir):
-                if (
-                    os.path.isfile(join(crash_dir, crashing_input))
-                    and crashing_input != "README.txt"
-                ):
-                    crashing_tests.append(crashing_input)
-                    shutil.copy(
-                        join(crash_dir, crashing_input),
-                        join(enhanced_setup, "tests", ""),
-                    )
-                    shutil.copy(
-                        join(crash_dir, crashing_input),
-                        join(enhanced_setup, "crashing_tests", ""),
-                    )
+                crashing_tests.append(crashing_input)
+                shutil.copy(
+                    join(crash_dir, crashing_input),
+                    join(enhanced_setup, "tests", ""),
+                )
+                shutil.copy(
+                    join(crash_dir, crashing_input),
+                    join(enhanced_setup, "crashing_tests", ""),
+                )
 
             benign_tests = []
             for benign_input in os.listdir(benign_dir):
-                if (
-                    os.path.isfile(join(benign_dir, benign_input))
-                    and benign_input != "README.txt"
-                ):
-                    benign_tests.append(benign_input)
-                    shutil.copy(
-                        join(benign_dir, benign_input),
-                        join(enhanced_setup, "tests", ""),
-                    )
-                    shutil.copy(
-                        join(benign_dir, benign_input),
-                        join(enhanced_setup, "benign_tests", ""),
-                    )
+                benign_tests.append(benign_input)
+                shutil.copy(
+                    join(benign_dir, benign_input),
+                    join(enhanced_setup, "tests", ""),
+                )
+                shutil.copy(
+                    join(benign_dir, benign_input),
+                    join(enhanced_setup, "benign_tests", ""),
+                )
 
             new_testcases = (
                 crashing_tests + benign_tests + os.listdir(join(base_setup, "tests"))
@@ -704,17 +694,13 @@ class BasicWorkflow(AbstractCompositeTool):
 
             new_bug_info = deepcopy(self.bug_info)
 
+            bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
+
+            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
             new_bug_info[self.key_exploit_list] = list(
                 set(new_bug_info[self.key_exploit_list] + new_testcases)
             )
-
-            new_bug_info[self.key_exploit_inputs] = [
-                {"format": "raw", "dir": "crashing_tests"}
-            ]
-            new_bug_info[self.key_benign_inputs] = [
-                {"format": "raw", "dir": "benign_tests"}
-            ]
-            new_bug_info["test_dir_abspath"] = self.dir_setup
 
             new_bug_info[self.key_passing_tests] = (
                 benign_tests + new_bug_info[self.key_passing_tests]
