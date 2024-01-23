@@ -29,7 +29,7 @@ class AFLPlusPlus(AbstractFuzzTool):
 
         self.timestamp_log_start()
 
-        initial_corpus = join(self.dir_setup, self.name, "initial-corpus")
+        initial_corpus = join(self.dir_expr, "initial-corpus")
 
         dictionary = ""
         if self.is_file(join(self.dir_setup, self.name, "autodict.dict")):
@@ -39,22 +39,16 @@ class AFLPlusPlus(AbstractFuzzTool):
 
         self.run_command("mkdir {}".format(initial_corpus))
 
-        self.run_command(
-            "bash -c 'cp -r {}/* {}' ".format(
-                join(self.dir_setup, "benign_tests"),
-                initial_corpus,
-            )
-        )
-        self.run_command(
-            "bash -c 'cp -r {}/* {}' ".format(
-                join(self.dir_setup, "crashing_tests"),
-                initial_corpus,
-            )
-        )
+        additional_params = fuzz_config_info.get(self.key_tool_params, "")
+
+        if "-C" in additional_params:
+            self.copy_crashing_tests(initial_corpus)
+        else:
+            self.copy_benign_tests(initial_corpus)
 
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
             timeout=timeout,
-            additional_params=bug_info.get(self.key_tool_params, ""),
+            additional_params=additional_params,
             input_folder=initial_corpus,
             output_folder=self.dir_output,
             dict=dictionary,
@@ -69,3 +63,82 @@ class AFLPlusPlus(AbstractFuzzTool):
         self.process_status(status)
 
         self.timestamp_log_end()
+
+        self.emit_normal("Genrating meta-data.json")
+
+        base_dir = join(self.dir_output, "default")
+        source_crash_dir = join(base_dir, "crashes")
+        source_benign_dir = join(base_dir, "queue")
+
+        target_benign_dir = join(self.dir_output, "benign_tests")
+        target_crash_dir = join(self.dir_output, "crashing_tests")
+
+        self.run_command("mkdir {}".format(target_benign_dir))
+        self.run_command("mkdir {}".format(target_crash_dir))
+
+        self.copy_benign_tests(target_benign_dir)
+        self.copy_crashing_tests(target_crash_dir)
+
+        self.run_command(
+            "bash -c 'cp -r {}/id* {} '".format(source_benign_dir, target_benign_dir)
+        )
+        self.run_command(
+            "bash -c 'cp -r {}/id* {} '".format(source_crash_dir, target_crash_dir)
+        )
+
+        new_bug_info = {}
+
+        new_bug_info[self.key_exploit_inputs] = [
+            {"format": "raw", "dir": "crashing_tests"}
+        ]
+        new_bug_info[self.key_benign_inputs] = [
+            {"format": "raw", "dir": "benign_tests"}
+        ]
+
+        new_bug_info[self.key_exploit_list] = list(
+            map(
+                lambda x: join("benign_tests", os.path.basename(x)),
+                self.list_dir(target_benign_dir, regex="in*"),
+            )
+        ) + list(
+            map(
+                lambda x: join("crashing_tests", os.path.basename(x)),
+                self.list_dir(target_crash_dir, regex="in*"),
+            )
+        )
+
+        new_bug_info["test_dir_abspath"] = self.dir_setup
+        self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
+
+    def copy_crashing_tests(self, path):
+        # Get Crashing tests
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, "crashing_tests"),
+                path,
+            )
+        )
+
+    def copy_benign_tests(self, path):
+        # Get Benign Tests
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, "benign_tests"),
+                path,
+            )
+        )
+        # Get default seeds
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, "tests"),
+                path,
+            )
+        )
+
+        # Get special seeds
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, self.name, "initial-corpus"),
+                path,
+            )
+        )
