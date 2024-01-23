@@ -21,7 +21,8 @@ benchmark/**/fix2fit/*-driver
 benchmark/**/compile_commands.json
 benchmark/**/f1x-*
 summaries/**
-composite_worksapce
+composite_workspace
 tags
 tags.lock
 .venv
+
