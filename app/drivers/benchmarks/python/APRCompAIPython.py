@@ -8,6 +8,7 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 class APRCompAIPython(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "aprcomp/benchmark-aipython-2024"
         super(APRCompAIPython, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):
