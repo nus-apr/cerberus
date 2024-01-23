@@ -548,7 +548,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
-                                (5 / 60.0),  # Run for 5 minutes
+                                (2 / 60.0),  # Run for 2 minutes
                             ),
                         ],
                         callback=self.on_crash_analysis_finished,
