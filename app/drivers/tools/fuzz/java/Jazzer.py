@@ -72,6 +72,11 @@ class Jazzer(AbstractFuzzTool):
         if len(reproducers) != 1:
             self.error_exit(f"Expected 1 reproducer, got {len(reproducers)}")
 
+        reproducer_file = reproducers[0]
+        s = "".join(self.read_file(reproducer_file))
+        lines = self.reproducer_to_junit4(s).splitlines(keepends=True)
+        self.write_file(lines, reproducer_file)
+
         self.timestamp_log_end()
 
     def ensure_command(
@@ -85,3 +90,30 @@ class Jazzer(AbstractFuzzTool):
         tmp = classname.split(".")
         tmp[-1] += ".java"
         return join(*tmp)
+
+    @classmethod
+    def reproducer_to_junit4(cls, s: str):
+        lines = s.splitlines(keepends=True)
+
+        lines.insert(0, "import org.junit.Test;\n")
+
+        for idx, line in enumerate(lines):
+            if "public static void main(String[] args) throws Throwable" in line:
+                break
+        else:
+            raise RuntimeError("declaration of main not found")
+        lines.insert(idx, "    @Test")
+        lines[
+            idx + 1
+        ] = "    public /*static*/ void main(/*String[] args*/) throws Throwable {\n"
+
+        for idx, line in enumerate(lines):
+            if "fuzzerInitialize.invoke(null, (Object) args);" in line:
+                break
+        else:
+            raise RuntimeError("fuzzer initialization not found")
+        lines[
+            idx
+        ] = "                fuzzerInitialize.invoke(null, (Object) /*args*/ null);"
+
+        return "\n".join(lines)
