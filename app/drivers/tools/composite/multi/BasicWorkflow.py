@@ -259,6 +259,8 @@ class BasicWorkflow(AbstractCompositeTool):
         """
         try:
             values.task_type.set(task_type)
+            values.current_task_profile_id.set(composite_config_info["id"])
+            values.current_container_profile_id.set(composite_config_info["id"])
             tool_tag = composite_config_info.get(self.key_task_tag, "")
             image_tag = composite_config_info.get(self.key_image_tag, "")
             image_name = create_task_image_identifier(
@@ -465,21 +467,15 @@ class BasicWorkflow(AbstractCompositeTool):
             os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
             os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
 
-            crashing_tests = []
-            for crashing_input in os.listdir(crash_dir):
-                if (
-                    os.path.isfile(join(crash_dir, crashing_input))
-                    and crashing_input != "README.txt"
-                ):
-                    crashing_tests.append(crashing_input)
-                    shutil.copy(
-                        join(crash_dir, crashing_input),
-                        join(enhanced_setup, "tests", ""),
-                    )
-                    shutil.copy(
-                        join(crash_dir, crashing_input),
-                        join(enhanced_setup, "crashing_tests", ""),
-                    )
+            crashing_tests = [basename(event.src_path)]
+            shutil.copy(
+                join(crash_dir, basename(event.src_path)),
+                join(enhanced_setup, "tests", ""),
+            )
+            shutil.copy(
+                join(crash_dir, basename(event.src_path)),
+                join(enhanced_setup, "crashing_tests", ""),
+            )
 
             benign_tests = []
             for benign_input in os.listdir(benign_dir):
