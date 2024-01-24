@@ -217,8 +217,8 @@ resource-limits:
             f"-{subject_name.replace('-', '_')}"
             f"-{bug_id.replace('-', '_')}"
         ).lower()
-        test_list = bug_info.get(self.key_passing_tests, []) + bug_info.get(
-            self.key_failing_tests, []
+        test_list = bug_info.get(self.key_passing_test_identifiers, []) + bug_info.get(
+            self.key_failing_test_identifiers, []
         )
         self.build_runtime_docker_image(docker_tag_id)
         fix_files = []

@@ -48,8 +48,8 @@ class TBar(AbstractRepairTool):
         )
 
         env = dict(
-            FAILING_TESTS=(" ".join(bug_info[self.key_failing_tests])),
-            PASSING_TESTS=(" ".join(bug_info[self.key_passing_tests])),
+            FAILING_TESTS=(" ".join(bug_info[self.key_failing_test_identifiers])),
+            PASSING_TESTS=(" ".join(bug_info[self.key_passing_test_identifiers])),
             CLASS_DIRECTORY=f"{bug_info[self.key_dir_class]}/",
             TEST_CLASS_DIRECTORY=f"{bug_info[self.key_dir_test_class]}/",
             SOURCE_DIRECTORY=f"{bug_info[self.key_dir_source]}/",

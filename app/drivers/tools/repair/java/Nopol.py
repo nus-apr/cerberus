@@ -24,7 +24,7 @@ class Nopol(AbstractRepairTool):
         """
 
         timeout_h = str(repair_config_info[self.key_timeout])
-        failing_test_list = bug_info[self.key_failing_tests]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         self.dir_source = dir_java_src
 
@@ -39,7 +39,7 @@ class Nopol(AbstractRepairTool):
 
         list_deps_str = ":".join(list_deps)
 
-        test_classes_str = " ".join(failing_test_list)
+        test_classes_str = " ".join(failing_test_identifiers_list)
         nopol_jar_path = (
             f"{self.nopol_home}/nopol/nopol-{self.nopol_version}"
             f"-SNAPSHOT-jar-with-dependencies.jar"

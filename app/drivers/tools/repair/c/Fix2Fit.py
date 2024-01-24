@@ -99,13 +99,13 @@ class Fix2Fit(AbstractRepairTool):
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         abs_path_binary = join(self.dir_expr, "src", bug_info[self.key_bin_path])
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += test_id + " "
-        if passing_test_list:
-            for test_id in passing_test_list:
+        if passing_test_identifiers_list:
+            for test_id in passing_test_identifiers_list:
                 test_id_list += test_id + " "
 
         abs_path_buggy_file = join(
@@ -178,7 +178,7 @@ class Fix2Fit(AbstractRepairTool):
         self.emit_highlight(" Log File: " + self.log_output_path)
 
         is_timeout = True
-        reported_failing_test = []
+        reported_failing_test_identifiers = []
         if self.is_file(dir_results + "/original.txt"):
             log_lines = self.read_file(dir_results + "/original.txt")
             self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
@@ -187,7 +187,7 @@ class Fix2Fit(AbstractRepairTool):
                 if "no patch found" in line:
                     self.emit_warning("[warning] no patch found by F1X")
                 elif "negative tests: [" in line:
-                    reported_failing_test = (
+                    reported_failing_test_identifiers = (
                         str(line)
                         .split("negative tests: [")[-1]
                         .split("]")[0]
@@ -252,14 +252,16 @@ class Fix2Fit(AbstractRepairTool):
         if is_timeout:
             self.emit_warning("[warning] timeout detected")
         if (
-            reported_failing_test != fail_list
-            and reported_failing_test
+            reported_failing_test_identifiers != fail_list
+            and reported_failing_test_identifiers
             and not is_timeout
         ):
             self.emit_warning("[warning] unexpected failing test-cases reported")
             self.emit_warning("expected fail list: {0}".format(",".join(fail_list)))
             self.emit_warning(
-                "reported fail list: {0}".format(",".join(reported_failing_test))
+                "reported fail list: {0}".format(
+                    ",".join(reported_failing_test_identifiers)
+                )
             )
 
         dir_patch = self.dir_expr + "/patches"

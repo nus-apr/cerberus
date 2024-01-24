@@ -51,8 +51,8 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.run_command(localize_command, self.log_output_path, dir_path="/sbfl")
 
-        dir_failing_traces = join(self.dir_output, "failing_tests")
-        dir_passing_traces = join(self.dir_output, "passing_tests")
+        dir_failing_traces = join(self.dir_output, self.key_failing_test_identifiers)
+        dir_passing_traces = join(self.dir_output, self.key_passing_test_identifiers)
         self.run_command("mkdir -p {}".format(dir_failing_traces))
         self.run_command("mkdir -p {}".format(dir_passing_traces))
 
@@ -60,21 +60,36 @@ class E9PatchSBFL(AbstractLocalizeTool):
             f"bash -c 'mv /sbfl/*.tracer {join(self.dir_expr,'src',bug_info[self.key_bin_path])}'"
         )
 
-        if not bug_info[self.key_failing_tests] or not bug_info[self.key_passing_tests]:
+        if (
+            not bug_info[self.key_failing_test_identifiers]
+            or not bug_info[self.key_passing_test_identifiers]
+        ):
             self.error_exit("This tool requires positive and negative test cases")
 
-        for failing_test in bug_info[self.key_failing_tests]:
+        for failing_test_identifiers in bug_info[self.key_failing_test_identifiers]:
             self.run_command(
-                "bash {} {}".format(bug_info[self.key_test_script], failing_test),
+                "bash {} {}".format(
+                    bug_info[self.key_test_script], failing_test_identifiers
+                ),
                 dir_path=self.dir_setup,
-                env={"TRACE_FILE": join(dir_failing_traces, failing_test + ".trace")},
+                env={
+                    "TRACE_FILE": join(
+                        dir_failing_traces, failing_test_identifiers + ".trace"
+                    )
+                },
             )
 
-        for passing_test in bug_info[self.key_passing_tests]:
+        for passing_test_identifiers in bug_info[self.key_passing_test_identifiers]:
             self.run_command(
-                "bash {} {}".format(bug_info[self.key_test_script], passing_test),
+                "bash {} {}".format(
+                    bug_info[self.key_test_script], passing_test_identifiers
+                ),
                 dir_path=self.dir_setup,
-                env={"TRACE_FILE": join(dir_passing_traces, passing_test + ".trace")},
+                env={
+                    "TRACE_FILE": join(
+                        dir_passing_traces, passing_test_identifiers + ".trace"
+                    )
+                },
             )
 
         status = self.run_command(

@@ -202,12 +202,16 @@ def collect_benchmark_result(
     )
 
 
-def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: AbstractTool):
+def collect_tool_result(
+    dir_info: DirectoryInfo, experiment_info: Dict[str, Any], tool: AbstractTool
+):
     emitter.normal("\t\t[framework] collecting experiment results")
     task_tag_name = dir_info["local"]["logs"].split("/")[-1]
     bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
-    tool.analyse_output(dir_info, bug_id, failing_test_list)
+    failing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_FAILING_TEST, []
+    )
+    tool.analyse_output(dir_info, bug_id, failing_test_identifiers_list)
     tool.print_stats()
     tool.log_output_path = ""
     logger.log_tool_stats(task_tag_name, tool.stats)

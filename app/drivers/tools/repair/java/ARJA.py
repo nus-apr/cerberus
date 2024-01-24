@@ -27,8 +27,8 @@ class ARJA(AbstractRepairTool):
 
         classpath = f"{join(self.arja_home,'lib/*')}:{join(self.arja_home,'bin')}"
         dir_localization = f"{self.dir_output}/localization"
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
 
         dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
@@ -66,8 +66,8 @@ class ARJA(AbstractRepairTool):
             f"-DgzoltarDataDir {dir_localization} "
         )
 
-        if not passing_test_list:
-            test_list_str = ",".join(failing_test_list)
+        if not passing_test_identifiers_list:
+            test_list_str = ",".join(failing_test_identifiers_list)
             arja_command += f" -Dtests {test_list_str}"
 
         status = self.run_command(

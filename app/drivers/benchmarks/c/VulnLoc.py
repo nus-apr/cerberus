@@ -90,8 +90,10 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash test.sh {failing_test_list[0]}"
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
+        command_str = f"bash test.sh {failing_test_identifiers_list[0]}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -99,10 +101,12 @@ class VulnLoc(AbstractBenchmark):
             os.path.join(self.dir_setup),
         )
 
-        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_test_identifiers_list = experiment_item[
+            self.key_passing_test_identifiers
+        ]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash test.sh {passing_test_list[0]}"
+        if len(passing_test_identifiers_list) != 0:
+            command_str = f"bash test.sh {passing_test_identifiers_list[0]}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
@@ -123,8 +127,10 @@ class VulnLoc(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = "bash verify.sh {}".format(failing_test_list[0])
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
+        command_str = "bash verify.sh {}".format(failing_test_identifiers_list[0])
         status = self.run_command(
             container_id, command_str, self.log_test_path, self.dir_setup
         )

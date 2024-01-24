@@ -74,9 +74,17 @@ class F1X(AbstractRepairTool):
         fix_location = bug_info.get(self.key_localization, [{}])[0].get(
             self.key_fix_loc, None
         )
-        fix_file_list = list(filter(lambda x : x is not None, map(lambda x: x.get(self.key_fix_file,None) , bug_info.get(self.key_localization, [{}]))))
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        fix_file_list = list(
+            filter(
+                lambda x: x is not None,
+                map(
+                    lambda x: x.get(self.key_fix_file, None),
+                    bug_info.get(self.key_localization, [{}]),
+                ),
+            )
+        )
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         timeout = str(repair_config_info[self.key_timeout])
         subject_name = bug_info[self.key_subject]
         benchmark_name = bug_info[self.key_benchmark]
@@ -87,10 +95,10 @@ class F1X(AbstractRepairTool):
         )
         test_driver_path = join(self.dir_expr, "f1x-test")
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += str(test_id) + " "
-        if passing_test_list:
-            for test_id in passing_test_list:
+        if passing_test_identifiers_list:
+            for test_id in passing_test_identifiers_list:
                 test_id_list += str(test_id) + " "
 
         abs_path_buggy_file = None

@@ -13,12 +13,11 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 
 class AbstractSelectTool(AbstractTool):
-
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
-    key_failing_tests = definitions.KEY_FAILING_TEST
-    key_passing_tests = definitions.KEY_PASSING_TEST
+    key_failing_test_identifiers = definitions.KEY_FAILING_TEST
+    key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY

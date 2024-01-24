@@ -29,8 +29,8 @@ class CPR(AbstractRepairTool):
         )
         conf_path = join(self.dir_expr, "cpr", "repair.conf")
         timeout_m = str(float(timeout) * 60)
-        test_id_list = ",".join(bug_info[self.key_failing_tests])
-        seed_id_list = ",".join(bug_info[self.key_passing_tests])
+        test_id_list = ",".join(bug_info[self.key_failing_test_identifiers])
+        seed_id_list = ",".join(bug_info[self.key_passing_test_identifiers])
 
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.timestamp_log_start()

@@ -22,8 +22,8 @@ class Darjeeling(AbstractRepairTool):
         dir_c_src = join(self.dir_expr, "src", bug_info["source_directory"])
         fix_file = join(self.dir_expr, "src", bug_info["fix_file"])
         bug_id = join(self.dir_expr, "src", bug_info["bug_id"])
-        passing_test_list = join(self.dir_expr, "src", bug_info[self.key_passing_tests])
-        failing_test_list = join(self.dir_expr, "src", bug_info[self.key_failing_tests])
+        passing_test_identifiers_list = join(self.dir_expr, "src", bug_info[self.key_passing_test_identifiers])
+        failing_test_identifiers_list = join(self.dir_expr, "src", bug_info[self.key_failing_test_identifiers])
         patch_directory = join(self.dir_output, "patches")
 
         # execute repair tool
@@ -32,8 +32,8 @@ class Darjeeling(AbstractRepairTool):
             f"--dir_c_src {dir_c_src} "
             f"--fix_file {fix_file} "
             f"--bug_id {bug_id} "
-            f"--passing_test_list {passing_test_list} "
-            f"--failing_test_list {failing_test_list} "
+            f"--passing_test_identifiers_list {passing_test_identifiers_list} "
+            f"--failing_test_identifiers_list {failing_test_identifiers_list} "
             f"--patch_directory {patch_directory}"
         )
         self.timestamp_log_start()

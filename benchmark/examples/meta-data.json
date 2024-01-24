@@ -5,12 +5,12 @@
    "bug_id": "user-input",
    "source_file": "test.c",
    "line_numbers": [6],
-   "failing_test": "1",
-   "passing_test": "",
+   "failing_test_identifiers": "1",
+   "passing_test_identifiers": "",
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "test",
-   "crash_input": "1",
+   "binary_args": "1",
    "test_timeout": 10
  },
  {
@@ -19,12 +19,12 @@
    "bug_id": "file-input",
    "source_file": "test.c",
    "line_numbers": [19],
-   "failing_test": "1",
-   "passing_test": "",
+   "failing_test_identifiers": "1",
+   "passing_test_identifiers": "",
    "count_neg": 1,
    "count_pos": 0,
    "binary_path": "test",
-   "crash_input": "$POC",
+   "binary_args": "$POC",
    "test_timeout": 10
  },
   {
@@ -33,12 +33,12 @@
    "bug_id": "insert-if",
    "source_file": "test.c",
    "line_numbers": [6],
-   "failing_test": "3",
-   "passing_test": "1,2,4,5",
+   "failing_test_identifiers": "3",
+   "passing_test_identifiers": "1,2,4,5",
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "test",
-   "crash_input": "1",
+   "binary_args": "1",
    "test_timeout": 10
  },
   {
@@ -47,12 +47,12 @@
    "bug_id": "update-if",
    "source_file": "test.c",
    "line_numbers": [7],
-   "failing_test": "3",
-   "passing_test": "1,2,4,5",
+   "failing_test_identifiers": "3",
+   "passing_test_identifiers": "1,2,4,5",
    "count_neg": 1,
    "count_pos": 4,
    "binary_path": "test",
-   "crash_input": "1",
+   "binary_args": "1",
    "test_timeout": 10
  },
   {
@@ -61,12 +61,12 @@
    "bug_id": "gcd",
    "source_file": "gcd.c",
    "line_numbers": [10],
-   "failing_test": "11",
-   "passing_test": "1,2,3,4,5,6,7,8,9,10",
+   "failing_test_identifiers": "11",
+   "passing_test_identifiers": "1,2,3,4,5,6,7,8,9,10",
    "count_neg": 1,
    "count_pos": 10,
    "binary_path": "gcd",
-   "crash_input": "55",
+   "binary_args": "55",
    "test_timeout": 10
  }
 ]

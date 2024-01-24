@@ -31,15 +31,19 @@ def run_selection(
         validate_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
 
-    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
-    if isinstance(passing_test_list, str):
-        passing_test_list = passing_test_list.split(",")
-    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
-    if isinstance(failing_test_list, str):
-        failing_test_list = failing_test_list.split(",")
+    passing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_PASSING_TEST, []
+    )
+    if isinstance(passing_test_identifiers_list, str):
+        passing_test_identifiers_list = passing_test_identifiers_list.split(",")
+    failing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_FAILING_TEST, []
+    )
+    if isinstance(failing_test_identifiers_list, str):
+        failing_test_identifiers_list = failing_test_identifiers_list.split(",")
 
-    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list
-    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_identifiers_list
+    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:
@@ -69,14 +73,6 @@ def select_all(
     total_timeout = time.time() + 60 * 60 * time_duration
 
     final_status = [TaskStatus.NONE]
-
-    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
-    if isinstance(passing_test_list, str):
-        passing_test_list = passing_test_list.split(",")
-
-    failing_test_list = str(
-        experiment_info.get(definitions.KEY_FAILING_TEST, "")
-    ).split(",")
 
     if values.ui_active:
         run_selection(

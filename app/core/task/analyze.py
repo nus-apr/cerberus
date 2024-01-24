@@ -46,15 +46,21 @@ def run_analysis(
     test_timeout = int(
         analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10)
     )
-    passing_test_list = experiment_info.get(definitions.KEY_PASSING_TEST, [])
-    if isinstance(passing_test_list, str):
-        passing_test_list = passing_test_list.split(",")
-    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
-    if isinstance(failing_test_list, str):
-        failing_test_list = failing_test_list.split(",")
-    pass_test_count = int(len(passing_test_list) * test_ratio)
-    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_list[:pass_test_count]
-    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_list
+    passing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_PASSING_TEST, []
+    )
+    if isinstance(passing_test_identifiers_list, str):
+        passing_test_identifiers_list = passing_test_identifiers_list.split(",")
+    failing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_FAILING_TEST, []
+    )
+    if isinstance(failing_test_identifiers_list, str):
+        failing_test_identifiers_list = failing_test_identifiers_list.split(",")
+    pass_test_count = int(len(passing_test_identifiers_list) * test_ratio)
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_identifiers_list[
+        :pass_test_count
+    ]
+    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
     try:

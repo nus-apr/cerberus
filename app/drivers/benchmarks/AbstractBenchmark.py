@@ -47,13 +47,14 @@ class AbstractBenchmark(AbstractDriver):
     key_bug_id = definitions.KEY_BUG_ID
     key_fix_file = definitions.KEY_FIX_FILE
     key_localization = definitions.KEY_LOCALIZATION
-    key_failing_tests = definitions.KEY_FAILING_TEST
-    key_passing_tests = definitions.KEY_PASSING_TEST
+    key_failing_test_identifiers = definitions.KEY_FAILING_TEST
+    key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
     key_compile_cmd = definitions.KEY_COMPILE_CMD
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
+    key_test_script = definitions.KEY_TEST_SCRIPT
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
@@ -137,12 +138,20 @@ class AbstractBenchmark(AbstractDriver):
     @staticmethod
     def process_metadata(data):
         for experiment_item in data:
-            passing_list = experiment_item[AbstractBenchmark.key_passing_tests]
-            failing_list = experiment_item[AbstractBenchmark.key_failing_tests]
+            passing_list = experiment_item[
+                AbstractBenchmark.key_passing_test_identifiers
+            ]
+            failing_list = experiment_item[
+                AbstractBenchmark.key_failing_test_identifiers
+            ]
             passing_list_str = [f"{x}" for x in passing_list]
             failing_list_str = [f"{x}" for x in failing_list]
-            experiment_item[AbstractBenchmark.key_passing_tests] = passing_list_str
-            experiment_item[AbstractBenchmark.key_failing_tests] = failing_list_str
+            experiment_item[
+                AbstractBenchmark.key_passing_test_identifiers
+            ] = passing_list_str
+            experiment_item[
+                AbstractBenchmark.key_failing_test_identifiers
+            ] = failing_list_str
         return data
 
     @staticmethod

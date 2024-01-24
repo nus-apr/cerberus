@@ -138,8 +138,10 @@ class Bears(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash test_subject {failing_test_list[0]}"
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
+        command_str = f"bash test_subject {failing_test_identifiers_list[0]}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -147,10 +149,12 @@ class Bears(AbstractBenchmark):
             os.path.join(self.dir_setup),
         )
 
-        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_test_identifiers_list = experiment_item[
+            self.key_passing_test_identifiers
+        ]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash test_subject {passing_test_list[0]}"
+        if len(passing_test_identifiers_list) != 0:
+            command_str = f"bash test_subject {passing_test_identifiers_list[0]}"
             passing_status = self.run_command(
                 container_id,
                 command_str,

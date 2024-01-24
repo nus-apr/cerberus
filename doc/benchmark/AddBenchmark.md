@@ -128,18 +128,18 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
   information
 * Common but not mandatory:
   * `source_file` - The specific file containing the bug
-  * `failing_test` - A string or a list containing test identifiers for tests which fail
-  * `passing_test` -  A string or a list containing test identifiers for tests which pass
-  * `count_pos` - The amount of tests in `failing_test`
-  * `count_neg` - The amount of tests in `passing_test`
+  * `failing_test_identifiers` - A string or a list containing test identifiers for tests which fail
+  * `passing_test_identifiers` -  A string or a list containing test identifiers for tests which pass
+  * `count_pos` - The amount of tests in `failing_test_identifiers`
+  * `count_neg` - The amount of tests in `passing_test_identifiers`
   * `config_script` - A path to the name of the configuration script. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `build_script` - A path to the configuration script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `clean_script`  - A path to the clean-up script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `build_script`  - A path to the build script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `test_script` - A path to the test script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`. The script should be able to accept the keyword `all` to allow for execution of all tests or the identifier for test. This can be benchmark specific but a preferable standard can be either a file path to indicate input files or name of a test method `file::method`.
   * `language` - The language of the subject. `multi` if there is more than one
-  * `crash_input` - command to execute the binary. `$POC` represents where the input should be passed
-  * `exploit_file_list` - a list of crashing inputs. Similar to `failing_test`
+  * `binary_args` - command to execute the binary. `$POC` represents where the input should be passed
+  * `exploit_file_list` - a list of crashing inputs. Similar to `failing_test_identifiers`
 * Java:
   * `dependencies` - specific dependencies of the project.
   * `source_directory` - the location of the .java files for the project. Path is relative to the root of the project.
@@ -162,10 +162,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,
@@ -183,10 +183,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,
@@ -204,10 +204,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,

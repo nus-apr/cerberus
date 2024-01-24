@@ -17,8 +17,8 @@ class GenProg(AbstractRepairTool):
         if self.is_instrument_only:
             return
         task_conf_id = repair_config_info[self.key_id]
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         bug_id = str(bug_info[self.key_bug_id])
         self.fix_file = bug_info[self.key_localization][0][self.key_fix_file]
 
@@ -28,8 +28,8 @@ class GenProg(AbstractRepairTool):
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-        count_pass = len(passing_test_list)
-        count_neg = len(failing_test_list)
+        count_pass = len(passing_test_identifiers_list)
+        count_neg = len(failing_test_identifiers_list)
         repair_config_str = (
             "--program {program}\n"
             "--pos-tests {p_size}\n"

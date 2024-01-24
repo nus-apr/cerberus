@@ -68,14 +68,20 @@ class ManyBugs(AbstractBenchmark):
         self.log_test_path = (
             self.log_dir_path + "/" + self.name + "-" + bug_id + "-test-all.log"
         )
-        failing_test_cases = experiment_item[self.key_failing_tests].split(",")
-        passing_test_cases = experiment_item[self.key_passing_tests].split(",")
-        passing_test_cases = experiment_item[self.key_passing_tests].split(",")
+        failing_test_identifiers_cases = experiment_item[
+            self.key_failing_test_identifiers
+        ].split(",")
+        passing_test_identifiers_cases = experiment_item[
+            self.key_passing_test_identifiers
+        ].split(",")
+        passing_test_identifiers_cases = experiment_item[
+            self.key_passing_test_identifiers
+        ].split(",")
         unexpected_fail_list = []
         unexpected_pass_list = []
         with open(self.log_test_path, "w") as log_file:
             log_file.write("FAILING TEST CASES\n")
-            for test_id in failing_test_cases:
+            for test_id in failing_test_identifiers_cases:
                 command_str = "bash test.sh {} {}".format(
                     self.base_dir_experiment, test_id
                 )
@@ -89,7 +95,7 @@ class ManyBugs(AbstractBenchmark):
                     unexpected_pass_list.append(test_id)
 
             log_file.write("PASSING TEST CASES\n")
-            for test_id in passing_test_cases:
+            for test_id in passing_test_identifiers_cases:
                 command_str = "bash test.sh {} {}".format(
                     self.base_dir_experiment, test_id
                 )

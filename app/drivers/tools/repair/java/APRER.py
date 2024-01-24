@@ -27,30 +27,30 @@ class APRER(AbstractRepairTool):
 
         dir_java_src = bug_info["source_directory"]
         dir_test_src = bug_info["test_directory"]
-        f_test_list = bug_info[self.key_failing_tests]
-        p_test_list = bug_info[self.key_passing_tests]
+        f_test_list = bug_info[self.key_failing_test_identifiers]
+        p_test_list = bug_info[self.key_passing_test_identifiers]
 
         print(dir_java_src)
         print(dir_test_src)
 
-        failing_test_list = ""
-        passing_test_list = ""
+        failing_test_identifiers_list = ""
+        passing_test_identifiers_list = ""
         for ft in f_test_list:
             if "::" in ft:
                 tmp = ft.split("::")[0]
-                if tmp not in failing_test_list:
-                    failing_test_list += tmp + ","
+                if tmp not in failing_test_identifiers_list:
+                    failing_test_identifiers_list += tmp + ","
             else:
-                failing_test_list += ft + ","
+                failing_test_identifiers_list += ft + ","
 
         for pt in p_test_list:
             print(pt)
             if "::" in pt:
                 tmp = pt.split("::")[0]
-                if tmp not in passing_test_list:
-                    passing_test_list += tmp + ","
+                if tmp not in passing_test_identifiers_list:
+                    passing_test_identifiers_list += tmp + ","
             else:
-                passing_test_list += pt + ","
+                passing_test_identifiers_list += pt + ","
 
         patch_directory = self.dir_output
         setup_scripts = self.dir_setup
@@ -61,8 +61,8 @@ class APRER(AbstractRepairTool):
             f" {project_dir} "
             f" {dir_java_src} "
             f" {dir_test_src} "
-            f" {failing_test_list} "
-            f" {passing_test_list} "
+            f" {failing_test_identifiers_list} "
+            f" {passing_test_identifiers_list} "
             f" {patch_directory} "
             f" {setup_scripts} "
         )

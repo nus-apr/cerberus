@@ -26,8 +26,8 @@ class Angelix(AbstractRepairTool):
         fix_line_number_list = bug_info[self.key_localization][0][self.key_fix_lines]
         fix_location = bug_info[self.key_localization][0][self.key_fix_loc]
         timeout = str(repair_config_info[self.key_timeout])
-        failing_test_list = bug_info[self.key_failing_tests]
-        passing_test_list = bug_info[self.key_passing_tests]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
         subject_name = bug_info[self.key_subject]
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
@@ -43,10 +43,12 @@ class Angelix(AbstractRepairTool):
         timeout_s = int(timeout) * 3600
         syn_timeout = int(0.25 * timeout_s * 1000)
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += test_id + " "
-        if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+        if passing_test_identifiers_list:
+            filtered_list = self.filter_tests(
+                passing_test_identifiers_list, subject_name, bug_id
+            )
             for test_id in filtered_list:
                 test_id_list += test_id + " "
 

@@ -7,7 +7,6 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class APRCompAIJava(AbstractBenchmark):
-
     log_instrument_path = None
 
     def __init__(self):
@@ -62,8 +61,10 @@ class APRCompAIJava(AbstractBenchmark):
     def test(self, bug_index, container_id):
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
-        failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash {experiment_item['test_script']} {failing_test_list[0].replace('::','#')}"
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
+        command_str = f"bash {experiment_item[self.key_test_script]} {failing_test_identifiers_list[0].replace('::','#')}"
         time = datetime.now()
         failing_status = self.run_command(
             container_id,
@@ -72,10 +73,12 @@ class APRCompAIJava(AbstractBenchmark):
             os.path.join(self.dir_setup),
         )
 
-        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_test_identifiers_list = experiment_item[
+            self.key_passing_test_identifiers
+        ]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash {experiment_item['test_script']} {passing_test_list[0].replace('::','#')}"
+        if len(passing_test_identifiers_list) != 0:
+            command_str = f"bash {experiment_item[self.key_test_script]} {passing_test_identifiers_list[0].replace('::','#')}"
             passing_status = self.run_command(
                 container_id,
                 command_str,

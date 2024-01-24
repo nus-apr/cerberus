@@ -31,8 +31,8 @@ class ARJA_E(AbstractRepairTool):
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
         dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
         dir_test_bin = join(self.dir_expr, "src", bug_info[self.key_dir_test_class])
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
 
         list_deps = [
             join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
@@ -71,8 +71,8 @@ class ARJA_E(AbstractRepairTool):
             f"-DgzoltarDataDir {dir_localization} "
         )
 
-        if not passing_test_list:
-            test_list_str = ",".join(failing_test_list)
+        if not passing_test_identifiers_list:
+            test_list_str = ",".join(failing_test_identifiers_list)
             arja_e_command += f" -Dtests {test_list_str}"
 
         status = self.run_command(

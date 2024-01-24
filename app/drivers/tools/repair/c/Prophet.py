@@ -95,18 +95,26 @@ class Prophet(AbstractRepairTool):
 
     def generate_revlog(self, experiment_info, revlog_file, bug_id):
         subject_name = experiment_info[self.key_subject]
-        failing_test_list = experiment_info[self.key_failing_tests]
-        passing_test_list = experiment_info[self.key_passing_tests]
+        failing_test_identifiers_list = experiment_info[
+            self.key_failing_test_identifiers
+        ]
+        passing_test_identifiers_list = experiment_info[
+            self.key_passing_test_identifiers
+        ]
         benchmark_name = experiment_info[self.key_benchmark]
 
         test_config = ["-", "-"]
-        test_config.append("Diff Cases: Tot {0}".format(len(failing_test_list)))
-        test_config.append((" ".join(failing_test_list)))
-        test_config.append("Positive Cases: Tot {0}".format(len(passing_test_list)))
+        test_config.append(
+            "Diff Cases: Tot {0}".format(len(failing_test_identifiers_list))
+        )
+        test_config.append((" ".join(failing_test_identifiers_list)))
+        test_config.append(
+            "Positive Cases: Tot {0}".format(len(passing_test_identifiers_list))
+        )
 
-        if passing_test_list:
+        if passing_test_identifiers_list:
             filtered_list = self.filter_tests(
-                passing_test_list, subject_name, bug_id, benchmark_name
+                passing_test_identifiers_list, subject_name, bug_id, benchmark_name
             )
             test_config.append((" ".join(filtered_list) + "\n"))
 

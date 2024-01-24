@@ -26,8 +26,8 @@ class LLMR(AbstractRepairTool):
         model = repair_config_info.get("model", "gpt-4")
         params = repair_config_info.get(self.key_tool_params, "")
 
-        passing_tests = ",".join(bug_info[self.key_passing_tests])
-        failing_tests = ",".join(bug_info[self.key_failing_tests])
+        passing_test_identifiers = ",".join(bug_info[self.key_passing_test_identifiers])
+        failing_test_identifiers = ",".join(bug_info[self.key_failing_test_identifiers])
 
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
@@ -76,7 +76,7 @@ class LLMR(AbstractRepairTool):
 
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language} {params}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} {params}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -91,11 +91,15 @@ class LLMR(AbstractRepairTool):
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
             model=model,
-            passing_tests="-passing-tests {}".format(passing_tests)
-            if passing_tests != ""
+            passing_test_identifiers="-passing-tests {}".format(
+                passing_test_identifiers
+            )
+            if passing_test_identifiers != ""
             else " ",
-            failing_tests="-failing-tests {}".format(failing_tests)
-            if failing_tests != ""
+            failing_test_identifiers="-failing-tests {}".format(
+                failing_test_identifiers
+            )
+            if failing_test_identifiers != ""
             else " ",
             binary_path="-binary-loc {}".format(bug_info[self.key_bin_path])
             if self.key_bin_path in bug_info

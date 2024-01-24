@@ -23,8 +23,8 @@ class AbstractRepairTool(AbstractTool):
     key_fix_file_list = definitions.KEY_FIX_FILE_LIST
     key_fix_lines = definitions.KEY_FIX_LINES
     key_fix_loc = definitions.KEY_FIX_LOC
-    key_failing_tests = definitions.KEY_FAILING_TEST
-    key_passing_tests = definitions.KEY_PASSING_TEST
+    key_failing_test_identifiers = definitions.KEY_FAILING_TEST
+    key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY

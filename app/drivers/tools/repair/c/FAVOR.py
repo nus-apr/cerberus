@@ -63,7 +63,7 @@ class FAVOR(AbstractRepairTool):
             self.dir_expr, f"src", bug_info.get("source_file")
         )
         binary_path = os.path.join(self.dir_expr, f"src", bug_info.get("binary_path"))
-        crash_command = bug_info.get("crash_input").replace("$POC", test_case_path)
+        crash_command = bug_info.get(self.key_crash_cmd).replace("$POC", test_case_path)
 
         if not self.is_file(buggy_file_path):
             self.error_exit("buggy source file not found")

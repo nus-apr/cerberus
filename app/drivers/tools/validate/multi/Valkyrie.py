@@ -22,7 +22,7 @@ class Valkyrie(AbstractValidateTool):
             config_script = bug_info[self.key_config_script]
             abs_path_c_script = f"{self.dir_setup}/{config_script}"
             conf_content.append(f"config_script:{abs_path_c_script}\n")
-            
+
         if bug_info.get(self.key_localization, None):
             localization = bug_info[self.key_localization]
             if len(localization) > 1:
@@ -36,7 +36,7 @@ class Valkyrie(AbstractValidateTool):
             f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
         )
         conf_content.append(
-            f"test_id_list:{','.join(bug_info[self.key_failing_tests])}\n"
+            f"test_id_list:{','.join(bug_info[self.key_failing_test_identifiers])}\n"
         )
         build_script = bug_info[self.key_build_script]
         abs_path_b_script = f"{self.dir_setup}/{build_script}"

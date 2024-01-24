@@ -206,14 +206,14 @@ class BasicWorkflow(AbstractCompositeTool):
         )
 
         found_starter = False
-        for starter in ["analyze", "fuzz", "repair"]:
+        for starter in ["analyze", "fuzz", "crash-analyze", "repair"]:
             if starter in self.tool_map:
                 found_starter = True
                 for tool, params, tag, _ in self.tool_map[
                     cast(CompsiteTaskType, starter)
                 ]:
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             starter,
                             *self.get_args(
@@ -241,7 +241,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def run(
+    def run_subtask(
         self,
         task_type: TaskType,
         dir_info: DirectoryInfo,
@@ -413,8 +413,8 @@ class BasicWorkflow(AbstractCompositeTool):
             == list(self.task_mappings["localize"].keys())[0]
         ):
             if (
-                not dirname(event.src_path).endswith("failing_tests")
-                and not dirname(event.src_path).endswith("passing_tests")
+                not dirname(event.src_path).endswith("failing_test_identifiers")
+                and not dirname(event.src_path).endswith("passing_test_identifiers")
                 and not event.is_directory
                 and basename(event.src_path) == "meta-data.json"
             ):
@@ -513,12 +513,12 @@ class BasicWorkflow(AbstractCompositeTool):
             ]
             new_bug_info["test_dir_abspath"] = self.dir_setup
 
-            new_bug_info[self.key_passing_tests] = (
-                benign_tests + new_bug_info[self.key_passing_tests]
+            new_bug_info[self.key_passing_test_identifiers] = (
+                benign_tests + new_bug_info[self.key_passing_test_identifiers]
             )
 
-            new_bug_info[self.key_failing_tests] = (
-                crashing_tests + new_bug_info[self.key_failing_tests]
+            new_bug_info[self.key_failing_test_identifiers] = (
+                crashing_tests + new_bug_info[self.key_failing_test_identifiers]
             )
 
             writer.write_as_json(
@@ -534,7 +534,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 for tool, params, tag, type in self.tool_map["crash-analyze"]:
                     self.emit_debug("with params {}".format(params))
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             type,
                             *self.get_args(
@@ -554,7 +554,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 for tool, params, tag, type in self.tool_map["localize"]:
                     self.emit_debug(f"tool! {tool.name}")
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             "localize",
                             *self.get_args(
@@ -572,7 +572,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("starting repair")
                 for tool, params, tag, type in self.tool_map["repair"]:
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             "repair",
                             *self.get_args(
@@ -618,7 +618,7 @@ class BasicWorkflow(AbstractCompositeTool):
             if "repair" in self.tool_map:
                 for tool, params, tag, type in self.tool_map["repair"]:
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             "repair",
                             *self.get_args(
@@ -698,12 +698,12 @@ class BasicWorkflow(AbstractCompositeTool):
                 set(new_bug_info[self.key_exploit_list] + new_testcases)
             )
 
-            new_bug_info[self.key_passing_tests] = (
-                benign_tests + new_bug_info[self.key_passing_tests]
+            new_bug_info[self.key_passing_test_identifiers] = (
+                benign_tests + new_bug_info[self.key_passing_test_identifiers]
             )
 
-            new_bug_info[self.key_failing_tests] = (
-                crashing_tests + new_bug_info[self.key_failing_tests]
+            new_bug_info[self.key_failing_test_identifiers] = (
+                crashing_tests + new_bug_info[self.key_failing_test_identifiers]
             )
 
             writer.write_as_json(
@@ -718,7 +718,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("starting localizer")
                 for tool, params, tag, type in self.tool_map["localize"]:
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             "localize",
                             *self.get_args(
@@ -736,7 +736,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("starting repair")
                 for tool, params, tag, type in self.tool_map["repair"]:
                     self.pool.apply_async(
-                        self.run,
+                        self.run_subtask,
                         [
                             "repair",
                             *self.get_args(
