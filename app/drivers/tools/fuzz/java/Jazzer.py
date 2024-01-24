@@ -76,8 +76,13 @@ class Jazzer(AbstractFuzzTool):
         if len(reproducers) != 1:
             self.error_exit(f"Expected 1 reproducer, got {len(reproducers)}")
 
-        self.run_command(f"python3 /opt/rewrite_reproducer.py {reproducers}")
-        self.run_command(f"python3 /opt/rewrite_reproducer.py {benign_path}")
+        status = self.run_command(f"python3 /opt/rewrite_reproducer.py {reproducer_path}")
+        if status != 0:
+            self.error_exit("failed to rewrite reproducers")
+
+        status = self.run_command(f"python3 /opt/rewrite_reproducer.py {benign_path}")
+        if status != 0:
+            self.error_exit("failed to rewrite benign tests")
 
         self.timestamp_log_end()
 
