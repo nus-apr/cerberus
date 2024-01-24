@@ -52,10 +52,10 @@ class Jazzer(AbstractFuzzTool):
         )
         self.ensure_command(compile_command)
 
-        reproducer_path = join(self.dir_output, "reproducers")
+        reproducer_path = join(self.dir_output, "crashing_tests")
         self.ensure_command(f"mkdir {reproducer_path}")
 
-        benign_path = join(self.dir_output, "benign")
+        benign_path = join(self.dir_output, "benign_tests")
         self.ensure_command(f"mkdir {benign_path}")
 
         artifact_prefix = join(self.dir_output, "jazzer_artifacts")
@@ -76,13 +76,40 @@ class Jazzer(AbstractFuzzTool):
         if len(reproducers) != 1:
             self.error_exit(f"Expected 1 reproducer, got {len(reproducers)}")
 
-        status = self.run_command(f"python3 /opt/rewrite_reproducer.py {reproducer_path}")
+        status = self.run_command(
+            f"python3 /opt/rewrite_reproducer.py {reproducer_path}"
+        )
         if status != 0:
             self.error_exit("failed to rewrite reproducers")
 
         status = self.run_command(f"python3 /opt/rewrite_reproducer.py {benign_path}")
         if status != 0:
             self.error_exit("failed to rewrite benign tests")
+
+        new_bug_info = {}
+
+        new_bug_info[self.key_exploit_inputs] = [
+            {"format": "junit", "dir": "crashing_tests"}
+        ]
+        new_bug_info[self.key_benign_inputs] = [
+            {"format": "junit", "dir": "benign_tests"}
+        ]
+
+        new_bug_info[self.key_exploit_list] = list(
+            map(
+                lambda x: os.path.basename(x)[: -len(".java")],
+                self.list_dir(reproducer_path, regex=".java"),
+            )
+        ) + list(
+            map(
+                lambda x: os.path.basename(x)[: -len(".java")],
+                self.list_dir(benign_path, regex=".java"),
+            )
+        )
+
+        new_bug_info["test_dir_abspath"] = self.dir_setup
+
+        self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
 
         self.timestamp_log_end()
 
