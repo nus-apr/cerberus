@@ -40,6 +40,20 @@ class FlaCoCo(AbstractLocalizeTool):
         status = self.run_command(localize_command, self.log_output_path)
         self.process_status(status)
 
+        if self.is_file(join(self.dir_output, "localilzation.csv")):
+            localization = []
+            lines = self.read_file(self.dir_output, "localization.csv")
+            for entry in lines:
+                path, line, score = entry.split(",")
+                localization.append(
+                    {
+                        "source_file": path,
+                        "line_numbers": [line],
+                        "score": score,
+                    }
+                )
+            self.write_json(localization, join(self.dir_output, "meta-data.json"))
+
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 

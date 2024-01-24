@@ -100,6 +100,9 @@ class VulnFix(AbstractRepairTool):
             # assumes instrumentation converted stdarg as a file handling command
             exploit_path = join(self.dir_setup, "tests/exploit")
         else:
+            self.emit_debug(bug_info)
+            self.emit_debug(bug_info[self.key_exploit_list])
+
             exploit_path = join(
                 self.dir_setup, sorted(bug_info[self.key_exploit_list])[0]
             )
