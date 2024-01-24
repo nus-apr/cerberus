@@ -46,6 +46,25 @@ class AFLPlusPlus(AbstractFuzzTool):
         else:
             self.copy_benign_tests(initial_corpus)
 
+        if (
+            self.key_config_script not in bug_info
+            or self.key_build_script not in bug_info
+        ):
+            self.emit_error(
+                "AFL++ needs to rebuild the project with coverage instrumntation"
+            )
+
+        self.run_command(
+            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}".format(
+                join(self.dir_setup, bug_info[self.key_config_script])
+            )
+        )
+        self.run_command(
+            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
+                join(self.dir_setup, bug_info[self.key_build_script])
+            )
+        )
+
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
             timeout=timeout,
             additional_params=additional_params,
