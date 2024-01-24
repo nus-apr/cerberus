@@ -8,7 +8,7 @@ class Jazzer(AbstractFuzzTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "crhf2docker/jazzer:alpha"
+        self.image_name = "crhf2docker/jazzer:alpha-0.2"
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
@@ -44,7 +44,7 @@ class Jazzer(AbstractFuzzTool):
             join(self.dir_expr, "src", dep) for dep in bug_info["dependencies"]
         ]
         classpaths.append(join(self.dir_expr, "src", bug_info["class_directory"]))
-        classpaths.extend(self.list_dir("/opt/jazzer/lib"))
+        classpaths.append("/opt/jazzer/jazzer_standalone.jar")
 
         compile_command = (
             f"javac -cp '{':'.join(classpaths)}:{harness_source_dir}'"
@@ -55,12 +55,16 @@ class Jazzer(AbstractFuzzTool):
         reproducer_path = join(self.dir_output, "reproducers")
         self.ensure_command(f"mkdir {reproducer_path}")
 
+        benign_path = join(self.dir_output, "benign")
+        self.ensure_command(f"mkdir {benign_path}")
+
         artifact_prefix = join(self.dir_output, "jazzer_artifacts")
         self.ensure_command(f"mkdir {artifact_prefix}")
 
         fuzz_command = (
             f"/opt/jazzer/jazzer --cp={':'.join(classpaths)}:{harness_class_dir} --target_class={target_class}"
             f" --reproducer_path={reproducer_path}"
+            f" --benign_path={benign_path}"
             f" -artifact_prefix={artifact_prefix}"
             f" -timeout={timeout}"
         )
@@ -72,10 +76,8 @@ class Jazzer(AbstractFuzzTool):
         if len(reproducers) != 1:
             self.error_exit(f"Expected 1 reproducer, got {len(reproducers)}")
 
-        reproducer_file = reproducers[0]
-        s = "".join(self.read_file(reproducer_file))
-        lines = self.reproducer_to_junit4(s).splitlines(keepends=True)
-        self.write_file(lines, reproducer_file)
+        self.run_command(f"python3 /opt/rewrite_reproducer.py {reproducers}")
+        self.run_command(f"python3 /opt/rewrite_reproducer.py {benign_path}")
 
         self.timestamp_log_end()
 
@@ -90,30 +92,3 @@ class Jazzer(AbstractFuzzTool):
         tmp = classname.split(".")
         tmp[-1] += ".java"
         return join(*tmp)
-
-    @classmethod
-    def reproducer_to_junit4(cls, s: str):
-        lines = s.splitlines(keepends=True)
-
-        lines.insert(0, "import org.junit.Test;\n")
-
-        for idx, line in enumerate(lines):
-            if "public static void main(String[] args) throws Throwable" in line:
-                break
-        else:
-            raise RuntimeError("declaration of main not found")
-        lines.insert(idx, "    @Test")
-        lines[
-            idx + 1
-        ] = "    public /*static*/ void main(/*String[] args*/) throws Throwable {\n"
-
-        for idx, line in enumerate(lines):
-            if "fuzzerInitialize.invoke(null, (Object) args);" in line:
-                break
-        else:
-            raise RuntimeError("fuzzer initialization not found")
-        lines[
-            idx
-        ] = "                fuzzerInitialize.invoke(null, (Object) /*args*/ null);"
-
-        return "\n".join(lines)
