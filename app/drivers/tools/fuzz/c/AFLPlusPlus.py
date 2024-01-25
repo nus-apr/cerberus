@@ -55,7 +55,7 @@ class AFLPlusPlus(AbstractFuzzTool):
             )
 
         self.run_command(
-            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}".format(
+            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
                 join(self.dir_setup, bug_info[self.key_config_script])
             )
         )
