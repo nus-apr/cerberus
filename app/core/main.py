@@ -268,7 +268,7 @@ def process_tasks(tasks: TaskList):
         )
 
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
-
+        tool.tool_tag = tool_tag
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         dir_info = task.generate_dir_info(

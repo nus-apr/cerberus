@@ -597,6 +597,7 @@ class Cerberus(App[List[Result]]):
         task_config: TaskConfig,
     ):
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+        tool.tool_tag = tool_tag
         key = main.create_task_identifier(
             benchmark,
             task_profile,

@@ -1,5 +1,6 @@
 import csv
 import hashlib
+import json
 import os
 import shutil
 import time
@@ -153,6 +154,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     tool = cast(AbstractTool, MockTool())
                 else:
                     tool = configuration.load_tool(tool_name, real_type)
+                    tool.tool_tag = tool_tag
 
                 self.emit_debug(tool.bindings)
                 tool.bindings = tool.bindings or {}
@@ -258,6 +260,15 @@ class BasicWorkflow(AbstractCompositeTool):
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
         try:
+            with open(
+                join(
+                    list(self.task_mappings["repair"].keys())[0],
+                    "cerberus_internal.json",
+                ),
+                "w",
+            ) as f:
+                f.write(json.dumps({"dir_info": dir_info, "bug_info": bug_info}))
+
             values.task_type.set(task_type)
             values.current_task_profile_id.set(composite_config_info["id"])
             values.current_container_profile_id.set(composite_config_info["id"])
@@ -342,6 +353,7 @@ class BasicWorkflow(AbstractCompositeTool):
             ".synced",
             "cmdline",
             ".fuzzer_stats_tmp",
+            "cerberus_internal.json",
         ]:
             return False
         if ".state" in event.src_path or ".trace" in event.src_path:
@@ -355,69 +367,47 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_debug("Time to die")
                 self.message_queue.put(self.exit_message)
 
-        if (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["repair"].keys())[0]]
-            )
-            == list(self.task_mappings["repair"].keys())[0]
-        ):
-            self.emit_highlight("Repair update")
+        if os.path.commonprefix([event.src_path, self.repair_root]) == self.repair_root:
+            if "patches" in event.src_path:
+                self.emit_highlight("Repair update")
+                self.on_patch_created(event)
             pass
         elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["analyze"].keys())[0]]
-            )
-            == list(self.task_mappings["analyze"].keys())[0]
+            os.path.commonprefix([event.src_path, self.analyze_root])
+            == self.analyze_root
         ):
             self.emit_highlight("Analyze Update")
             pass
-        elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["fuzz"].keys())[0]]
-            )
-            == list(self.task_mappings["fuzz"].keys())[0]
-        ):
+        elif os.path.commonprefix([event.src_path, self.fuzz_root]) == self.fuzz_root:
             # self.emit_highlight("Fuzz Update")
             # self.emit_debug(dirname(event.src_path))
             if dirname(event.src_path).endswith("crashes"):
                 # self.emit_normal("Found a crash!")
                 self.pool.apply_async(self.on_crash_found, [event])
         elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["validate"].keys())[0]]
-            )
-            == list(self.task_mappings["validate"].keys())[0]
+            os.path.commonprefix([event.src_path, self.validate_root])
+            == self.validate_root
         ):
             self.emit_highlight("Validate Update")
             pass
         elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["select"].keys())[0]]
-            )
-            == list(self.task_mappings["select"].keys())[0]
+            os.path.commonprefix([event.src_path, self.select_root]) == self.select_root
         ):
             self.emit_highlight("Select Update")
             pass
+        # elif (
+        #     os.path.commonprefix(
+        #         [event.src_path, self.crash_analyze_root]
+        #     )
+        #     == list(self.task_mappings["crash-analyze"].keys())[0]
+        # ):
+        #     # self.emit_debug("Ignoring crash analysis update")
+        #     pass
         elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["crash-analyze"].keys())[0]]
-            )
-            == list(self.task_mappings["crash-analyze"].keys())[0]
+            os.path.commonprefix([event.src_path, self.localize_root])
+            == self.localize_root
         ):
-            # self.emit_debug("Ignoring crash analysis update")
-            pass
-        elif (
-            os.path.commonprefix(
-                [event.src_path, list(self.task_mappings["localize"].keys())[0]]
-            )
-            == list(self.task_mappings["localize"].keys())[0]
-        ):
-            if (
-                not dirname(event.src_path).endswith("failing_test_identifiers")
-                and not dirname(event.src_path).endswith("passing_test_identifiers")
-                and not event.is_directory
-                and basename(event.src_path) == "meta-data.json"
-            ):
+            if basename(event.src_path) == "meta-data.json":
                 self.emit_highlight("Localize Update")
                 self.emit_highlight(event)
                 self.pool.apply_async(self.on_localization_created, [event])
@@ -607,6 +597,53 @@ class BasicWorkflow(AbstractCompositeTool):
                         self.run_subtask,
                         [
                             "repair",
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                            ),
+                        ],
+                    )
+        except Exception as e:
+            self.emit_warning(e)
+            traceback.print_exc()
+        pass
+
+    def on_patch_created(self, event: FileSystemEvent):
+        try:
+            subtask_hash = hashlib.sha1()
+            subtask_hash.update(str(time.time()).encode("utf-8"))
+            subtask_tag = subtask_hash.hexdigest()[:8]
+
+            base_setup = self.proto_args[0]["local"]["setup"]
+            enhanced_setup = join(
+                dirname(os.path.normpath(base_setup)),
+                f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+            )
+            self.emit_debug(f"Setup dir is {base_setup}")
+            self.emit_debug(f"New setup dir is {enhanced_setup}")
+
+            shutil.copytree(base_setup, enhanced_setup)
+
+            os.makedirs(join(enhanced_setup, "patches"), exist_ok=True)
+            shutil.copy(event.src_path, join(enhanced_setup, "patches"))
+
+            self.emit_debug("Copying")
+
+            new_bug_info = deepcopy(self.bug_info)
+
+            bug_info_extension = reader.read_json(event.src_path)
+            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
+            if "validate" in self.tool_map:
+                for tool, params, tag, type in self.tool_map["validate"]:
+                    self.pool.apply_async(
+                        self.run_subtask,
+                        [
+                            "validate",
                             *self.get_args(
                                 tool,
                                 tag,
@@ -831,6 +868,15 @@ class BasicWorkflow(AbstractCompositeTool):
                 join(root_dir, "crash-analyze"): {"bind": "/output", "mode": "rw"}
             },
         }
+
+        self.repair_root = list(self.task_mappings["repair"].keys())[0]
+        self.analyze_root = list(self.task_mappings["analyze"].keys())[0]
+        self.fuzz_root = list(self.task_mappings["fuzz"].keys())[0]
+        self.select_root = list(self.task_mappings["select"].keys())[0]
+        self.validate_root = list(self.task_mappings["validate"].keys())[0]
+        self.localize_root = list(self.task_mappings["localize"].keys())[0]
+        self.crash_analyze_root = list(self.task_mappings["crash-analyze"].keys())[0]
+
         self.emit_debug(task_mappings)
         for task in task_mappings.values():
             for key in task.keys():

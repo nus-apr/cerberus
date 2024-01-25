@@ -116,19 +116,43 @@ class AbstractCompositeTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("composite-tool", self.name, message)
+        super().emit_normal(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_warning(self, message):
-        super().emit_warning("composite-tool", self.name, message)
+        super().emit_warning(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_error(self, message):
-        super().emit_error("composite-tool", self.name, message)
+        super().emit_error(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_highlight(self, message):
-        super().emit_highlight("composite-tool", self.name, message)
+        super().emit_highlight(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_success(self, message):
-        super().emit_success("composite-tool", self.name, message)
+        super().emit_success(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_debug(self, message):
-        super().emit_debug("composite-tool", self.name, message)
+        super().emit_debug(
+            "composite-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )

@@ -122,19 +122,43 @@ class AbstractValidateTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("validate-tool", self.name, message)
+        super().emit_normal(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_warning(self, message):
-        super().emit_warning("validate-tool", self.name, message)
+        super().emit_warning(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_error(self, message):
-        super().emit_error("validate-tool", self.name, message)
+        super().emit_error(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_highlight(self, message):
-        super().emit_highlight("validate-tool", self.name, message)
+        super().emit_highlight(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_success(self, message):
-        super().emit_success("validate-tool", self.name, message)
+        super().emit_success(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_debug(self, message):
-        super().emit_debug("validate-tool", self.name, message)
+        super().emit_debug(
+            "validate-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )

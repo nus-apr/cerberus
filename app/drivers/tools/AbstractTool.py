@@ -30,6 +30,7 @@ class AbstractTool(AbstractDriver):
     image_name = ""
     invoke_command = ""
     name = ""
+    tool_tag = ""
     dir_logs = ""
     dir_output = ""
     dir_expr = ""

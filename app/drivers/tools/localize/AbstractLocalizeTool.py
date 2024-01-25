@@ -111,19 +111,43 @@ class AbstractLocalizeTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("localize-tool", self.name, message)
+        super().emit_normal(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_warning(self, message):
-        super().emit_warning("localize-tool", self.name, message)
+        super().emit_warning(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_error(self, message):
-        super().emit_error("localize-tool", self.name, message)
+        super().emit_error(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_highlight(self, message):
-        super().emit_highlight("localize-tool", self.name, message)
+        super().emit_highlight(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_success(self, message):
-        super().emit_success("localize-tool", self.name, message)
+        super().emit_success(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_debug(self, message):
-        super().emit_debug("localize-tool", self.name, message)
+        super().emit_debug(
+            "localize-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )

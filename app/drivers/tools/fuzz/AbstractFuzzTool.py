@@ -87,19 +87,43 @@ class AbstractFuzzTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("fuzz-tool", self.name, message)
+        super().emit_normal(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_warning(self, message):
-        super().emit_warning("fuzz-tool", self.name, message)
+        super().emit_warning(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_error(self, message):
-        super().emit_error("fuzz-tool", self.name, message)
+        super().emit_error(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_highlight(self, message):
-        super().emit_highlight("fuzz-tool", self.name, message)
+        super().emit_highlight(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_success(self, message):
-        super().emit_success("fuzz-tool", self.name, message)
+        super().emit_success(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_debug(self, message):
-        super().emit_debug("fuzz-tool", self.name, message)
+        super().emit_debug(
+            "fuzz-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )

@@ -157,19 +157,43 @@ class AbstractRepairTool(AbstractTool):
         self.stats.write(self.emit_highlight, "\t")
 
     def emit_normal(self, message):
-        super().emit_normal("repair-tool", self.name, message)
+        super().emit_normal(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_warning(self, message):
-        super().emit_warning("repair-tool", self.name, message)
+        super().emit_warning(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_error(self, message):
-        super().emit_error("repair-tool", self.name, message)
+        super().emit_error(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_highlight(self, message):
-        super().emit_highlight("repair-tool", self.name, message)
+        super().emit_highlight(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_success(self, message):
-        super().emit_success("repair-tool", self.name, message)
+        super().emit_success(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
 
     def emit_debug(self, message):
-        super().emit_debug("repair-tool", self.name, message)
+        super().emit_debug(
+            "repair-tool",
+            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
+            message,
+        )
