@@ -477,21 +477,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 join(enhanced_setup, "crashing_tests", ""),
             )
 
-            benign_tests = []
-            for benign_input in os.listdir(benign_dir):
-                if (
-                    os.path.isfile(join(benign_dir, benign_input))
-                    and benign_input != "README.txt"
-                ):
-                    benign_tests.append(benign_input)
-                    shutil.copy(
-                        join(benign_dir, benign_input),
-                        join(enhanced_setup, "tests", ""),
-                    )
-                    shutil.copy(
-                        join(benign_dir, benign_input),
-                        join(enhanced_setup, "benign_tests", ""),
-                    )
+            benign_tests = self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
             new_testcases = (
                 crashing_tests + benign_tests + os.listdir(join(base_setup, "tests"))
@@ -658,29 +644,11 @@ class BasicWorkflow(AbstractCompositeTool):
             os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
             os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
 
-            crashing_tests = []
-            for crashing_input in os.listdir(crash_dir):
-                crashing_tests.append(crashing_input)
-                shutil.copy(
-                    join(crash_dir, crashing_input),
-                    join(enhanced_setup, "tests", ""),
-                )
-                shutil.copy(
-                    join(crash_dir, crashing_input),
-                    join(enhanced_setup, "crashing_tests", ""),
-                )
+            crashing_tests = self.copy_tests(
+                crash_dir, enhanced_setup, "crashing_tests"
+            )
 
-            benign_tests = []
-            for benign_input in os.listdir(benign_dir):
-                benign_tests.append(benign_input)
-                shutil.copy(
-                    join(benign_dir, benign_input),
-                    join(enhanced_setup, "tests", ""),
-                )
-                shutil.copy(
-                    join(benign_dir, benign_input),
-                    join(enhanced_setup, "benign_tests", ""),
-                )
+            benign_tests = self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
             new_testcases = (
                 crashing_tests + benign_tests + os.listdir(join(base_setup, "tests"))
@@ -756,6 +724,22 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_warning(e)
             traceback.print_exc()
         pass
+
+    def copy_tests(self, source_dir, destination_dir, subtype):
+        tests = []
+        for test_case in os.listdir(source_dir):
+            if os.path.isdir(join(source_dir, test_case)) or test_case == "README.txt":
+                tests.append(test_case)
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, "tests", ""),
+                )
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, subtype, ""),
+                )
+
+        return tests
 
     def save_artifacts(self, dir_info):
         """
