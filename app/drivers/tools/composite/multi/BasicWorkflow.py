@@ -729,15 +729,16 @@ class BasicWorkflow(AbstractCompositeTool):
         tests = []
         for test_case in os.listdir(source_dir):
             if os.path.isdir(join(source_dir, test_case)) or test_case == "README.txt":
-                tests.append(test_case)
-                shutil.copy(
-                    join(source_dir, test_case),
-                    join(destination_dir, "tests", ""),
-                )
-                shutil.copy(
-                    join(source_dir, test_case),
-                    join(destination_dir, subtype, ""),
-                )
+                continue
+            tests.append(test_case)
+            shutil.copy(
+                join(source_dir, test_case),
+                join(destination_dir, "tests", ""),
+            )
+            shutil.copy(
+                join(source_dir, test_case),
+                join(destination_dir, subtype, ""),
+            )
 
         return tests
 
