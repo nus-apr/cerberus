@@ -71,7 +71,6 @@ class AbstractTool(AbstractDriver):
     key_adv_test_script = definitions.KEY_ADV_TEST_SCRIPT
     key_failing_test_identifiers = definitions.KEY_FAILING_TEST
     key_passing_test_identifiers = definitions.KEY_PASSING_TEST
-    key_make_metadata = definitions.KEY_MAKE_METADATA
     key_gpus = definitions.KEY_GPUS
     key_cpus = definitions.KEY_CPUS
     stats: ToolStats

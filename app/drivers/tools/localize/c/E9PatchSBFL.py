@@ -103,9 +103,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.timestamp_log_end()
 
-        if localization_config_info.get(self.key_make_metadata, False) and self.is_file(
-            join(self.dir_output, "ochiai.csv")
-        ):
+        if self.is_file(join(self.dir_output, "ochiai.csv")):
             lines = self.read_file(join(self.dir_output, "ochiai.csv"))
             import csv
 
@@ -128,7 +126,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 "localization": localization_info,
             }
 
-            self.write_json(new_metadata, join(self.dir_output, "meta-data.json"))
+            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 

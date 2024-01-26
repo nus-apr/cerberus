@@ -57,6 +57,7 @@ from app.drivers.tools.MockTool import MockTool
 class BasicWorkflow(AbstractCompositeTool):
     key_task_tag: str = "task_tag"
     key_image_tag: str = "image_tag"
+    key_real_type = "real_type"
 
     def __init__(self):
         self.name = basename(__file__)[:-3].lower()
@@ -106,7 +107,6 @@ class BasicWorkflow(AbstractCompositeTool):
         self.observed: Set[Any] = set()
 
         self.emit_debug(composite_config_info)
-        composite_config_info[self.key_make_metadata] = True
         composite_sequence = composite_config_info[self.key_composite_sequence]
         root_tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
 
@@ -127,7 +127,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.tool_map: Dict[
             CompsiteTaskType, List[Tuple[AbstractTool, str, str, str]]
         ] = {}
-
+        # TODO move tool to be generated dynamically
         for task_type, tools in composite_sequence.items():
             self.tool_map[task_type] = []
             for tool_info in tools:
