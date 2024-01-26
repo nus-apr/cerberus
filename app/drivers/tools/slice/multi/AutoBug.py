@@ -24,7 +24,7 @@ class AutoBug(AbstractSliceTool):
                 f'CFLAGS="-fPIC -pie -O0 -g3" CXXFLAGS="-fPIC -pie -O0 -g3" {config_script} {self.dir_expr}\n',
                 f'CFLAGS="-fPIC -pie -O0 -g3" CXXFLAGS="-fPIC -pie -O0 -g3" {build_script} {self.dir_expr}\n',
                 f"cp {binary_path} {binary_path}.orig\n",
-                f"e9tool -CFR -100 -M true -P 'entry((static int64_t)addr)@autobug' {binary_path}.orig -o {binary_path}\n",
+                f"cd /opt/autobug && e9tool -CFR -100 -M true -P 'entry((static int64_t)addr)@autobug' {binary_path}.orig -o {binary_path}\n",
             ],
             instrument_script_path,
         )
@@ -82,7 +82,9 @@ class AutoBug(AbstractSliceTool):
             + "'"
         )
 
-        status = self.run_command(slice_command, self.log_output_path)
+        status = self.run_command(
+            slice_command, self.log_output_path, dir_path="/opt/autobug"
+        )
         self.process_status(status)
 
         self.timestamp_log_end()
