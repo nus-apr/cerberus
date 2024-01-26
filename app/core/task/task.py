@@ -60,6 +60,7 @@ def generate_local_dir_info(
     dir_patches_local = join(dir_setup_local, "patches")
     dir_validation_local = join(dir_setup_local, "validation")
     dir_selection_local = join(dir_setup_local, "selection")
+    dir_slicing_local = join(dir_setup_local, "slicing")
 
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
@@ -75,6 +76,7 @@ def generate_local_dir_info(
         dir_localization_local,
         dir_validation_local,
         dir_selection_local,
+        dir_slicing_local,
     ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
@@ -95,6 +97,7 @@ def generate_local_dir_info(
         "patches": dir_patches_local,
         "localization": dir_localization_local,
         "selection": dir_selection_local,
+        "slicing": dir_slicing_local,
         "validation": dir_validation_local,
         "bugs": dir_bugs_local,
     }
