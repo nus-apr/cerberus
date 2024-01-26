@@ -28,17 +28,28 @@ class GZoltar(AbstractLocalizeTool):
 
         gzoltar_version = "1.7.4-SNAPSHOT"
 
+        env = {}
+        if bug_info.get(self.key_language, "") == "java":
+            env["JAVA_HOME"] = "/usr/lib/jvm/java-{}-openjdk-amd64".format(
+                bug_info.get("java_version", 8)
+            )
+            if int(bug_info.get("java_version", 8)) == 8:
+                self.run_command(
+                    f"update-java-alternatives -s java-1.8.0-openjdk-amd64"
+                )
+
         self.emit_normal("Building project")
         if self.key_build_script in bug_info:
             build_script = bug_info[self.key_build_script]
             self.run_command(
-                "bash " + build_script, self.log_output_path, self.dir_setup
+                "bash " + build_script, self.log_output_path, self.dir_setup, env=env
             )
         else:
             self.run_command(
                 "mvn clean compile test-compile",
                 self.log_output_path,
                 join(self.dir_expr, "src"),
+                env=env,
             )
 
         tests_list = join(self.dir_expr, "unit-tests.txt")
@@ -56,6 +67,7 @@ class GZoltar(AbstractLocalizeTool):
                 ),
             ),
             dir_path=join(self.dir_expr, "src"),
+            env=env,
         )
 
         if not self.is_file(tests_list):
@@ -80,7 +92,8 @@ class GZoltar(AbstractLocalizeTool):
                 gzoltar_cli="/gzoltar/com.gzoltar.cli/target/com.gzoltar.cli-{}-jar-with-dependencies.jar".format(
                     gzoltar_version
                 ),
-            )
+            ),
+            env=env,
         )
 
         self.emit_normal("Running each unit test case in isolation")
@@ -101,7 +114,8 @@ class GZoltar(AbstractLocalizeTool):
                 ),
                 test_method=tests_list,
                 ser_file=ser_file,
-            )
+            ),
+            env=env,
         )
 
         self.emit_normal("Restore classes")
@@ -151,9 +165,40 @@ class GZoltar(AbstractLocalizeTool):
         )
 
         status = self.run_command(
-            localize_command, self.log_output_path, dir_path=join(self.dir_expr, "src")
+            localize_command,
+            self.log_output_path,
+            dir_path=join(self.dir_expr, "src"),
+            env=env,
         )
         self.process_status(status)
+
+        if self.is_file(join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")):
+            localization = []
+            lines = self.read_file(
+                join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")
+            )[1:]
+            for entry in lines:
+                path_line, score = entry.split(";")
+                reference, line = path_line.split(":")
+                path = (
+                    "src/main/java/"
+                    + reference.split("#")[0].replace(".", "/").replace("$", "/")
+                    + ".java"
+                )
+                localization.append(
+                    {
+                        "source_file": path,
+                        "line_numbers": [line],
+                        "score": score,
+                    }
+                )
+
+            new_metadata = {
+                "generator": "gzoltar",
+                "confidence": "1",
+                "localization": localization,
+            }
+            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))

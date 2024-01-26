@@ -219,9 +219,14 @@ class BasicWorkflow(AbstractCompositeTool):
                         [
                             starter,
                             *self.get_args(
-                                tool, tag, new_params=params, new_task_tag=tag
+                                tool,
+                                tag,
+                                new_params=params,
+                                new_task_tag=tag,
+                                real_task_type=starter,
                             ),
                         ],
+                        callback=self.on_fuzzing_finished,
                     )
                 break
 
@@ -260,15 +265,6 @@ class BasicWorkflow(AbstractCompositeTool):
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
         try:
-            with open(
-                join(
-                    list(self.task_mappings["repair"].keys())[0],
-                    "cerberus_internal.json",
-                ),
-                "w",
-            ) as f:
-                f.write(json.dumps({"dir_info": dir_info, "bug_info": bug_info}))
-
             values.task_type.set(task_type)
             values.current_task_profile_id.set(composite_config_info["id"])
             values.current_container_profile_id.set(composite_config_info["id"])
@@ -290,6 +286,34 @@ class BasicWorkflow(AbstractCompositeTool):
                 str(run_index),
                 tool_tag,
             )
+
+            with open(
+                join(
+                    list(
+                        self.task_mappings[
+                            composite_config_info[self.key_real_type]
+                        ].keys()
+                    )[0],
+                    "cerberus_internal.json",
+                ),
+                "w",
+            ) as f:
+                self.emit_debug("Creating internal representation")
+                f.write(
+                    json.dumps(
+                        {
+                            "dir_info": task.generate_tool_dir_info(
+                                benchmark.name,
+                                bug_info[self.key_subject],
+                                bug_info[self.key_bug_id],
+                                hash,
+                                key,
+                                tool_tag,
+                            ),
+                            "bug_info": bug_info,
+                        }
+                    )
+                )
 
             task.run(
                 benchmark,
@@ -341,8 +365,11 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def filter_event(self, event: FileSystemEvent):
         """
-        Exclude commonly known files which are not a signal for an interesting change
+        Exclude commonly known files which are not a signal for an interesting change.
+        Directories are ignored!
         """
+        if event.is_directory:
+            return False
         if basename(event.src_path) in [
             "README.txt",
             "fuzz_bitmap",
@@ -354,6 +381,8 @@ class BasicWorkflow(AbstractCompositeTool):
             "cmdline",
             ".fuzzer_stats_tmp",
             "cerberus_internal.json",
+        ] or os.path.basename(os.path.normpath(dirname(event.src_path))) in [
+            "benign_tests"
         ]:
             return False
         if ".state" in event.src_path or ".trace" in event.src_path:
@@ -362,7 +391,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def process_event(self, event: FileSystemEvent):
         # self.emit_debug(f"Processing! {event}")
-        if basename(event.src_path) == "quit":
+        if basename(event.src_path) == self.exit_message:
             for _ in range(self.process_count):
                 self.emit_debug("Time to die")
                 self.message_queue.put(self.exit_message)
@@ -411,6 +440,158 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_highlight("Localize Update")
                 self.emit_highlight(event)
                 self.pool.apply_async(self.on_localization_created, [event])
+
+    def on_fuzzing_finished(self, res):
+        try:
+            base_dir = list(self.task_mappings["fuzz"].keys())[0]
+            benign_dir = join(base_dir, "benign_tests")
+            crash_dir = join(base_dir, "crashing_tests")
+
+            subtask_hash = hashlib.sha1()
+            subtask_hash.update(str(time.time()).encode("utf-8"))
+            subtask_tag = subtask_hash.hexdigest()[:8]
+
+            if os.path.isfile(join(self.crash_analyze_root, "cerberus_internal.json")):
+                with open(
+                    join(self.crash_analyze_root, "cerberus_internal.json"), "r"
+                ) as f:
+                    data = json.loads(f.read())
+                    dir_info = data["dir_info"]
+                    # bug_info = data["bug_info"]
+                    base_setup = dir_info["local"]["setup"]
+                    previous_setup = basename(os.path.normpath(base_setup))
+                    if len(previous_setup.split("-")[-1]) == 8:
+                        # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup[:-9]}-{subtask_tag}",
+                        )
+                    else:
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup}-{subtask_tag}",
+                        )
+            else:
+                dir_info = self.proto_args[0]
+                base_setup = dir_info["local"]["setup"]
+                enhanced_setup = join(
+                    dirname(os.path.normpath(base_setup)),
+                    f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+                )
+
+            self.emit_debug(f"Setup dir is {base_setup}")
+            self.emit_debug(f"New setup dir is {enhanced_setup}")
+
+            shutil.copytree(base_setup, enhanced_setup)
+            os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
+            os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
+
+            crashing_tests = self.copy_tests(
+                crash_dir, enhanced_setup, "crashing_tests"
+            )
+
+            benign_tests = self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
+
+            original_tests = []
+
+            if os.path.isdir(join(base_setup, "tests")):
+                original_tests = os.listdir(join(base_setup, "tests"))
+
+            new_testcases = crashing_tests + benign_tests + original_tests
+
+            self.emit_debug(f"New testcases are {new_testcases}")
+
+            new_bug_info = deepcopy(self.bug_info)
+
+            bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
+
+            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
+            new_bug_info[self.key_exploit_list] = list(
+                set(new_bug_info[self.key_exploit_list] + new_testcases)
+            )
+
+            new_bug_info[self.key_passing_test_identifiers] = (
+                benign_tests + new_bug_info[self.key_passing_test_identifiers]
+            )
+
+            new_bug_info[self.key_failing_test_identifiers] = (
+                crashing_tests + new_bug_info[self.key_failing_test_identifiers]
+            )
+
+            writer.write_as_json(
+                new_bug_info,
+                join(
+                    list(self.task_mappings["fuzz"].keys())[0],
+                    f"meta-data-{subtask_tag}.json",
+                ),
+            )
+
+            if "crash-analyze" in self.tool_map:
+                self.emit_debug("starting crash analyzer")
+                for tool, params, tag, type in self.tool_map["crash-analyze"]:
+                    self.emit_debug("with params {}".format(params))
+                    self.pool.apply_async(
+                        self.run_subtask,
+                        [
+                            type,
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                                (2 / 60.0),  # Run for 2 minutes
+                                "crash-analyze",
+                            ),
+                        ],
+                        callback=self.on_crash_analysis_finished,
+                    )
+            elif "localize" in self.tool_map:
+                self.emit_debug("starting localizer")
+                for tool, params, tag, type in self.tool_map["localize"]:
+                    self.pool.apply_async(
+                        self.run_subtask,
+                        [
+                            "localize",
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                                real_task_type=type,
+                            ),
+                        ],
+                    )
+
+            elif "repair" in self.tool_map:
+                self.emit_debug("starting repair")
+                for tool, params, tag, type in self.tool_map["repair"]:
+                    self.pool.apply_async(
+                        self.run_subtask,
+                        [
+                            "repair",
+                            *self.get_args(
+                                tool,
+                                tag,
+                                new_bug_info,
+                                subtask_hash,
+                                subtask_tag,
+                                params,
+                                real_task_type=type,
+                            ),
+                        ],
+                    )
+            else:
+                self.emit_debug("What do I do??")
+
+        except Exception as e:
+            self.emit_warning(e)
+            traceback.print_exc()
+        pass
 
     def event_worker(self):
         while True:
@@ -521,6 +702,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_tag,
                                 params,
                                 (2 / 60.0),  # Run for 2 minutes
+                                "crash-analyze",
                             ),
                         ],
                         callback=self.on_crash_analysis_finished,
@@ -540,6 +722,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -558,6 +741,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -574,11 +758,32 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
-            base_setup = self.proto_args[0]["local"]["setup"]
-            enhanced_setup = join(
-                dirname(os.path.normpath(base_setup)),
-                f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
-            )
+            if os.path.isfile(join(self.localize_root, "cerberus_internal.json")):
+                with open(join(self.localize_root, "cerberus_internal.json"), "r") as f:
+                    data = json.loads(f.read())
+                    dir_info = data["dir_info"]
+                    # bug_info = data["bug_info"]
+                    base_setup = dir_info["local"]["setup"]
+                    previous_setup = basename(os.path.normpath(base_setup))
+                    if len(previous_setup.split("-")[-1]) == 8:
+                        # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup[:-9]}-{subtask_tag}",
+                        )
+                    else:
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup}-{subtask_tag}",
+                        )
+            else:
+                dir_info = self.proto_args[0]
+                base_setup = dir_info["local"]["setup"]
+                enhanced_setup = join(
+                    dirname(os.path.normpath(base_setup)),
+                    f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+                )
+
             self.emit_debug(f"Setup dir is {base_setup}")
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
@@ -604,6 +809,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -618,11 +824,32 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
-            base_setup = self.proto_args[0]["local"]["setup"]
-            enhanced_setup = join(
-                dirname(os.path.normpath(base_setup)),
-                f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
-            )
+            if os.path.isfile(join(self.repair_root, "cerberus_internal.json")):
+                with open(join(self.repair_root, "cerberus_internal.json"), "r") as f:
+                    data = json.loads(f.read())
+                    dir_info = data["dir_info"]
+                    # bug_info = data["bug_info"]
+                    base_setup = dir_info["local"]["setup"]
+                    previous_setup = basename(os.path.normpath(base_setup))
+                    if len(previous_setup.split("-")[-1]) == 8:
+                        # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup[:-9]}-{subtask_tag}",
+                        )
+                    else:
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup}-{subtask_tag}",
+                        )
+            else:
+                dir_info = self.proto_args[0]
+                base_setup = dir_info["local"]["setup"]
+                enhanced_setup = join(
+                    dirname(os.path.normpath(base_setup)),
+                    f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+                )
+
             self.emit_debug(f"Setup dir is {base_setup}")
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
@@ -634,9 +861,6 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug("Copying")
 
             new_bug_info = deepcopy(self.bug_info)
-
-            bug_info_extension = reader.read_json(event.src_path)
-            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
 
             if "validate" in self.tool_map:
                 for tool, params, tag, type in self.tool_map["validate"]:
@@ -651,6 +875,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -669,12 +894,35 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
-            base_setup = self.proto_args[0]["local"]["setup"]
-            self.emit_debug(f"Base setup dir is {base_setup}")
-            enhanced_setup = join(
-                dirname(os.path.normpath(base_setup)),
-                f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
-            )
+            if os.path.isfile(join(self.crash_analyze_root, "cerberus_internal.json")):
+                with open(
+                    join(self.crash_analyze_root, "cerberus_internal.json"), "r"
+                ) as f:
+                    data = json.loads(f.read())
+                    dir_info = data["dir_info"]
+                    # bug_info = data["bug_info"]
+                    base_setup = dir_info["local"]["setup"]
+                    previous_setup = basename(os.path.normpath(base_setup))
+                    if len(previous_setup.split("-")[-1]) == 8:
+                        # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup[:-9]}-{subtask_tag}",
+                        )
+                    else:
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup}-{subtask_tag}",
+                        )
+            else:
+                dir_info = self.proto_args[0]
+                base_setup = dir_info["local"]["setup"]
+                enhanced_setup = join(
+                    dirname(os.path.normpath(base_setup)),
+                    f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+                )
+
+            self.emit_debug(f"Setup dir is {base_setup}")
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
             shutil.copytree(base_setup, enhanced_setup)
@@ -714,7 +962,7 @@ class BasicWorkflow(AbstractCompositeTool):
             writer.write_as_json(
                 new_bug_info,
                 join(
-                    list(self.task_mappings["fuzz"].keys())[0],
+                    list(self.task_mappings["crash-analyze"].keys())[0],
                     f"meta-data-{subtask_tag}.json",
                 ),
             )
@@ -733,6 +981,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -751,6 +1000,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 subtask_hash,
                                 subtask_tag,
                                 params,
+                                real_task_type=type,
                             ),
                         ],
                     )
@@ -764,6 +1014,8 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def copy_tests(self, source_dir, destination_dir, subtype):
         tests = []
+        os.makedirs(join(destination_dir, "tests", ""), exist_ok=True)
+        os.makedirs(join(destination_dir, subtype, ""), exist_ok=True)
         for test_case in os.listdir(source_dir):
             if os.path.isdir(join(source_dir, test_case)) or test_case == "README.txt":
                 continue
@@ -802,6 +1054,7 @@ class BasicWorkflow(AbstractCompositeTool):
         new_task_tag: Optional[str] = None,
         new_params: Optional[str] = None,
         new_timeout: Optional[float] = None,
+        real_task_type: Optional[str] = None,
     ):
         """
         Construct the arguments for the run function from the proto_args.
@@ -839,6 +1092,9 @@ class BasicWorkflow(AbstractCompositeTool):
         if new_timeout is not None:
             composite_config_info_new[self.key_timeout] = new_timeout
 
+        if real_task_type:
+            composite_config_info_new[self.key_real_type] = real_task_type
+
         return (
             dir_info,
             benchmark,
@@ -869,13 +1125,13 @@ class BasicWorkflow(AbstractCompositeTool):
             },
         }
 
-        self.repair_root = list(self.task_mappings["repair"].keys())[0]
-        self.analyze_root = list(self.task_mappings["analyze"].keys())[0]
-        self.fuzz_root = list(self.task_mappings["fuzz"].keys())[0]
-        self.select_root = list(self.task_mappings["select"].keys())[0]
-        self.validate_root = list(self.task_mappings["validate"].keys())[0]
-        self.localize_root = list(self.task_mappings["localize"].keys())[0]
-        self.crash_analyze_root = list(self.task_mappings["crash-analyze"].keys())[0]
+        self.repair_root = list(task_mappings["repair"].keys())[0]
+        self.analyze_root = list(task_mappings["analyze"].keys())[0]
+        self.fuzz_root = list(task_mappings["fuzz"].keys())[0]
+        self.select_root = list(task_mappings["select"].keys())[0]
+        self.validate_root = list(task_mappings["validate"].keys())[0]
+        self.localize_root = list(task_mappings["localize"].keys())[0]
+        self.crash_analyze_root = list(task_mappings["crash-analyze"].keys())[0]
 
         self.emit_debug(task_mappings)
         for task in task_mappings.values():

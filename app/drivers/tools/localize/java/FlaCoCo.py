@@ -28,6 +28,7 @@ class FlaCoCo(AbstractLocalizeTool):
 
         formula = bug_info.get("fl_formula", "Ochiai").upper()
 
+        env = {}
         self.timestamp_log_start()
         localize_command = "timeout -k 5m {}h java -jar /flacoco/target/flacoco-1.0.7-SNAPSHOT-jar-with-dependencies.jar -f {} --projectpath {} {} -o {}".format(
             timeout,
@@ -37,12 +38,12 @@ class FlaCoCo(AbstractLocalizeTool):
             join(self.dir_output, "localilzation.csv"),
         )
 
-        status = self.run_command(localize_command, self.log_output_path)
+        status = self.run_command(localize_command, self.log_output_path, env=env)
         self.process_status(status)
 
         if self.is_file(join(self.dir_output, "localilzation.csv")):
             localization = []
-            lines = self.read_file(self.dir_output, "localization.csv")
+            lines = self.read_file(join(self.dir_output, "localization.csv"))
             for entry in lines:
                 path, line, score = entry.split(",")
                 localization.append(
@@ -52,7 +53,12 @@ class FlaCoCo(AbstractLocalizeTool):
                         "score": score,
                     }
                 )
-            self.write_json(localization, join(self.dir_output, "meta-data.json"))
+            new_metadata = {
+                "generator": "flacoco",
+                "confidence": "1",
+                "localization": localization,
+            }
+            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
