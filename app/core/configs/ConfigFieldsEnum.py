@@ -56,6 +56,7 @@ class ConfigFieldsEnum(Enum):
     FUZZ = "fuzz"
     ANALYZE = "analyze"
     LOCALIZE = "localize"
+    SLICE = "slice"
     REPAIR = "repair"
     SELECT = "select"
     ORCHESTRATOR = "orchestrator"

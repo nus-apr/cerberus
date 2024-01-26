@@ -23,6 +23,7 @@ from app.core.task import fuzz
 from app.core.task import localize
 from app.core.task import repair
 from app.core.task import select
+from app.core.task import slice
 from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -32,6 +33,7 @@ from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
+from app.drivers.tools.slice.AbstractSliceTool import AbstractSliceTool
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 from app.plugins import valkyrie
 
@@ -638,6 +640,15 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractSelectTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "slice":
+            slice.slice_all(
+                dir_info,
+                bug_info,
+                cast(AbstractSliceTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,
