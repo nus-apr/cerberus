@@ -387,9 +387,11 @@ def prepare_tool_experiment_image(
 
         emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
 
+        home_directory = "/root/"
         prefix = ""
         if not tool.runs_as_root:
             prefix = "sudo"
+            home_directory = f"/home/{tool.image_user}/"
             if tool.sudo_password:
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
@@ -416,7 +418,9 @@ def prepare_tool_experiment_image(
             "COPY --from={0} {2} {1} {1}\n".format(bug_image_id, "/logs", ownership)
         )
         dock_file.write(
-            "COPY --from={0} {2} {1} {1}\n".format(bug_image_id, "/root/", ownership)
+            "COPY --from={0} {3} {1} {2}\n".format(
+                bug_image_id, "/root/", home_directory, ownership
+            )
         )
 
         src_dir = bug_info.get(
