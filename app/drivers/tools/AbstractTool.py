@@ -77,6 +77,9 @@ class AbstractTool(AbstractDriver):
     key_cpus = definitions.KEY_CPUS
     stats: ToolStats
     bindings: Optional[Dict[str, Any]] = None
+    runs_as_root: bool = True
+    sudo_password: str = ""
+    image_user: str = "root"
 
     def __init__(self, tool_name: str):
         """add initialization commands to all tools here"""

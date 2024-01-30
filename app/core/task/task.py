@@ -356,13 +356,13 @@ def construct_container_volumes(
 
 def prepare_tool_experiment_image(
     bug_image_id: str,
-    repair_tool: AbstractTool,
+    tool: AbstractTool,
     dir_info: DirectoryInfo,
     image_name: str,
     bug_info: Dict[str, Any],
     tag: Optional[str],
 ):
-    dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
+    dockerfile_name = "Dockerfile-{}-{}".format(tool.name, bug_image_id)
     if tag and tag != "":
         dockerfile_name += "-{}".format(tag)
 
@@ -372,41 +372,8 @@ def prepare_tool_experiment_image(
     )
     os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
     with open(tmp_dockerfile, "w") as dock_file:
-        dock_file.write("FROM {}\n".format(repair_tool.image_name))
+        dock_file.write("FROM {}\n".format(tool.image_name))
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
-
-        src_dir = bug_info.get(
-            definitions.KEY_SOURCE_DIRECTORY,
-            join(dir_info["container"]["experiment"], "src"),
-        )
-        if str(src_dir)[-1] == "/":
-            src_dir = src_dir[:-1]
-        pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
-        pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
-        if repair_tool.name.lower() in ["et", "grt5"]:
-            dock_file.write(
-                "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
-                "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
-                "-Dmaven.compiler.useIncrementalCompilation=false "
-                "-Dmaven.compiler.failOnError=true -Dsurefire.skipAfterFailureCount=1 "
-                "compiler:compile surefire:test "
-                f"-Drat.skip=true -f {pom_file}; return 0\n"
-            )
-        elif repair_tool.name.lower() in [
-            "aprer",
-            "repaircat",
-            "repairllama",
-            "arja",
-            "arja_e",
-            "tbar",
-        ]:
-            dock_file.write(
-                "RUN mvn clean compile test "
-                f"-Drat.skip=true -f {pom_file}; return 0\n"
-            )
 
         res, (output, error) = utilities.run_command(
             f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
@@ -420,28 +387,80 @@ def prepare_tool_experiment_image(
 
         emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
 
+        home_directory = "/root/"
+        prefix = ""
+        if not tool.runs_as_root:
+            prefix = "sudo"
+            home_directory = f"/home/{tool.image_user}/"
+            if tool.sudo_password:
+                prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
+
         # Create a special group to ensure that files are accessible
         dock_file.write(
-            f"RUN bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}'\n"
+            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
         )
 
         # Make all user's primary group to be our special group
         dock_file.write(
-            f'RUN bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "  \n'
+            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
         )
 
-        if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
-            dock_file.write(
-                "RUN bash {0} || sudo bash {0} \n".format(
-                    join(dir_info["container"]["setup"], "deps.sh")
-                )
+        ownership = ""
+        if tool.image_user != "root":
+            ownership = f"--chown={tool.image_user}:{definitions.GROUP_NAME}"
+
+        dock_file.write(
+            "COPY --from={0} {2} {1} {1}\n".format(
+                bug_image_id, "/experiment", ownership
             )
-        if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
-            dock_file.write(
-                "RUN bash {0} || sudo bash {0} \n".format(
-                    join(dir_info["container"]["setup"], "install_deps")
-                )
+        )
+        dock_file.write(
+            "COPY --from={0} {2} {1} {1}\n".format(bug_image_id, "/logs", ownership)
+        )
+        dock_file.write(
+            "COPY --from={0} {3} {1} {2}\n".format(
+                bug_image_id, "/root/", home_directory, ownership
             )
+        )
+
+        src_dir = bug_info.get(
+            definitions.KEY_SOURCE_DIRECTORY,
+            join(dir_info["container"]["experiment"], "src"),
+        )
+        if str(src_dir)[-1] == "/":
+            src_dir = src_dir[:-1]
+        pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
+        pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
+        if tool.name.lower() in ["et", "grt5"]:
+            dock_file.write(
+                "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
+                "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
+                "-Dmaven.compiler.useIncrementalCompilation=false "
+                "-Dmaven.compiler.failOnError=true -Dsurefire.skipAfterFailureCount=1 "
+                "compiler:compile surefire:test "
+                f"-Drat.skip=true -f {pom_file}; return 0\n"
+            )
+        elif tool.name.lower() in [
+            "aprer",
+            "repaircat",
+            "repairllama",
+            "arja",
+            "arja_e",
+            "tbar",
+        ]:
+            dock_file.write(
+                "RUN mvn clean compile test "
+                f"-Drat.skip=true -f {pom_file}; return 0\n"
+            )
+
+        for x in ["deps.sh", "install_deps"]:
+            if os.path.exists(join(dir_info["local"]["setup"], x)):
+                dock_file.write(
+                    "RUN {1} bash {0} \n".format(
+                        join(dir_info["container"]["setup"], x), prefix
+                    )
+                )
+
         # We assume that the container will always have the sh command available
         # This line is included against some issues with the container lifetime
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
