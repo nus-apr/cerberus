@@ -13,4 +13,4 @@ TaskType = Literal[
     "prepare",
 ]
 
-CompsiteTaskType = Union[TaskType, Literal["crash-analyze"]]
+CompositeTaskType = Union[TaskType, Literal["crash-analyze"]]

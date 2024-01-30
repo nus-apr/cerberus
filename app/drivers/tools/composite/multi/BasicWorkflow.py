@@ -43,7 +43,7 @@ from app.core.task import select
 from app.core.task import task
 from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
-from app.core.task.typing.TaskType import CompsiteTaskType
+from app.core.task.typing.TaskType import CompositeTaskType
 from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -125,7 +125,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.bug_info = bug_info
 
         self.tool_map: Dict[
-            CompsiteTaskType, List[Tuple[AbstractTool, str, str, str]]
+            CompositeTaskType, List[Tuple[AbstractTool, str, str, str]]
         ] = {}
         # TODO move tool to be generated dynamically
         for task_type, tools in composite_sequence.items():
@@ -212,7 +212,7 @@ class BasicWorkflow(AbstractCompositeTool):
             if starter in self.tool_map:
                 found_starter = True
                 for tool, params, tag, _ in self.tool_map[
-                    cast(CompsiteTaskType, starter)
+                    cast(CompositeTaskType, starter)
                 ]:
                     self.pool.apply_async(
                         self.run_subtask,
@@ -405,7 +405,9 @@ class BasicWorkflow(AbstractCompositeTool):
             os.path.commonprefix([event.src_path, self.analyze_root])
             == self.analyze_root
         ):
-            self.emit_highlight("Analyze Update")
+            if basename(event.src_path) == "meta-data.json":
+                self.emit_highlight("Analyze Update")
+                self.pool.apply_async(self.on_analysis_finished, [event])
             pass
         elif os.path.commonprefix([event.src_path, self.fuzz_root]) == self.fuzz_root:
             # self.emit_highlight("Fuzz Update")
@@ -818,6 +820,76 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
+    def on_analysis_finished(self, event: FileSystemEvent):
+        try:
+            subtask_hash = hashlib.sha1()
+            subtask_hash.update(str(time.time()).encode("utf-8"))
+            subtask_tag = subtask_hash.hexdigest()[:8]
+
+            if os.path.isfile(join(self.localize_root, "cerberus_internal.json")):
+                with open(join(self.localize_root, "cerberus_internal.json"), "r") as f:
+                    data = json.loads(f.read())
+                    dir_info = data["dir_info"]
+                    # bug_info = data["bug_info"]
+                    base_setup = dir_info["local"]["setup"]
+                    previous_setup = basename(os.path.normpath(base_setup))
+                    if len(previous_setup.split("-")[-1]) == 8:
+                        # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup[:-9]}-{subtask_tag}",
+                        )
+                    else:
+                        enhanced_setup = join(
+                            dirname(os.path.normpath(base_setup)),
+                            f"{previous_setup}-{subtask_tag}",
+                        )
+            else:
+                dir_info = self.proto_args[0]
+                base_setup = dir_info["local"]["setup"]
+                enhanced_setup = join(
+                    dirname(os.path.normpath(base_setup)),
+                    f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
+                )
+
+            self.emit_debug(f"Setup dir is {base_setup}")
+            self.emit_debug(f"New setup dir is {enhanced_setup}")
+
+            shutil.copytree(base_setup, enhanced_setup)
+
+            self.emit_debug("Copying")
+
+            new_bug_info = deepcopy(self.bug_info)
+
+            bug_info_extension = reader.read_json(event.src_path)
+            new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
+            for next_task in ["fuzz", "localize", "repair"]:
+                if next_task in self.tool_map:
+                    for tool, params, tag, type in self.tool_map[
+                        cast(CompositeTaskType, next_task)
+                    ]:
+                        self.pool.apply_async(
+                            self.run_subtask,
+                            [
+                                next_task,
+                                *self.get_args(
+                                    tool,
+                                    tag,
+                                    new_bug_info,
+                                    subtask_hash,
+                                    subtask_tag,
+                                    params,
+                                    real_task_type=type,
+                                ),
+                            ],
+                        )
+                    break
+        except Exception as e:
+            self.emit_warning(e)
+            traceback.print_exc()
+        pass
+
     def on_patch_created(self, event: FileSystemEvent):
         try:
             subtask_hash = hashlib.sha1()
@@ -1108,12 +1180,12 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def make_task_mappings(
         self, root_dir: str
-    ) -> Dict[CompsiteTaskType, Dict[str, Dict[str, str]]]:
+    ) -> Dict[CompositeTaskType, Dict[str, Dict[str, str]]]:
         """
         Create the mappings for each task type.
         When the tool is created we add this mapping to allow for a common output directory
         """
-        task_mappings: Dict[CompsiteTaskType, Dict[str, Dict[str, str]]] = {
+        task_mappings: Dict[CompositeTaskType, Dict[str, Dict[str, str]]] = {
             "fuzz": {join(root_dir, "fuzzing"): {"bind": "/output", "mode": "rw"}},
             "repair": {join(root_dir, "repair"): {"bind": "/output", "mode": "rw"}},
             "analyze": {join(root_dir, "analyze"): {"bind": "/output", "mode": "rw"}},
