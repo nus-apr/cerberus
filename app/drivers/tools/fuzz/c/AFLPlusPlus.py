@@ -76,7 +76,10 @@ class AFLPlusPlus(AbstractFuzzTool):
         )
 
         status = self.run_command(
-            fuzz_command, self.log_output_path, join(self.dir_expr, "src")
+            fuzz_command,
+            self.log_output_path,
+            join(self.dir_expr, "src"),
+            env={"AFL_NO_UI": 1},
         )
 
         self.process_status(status)
@@ -95,7 +98,9 @@ class AFLPlusPlus(AbstractFuzzTool):
         self.run_command("mkdir {}".format(target_benign_dir))
         self.run_command("mkdir {}".format(target_crash_dir))
 
-        self.copy_benign_tests(target_benign_dir)
+        if "-C" not in additional_params:
+            # Crash exploration will be more focused on generating crashing tests but we cannot be sure
+            self.copy_benign_tests(target_benign_dir)
         self.copy_crashing_tests(target_crash_dir)
 
         self.run_command(
