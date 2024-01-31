@@ -3,6 +3,7 @@ import os
 import re
 import shutil
 import time
+from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
@@ -73,6 +74,10 @@ class AbstractTool(AbstractDriver):
     key_adv_test_script = definitions.KEY_ADV_TEST_SCRIPT
     key_failing_test_identifiers = definitions.KEY_FAILING_TEST
     key_passing_test_identifiers = definitions.KEY_PASSING_TEST
+    key_dir_class = definitions.KEY_CLASS_DIRECTORY
+    key_dir_source = definitions.KEY_SOURCE_DIRECTORY
+    key_dir_tests = definitions.KEY_TEST_DIRECTORY
+    key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_gpus = definitions.KEY_GPUS
     key_cpus = definitions.KEY_CPUS
     stats: ToolStats
@@ -113,6 +118,38 @@ class AbstractTool(AbstractDriver):
             if os.path.isdir(self.dir_expr):
                 rm_command = "rm -rf {}".format(self.dir_expr)
                 execute_command(rm_command)
+
+    def create_metadata(self, dir_info: DirectoryInfo, bug_info) -> None:
+        pass
+
+    def process_tests(self, dir_info: DirectoryInfo, bug_info) -> None:
+        for test_group in [self.key_benign_inputs, self.key_exploit_inputs]:
+            for tests in bug_info.get(test_group, []):
+                """
+                Documents how to process tests to ensure their usability
+                """
+                if tests["format"] == "junit":
+                    jazzer_dep = """
+                        <dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>
+                    """
+
+                    self.run_command(
+                        "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} \;".format(
+                            join(self.dir_setup, tests["dir"]), jazzer_dep
+                        )
+                    )
+
+                    self.run_command(
+                        "bash -c 'cp -r {}/* {}'".format(
+                            join(self.dir_setup, tests["dir"]),
+                            join(self.dir_expr, "src", bug_info[self.key_dir_tests]),
+                        )
+                    )
+                if tests["format"] == "raw":
+                    pass
+                if tests["format"] == "ktest":
+                    pass
+        pass
 
     def update_info(
         self,

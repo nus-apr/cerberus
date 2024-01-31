@@ -26,6 +26,7 @@ def run_fuzz(
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
     tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.process_tests(dir_info, experiment_info)
     try:
         tool.run_fuzz(experiment_info, fuzz_config_info)
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:

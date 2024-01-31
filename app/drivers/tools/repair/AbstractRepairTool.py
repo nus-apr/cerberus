@@ -26,10 +26,6 @@ class AbstractRepairTool(AbstractTool):
     key_failing_test_identifiers = definitions.KEY_FAILING_TEST
     key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
-    key_dir_class = definitions.KEY_CLASS_DIRECTORY
-    key_dir_source = definitions.KEY_SOURCE_DIRECTORY
-    key_dir_tests = definitions.KEY_TEST_DIRECTORY
-    key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
     stats: RepairToolStats

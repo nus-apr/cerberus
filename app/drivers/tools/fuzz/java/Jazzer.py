@@ -86,6 +86,9 @@ class Jazzer(AbstractFuzzTool):
         if status != 0:
             self.error_exit("failed to rewrite benign tests")
 
+        self.run_command("cp -r {} {}".format(harness_source_dir, reproducer_path))
+        self.run_command("cp -r {} {}".format(harness_source_dir, benign_path))
+
         new_bug_info = {}
 
         new_bug_info[self.key_exploit_inputs] = [

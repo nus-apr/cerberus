@@ -46,6 +46,7 @@ def run_selection(
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
     tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.process_tests(dir_info, experiment_info)
     try:
         tool.run_selection(experiment_info, validate_config_info)
         if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
