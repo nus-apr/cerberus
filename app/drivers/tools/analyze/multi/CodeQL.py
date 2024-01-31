@@ -16,8 +16,9 @@ class CodeQL(AbstractAnalyzeTool):
         self.runs_as_root = False
         self.image_user = "ubuntu"
         self.sudo_password = "ubuntu"
+        os.makedirs(join(values.dir_dynamic, "codeql_queries"), exist_ok=True)
         self.bindings = {
-            values.dir_dynamic: {
+            join(values.dir_dynamic, "codeql_queries"): {
                 "bind": "/queries",
                 "mode": "rw",
             }
@@ -33,6 +34,21 @@ class CodeQL(AbstractAnalyzeTool):
         language = bug_info.get(self.key_language, "all")
 
         self.write_json([bug_info], os.path.join(self.dir_expr, "meta-data.json"))
+
+        self.run_command(
+            "bash -c 'echo \"{}\n\" | sudo -S mkdir -p {}'".format(
+                self.sudo_password, self.dir_output
+            )
+        )
+        self.output_path = join(
+            "/home",
+            "ubuntu",
+            "workspace",
+            "output",
+            bug_info[self.key_benchmark],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
+        )
 
         analysis_command = (
             "bash /home/ubuntu/workspace/script/cerberus_entrypoint.sh {} {}".format(
@@ -50,13 +66,11 @@ class CodeQL(AbstractAnalyzeTool):
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info):
-        # infer_output = join(self.dir_expr, "src", "infer-out")
-        # infer_report_json = join(infer_output, "report.json")
-        # infer_report_txt = join(infer_output, "report.txt")
-        # copy_command_json = "cp -f {} {}".format(infer_report_json, self.dir_output)
-        # copy_command_txt = "cp -f {} {}".format(infer_report_txt, self.dir_output)
-        # self.run_command(copy_command_json)
-        # self.run_command(copy_command_txt)
+        self.run_command(
+            "bash -c 'echo \"{}\n\" | sudo -S cp {}/* {}'".format(
+                self.sudo_password, self.output_path, self.dir_output
+            )
+        )
         super(CodeQL, self).save_artifacts(dir_info)
         return
 
