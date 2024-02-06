@@ -191,11 +191,15 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_highlight("Done with setup!")
 
         self.emit_highlight("Preparing watcher")
-        watcher_handle = self.pool.apply_async(self.watcher)
+        watcher_handle = self.pool.apply_async(
+            self.watcher, error_callback=self.error_callback_handler
+        )
 
         self.emit_highlight("Preparing workers")
         for _ in range(self.event_processor_count):
-            self.pool.apply_async(self.event_worker)
+            self.pool.apply_async(
+                self.event_worker, error_callback=self.error_callback_handler
+            )
 
         self.proto_args = (
             dir_info,
@@ -227,6 +231,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             ),
                         ],
                         callback=self.on_fuzzing_finished,
+                        error_callback=self.error_callback_handler,
                     )
                 break
 
@@ -333,6 +338,11 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_warning(e)
             traceback.print_exc()
 
+    def error_callback_handler(self, e: BaseException):
+        self.emit_error("I got an exception!")
+        self.emit_warning(e)
+        traceback.print_exc()
+
     def watcher(self):
         event_handler = FileCreationHandler(self.message_queue)
         self.emit_highlight("Observing {}".format(self.root_dir))
@@ -407,14 +417,22 @@ class BasicWorkflow(AbstractCompositeTool):
         ):
             if basename(event.src_path) == "meta-data.json":
                 self.emit_highlight("Analyze Update")
-                self.pool.apply_async(self.on_analysis_finished, [event])
+                self.pool.apply_async(
+                    self.on_analysis_finished,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
             pass
         elif os.path.commonprefix([event.src_path, self.fuzz_root]) == self.fuzz_root:
             # self.emit_highlight("Fuzz Update")
             # self.emit_debug(dirname(event.src_path))
             if dirname(event.src_path).endswith("crashes"):
                 # self.emit_normal("Found a crash!")
-                self.pool.apply_async(self.on_crash_found, [event])
+                self.pool.apply_async(
+                    self.on_crash_found,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
         elif (
             os.path.commonprefix([event.src_path, self.validate_root])
             == self.validate_root
@@ -441,7 +459,11 @@ class BasicWorkflow(AbstractCompositeTool):
             if basename(event.src_path) == "meta-data.json":
                 self.emit_highlight("Localize Update")
                 self.emit_highlight(event)
-                self.pool.apply_async(self.on_localization_created, [event])
+                self.pool.apply_async(
+                    self.on_localization_created,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
 
     def on_fuzzing_finished(self, res):
         try:
@@ -549,6 +571,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             ),
                         ],
                         callback=self.on_crash_analysis_finished,
+                        error_callback=self.error_callback_handler,
                     )
             elif "localize" in self.tool_map:
                 self.emit_debug("starting localizer")
@@ -567,6 +590,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -586,6 +610,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -618,7 +643,7 @@ class BasicWorkflow(AbstractCompositeTool):
             benign_dir = join(dirname(crash_dir), "queue")
             current_time = int(time.time())
 
-            if self.last_crash is not None and current_time - self.last_crash <= 12000:
+            if self.last_crash is not None and current_time - self.last_crash <= 60:
                 # self.emit_debug("Debouncing the crash")
                 return
 
@@ -727,6 +752,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -746,6 +772,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -814,6 +841,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
         except Exception as e:
             self.emit_warning(e)
@@ -883,6 +911,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                     real_task_type=type,
                                 ),
                             ],
+                            error_callback=self.error_callback_handler,
                         )
                     break
         except Exception as e:
@@ -950,6 +979,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
         except Exception as e:
             self.emit_warning(e)
@@ -1056,6 +1086,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -1075,6 +1106,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
