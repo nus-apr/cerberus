@@ -140,7 +140,7 @@ class AbstractTool(AbstractDriver):
                     )
 
                     self.run_command(
-                        "bash -c 'cp -r {}/* {}'".format(
+                        "bash -c 'cp {}/. {}'".format(
                             join(self.dir_setup, tests["dir"]),
                             join(self.dir_expr, "src", bug_info[self.key_dir_tests]),
                         )
