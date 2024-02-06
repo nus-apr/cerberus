@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import json
+import multiprocessing
 import os
 import shutil
 import time
@@ -8,6 +9,7 @@ import traceback
 from copy import deepcopy
 from multiprocessing import Lock
 from multiprocessing.pool import ThreadPool
+from multiprocessing.synchronize import Lock as LockType
 from os.path import basename
 from os.path import dirname
 from os.path import join
@@ -53,6 +55,19 @@ from app.drivers.tools.composite.multi.basic.FileCreationHandler import (
 )
 from app.drivers.tools.MockTool import MockTool
 
+active_jobs_lock: LockType
+
+
+# Due to the way python multiprocess works,
+# we cannot pass a lock to the pool initializer by just seeting a
+# field on the object, similarly to how it is done in the UI module
+# (the UI module is using in process threads and the lock is not shared across process, has to be reworked).
+# Instead, we need to use a global variable which is per process.
+# This is not ideal, but it is the correct way to make it work.
+def init_pool_processes(active_jobs_lock_x: LockType):
+    global active_jobs_lock
+    active_jobs_lock = active_jobs_lock_x
+
 
 class BasicWorkflow(AbstractCompositeTool):
     key_task_tag: str = "task_tag"
@@ -66,8 +81,12 @@ class BasicWorkflow(AbstractCompositeTool):
         self.image_name = "ubuntu:20.04"
         self.process_count = 12
         self.event_processor_count = 4
-        self.exit_message = "quit"
+        self.exit_message = "quit"  # Message for terminating the flow
+        self.exit_message_delayed = (
+            "quit_delayed"  # Message for a termination that will happen after a delay
+        )
         self.last_crash = 0
+        self.active_jobs = 0
 
     def run_composite(
         self,
@@ -100,7 +119,11 @@ class BasicWorkflow(AbstractCompositeTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-        self.pool = ThreadPool(processes=self.process_count)
+        self.pool = ThreadPool(
+            processes=self.process_count,
+            initializer=init_pool_processes,
+            initargs=(Lock(),),
+        )
         self.message_queue: Queue[Union[str, FileSystemEvent]] = Queue()
         self.observer = Observer()
         self.mutex = Lock()
@@ -269,6 +292,12 @@ class BasicWorkflow(AbstractCompositeTool):
         Common entry point for a subtask, we take the original task tag to not create new images.
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
+
+        global active_jobs_lock
+        with active_jobs_lock:
+            self.active_jobs += 1
+            self.emit_debug(f"Active jobs: {self.active_jobs}")
+
         try:
             values.task_type.set(task_type)
             values.current_task_profile_id.set(composite_config_info["id"])
@@ -337,6 +366,12 @@ class BasicWorkflow(AbstractCompositeTool):
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
+
+        with active_jobs_lock:
+            self.active_jobs -= 1
+            self.emit_debug(f"Active jobs: {self.active_jobs}")
+            if self.active_jobs == 0:
+                self.message_queue.put(self.exit_message_delayed)
 
     def error_callback_handler(self, e: BaseException):
         self.emit_error("I got an exception!")
@@ -621,14 +656,24 @@ class BasicWorkflow(AbstractCompositeTool):
         pass
 
     def event_worker(self):
+        global active_jobs_lock  # Capture the process lock
         while True:
             event = self.message_queue.get()
-            if isinstance(event, str) and event == self.exit_message:
-                if self.observer.is_alive():
-                    self.observer.stop()
-                break
-            elif isinstance(event, str):
-                self.emit_debug(f"Got string {event}. Why?")
+            if isinstance(event, str):
+                if event == self.exit_message:
+                    if self.observer.is_alive():
+                        self.observer.stop()
+                    break
+                elif event == self.exit_message_delayed:
+                    time.sleep(60)  # wait for 60 seconds
+                    with (
+                        active_jobs_lock
+                    ):  # If no task started in the past minute, exit
+                        if self.active_jobs == 0:
+                            self.message_queue.put(self.exit_message)
+                else:
+                    self.emit_debug(f"Got string {event}. Why?")
+
                 continue
             if self.pre_process_event(event):
                 # self.emit_debug("Got message {}".format(event))
