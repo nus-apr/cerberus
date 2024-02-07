@@ -24,6 +24,7 @@ from typing import Set
 from typing import Tuple
 from typing import Union
 
+from jsonschema import Draft7Validator
 from watchdog.events import DirCreatedEvent
 from watchdog.events import FileCreatedEvent
 from watchdog.events import FileSystemEvent
@@ -38,6 +39,7 @@ from app.core import values
 from app.core import writer
 from app.core.main import create_task_identifier
 from app.core.main import create_task_image_identifier
+from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task import analyze
 from app.core.task import fuzz
 from app.core.task import repair
@@ -868,7 +870,10 @@ class BasicWorkflow(AbstractCompositeTool):
             new_bug_info = deepcopy(self.bug_info)
 
             bug_info_extension = reader.read_json(event.src_path)
+
             new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
+            # self.validate([new_bug_info])
 
             if "repair" in self.tool_map:
                 for tool, params, tag, type in self.tool_map["repair"]:
@@ -892,6 +897,15 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_warning(e)
             traceback.print_exc()
         pass
+
+    def validate(self, metadata: List):
+        validator = Draft7Validator(general_section_schema)
+        errors = list(validator.iter_errors(metadata))
+        if len(errors) != 0:
+            for error in errors:
+                self.emit_warning(error.message)
+                self.emit_warning(error.path)
+            raise ValueError("Metadata is not valid. Will not continue")
 
     def on_analysis_finished(self, event: FileSystemEvent):
         try:
