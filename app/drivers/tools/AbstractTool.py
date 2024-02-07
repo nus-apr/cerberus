@@ -9,6 +9,7 @@ from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Tuple
 
 from app.core import abstractions
 from app.core import container
@@ -85,6 +86,7 @@ class AbstractTool(AbstractDriver):
     runs_as_root: bool = True
     sudo_password: str = ""
     image_user: str = "root"
+    command_history: List[Tuple[str, str, Dict[str, str]]] = []
 
     def __init__(self, tool_name: str):
         """add initialization commands to all tools here"""
@@ -156,10 +158,15 @@ class AbstractTool(AbstractDriver):
         container_id: Optional[str],
         instrument_only: bool,
         dir_info: DirectoryInfo,
+        experiment_info: Dict[str, Any],
     ) -> None:
         self.container_id = container_id
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
+        self.update_experiment_info(experiment_info)
+
+    def update_experiment_info(self, experiment_info: Dict[str, Any]) -> None:
+        self.write_json([experiment_info], join(self.dir_expr, "meta-data.json"))
 
     def update_container_stats(self, container_id: str) -> None:
         container_stats = container.get_container_stats(container_id)
@@ -199,7 +206,11 @@ class AbstractTool(AbstractDriver):
         self.stats.time_stats.timestamp_end = timestamp_txt
 
     def run_command(
-        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
+        self,
+        command: str,
+        log_file_path="/dev/null",
+        dir_path: Optional[str] = None,
+        env: Dict[str, str] = dict(),
     ):
         """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         if self.container_id:
@@ -220,10 +231,16 @@ class AbstractTool(AbstractDriver):
                 dir_path = self.dir_expr
             command += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command, env=env, directory=dir_path)
+
+        self.command_history.append((dir_path, command, env))
         return exit_code
 
     def exec_command(
-        self, command: str, log_file_path="/dev/null", dir_path=None, env=dict()
+        self,
+        command: str,
+        log_file_path="/dev/null",
+        dir_path: Optional[str] = None,
+        env: Dict[str, str] = dict(),
     ):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
@@ -245,6 +262,8 @@ class AbstractTool(AbstractDriver):
                 dir_path = self.dir_expr
             command += " >> {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command, env=env, directory=dir_path)
+
+        self.command_history.append((dir_path, command, env))
         return exit_code, None
 
     def process_status(self, status: int) -> None:
@@ -460,6 +479,23 @@ class AbstractTool(AbstractDriver):
                         self.log_output_path = os.path.join(self.dir_logs, file)
                         break
         return self.log_output_path
+
+    def save_trace(self):
+        """
+        Captures all the executed commands
+        """
+        script_contents = [
+            "#!/bin/bash\n",
+            "#This script is used to save the trace of the tool\n",
+        ]
+        for dir, command, env in self.command_history:
+            line = "cd {}\nexport {}\n{}\n".format(
+                dir, " ".join(f"{k}={v }" for k, v in env.items()), command
+            )
+            script_contents.append(line)
+
+        self.write_file(script_contents, join(self.dir_expr, "trace.sh"))
+        self.write_file(script_contents, join(self.dir_output, "trace.sh"))
 
     def emit_normal(self, abstraction, concrete, message):
         super().emit_normal(abstraction, concrete, message)

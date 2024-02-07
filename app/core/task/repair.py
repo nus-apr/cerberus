@@ -20,7 +20,7 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 def run_repair(
     dir_info: DirectoryInfo,
-    experiment_info,
+    experiment_info: Dict[str, Any],
     tool: AbstractRepairTool,
     repair_config_info: Dict[str, Any],
     container_id: Optional[str],
@@ -65,7 +65,7 @@ def run_repair(
     ]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
     tool.process_tests(dir_info, experiment_info)
     try:
         tool.run_repair(experiment_info, repair_config_info)

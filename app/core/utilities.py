@@ -59,7 +59,7 @@ def create_output_directories():
 
 
 def execute_command(
-    command: str, show_output=True, env: Dict[str, Any] = dict(), directory=None
+    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
 ):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
@@ -88,7 +88,7 @@ def execute_command(
 
 
 def run_command(
-    command: str, show_output=True, env: Dict[str, Any] = dict(), directory=None
+    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
 ):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
