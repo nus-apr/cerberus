@@ -1180,17 +1180,30 @@ class BasicWorkflow(AbstractCompositeTool):
         os.makedirs(join(destination_dir, "tests", ""), exist_ok=True)
         os.makedirs(join(destination_dir, subtype, ""), exist_ok=True)
         for test_case in os.listdir(source_dir):
-            if os.path.isdir(join(source_dir, test_case)) or test_case == "README.txt":
+            if test_case == "README.txt":
                 continue
-            tests.append(test_case)
-            shutil.copy(
-                join(source_dir, test_case),
-                join(destination_dir, "tests", ""),
-            )
-            shutil.copy(
-                join(source_dir, test_case),
-                join(destination_dir, subtype, ""),
-            )
+            if os.path.isdir(join(source_dir, test_case)):
+                # TODO directories are only copied over for now
+                shutil.copytree(
+                    join(source_dir, test_case),
+                    join(destination_dir, "tests", test_case),
+                    dirs_exist_ok=True,
+                )
+                shutil.copytree(
+                    join(source_dir, test_case),
+                    join(destination_dir, subtype, test_case),
+                    dirs_exist_ok=True,
+                )
+            else:
+                tests.append(test_case)
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, "tests", ""),
+                )
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, subtype, ""),
+                )
 
         return tests
 
