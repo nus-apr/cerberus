@@ -131,18 +131,16 @@ class AbstractTool(AbstractDriver):
                 Documents how to process tests to ensure their usability
                 """
                 if tests["format"] == "junit":
-                    jazzer_dep = """
-                        <dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>
-                    """
+                    jazzer_dep = """<dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>"""
 
                     self.run_command(
-                        "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} \;".format(
-                            join(self.dir_setup, tests["dir"]), jazzer_dep
+                        "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} ;".format(
+                            join(self.dir_expr, "src"), jazzer_dep
                         )
                     )
 
                     self.run_command(
-                        "bash -c 'cp {}/. {}'".format(
+                        "bash -c 'cp -r {}/. {}'".format(
                             join(self.dir_setup, tests["dir"]),
                             join(self.dir_expr, "src", bug_info[self.key_dir_tests]),
                         )
@@ -166,7 +164,7 @@ class AbstractTool(AbstractDriver):
         self.update_experiment_info(experiment_info)
 
     def update_experiment_info(self, experiment_info: Dict[str, Any]) -> None:
-        self.write_json([experiment_info], join(self.dir_expr, "meta-data.json"))
+        self.write_json([experiment_info], join(self.dir_base_expr, "meta-data.json"))
 
     def update_container_stats(self, container_id: str) -> None:
         container_stats = container.get_container_stats(container_id)
@@ -488,11 +486,16 @@ class AbstractTool(AbstractDriver):
             "#!/bin/bash\n",
             "#This script is used to save the trace of the tool\n",
         ]
+        last_dir = ""
         for dir, command, env in self.command_history:
-            line = "cd {}\nexport {}\n{}\n".format(
-                dir, " ".join(f"{k}={v }" for k, v in env.items()), command
-            )
-            script_contents.append(line)
+            if last_dir != dir:
+                script_contents.append("cd {}\n".format(dir))
+                last_dir = dir
+            if env:
+                script_contents.append(
+                    "export {}\n".format(" ".join(f"{k}={v}" for k, v in env.items()))
+                )
+            script_contents.append("{}\n".format(command))
 
         self.write_file(script_contents, join(self.dir_expr, "trace.sh"))
         self.write_file(script_contents, join(self.dir_output, "trace.sh"))
