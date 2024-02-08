@@ -213,6 +213,7 @@ def collect_tool_result(
     )
     tool.analyse_output(dir_info, bug_id, failing_test_identifiers_list)
     tool.print_stats()
+    tool.save_trace()
     tool.log_output_path = ""
     logger.log_tool_stats(task_tag_name, tool.stats)
     dir_info["local"]["summary"] = construct_job_summary(

@@ -1,6 +1,7 @@
 import csv
 import hashlib
 import json
+import multiprocessing
 import os
 import shutil
 import time
@@ -8,6 +9,7 @@ import traceback
 from copy import deepcopy
 from multiprocessing import Lock
 from multiprocessing.pool import ThreadPool
+from multiprocessing.synchronize import Lock as LockType
 from os.path import basename
 from os.path import dirname
 from os.path import join
@@ -22,6 +24,7 @@ from typing import Set
 from typing import Tuple
 from typing import Union
 
+from jsonschema import Draft7Validator
 from watchdog.events import DirCreatedEvent
 from watchdog.events import FileCreatedEvent
 from watchdog.events import FileSystemEvent
@@ -36,6 +39,7 @@ from app.core import values
 from app.core import writer
 from app.core.main import create_task_identifier
 from app.core.main import create_task_image_identifier
+from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task import analyze
 from app.core.task import fuzz
 from app.core.task import repair
@@ -53,6 +57,19 @@ from app.drivers.tools.composite.multi.basic.FileCreationHandler import (
 )
 from app.drivers.tools.MockTool import MockTool
 
+active_jobs_lock: LockType
+
+
+# Due to the way python multiprocess works,
+# we cannot pass a lock to the pool initializer by just seeting a
+# field on the object, similarly to how it is done in the UI module
+# (the UI module is using in process threads and the lock is not shared across process, has to be reworked).
+# Instead, we need to use a global variable which is per process.
+# This is not ideal, but it is the correct way to make it work.
+def init_pool_processes(active_jobs_lock_x: LockType):
+    global active_jobs_lock
+    active_jobs_lock = active_jobs_lock_x
+
 
 class BasicWorkflow(AbstractCompositeTool):
     key_task_tag: str = "task_tag"
@@ -66,8 +83,12 @@ class BasicWorkflow(AbstractCompositeTool):
         self.image_name = "ubuntu:20.04"
         self.process_count = 12
         self.event_processor_count = 4
-        self.exit_message = "quit"
+        self.exit_message = "quit"  # Message for terminating the flow
+        self.exit_message_delayed = (
+            "quit_delayed"  # Message for a termination that will happen after a delay
+        )
         self.last_crash = 0
+        self.active_jobs = 0
 
     def run_composite(
         self,
@@ -100,7 +121,11 @@ class BasicWorkflow(AbstractCompositeTool):
             self.dir_expr - directory for experiment
             self.dir_output - directory to store artifacts/output
         """
-        self.pool = ThreadPool(processes=self.process_count)
+        self.pool = ThreadPool(
+            processes=self.process_count,
+            initializer=init_pool_processes,
+            initargs=(Lock(),),
+        )
         self.message_queue: Queue[Union[str, FileSystemEvent]] = Queue()
         self.observer = Observer()
         self.mutex = Lock()
@@ -191,11 +216,15 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_highlight("Done with setup!")
 
         self.emit_highlight("Preparing watcher")
-        watcher_handle = self.pool.apply_async(self.watcher)
+        watcher_handle = self.pool.apply_async(
+            self.watcher, error_callback=self.error_callback_handler
+        )
 
         self.emit_highlight("Preparing workers")
         for _ in range(self.event_processor_count):
-            self.pool.apply_async(self.event_worker)
+            self.pool.apply_async(
+                self.event_worker, error_callback=self.error_callback_handler
+            )
 
         self.proto_args = (
             dir_info,
@@ -227,6 +256,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             ),
                         ],
                         callback=self.on_fuzzing_finished,
+                        error_callback=self.error_callback_handler,
                     )
                 break
 
@@ -264,6 +294,12 @@ class BasicWorkflow(AbstractCompositeTool):
         Common entry point for a subtask, we take the original task tag to not create new images.
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
+
+        global active_jobs_lock
+        with active_jobs_lock:
+            self.active_jobs += 1
+            self.emit_debug(f"Active jobs: {self.active_jobs}")
+
         try:
             values.task_type.set(task_type)
             values.current_task_profile_id.set(composite_config_info["id"])
@@ -332,6 +368,17 @@ class BasicWorkflow(AbstractCompositeTool):
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
+
+        with active_jobs_lock:
+            self.active_jobs -= 1
+            self.emit_debug(f"Active jobs: {self.active_jobs}")
+            if self.active_jobs == 0:
+                self.message_queue.put(self.exit_message_delayed)
+
+    def error_callback_handler(self, e: BaseException):
+        self.emit_error("I got an exception!")
+        self.emit_warning(e)
+        traceback.print_exc()
 
     def watcher(self):
         event_handler = FileCreationHandler(self.message_queue)
@@ -407,14 +454,22 @@ class BasicWorkflow(AbstractCompositeTool):
         ):
             if basename(event.src_path) == "meta-data.json":
                 self.emit_highlight("Analyze Update")
-                self.pool.apply_async(self.on_analysis_finished, [event])
+                self.pool.apply_async(
+                    self.on_analysis_finished,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
             pass
         elif os.path.commonprefix([event.src_path, self.fuzz_root]) == self.fuzz_root:
             # self.emit_highlight("Fuzz Update")
             # self.emit_debug(dirname(event.src_path))
             if dirname(event.src_path).endswith("crashes"):
                 # self.emit_normal("Found a crash!")
-                self.pool.apply_async(self.on_crash_found, [event])
+                self.pool.apply_async(
+                    self.on_crash_found,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
         elif (
             os.path.commonprefix([event.src_path, self.validate_root])
             == self.validate_root
@@ -441,7 +496,11 @@ class BasicWorkflow(AbstractCompositeTool):
             if basename(event.src_path) == "meta-data.json":
                 self.emit_highlight("Localize Update")
                 self.emit_highlight(event)
-                self.pool.apply_async(self.on_localization_created, [event])
+                self.pool.apply_async(
+                    self.on_localization_created,
+                    [event],
+                    error_callback=self.error_callback_handler,
+                )
 
     def on_fuzzing_finished(self, res):
         try:
@@ -549,6 +608,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             ),
                         ],
                         callback=self.on_crash_analysis_finished,
+                        error_callback=self.error_callback_handler,
                     )
             elif "localize" in self.tool_map:
                 self.emit_debug("starting localizer")
@@ -567,6 +627,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -586,6 +647,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -596,14 +658,24 @@ class BasicWorkflow(AbstractCompositeTool):
         pass
 
     def event_worker(self):
+        global active_jobs_lock  # Capture the process lock
         while True:
             event = self.message_queue.get()
-            if isinstance(event, str) and event == self.exit_message:
-                if self.observer.is_alive():
-                    self.observer.stop()
-                break
-            elif isinstance(event, str):
-                self.emit_debug(f"Got string {event}. Why?")
+            if isinstance(event, str):
+                if event == self.exit_message:
+                    if self.observer.is_alive():
+                        self.observer.stop()
+                    break
+                elif event == self.exit_message_delayed:
+                    time.sleep(60)  # wait for 60 seconds
+                    with (
+                        active_jobs_lock
+                    ):  # If no task started in the past minute, exit
+                        if self.active_jobs == 0:
+                            self.message_queue.put(self.exit_message)
+                else:
+                    self.emit_debug(f"Got string {event}. Why?")
+
                 continue
             if self.pre_process_event(event):
                 # self.emit_debug("Got message {}".format(event))
@@ -618,7 +690,7 @@ class BasicWorkflow(AbstractCompositeTool):
             benign_dir = join(dirname(crash_dir), "queue")
             current_time = int(time.time())
 
-            if self.last_crash is not None and current_time - self.last_crash <= 12000:
+            if self.last_crash is not None and current_time - self.last_crash <= 60:
                 # self.emit_debug("Debouncing the crash")
                 return
 
@@ -727,6 +799,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -746,6 +819,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -796,7 +870,10 @@ class BasicWorkflow(AbstractCompositeTool):
             new_bug_info = deepcopy(self.bug_info)
 
             bug_info_extension = reader.read_json(event.src_path)
+
             new_bug_info = dict(new_bug_info, **(bug_info_extension[0]))
+
+            # self.validate([new_bug_info])
 
             if "repair" in self.tool_map:
                 for tool, params, tag, type in self.tool_map["repair"]:
@@ -814,11 +891,21 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
         pass
+
+    def validate(self, metadata: List):
+        validator = Draft7Validator(general_section_schema)
+        errors = list(validator.iter_errors(metadata))
+        if len(errors) != 0:
+            for error in errors:
+                self.emit_warning(error.message)
+                self.emit_warning(error.path)
+            raise ValueError("Metadata is not valid. Will not continue")
 
     def on_analysis_finished(self, event: FileSystemEvent):
         try:
@@ -883,6 +970,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                     real_task_type=type,
                                 ),
                             ],
+                            error_callback=self.error_callback_handler,
                         )
                     break
         except Exception as e:
@@ -950,6 +1038,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
         except Exception as e:
             self.emit_warning(e)
@@ -1056,6 +1145,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
 
             elif "repair" in self.tool_map:
@@ -1075,6 +1165,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=type,
                             ),
                         ],
+                        error_callback=self.error_callback_handler,
                     )
             else:
                 self.emit_debug("What do I do??")
@@ -1089,17 +1180,30 @@ class BasicWorkflow(AbstractCompositeTool):
         os.makedirs(join(destination_dir, "tests", ""), exist_ok=True)
         os.makedirs(join(destination_dir, subtype, ""), exist_ok=True)
         for test_case in os.listdir(source_dir):
-            if os.path.isdir(join(source_dir, test_case)) or test_case == "README.txt":
+            if test_case == "README.txt":
                 continue
-            tests.append(test_case)
-            shutil.copy(
-                join(source_dir, test_case),
-                join(destination_dir, "tests", ""),
-            )
-            shutil.copy(
-                join(source_dir, test_case),
-                join(destination_dir, subtype, ""),
-            )
+            if os.path.isdir(join(source_dir, test_case)):
+                # TODO directories are only copied over for now
+                shutil.copytree(
+                    join(source_dir, test_case),
+                    join(destination_dir, "tests", test_case),
+                    dirs_exist_ok=True,
+                )
+                shutil.copytree(
+                    join(source_dir, test_case),
+                    join(destination_dir, subtype, test_case),
+                    dirs_exist_ok=True,
+                )
+            else:
+                tests.append(test_case)
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, "tests", ""),
+                )
+                shutil.copy(
+                    join(source_dir, test_case),
+                    join(destination_dir, subtype, ""),
+                )
 
         return tests
 

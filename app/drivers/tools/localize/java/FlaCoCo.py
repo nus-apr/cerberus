@@ -2,6 +2,7 @@ import os
 import re
 from os.path import join
 
+from app.core import values
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 
 
@@ -29,13 +30,53 @@ class FlaCoCo(AbstractLocalizeTool):
         formula = bug_info.get("fl_formula", "Ochiai").upper()
 
         env = {}
+        if bug_info.get(self.key_language, "") == "java":
+            env["JAVA_HOME"] = "/usr/lib/jvm/java-{}-openjdk-amd64".format(
+                bug_info.get("java_version", 8)
+            )
+            if int(bug_info.get("java_version", 8)) == 8:
+                self.run_command(
+                    f"update-java-alternatives -s java-1.8.0-openjdk-amd64"
+                )
+
+        if self.key_clean_script in bug_info:
+            self.run_command(
+                "bash {}".format(bug_info[self.key_clean_script]),
+                dir_path=self.dir_setup,
+                env=env,
+            )
+        else:
+            if bug_info[self.build_system] == "maven":
+                self.run_command(
+                    "mvn clean", dir_path=join(self.dir_expr, "src"), env=env
+                )
+            else:
+                pass
+
+        if self.key_build_script in bug_info:
+            self.run_command(
+                "bash {}".format(bug_info[self.key_build_script]),
+                dir_path=self.dir_setup,
+                env=env,
+            )
+        else:
+            if bug_info[self.build_system] == "maven":
+                self.run_command(
+                    "mvn compile test-compile",
+                    dir_path=join(self.dir_expr, "src"),
+                    env=env,
+                )
+            else:
+                pass
+
         self.timestamp_log_start()
-        localize_command = "timeout -k 5m {}h java -jar /flacoco/target/flacoco-1.0.7-SNAPSHOT-jar-with-dependencies.jar -f {} --projectpath {} {} -o {}".format(
+        localize_command = "timeout -k 5m {}h java -jar /flacoco/target/flacoco-1.0.7-SNAPSHOT-jar-with-dependencies.jar -f {} --projectpath {} {} -o {} {}".format(
             timeout,
             formula,
             join(self.dir_expr, "src"),
             additional_tool_param,
             join(self.dir_output, "localilzation.csv"),
+            "-v" if values.is_debug else "",
         )
 
         status = self.run_command(localize_command, self.log_output_path, env=env)

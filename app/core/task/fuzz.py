@@ -18,14 +18,14 @@ from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 def run_fuzz(
     dir_info: DirectoryInfo,
-    experiment_info,
+    experiment_info: Dict[str, Any],
     tool: AbstractFuzzTool,
     fuzz_config_info: Dict[str, Any],
     container_id: Optional[str],
     benchmark_name: str,
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
-    tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
     tool.process_tests(dir_info, experiment_info)
     try:
         tool.run_fuzz(experiment_info, fuzz_config_info)

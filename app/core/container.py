@@ -31,7 +31,7 @@ def get_client():
         cached_client = docker.DockerClient(
             base_url=values.docker_host,
             version="1.41",
-            timeout=900
+            timeout=900,
             # user_agent="Cerberus Agent",
             # use_ssh_client=True,
         )
@@ -275,7 +275,12 @@ def build_container(
             "privileged": True,
             "cpuset_cpus": ",".join(cpu),
             "tty": True,
-            "environment": {"EXPERIMENT_DIR": values.container_base_experiment},
+            "environment": {
+                "EXPERIMENT_DIR": values.container_base_experiment,
+                "METADATA_FILE": os.path.join(
+                    values.container_base_experiment, "meta-data.json"
+                ),
+            },
         }
 
         if disable_network:

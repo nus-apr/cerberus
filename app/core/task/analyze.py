@@ -62,7 +62,7 @@ def run_analysis(
     ]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
     tool.process_tests(dir_info, experiment_info)
     try:
         tool.run_analysis(experiment_info, analysis_config_info)

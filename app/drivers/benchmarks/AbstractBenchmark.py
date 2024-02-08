@@ -15,6 +15,8 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.metadata.MetadataLoader import MetadataLoader
+from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task.stats.BenchmarkStats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
@@ -125,15 +127,18 @@ class AbstractBenchmark(AbstractDriver):
     def load_meta_file_static(path, name) -> List[Any]:
         meta_file_path = join(path, name, "meta-data.json")
         AbstractBenchmark.check_benchmark_folder(name)
-        with open(meta_file_path, "r") as in_file:
-            json_data = json.load(in_file)
-            if json_data:
-                return AbstractBenchmark.process_metadata(json_data)
-            else:
-                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
-                utilities.error_exit(
-                    "Could not load meta-data from {}".format(meta_file_path)
+        try:
+            loader = MetadataLoader(meta_file_path, general_section_schema)
+            loader.load()
+            loader.validate()
+            return AbstractBenchmark.process_metadata(loader.get_meta_data())
+        except Exception as e:
+            values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+            utilities.error_exit(
+                "Could not load meta-data from {}. Reason is {}".format(
+                    meta_file_path, e
                 )
+            )
 
     @staticmethod
     def process_metadata(data):
@@ -185,14 +190,21 @@ class AbstractBenchmark(AbstractDriver):
             if not os.path.exists(meta_file_loc):
                 utilities.error_exit("Special meta file path is incorrect")
 
-        with open(meta_file_loc, "r") as in_file:
-            json_data = json.load(in_file)
-            if json_data:
-                self.experiment_subjects = AbstractBenchmark.process_metadata(json_data)
-                self.size = len(json_data)
-            else:
-                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
-                utilities.error_exit("Could not load meta-data from ", self.meta_file)
+        try:
+            loader = MetadataLoader(meta_file_loc, general_section_schema)
+            loader.load()
+            loader.validate()
+            self.experiment_subjects = AbstractBenchmark.process_metadata(
+                loader.get_meta_data()
+            )
+            self.size = len(self.experiment_subjects)
+        except Exception as e:
+            values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+            utilities.error_exit(
+                "Could not load meta-data from {}. Reason is {}".format(
+                    meta_file_loc, e
+                )
+            )
 
     def run_command(
         self,

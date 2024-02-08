@@ -18,7 +18,7 @@ from app.drivers.tools.composite.AbstractCompositeTool import AbstractCompositeT
 
 def run_composite(
     dir_info: DirectoryInfo,
-    experiment_info,
+    experiment_info: Dict[str, Any],
     tool: AbstractCompositeTool,
     composite_config_info: Dict[str, Any],
     container_config_info: Dict[str, Any],
@@ -65,7 +65,7 @@ def run_composite(
     ]
     experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
     experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
-    tool.update_info(container_id, values.only_instrument, dir_info)
+    tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
     try:
         tool.run_composite(
             dir_info,

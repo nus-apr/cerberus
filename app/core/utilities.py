@@ -11,6 +11,7 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 from typing import Any
+from typing import Dict
 from typing import NoReturn
 
 from app.core import emitter
@@ -57,14 +58,20 @@ def create_output_directories():
             os.makedirs(dir_i)
 
 
-def execute_command(command: str, show_output=True, env=dict(), directory=None):
+def execute_command(
+    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
+):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     if not directory:
         directory = os.getcwd()
-        print_command = command
+        print_command = "[{}] {}".format(directory, command)
     else:
         print_command = "[{}] {}".format(directory, command)
+
+    if env:
+        print_command += f""" ({' '.join(f"{k}={v}" for k, v in env.items())})"""
+
     emitter.command(print_command)
     command = "{{ {} ;}} 2> {}".format(command, values.file_error_log)
     if not show_output:
@@ -80,14 +87,20 @@ def execute_command(command: str, show_output=True, env=dict(), directory=None):
     return int(process.returncode)
 
 
-def run_command(command: str, show_output=True, env=dict(), directory=None):
+def run_command(
+    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
+):
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     if not directory:
         directory = os.getcwd()
-        print_command = command
+        print_command = "[{}] {}".format(directory, command)
     else:
         print_command = "[{}] {}".format(directory, command)
+
+    if env:
+        print_command += f""" ({' '.join(f"{k}={v}" for k, v in env.items())})"""
+
     emitter.command(print_command)
     command = "{{ {} ;}} 2> {}".format(command, values.file_error_log)
     if not show_output:

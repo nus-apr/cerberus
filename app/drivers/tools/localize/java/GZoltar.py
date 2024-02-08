@@ -1,5 +1,6 @@
 import os
 import re
+from os.path import dirname
 from os.path import join
 
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
@@ -52,14 +53,31 @@ class GZoltar(AbstractLocalizeTool):
                 env=env,
             )
 
+        if bug_info.get("build_system", "NAN") == "maven":
+            self.run_command(
+                "mvn dependency:copy-dependencies",
+                self.log_output_path,
+                join(self.dir_expr, "src"),
+                env=env,
+            )
+
         tests_list = join(self.dir_expr, "unit-tests.txt")
+
+        deps_location_test = join(
+            self.dir_expr, "src", dirname(bug_info[self.key_dir_class]), "dependency"
+        )
+        if self.is_dir(deps_location_test):
+            deps_location = ":" + join(deps_location_test, "*")
+        else:
+            deps_location = ""
 
         self.timestamp_log_start()
         self.emit_normal("Generating test method list")
         self.run_command(
-            "java -cp {test_dir}:{junit}:{hamcrest}:{gzoltar_cli} com.gzoltar.cli.Main listTestMethods {test_dir} --outputFile {output}".format(
+            "java -cp {test_dir}:{junit}:{hamcrest}:{gzoltar_cli}{deps} com.gzoltar.cli.Main listTestMethods {test_dir} --outputFile {output}".format(
                 output=tests_list,
                 hamcrest="/gzoltar/libs/hamcrest-core.jar",
+                deps=deps_location,
                 junit="/gzoltar/libs/junit.jar",
                 test_dir=join(self.dir_expr, "src", bug_info[self.key_dir_test_class]),
                 gzoltar_cli="/gzoltar/com.gzoltar.cli/target/com.gzoltar.cli-{}-jar-with-dependencies.jar".format(
@@ -83,8 +101,9 @@ class GZoltar(AbstractLocalizeTool):
         )
 
         self.run_command(
-            "java -cp {backup_dir}:{gzoltar_agent}:{gzoltar_cli} com.gzoltar.cli.Main instrument --outputDirectory {class_dir} {backup_dir}".format(
+            "java -cp {backup_dir}:{gzoltar_agent}:{gzoltar_cli}{deps} com.gzoltar.cli.Main instrument --outputDirectory {class_dir} {backup_dir}".format(
                 backup_dir=join(self.dir_expr, "src", "class-backup"),
+                deps=deps_location,
                 class_dir=join(self.dir_expr, "src", bug_info[self.key_dir_class]),
                 gzoltar_agent="/gzoltar/com.gzoltar.agent.rt/target/com.gzoltar.agent.rt-{}-all.jar".format(
                     gzoltar_version
@@ -96,13 +115,15 @@ class GZoltar(AbstractLocalizeTool):
             env=env,
         )
 
+        return
         self.emit_normal("Running each unit test case in isolation")
 
         ser_file = join(self.dir_output, "ser_file.ser")
         self.run_command(
-            """java -cp {test_dir}:{class_dir}:{junit}:{hamcrest}:{gzoltar_agent}:{gzoltar_cli} -Dgzoltar-agent.destfile={ser_file} -Dgzoltar-agent.output="file" \
+            """java -cp {test_dir}:{class_dir}:{junit}:{hamcrest}:{gzoltar_agent}:{gzoltar_cli}{deps} -Dgzoltar-agent.destfile={ser_file} -Dgzoltar-agent.output="file" \
                             com.gzoltar.cli.Main runTestMethods --testMethods {test_method} --offline --collectCoverage""".format(
                 test_dir=join(self.dir_expr, "src", bug_info[self.key_dir_test_class]),
+                deps=deps_location,
                 class_dir=join(self.dir_expr, "src", bug_info[self.key_dir_class]),
                 junit="/gzoltar/libs/junit.jar",
                 hamcrest="/gzoltar/libs/hamcrest-core.jar",
@@ -136,7 +157,7 @@ class GZoltar(AbstractLocalizeTool):
         formula = bug_info.get("fl_formula", "Ochiai").lower()
         metric = bug_info.get("fl_metric", "entropy").lower()
         granularity = bug_info.get("fl_granularity", "line").lower()
-        localize_command = """ java -cp {class_dir}:{test_dir}:{junit}:{hamcrest}:{gzoltar_cli} \
+        localize_command = """ java -cp {class_dir}:{test_dir}:{junit}:{hamcrest}:{gzoltar_cli}{deps} \
   com.gzoltar.cli.Main faultLocalizationReport \
     --buildLocation "{class_dir}" \
     --granularity "{granularity}" \
@@ -151,6 +172,7 @@ class GZoltar(AbstractLocalizeTool):
     --formatter "txt" {additional_params} """.format(
             formula=formula,
             metric=metric,
+            deps=deps_location,
             granularity=granularity,
             class_dir=join(self.dir_expr, "src", bug_info[self.key_dir_class]),
             output_dir=join(self.dir_output),
