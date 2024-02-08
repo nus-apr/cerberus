@@ -8,7 +8,7 @@ class DirectedAFLpp(AbstractFuzzTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "joern-directed-aflpp"
+        self.image_name = "wolffdy/joern-directed-aflpp"
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
