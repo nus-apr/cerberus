@@ -724,7 +724,7 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
-    return dir_info
+    return (tool.stats.error_stats.is_error, dir_info)
 
 
 def print_task_info(

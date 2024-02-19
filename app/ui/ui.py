@@ -786,7 +786,7 @@ class Cerberus(App[List[Result]]):
             status = TaskStatus.SUCCESS
             dir_info = {}
             try:
-                dir_info = task.run(
+                err, dir_info = task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
@@ -798,6 +798,8 @@ class Cerberus(App[List[Result]]):
                     str(message.run),
                     message.experiment_image_id,
                 )
+                if err:
+                    status = TaskStatus.FAIL
             except Exception as e:
                 try:
                     job_time_map_mutex.acquire(blocking=True)
@@ -1065,13 +1067,13 @@ def update_current_job(status: str):
             app.update_status(current_job, status)
 
 
-def setup_ui(tasks: Optional[TaskList] = None):
+def setup_ui(tasks: Optional[TaskList] = None) -> Tuple[int, bool]:
     global app
     app = Cerberus()
     app.tasks = tasks
     experiment_results = app.run()
     print_results(experiment_results)
-    return len(experiment_results) if experiment_results else 0
+    return (len(experiment_results), True) if experiment_results else (0, False)
 
 
 def print_results(experiment_results: Optional[List[Result]]):

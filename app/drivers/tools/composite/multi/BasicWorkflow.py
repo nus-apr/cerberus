@@ -352,7 +352,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     )
                 )
 
-            task.run(
+            err, _ = task.run(
                 benchmark,
                 tool,
                 bug_info,
@@ -366,6 +366,8 @@ class BasicWorkflow(AbstractCompositeTool):
                 hash,
                 tool_tag,
             )
+            if err:
+                self.stats.error_stats.is_error = True
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
@@ -379,6 +381,7 @@ class BasicWorkflow(AbstractCompositeTool):
     def error_callback_handler(self, e: BaseException):
         self.emit_error("I got an exception!")
         self.emit_warning(e)
+        self.stats.error_stats.is_error = True
         traceback.print_exc()
 
     def watcher(self):

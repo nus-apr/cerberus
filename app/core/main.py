@@ -96,7 +96,7 @@ def main():
 
     rich.traceback.install(show_locals=True)
     parsed_args = parse_args()
-    is_error = False
+    has_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
     set_start_method("spawn")
@@ -141,15 +141,15 @@ def main():
                 utilities.error_exit(
                     "Parallel mode is currently supported only for versions 3.10+"
                 )
-            iteration = ui.setup_ui(tasks)
+            iteration, has_error = ui.setup_ui(tasks)
         else:
             emitter.information("\t\t[framework] starting processing of tasks")
-            process_tasks(tasks)
+            has_error = process_tasks(tasks)
 
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
-        is_error = True
+        has_error = True
         values.ui_active = False
         emitter.error("Runtime Error")
         emitter.error(str(e))
@@ -160,8 +160,8 @@ def main():
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
         if not parsed_args.parallel:
-            notification.end(total_duration, is_error)
-        emitter.end(total_duration, iteration, is_error)
+            notification.end(total_duration, has_error)
+        emitter.end(total_duration, iteration, has_error)
 
 
 def process_config_file(parsed_args):
@@ -182,6 +182,7 @@ def process_config_file(parsed_args):
 
 
 def process_tasks(tasks: TaskList):
+    has_error = False
     for iteration, (task_config, task_data) in enumerate(tasks):
         (
             benchmark,
@@ -277,7 +278,7 @@ def process_tasks(tasks: TaskList):
                 tool_tag,
             )
 
-            task.run(
+            (err, _) = task.run(
                 benchmark,
                 tool,
                 experiment_item,
@@ -289,3 +290,6 @@ def process_tasks(tasks: TaskList):
                 str(run_index),
                 image_name,
             )
+            if err:
+                has_error = True
+    return has_error
