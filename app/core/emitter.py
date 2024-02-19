@@ -63,8 +63,10 @@ TEXTUALIZE_COLOR_MAP = {
 
 def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
     if not values.ui_active:
-        message = "[bold {}]{}".format(
-            RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
+        message = "[bold {}]{} {}".format(
+            RICH_COLOR_MAP[print_color],
+            values.job_identifier.get("Root"),
+            str(print_message).replace("[", "\\["),
         )
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
