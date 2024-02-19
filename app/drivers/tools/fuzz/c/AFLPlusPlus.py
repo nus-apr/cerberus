@@ -143,6 +143,14 @@ class AFLPlusPlus(AbstractFuzzTool):
             )
         )
 
+        # Get custom seeds
+        self.run_command(
+            "bash -c 'cp -r {}/* {}' ".format(
+                join(self.dir_setup, self.name, "initial-crashing-corpus"),
+                path,
+            )
+        )
+
     def copy_benign_tests(self, path):
         # Get Benign Tests
         self.run_command(
@@ -151,18 +159,14 @@ class AFLPlusPlus(AbstractFuzzTool):
                 path,
             )
         )
-        # Get default seeds
-        self.run_command(
-            "bash -c 'cp -r {}/* {}' ".format(
-                join(self.dir_setup, "tests"),
-                path,
-            )
-        )
+
+        # Ensure at least one test-case
+        self.write_file(["hi"],  join(path, "hi.txt"))
 
         # Get special seeds
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(
-                join(self.dir_setup, self.name, "initial-corpus"),
+                join(self.dir_setup, self.name, "initial-benign-corpus"),
                 path,
             )
         )
