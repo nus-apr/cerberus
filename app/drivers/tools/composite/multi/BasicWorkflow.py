@@ -322,6 +322,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 str(run_index),
                 tool_tag,
             )
+            values.job_identifier.set(key)
 
             with open(
                 join(

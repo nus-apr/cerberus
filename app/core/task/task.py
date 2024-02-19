@@ -580,7 +580,7 @@ def run(
         bug_name,
         hash,
         task_identifier,
-        tag or task_config_info.get(definitions.KEY_TOOL_TAG, ""),
+        tag or cast(str, task_config_info.get(definitions.KEY_TOOL_TAG, "")),
     )
     benchmark.update_dir_info(dir_info)
     print_task_info(

@@ -1,5 +1,7 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
@@ -62,7 +64,7 @@ class DirectedAFLpp(AbstractFuzzTool):
         self.write_json(bug_info, os.path.join(self.dir_expr, "meta-data.json"))
 
         self.run_command(
-            "python3 /opt/selective_instrument.py {} {}".format(
+            "python3 /opt/selective_instrument.py {}".format(
                 os.path.join(self.dir_expr, "meta-data.json")
             ),
             dir_path="/opt/",
@@ -82,7 +84,7 @@ class DirectedAFLpp(AbstractFuzzTool):
             fuzz_command,
             self.log_output_path,
             join(self.dir_expr, "src"),
-            env={"AFL_NO_UI": 1},
+            env={"AFL_NO_UI": str(1)},
         )
 
         self.process_status(status)
@@ -113,7 +115,7 @@ class DirectedAFLpp(AbstractFuzzTool):
             "bash -c 'cp -r {}/id* {} '".format(source_crash_dir, target_crash_dir)
         )
 
-        new_bug_info = {}
+        new_bug_info: Dict[str, Any] = {}
 
         new_bug_info[self.key_exploit_inputs] = [
             {"format": "raw", "dir": "crashing_tests"}
@@ -164,7 +166,7 @@ class DirectedAFLpp(AbstractFuzzTool):
         )
 
         # Ensure at least one test-case
-        self.write_file(["hi"],  join(path, "hi.txt"))
+        self.write_file(["hi"], join(path, "hi.txt"))
 
         # Get custom seeds
         self.run_command(

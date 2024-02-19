@@ -46,7 +46,7 @@ class FlaCoCo(AbstractLocalizeTool):
                 env=env,
             )
         else:
-            if bug_info[self.build_system] == "maven":
+            if bug_info["build_system"] == "maven":
                 self.run_command(
                     "mvn clean", dir_path=join(self.dir_expr, "src"), env=env
                 )
@@ -60,7 +60,7 @@ class FlaCoCo(AbstractLocalizeTool):
                 env=env,
             )
         else:
-            if bug_info[self.build_system] == "maven":
+            if bug_info["build_system"] == "maven":
                 self.run_command(
                     "mvn compile test-compile",
                     dir_path=join(self.dir_expr, "src"),
@@ -76,7 +76,7 @@ class FlaCoCo(AbstractLocalizeTool):
             join(self.dir_expr, "src"),
             additional_tool_param,
             join(self.dir_output, "localilzation.csv"),
-            "-v" if values.is_debug else "",
+            "-v" if values.debug else "",
         )
 
         status = self.run_command(localize_command, self.log_output_path, env=env)

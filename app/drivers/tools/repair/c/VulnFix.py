@@ -42,7 +42,7 @@ class VulnFix(AbstractRepairTool):
         )
         env = dict()
         if self.is_ui_active:
-            env["AFL_NO_AFFINITY"] = 1
+            env["AFL_NO_AFFINITY"] = str(1)
         status = self.run_command(
             vulnfix_command,
             log_file_path=self.log_output_path,

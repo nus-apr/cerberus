@@ -1,5 +1,7 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
@@ -89,7 +91,7 @@ class Jazzer(AbstractFuzzTool):
         self.run_command("cp -r {} {}".format(harness_source_dir, reproducer_path))
         self.run_command("cp -r {} {}".format(harness_source_dir, benign_path))
 
-        new_bug_info = {}
+        new_bug_info: Dict[str, Any] = {}
 
         new_bug_info[self.key_exploit_inputs] = [
             {"format": "junit", "dir": "crashing_tests"}

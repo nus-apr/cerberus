@@ -37,6 +37,7 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
+from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.stats.ToolStats import ToolStats
@@ -243,7 +244,7 @@ class Cerberus(App[List[Result]]):
                     bug_index,
                 ),
             ) in enumerate(tasks):
-                image_name = main.create_task_image_identifier(
+                image_name = create_task_image_identifier(
                     benchmark,
                     tool,
                     experiment_item,

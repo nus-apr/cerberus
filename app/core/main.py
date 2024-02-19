@@ -25,6 +25,9 @@ from app.core.configs.ConfigDataLoader import ConfigDataLoader
 from app.core.configs.ConfigValidationSchemas import config_validation_schema
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configuration import Configurations
+from app.core.identifiers import create_bug_image_identifier
+from app.core.identifiers import create_task_identifier
+from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
 from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskProcessor import TaskProcessor
@@ -58,55 +61,6 @@ def bootstrap(arg_list: Namespace):
     config.update_configuration()
     config.print_configuration()
     return config
-
-
-def create_task_image_identifier(
-    benchmark: AbstractBenchmark,
-    tool: AbstractTool,
-    experiment_item: Dict[str, Any],
-    tag: Optional[str] = None,
-):
-    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    image_args = [tool.name, benchmark.name, subject_name, bug_name]
-
-    if tag and tag != "":
-        image_args.append(tag)
-
-    image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
-    return image_name.lower()
-
-
-def create_bug_image_identifier(
-    benchmark: AbstractBenchmark, experiment_item: Dict[str, Any]
-):
-    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    return "-".join(
-        map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
-    ).lower()
-
-
-def create_task_identifier(
-    benchmark: AbstractBenchmark,
-    task_profile,
-    container_profile,
-    experiment_item,
-    tool: AbstractTool,
-    run_index: str,
-    tool_tag: str,
-):
-    return "-".join(
-        [
-            benchmark.name,
-            tool.name if tool_tag == "" else f"{tool.name}-{tool_tag}",
-            experiment_item[definitions.KEY_SUBJECT],
-            experiment_item[definitions.KEY_BUG_ID],
-            task_profile[definitions.KEY_ID],
-            container_profile[definitions.KEY_ID],
-            run_index,
-        ]
-    )
 
 
 iteration = 0

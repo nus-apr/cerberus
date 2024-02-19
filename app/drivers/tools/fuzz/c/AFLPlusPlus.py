@@ -1,5 +1,7 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
@@ -79,7 +81,7 @@ class AFLPlusPlus(AbstractFuzzTool):
             fuzz_command,
             self.log_output_path,
             join(self.dir_expr, "src"),
-            env={"AFL_NO_UI": 1},
+            env={"AFL_NO_UI": str(1)},
         )
 
         self.process_status(status)
@@ -110,7 +112,7 @@ class AFLPlusPlus(AbstractFuzzTool):
             "bash -c 'cp -r {}/id* {} '".format(source_crash_dir, target_crash_dir)
         )
 
-        new_bug_info = {}
+        new_bug_info: Dict[str, Any] = {}
 
         new_bug_info[self.key_exploit_inputs] = [
             {"format": "raw", "dir": "crashing_tests"}
@@ -161,7 +163,7 @@ class AFLPlusPlus(AbstractFuzzTool):
         )
 
         # Ensure at least one test-case
-        self.write_file(["hi"],  join(path, "hi.txt"))
+        self.write_file(["hi"], join(path, "hi.txt"))
 
         # Get special seeds
         self.run_command(
