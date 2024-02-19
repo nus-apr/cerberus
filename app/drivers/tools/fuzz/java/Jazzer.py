@@ -91,28 +91,11 @@ class Jazzer(AbstractFuzzTool):
         self.run_command("cp -r {} {}".format(harness_source_dir, reproducer_path))
         self.run_command("cp -r {} {}".format(harness_source_dir, benign_path))
 
-        new_bug_info: Dict[str, Any] = {}
-
-        new_bug_info[self.key_exploit_inputs] = [
-            {"format": "junit", "dir": "crashing_tests"}
-        ]
-        new_bug_info[self.key_benign_inputs] = [
-            {"format": "junit", "dir": "benign_tests"}
-        ]
-
-        new_bug_info[self.key_exploit_list] = list(
-            map(
-                lambda x: os.path.basename(x)[: -len(".java")],
-                self.list_dir(reproducer_path, regex=".java"),
-            )
-        ) + list(
-            map(
-                lambda x: os.path.basename(x)[: -len(".java")],
-                self.list_dir(benign_path, regex=".java"),
-            )
-        )
-
-        new_bug_info["test_dir_abspath"] = self.dir_setup
+        new_bug_info: Dict[str, Any] = {
+            self.key_exploit_inputs: [{"format": "junit", "dir": "crashing_tests"}],
+            self.key_benign_inputs: [{"format": "junit", "dir": "benign_tests"}],
+            "test_dir_abspath": self.dir_setup,
+        }
 
         self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
 
