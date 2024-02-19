@@ -1,5 +1,10 @@
 from typing import Dict
 from typing import List
-from typing import Union
+from typing import Literal
 
-CompositeSequence = Dict[str, List[str]]
+from app.core.task.typing.TaskType import CompositeTaskType
+
+CompositeSequence = Dict[
+    CompositeTaskType,
+    List[Dict[Literal["name", "type", "params", "tag", "ignore"], str]],
+]
