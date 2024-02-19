@@ -52,7 +52,6 @@ class JoernSBFL(AbstractLocalizeTool):
         self.emit_normal("Running tool...")
 
         bug_info["src"] = {"root_abspath": os.path.join(self.dir_expr, "src")}
-        bug_info["output_dir_abspath"] = self.dir_output
         bug_info["test_dir_abspath"] = self.dir_setup
         self.write_json(bug_info, os.path.join(self.dir_expr, "meta-data.json"))
 

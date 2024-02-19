@@ -163,6 +163,8 @@ class AbstractTool(AbstractDriver):
         self.update_dir_info(dir_info)
         self.update_experiment_info(experiment_info)
 
+        experiment_info[definitions.KEY_OUTPUT_DIR_ABSPATH] = self.dir_output
+
     def update_experiment_info(self, experiment_info: Dict[str, Any]) -> None:
         self.write_json([experiment_info], join(self.dir_base_expr, "meta-data.json"))
 

@@ -588,6 +588,7 @@ def run(
     )
 
     dir_info = update_dir_info(dir_info, tool.name)
+
     dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
 
