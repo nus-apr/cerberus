@@ -123,29 +123,15 @@ class AbstractAFL(AbstractFuzzTool):
             "bash -c 'cp -r {}/id* {} '".format(source_crash_dir, target_crash_dir)
         )
 
-        new_bug_info: Dict[str, Any] = {}
-
-        new_bug_info[self.key_exploit_inputs] = [
-            {"format": "raw", "dir": "crashing_tests"}
-        ]
-        new_bug_info[self.key_benign_inputs] = [
-            {"format": "raw", "dir": "benign_tests"}
-        ]
-
-        new_bug_info[self.key_exploit_list] = list(
-            map(
-                lambda x: join("benign_tests", os.path.basename(x)),
-                self.list_dir(target_benign_dir, regex="in*"),
-            )
-        ) + list(
-            map(
-                lambda x: join("crashing_tests", os.path.basename(x)),
-                self.list_dir(target_crash_dir, regex="in*"),
-            )
+        new_bug_info: Dict[str, Any] = {
+            self.key_exploit_inputs: [{"format": "raw", "dir": "crashing_tests"}],
+            self.key_benign_inputs: [{"format": "raw", "dir": "benign_tests"}],
+            "test_dir_abspath": self.dir_setup,
+        }
+        self.write_json(
+            [new_bug_info],
+            join(self.dir_output, "meta-data.json"),
         )
-
-        new_bug_info["test_dir_abspath"] = self.dir_setup
-        self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
 
     def copy_crashing_tests(self, corpus_path):
         # Get Crashing tests
