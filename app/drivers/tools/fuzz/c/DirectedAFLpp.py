@@ -4,11 +4,11 @@ from os.path import join
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
-class AFLPlusPlus(AbstractFuzzTool):
+class DirectedAFLpp(AbstractFuzzTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "mirchevmp/aflplusplus"
+        self.image_name = "wolffdy/joern-directed-aflpp"
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         """
@@ -19,7 +19,7 @@ class AFLPlusPlus(AbstractFuzzTool):
         return self.stats
 
     def run_fuzz(self, bug_info, fuzz_config_info):
-        super(AFLPlusPlus, self).run_fuzz(bug_info, fuzz_config_info)
+        super(DirectedAFLpp, self).run_fuzz(bug_info, fuzz_config_info)
         self.emit_normal("executing fuzz command")
 
         timeout = int(float(fuzz_config_info[self.key_timeout]) * 60)
@@ -54,15 +54,18 @@ class AFLPlusPlus(AbstractFuzzTool):
                 "AFL++ needs to rebuild the project with coverage instrumntation"
             )
 
+        self.emit_normal("Running tool...")
+
+        bug_info["src"] = {"root_abspath": os.path.join(self.dir_expr, "src")}
+        bug_info["output_dir_abspath"] = self.dir_output
+        bug_info["test_dir_abspath"] = self.dir_setup
+        self.write_json(bug_info, os.path.join(self.dir_expr, "meta-data.json"))
+
         self.run_command(
-            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
-                join(self.dir_setup, bug_info[self.key_config_script])
-            )
-        )
-        self.run_command(
-            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
-                join(self.dir_setup, bug_info[self.key_build_script])
-            )
+            "python3 /opt/selective_instrument.py {} {}".format(
+                os.path.join(self.dir_expr, "meta-data.json")
+            ),
+            dir_path="/opt/",
         )
 
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
@@ -146,7 +149,7 @@ class AFLPlusPlus(AbstractFuzzTool):
         # Get custom seeds
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(
-                join(self.dir_setup, self.name, "initial-crashing-corpus"),
+                join(self.dir_setup, self.name, "initial-benign-corpus"),
                 path,
             )
         )
@@ -163,7 +166,7 @@ class AFLPlusPlus(AbstractFuzzTool):
         # Ensure at least one test-case
         self.write_file(["hi"],  join(path, "hi.txt"))
 
-        # Get special seeds
+        # Get custom seeds
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(
                 join(self.dir_setup, self.name, "initial-benign-corpus"),
