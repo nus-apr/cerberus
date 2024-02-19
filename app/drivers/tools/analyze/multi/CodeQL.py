@@ -33,7 +33,9 @@ class CodeQL(AbstractAnalyzeTool):
         dir_src = join(self.dir_expr, "src")
         language = bug_info.get(self.key_language, "all")
 
-        self.write_json([bug_info], os.path.join(self.dir_expr, "meta-data.json"))
+        metadata_loc = os.path.join(self.dir_expr, "meta-data.json")
+
+        self.write_json([bug_info], metadata_loc)
 
         self.run_command(
             "bash -c 'echo \"{}\n\" | sudo -S mkdir -p {}'".format(
@@ -52,7 +54,7 @@ class CodeQL(AbstractAnalyzeTool):
 
         analysis_command = (
             "bash /home/ubuntu/workspace/script/cerberus_entrypoint.sh {} {}".format(
-                os.path.join(self.dir_expr, "meta-data.json"), language
+                metadata_loc, language
             )
         )
 
