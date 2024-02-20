@@ -18,6 +18,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 class AbstractLocalizeTool(AbstractTool):
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
+    key_analysis_output = definitions.KEY_ANALYSIS_OUTPUT
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
     key_failing_test_identifiers = definitions.KEY_FAILING_TEST
     key_passing_test_identifiers = definitions.KEY_PASSING_TEST
