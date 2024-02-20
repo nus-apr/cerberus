@@ -126,7 +126,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 "localization": localization_info,
             }
 
-            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
+            self.write_json({self.key_analysis_output: [new_metadata]}, join(self.dir_output, "meta-data.json"))
 
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
