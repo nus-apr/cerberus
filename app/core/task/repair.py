@@ -28,6 +28,16 @@ def run_repair(
 ):
     experiment_info[definitions.KEY_BENCHMARK] = benchmark_name
 
+    # TODO replace with a better solution
+    if (
+        definitions.KEY_ANALYSIS_OUTPUT in experiment_info
+        and definitions.KEY_LOCALIZATION
+        in experiment_info[definitions.KEY_ANALYSIS_OUTPUT][-1]
+    ):
+        experiment_info[definitions.KEY_LOCALIZATION] = experiment_info[
+            definitions.KEY_ANALYSIS_OUTPUT
+        ][-1][definitions.KEY_LOCALIZATION]
+
     if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
         for localization_entry in experiment_info[definitions.KEY_LOCALIZATION]:
             del localization_entry[definitions.KEY_CONFIG_FIX_LOC]
