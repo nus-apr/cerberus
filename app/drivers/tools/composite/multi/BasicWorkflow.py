@@ -461,7 +461,7 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_tag = subtask_hash.hexdigest()[:8]
 
             (base_setup, enhanced_setup) = self.get_setup_directories(
-                self.crash_analyze_root, subtask_tag
+                self.fuzz_root, subtask_tag
             )
 
             self.emit_debug(f"Setup dir is {base_setup}")
