@@ -124,12 +124,13 @@ class AbstractAFL(AbstractFuzzTool):
         )
 
         new_bug_info: Dict[str, Any] = {
+            self.key_generator : self.name,
             self.key_exploit_inputs: [{"format": "raw", "dir": "crashing_tests"}],
             self.key_benign_inputs: [{"format": "raw", "dir": "benign_tests"}],
             "test_dir_abspath": self.dir_setup,
         }
         self.write_json(
-            [new_bug_info],
+            [{ self.key_analysis_output : [new_bug_info] }],
             join(self.dir_output, "meta-data.json"),
         )
 

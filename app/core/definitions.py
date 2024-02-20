@@ -1,6 +1,8 @@
 KEY_BUG_ID = "bug_id"
 KEY_BENCHMARK = "benchmark"
 KEY_ID = "id"
+KEY_GENERATOR = "generator"
+KEY_ANALYSIS_OUTPUT = "analysis_output"
 KEY_SUBJECT = "subject"
 KEY_LANGUAGE = "language"
 KEY_FIX_FILE = "source_file"

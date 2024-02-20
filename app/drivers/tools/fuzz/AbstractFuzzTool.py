@@ -15,6 +15,8 @@ class AbstractFuzzTool(AbstractTool):
     key_bin_path = definitions.KEY_BINARY_PATH
     key_crash_cmd = definitions.KEY_CRASH_CMD
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
+    key_generator = definitions.KEY_GENERATOR
+    key_analysis_output = definitions.KEY_ANALYSIS_OUTPUT
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
     stats: FuzzToolStats
