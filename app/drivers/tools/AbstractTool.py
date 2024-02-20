@@ -125,30 +125,55 @@ class AbstractTool(AbstractDriver):
         pass
 
     def process_tests(self, dir_info: DirectoryInfo, bug_info) -> None:
-        for test_group in [self.key_benign_inputs, self.key_exploit_inputs]:
-            for tests in bug_info.get(test_group, []):
-                """
-                Documents how to process tests to ensure their usability
-                """
-                if tests["format"] == "junit":
-                    jazzer_dep = """<dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>"""
+        for test_group, identifier_key, len_key in [
+            (
+                self.key_benign_inputs,
+                self.key_passing_test_identifiers,
+                definitions.KEY_COUNT_POS,
+            ),
+            (
+                self.key_exploit_inputs,
+                self.key_failing_test_identifiers,
+                definitions.KEY_COUNT_NEG,
+            ),
+        ]:
+            for analysis_result in bug_info.get(definitions.KEY_ANALYSIS_OUTPUT, []):
+                for tests in analysis_result.get(test_group, []):
+                    """
+                    Documents how to process tests to ensure their usability
+                    """
+                    if tests["format"] == "junit":
+                        jazzer_dep = """<dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>"""
 
-                    self.run_command(
-                        "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} ;".format(
-                            join(self.dir_expr, "src"), jazzer_dep
+                        self.run_command(
+                            "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} ;".format(
+                                join(self.dir_expr, "src"), jazzer_dep
+                            )
                         )
-                    )
 
-                    self.run_command(
-                        "bash -c 'cp -r {}/. {}'".format(
-                            join(self.dir_setup, tests["dir"]),
-                            join(self.dir_expr, "src", bug_info[self.key_dir_tests]),
+                        self.run_command(
+                            "bash -c 'cp -r {}/. {}'".format(
+                                join(self.dir_setup, tests["dir"]),
+                                join(
+                                    self.dir_expr, "src", bug_info[self.key_dir_tests]
+                                ),
+                            )
                         )
-                    )
-                if tests["format"] == "raw":
-                    pass
-                if tests["format"] == "ktest":
-                    pass
+                    if tests["format"] == "raw":
+                        # TODO make recursive
+                        bug_info[identifier_key] = bug_info.get(
+                            identifier_key, []
+                        ) + os.listdir(join(self.dir_setup, tests["dir"]))
+                        bug_info[len_key] = len(bug_info[identifier_key])
+                        self.run_command(
+                            "bash -c 'cp -r {}/. {}'".format(
+                                join(self.dir_setup, tests["dir"]),
+                                join(self.dir_setup, "tests"),
+                            )
+                        )
+                        pass
+                    if tests["format"] == "ktest":
+                        pass
         pass
 
     def update_info(
