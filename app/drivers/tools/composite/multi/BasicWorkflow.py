@@ -613,7 +613,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.on_task_finished(event, ["repair"])
 
     def on_repair_finished(self, event: FileSystemEvent):
-        def f(base_setup: str, enhanced_setup: str):
+        def f(base_setup: str, enhanced_setup: str, new_bug_info: Dict[str, Any]):
             os.makedirs(join(enhanced_setup, "patches"), exist_ok=True)
             shutil.copy(event.src_path, join(enhanced_setup, "patches"))
 
@@ -642,8 +642,13 @@ class BasicWorkflow(AbstractCompositeTool):
         self,
         event: FileSystemEvent,
         next_task_options: List[CompositeTaskType],
-        on_copy: Optional[Callable[[str, str], None]] = None,
+        on_copy: Optional[Callable[[str, str, Dict[str, Any]], None]] = None,
     ):
+        """
+        Generic method for handling the completion of a task.
+        On_copy is an entrypoint for addditional processing that can be done after the copy of the setup directory.
+        The arguments for on_copy are the base_setup, enhanced_setup directories and the new_bug_info.
+        """
         try:
             subtask_hash = hashlib.sha1()
             subtask_hash.update(str(time.time()).encode("utf-8"))
@@ -663,7 +668,7 @@ class BasicWorkflow(AbstractCompositeTool):
             new_bug_info = self.merge_dict(self.bug_info, bug_info_extension[0])
 
             if on_copy:
-                on_copy(base_setup, enhanced_setup)
+                on_copy(base_setup, enhanced_setup, new_bug_info)
 
             # self.validate_metadata([new_bug_info])
 
@@ -714,6 +719,11 @@ class BasicWorkflow(AbstractCompositeTool):
         subtask_tag: Optional[str],
         next_task_options: List[CompositeTaskType],
     ):
+        """
+        Start subsequent tasks in the workflow.
+        Next_task_options is assumed to be a sorted list of the tasks that can be executed.
+        Returns False if no tool was available for any of the possible follow-up tasks.
+        """
         callbacks = {
             "fuzz": self.on_fuzzing_finished,
             "crash-analyze": self.on_crash_analysis_finished,
@@ -814,6 +824,9 @@ class BasicWorkflow(AbstractCompositeTool):
         )
 
     def get_setup_directories(self, root, subtask_tag):
+        """
+        Extracts the setup directories from the internal representation or the proto arguments.
+        """
         if os.path.isfile(join(root, "cerberus_internal.json")):
             with open(join(root, "cerberus_internal.json"), "r") as f:
                 data = json.loads(f.read())
