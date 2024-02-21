@@ -86,7 +86,7 @@ class AbstractTool(AbstractDriver):
     runs_as_root: bool = True
     sudo_password: str = ""
     image_user: str = "root"
-    command_history: List[Tuple[str, str, Dict[str, str]]] = []
+    command_history: List[Tuple[str, str, Dict[str, str]]]
 
     def __init__(self, tool_name: str):
         """add initialization commands to all tools here"""
@@ -100,6 +100,7 @@ class AbstractTool(AbstractDriver):
         self.is_dump_patches = values.dump_patches
         self.use_container = values.use_container
         self.use_valkyrie = values.use_valkyrie
+        self.command_history = []
         self.use_gpu = super().get_config_value("use_gpu")
 
     @abc.abstractmethod
@@ -163,7 +164,7 @@ class AbstractTool(AbstractDriver):
                         # TODO make recursive
                         bug_info[identifier_key] = bug_info.get(
                             identifier_key, []
-                        ) + os.listdir(join(self.dir_setup, tests["dir"]))
+                        ) + os.listdir(join(dir_info["local"]["setup"], tests["dir"]))
                         bug_info[len_key] = len(bug_info[identifier_key])
                         self.run_command(
                             "bash -c 'cp -r {}/. {}'".format(
