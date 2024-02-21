@@ -83,8 +83,12 @@ class F1X(AbstractRepairTool):
                 ),
             )
         )
-        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
-        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
+        passing_test_identifiers_list = bug_info.get(
+            self.key_passing_test_identifiers, []
+        )
+        failing_test_identifiers_list = bug_info.get(
+            self.key_failing_test_identifiers, []
+        )
         timeout = str(repair_config_info[self.key_timeout])
         subject_name = bug_info[self.key_subject]
         benchmark_name = bug_info[self.key_benchmark]
