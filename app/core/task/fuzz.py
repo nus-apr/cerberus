@@ -48,6 +48,12 @@ def fuzz_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
+
+    if definitions.KEY_CONFIG_FUZZ_TIMEOUT in fuzz_config_info:
+        fuzz_config_info[definitions.KEY_CONFIG_TIMEOUT] = fuzz_config_info[
+            definitions.KEY_CONFIG_FUZZ_TIMEOUT
+        ]
+
     time_duration = float(fuzz_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     total_timeout = time.time() + 60 * 60 * time_duration
 

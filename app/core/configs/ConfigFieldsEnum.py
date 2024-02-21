@@ -51,6 +51,14 @@ class ConfigFieldsEnum(Enum):
     NAME = "name"
     TYPE = "type"
 
+    REPAIR_TIMEOUT = "repair-timeout"
+    FUZZ_TIMEOUT = "fuzz-timeout"
+    LOCALIZE_TIMEOUT = "localize-timeout"
+    ANALYZE_TIMEOUT = "analyze-timeout"
+    COMPOSITE_TIMEOUT = "composite-timeout"
+    VALIDATE_TIMEOUT = "validate-timeout"
+    SELECT_TIMEOUT = "select-timeout"
+
     # composite fields
     COMPOSITE_SEQUENCE = "composite-sequence"
     FUZZ = "fuzz"

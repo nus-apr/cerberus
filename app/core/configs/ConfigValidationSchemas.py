@@ -35,6 +35,12 @@ task_profile_schema = {
     "properties": {
         ConfigFieldsEnum.PROFILE_ID.value: {"type": "string"},
         ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.FUZZ_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.REPAIR_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.LOCALIZE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.VALIDATE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.SELECT_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.COMPOSITE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FAULT_LOCATION.value: {"type": "string"},
         ConfigFieldsEnum.PASSING_TEST_RATIO.value: {
             "type": "number",

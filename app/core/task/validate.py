@@ -84,6 +84,12 @@ def validate_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
+
+    if definitions.KEY_CONFIG_VALIDATE_TIMEOUT in validate_config_info:
+        validate_config_info[definitions.KEY_CONFIG_TIMEOUT] = validate_config_info[
+            definitions.KEY_CONFIG_VALIDATE_TIMEOUT
+        ]
+
     time_duration = float(validate_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration

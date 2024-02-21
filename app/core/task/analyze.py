@@ -86,6 +86,12 @@ def analyze_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
+
+    if definitions.KEY_CONFIG_ANALYZE_TIMEOUT in analysis_config_info:
+        analysis_config_info[definitions.KEY_CONFIG_TIMEOUT] = analysis_config_info[
+            definitions.KEY_CONFIG_FUZZ_TIMEOUT
+        ]
+
     time_duration = float(analysis_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     total_timeout = time.time() + 60 * 60 * time_duration
 

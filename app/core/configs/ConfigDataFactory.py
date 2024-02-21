@@ -74,21 +74,22 @@ class ConfigDataFactory:
         for task_profile_dict in profiles_config_dict[
             ConfigFieldsEnum.TASK_PROFILES_LIST.value
         ]:
-            task_profiles_list.append(
-                TaskProfile(
-                    profile_id=task_profile_dict[ConfigFieldsEnum.PROFILE_ID.value],
-                    timeout=task_profile_dict[ConfigFieldsEnum.TIMEOUT.value],
-                    patch_directory=task_profile_dict.get(
-                        ConfigFieldsEnum.PATCH_DIRECTORY.value, None
-                    ),
-                    fault_location=task_profile_dict[
-                        ConfigFieldsEnum.FAULT_LOCATION.value
-                    ],
-                    passing_test_ratio=task_profile_dict[
-                        ConfigFieldsEnum.PASSING_TEST_RATIO.value
-                    ],
-                )
+            # TODO update the TaskProfile
+            profile = TaskProfile(
+                profile_id=task_profile_dict[ConfigFieldsEnum.PROFILE_ID.value],
+                timeout=task_profile_dict[ConfigFieldsEnum.TIMEOUT.value],
+                patch_directory=task_profile_dict.get(
+                    ConfigFieldsEnum.PATCH_DIRECTORY.value, None
+                ),
+                fault_location=task_profile_dict[ConfigFieldsEnum.FAULT_LOCATION.value],
+                passing_test_ratio=task_profile_dict[
+                    ConfigFieldsEnum.PASSING_TEST_RATIO.value
+                ],
             )
+            for k, v in task_profile_dict.items():
+                if not hasattr(profile, k):
+                    setattr(profile, k, v)
+            task_profiles_list.append(profile)
 
         return ProfilesConfig(
             task_profiles_list=task_profiles_list,

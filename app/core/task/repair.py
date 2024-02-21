@@ -172,6 +172,12 @@ def repair_all(
     tool_thread = None
     if not values.ui_active:
         parallel.initialize()
+
+    if definitions.KEY_CONFIG_REPAIR_TIMEOUT in repair_config_info:
+        repair_config_info[definitions.KEY_CONFIG_TIMEOUT] = repair_config_info[
+            definitions.KEY_CONFIG_REPAIR_TIMEOUT
+        ]
+
     time_duration = float(repair_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration

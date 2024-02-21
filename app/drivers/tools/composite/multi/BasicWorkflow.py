@@ -123,7 +123,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.observer = Observer()
         self.cpu_queue: Queue[str] = Queue()
         # TODO implement gpu queue
-        for i in range(min(self.process_count, composite_config_info[self.key_cpus])):
+        for i in composite_config_info[self.key_cpus]:
             self.cpu_queue.put(str(i))
 
         self.mutex = Lock()
