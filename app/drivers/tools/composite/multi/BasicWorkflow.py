@@ -74,7 +74,7 @@ class BasicWorkflow(AbstractCompositeTool):
         super().__init__(self.name)
         # preferably change to a container with the dependencies ready to reduce setup time
         self.image_name = "ubuntu:20.04"
-        self.process_count = 12
+        self.process_count = 16
         self.event_processor_count = 4
         self.exit_message = "quit"  # Message for terminating the flow
         self.exit_message_delayed = (
@@ -121,6 +121,11 @@ class BasicWorkflow(AbstractCompositeTool):
         )
         self.message_queue: Queue[Union[str, FileSystemEvent]] = Queue()
         self.observer = Observer()
+        self.cpu_queue: Queue[str] = Queue()
+        # TODO implement gpu queue
+        for i in range(min(self.process_count, composite_config_info[self.key_cpus])):
+            self.cpu_queue.put(str(i))
+
         self.mutex = Lock()
         self.observed: Set[Any] = set()
 
@@ -269,6 +274,7 @@ class BasicWorkflow(AbstractCompositeTool):
             self.active_jobs += 1
             self.emit_debug(f"Active jobs: {self.active_jobs}")
 
+        cpu = None
         try:
             values.task_type.set(task_type)
             values.current_task_profile_id.set(composite_config_info["id"])
@@ -292,6 +298,9 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool_tag,
             )
             values.job_identifier.set(key)
+
+            # TODO track multiple cpus
+            cpu = self.cpu_queue.get()
 
             with open(
                 join(
@@ -328,7 +337,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 composite_config_info,
                 container_config_info,
                 key,
-                composite_config_info[self.key_cpus],
+                [cpu],
                 composite_config_info[self.key_gpus],
                 run_index,
                 image_name,
@@ -340,6 +349,9 @@ class BasicWorkflow(AbstractCompositeTool):
         except Exception as e:
             self.emit_warning(e)
             traceback.print_exc()
+        finally:
+            if cpu is not None:
+                self.cpu_queue.put(cpu)
 
         with active_jobs_lock:
             self.active_jobs -= 1
