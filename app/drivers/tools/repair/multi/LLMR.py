@@ -120,7 +120,7 @@ class LLMR(AbstractRepairTool):
         self.timestamp_log_end()
 
         self.write_json(
-            {"patches_dir": join(self.dir_output, "patches")},
+            [{"patches_dir": join(self.dir_output, "patches")}],
             join(self.dir_output, "meta-data.json"),
         )
 
