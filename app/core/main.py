@@ -99,7 +99,7 @@ def main():
     has_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
-    set_start_method("spawn")
+    set_start_method("fork")
     start_time = time.time()
     utilities.create_output_directories()
     values.gpus = utilities.get_gpu_count()
