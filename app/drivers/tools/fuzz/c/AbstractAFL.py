@@ -151,9 +151,6 @@ class AbstractAFL(AbstractFuzzTool):
             )
         )
 
-        # Ensure at least one test-case
-        # self.write_file(["hi"], join(corpus_path, "hi.txt"))
-
         # Get special seeds
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(
@@ -161,3 +158,7 @@ class AbstractAFL(AbstractFuzzTool):
                 corpus_path,
             )
         )
+
+        # Ensure at least one test-case
+        if len(self.list_dir(corpus_path)) == 0:
+            self.write_file(["hi"], join(corpus_path, "hi.txt"))
