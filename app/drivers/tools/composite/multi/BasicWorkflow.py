@@ -439,6 +439,11 @@ class BasicWorkflow(AbstractCompositeTool):
                         [event],
                         error_callback=self.error_callback_handler,
                     )
+            elif (
+                os.path.commonprefix([event.src_path, self.crash_analyze_root])
+                == self.crash_analyze_root
+            ):
+                pass
             else:
                 self.emit_warning("Ignoring file {}".format(event.src_path))
             # elif (
