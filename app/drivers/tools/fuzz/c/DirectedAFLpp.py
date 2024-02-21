@@ -16,6 +16,7 @@ class DirectedAFLpp(AbstractAFL):
         metadata_loc = os.path.join(self.dir_expr, "meta-data.json")
         bug_info["src"] = {"root_abspath": os.path.join(self.dir_expr, "src")}
         bug_info["test_dir_abspath"] = self.dir_setup
+        bug_info["setup_dir_abspath"] = self.dir_setup
         self.write_json(bug_info, metadata_loc)
 
         self.run_command(

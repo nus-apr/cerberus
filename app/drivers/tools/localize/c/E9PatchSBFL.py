@@ -108,7 +108,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
             import csv
 
             localization_info = []
-            for line in csv.DictReader(lines, fieldnames=["line", "probability"]):
+            for line in csv.DictReader(lines, fieldnames=["file", "probability"]):
                 path = line["file"]
                 probability = line["probability"]
                 file, line_number = path.split(":")
@@ -126,7 +126,10 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 "localization": localization_info,
             }
 
-            self.write_json({self.key_analysis_output: [new_metadata]}, join(self.dir_output, "meta-data.json"))
+            self.write_json(
+                [{self.key_analysis_output: [new_metadata]}],
+                join(self.dir_output, "meta-data.json"),
+            )
 
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 

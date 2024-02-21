@@ -67,16 +67,7 @@ class AbstractAFL(AbstractFuzzTool):
                 "AFL++ needs to rebuild the project with coverage instrumntation"
             )
 
-        self.run_command(
-            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
-                join(self.dir_setup, bug_info[self.key_config_script])
-            )
-        )
-        self.run_command(
-            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
-                join(self.dir_setup, bug_info[self.key_build_script])
-            )
-        )
+        self.prepare_for_fuzz(bug_info)
 
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
             timeout=timeout,
@@ -92,7 +83,7 @@ class AbstractAFL(AbstractFuzzTool):
             fuzz_command,
             self.log_output_path,
             join(self.dir_expr, "src"),
-            env={"AFL_NO_UI": str(1)},
+            env={"AFL_NO_UI": str(1), "AFL_CRASHING_SEEDS_AS_NEW_CRASH": str(1)},
         )
 
         self.process_status(status)
@@ -124,13 +115,13 @@ class AbstractAFL(AbstractFuzzTool):
         )
 
         new_bug_info: Dict[str, Any] = {
-            self.key_generator : self.name,
+            self.key_generator: self.name,
             self.key_exploit_inputs: [{"format": "raw", "dir": "crashing_tests"}],
             self.key_benign_inputs: [{"format": "raw", "dir": "benign_tests"}],
             "test_dir_abspath": self.dir_setup,
         }
         self.write_json(
-            [{ self.key_analysis_output : [new_bug_info] }],
+            [{self.key_analysis_output: [new_bug_info]}],
             join(self.dir_output, "meta-data.json"),
         )
 
@@ -161,7 +152,7 @@ class AbstractAFL(AbstractFuzzTool):
         )
 
         # Ensure at least one test-case
-        self.write_file(["hi"], join(corpus_path, "hi.txt"))
+        # self.write_file(["hi"], join(corpus_path, "hi.txt"))
 
         # Get special seeds
         self.run_command(
