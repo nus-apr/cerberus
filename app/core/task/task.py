@@ -241,7 +241,7 @@ def retrieve_results(archive_name: str, tool: AbstractTool) -> bool:
 def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool) -> None:
     emitter.normal(
         "\t\t[framework] Saving artifacts from tool {}{} and cleaning up".format(
-            tool.name, f"-{tool.run_command}" if tool.tool_tag else ""
+            tool.name, f"-{tool.tool_tag}" if tool.tool_tag else ""
         )
     )
     local_info = dir_info["local"]
