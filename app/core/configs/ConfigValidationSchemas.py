@@ -265,6 +265,7 @@ composite_sequence_schema = {
         },
         ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.VALIDATE.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.SELECT.value: {"type": "array", "items": tool_config_schema},
     },
     "additionalProperties": False,

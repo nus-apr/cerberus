@@ -54,6 +54,7 @@ class ConfigFieldsEnum(Enum):
     # composite fields
     COMPOSITE_SEQUENCE = "composite-sequence"
     FUZZ = "fuzz"
+    VALIDATE = "validate"
     ANALYZE = "analyze"
     CRASH_ANALYZE = "crash-analyze"
     LOCALIZE = "localize"
