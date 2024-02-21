@@ -147,8 +147,8 @@ def analyze_all(
                 values.task_type.get(None),
                 final_status,
             ),
-            name="Wrapper thread for analysis {} {} {}".format(
-                analyze_tool.name, benchmark_name, container_id
+            name="Wrapper thread for analysis {} {} {} {}".format(
+                analyze_tool.name, analyze_tool.tool_tag, benchmark_name, container_id
             ),
         )
         tool_thread.start()
@@ -163,8 +163,8 @@ def analyze_all(
         tool_thread.join(wait_time)
         if tool_thread.is_alive():
             emitter.highlight(
-                "\t\t\t[framework] thread for {} is not done, setting event to kill thread.".format(
-                    analyze_tool.name
+                "\t\t\t[framework] thread for {} {} is not done, setting event to kill thread.".format(
+                    analyze_tool.name, analyze_tool.tool_tag
                 )
             )
             event = threading.Event()
@@ -175,8 +175,8 @@ def analyze_all(
             # the loop before finally stopping.
         else:
             emitter.highlight(
-                "\t\t\t[framework] thread for {} has already finished.".format(
-                    analyze_tool.name
+                "\t\t\t[framework] thread for {}{} has already finished.".format(
+                    analyze_tool.name, analyze_tool.tool_tag
                 )
             )
 

@@ -172,7 +172,7 @@ def composite_run_all(
                 final_status,
                 hash,
             ),
-            name="Wrapper thread for analysis {} {} {}".format(
+            name="Wrapper thread for composite {} {} {}".format(
                 composite_tool.name, benchmark.name, container_id
             ),
         )

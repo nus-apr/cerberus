@@ -106,8 +106,8 @@ def fuzz_all(
                 values.task_type.get(None),
                 final_status,
             ),
-            name="Wrapper thread for fuzzing {} {} {}".format(
-                fuzzer.name, benchmark_name, container_id
+            name="Wrapper thread for fuzzing {} {} {} {}".format(
+                fuzzer.name, fuzzer.tool_tag, benchmark_name, container_id
             ),
         )
         tool_thread.start()
@@ -122,8 +122,8 @@ def fuzz_all(
         tool_thread.join(wait_time)
         if tool_thread.is_alive():
             emitter.highlight(
-                "\t\t\t[framework] thread for {} is not done, setting event to kill thread.".format(
-                    fuzzer.name
+                "\t\t\t[framework] thread for {} {} is not done, setting event to kill thread.".format(
+                    fuzzer.name, fuzzer.tool_tag
                 )
             )
             event = threading.Event()
@@ -134,8 +134,8 @@ def fuzz_all(
             # the loop before finally stopping.
         else:
             emitter.highlight(
-                "\t\t\t[framework] thread for {} has already finished.".format(
-                    fuzzer.name
+                "\t\t\t[framework] thread for {} {} has already finished.".format(
+                    fuzzer.name, fuzzer.tool_tag
                 )
             )
 

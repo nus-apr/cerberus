@@ -128,8 +128,8 @@ def localize_all(
                 values.task_type.get(None),
                 final_status,
             ),
-            name="Wrapper thread for validation {} {} {}".format(
-                validate_tool.name, benchmark_name, container_id
+            name="Wrapper thread for validation {} {} {} {}".format(
+                validate_tool.name, validate_tool.tool_tag, benchmark_name, container_id
             ),
         )
         tool_thread.start()

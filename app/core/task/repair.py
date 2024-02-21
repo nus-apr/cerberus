@@ -301,8 +301,8 @@ def repair_all(
                 values.task_type.get(None),
                 final_status,
             ),
-            name="Wrapper thread for repair {} {} {}".format(
-                repair_tool.name, benchmark_name, container_id
+            name="Wrapper thread for repair {} {} {} {}".format(
+                repair_tool.name, repair_tool.tool_tag, benchmark_name, container_id
             ),
         )
         tool_thread.start()
