@@ -857,6 +857,10 @@ class BasicWorkflow(AbstractCompositeTool):
 
         if new_timeout is not None:
             composite_config_info_new[self.key_timeout] = new_timeout
+            if real_task_type == "crash-analyze":  # TODO rework this a little
+                composite_config_info_new[
+                    definitions.KEY_CONFIG_FUZZ_TIMEOUT
+                ] = new_timeout
 
         if real_task_type:
             composite_config_info_new[self.key_real_type] = real_task_type
