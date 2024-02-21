@@ -32,6 +32,10 @@ class CodeQL(AbstractAnalyzeTool):
         self.timestamp_log_start()
         dir_src = join(self.dir_expr, "src")
         language = bug_info.get(self.key_language, "all")
+        if language == "c":
+            # Ensure that the project is clean and can be built
+            self.run_command("make clean", dir_path=join(self.dir_expr, "src"))
+            language = "cpp"  # Expand c to cpp
 
         metadata_loc = os.path.join(self.dir_expr, "meta-data.json")
 
