@@ -797,6 +797,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                     None if next_task != "crash-analyze" else (2 / 60.0)
                                 ),
                                 real_task_type=next_task,
+                                task_type=type,
                             ),
                         ],
                         callback=callbacks.get(next_task, None),
@@ -821,6 +822,7 @@ class BasicWorkflow(AbstractCompositeTool):
         new_params: Optional[str] = None,
         new_timeout: Optional[float] = None,
         real_task_type: Optional[str] = None,
+        task_type: Optional[str] = None,
     ):
         """
         Construct the arguments for the run function from the proto_args.
@@ -857,9 +859,9 @@ class BasicWorkflow(AbstractCompositeTool):
 
         if new_timeout is not None:
             composite_config_info_new[self.key_timeout] = new_timeout
-            if real_task_type == "crash-analyze":  # TODO rework this a little
+            if task_type:
                 composite_config_info_new[
-                    definitions.KEY_CONFIG_FUZZ_TIMEOUT
+                    task_type + "-" + self.key_timeout
                 ] = new_timeout
 
         if real_task_type:
