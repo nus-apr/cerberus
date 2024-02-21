@@ -399,6 +399,7 @@ class BasicWorkflow(AbstractCompositeTool):
             "plot_data",
             ".synced",
             "cmdline",
+            "trace.sh",
             ".fuzzer_stats_tmp",
             "cerberus_internal.json",
         ] or os.path.basename(os.path.normpath(dirname(event.src_path))) in [
@@ -482,7 +483,14 @@ class BasicWorkflow(AbstractCompositeTool):
 
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
 
-            new_bug_info = self.merge_dict(self.bug_info, bug_info_extension[0])
+            new_bug_info = self.merge_dict(
+                self.bug_info,
+                (
+                    bug_info_extension[0]
+                    if isinstance(bug_info_extension, list)
+                    else bug_info_extension
+                ),
+            )
 
             writer.write_as_json(
                 new_bug_info,
@@ -510,7 +518,7 @@ class BasicWorkflow(AbstractCompositeTool):
             benign_dir = join(dirname(crash_dir), "queue")
             current_time = int(time.time())
 
-            if self.last_crash is not None and current_time - self.last_crash <= 60:
+            if self.last_crash is not None and current_time - self.last_crash <= 1200:
                 # self.emit_debug("Debouncing the crash")
                 return
 
@@ -593,7 +601,14 @@ class BasicWorkflow(AbstractCompositeTool):
 
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
 
-            new_bug_info = self.merge_dict(self.bug_info, bug_info_extension[0])
+            new_bug_info = self.merge_dict(
+                self.bug_info,
+                (
+                    bug_info_extension[0]
+                    if isinstance(bug_info_extension, list)
+                    else bug_info_extension
+                ),
+            )
 
             writer.write_as_json(
                 new_bug_info,
@@ -670,7 +685,14 @@ class BasicWorkflow(AbstractCompositeTool):
 
             bug_info_extension = reader.read_json(event.src_path)
 
-            new_bug_info = self.merge_dict(self.bug_info, bug_info_extension[0])
+            new_bug_info = self.merge_dict(
+                self.bug_info,
+                (
+                    bug_info_extension[0]
+                    if isinstance(bug_info_extension, list)
+                    else bug_info_extension
+                ),
+            )
 
             if on_copy:
                 on_copy(base_setup, enhanced_setup, new_bug_info)
@@ -761,8 +783,8 @@ class BasicWorkflow(AbstractCompositeTool):
                 return True
         else:
             self.emit_warning(
-                "Did not find a successor task in the list {}. Terminating this path.".format(
-                    next_task_options
+                "Did not find a successor task from the options {}. Terminating this path.".format(
+                    ",".join(next_task_options)
                 )
             )
             return False
