@@ -512,12 +512,20 @@ class BasicWorkflow(AbstractCompositeTool):
                 ),
             )
 
-            self.do_step(
-                new_bug_info,
-                subtask_hash,
-                subtask_tag,
-                ["crash-analyze", "localize", "repair"],
-            )
+            if len(os.listdir(join(enhanced_setup, "crashing_tests"))) == 0:
+                self.emit_warning(
+                    "Could not find a crashing test for {} {}. Terminating path.".format(
+                        self.bug_info[self.key_subject],
+                        self.bug_info[self.key_bug_id],
+                    ),
+                )
+            else:
+                self.do_step(
+                    new_bug_info,
+                    subtask_hash,
+                    subtask_tag,
+                    ["crash-analyze", "localize", "repair"],
+                )
 
         except Exception as e:
             self.emit_warning(e)
