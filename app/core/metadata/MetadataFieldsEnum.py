@@ -41,7 +41,7 @@ class MetadataFieldsEnum(Enum):
     EXPLOIT_INPUTS = "exploit_inputs"
     BENIGN_INPUTS = "benign_inputs"
     FORMAT = "format"
-    DIR = "DIR"
+    DIR = "dir"
     LOCALIZATION = "localization"
     FAILING_TEST_ID = "failing_test_identifiers_id"
     PARSING = "parsing"

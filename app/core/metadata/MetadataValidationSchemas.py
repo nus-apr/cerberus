@@ -92,28 +92,37 @@ output_data_schema = {
 Analysis Output Schema
 """
 analysis_output_schema = {
-    "type": "object",
-    "properties": {
-        MetadataFieldsEnum.BUG_TYPE.value: {"type": "string"},
-        MetadataFieldsEnum.GENERATOR.value: {"type": "string"},
-        MetadataFieldsEnum.CONFIDENCE.value: {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 1,
+    "type": "array",
+    "items": {
+        "type": "object",
+        "properties": {
+            MetadataFieldsEnum.BUG_TYPE.value: {"type": "string"},
+            MetadataFieldsEnum.GENERATOR.value: {"type": "string"},
+            MetadataFieldsEnum.CONFIDENCE.value: {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+            },
+            MetadataFieldsEnum.STACK_TRACE.value: {
+                "type": "array",
+                "items": stack_trace_schema,
+            },
+            MetadataFieldsEnum.BENIGN_INPUTS.value: {
+                "type": "array",
+                "items": output_data_schema,
+            },
+            MetadataFieldsEnum.EXPLOIT_INPUTS.value: {
+                "type": "array",
+                "items": output_data_schema,
+            },
+            #   MetadataFieldsEnum.PARSING.value: {"type": "string"},
+            #   MetadataFieldsEnum.CORRECT.value: {"type": "boolean"},
+            #   MetadataFieldsEnum.ORDERED_PATCHES.value: {"type": "array", "items": {"type": "string"}},
+            #   MetadataFieldsEnum.MESSAGE.value: {"type": "string"},
         },
-        MetadataFieldsEnum.STACK_TRACE.value: {
-            "type": "array",
-            "items": stack_trace_schema,
-        },
-        MetadataFieldsEnum.BENIGN_INPUTS.value: output_data_schema,
-        MetadataFieldsEnum.EXPLOIT_INPUTS.value: output_data_schema,
-        #   MetadataFieldsEnum.PARSING.value: {"type": "string"},
-        #   MetadataFieldsEnum.CORRECT.value: {"type": "boolean"},
-        #   MetadataFieldsEnum.ORDERED_PATCHES.value: {"type": "array", "items": {"type": "string"}},
-        #   MetadataFieldsEnum.MESSAGE.value: {"type": "string"},
+        "additionalProperties": True,
+        "required": [MetadataFieldsEnum.GENERATOR.value],
     },
-    "additionalProperties": True,
-    "required": [MetadataFieldsEnum.GENERATOR.value],
 }
 
 
@@ -233,7 +242,7 @@ bug_info_schema = {
                 output_data_schema,
             ]
         },
-        MetadataFieldsEnum.ANALYSIS_OUTPUT.value: {"type": analysis_output_schema},
+        MetadataFieldsEnum.ANALYSIS_OUTPUT.value: analysis_output_schema,
         MetadataFieldsEnum.PATCHES_DIR.value: {"type": "string"},
         MetadataFieldsEnum.PLAUIBLE_PATCHES_DIR: {"type": "string"},
     },
