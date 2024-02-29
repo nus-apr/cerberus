@@ -1,4 +1,5 @@
 import os
+from datetime import datetime
 
 from app.core import definitions
 from app.core import emitter
@@ -11,28 +12,41 @@ class Examples(AbstractBenchmark):
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Examples, self).__init__()
 
-    def deploy(self, bug_id, container_id):
-        emitter.normal("\t\t\tdownloading experiment subject")
+    def deploy(self, bug_index, container_id):
+        self.emit_normal("downloading experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_deploy_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-deploy.log"
         )
-        command_str = "bash setup.sh {}".format(self.base_dir_experiment)
+        time = datetime.now()
+        command_str = "bash setup.sh"
         status = self.run_command(
             container_id, command_str, self.log_deploy_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
     def config(self, bug_id, container_id):
         return True
 
-    def build(self, bug_id, container_id):
-        emitter.normal("\t\t\tbuilding experiment subject")
+    def build(self, bug_index, container_id):
+        self.emit_normal("building experiment subject")
+        experiment_item = self.experiment_subjects[bug_index - 1]
+        bug_id = str(experiment_item[self.key_bug_id])
         self.log_build_path = (
             self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
         )
-        command_str = "bash build.sh {}".format(self.base_dir_experiment)
+        time = datetime.now()
+        command_str = "bash build.sh"
+
         status = self.run_command(
             container_id, command_str, self.log_build_path, self.dir_setup
+        )
+        self.emit_debug(
+            "setup took {} second(s)".format((datetime.now() - time).total_seconds())
         )
         return status == 0
 
