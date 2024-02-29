@@ -1,4 +1,124 @@
 [
+  {
+        "id": 1,
+        "subject": "binutils",
+        "bug_id": "CVE-2017-14745",
+        "localization": [
+            {
+                "source_file": "bfd/elf64-x86-64.c",
+                "line_numbers": [
+                    6720
+                ]
+            }
+        ],
+        "failing_test_identifiers": [
+            "1.bin"
+        ],
+        "passing_test_identifiers": [],
+        "count_neg": 1,
+        "count_pos": 0,
+        "binary_path": "binutils/objdump",
+        "binary_args": "-D $POC",
+        "exploit_file_list": [
+            "tests/1.bin"
+        ],
+        "crash_stack_trace": [
+            [
+                "compare_relocs",
+                "bfd/elf64-x86-64.c",
+                6632
+            ],
+            [
+                "elf_x86_64_get_synthetic_symtab",
+                "bfd/elf64-x86-64.c",
+                6722
+            ],
+            [
+                "dump_bfd",
+                "objdump.c",
+                3525
+            ],
+            [
+                "display_object_bfd",
+                "objdump.c",
+                3603
+            ],
+            [
+                "display_any_bfd",
+                "objdump.c",
+                3692
+            ],
+            [
+                "display_file",
+                "objdump.c",
+                3713
+            ],
+            [
+                "main",
+                "objdump.c",
+                4015
+            ]
+        ],
+        "test_timeout": 5,
+        "language": "c",
+        "config_script": "config.sh",
+        "build_script": "build.sh",
+        "test_script": "test.sh",
+        "build_command": "make -j20 CFLAGS='-Wno-error' CXXFLAGS='-Wno-error' LDFLAGS='-ldl -lutil'",
+        "bug_type": "Integer Overflow",
+        "src": {
+            "root_abspath": "/experiment/vulnloc/binutils/CVE-2017-14745/src",
+            "entrypoint": {
+                "file": "binutils/objdump.c",
+                "function": "main"
+            }
+        },
+        "output_dir_abspath": "/output",
+        "stack_trace": [
+            {
+                "depth": 0,
+                "function": "compare_relocs",
+                "source_file": "bfd/elf64-x86-64.c",
+                "line": 6632
+            },
+            {
+                "depth": 1,
+                "function": "elf_x86_64_get_synthetic_symtab",
+                "source_file": "bfd/elf64-x86-64.c",
+                "line": 6722
+            },
+            {
+                "depth": 2,
+                "function": "dump_bfd",
+                "source_file": "objdump.c",
+                "line": 3525
+            },
+            {
+                "depth": 3,
+                "function": "display_object_bfd",
+                "source_file": "objdump.c",
+                "line": 3603
+            },
+            {
+                "depth": 4,
+                "function": "display_any_bfd",
+                "source_file": "objdump.c",
+                "line": 3692
+            },
+            {
+                "depth": 5,
+                "function": "display_file",
+                "source_file": "objdump.c",
+                "line": 3713
+            },
+            {
+                "depth": 6,
+                "function": "main",
+                "source_file": "objdump.c",
+                "line": 4015
+            }
+        ]
+    },
  {
    "id": 1,
    "subject": "crashes",
@@ -13,20 +133,44 @@
    "crash_input": "1",
    "test_timeout": 10
  },
- {
-   "id": 2,
-   "subject": "crashes",
-   "bug_id": "file-input",
-   "source_file": "test.c",
-   "line_numbers": [19],
-   "failing_test": "1",
-   "passing_test": "",
-   "count_neg": 1,
-   "count_pos": 0,
-   "binary_path": "test",
-   "crash_input": "$POC",
-   "test_timeout": 10
- },
+  {
+    "id": 2,
+    "subject": "crashes",
+    "bug_id": "file-input",
+    "localization": [
+      {
+        "source_file": "test.c",
+        "line_numbers": [
+          19
+        ]
+      }
+    ],
+    "failing_test_identifiers": [
+      "1"
+    ],
+    "passing_test_identifiers": [],
+    "failing_test": "1",
+    "passing_test": "",
+    "exploit_file_list": [
+      "tests/exploit"
+    ],
+    "count_neg": 1,
+    "count_pos": 0,
+    "bug_type": "Divide by Zero",
+    "src": {
+      "root_abspath": "/experiment/examples/crashes/file-input/src",
+      "entrypoint": {
+        "file": "test",
+        "function": "main"
+      }
+    },
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "output_dir_abspath": "/output",
+    "binary_path": "test",
+    "crash_input": "$POC",
+    "test_timeout": 10
+  },
   {
    "id": 3,
    "subject": "test-suite",
