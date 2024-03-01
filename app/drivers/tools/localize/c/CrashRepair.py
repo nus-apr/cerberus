@@ -18,7 +18,7 @@ class CrashRepair(AbstractLocalizeTool):
         if not config_script:
             self.error_exit(f"{self.name} requires a configuration script as input")
 
-        repair_conf_path = join(self.dir_setup, "crashrepair", "repair.conf")
+        repair_conf_path = join(self.dir_expr, "crashrepair.conf")
         conf_content = []
         if self.key_exploit_list not in bug_info:
             self.error_exit("CrashRepair requires a proof of concept")
@@ -41,9 +41,7 @@ class CrashRepair(AbstractLocalizeTool):
             f"config_command:CC=crepair-cc CXX=crepair-cxx {self.dir_setup}/{config_script}\n"
         )
         conf_content.append(
-            "build_command:CC=crashrepair-cc CXX=crashrepair-cxx {}\n".format(
-                build_command
-            )
+            "build_command:CC=crepair-cc CXX=crepair-cxx {}\n".format(build_command)
         )
         if self.key_crash_cmd not in bug_info:
             self.error_exit("CrashRepair requires a test input list")
@@ -79,30 +77,39 @@ class CrashRepair(AbstractLocalizeTool):
 
     def save_artifacts(self, dir_info):
         list_artifact_dirs = ["/CrashRepair/output/", "/CrashRepair/logs/"]
-
+        list_artifact_files = [
+            f"/CrashRepair/output/{self.stats.bug_info[self.key_bug_id]}/analysis.json"
+        ]
         for d in list_artifact_dirs:
             copy_command = f"cp -rf {d} {self.dir_output}"
+            self.run_command(copy_command)
+        for f in list_artifact_files:
+            copy_command = f"cp {f} {self.dir_output}"
             self.run_command(copy_command)
         super(CrashRepair, self).save_artifacts(dir_info)
         return
 
     def analyse_output(self, dir_info, bug_id, fail_list):
         self.emit_normal("reading output")
+        report_path = f"/CrashRepair/output/{bug_id}/analysis.json"
+        report_json = self.read_json(report_path)
 
-        count_plausible = 0
-        count_enumerations = 0
-        count_compile_errors = 0
-        search_space = 0
-
-        # count number of patch files
-        self.stats.fix_loc_stats.generated = len(
-            self.list_dir(
-                join(
-                    self.dir_expr,
-                    "patch-valid" if self.use_valkyrie else "patches",
-                )
+        count_fix_locs = 0
+        count_src_files = 0
+        count_fix_funcs = 0
+        if report_json:
+            localization_list = report_json.get("analysis_output")[0].get(
+                "localization"
             )
-        )
+            if localization_list:
+                count_fix_locs = len(localization_list)
+                src_files = set()
+                fix_funcs = set()
+                for l in localization_list:
+                    src_files.add(l.get("source_file"))
+                    fix_funcs.add(l.get("function"))
+                count_fix_funcs = len(fix_funcs)
+                count_src_files = len(src_files)
 
         # extract information from output log
         if not self.log_output_path or not self.is_file(self.log_output_path):
@@ -117,24 +124,10 @@ class CrashRepair(AbstractLocalizeTool):
             self.stats.time_stats.timestamp_end = log_lines[-1].rstrip()
 
             for line in log_lines:
-                if "evaluating candidate patch" in line:
-                    count_enumerations += 1
-                if "writing" in line and "mutations" in line:
-                    mutations = re.search(r"writing (.*) mutations", line)
-                    if not mutations:
-                        self.emit_warning("No mutations found??")
-                        continue
-                    search_space = int(mutations.group(1))
-                elif "saving successful patch" in line:
-                    count_plausible += 1
-                elif "failed to compile" in line:
-                    count_compile_errors += 1
-
                 if any(err in line.lower() for err in self.error_messages):
                     self.stats.error_stats.is_error = True
 
-        self.stats.fix_loc_stats.non_compilable = count_compile_errors
-        self.stats.fix_loc_stats.plausible = count_plausible
-        self.stats.fix_loc_stats.enumerations = count_enumerations
-        self.stats.fix_loc_stats.size = search_space
+        self.stats.fix_loc_stats.fix_locs = count_fix_locs
+        self.stats.fix_loc_stats.source_files = count_src_files
+        self.stats.fix_loc_stats.fix_funcs = count_fix_funcs
         return self.stats
