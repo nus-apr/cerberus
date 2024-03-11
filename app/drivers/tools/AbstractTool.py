@@ -162,9 +162,13 @@ class AbstractTool(AbstractDriver):
                         )
                     if tests["format"] == "raw":
                         # TODO make recursive
-                        bug_info[identifier_key] = bug_info.get(
-                            identifier_key, []
-                        ) + os.listdir(join(dir_info["local"]["setup"], tests["dir"]))
+                        test_dir_path = join(dir_info["local"]["setup"], tests["dir"])
+                        test_identifiers = []
+                        if os.path.exists(test_dir_path):
+                            test_identifiers = os.listdir(test_dir_path)
+                        bug_info[identifier_key] = (
+                            bug_info.get(identifier_key, []) + test_identifiers
+                        )
                         bug_info[len_key] = len(bug_info[identifier_key])
                         self.run_command(
                             "bash -c 'cp -r {}/. {}'".format(

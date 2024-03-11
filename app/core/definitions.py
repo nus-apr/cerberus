@@ -14,6 +14,7 @@ KEY_FIX_LOC = "fix_loc"
 KEY_PASSING_TEST = "passing_test_identifiers"
 KEY_FAILING_TEST = "failing_test_identifiers"
 KEY_CONFIG_TIMEOUT = "timeout"
+KEY_FL_FORMULA = "fl_formula"
 
 KEY_CONFIG_REPAIR_TIMEOUT = "repair-timeout"
 KEY_CONFIG_FUZZ_TIMEOUT = "fuzz-timeout"

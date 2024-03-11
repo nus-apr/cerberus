@@ -28,6 +28,7 @@ class AbstractLocalizeTool(AbstractTool):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
+    key_fl_formula = definitions.KEY_FL_FORMULA
     stats: LocalizeToolStats
 
     def __init__(self, tool_name):

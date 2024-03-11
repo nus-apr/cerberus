@@ -93,7 +93,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
             )
 
         status = self.run_command(
-            f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces}"
+            f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces} -a {localization_config_info.get(self.key_fl_formula,'ochiai').lower()} {localization_config_info.get(self.key_tool_params, '')}"
         )
 
         self.run_command("rm -rf {}".format(dir_failing_traces))
@@ -103,22 +103,8 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.timestamp_log_end()
 
-        if self.is_file(join(self.dir_output, "ochiai.csv")):
-            lines = self.read_file(join(self.dir_output, "ochiai.csv"))
-            import csv
-
-            localization_info = []
-            for line in csv.DictReader(lines, fieldnames=["file", "probability"]):
-                path = line["file"]
-                probability = line["probability"]
-                file, line_number = path.split(":")
-                localization_info.append(
-                    {
-                        definitions.KEY_FIX_FILE: file,
-                        definitions.KEY_SCORE: probability,
-                        definitions.KEY_FIX_LINES: [line_number],
-                    }
-                )
+        if self.is_file(join(self.dir_output, "ochiai.json")):
+            localization_info = self.read_json(join(self.dir_output, "ochiai.json"))
 
             new_metadata = {
                 "generator": "e9patchsbfl",

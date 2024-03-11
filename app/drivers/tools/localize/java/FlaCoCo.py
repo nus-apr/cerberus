@@ -27,7 +27,7 @@ class FlaCoCo(AbstractLocalizeTool):
         timeout_m = str(float(timeout) * 60)
         additional_tool_param = localization_config_info[self.key_tool_params]
 
-        formula = bug_info.get("fl_formula", "Ochiai").upper()
+        formula = bug_info.get(self.key_fl_formula, "Ochiai").upper()
 
         env = {}
         if bug_info.get(self.key_language, "") == "java":
