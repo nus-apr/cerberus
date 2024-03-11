@@ -1,6 +1,8 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -68,12 +70,10 @@ class F1X(AbstractRepairTool):
 
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        fix_file = bug_info.get(self.key_localization, [{}])[0].get(
-            self.key_fix_file, None
-        )
-        fix_location = bug_info.get(self.key_localization, [{}])[0].get(
-            self.key_fix_loc, None
-        )
+        fix_info: Dict[str, Any] = bug_info.get(self.key_localization, [{}])[0]
+        fix_file = fix_info.get(self.key_fix_file, None)
+
+        self.emit_debug((fix_info, fix_file))
         fix_file_list = list(
             filter(
                 lambda x: x is not None,
@@ -90,8 +90,6 @@ class F1X(AbstractRepairTool):
             self.key_failing_test_identifiers, []
         )
         timeout = str(repair_config_info[self.key_timeout])
-        subject_name = bug_info[self.key_subject]
-        benchmark_name = bug_info[self.key_benchmark]
         additional_tool_param = repair_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
@@ -101,18 +99,16 @@ class F1X(AbstractRepairTool):
         test_id_list = ""
         for test_id in failing_test_identifiers_list:
             test_id_list += str(test_id) + " "
-        if passing_test_identifiers_list:
-            for test_id in passing_test_identifiers_list:
-                test_id_list += str(test_id) + " "
+
+        for test_id in passing_test_identifiers_list:
+            test_id_list += str(test_id) + " "
 
         abs_path_buggy_file = None
-        if fix_location or fix_file:
-            abs_path_buggy_file = join(
-                self.dir_expr, "src", fix_location if fix_location else fix_file
-            )
+        if fix_file:
+            abs_path_buggy_file = join(self.dir_expr, "src", fix_file)
         elif fix_file_list:
             abs_path_buggy_file = ",".join(
-                f"{self.dir_expr}/src/{f}" for f in fix_file_list
+                join(self.dir_expr, "src", f) for f in fix_file_list
             )
 
         dir_patch = f"{self.dir_output}/patches"
