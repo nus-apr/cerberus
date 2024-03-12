@@ -70,19 +70,27 @@ class F1X(AbstractRepairTool):
 
         task_conf_id = repair_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        fix_info: Dict[str, Any] = bug_info.get(self.key_localization, [{}])[0]
-        fix_file = fix_info.get(self.key_fix_file, None)
 
-        self.emit_debug((fix_info, fix_file))
+        def process_info(x):
+            file = x.get(self.key_fix_file, "")
+            lines = list(map(int, x.get(self.key_fix_lines, [])))
+            if not lines:
+                return file
+            elif len(lines) == 1:
+                return file + ":" + str(lines[0])
+            else:
+                return file + ":" + str(min(lines)) + "-" + str(max(lines))
+
         fix_file_list = list(
             filter(
-                lambda x: x is not None,
+                lambda x: x != "",
                 map(
-                    lambda x: x.get(self.key_fix_file, None),
+                    process_info,
                     bug_info.get(self.key_localization, [{}]),
                 ),
             )
         )
+        self.emit_debug(fix_file_list)
         passing_test_identifiers_list = bug_info.get(
             self.key_passing_test_identifiers, []
         )
@@ -104,9 +112,7 @@ class F1X(AbstractRepairTool):
             test_id_list += str(test_id) + " "
 
         abs_path_buggy_file = None
-        if fix_file:
-            abs_path_buggy_file = join(self.dir_expr, "src", fix_file)
-        elif fix_file_list:
+        if fix_file_list:
             abs_path_buggy_file = ",".join(
                 join(self.dir_expr, "src", f) for f in fix_file_list
             )
