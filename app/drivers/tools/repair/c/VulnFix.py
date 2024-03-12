@@ -91,6 +91,18 @@ class VulnFix(AbstractRepairTool):
             cmd = bug_info[self.key_crash_cmd]
             cmd = cmd.replace("$POC", "<exploit>")
             line_cmd = "cmd=" + cmd + "\n"
+
+        fix_file_path=bug_info['source_file']
+        fix_line = bug_info['line_numbers'][0]
+        crash_file = bug_info['crash_stack_trace'][0][1]
+        crash_file = os.path.basename(crash_file)
+        crash_line = bug_info['crash_stack_trace'][0][2]
+        crash_location = f"{crash_file}:{crash_line}"
+
+        fix_location = f"{os.path.basename(fix_file_path)}:{fix_line}"
+
+        all_cmds = f"fix-file-path={fix_file_path}\nfix-line={fix_line}\ncrash-location={crash_location}\nfix-location={fix_location}"
+
         # (4) exploit
 
         if (
@@ -126,6 +138,7 @@ class VulnFix(AbstractRepairTool):
             config_updates.append(line_normals)
         config_updates.append(line_runtime_dir)
         config_updates.append(line_source_dir)
+        config_updates.append(all_cmds)
         self.append_file(config_updates, config_path)
         return config_path
 
