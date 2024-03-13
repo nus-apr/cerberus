@@ -2,11 +2,11 @@ import os
 import re
 from os.path import join
 
+from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class CrashRepair(AbstractRepairTool):
-
     error_messages = ["aborted", "core dumped", "runtime error", "segmentation fault"]
 
     def __init__(self):
@@ -28,12 +28,12 @@ class CrashRepair(AbstractRepairTool):
         conf_content.append("binary_path:{}\n".format(bug_info[self.key_bin_path]))
         conf_content.append(
             "config_command:CC=crashrepair-cc CXX=crashrepair-cxx {}\n".format(
-                self.dir_setup + "/config.sh /experiment"
+                self.dir_setup + "/config.sh " + values.container_base_experiment
             )
         )
         conf_content.append(
             "build_command:CC=crashrepair-cc CXX=crashrepair-cxx {}\n".format(
-                self.dir_setup + "/build.sh /experiment"
+                self.dir_setup + "/build.sh " + values.container_base_experiment
             )
         )
         if self.key_crash_cmd not in bug_info:

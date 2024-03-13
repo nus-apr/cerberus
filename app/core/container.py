@@ -351,7 +351,10 @@ def build_container(
 
 
 def exec_command(
-    container_id: str, command: str, workdir="/experiment", env: Dict[str, str] = dict()
+    container_id: str,
+    command: str,
+    workdir=values.container_base_experiment,
+    env: Dict[str, str] = dict(),
 ) -> Tuple[int, Optional[Tuple[Optional[bytes], Optional[bytes]]]]:
     client = get_client()
     exit_code: int

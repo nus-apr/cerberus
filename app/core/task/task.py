@@ -128,7 +128,7 @@ def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name
     dir_path = join(benchmark_name, subject_name, bug_name, "")
 
     dir_setup_container = join("/setup", dir_path)
-    dir_exp_container = join("/experiment", dir_path)
+    dir_exp_container = join(values.container_base_experiment, dir_path)
     dir_logs_container = "/logs"
     dir_artifact_container = "/output"
     dir_aux_container = join(dir_exp_container, ".aux")
@@ -336,7 +336,6 @@ def construct_container_volumes(
     dir_info: DirectoryInfo, extra_volumes: Optional[Dict[str, Any]] = None
 ):
     volume_list = {
-        # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
         dir_info["local"]["logs"]: {"bind": "/logs", "mode": "rw"},
         dir_info["local"]["setup"]: {
             "bind": dir_info["container"]["setup"],
@@ -412,7 +411,7 @@ def prepare_tool_experiment_image(
 
         dock_file.write(
             "COPY --from={0} {2} {1} {1}\n".format(
-                bug_image_id, "/experiment", ownership
+                bug_image_id, values.container_base_experiment, ownership
             )
         )
         dock_file.write(

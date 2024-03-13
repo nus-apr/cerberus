@@ -3,6 +3,7 @@ import os
 import re
 from os.path import join
 
+from app.core import values
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -172,7 +173,7 @@ resource-limits:
                 "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
                 "RUN pip3 install coverage pytest pytest-cov gcovr\n",
                 f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
-                "WORKDIR /experiment\n",
+                f"WORKDIR {values.container_base_experiment}\n",
                 'ENTRYPOINT ["/bin/sh", "-c"]\n',
                 'CMD ["bash"]',
             ],

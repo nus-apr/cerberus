@@ -179,6 +179,7 @@ class AbstractTool(AbstractDriver):
                         pass
                     if tests["format"] == "ktest":
                         pass
+        self.write_json([bug_info], join(self.dir_expr, "meta-data.json"))
         pass
 
     def update_info(
@@ -209,7 +210,7 @@ class AbstractTool(AbstractDriver):
             self.dir_inst = dir_info["container"]["instrumentation"]
             self.dir_setup = dir_info["container"]["setup"]
             self.dir_output = dir_info["container"]["artifacts"]
-            self.dir_base_expr = "/experiment"
+            self.dir_base_expr = values.container_base_experiment
         else:
             self.dir_expr = dir_info["local"]["experiment"]
             self.dir_logs = dir_info["local"]["logs"]
@@ -245,7 +246,7 @@ class AbstractTool(AbstractDriver):
         """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         if self.container_id:
             if not dir_path:
-                dir_path = "/experiment"
+                dir_path = values.container_base_experiment
             exit_code, output = container.exec_command(
                 self.container_id, command, dir_path, env
             )
@@ -275,7 +276,7 @@ class AbstractTool(AbstractDriver):
         """executes the specified command at the given dir_path and save the output to log_file"""
         if self.container_id:
             if not dir_path:
-                dir_path = "/experiment"
+                dir_path = values.container_base_experiment
             exit_code, output = container.exec_command(
                 self.container_id, command, dir_path, env
             )

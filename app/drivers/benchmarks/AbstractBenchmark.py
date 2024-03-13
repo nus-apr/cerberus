@@ -211,7 +211,7 @@ class AbstractBenchmark(AbstractDriver):
         container_id: Optional[str],
         command_str: str,
         log_file_path="/dev/null",
-        dir_path="/experiment",
+        dir_path=values.container_base_experiment,
         env=dict(),
     ):
         if container_id:
