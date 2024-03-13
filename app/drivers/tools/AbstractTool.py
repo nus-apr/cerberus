@@ -180,7 +180,7 @@ class AbstractTool(AbstractDriver):
                         pass
                     if tests["format"] == "ktest":
                         pass
-        self.write_json([bug_info], join(self.dir_expr, "meta-data.json"))
+        self.write_json([bug_info], join(self.dir_base_expr, "meta-data.json"))
         pass
 
     def update_info(

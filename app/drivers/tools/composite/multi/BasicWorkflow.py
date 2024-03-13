@@ -538,7 +538,7 @@ class BasicWorkflow(AbstractCompositeTool):
             benign_dir = join(dirname(crash_dir), "queue")
             current_time = int(time.time())
 
-            if self.last_crash is not None and current_time - self.last_crash <= 1200:
+            if self.last_crash is not None and current_time - self.last_crash <= 3000:
                 # self.emit_debug("Debouncing the crash")
                 return
 
@@ -1004,7 +1004,7 @@ class BasicWorkflow(AbstractCompositeTool):
                         )
                         new_info[key] = candidate[key]
                     elif type(info[key]) == list:
-                        new_info[key] = list(set(info[key] + candidate[key]))
+                        new_info[key] = info[key] + candidate[key]
                     elif type(info[key]) == dict:
                         new_info[key] = self.merge_dict(info[key], candidate[key])
                     else:
