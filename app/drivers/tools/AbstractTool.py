@@ -81,6 +81,7 @@ class AbstractTool(AbstractDriver):
     key_dir_test_class = definitions.KEY_TEST_CLASS_DIRECTORY
     key_gpus = definitions.KEY_GPUS
     key_cpus = definitions.KEY_CPUS
+    key_analysis_output = definitions.KEY_ANALYSIS_OUTPUT
     stats: ToolStats
     bindings: Optional[Dict[str, Any]] = None
     runs_as_root: bool = True
@@ -138,7 +139,7 @@ class AbstractTool(AbstractDriver):
                 definitions.KEY_COUNT_NEG,
             ),
         ]:
-            for analysis_result in bug_info.get(definitions.KEY_ANALYSIS_OUTPUT, []):
+            for analysis_result in bug_info.get(self.key_analysis_output, []):
                 for tests in analysis_result.get(test_group, []):
                     """
                     Documents how to process tests to ensure their usability

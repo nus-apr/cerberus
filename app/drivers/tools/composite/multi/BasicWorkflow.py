@@ -568,11 +568,15 @@ class BasicWorkflow(AbstractCompositeTool):
 
             new_bug_info = deepcopy(self.bug_info)
 
-            new_bug_info[self.key_exploit_inputs] = [
-                {"format": "raw", "dir": "crashing_tests"}
-            ]
-            new_bug_info[self.key_benign_inputs] = [
-                {"format": "raw", "dir": "benign_tests"}
+            new_bug_info[self.key_analysis_output] = [
+                {
+                    "generator": "Crash reaction",
+                    "confidence": 1.0,
+                    self.key_exploit_inputs: [
+                        {"format": "raw", "dir": "crashing_tests"}
+                    ],
+                    self.key_benign_inputs: [{"format": "raw", "dir": "benign_tests"}],
+                }
             ]
             new_bug_info["test_dir_abspath"] = self.dir_setup
 
@@ -984,7 +988,7 @@ class BasicWorkflow(AbstractCompositeTool):
             new_info[key] = info[key]
             # Points of merging that are interesting are the keys
             if key in candidate and info[key] != candidate[key]:
-                if type(info[key] != candidate[key]):
+                if type(info[key]) != type(candidate[key]):
                     self.emit_warning(
                         "Overriding key {} with value {} with value {}".format(
                             key, info[key], candidate[key]
