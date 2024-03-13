@@ -39,6 +39,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
         if self.key_fix_file in bug_info:
             self.run_command(
                 f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_fix_file])} $(cat  {join(self.dir_expr,'src',bug_info[self.key_fix_file])} | wc -l ) >> /sbfl/lines.txt'",
+                log_file_path=self.log_output_path,
                 dir_path="/sbfl",
             )
         else:
@@ -93,7 +94,8 @@ class E9PatchSBFL(AbstractLocalizeTool):
             )
 
         status = self.run_command(
-            f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces} -a {localization_config_info.get(self.key_fl_formula,'ochiai').lower()} {localization_config_info.get(self.key_tool_params, '')}"
+            f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces} -a {localization_config_info.get(self.key_fl_formula,'ochiai').lower()} {localization_config_info.get(self.key_tool_params, '')}",
+            log_file_path=self.log_output_path,
         )
 
         self.run_command("rm -rf {}".format(dir_failing_traces))

@@ -84,6 +84,7 @@ class GZoltar(AbstractLocalizeTool):
                     gzoltar_version
                 ),
             ),
+            log_file_path=self.log_output_path,
             dir_path=join(self.dir_expr, "src"),
             env=env,
         )
@@ -112,6 +113,7 @@ class GZoltar(AbstractLocalizeTool):
                     gzoltar_version
                 ),
             ),
+            log_file_path=self.log_output_path,
             env=env,
         )
 
@@ -136,6 +138,7 @@ class GZoltar(AbstractLocalizeTool):
                 test_method=tests_list,
                 ser_file=ser_file,
             ),
+            log_file_path=self.log_output_path,
             env=env,
         )
 

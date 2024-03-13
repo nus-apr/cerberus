@@ -58,6 +58,7 @@ class JoernSBFL(AbstractLocalizeTool):
 
         self.run_command(
             "python3 /opt/crash_analysis.py {}".format(metadata_loc),
+            log_file_path=self.log_output_path,
             dir_path="/opt/",
         )
 

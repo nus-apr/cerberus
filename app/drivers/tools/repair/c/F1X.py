@@ -153,7 +153,8 @@ class F1X(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
         if self.is_dump_patches:
-            self.create_patches_from_space(fix_file)
+            for fix_file in fix_file_list:
+                self.create_patches_from_space(fix_file)
         self.timestamp_log_end()
 
     def create_patches_from_space(self, source_file):
