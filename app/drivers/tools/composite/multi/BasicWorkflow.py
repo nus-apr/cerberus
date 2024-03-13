@@ -996,13 +996,19 @@ class BasicWorkflow(AbstractCompositeTool):
                     )
                     info[key] = candidate[key]
                 else:
-                    if type(info[key]) not in [list, dict]:
+                    if type(info[key]) != list and type(info[key]) != dict:
+                        self.emit_warning(
+                            "Overriding key {} with value {} with value {}".format(
+                                key, info[key], candidate[key]
+                            )
+                        )
                         new_info[key] = candidate[key]
+                    elif type(info[key]) == list:
+                        new_info[key] = list(set(info[key] + candidate[key]))
+                    elif type(info[key]) == dict:
+                        new_info[key] = self.merge_dict(info[key], candidate[key])
                     else:
-                        if type(info[key]) == list:
-                            new_info[key] = list(set(info[key] + candidate[key]))
-                        elif type(info[key]) == dict:
-                            new_info[key] = self.merge_dict(info[key], candidate[key])
+                        self.emit_error("HOW?")
 
         for key in candidate:
             if key not in info:
