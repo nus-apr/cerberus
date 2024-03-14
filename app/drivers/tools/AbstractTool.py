@@ -68,6 +68,8 @@ class AbstractTool(AbstractDriver):
     key_config_script = definitions.KEY_CONFIG_SCRIPT
     key_test_script = definitions.KEY_TEST_SCRIPT
     key_clean_script = definitions.KEY_CLEAN_SCRIPT
+    key_failing_test_identifiers = definitions.KEY_FAILING_TEST
+    key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_exploit_inputs = definitions.KEY_EXPLOIT_INPUTS
     key_benign_inputs = definitions.KEY_BENIGN_INPUTS
     key_pub_test_script = definitions.KEY_PUB_TEST_SCRIPT

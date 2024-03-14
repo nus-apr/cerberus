@@ -95,9 +95,13 @@ class FlaCoCo(AbstractLocalizeTool):
                     }
                 )
             new_metadata = {
-                "generator": "flacoco",
-                "confidence": "1",
-                "localization": localization,
+                self.key_analysis_output: [
+                    {
+                        "generator": "flacoco",
+                        "confidence": "1",
+                        "localization": localization,
+                    }
+                ]
             }
             self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 

@@ -202,6 +202,7 @@ class GZoltar(AbstractLocalizeTool):
                 join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")
             )[1:]
             for entry in lines:
+                entry = entry.strip()
                 path_line, score = entry.split(";")
                 reference, line = path_line.split(":")
                 second_dollar = None
@@ -229,15 +230,30 @@ class GZoltar(AbstractLocalizeTool):
                         "score": score,
                     }
                 )
+            passing_identifiers = []
+            failing_identifiers = []
+            for test_line in self.read_file(
+                join(self.dir_output, "sfl", "txt", "tests.csv")
+            ):
+                test_line = test_line.strip()
+                identifier, outcome, runtime, stack_trace, *rest = test_line.split(",")
+                if outcome == "PASS":
+                    passing_identifiers.append(identifier)
+                elif outcome == "FAIL":
+                    failing_identifiers.append(identifier)
+                else:
+                    self.emit_warning("INVALID OUTCOME?? {}".format(outcome))
 
             new_metadata = {
+                self.key_passing_test_identifiers: passing_identifiers,
+                self.key_failing_test_identifiers: failing_identifiers,
                 self.key_analysis_output: [
                     {
                         "generator": "gzoltar",
                         "confidence": "1",
                         "localization": localization[:10],
                     }
-                ]
+                ],
             }
             self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
