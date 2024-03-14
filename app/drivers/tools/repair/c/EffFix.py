@@ -137,9 +137,9 @@ class EffFix(AbstractRepairTool):
             # driver's setup do not write to the same place and overwrite the pre-analysis result.
             # For example, if benchmark write to /experiment, that does not overwrite things here.
             expr_base_dir = "/effFix-experiment/effFix-benchmark/"
-            self.dir_exp = join(expr_base_dir, subject, bug_id)
+            self.dir_expr = join(expr_base_dir, subject, bug_id)
 
-        self.dir_output = join(self.dir_exp, "repair")
+        self.dir_output = join(self.dir_expr, "repair")
         config_path = join(self.dir_expr, self.name, "repair.conf")
         # config_path = self.prepare(bug_info)
         # if config_path is None:
