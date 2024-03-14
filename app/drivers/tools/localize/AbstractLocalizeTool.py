@@ -60,6 +60,36 @@ class AbstractLocalizeTool(AbstractTool):
         super().save_artifacts(dir_info)
         return
 
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
+        """instrumentation for the experiment as needed by the tool"""
+        if not self.is_file(join(self.dir_inst, "instrument.sh")):
+            return
+        self.emit_normal("running instrumentation script")
+        bug_id = bug_info[definitions.KEY_BUG_ID]
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
+        buggy_file = bug_info.get(self.key_localization, [{}])[0].get(
+            definitions.KEY_FIX_FILE, ""
+        )
+        self.log_instrument_path = join(
+            self.dir_logs,
+            "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),
+        )
+        time = datetime.now()
+        command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
+        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
+        self.emit_debug(
+            "\t\t\t instrumentation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        if status not in [0, 126]:
+            error_exit(
+                "error with instrumentation of {}; exit code {}".format(
+                    self.name, str(status)
+                )
+            )
+        return
+
     def analyse_output(
         self, dir_info, bug_id: str, fail_list: List[str]
     ) -> LocalizeToolStats:
@@ -83,6 +113,7 @@ class AbstractLocalizeTool(AbstractTool):
         self.emit_normal("running fix localization on subject")
         utilities.check_space()
         self.pre_process()
+        self.instrument(bug_info)
         self.emit_normal("executing localization command")
         task_conf_id = localization_config_info[definitions.KEY_ID]
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
