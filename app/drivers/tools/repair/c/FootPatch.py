@@ -31,11 +31,11 @@ class FootPatch(AbstractRepairTool):
             del new_env["GLOBAL_REPAIR"]
         new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
-        compile_list = bug_info.get(self.key_compile_programs, [])
+        build_command_repair = bug_info.get(self.key_build_command_repair, "")
         analysis_command = (
             "footpatch "
-            "-j 20 --headers --no-filtering -- make -j20 {}".format(
-                " ".join(compile_list)
+            "-j 32 --headers --no-filtering -- {}".format(
+                build_command_repair
             )
         )
         log_analysis_path = join(self.dir_logs, "footpatch-capture-output.log")
@@ -75,12 +75,12 @@ class FootPatch(AbstractRepairTool):
         new_env["GLOBAL_REPAIR"] = "1"
 
         self.timestamp_log_start()
-        compile_list = bug_info.get(self.key_compile_programs, [])
+        build_command_repair = bug_info.get(self.key_build_command_repair, "")
         footpatch_command = (
             "timeout -k 5m {0}h footpatch "
-            "-j 20 --headers --no-filtering {1} "
-            "-- make -j20 {2} ".format(
-                timeout_h, additional_tool_param, " ".join(compile_list)
+            "-j 32 --headers --no-filtering {1} "
+            "-- {} ".format(
+                timeout_h, additional_tool_param, build_command_repair
             )
         )
 
