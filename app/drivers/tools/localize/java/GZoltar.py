@@ -117,7 +117,6 @@ class GZoltar(AbstractLocalizeTool):
             env=env,
         )
 
-        return
         self.emit_normal("Running each unit test case in isolation")
 
         ser_file = join(self.dir_output, "ser_file.ser")
