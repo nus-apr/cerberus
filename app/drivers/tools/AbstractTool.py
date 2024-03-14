@@ -163,6 +163,10 @@ class AbstractTool(AbstractDriver):
                         )
                     if tests["format"] == "raw":
                         # TODO make recursive
+                        # Remove the
+                        self.run_command(
+                            "rm .state", dir_path=join(self.dir_setup, tests["dir"])
+                        )
                         test_dir_path = join(dir_info["local"]["setup"], tests["dir"])
                         test_identifiers = []
                         if os.path.exists(test_dir_path):

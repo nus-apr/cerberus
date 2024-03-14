@@ -41,8 +41,7 @@ class VulnFix(AbstractRepairTool):
             timeout_h, additional_tool_param, config_path
         )
         env = dict()
-        if self.is_ui_active:
-            env["AFL_NO_AFFINITY"] = str(1)
+        env["AFL_NO_AFFINITY"] = str(1)
         status = self.run_command(
             vulnfix_command,
             log_file_path=self.log_output_path,
@@ -106,19 +105,21 @@ class VulnFix(AbstractRepairTool):
         all_cmds = f"fix-file-path={fix_file_path}\nfix-line={fix_line}\ncrash-location={crash_location}\nfix-location={fix_location}"
 
         # (4) exploit
-
+        self.emit_debug(bug_info)
         if (
-            self.key_exploit_list not in bug_info
-            or len(bug_info[self.key_exploit_list]) < 1
+            self.key_failing_test_identifiers not in bug_info
+            or len(bug_info[self.key_failing_test_identifiers]) < 1
         ):
             # assumes instrumentation converted stdarg as a file handling command
             exploit_path = join(self.dir_setup, "tests/exploit")
         else:
             self.emit_debug(bug_info)
-            self.emit_debug(bug_info[self.key_exploit_list])
+            self.emit_debug(bug_info[self.key_failing_test_identifiers])
 
             exploit_path = join(
-                self.dir_setup, sorted(bug_info[self.key_exploit_list])[0]
+                self.dir_setup,
+                "tests",
+                sorted(bug_info[self.key_failing_test_identifiers])[0],
             )
         line_exploit = "exploit=" + exploit_path + "\n"
         # (5) (OPTIONAL) normal-in
