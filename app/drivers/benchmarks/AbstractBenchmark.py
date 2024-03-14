@@ -136,8 +136,8 @@ class AbstractBenchmark(AbstractDriver):
     @staticmethod
     def process_metadata(data):
         for experiment_item in data:
-            passing_list = experiment_item[AbstractBenchmark.key_passing_tests]
-            failing_list = experiment_item[AbstractBenchmark.key_failing_tests]
+            passing_list = experiment_item.get(AbstractBenchmark.key_passing_tests, [])
+            failing_list = experiment_item.get(AbstractBenchmark.key_failing_tests, [])
             passing_list_str = [f"{x}" for x in passing_list]
             failing_list_str = [f"{x}" for x in failing_list]
             experiment_item[AbstractBenchmark.key_passing_tests] = passing_list_str
