@@ -204,23 +204,40 @@ class GZoltar(AbstractLocalizeTool):
             for entry in lines:
                 path_line, score = entry.split(";")
                 reference, line = path_line.split(":")
+                second_dollar = None
+                try:
+                    first_dollar = reference.index("$")
+                    second_dollar = first_dollar + reference[first_dollar + 1 :].index(
+                        "$"
+                    )
+                except Exception as e:
+                    pass
                 path = (
                     "src/main/java/"
-                    + reference.split("#")[0].replace(".", "/").replace("$", "/")
+                    + reference.split("#")[0]
+                    .replace(".", "/")[
+                        : second_dollar + 1 if second_dollar is not None else None
+                    ]
+                    .replace("$", "/")
                     + ".java"
                 )
                 localization.append(
                     {
                         "source_file": path,
+                        "location": reference,
                         "line_numbers": [line],
                         "score": score,
                     }
                 )
 
             new_metadata = {
-                "generator": "gzoltar",
-                "confidence": "1",
-                "localization": localization,
+                self.key_analysis_output: [
+                    {
+                        "generator": "gzoltar",
+                        "confidence": "1",
+                        "localization": localization[:10],
+                    }
+                ]
             }
             self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
