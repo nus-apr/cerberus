@@ -43,6 +43,26 @@ class ARJA_E(AbstractRepairTool):
         list_deps.append(join(self.arja_e_home, "external", "lib", "junit-4.12.jar"))
         list_deps_str = ":".join(list_deps)
 
+        localization_lines = self.transform_localization(
+            bug_info[self.key_localization]
+        )
+        dir_localization = f"{self.dir_output}/localization"
+        self.run_command(f"mkdir {dir_localization}")
+        self.write_file(localization_lines, join(dir_localization, "spectra"))
+
+        test_name_lines = (
+            ["name,outcome,runtime,stacktrace\n"]
+            + [
+                f"{name},FAIL,0,\n"
+                for name in bug_info[self.key_failing_test_identifiers]
+            ]
+            + [
+                f"{name},PASS,0,\n"
+                for name in bug_info[self.key_passing_test_identifiers]
+            ]
+        )
+        self.write_file(test_name_lines, join(dir_localization, "tests"))
+
         arja_default_population_size = 40
         # use a large one to keep ARJA running forever
         # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
@@ -50,7 +70,6 @@ class ARJA_E(AbstractRepairTool):
 
         test_timeout = 30000
         java_version = bug_info[self.key_java_version]
-        dir_localization = f"{self.dir_output}/localization"
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
         # generate patches
         self.timestamp_log_start()
@@ -158,3 +177,16 @@ class ARJA_E(AbstractRepairTool):
         self.stats.patch_stats.plausible = count_plausible
 
         return self.stats
+
+    def transform_localization(self, data):
+        # Examples:
+        # org.jsoup.parser$TokeniserState$37#read(org.jsoup.parser.Tokeniser,org.jsoup.parser.CharacterReader)
+        # org.jsoup.parser$Parser#xmlParser()
+        lines = ["name;suspiciousness_value\n"]
+        for x in data:
+            suspiciousness = x["score"]
+            method = x["location"]
+            classname = method.split("#")[0].replace("$", ".", 1)
+            for lineno in x["line_numbers"]:
+                lines.append(f"<{classname}{{#{lineno},{suspiciousness}\n")
+        return lines
