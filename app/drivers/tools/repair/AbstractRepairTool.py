@@ -119,7 +119,7 @@ class AbstractRepairTool(AbstractTool):
             definitions.KEY_COUNT_POS,
         ]
         for k in interested_keys:
-            filtered_bug_info[k] = bug_info[k]
+            filtered_bug_info[k] = bug_info.get(k, "")
         repair_config_info["container-id"] = self.container_id
         self.stats.bug_info = filtered_bug_info
         self.stats.config_info = repair_config_info
@@ -134,7 +134,7 @@ class AbstractRepairTool(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
-        base_dir_patches = dir_info["patches"]
+        base_dir_patches = dir_info.get("patches", "")
         if os.path.isdir(base_dir_patches):
             dir_patches = join(base_dir_patches, self.name)
             if os.path.isdir(dir_patches):
