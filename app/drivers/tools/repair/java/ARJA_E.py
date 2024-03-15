@@ -187,6 +187,8 @@ class ARJA_E(AbstractRepairTool):
             suspiciousness = x["score"]
             method = x["location"]
             classname = method.split("#")[0].replace("$", ".", 1)
+            if "$" in classname:
+                classname = classname[:classname.index("$")]
             for lineno in x["line_numbers"]:
                 lines.append(f"<{classname}{{#{lineno},{suspiciousness}\n")
         return lines
