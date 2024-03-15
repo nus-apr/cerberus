@@ -68,7 +68,7 @@ class ARJA_E(AbstractRepairTool):
         # there is `populationSize * maxGenerations` as an `int` in ARJA; do not overflow
         max_generations = 0x7FFFFFFF // (arja_default_population_size + 1)
 
-        test_timeout = 30000
+        test_timeout = 20
         java_version = bug_info[self.key_java_version]
         repair_timeout = int(datetime.timedelta(days=365).total_seconds() // 60)
         # generate patches
@@ -187,8 +187,7 @@ class ARJA_E(AbstractRepairTool):
             suspiciousness = x["score"]
             method = x["location"]
             classname = method.split("#")[0].replace("$", ".", 1)
-            if "$" in classname:
-                classname = classname[:classname.index("$")]
+            classname = re.sub(r"\$\d+$", "", classname)
             for lineno in x["line_numbers"]:
                 lines.append(f"<{classname}{{#{lineno},{suspiciousness}\n")
         return lines
