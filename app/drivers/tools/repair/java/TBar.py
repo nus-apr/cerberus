@@ -1,6 +1,6 @@
 import os
-from os.path import basename
-from os.path import join
+import re
+from os.path import basename, join
 
 from app.core import definitions
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -129,19 +129,10 @@ class TBar(AbstractRepairTool):
         )
 
         # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
-        test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
-        if test_failed_tests_file != 0 and not run_fl:
-            self.emit_warning(
-                f"{failed_tests_file} does not exist in FailedTestCases/ directory."
-                "Will try to find if there is a hardcoded suspiciousness file"
-            )
-            test_fl_data = self.run_command(f"test -f {fl_data}")
-            if self.run_command(f"test -f {fl_data}") != 0:
-                self.error_exit(
-                    "Could not find a suspiciousness file. Unsupported state"
-                )
-            self.emit_debug("{} {}".format(test_failed_tests_file, test_fl_data))
-        elif run_fl:
+        # test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
+        if not run_fl:
+            self.write_fl_data(experiment_info, failed_tests_file, fl_data)
+        else:
             cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,experiment_info[self.key_build_script])}"
 
             # cmd = (
@@ -196,6 +187,27 @@ class TBar(AbstractRepairTool):
                 self.dir_output + "/",
             ]
         )
+
+    # TODO Rename this here and in `create_parameters`
+    def write_fl_data(self, experiment_info, failed_tests_file, fl_data):
+        failing_tests = experiment_info[self.key_failing_test_identifiers]
+        lines = [f"Failing tests: {len(failing_tests)}:\n"]
+        lines.extend(f"  - {name.replace('#', '::')}\n" for name in failing_tests)
+        self.write_file(lines, failed_tests_file)
+
+        test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
+
+        lines = []
+        for x in experiment_info[self.key_localization]:
+            classname = x["location"].split("#")[0].replace("$", ".", 1)
+            classname = re.sub(r"\$\d+$", "", classname)
+            lines.extend(f"{classname}@{lineno}\n" for lineno in x["line_numbers"])
+        self.write_file(lines, fl_data)
+
+        test_fl_data = self.run_command(f"test -f {fl_data}")
+        if self.run_command(f"test -f {fl_data}") != 0:
+            self.error_exit("Suspiciousness file was not written. Unsupported state")
+        self.emit_debug(f"{test_failed_tests_file} {test_fl_data}")
 
     def save_artifacts(self, dir_info):
         """
