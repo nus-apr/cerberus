@@ -129,7 +129,7 @@ class EffFix(AbstractRepairTool):
     def run_repair(self, bug_info, repair_config_info):
         bug_id = str(bug_info[self.key_bug_id])
         subject = bug_info[self.key_subject]
-        if bug_info[self.key_benchmark] == 'effFix':
+        if bug_info[self.key_benchmark].lower() == 'efffix':
             # A special case when running EffFix on the effFix benchmark
             # to save time, the tool image already contains pre-analysis results for all
             # experiment subjects (including source code and analysis artifacts).
@@ -140,7 +140,7 @@ class EffFix(AbstractRepairTool):
             self.dir_expr = join(expr_base_dir, subject, bug_id)
 
         self.dir_output = join(self.dir_expr, "repair")
-        config_path = join(self.dir_expr, self.name, "repair.conf")
+        config_path = join(self.dir_expr, "EffFix", "repair.conf")
         # config_path = self.prepare(bug_info)
         # if config_path is None:
         #     return
