@@ -112,14 +112,15 @@ class TBar(AbstractRepairTool):
 
         self.run_command(symlink_command)
 
+        failed_tests_dir = join(self.tbar_root_dir, "FailedTestCases/")
+        self.run_command(f"mkdir -p {failed_tests_dir}")
         failed_tests_file = join(
-            self.tbar_root_dir,
-            "FailedTestCases/",
-            f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
+            failed_tests_dir, f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
         )
 
         self.emit_debug("I am looking for {}".format(failed_tests_file))
         fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
+        self.run_command(f"mkdir -p {fl_out_dir}")
         fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
 
         failed_tests_file_copy = join(
@@ -148,7 +149,7 @@ class TBar(AbstractRepairTool):
                 log_file_path=self.log_output_path,
             )
         # actually, this is needed for non-maven projects, but do it anyway
-        self.run_command(f"ln -s {failed_tests_file} {failed_tests_file_copy}")
+        self.run_command(f"ln -sf {failed_tests_file} {failed_tests_file_copy}")
 
         if not self.is_file(fl_data):
             if run_fl:
@@ -190,6 +191,9 @@ class TBar(AbstractRepairTool):
 
     # TODO Rename this here and in `create_parameters`
     def write_fl_data(self, experiment_info, failed_tests_file, fl_data):
+        self.run_command(f"rm -f {failed_tests_file}")
+        self.run_command(f"rm -f {fl_data}")
+
         failing_tests = experiment_info[self.key_failing_test_identifiers]
         lines = [f"Failing tests: {len(failing_tests)}:\n"]
         lines.extend(f"  - {name.replace('#', '::')}\n" for name in failing_tests)
