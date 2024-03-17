@@ -25,8 +25,10 @@ def generate_local_dir_info(
     dir_setup_local = join(values.dir_benchmark, dir_path)
 
     if tag:  # Allow for the usage of custom setup folders
-        dir_path_extended = join(benchmark_name, subject_name, f"{bug_name}-{tag}", "")
-        dir_setup_extended = join(values.dir_benchmark, dir_path_extended)
+        # TODO can be reworked to make the dir at different locations
+        dir_setup_extended = join(
+            values.dir_benchmark, benchmark_name, subject_name, f"{bug_name}-{tag}", ""
+        )
         if os.path.exists(dir_setup_extended):
             dir_setup_local = dir_setup_extended
 
