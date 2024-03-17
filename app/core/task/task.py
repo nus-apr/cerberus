@@ -488,10 +488,12 @@ def execute(
                 task_config_info,
                 container_id,
                 benchmark,
+                run_index,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
                 values.task_type.get(None),
                 final_status,
+                hash,
             ),
             name="Wrapper thread for {} {} {} {} {}".format(
                 values.task_type.get("N/A"),
