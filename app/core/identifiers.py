@@ -49,8 +49,8 @@ def create_task_image_identifier(
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
     image_args = [tool.name, benchmark.name, subject_name, bug_name]
 
-    if tag and tag != "":
-        image_args.append(tag)
+    # if tag and tag != "":
+    #    image_args.append(tag)
 
     image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
     return image_name.lower()
