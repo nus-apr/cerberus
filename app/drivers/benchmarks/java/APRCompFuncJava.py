@@ -8,6 +8,7 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 class APRCompFuncJava(AbstractBenchmark):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "aprcomp/benchmark-funcjava-2024"
         super(APRCompFuncJava, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):

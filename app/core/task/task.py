@@ -24,6 +24,7 @@ from app.core.task import fuzz
 from app.core.task import localize
 from app.core.task import repair
 from app.core.task import select
+from app.core.task import slice
 from app.core.task import validate
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -34,6 +35,7 @@ from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
+from app.drivers.tools.slice.AbstractSliceTool import AbstractSliceTool
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 from app.plugins import valkyrie
 
@@ -66,6 +68,7 @@ def generate_local_dir_info(
     dir_patches_local = join(dir_setup_local, "patches")
     dir_validation_local = join(dir_setup_local, "validation")
     dir_selection_local = join(dir_setup_local, "selection")
+    dir_slicing_local = join(dir_setup_local, "slicing")
 
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
@@ -81,6 +84,7 @@ def generate_local_dir_info(
         dir_localization_local,
         dir_validation_local,
         dir_selection_local,
+        dir_slicing_local,
     ]:
         if not os.path.isdir(directory):
             os.makedirs(directory, exist_ok=True)
@@ -95,6 +99,7 @@ def generate_local_dir_info(
         "patches": dir_patches_local,
         "localization": dir_localization_local,
         "selection": dir_selection_local,
+        "slicing": dir_slicing_local,
         "validation": dir_validation_local,
         "bugs": dir_bugs_local,
     }
@@ -690,6 +695,15 @@ def run(
                 dir_info,
                 bug_info,
                 cast(AbstractSelectTool, tool),
+                task_config_info,
+                container_id,
+                benchmark.name,
+            )
+        elif task_type == "slice":
+            slice.slice_all(
+                dir_info,
+                bug_info,
+                cast(AbstractSliceTool, tool),
                 task_config_info,
                 container_id,
                 benchmark.name,

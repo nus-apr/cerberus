@@ -66,6 +66,7 @@ class ConfigFieldsEnum(Enum):
     ANALYZE = "analyze"
     CRASH_ANALYZE = "crash-analyze"
     LOCALIZE = "localize"
+    SLICE = "slice"
     REPAIR = "repair"
     SELECT = "select"
     ORCHESTRATOR = "orchestrator"
@@ -81,6 +82,7 @@ class ConfigFieldsEnum(Enum):
     PARAMS = "params"
     TAG = "tag"
     IMAGE = "image"
+    HASH_DIGEST = "hash_digest"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"

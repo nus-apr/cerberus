@@ -34,7 +34,7 @@ class effFix(AbstractBenchmark):
         self.emit_normal("installing experiment dependencies")
         time = datetime.now()
         if self.is_file(f"{self.dir_setup}/deps.sh", container_id):
-            command_str = "bash deps.sh {}".format(self.base_dir_experiment)
+            command_str = "bash deps.sh"
             status = self.run_command(
                 container_id, command_str, self.log_deps_path, self.dir_setup
             )
@@ -63,24 +63,26 @@ class effFix(AbstractBenchmark):
         return status == 0
 
     def build(self, bug_index, container_id):
-        self.emit_normal("building experiment subject")
-        experiment_item = self.experiment_subjects[bug_index - 1]
-        bug_id = str(experiment_item[self.key_bug_id])
-        self.log_build_path = (
-            self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
-        )
-        time = datetime.now()
-        command_str = "bash build.sh {}".format(self.base_dir_experiment)
-        status = self.run_command(
-            container_id, command_str, self.log_build_path, self.dir_setup
-        )
-        self.emit_normal(
-            "build took {} second(s)".format((datetime.now() - time).total_seconds())
-        )
-        return status == 0
+        self.emit_normal("Skip building experiment subject, since tools are supposed to build the subjects in effFix benchmark.")
+        return True
+        # self.emit_normal("building experiment subject")
+        # experiment_item = self.experiment_subjects[bug_index - 1]
+        # bug_id = str(experiment_item[self.key_bug_id])
+        # self.log_build_path = (
+        #     self.dir_logs + "/" + self.name + "-" + bug_id + "-build.log"
+        # )
+        # time = datetime.now()
+        # command_str = "bash build.sh {}".format(self.base_dir_experiment)
+        # status = self.run_command(
+        #     container_id, command_str, self.log_build_path, self.dir_setup
+        # )
+        # self.emit_normal(
+        #     "build took {} second(s)".format((datetime.now() - time).total_seconds())
+        # )
+        # return status == 0
 
     def test(self, bug_index, container_id):
-        self.emit_normal("testing experiment subject")
+        self.emit_normal("Skip testing experiment subject, since no test in effFix benchmark.")
         return True
 
     def clean(self, exp_dir_path, container_id):

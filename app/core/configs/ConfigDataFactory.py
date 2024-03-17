@@ -192,6 +192,9 @@ class ConfigDataFactory:
                         params=tool_config_dict.get(ConfigFieldsEnum.PARAMS.value, ""),
                         tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
                         image=tool_config_dict.get(ConfigFieldsEnum.IMAGE.value, ""),
+                        hash_digest=tool_config_dict.get(
+                            ConfigFieldsEnum.HASH_DIGEST.value, ""
+                        ),
                     )
                 )
 

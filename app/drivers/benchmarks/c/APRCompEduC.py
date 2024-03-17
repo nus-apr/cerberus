@@ -7,6 +7,7 @@ from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 class APRCompEduC(AbstractBenchmark):
     def __init__(self):
         self.name = str(os.path.basename(__file__)[:-3]).lower()
+        self.image_name = "aprcomp/benchmark-educ-2024"
         super(APRCompEduC, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):

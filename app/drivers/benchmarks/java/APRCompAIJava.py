@@ -11,6 +11,7 @@ class APRCompAIJava(AbstractBenchmark):
 
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
+        self.image_name = "aprcomp/benchmark-aijava-2024"
         super(APRCompAIJava, self).__init__()
 
     def setup_experiment(self, bug_index, container_id, test_all):

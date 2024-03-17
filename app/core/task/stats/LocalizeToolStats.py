@@ -9,22 +9,15 @@ from app.core.task.TaskStatus import TaskStatus
 
 
 class FixLocStats:
-    size: int = -1
-    enumerations: int = -1
-    plausible: int = -1
-    generated: int = -1
-    correct: int = -1
-
-    def get_exploration_ratio(self):
-        return (self.enumerations / self.size) * 100
+    fix_locs: int = -1
+    source_files: int = -1
+    fix_funcs: int = -1
 
     def get_dict(self, is_validate=False):
         summary = {
-            "search space": self.size,
-            "enumerations": self.enumerations,
-            "plausible": self.plausible,
-            "correct": self.correct,
-            "generated": self.generated,
+            "fix locations": self.fix_locs,
+            "source files": self.source_files,
+            "fix_functions": self.fix_funcs,
         }
         return summary
 
@@ -42,7 +35,7 @@ class LocalizeToolStats(ToolStats):
 
     def get_dict(self):
         res = super(LocalizeToolStats, self).get_dict()
-        res["details"]["space"] = self.fix_loc_stats.get_dict()
+        res["details"]["localization"] = self.fix_loc_stats.get_dict()
         if "info" not in res:
             res["info"] = dict()
         res["info"]["bug-info"] = self.bug_info
@@ -50,21 +43,18 @@ class LocalizeToolStats(ToolStats):
         return res
 
     def write(self, printer, prefix=""):
-        printer("{1} search space size: {0}\n".format(self.fix_loc_stats.size, prefix))
         printer(
-            "{1} count enumerations: {0}\n".format(
-                self.fix_loc_stats.enumerations, prefix
-            )
+            "{1} count fix locations: {0}\n".format(self.fix_loc_stats.fix_locs, prefix)
         )
 
         printer(
-            "{1} count plausible locations: {0}\n".format(
-                self.fix_loc_stats.plausible, prefix
+            "{1} count unique source files: {0}\n".format(
+                self.fix_loc_stats.source_files, prefix
             )
         )
         printer(
-            "{1} count generated locations: {0}\n".format(
-                self.fix_loc_stats.generated, prefix
+            "{1} count fix functions: {0}\n".format(
+                self.fix_loc_stats.fix_funcs, prefix
             )
         )
 
