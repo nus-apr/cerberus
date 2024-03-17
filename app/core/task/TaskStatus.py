@@ -21,39 +21,26 @@ class TaskStatus(Enum):
     VALIDATING = 15
 
     def __str__(self) -> str:
-        if self.value == self.SUCCESS:
-            return "Success"
-        elif self.value == self.FAIL:
-            return "Failure"
-        elif self.value == self.PREPROCESSING:
-            return "Preprocessing"
-        elif self.value == self.REPAIRING:
-            return "Repairing"
-        elif self.value == self.EXTRACTING_PATCHES:
-            return "Extracting Patches"
-        elif self.value == self.PREPARING_IMAGE:
-            return "Preparing image"
-        elif self.value == self.FAIL_IN_SETUP:
-            return "Failed in image setup phase"
-        elif self.value == self.FAIL_IN_DEPLOY:
-            return "Failed in image deploy phase"
-        elif self.value == self.FAIL_IN_BUILD:
-            return "Failed in image building phase"
-        elif self.value == self.FAIL_IN_CONFIG:
-            return "Failed in image configuration phase"
-        elif self.value == self.FAIL_IN_TEST:
-            return "Failed in image testing phase"
-        elif self.value == self.FAIL_IN_VERIFY:
-            return "Failed in image verification phase"
-        elif self.value == self.FAIL_IN_INSTRUMENT:
-            return "Failed in image instrumentation phase"
-        elif self.value == self.FAIL_IN_TOOL:
-            return "Tool returned non-zero status"
-        elif self.value == self.CANCELLED:
-            return "Job Cancelled"
-        elif self.value == self.VALIDATING:
-            return "Tool validating patches"
-        elif self.value == self.NONE:
-            return "NONEEEEEE"
+        response_map = {
+            TaskStatus.SUCCESS: "Success",
+            TaskStatus.FAIL: "Failure",
+            TaskStatus.PREPROCESSING: "Preprocessing",
+            TaskStatus.REPAIRING: "Repairing",
+            TaskStatus.EXTRACTING_PATCHES: "Extracting Patches",
+            TaskStatus.PREPARING_IMAGE: "Preparing image",
+            TaskStatus.FAIL_IN_SETUP: "Failed in image setup phase",
+            TaskStatus.FAIL_IN_DEPLOY: "Failed in image deploy phase",
+            TaskStatus.FAIL_IN_BUILD: "Failed in image building phase",
+            TaskStatus.FAIL_IN_CONFIG: "Failed in image configuration phase",
+            TaskStatus.FAIL_IN_TEST: "Failed in image testing phase",
+            TaskStatus.FAIL_IN_VERIFY: "Failed in image verification phase",
+            TaskStatus.FAIL_IN_INSTRUMENT: "Failed in image instrumentation phase",
+            TaskStatus.FAIL_IN_TOOL: "Tool returned non-zero status",
+            TaskStatus.CANCELLED: "Job Cancelled",
+            TaskStatus.VALIDATING: "Tool validating patches",
+            TaskStatus.NONE: "NONEEEEEE",
+        }
+        if self in response_map:
+            return response_map[self]
         else:
             raise NotImplementedError("New status defined but not implemented in repr")
