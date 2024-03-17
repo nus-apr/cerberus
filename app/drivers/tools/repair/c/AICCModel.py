@@ -1,22 +1,28 @@
 import os
 from os import path
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class AICCModel(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mirchevmp/aiccm"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(AICCModel, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
         if self.is_instrument_only:
@@ -26,27 +32,19 @@ class AICCModel(AbstractRepairTool):
         self.dir_output = path.join(self.dir_expr, "result")
         self.dir_logs = path.join(self.dir_expr, "logs")
 
-        dir_extractfix_exist = self.is_dir(self.dir_root)
-        if not dir_extractfix_exist:
-            # self.emit_error(
-            #     "[Exception] ExtractFix repo is not at the expected location. "
-            #     "Please double check whether we are in ExtractFix container."
-            # )
-            self.error_exit("ExtractFix repo is not at the expected location.")
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         # prepare the config file
-        parameters = self.create_parameters(bug_info)
 
         # start running
         self.timestamp_log_start()
-        extractfix_command = "bash -c 'source /ExtractFix/setup.sh && timeout -k 5m {}h ./ExtractFix.py {} {} >> {}'".format(
-            timeout_h, parameters, additional_tool_param, self.log_output_path
+        tool_commandd = "bash -c 'source /ExtractFix/setup.sh && timeout -k 5m {}h ./ExtractFix.py {} {} >> {}'".format(
+            timeout_h, "", additional_tool_param, self.log_output_path
         )
         status = self.run_command(
-            extractfix_command,
+            tool_commandd,
             log_file_path=self.log_output_path,
-            dir_path=path.join(self.dir_root, "build"),
+            dir_path=path.join(self.dir_expr, "src"),
         )
 
         self.process_status(status)
@@ -54,7 +52,7 @@ class AICCModel(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -65,7 +63,9 @@ class AICCModel(AbstractRepairTool):
         super().save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

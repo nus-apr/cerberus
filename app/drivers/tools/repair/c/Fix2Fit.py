@@ -1,17 +1,22 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Fix2Fit(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "yuntongzhang/fix2fit"
 
-    def generate_test_driver(self, test_script):
+    def generate_test_driver(self, test_script: str) -> str:
         self.emit_normal(f"preparing test driver for {self.name}")
         test_driver_path = self.dir_expr + f"/{self.name}-test"
         self.write_file(
@@ -22,7 +27,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return test_driver_path
 
-    def generate_build_driver(self, build_script):
+    def generate_build_driver(self, build_script: str) -> str:
         self.emit_normal(f"preparing build driver for {self.name}")
         build_driver_path = self.dir_expr + f"/{self.name}-build"
         self.write_file(
@@ -36,7 +41,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return build_driver_path
 
-    def generate_config_driver(self, config_script):
+    def generate_config_driver(self, config_script: str) -> str:
         self.emit_normal(f"preparing config driver for {self.name}")
         config_driver_path = self.dir_expr + f"/{self.name}-config"
         dir_src = join(self.dir_expr, "src")
@@ -51,7 +56,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return config_driver_path
 
-    def clean_subject(self):
+    def clean_subject(self) -> None:
         self.emit_normal(f"cleaning previous artifacts")
         clean_script = self.dir_expr + f"{self.name}-clean"
         dir_src = join(self.dir_expr, "src")
@@ -68,7 +73,9 @@ class Fix2Fit(AbstractRepairTool):
         log_clean_path = join(self.dir_logs, f"{self.name}-clean.log")
         self.run_command(clean_command, log_file_path=log_clean_path)
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
         test_script = bug_info.get(self.key_test_script, None)
@@ -88,7 +95,7 @@ class Fix2Fit(AbstractRepairTool):
         build_driver = self.generate_build_driver(build_script_path)
         test_driver = self.generate_test_driver(test_script_path)
         self.clean_subject()
-        super(Fix2Fit, self).run_repair(bug_info, repair_config_info)
+
         if self.is_instrument_only:
             return
         task_conf_id = str(self.current_task_profile_id.get("NA"))
@@ -111,9 +118,11 @@ class Fix2Fit(AbstractRepairTool):
         abs_path_buggy_file = join(
             self.dir_expr,
             "src",
-            fix_location
-            if fix_location
-            else self.read_file(self.dir_expr + "/manifest.txt")[0],
+            (
+                fix_location
+                if fix_location
+                else self.read_file(self.dir_expr + "/manifest.txt")[0]
+            ),
         )
 
         self.timestamp_log_start()
@@ -128,15 +137,13 @@ class Fix2Fit(AbstractRepairTool):
             "BUILD": build_driver,
             "DRIVER": test_driver,
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(
-                repair_config_info[self.key_config_timeout_test]
-            ),
-            "TIMEOUT": "{}h; ".format(repair_config_info[self.key_timeout]),
+            "T_TIMEOUT": "{}000".format(task_config_info[self.key_config_timeout_test]),
+            "TIMEOUT": "{}h; ".format(task_config_info[self.key_timeout]),
             "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
 
         repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
-            str(repair_config_info[self.key_timeout])
+            str(task_config_info[self.key_timeout])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(
@@ -147,14 +154,16 @@ class Fix2Fit(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         dir_patch = join(self.dir_expr, "patches")
         self.run_command("mkdir {}".format(self.dir_output))
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

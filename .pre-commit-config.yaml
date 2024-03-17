@@ -1,6 +1,6 @@
 repos:
 -   repo: https://github.com/psf/black
-    rev: 23.12.1
+    rev: 24.2.0
     hooks:
     -   id: black
 -   repo: https://github.com/pre-commit/pre-commit-hooks
@@ -8,12 +8,17 @@ repos:
     hooks:
     -   id: trailing-whitespace
     -   id: check-xml
+    -   id: check-json
+    -   id: check-toml
+    -   id: check-yaml
     -   id: check-ast
 -   repo: https://github.com/asottile/reorder_python_imports
     rev: v3.12.0
     hooks:
     -   id: reorder-python-imports
 -   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.8.0  # Use the sha / tag you want to point at
+    rev: v1.9.0  # Use the sha / tag you want to point at
     hooks:
     -   id: mypy
+        args: [--strict ,--python-version, "3.9",  --disable-error-code,  unused-ignore]
+        additional_dependencies: [docker, "textual[syntax]==0.52.1", slack_sdk, discord, cython, types-jsonschema, jsonschema, semver, watchdog]

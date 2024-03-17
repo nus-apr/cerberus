@@ -1,12 +1,17 @@
 import json
 import os
 from pathlib import Path
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class GRT5(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # self.image_name = "grt5-dev"
@@ -15,8 +20,10 @@ class GRT5(AbstractRepairTool):
             "sha256:a77d4e8a6d71cc41b7bda2b7e258e8956de0163789d6fbd730a983f75e8f2f21"
         )
 
-    def run_repair(self, bug_info, repair_config_info):
-        super().run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         self.timestamp_log_start()
 
         # print("!!! begin")
@@ -27,7 +34,7 @@ class GRT5(AbstractRepairTool):
 
         repo_path = (Path(self.dir_expr) / "src").resolve()
         setup_path = Path(self.dir_setup).resolve()
-        # print(bug_info, repair_config_info, self.container_id)
+        # print(bug_info, task_config_info, self.container_id)
 
         # test list maybe `com.clz::mtd` or `com.clz`, let's make them into `com.clz`
 
@@ -76,9 +83,9 @@ class GRT5(AbstractRepairTool):
                 "test_failed": test_failed,
                 "test_timeout": bug_info["test_timeout"],
                 "test_sh_fn": bug_info["test_script"],
-                "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
-                "cpus": repair_config_info[self.key_cpus],
-                "gpus": repair_config_info[self.key_gpus],
+                "total_timeout_s": int(float(task_config_info["timeout"]) * 3600),
+                "cpus": task_config_info[self.key_cpus],
+                "gpus": task_config_info[self.key_gpus],
             },
             "/root/workflow/info.json",
         )
@@ -95,7 +102,7 @@ class GRT5(AbstractRepairTool):
 
         # print("!!! end")
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -110,7 +117,9 @@ class GRT5(AbstractRepairTool):
         super().save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -138,7 +147,7 @@ class GRT5(AbstractRepairTool):
 
         if not stats:
             self.stats.error_stats.is_error = True
-            return
+            return self.stats
 
         self.stats.patch_stats.size = stats["n_generated"]
         self.stats.patch_stats.enumerations = stats["n_validated"]

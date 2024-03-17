@@ -100,6 +100,7 @@ experiment_status: ContextVar[TaskStatus] = ContextVar(
     "experiment_status", default=TaskStatus.NONE
 )
 job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
+session_identifier: ContextVar[str] = ContextVar("session_id", default="root")
 
 slack_configuration = {
     "enabled": False,
@@ -151,7 +152,7 @@ apr_max_limit = {
 }
 
 
-def get_task_types():
+def get_task_types() -> List[str]:
     tool_dir = f"{dir_tool_drivers}"
     return sorted(
         ["prepare"]
@@ -167,7 +168,7 @@ def get_task_types():
     )
 
 
-def get_list_tools(tool_type=""):
+def get_list_tools(tool_type: str = "") -> List[str]:
     tool_dir = f"{dir_tool_drivers}/{tool_type}"
     return list(
         l[:-3].lower()
@@ -178,7 +179,7 @@ def get_list_tools(tool_type=""):
     )
 
 
-def get_list_benchmarks():
+def get_list_benchmarks() -> List[str]:
     return list(
         l[:-3].lower()
         for l in filter(

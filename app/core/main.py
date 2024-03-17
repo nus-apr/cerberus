@@ -9,6 +9,7 @@ from multiprocessing import set_start_method
 from typing import Any
 from typing import cast
 from typing import Dict
+from typing import NoReturn
 from typing import Optional
 
 import rich.traceback
@@ -20,6 +21,7 @@ from app.core import logger
 from app.core import utilities
 from app.core import values
 from app.core.args import parse_args
+from app.core.configs.Config import Config
 from app.core.configs.ConfigDataFactory import ConfigDataFactory
 from app.core.configs.ConfigDataLoader import ConfigDataLoader
 from app.core.configs.ConfigValidationSchemas import config_validation_schema
@@ -29,28 +31,30 @@ from app.core.identifiers import create_bug_image_identifier
 from app.core.identifiers import create_task_identifier
 from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
-from app.core.task.TaskProcessor import TaskList
+from app.core.task.dir_info import generate_dir_info
+from app.core.task.image import prepare_experiment_image
+from app.core.task.image import prepare_experiment_tool_image
 from app.core.task.TaskProcessor import TaskProcessor
+from app.core.task.typing.TaskList import TaskList
 from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
 from app.ui import ui
 
 
-def timeout_handler(signum, frame):
+def timeout_handler(signum: int, frame: Any) -> NoReturn:
     emitter.error("TIMEOUT Exception")
     raise Exception("end of time")
 
 
-def shutdown(signum, frame):
+def shutdown(signum: int, frame: Any) -> NoReturn:
     # global stop_event
     emitter.warning("Exiting due to Terminate Signal")
     # stop_event.set()
     raise SystemExit
 
 
-def bootstrap(arg_list: Namespace):
+def bootstrap(arg_list: Namespace) -> Configurations:
     emitter.sub_title("Bootstrapping framework")
     config = Configurations()
     config.read_email_config_file()
@@ -69,10 +73,10 @@ iteration = 0
 def process_configs(
     task_config: TaskConfig,
     benchmark: AbstractBenchmark,
-    experiment_item,
+    experiment_item: Dict[str, Any],
     task_profile: Dict[str, Any],
     container_profile: Dict[str, Any],
-):
+) -> None:
     for k, v in task_config.__dict__.items():
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
@@ -87,7 +91,7 @@ def process_configs(
         )
 
 
-def main():
+def main() -> None:
     global iteration
     if not sys.warnoptions:
         import warnings
@@ -164,7 +168,7 @@ def main():
         emitter.end(total_duration, iteration, has_error)
 
 
-def process_config_file(parsed_args):
+def process_config_file(parsed_args: Namespace) -> Config:
     values.arg_pass = True
     config_loader = ConfigDataLoader(
         file_path=parsed_args.config_file,
@@ -181,7 +185,7 @@ def process_config_file(parsed_args):
     return config
 
 
-def process_tasks(tasks: TaskList):
+def process_tasks(tasks: TaskList) -> bool:
     has_error = False
     for iteration, (task_config, task_data) in enumerate(tasks):
         (
@@ -226,11 +230,15 @@ def process_tasks(tasks: TaskList):
         tool.tool_tag = tool_tag
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_info = task.generate_dir_info(
+        dir_info = generate_dir_info(
             benchmark.name,
             subject_name,
             bug_name,
             tool_tag,
+        )
+
+        experiment_image_id = prepare_experiment_image(
+            benchmark, experiment_item, cpus, [], tool_tag
         )
 
         if task_config.task_type == "prepare":
@@ -238,12 +246,7 @@ def process_tasks(tasks: TaskList):
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(iteration, bug_index, 1)
             )
-            task.prepare_experiment(benchmark, experiment_item, cpus, [], tag=tool_tag)
             continue
-
-        experiment_image_id = task.prepare_experiment(
-            benchmark, experiment_item, cpus, [], tool_tag
-        )
 
         image_name = create_task_image_identifier(
             benchmark,
@@ -251,7 +254,7 @@ def process_tasks(tasks: TaskList):
             experiment_item,
             tool_tag,
         )
-        task.prepare_experiment_tool(
+        prepare_experiment_tool_image(
             experiment_image_id,
             tool,
             task_profile,
@@ -260,6 +263,7 @@ def process_tasks(tasks: TaskList):
             experiment_item,
             tool_tag,
         )
+
         for run_index in range(task_config.runs):
             iteration = iteration + 1
             emitter.sub_sub_title(

@@ -9,7 +9,7 @@ from app.core import emitter
 from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.tasks_data.CompositeTaskConfig import CompositeTaskConfig
-from app.core.task import task
+from app.core.task.dir_info import generate_dir_info
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -18,12 +18,12 @@ from app.drivers.tools.MockTool import MockTool
 
 class TaskProcessor:
     @staticmethod
-    def expand_interval(interval) -> List[int]:
+    def expand_interval(interval: str) -> List[int]:
         start_range, end_range = interval.split("-")
         return list(range(int(start_range), int(end_range) + 1))
 
     @staticmethod
-    def normalize_id_list(id_list_raw, size) -> List[int]:
+    def normalize_id_list(id_list_raw: List[str], size: int) -> List[int]:
         # TODO: Add support for "*"
         id_list: List[int] = []
         for element in id_list_raw:
@@ -146,7 +146,7 @@ class TaskProcessor:
                                         )
 
                                 if not tasks_chunk_config.task_config.only_analyse:
-                                    tool_template.check_tool_exists()
+                                    tool_template.ensure_tool_exists()
 
                             # filter skipped bug id
                             for bug_id in bug_id_list:
@@ -174,7 +174,7 @@ class TaskProcessor:
                                 subject_name = str(
                                     experiment_item[definitions.KEY_SUBJECT]
                                 )
-                                dir_info = task.generate_dir_info(
+                                dir_info = generate_dir_info(
                                     benchmark_name,
                                     subject_name,
                                     bug_name,

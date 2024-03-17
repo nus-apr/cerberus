@@ -1,34 +1,31 @@
 import abc
+from typing import Any
+from typing import NoReturn
 
-from app.core import abstractions
 from app.core import emitter
-from app.core import utilities
 from app.core import values
 
 
 class AbstractDriver:
-    @abc.abstractmethod
-    def emit_normal(self, abstraction, concrete, message):
+    def _emit_normal_raw(self, abstraction: str, concrete: str, message: Any) -> None:
         emitter.normal(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def emit_warning(self, abstraction, concrete, message):
+    def _emit_warning_raw(self, abstraction: str, concrete: str, message: Any) -> None:
         emitter.warning(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def emit_error(self, abstraction, concrete, message):
+    def _emit_error_raw(self, abstraction: str, concrete: str, message: Any) -> None:
         emitter.error(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def emit_highlight(self, abstraction, concrete, message):
+    def _emit_highlight_raw(
+        self, abstraction: str, concrete: str, message: Any
+    ) -> None:
         emitter.highlight(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def emit_success(self, abstraction, concrete, message):
+    def _emit_success_raw(self, abstraction: str, concrete: str, message: Any) -> None:
         emitter.success(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def emit_debug(self, abstraction, concrete, message):
+    def _emit_debug_raw(self, abstraction: str, concrete: str, message: Any) -> None:
         emitter.debug(f"\t\t\t[{abstraction}][{concrete}] {message}")
 
-    def get_config_value(self, config_name: str):
-        config_val = getattr(values, config_name)  # Same as someClass = foo.Class3
-        return config_val
-
-    def error_exit(self, message):
+    def error_exit(self, message: Any) -> NoReturn:
         raise Exception(message)

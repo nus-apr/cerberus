@@ -1,24 +1,30 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class VulnFix(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.dir_root = "/home/yuntong/vulnfix"
         self.image_name = "yuntongzhang/vulnfix:latest-manual"
         self.cpu_usage = 1
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(VulnFix, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
         if self.is_instrument_only:
             return
@@ -30,8 +36,8 @@ class VulnFix(AbstractRepairTool):
             #     "Please double check whether we are in VulnFix container."
             # )
             self.error_exit("vulnfix repo is not at the expected location")
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         # get ready the config file
         config_path = self.populate_config_file(bug_info)
 
@@ -54,7 +60,7 @@ class VulnFix(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def populate_config_file(self, bug_info):
+    def populate_config_file(self, bug_info: Dict[str, Any]) -> str:
         """
         Some fields of the VulnFix config file contains information which overlaps with what
         Cerberus already has, and also some of the fields depends on actual paths in the system. These fields are populated here into the existing config file template.
@@ -148,7 +154,7 @@ class VulnFix(AbstractRepairTool):
         self.append_file(config_updates, config_path)
         return config_path
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -158,7 +164,9 @@ class VulnFix(AbstractRepairTool):
         super().save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

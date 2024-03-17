@@ -14,17 +14,22 @@ Create a new file in `app/drivers/benchmarks/<language of benchmark>` with the B
 import shutil
 import os
 from os.path import join
+from typing import Dict
+from typing import Optional
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.core.utilities import execute_command
 from app import definitions, values, emitter
 
 
 class NewBenchmark(AbstractBenchmark):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewBenchmark, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         is_error = super(Defects4J, self).setup_experiment(
             bug_index, container_id, test_all
         )
@@ -39,31 +44,31 @@ class NewBenchmark(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tdownloading experiment subject")
         return True
 
-    def config(self, bug_id, container_id):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True
 
-    def build(self, bug_id, container_id):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tbuilding experiment subject")
         return True
 
-    def test(self, bug_id, container_id):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\ttesting experiment subject")
         return True
 
-    def verify(self, bug_id, container_id):
+    def verify(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tverify dev patch and test-oracle")
         return True
 
-    def transform(self, bug_id, container_id):
+    def transform(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\ttransform fix-file")
         return True
 
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)

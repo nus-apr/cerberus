@@ -2,13 +2,18 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
 from app.core import values
+from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 class CodeQL(AbstractAnalyzeTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # the version in ubuntu-18 as better compatibility with the VulnLoc benchmark
@@ -24,10 +29,12 @@ class CodeQL(AbstractAnalyzeTool):
             }
         }
 
-    def run_analysis(self, bug_info, repair_config_info):
-        super(CodeQL, self).run_analysis(bug_info, repair_config_info)
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
 
         self.timestamp_log_start()
         dir_src = join(self.dir_expr, "src")
@@ -71,7 +78,7 @@ class CodeQL(AbstractAnalyzeTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         self.run_command(
             "bash -c 'echo \"{}\n\" | sudo -S cp {}/* {}'".format(
                 self.sudo_password, self.output_path, self.dir_output
@@ -80,7 +87,9 @@ class CodeQL(AbstractAnalyzeTool):
         super(CodeQL, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> AnalysisToolStats:
         self.emit_normal("reading output logs")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

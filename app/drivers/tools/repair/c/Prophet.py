@@ -2,29 +2,35 @@ import os
 import re
 from os import path
 from os.path import join
+from typing import Any
+from typing import Dict
 from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Prophet(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/prophet"
         self.file = ""
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(Prophet, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         self.file = bug_info[self.key_localization][0][self.key_fix_file]
         revlog_file = join(self.dir_expr + "prophet", "prophet.revlog")
         self.generate_revlog(bug_info, revlog_file, bug_id)
-        timeout = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = "{}/{}-{}-{}-output.log".format(
             self.dir_logs, task_conf_id, self.name.lower(), bug_id
         )
@@ -63,7 +69,9 @@ class Prophet(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def generate_localization(self, bug_info, localization_file, dir_setup):
+    def generate_localization(
+        self, bug_info: Dict[str, Any], localization_file: str, dir_setup: str
+    ) -> None:
         fix_location = bug_info[self.key_localization][0][self.key_fix_loc]
         tmp_localization_file = "/tmp/profile_localization.res"
         if fix_location:
@@ -93,7 +101,9 @@ class Prophet(AbstractRepairTool):
                         localization_file,
                     )
 
-    def generate_revlog(self, experiment_info, revlog_file, bug_id):
+    def generate_revlog(
+        self, experiment_info: Dict[str, Any], revlog_file: str, bug_id: str
+    ) -> None:
         subject_name = experiment_info[self.key_subject]
         failing_test_identifiers_list = experiment_info[
             self.key_failing_test_identifiers
@@ -122,7 +132,7 @@ class Prophet(AbstractRepairTool):
 
         self.write_file(list(map(lambda line: line + "\n", test_config)), revlog_file)
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         dir_patch = join(self.dir_expr, "patches")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
         self.run_command(copy_command)
@@ -153,7 +163,9 @@ class Prophet(AbstractRepairTool):
                 self.run_command(del_command)
         super(Prophet, self).save_artifacts(dir_info)
 
-    def filter_tests(self, test_id_list, subject, bug_id, benchmark_name):
+    def filter_tests(
+        self, test_id_list: List[str], subject: str, bug_id: str, benchmark_name: str
+    ) -> List[str]:
         filtered_list = []
         filter_list: List[int] = []
         if benchmark_name == "manybugs":
@@ -167,23 +179,21 @@ class Prophet(AbstractRepairTool):
                             159,
                             160,
                             161,
+                            162,
                             163,
                             164,
-                            162,
                             60,
                             70,
                             98,
-                            156,
                             151,
                             152,
                             153,
                             155,
+                            156,
                             255,
                         ]
                     )
-                elif bug_id == "69372":
-                    filter_list.extend([60, 255, 320])
-                elif bug_id == "69224":
+                elif bug_id == "69372" or bug_id == "69224":
                     filter_list.extend([60, 255, 320])
                 elif bug_id == "70059":
                     filter_list.extend([60, 255])
@@ -5598,9 +5608,7 @@ class Prophet(AbstractRepairTool):
                     filter_list.extend([6618, 9379, 9389])
                 elif bug_id == "d4ae4e79db":
                     filter_list.extend([6597, 9378, 9383])
-                elif bug_id == "b5f15ef561":
-                    filter_list.extend([6795, 9414, 9429])
-                elif bug_id == "2e5d5e5ac6":
+                elif bug_id == "b5f15ef561" or bug_id == "2e5d5e5ac6":
                     filter_list.extend([6795, 9414, 9429])
                 elif bug_id == "9b86852d6e":
                     filter_list.extend([6795, 9417, 9431])
@@ -5616,9 +5624,7 @@ class Prophet(AbstractRepairTool):
                     filter_list.extend([6714, 9393, 9409])
                 elif bug_id == "bc810a443d":
                     filter_list.extend([6714, 9392, 9408])
-                elif bug_id == "d3b20b4058":
-                    filter_list.extend([6687, 7636, 9381, 9396])
-                elif bug_id == "f330c8ab4e":
+                elif bug_id == "d3b20b4058" or bug_id == "f330c8ab4e":
                     filter_list.extend([6687, 7636, 9381, 9396])
                 elif bug_id == "b548293b99":
                     filter_list.extend([5394, 5405, 7956])
@@ -5647,9 +5653,9 @@ class Prophet(AbstractRepairTool):
             if int(t_id) not in filter_list:
                 filtered_list.append(t_id)
 
-        return filtered_list
+        return list(map(str, filtered_list))
 
-    def read_log_file(self):
+    def read_log_file(self) -> None:
         self.stats.time_stats.set_log_time_fmt("%S")  # Temporary
         # timeline = ""
         log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
@@ -5694,7 +5700,9 @@ class Prophet(AbstractRepairTool):
                 # if self.stats.time_stats.timestamp_plausible == 0:
                 #     self.stats.time_stats.timestamp_plausible = timeline
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

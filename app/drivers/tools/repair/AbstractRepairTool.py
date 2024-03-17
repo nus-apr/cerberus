@@ -11,6 +11,7 @@ from app.core import container
 from app.core import definitions
 from app.core import utilities
 from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import error_exit
 from app.drivers.tools.AbstractTool import AbstractTool
 
@@ -28,12 +29,13 @@ class AbstractRepairTool(AbstractTool):
     key_dependencies = definitions.KEY_DEPENDENCIES
     stats: RepairToolStats
 
-    def __init__(self, tool_name):
+    def __init__(self, tool_name: str) -> None:
         self.stats = RepairToolStats()
+        self.tool_type = "repair-tool"
         super().__init__(tool_name)
 
     def analyse_output(
-        self, dir_info, bug_id: str, fail_list: List[str]
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
     ) -> RepairToolStats:
         """
         analyse tool output and collect information
@@ -58,72 +60,7 @@ class AbstractRepairTool(AbstractTool):
 
         return self.stats
 
-    def instrument(self, bug_info: Dict[str, Any]) -> None:
-        """instrumentation for the experiment as needed by the tool"""
-        if not self.is_file(join(self.dir_inst, "instrument.sh")):
-            return
-        self.emit_normal("running instrumentation script")
-        bug_id = bug_info[definitions.KEY_BUG_ID]
-        task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info.get(self.key_localization, [{}])[0].get(
-            definitions.KEY_FIX_FILE, ""
-        )
-        self.log_instrument_path = join(
-            self.dir_logs,
-            "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),
-        )
-        time = datetime.now()
-        command_str = "bash instrument.sh {} {}".format(self.dir_base_expr, buggy_file)
-        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        self.emit_debug(
-            "\t\t\t instrumentation took {} second(s)".format(
-                (datetime.now() - time).total_seconds()
-            )
-        )
-        if status not in [0, 126]:
-            error_exit(
-                "error with instrumentation of {}; exit code {}".format(
-                    self.name, str(status)
-                )
-            )
-        return
-
-    def run_repair(
-        self, bug_info: Dict[str, Any], repair_config_info: Dict[str, Any]
-    ) -> None:
-        self.emit_normal("repairing experiment subject")
-        utilities.check_space()
-        self.pre_process()
-        self.instrument(bug_info)
-        self.emit_normal("executing repair command")
-        task_conf_id = repair_config_info[definitions.KEY_ID]
-        bug_id = str(bug_info[definitions.KEY_BUG_ID])
-        self.dir_patch = join(
-            self.dir_output,
-            "patch-valid" if self.use_valkyrie else "patches",
-        )
-        log_file_name = "{}-{}-{}-output.log".format(
-            task_conf_id, self.name.lower(), bug_id
-        )
-        filtered_bug_info = dict()
-        interested_keys = [
-            self.key_id,
-            self.key_bug_id,
-            self.key_subject,
-            self.key_benchmark,
-            definitions.KEY_COUNT_NEG,
-            definitions.KEY_COUNT_POS,
-        ]
-        for k in interested_keys:
-            filtered_bug_info[k] = bug_info.get(k, "")
-        repair_config_info["container-id"] = self.container_id
-        self.stats.bug_info = filtered_bug_info
-        self.stats.config_info = repair_config_info
-        self.log_output_path = os.path.join(self.dir_logs, log_file_name)
-        self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
-        return
-
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -146,48 +83,3 @@ class AbstractRepairTool(AbstractTool):
 
         super().save_artifacts(dir_info)
         return
-
-    def print_stats(self) -> None:
-        self.stats.write(self.emit_highlight, "\t")
-
-    def emit_normal(self, message):
-        super().emit_normal(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )
-
-    def emit_warning(self, message):
-        super().emit_warning(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )
-
-    def emit_error(self, message):
-        super().emit_error(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )
-
-    def emit_highlight(self, message):
-        super().emit_highlight(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )
-
-    def emit_success(self, message):
-        super().emit_success(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )
-
-    def emit_debug(self, message):
-        super().emit_debug(
-            "repair-tool",
-            self.name + (("-" + self.tool_tag) if self.tool_tag else ""),
-            message,
-        )

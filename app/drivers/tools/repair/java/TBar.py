@@ -1,25 +1,33 @@
 import os
 import re
-from os.path import basename, join
+from os.path import basename
+from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Set
 
 from app.core import definitions
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class TBar(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.tbar_root_dir = "/TBar"
         self.image_name = "mirchevmp/tbar-cerberus:latest"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(TBar, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
         if self.is_instrument_only:
             return
@@ -31,8 +39,8 @@ class TBar(AbstractRepairTool):
             #     "Please double check whether we are in TBar container."
             # )
             self.error_exit("TBar repo is not at the expected location.")
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
 
         if self.container_id:
             # Ensure that the container has git setup
@@ -62,7 +70,7 @@ class TBar(AbstractRepairTool):
         # start running
         self.timestamp_log_start()
 
-        run_fl = repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "auto"
+        run_fl = task_config_info[definitions.KEY_CONFIG_FIX_LOC] == "tool"
         parameters = self.create_parameters(bug_info, run_fl, env)
 
         tbar_command = (
@@ -82,7 +90,9 @@ class TBar(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def create_parameters(self, experiment_info, run_fl, env):
+    def create_parameters(
+        self, experiment_info: Dict[str, Any], run_fl: bool, env: Dict[str, str]
+    ) -> str:
         """
         Formats of execution cmds:
             * ./PerfectFLTBarRunner.sh <Bug_Data_Path> <Bug_ID> <defects4j_Home> <Generate_All_Possible_Patches_Bool>
@@ -115,7 +125,8 @@ class TBar(AbstractRepairTool):
         failed_tests_dir = join(self.tbar_root_dir, "FailedTestCases/")
         self.run_command(f"mkdir -p {failed_tests_dir}")
         failed_tests_file = join(
-            failed_tests_dir, f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
+            failed_tests_dir,
+            f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
         )
 
         self.emit_debug("I am looking for {}".format(failed_tests_file))
@@ -129,26 +140,17 @@ class TBar(AbstractRepairTool):
             f"{bug_id_str}.txt",
         )
 
-        # FIXME: this does not accomodate subjects outside of defects4j and lmdefects
-        # test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
         if not run_fl:
             self.write_fl_data(experiment_info, failed_tests_file, fl_data)
         else:
             cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,experiment_info[self.key_build_script])}"
-
-            # cmd = (
-            #    f"java -cp 'target/classes:target/dependency/*' "
-            #    f"edu.lu.uni.serval.tbar.faultlocalization.FL {fl_out_dir}"
-            #    f" {self.dir_expr} {bug_id_str}"
-            # )
-
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
                 env=env,
                 log_file_path=self.log_output_path,
             )
-        # actually, this is needed for non-maven projects, but do it anyway
+        # actually, this is needed only for non-maven projects, but do it anyway
         self.run_command(f"ln -sf {failed_tests_file} {failed_tests_file_copy}")
 
         if not self.is_file(fl_data):
@@ -157,25 +159,6 @@ class TBar(AbstractRepairTool):
             else:
                 msg = f"Fault localization not provided; expected {fl_data}"
             self.error_exit(msg)
-
-            # emitter.debug("Making 'weak' fault Localization")
-            # self.run_command(
-            #     "mkdir -p {}".format(
-            #         join(self.tbar_root_dir, "SuspiciousCodePositions", bug_id_str)
-            #     )
-            # )
-            # f = self.read_file(
-            #     join(
-            #         self.dir_expr,
-            #         "src",
-            #         experiment_info[self.key_dir_source],
-            #         experiment_info["source_file"].replace(".", "/") + ".java",
-            #     )
-            # )
-            # faulty_lines = [
-            #     "{}@{}\n".format(experiment_info["source_file"], l)
-            #     for l in range(len(f))
-            # ]
 
             # self.write_file(faulty_lines, fl_data)
 
@@ -190,7 +173,9 @@ class TBar(AbstractRepairTool):
         )
 
     # TODO Rename this here and in `create_parameters`
-    def write_fl_data(self, experiment_info, failed_tests_file, fl_data):
+    def write_fl_data(
+        self, experiment_info: Dict[str, Any], failed_tests_file: str, fl_data: str
+    ) -> None:
         self.run_command(f"rm -f {failed_tests_file}")
         self.run_command(f"rm -f {fl_data}")
 
@@ -213,7 +198,7 @@ class TBar(AbstractRepairTool):
             self.error_exit("Suspiciousness file was not written. Unsupported state")
         self.emit_debug(f"{test_failed_tests_file} {test_fl_data}")
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -238,7 +223,9 @@ class TBar(AbstractRepairTool):
         super().save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -266,7 +253,7 @@ class TBar(AbstractRepairTool):
 
         # count number of patch files
         # available only for FixPatterns
-        list_patches_files_set = set()
+        list_patches_files_set: Set[str] = set()
         dir_output_fix_patterns = join(
             self.tbar_root_dir, "OUTPUT", "FixPatterns", "TBar"
         )

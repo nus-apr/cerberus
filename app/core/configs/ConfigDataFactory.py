@@ -1,5 +1,7 @@
 import multiprocessing
+from typing import Any
 from typing import cast
+from typing import Dict
 from typing import List
 from typing import Type
 
@@ -20,7 +22,7 @@ from app.core.configs.tasks_data.ToolConfig import ToolConfig
 
 class ConfigDataFactory:
     @staticmethod
-    def _create_general_config(general_config_dict: dict) -> GeneralConfig:
+    def _create_general_config(general_config_dict: Dict[str, Any]) -> GeneralConfig:
         return GeneralConfig(
             parallel_mode=general_config_dict[ConfigFieldsEnum.PARALLEL_MODE.value],
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
@@ -47,7 +49,7 @@ class ConfigDataFactory:
         )
 
     @staticmethod
-    def _create_profiles_config(profiles_config_dict: dict) -> ProfilesConfig:
+    def _create_profiles_config(profiles_config_dict: Dict[str, Any]) -> ProfilesConfig:
         # load container profiles
         container_profiles_list = []
         for container_profile_dict in profiles_config_dict[
@@ -98,7 +100,7 @@ class ConfigDataFactory:
 
     @staticmethod
     def _create_tasks_chunks_config(
-        tasks_data_config_dict: dict,
+        tasks_data_config_dict: Dict[str, Any],
     ) -> List[TasksChunksConfig]:
         task_default_config = tasks_data_config_dict[
             ConfigFieldsEnum.DEFAULT_CONFIG.value
@@ -215,7 +217,7 @@ class ConfigDataFactory:
         return tasks_chunks_config_list
 
     @staticmethod
-    def create(config_data_dict: dict) -> Config:
+    def create(config_data_dict: Dict[str, Any]) -> Config:
         return Config(
             general=ConfigDataFactory._create_general_config(
                 config_data_dict[ConfigFieldsEnum.GENERAL.value]

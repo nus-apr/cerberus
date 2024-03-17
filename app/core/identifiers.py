@@ -9,7 +9,7 @@ from app.drivers.tools.AbstractTool import AbstractTool
 
 def create_bug_image_identifier(
     benchmark: AbstractBenchmark, experiment_item: Dict[str, Any]
-):
+) -> str:
     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
     return "-".join(
@@ -19,13 +19,13 @@ def create_bug_image_identifier(
 
 def create_task_identifier(
     benchmark: AbstractBenchmark,
-    task_profile,
-    container_profile,
-    experiment_item,
+    task_profile: Dict[str, Any],
+    container_profile: Dict[str, Any],
+    experiment_item: Dict[str, Any],
     tool: AbstractTool,
     run_index: str,
     tool_tag: str,
-):
+) -> str:
     return "-".join(
         [
             benchmark.name,
@@ -44,7 +44,7 @@ def create_task_image_identifier(
     tool: AbstractTool,
     experiment_item: Dict[str, Any],
     tag: Optional[str] = None,
-):
+) -> str:
     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
     image_args = [tool.name, benchmark.name, subject_name, bug_name]

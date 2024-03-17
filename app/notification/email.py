@@ -6,7 +6,7 @@ from app.core import definitions
 from app.core import values
 
 
-def create_message(text, to_address, subject):
+def create_message(text: str, to_address: str, subject: str) -> MIMEText:
     msg = MIMEText(text)
 
     msg["Subject"] = subject
@@ -15,7 +15,7 @@ def create_message(text, to_address, subject):
     return msg
 
 
-def send_message(text, subject="Cerberus status update"):
+def send_message(text: str, subject: str = "Cerberus status update") -> None:
     if not values.email_configuration[definitions.KEY_ENABLED]:
         return
     client = (
@@ -32,5 +32,7 @@ def send_message(text, subject="Cerberus status update"):
         s.sendmail(
             username,
             [values.email_configuration["to"]],
-            create_message(text, values.email_configuration["to"], subject).as_string(),
+            create_message(
+                text, str(values.email_configuration["to"]), subject
+            ).as_string(),
         )

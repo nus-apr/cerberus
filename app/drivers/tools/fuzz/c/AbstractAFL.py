@@ -3,15 +3,20 @@ import os
 from os.path import join
 from typing import Any
 from typing import Dict
+from typing import List
 
+from app.core.task.stats.FuzzToolStats import FuzzToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
 class AbstractAFL(AbstractFuzzTool):
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(self.name)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> FuzzToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -20,18 +25,20 @@ class AbstractAFL(AbstractFuzzTool):
         return self.stats
 
     @abc.abstractmethod
-    def prepare_for_fuzz(self, bug_info):
+    def prepare_for_fuzz(self, bug_info: Dict[str, Any]) -> None:
         pass
 
     @abc.abstractmethod
-    def get_params(self, bug_info):
-        return ""
+    def get_params(self, bug_info: Dict[str, Any]) -> str:
+        return str(bug_info.get("fuzz_params", ""))
 
-    def run_fuzz(self, bug_info, fuzz_config_info):
-        super(AbstractAFL, self).run_fuzz(bug_info, fuzz_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         self.emit_normal("executing fuzz command")
 
-        timeout = int(float(fuzz_config_info[self.key_timeout]) * 60)
+        timeout = int(float(task_config_info[self.key_timeout]) * 60)
 
         if self.key_bin_path not in bug_info:
             self.error_exit("no binary path provided")
@@ -49,7 +56,7 @@ class AbstractAFL(AbstractFuzzTool):
         self.run_command("mkdir {}".format(initial_corpus))
 
         additional_params = (
-            fuzz_config_info.get(self.key_tool_params, "")
+            task_config_info.get(self.key_tool_params, "")
             + " "
             + self.get_params(bug_info)
         )
@@ -125,7 +132,7 @@ class AbstractAFL(AbstractFuzzTool):
             join(self.dir_output, "meta-data.json"),
         )
 
-    def copy_crashing_tests(self, corpus_path):
+    def copy_crashing_tests(self, corpus_path: str) -> None:
         # Get Crashing tests
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(
@@ -142,7 +149,7 @@ class AbstractAFL(AbstractFuzzTool):
             )
         )
 
-    def copy_benign_tests(self, corpus_path):
+    def copy_benign_tests(self, corpus_path: str) -> None:
         # Get Benign Tests
         self.run_command(
             "bash -c 'cp -r {}/* {}' ".format(

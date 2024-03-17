@@ -3,6 +3,9 @@ from datetime import datetime
 from os import listdir
 from os.path import isfile
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import Tuple
 
 from app.core import definitions
 from app.core import emitter
@@ -12,11 +15,19 @@ from app.core.task.stats.ToolStats import ToolStats
 processed_count = 0
 
 
-def validate_patch(dir_info, file_info, repair_config_info):
+def validate_patch(
+    dir_info: Tuple[str, str],
+    file_info: Tuple[str, str, str, str],
+    task_config_info: Dict[str, Any],
+) -> str:
     global processed_count
     dir_patch, dir_process = dir_info
     binary_path, oracle_path, source_file, patch_file = file_info
-    test_id_list, is_rank, _, single_test_timeout = repair_config_info
+    is_rank = False  # TODO for Ridwan - what is this?
+    test_id_list = task_config_info.get(
+        definitions.KEY_FAILING_TEST, []
+    ) + task_config_info.get(definitions.KEY_PASSING_TEST, [])
+    single_test_timeout = task_config_info.get(definitions.KEY_TEST_TIMEOUT, 60)
     test_id_str = ",".join(test_id_list)
     lib_dir_path = values.dir_libs
     link_file = join(dir_process, patch_file)
@@ -63,7 +74,7 @@ def validate_patch(dir_info, file_info, repair_config_info):
     return patch_file
 
 
-def compute_latency_valkyrie(start_time_str, tend):
+def compute_latency_valkyrie(start_time_str: str, tend: float) -> float:
     # Fri 08 Oct 2021 04:59:55 PM +08
     fmt_1 = "%a %d %b %Y %H:%M:%S %p"
     start_time_str = start_time_str.split(" +")[0].strip()
@@ -72,7 +83,7 @@ def compute_latency_valkyrie(start_time_str, tend):
     return duration
 
 
-def analyse_output(patch_dir, tool_stats: ToolStats):
+def analyse_output(patch_dir: str, tool_stats: ToolStats) -> None:
     global processed_count
     emitter.normal("\t\t\t analysing output of Valkyrie")
     consumed_count = len(values.list_consumed)

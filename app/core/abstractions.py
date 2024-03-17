@@ -2,13 +2,16 @@ import json
 import os
 import pathlib
 from typing import Any
+from typing import List
 from typing import Optional
 from typing import Sequence
 
 from app.core import container
 
 
-def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
+def read_file(
+    container_id: Optional[str], file_path: str, encoding: str = "utf-8"
+) -> List[str]:
     file_content = []
     if container_id:
         file_content = container.read_file(container_id, file_path, encoding)
@@ -18,7 +21,9 @@ def read_file(container_id: Optional[str], file_path: str, encoding="utf-8"):
     return file_content
 
 
-def read_json(container_id: Optional[str], file_path: str, encoding="utf-8"):
+def read_json(
+    container_id: Optional[str], file_path: str, encoding: str = "utf-8"
+) -> Optional[Any]:
     json_data = None
     file_content = read_file(container_id, file_path, encoding)
     if file_content:
@@ -26,7 +31,9 @@ def read_json(container_id: Optional[str], file_path: str, encoding="utf-8"):
     return json_data
 
 
-def append_file(container_id: Optional[str], content: Sequence[str], file_path: str):
+def append_file(
+    container_id: Optional[str], content: Sequence[str], file_path: str
+) -> None:
     if container_id:
         container.append_file(container_id, file_path, content)
     else:
@@ -35,7 +42,9 @@ def append_file(container_id: Optional[str], content: Sequence[str], file_path: 
                 f.write(line)
 
 
-def write_file(container_id: Optional[str], content: Sequence[str], file_path: str):
+def write_file(
+    container_id: Optional[str], content: Sequence[str], file_path: str
+) -> None:
     if container_id:
         container.write_file(container_id, file_path, content)
     else:
@@ -44,12 +53,14 @@ def write_file(container_id: Optional[str], content: Sequence[str], file_path: s
                 f.write(line)
 
 
-def write_json(container_id: Optional[str], data: Any, file_path: str):
+def write_json(container_id: Optional[str], data: Any, file_path: str) -> None:
     content = json.dumps(data)
     write_file(container_id, [content], file_path)
 
 
-def list_dir(container_id: Optional[str], dir_path: str, regex=None):
+def list_dir(
+    container_id: Optional[str], dir_path: str, regex: Optional[str] = None
+) -> List[str]:
     file_list = []
     if container_id:
         if not regex:
@@ -61,19 +72,19 @@ def list_dir(container_id: Optional[str], dir_path: str, regex=None):
         if not regex:
             regex = "*"
         if os.path.isdir(dir_path):
-            list_files = list(pathlib.Path(dir_path).rglob(regex))
+            list_files = list(map(str, pathlib.Path(dir_path).rglob(regex)))
             file_list = [os.path.join(dir_path, t) for t in list_files]
     return file_list
 
 
-def is_dir(container_id: Optional[str], dir_path: str):
+def is_dir(container_id: Optional[str], dir_path: str) -> bool:
     if container_id:
         return container.is_dir(container_id, dir_path)
     else:
         return os.path.isdir(dir_path)
 
 
-def is_file(container_id: Optional[str], file_path: str):
+def is_file(container_id: Optional[str], file_path: str) -> bool:
     if container_id:
         return container.is_file(container_id, file_path)
     else:

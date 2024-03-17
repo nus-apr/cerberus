@@ -7,12 +7,12 @@ from app.drivers.tools.fuzz.c.AbstractAFL import AbstractAFL
 
 
 class DirectedAFLpp(AbstractAFL):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         self.image_name = "wolffdy/joern-directed-aflpp"
         super().__init__()
 
-    def prepare_for_fuzz(self, bug_info):
+    def prepare_for_fuzz(self, bug_info: Dict[str, Any]) -> None:
         metadata_loc = os.path.join(self.dir_expr, "meta-data.json")
         bug_info["src"] = {"root_abspath": os.path.join(self.dir_expr, "src")}
         bug_info["test_dir_abspath"] = self.dir_setup

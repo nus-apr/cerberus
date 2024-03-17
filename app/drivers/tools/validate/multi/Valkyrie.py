@@ -1,18 +1,22 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.ValidateToolStats import ValidateToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
 
 
 class Valkyrie(AbstractValidateTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/valkyrie"
-        self.id = ""
 
-    def populate_config_file(self, bug_info):
+    def populate_config_file(self, bug_info: Dict[str, Any]) -> str:
         self.emit_normal("generating config file")
         config_path = join(self.dir_expr, f"{self.name}.config")
         conf_content = list()
@@ -65,20 +69,21 @@ class Valkyrie(AbstractValidateTool):
         self.write_file(conf_content, config_path)
         return config_path
 
-    def run_validation(self, bug_info, validate_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         conf_path = self.populate_config_file(bug_info)
-        super(Valkyrie, self).run_validation(bug_info, validate_config_info)
+
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
-        self.id = bug_id
-        timeout = str(validate_config_info[self.key_timeout])
+        timeout = str(task_config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         timeout_m = str(float(timeout) * 60)
-        additional_tool_param = validate_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.timestamp_log_start()
         validate_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h valkyrie --conf=".format(
@@ -96,7 +101,9 @@ class Valkyrie(AbstractValidateTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> ValidateToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

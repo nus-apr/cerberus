@@ -1,10 +1,12 @@
+from typing import Any
+
 from app.core import definitions
 from app.core import utilities
 from app.core import values
 from app.notification import email
 
 
-def notify(message, data=None):
+def notify(message: str, data: Any = None) -> None:
     if values.email_configuration.get(definitions.KEY_ENABLED, False):
         email.send_message(message)
 
@@ -19,12 +21,12 @@ def notify(message, data=None):
         discord.send_message(message)
 
 
-def error_exit():
+def error_exit() -> None:
     error_message = "Cerberus Exited Abruptly"
     notify(error_message)
 
 
-def end(time_total, is_error=False):
+def end(time_total: str, is_error: bool = False) -> None:
     if values.arg_pass and not is_error:
         end_message = (
             f"{values.tool_name} finished successfully after " f"{time_total}  minutes"

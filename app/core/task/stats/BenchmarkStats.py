@@ -1,3 +1,6 @@
+from typing import Any
+from typing import Dict
+
 from app.core.task.stats.ContainerStats import ContainerStats
 from app.core.task.stats.ErrorStats import ErrorStats
 
@@ -15,7 +18,7 @@ class BenchmarkStats:
     include_dependencies_status: bool
     dependencies_compressed: bool
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.deployed = False
         self.configured = False
         self.built = False
@@ -25,7 +28,7 @@ class BenchmarkStats:
         self.error_stats = ErrorStats()
         self.container_stats = ContainerStats()
 
-    def get_dict(self):
+    def get_dict(self) -> Dict[str, Any]:
         summary_general = {
             "deployed": "OK" if self.deployed else "FAILED",
             "configured": "OK" if self.configured else "FAILED",

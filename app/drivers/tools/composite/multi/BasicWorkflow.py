@@ -31,13 +31,16 @@ from watchdog.observers import Observer
 from app.core import configuration
 from app.core import definitions
 from app.core import reader
-from app.core import utilities
 from app.core import values
 from app.core import writer
-from app.core.main import create_task_identifier
-from app.core.main import create_task_image_identifier
+from app.core.identifiers import create_task_identifier
+from app.core.identifiers import create_task_image_identifier
 from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task import task
+from app.core.task.dir_info import generate_tool_dir_info
+from app.core.task.image import prepare_experiment_image
+from app.core.task.image import prepare_experiment_tool_image
+from app.core.task.stats.CompositeToolStats import CompositeToolStats
 from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.task.typing.TaskType import CompositeTaskType
@@ -59,7 +62,7 @@ active_jobs_lock: LockType
 # (the UI module is using in process threads and the lock is not shared across process, has to be reworked).
 # Instead, we need to use a global variable which is per process.
 # This is not ideal, but it is the correct way to make it work.
-def init_pool_processes(active_jobs_lock_x: LockType):
+def init_pool_processes(active_jobs_lock_x: LockType) -> None:
     global active_jobs_lock
     active_jobs_lock = active_jobs_lock_x
 
@@ -69,7 +72,7 @@ class BasicWorkflow(AbstractCompositeTool):
     key_image_tag: str = "image_tag"
     key_real_type = "real_type"
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # preferably change to a container with the dependencies ready to reduce setup time
@@ -83,27 +86,26 @@ class BasicWorkflow(AbstractCompositeTool):
         self.last_crash = 0
         self.active_jobs = 0
 
-    def run_composite(
+    def invoke_advanced(
         self,
         dir_info: DirectoryInfo,
         benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
+        bug_info: Dict[str, Any],  # Entry from  meta-data.json
+        task_config_info: Dict[str, Any],  # Task Profile
+        container_config_info: Dict[str, Any],  # Container Profile
         run_index: str,  # Specific iteration of the workflow run
         hash: Any,  # Hash, to be used for unique locations
-    ):
+    ) -> None:
         """
         Entry point for the workflow.
-        The function parses the composite sequence proivded in the composite_config_info
+        The function parses the composite sequence proivded in the task_config_info
         and then starts an "initial tool" - fuzzer, localizer, repair tool, in that order of preference.
-        Currently the system does not terminate a lot of things and this is left as a TODO
         """
-        super(BasicWorkflow, self).run_composite(
+        super(BasicWorkflow, self).invoke_advanced(
             dir_info,
             benchmark,
             bug_info,
-            composite_config_info,
+            task_config_info,
             container_config_info,
             run_index,
             hash.hexdigest()[:8],
@@ -123,17 +125,17 @@ class BasicWorkflow(AbstractCompositeTool):
         self.observer = Observer()
         self.cpu_queue: Queue[str] = Queue()
         # TODO implement gpu queue
-        for i in composite_config_info[self.key_cpus]:
+        for i in task_config_info[self.key_cpus]:
             self.cpu_queue.put(str(i))
 
         self.mutex = Lock()
         self.observed: Set[Any] = set()
 
-        self.emit_debug(composite_config_info)
+        self.emit_debug(task_config_info)
         composite_sequence: CompositeSequence = cast(
-            CompositeSequence, composite_config_info[self.key_composite_sequence]
+            CompositeSequence, task_config_info[self.key_composite_sequence]
         )
-        root_tool_tag = composite_config_info.get(definitions.KEY_TOOL_TAG, "")
+        root_tool_tag = task_config_info.get(definitions.KEY_TOOL_TAG, "")
 
         self.emit_normal("setting up workflow")
         self.emit_debug(composite_sequence)
@@ -186,24 +188,24 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool.bindings.update(self.task_mappings[task_type])
                 self.emit_debug(tool.bindings)
 
-                tool.check_tool_exists()
+                tool.ensure_tool_exists()
                 image_name = create_task_image_identifier(
                     benchmark,
                     tool,
                     bug_info,
                     tool_tag,
                 )
-                experiment_image_id = task.prepare_experiment(
+                experiment_image_id = prepare_experiment_image(
                     benchmark,
                     bug_info,
-                    composite_config_info[self.key_cpus],
+                    task_config_info[self.key_cpus],
                     [],
                     tool_tag,
                 )
-                task.prepare_experiment_tool(
+                prepare_experiment_tool_image(
                     experiment_image_id,
                     tool,
-                    composite_config_info,
+                    task_config_info,
                     dir_info,
                     image_name,
                     bug_info,
@@ -230,7 +232,7 @@ class BasicWorkflow(AbstractCompositeTool):
             dir_info,
             benchmark,
             bug_info,
-            composite_config_info,
+            task_config_info,
             container_config_info,
             run_index,
             hash,
@@ -241,7 +243,7 @@ class BasicWorkflow(AbstractCompositeTool):
         if not self.do_step(
             bug_info, None, None, ["analyze", "fuzz", "crash-analyze", "repair"]
         ):
-            self.observer.stop()
+            self.observer.stop()  # type:ignore
             for _ in range(self.event_processor_count):
                 self.message_queue.put("exit")
             self.emit_error("No supported starter for the process")
@@ -257,13 +259,13 @@ class BasicWorkflow(AbstractCompositeTool):
         task_type: TaskType,
         dir_info: DirectoryInfo,
         benchmark: AbstractBenchmark,
-        bug_info,  # Entry from  meta-data.json
-        composite_config_info,  # Task Profile
-        container_config_info,  # Container Profile
-        run_index,  # Specific iteration of the workflow run
+        bug_info: Dict[str, Any],  # Entry from  meta-data.json
+        task_config_info: Dict[str, Any],  # Task Profile
+        container_config_info: Dict[str, Any],  # Container Profile
+        run_index: str,  # Specific iteration of the workflow run
         hash: Any,  # Hash, to be used for unique locations
         tool: AbstractTool,
-    ):
+    ) -> None:
         """
         Common entry point for a subtask, we take the original task tag to not create new images.
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
@@ -277,10 +279,10 @@ class BasicWorkflow(AbstractCompositeTool):
         cpu = None
         try:
             values.task_type.set(task_type)
-            values.current_task_profile_id.set(composite_config_info["id"])
-            values.current_container_profile_id.set(composite_config_info["id"])
-            tool_tag = composite_config_info.get(self.key_task_tag, "")
-            image_tag = composite_config_info.get(self.key_image_tag, "")
+            values.current_task_profile_id.set(task_config_info["id"])
+            values.current_container_profile_id.set(task_config_info["id"])
+            tool_tag = task_config_info.get(self.key_task_tag, "")
+            image_tag = task_config_info.get(self.key_image_tag, "")
             image_name = create_task_image_identifier(
                 benchmark,
                 tool,
@@ -290,7 +292,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
             key = create_task_identifier(
                 benchmark,
-                composite_config_info,
+                task_config_info,
                 container_config_info,
                 bug_info,
                 tool,
@@ -305,9 +307,7 @@ class BasicWorkflow(AbstractCompositeTool):
             with open(
                 join(
                     list(
-                        self.task_mappings[
-                            composite_config_info[self.key_real_type]
-                        ].keys()
+                        self.task_mappings[task_config_info[self.key_real_type]].keys()
                     )[0],
                     "cerberus_internal.json",
                 ),
@@ -317,7 +317,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 f.write(
                     json.dumps(
                         {
-                            "dir_info": task.generate_tool_dir_info(
+                            "dir_info": generate_tool_dir_info(
                                 benchmark.name,
                                 bug_info[self.key_subject],
                                 bug_info[self.key_bug_id],
@@ -334,11 +334,11 @@ class BasicWorkflow(AbstractCompositeTool):
                 benchmark,
                 tool,
                 bug_info,
-                composite_config_info,
+                task_config_info,
                 container_config_info,
                 key,
                 [cpu],
-                composite_config_info[self.key_gpus],
+                task_config_info[self.key_gpus],
                 run_index,
                 image_name,
                 hash,
@@ -359,26 +359,28 @@ class BasicWorkflow(AbstractCompositeTool):
             if self.active_jobs == 0:
                 self.message_queue.put(self.exit_message_delayed)
 
-    def error_callback_handler(self, e: BaseException):
+    def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
         self.emit_warning(e)
         self.stats.error_stats.is_error = True
         traceback.print_exc()
 
-    def watcher(self):
+    def watcher(self) -> None:
         event_handler = FileCreationHandler(self.message_queue)
         self.emit_highlight("Observing {}".format(self.root_dir))
-        self.observer.schedule(event_handler, self.root_dir, recursive=True)
-        self.observer.start()
+        self.observer.schedule(
+            event_handler, self.root_dir, recursive=True
+        )  # type:ignore
+        self.observer.start()  # type:ignore
 
         try:
             while self.observer.is_alive():
                 self.observer.join(1)
         finally:
-            self.observer.stop()
+            self.observer.stop()  # type:ignore
             self.observer.join()
 
-    def pre_process_event(self, event: FileSystemEvent):
+    def pre_process_event(self, event: FileSystemEvent) -> bool:
         if self.filter_event(event):
             # self.emit_debug("Did not filter {}".format(event))
             with self.mutex:
@@ -395,7 +397,7 @@ class BasicWorkflow(AbstractCompositeTool):
         # self.emit_debug("Filtered {}".format(event))
         return False
 
-    def filter_event(self, event: FileSystemEvent):
+    def filter_event(self, event: FileSystemEvent) -> bool:
         """
         Exclude commonly known files which are not a signal for an interesting change.
         Directories are ignored!
@@ -422,7 +424,7 @@ class BasicWorkflow(AbstractCompositeTool):
             return False
         return True
 
-    def process_event(self, event: FileSystemEvent):
+    def process_event(self, event: FileSystemEvent) -> None:
         # self.emit_debug(f"Processing! {event}")
         if basename(event.src_path) == self.exit_message:
             for _ in range(self.process_count):
@@ -468,7 +470,7 @@ class BasicWorkflow(AbstractCompositeTool):
             #     # self.emit_debug("Ignoring crash analysis update")
             #     pass
 
-    def on_fuzzing_finished(self, res):
+    def on_fuzzing_finished(self, res: Any) -> None:
         try:
             base_dir = list(self.task_mappings["fuzz"].keys())[0]
             benign_dir = join(base_dir, "benign_tests")
@@ -494,6 +496,8 @@ class BasicWorkflow(AbstractCompositeTool):
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
+            if bug_info_extension is None:
+                self.emit_error("Could not find meta-data.json")
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
@@ -532,7 +536,7 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
-    def on_crash_found(self, event: FileSystemEvent):
+    def on_crash_found(self, event: FileSystemEvent) -> None:
         try:
             crash_dir = dirname(event.src_path)
             benign_dir = join(dirname(crash_dir), "queue")
@@ -599,7 +603,7 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
-    def on_crash_analysis_finished(self, res):
+    def on_crash_analysis_finished(self, res: Any) -> None:
         try:
             base_dir = list(self.task_mappings["crash-analyze"].keys())[0]
             benign_dir = join(base_dir, "benign_tests")
@@ -624,6 +628,8 @@ class BasicWorkflow(AbstractCompositeTool):
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
+            if bug_info_extension is None:
+                self.emit_error("Could not find meta-data.json")
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
@@ -650,16 +656,16 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
-    def on_analysis_finished(self, event: FileSystemEvent):
+    def on_analysis_finished(self, event: FileSystemEvent) -> None:
         self.on_task_finished(event, ["fuzz", "localize", "repair"])
 
-    def on_localization_finished(self, event: FileSystemEvent):
+    def on_localization_finished(self, event: FileSystemEvent) -> None:
         self.on_task_finished(event, ["repair"])
 
-    def on_repair_finished(self, event: FileSystemEvent):
+    def on_repair_finished(self, event: FileSystemEvent) -> None:
         def copy_patches(
             base_setup: str, enhanced_setup: str, new_bug_info: Dict[str, Any]
-        ):
+        ) -> None:
             os.makedirs(join(enhanced_setup, "patches"), exist_ok=True)
             self.emit_debug(
                 f"Copying patches from {dirname(event.src_path)} to {enhanced_setup}"
@@ -673,17 +679,17 @@ class BasicWorkflow(AbstractCompositeTool):
 
         self.on_task_finished(event, ["validate"], copy_patches)
 
-    def on_validation_finished(self, event: FileSystemEvent):
+    def on_validation_finished(self, event: FileSystemEvent) -> None:
         self.emit_highlight("Validation finished")
         self.on_task_finished(event, ["select"])
         pass
 
-    def on_selection_finished(self, event: FileSystemEvent):
+    def on_selection_finished(self, event: FileSystemEvent) -> None:
         self.emit_highlight("Selection finished")
         self.emit_normal("The workflow has finished for this path.")
         pass
 
-    def validate_metadata(self, metadata: List):
+    def validate_metadata(self, metadata: List[Dict[str, Any]]) -> None:
         validator = Draft7Validator(general_section_schema)
         errors = list(validator.iter_errors(metadata))
         if len(errors) != 0:
@@ -697,7 +703,7 @@ class BasicWorkflow(AbstractCompositeTool):
         event: FileSystemEvent,
         next_task_options: List[CompositeTaskType],
         on_copy: Optional[Callable[[str, str, Dict[str, Any]], None]] = None,
-    ):
+    ) -> None:
         """
         Generic method for handling the completion of a task.
         On_copy is an entrypoint for addditional processing that can be done after the copy of the setup directory.
@@ -718,6 +724,8 @@ class BasicWorkflow(AbstractCompositeTool):
             shutil.copytree(base_setup, enhanced_setup)
 
             bug_info_extension = reader.read_json(event.src_path)
+            if bug_info_extension is None:
+                self.emit_error("Could not find meta-data.json")
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
@@ -741,7 +749,7 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
-    def copy_tests(self, source_dir, destination_dir, subtype):
+    def copy_tests(self, source_dir: str, destination_dir: str, subtype: str) -> None:
         os.makedirs(join(destination_dir, subtype, ""), exist_ok=True)
         for test_case in os.listdir(source_dir):
             if test_case == "README.txt":
@@ -759,7 +767,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     join(destination_dir, subtype, ""),
                 )
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -768,7 +776,9 @@ class BasicWorkflow(AbstractCompositeTool):
         """
         super().save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> CompositeToolStats:
         self.emit_normal("reading output")
 
         return self.stats
@@ -779,7 +789,7 @@ class BasicWorkflow(AbstractCompositeTool):
         subtask_hash: Optional[Any],
         subtask_tag: Optional[str],
         next_task_options: List[CompositeTaskType],
-    ):
+    ) -> bool:
         """
         Start subsequent tasks in the workflow.
         Next_task_options is assumed to be a sorted list of the tasks that can be executed.
@@ -791,9 +801,7 @@ class BasicWorkflow(AbstractCompositeTool):
         }
         for next_task in next_task_options:
             if next_task in self.tool_map:
-                for tool, params, tag, type in self.tool_map[
-                    cast(CompositeTaskType, next_task)
-                ]:
+                for tool, params, tag, type in self.tool_map[next_task]:
                     self.pool.apply_async(
                         self.run_subtask,
                         [
@@ -835,7 +843,16 @@ class BasicWorkflow(AbstractCompositeTool):
         new_timeout: Optional[float] = None,
         real_task_type: Optional[str] = None,
         task_type: Optional[str] = None,
-    ):
+    ) -> Tuple[
+        DirectoryInfo,
+        AbstractBenchmark,
+        Dict[str, Any],
+        Dict[str, Any],
+        Dict[str, Any],
+        str,
+        str,
+        AbstractTool,
+    ]:
         """
         Construct the arguments for the run function from the proto_args.
         Certain arguments are replaceable.
@@ -844,7 +861,7 @@ class BasicWorkflow(AbstractCompositeTool):
             dir_info,
             benchmark,
             bug_info,
-            composite_config_info,
+            task_config_info,
             container_config_info,
             run_index,
             hash,
@@ -856,41 +873,39 @@ class BasicWorkflow(AbstractCompositeTool):
         if new_hash:
             hash = new_hash
 
-        composite_config_info_new = deepcopy(composite_config_info)
+        task_config_info_new = deepcopy(task_config_info)
 
-        del composite_config_info_new["container-id"]
+        del task_config_info_new["container-id"]
 
         if image_tag:
-            composite_config_info_new[self.key_image_tag] = image_tag
+            task_config_info_new[self.key_image_tag] = image_tag
 
         if new_task_tag:
-            composite_config_info_new[self.key_task_tag] = new_task_tag
+            task_config_info_new[self.key_task_tag] = new_task_tag
 
         if new_params:
-            composite_config_info_new[definitions.KEY_TOOL_PARAMS] = new_params
+            task_config_info_new[definitions.KEY_TOOL_PARAMS] = new_params
 
         if new_timeout is not None:
-            composite_config_info_new[self.key_timeout] = new_timeout
+            task_config_info_new[self.key_timeout] = new_timeout
             if task_type:
-                composite_config_info_new[
-                    task_type + "-" + self.key_timeout
-                ] = new_timeout
+                task_config_info_new[task_type + "-" + self.key_timeout] = new_timeout
 
         if real_task_type:
-            composite_config_info_new[self.key_real_type] = real_task_type
+            task_config_info_new[self.key_real_type] = real_task_type
 
         return (
             dir_info,
             benchmark,
             bug_info,
-            composite_config_info_new,
+            task_config_info_new,
             container_config_info,
             run_index,
             hash,
             tool,
         )
 
-    def get_setup_directories(self, root, subtask_tag):
+    def get_setup_directories(self, root: str, subtask_tag: str) -> Tuple[str, str]:
         """
         Extracts the setup directories from the internal representation or the proto arguments.
         """
@@ -955,14 +970,14 @@ class BasicWorkflow(AbstractCompositeTool):
 
         return task_mappings
 
-    def event_worker(self):
+    def event_worker(self) -> None:
         global active_jobs_lock  # Capture the process lock
         while True:
             event = self.message_queue.get()
             if isinstance(event, str):
                 if event == self.exit_message:
                     if self.observer.is_alive():
-                        self.observer.stop()
+                        self.observer.stop()  # type: ignore
                     break
                 elif event == self.exit_message_delayed:
                     time.sleep(60)  # wait for 60 seconds
@@ -982,7 +997,9 @@ class BasicWorkflow(AbstractCompositeTool):
                 except Exception as e:
                     print(f"Exception when processing {event}:\n {e}")
 
-    def merge_dict(self, info, candidate):
+    def merge_dict(
+        self, info: Dict[Any, Any], candidate: Dict[Any, Any]
+    ) -> Dict[Any, Any]:
         new_info = {}
         for key in info:
             new_info[key] = info[key]

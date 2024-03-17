@@ -11,8 +11,13 @@ from os.path import abspath
 from os.path import dirname
 from os.path import join
 from typing import Any
+from typing import Callable
 from typing import Dict
+from typing import Generator
+from typing import List
 from typing import NoReturn
+from typing import Optional
+from typing import Tuple
 
 from app.core import emitter
 from app.core import logger
@@ -20,7 +25,7 @@ from app.core import values
 from app.notification import notification
 
 
-def escape_ansi(text: str):
+def escape_ansi(text: str) -> str:
     # 7-bit C1 ANSI sequences
     ansi_escape = re.compile(
         r"""
@@ -40,7 +45,7 @@ def escape_ansi(text: str):
     return result
 
 
-def create_output_directories():
+def create_output_directories() -> None:
     dir_list = [
         values.dir_logs,
         values.dir_output_base,
@@ -59,8 +64,11 @@ def create_output_directories():
 
 
 def execute_command(
-    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
-):
+    command: str,
+    show_output: bool = True,
+    env: Dict[str, str] = dict(),
+    directory: Optional[str] = None,
+) -> int:
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     if not directory:
@@ -88,8 +96,11 @@ def execute_command(
 
 
 def run_command(
-    command: str, show_output=True, env: Dict[str, str] = dict(), directory=None
-):
+    command: str,
+    show_output: bool = True,
+    env: Dict[str, str] = dict(),
+    directory: Optional[str] = None,
+) -> Tuple[int, Tuple[bytes, bytes]]:
     # Print executed command and execute it in console
     command = command.encode().decode("ascii", "ignore")
     if not directory:
@@ -130,7 +141,7 @@ def error_exit(*arg_list: Any) -> NoReturn:
     )
 
 
-def get_gpu_count():
+def get_gpu_count() -> int:
     """
     Get the number of gpus on the system. Uses nvidia-smi to obtain the number.
     """
@@ -145,48 +156,17 @@ def get_gpu_count():
         return 0
 
 
-def clean_files():
-    # Remove other residual files stored in ./output/
-    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
-    emitter.information("\t[framework] removing other residual files...")
-    if os.path.isdir("output"):
-        clean_command = "rm -rf " + values.dir_output
-        execute_command(clean_command)
+def flat_map(f: Callable[[Any], Any], xs: List[Any]) -> Generator[Any, None, None]:
+    return (y for ys in xs for y in f(ys))
 
 
-def clean_artifacts(output_dir: str):
+def clean_artifacts(output_dir: str) -> None:
     if os.path.isdir(output_dir):
         execute_command("rm -rf {}".format(output_dir))
     execute_command("mkdir {}".format(output_dir))
 
 
-def backup_file(file_path: str, backup_name: str):
-    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
-    backup_command = "cp {} {}".format(file_path, join(values.dir_backup, backup_name))
-    execute_command(backup_command)
-
-
-def restore_file(file_path: str, backup_name: str):
-    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
-    restore_command = "cp {} {}".format(join(values.dir_backup, backup_name), file_path)
-    execute_command(restore_command)
-
-
-def reset_git(source_directory: str):
-    logger.trace("{}:{}".format(__name__, sys._getframe().f_code.co_name), locals())
-    reset_command = "cd " + source_directory + ";git reset --hard HEAD"
-    execute_command(reset_command)
-
-
-def build_clean(program_path: str):
-    clean_command = "cd " + program_path + "; make clean; rm -rf klee-*"
-    process = subprocess.Popen([clean_command], stderr=subprocess.PIPE, shell=True)
-    (output, error) = process.communicate()
-    assert int(process.returncode) == 0
-    return int(process.returncode)
-
-
-def archive_results(dir_results: str, dir_archive: str):
+def archive_results(dir_results: str, dir_archive: str) -> int:
     for output_dir in [dir_results, dir_archive]:
         if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
@@ -199,11 +179,11 @@ def archive_results(dir_results: str, dir_archive: str):
         )
     )
 
-    execute_command(archive_command)
+    return execute_command(archive_command)
 
 
 @contextmanager
-def timeout(time: int):
+def timeout(time: int) -> Generator[None, None, None]:
     signal.signal(signal.SIGALRM, raise_timeout)
     signal.alarm(time)
     try:
@@ -214,18 +194,18 @@ def timeout(time: int):
         signal.signal(signal.SIGALRM, signal.SIG_IGN)
 
 
-def raise_timeout(signum, frame):
+def raise_timeout(signum: int, frame: Any) -> NoReturn:
     raise TimeoutError
 
 
-def get_hash(str_value: str):
+def get_hash(str_value: str) -> bytes:
     str_encoded = str_value.encode("utf-8")
     str_hasher = hashlib.sha1(str_encoded)
     hash_value = base64.urlsafe_b64encode(str_hasher.digest()[:10])
     return hash_value
 
 
-def check_space():
+def check_space() -> None:
     emitter.normal("\t\t[framework] checking disk space")
     total, used, free = shutil.disk_usage("/")
     emitter.information("\t\t\t total: %d GiB" % (total // (2**30)))

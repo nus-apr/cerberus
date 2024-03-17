@@ -2,20 +2,26 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 class Hippodrome(AbstractAnalyzeTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mirchevmp/hippodrome:latest"
 
-    def run_analysis(self, bug_info, repair_config_info):
-        super(Hippodrome, self).run_analysis(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
 
         # start running
         self.timestamp_log()
@@ -37,7 +43,9 @@ class Hippodrome(AbstractAnalyzeTool):
         self.timestamp_log()
         self.emit_highlight("\t\t\tlog file: {0}".format(self.log_output_path))
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> AnalysisToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

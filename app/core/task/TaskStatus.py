@@ -21,39 +21,39 @@ class TaskStatus(Enum):
     VALIDATING = 15
 
     def __str__(self) -> str:
-        if self is self.SUCCESS:
+        if self.value == self.SUCCESS:
             return "Success"
-        elif self is self.FAIL:
+        elif self.value == self.FAIL:
             return "Failure"
-        elif self is self.PREPROCESSING:
+        elif self.value == self.PREPROCESSING:
             return "Preprocessing"
-        elif self is self.REPAIRING:
+        elif self.value == self.REPAIRING:
             return "Repairing"
-        elif self is self.EXTRACTING_PATCHES:
+        elif self.value == self.EXTRACTING_PATCHES:
             return "Extracting Patches"
-        elif self is self.PREPARING_IMAGE:
+        elif self.value == self.PREPARING_IMAGE:
             return "Preparing image"
-        elif self is self.FAIL_IN_SETUP:
+        elif self.value == self.FAIL_IN_SETUP:
             return "Failed in image setup phase"
-        elif self is self.FAIL_IN_DEPLOY:
+        elif self.value == self.FAIL_IN_DEPLOY:
             return "Failed in image deploy phase"
-        elif self is self.FAIL_IN_BUILD:
+        elif self.value == self.FAIL_IN_BUILD:
             return "Failed in image building phase"
-        elif self is self.FAIL_IN_CONFIG:
+        elif self.value == self.FAIL_IN_CONFIG:
             return "Failed in image configuration phase"
-        elif self is self.FAIL_IN_TEST:
+        elif self.value == self.FAIL_IN_TEST:
             return "Failed in image testing phase"
-        elif self is self.FAIL_IN_VERIFY:
+        elif self.value == self.FAIL_IN_VERIFY:
             return "Failed in image verification phase"
-        elif self is self.FAIL_IN_INSTRUMENT:
+        elif self.value == self.FAIL_IN_INSTRUMENT:
             return "Failed in image instrumentation phase"
-        elif self is self.FAIL_IN_TOOL:
+        elif self.value == self.FAIL_IN_TOOL:
             return "Tool returned non-zero status"
-        elif self is self.CANCELLED:
+        elif self.value == self.CANCELLED:
             return "Job Cancelled"
-        elif self is self.VALIDATING:
+        elif self.value == self.VALIDATING:
             return "Tool validating patches"
-        elif self is self.NONE:
+        elif self.value == self.NONE:
             return "NONEEEEEE"
         else:
             raise NotImplementedError("New status defined but not implemented in repr")

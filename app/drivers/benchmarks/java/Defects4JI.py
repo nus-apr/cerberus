@@ -2,6 +2,7 @@ import os
 from datetime import datetime
 from os.path import join
 from typing import List
+from typing import Optional
 
 from app.core import container
 from app.drivers.benchmarks.java.Defects4J import Defects4J
@@ -10,11 +11,13 @@ from app.drivers.benchmarks.java.Defects4J import Defects4J
 class Defects4JI(Defects4J):
     log_instrument_path = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Defects4JI, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         is_error = super(Defects4JI, self).setup_experiment(
             bug_index, container_id, test_all
         )
@@ -26,7 +29,9 @@ class Defects4JI(Defects4J):
                 is_error = True
         return is_error
 
-    def setup_container(self, bug_index, image_name, cpu: List[str], gpu: List[str]):
+    def setup_container(
+        self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]
+    ) -> Optional[str]:
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -57,7 +62,7 @@ class Defects4JI(Defects4J):
                     )
         return container_id
 
-    def instrument(self, bug_index: int, container_id: str):
+    def instrument(self, bug_index: int, container_id: str) -> bool:
         self.emit_normal("instrumenting assertions")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])

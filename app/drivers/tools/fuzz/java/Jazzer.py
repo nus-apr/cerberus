@@ -2,17 +2,25 @@ import os
 from os.path import join
 from typing import Any
 from typing import Dict
+from typing import List
+from typing import Optional
+from typing import Tuple
+from typing import Union
 
+from app.core.task.stats.FuzzToolStats import FuzzToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
 class Jazzer(AbstractFuzzTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mirchevmp/jazzer:alpha-0.4"
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> FuzzToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -21,11 +29,13 @@ class Jazzer(AbstractFuzzTool):
 
         return self.stats
 
-    def run_fuzz(self, bug_info, fuzzer_config_info):
-        super().run_fuzz(bug_info, fuzzer_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         self.emit_normal("executing fuzz command")
 
-        timeout = int(float(fuzzer_config_info[self.key_timeout]) * 60)
+        timeout = int(float(task_config_info[self.key_timeout]) * 60)
 
         self.timestamp_log_start()
 
@@ -34,9 +44,14 @@ class Jazzer(AbstractFuzzTool):
         harness_class_dir = join(self.dir_setup, self.name, "target", "classes")
         self.ensure_command(f"mkdir -p {harness_class_dir}")
 
-        target_class = self.read_json(join(self.dir_setup, self.name, "harness.json"))[
-            "class"
-        ]
+        harness_info: Optional[Dict[str, Any]] = self.read_json(
+            join(self.dir_setup, self.name, "harness.json")
+        )
+
+        if harness_info is None:
+            self.error_exit("No harness provided!")
+
+        target_class = harness_info["class"]
 
         harness_source_dir = join(self.dir_setup, self.name, "src", "main", "java")
 
@@ -102,13 +117,17 @@ class Jazzer(AbstractFuzzTool):
         self.timestamp_log_end()
 
     def ensure_command(
-        self, command, log_file_path="/dev/null", dir_path=None, env=dict()
-    ):
+        self,
+        command: str,
+        log_file_path: str = "/dev/null",
+        dir_path: Optional[str] = None,
+        env: Dict[str, str] = dict(),
+    ) -> None:
         if self.run_command(command, log_file_path, dir_path, env):
             self.error_exit(f"'{command}' fails")
 
     @staticmethod
-    def class_name_to_file(classname):
+    def class_name_to_file(classname: str) -> str:
         tmp = classname.split(".")
         tmp[-1] += ".java"
         return join(*tmp)
