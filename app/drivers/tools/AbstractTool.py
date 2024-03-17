@@ -96,6 +96,7 @@ class AbstractTool(AbstractDriver):
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
     key_java_version = definitions.KEY_JAVA_VERSION
+    key_generator = definitions.KEY_GENERATOR
     # endregion
 
     stats: ToolStats

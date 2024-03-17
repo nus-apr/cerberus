@@ -268,7 +268,7 @@ class BasicWorkflow(AbstractCompositeTool):
         run_index: str,  # Specific iteration of the workflow run
         hash: Any,  # Hash, to be used for unique locations
         tool: AbstractTool,
-    ) -> None:
+    ) -> str:
         """
         Common entry point for a subtask, we take the original task tag to not create new images.
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
@@ -376,6 +376,7 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(f"Active jobs: {self.active_jobs}")
             if self.active_jobs == 0:
                 self.message_queue.put(self.exit_message_delayed)
+        return list(new_mappings.keys())[0]
 
     def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
@@ -490,9 +491,8 @@ class BasicWorkflow(AbstractCompositeTool):
             #     # self.emit_debug("Ignoring crash analysis update")
             #     pass
 
-    def on_fuzzing_finished(self, res: Any) -> None:
+    def on_fuzzing_finished(self, base_dir: str) -> None:
         try:
-            base_dir = list(self.root_task_mappings["fuzz"].keys())[0]
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 
@@ -626,9 +626,9 @@ class BasicWorkflow(AbstractCompositeTool):
             traceback.print_exc()
         pass
 
-    def on_crash_analysis_finished(self, res: Any) -> None:
+    def on_crash_analysis_finished(self, base_dir: str) -> None:
         try:
-            base_dir = list(self.root_task_mappings["crash-analyze"].keys())[0]
+            base_dir = base_dir
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 

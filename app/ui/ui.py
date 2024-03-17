@@ -976,7 +976,7 @@ class Cerberus(App[List[Result]]):
                 scroll_end=(self.selected_subject == message.session_identifier),
                 expand=True,
             )
-        else:
+        elif message.session_identifier != "(Root)":
             self.debug_print("I cannot find {}".format(message.session_identifier))
         self.debug_print(message.text)
 
