@@ -73,9 +73,8 @@ def write(
     indent_level: int = 0,
 ) -> None:
     if not values.ui_active:
-        message = "[bold {}]{} {}".format(
+        message = "[bold {}]{}".format(
             RICH_COLOR_MAP[print_color],
-            values.job_identifier.get("Root"),
             str(print_message).replace("[", "\\["),
         )
         if prefix:

@@ -85,7 +85,7 @@ class Write(Message):
 
     namespace = "cerberus"
 
-    def __init__(self, text: str, identifier: str) -> None:
+    def __init__(self, text: str, session_identifier: str) -> None:
         self.text = text
-        self.identifier = identifier
+        self.session_identifier = session_identifier
         super().__init__()

@@ -2,6 +2,7 @@ import hashlib
 import json
 import os
 import shutil
+import sys
 import time
 import traceback
 from copy import deepcopy
@@ -85,6 +86,8 @@ class BasicWorkflow(AbstractCompositeTool):
         )
         self.last_crash = 0
         self.active_jobs = 0
+        if not values.use_container:
+            self.error_exit("This tool cannot be run outside of containers for now")
 
     def invoke_advanced(
         self,
@@ -108,7 +111,7 @@ class BasicWorkflow(AbstractCompositeTool):
             task_config_info,
             container_config_info,
             run_index,
-            hash.hexdigest()[:8],
+            hash,
         )
         """
             self.dir_logs - directory to store logs
@@ -148,17 +151,20 @@ class BasicWorkflow(AbstractCompositeTool):
         os.makedirs(root_dir, exist_ok=True)
         self.root_dir = root_dir
 
-        self.task_mappings = self.make_task_mappings(root_dir)
+        self.root_task_mappings = self.make_root_task_mappings(root_dir)
         self.bug_info = bug_info
 
         self.tool_map: Dict[
             CompositeTaskType, List[Tuple[AbstractTool, str, str, str]]
         ] = {}
+
+        self.session_key = values.session_identifier.get("NAN")
+
         # TODO move tool to be generated dynamically
         for task_type, tools in composite_sequence.items():
             self.tool_map[task_type] = []
             for tool_info in tools:
-                tag_fragments = []
+                tag_fragments: List[str] = []
                 if root_tool_tag:
                     tag_fragments.append(root_tool_tag)
 
@@ -183,10 +189,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     tool = configuration.load_tool(tool_name, real_type)
                     tool.tool_tag = tool_tag
 
-                self.emit_debug(tool.bindings)
                 tool.bindings = tool.bindings or {}
-                tool.bindings.update(self.task_mappings[task_type])
-                self.emit_debug(tool.bindings)
 
                 tool.ensure_tool_exists()
                 image_name = create_task_image_identifier(
@@ -271,6 +274,16 @@ class BasicWorkflow(AbstractCompositeTool):
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
 
+        self.emit_debug(f"Bindings are {tool.bindings}")
+        tool.bindings = tool.bindings or {}
+        new_mappings = self.make_task_mappings(
+            tool.name, hash.hexdigest()[:8], self.root_task_mappings
+        )[task_type]
+        for host_dir, _ in new_mappings.items():
+            os.makedirs(host_dir, exist_ok=True, mode=0o777)
+        tool.bindings.update(new_mappings)
+        self.emit_debug(tool.bindings)
+
         global active_jobs_lock
         with active_jobs_lock:
             self.active_jobs += 1
@@ -300,6 +313,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool_tag,
             )
             values.job_identifier.set(key)
+            values.session_identifier.set(self.session_key)
 
             # TODO track multiple cpus
             cpu = self.cpu_queue.get()
@@ -307,7 +321,9 @@ class BasicWorkflow(AbstractCompositeTool):
             with open(
                 join(
                     list(
-                        self.task_mappings[task_config_info[self.key_real_type]].keys()
+                        self.root_task_mappings[
+                            task_config_info[self.key_real_type]
+                        ].keys()
                     )[0],
                     "cerberus_internal.json",
                 ),
@@ -347,8 +363,10 @@ class BasicWorkflow(AbstractCompositeTool):
             if err:
                 self.stats.error_stats.is_error = True
         except Exception as e:
-            self.emit_warning(e)
-            traceback.print_exc()
+            tb = traceback.format_exc()
+            self.emit_error(e)
+            self.emit_error(tb)
+            traceback.print_exc(file=sys.stderr)
         finally:
             if cpu is not None:
                 self.cpu_queue.put(cpu)
@@ -361,9 +379,11 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
-        self.emit_warning(e)
+        tb = traceback.format_exc()
+        self.emit_error(e)
+        self.emit_error(tb)
         self.stats.error_stats.is_error = True
-        traceback.print_exc()
+        traceback.print_exc(file=sys.stderr)
 
     def watcher(self) -> None:
         event_handler = FileCreationHandler(self.message_queue)
@@ -472,7 +492,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_fuzzing_finished(self, res: Any) -> None:
         try:
-            base_dir = list(self.task_mappings["fuzz"].keys())[0]
+            base_dir = list(self.root_task_mappings["fuzz"].keys())[0]
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 
@@ -501,17 +521,20 @@ class BasicWorkflow(AbstractCompositeTool):
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
-                (
-                    bug_info_extension[0]
-                    if isinstance(bug_info_extension, list)
-                    else bug_info_extension
+                cast(
+                    Dict[Any, Any],
+                    (
+                        bug_info_extension[0]
+                        if isinstance(bug_info_extension, list)
+                        else bug_info_extension
+                    ),
                 ),
             )
 
             writer.write_as_json(
                 new_bug_info,
                 join(
-                    list(self.task_mappings["fuzz"].keys())[0],
+                    list(self.root_task_mappings["fuzz"].keys())[0],
                     f"meta-data-{subtask_tag}.json",
                 ),
             )
@@ -587,7 +610,7 @@ class BasicWorkflow(AbstractCompositeTool):
             writer.write_as_json(
                 new_bug_info,
                 join(
-                    list(self.task_mappings["fuzz"].keys())[0],
+                    list(self.root_task_mappings["fuzz"].keys())[0],
                     f"meta-data-{subtask_tag}.json",
                 ),
             )
@@ -605,7 +628,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_crash_analysis_finished(self, res: Any) -> None:
         try:
-            base_dir = list(self.task_mappings["crash-analyze"].keys())[0]
+            base_dir = list(self.root_task_mappings["crash-analyze"].keys())[0]
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 
@@ -633,17 +656,20 @@ class BasicWorkflow(AbstractCompositeTool):
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
-                (
-                    bug_info_extension[0]
-                    if isinstance(bug_info_extension, list)
-                    else bug_info_extension
+                cast(
+                    Dict[Any, Any],
+                    (
+                        bug_info_extension[0]
+                        if isinstance(bug_info_extension, list)
+                        else bug_info_extension
+                    ),
                 ),
             )
 
             writer.write_as_json(
                 new_bug_info,
                 join(
-                    list(self.task_mappings["crash-analyze"].keys())[0],
+                    list(self.root_task_mappings["crash-analyze"].keys())[0],
                     f"meta-data-{subtask_tag}.json",
                 ),
             )
@@ -729,10 +755,13 @@ class BasicWorkflow(AbstractCompositeTool):
 
             new_bug_info = self.merge_dict(
                 self.bug_info,
-                (
-                    bug_info_extension[0]
-                    if isinstance(bug_info_extension, list)
-                    else bug_info_extension
+                cast(
+                    Dict[Any, Any],
+                    (
+                        bug_info_extension[0]
+                        if isinstance(bug_info_extension, list)
+                        else bug_info_extension
+                    ),
                 ),
             )
 
@@ -893,6 +922,10 @@ class BasicWorkflow(AbstractCompositeTool):
 
         if real_task_type:
             task_config_info_new[self.key_real_type] = real_task_type
+            if new_timeout is not None:
+                task_config_info_new[real_task_type + "-" + self.key_timeout] = (
+                    new_timeout
+                )
 
         return (
             dir_info,
@@ -936,7 +969,7 @@ class BasicWorkflow(AbstractCompositeTool):
             )
         return (base_setup, enhanced_setup)
 
-    def make_task_mappings(
+    def make_root_task_mappings(
         self, root_dir: str
     ) -> Dict[CompositeTaskType, Dict[str, Dict[str, str]]]:
         """
@@ -969,6 +1002,20 @@ class BasicWorkflow(AbstractCompositeTool):
                 os.makedirs(key, exist_ok=True)
 
         return task_mappings
+
+    def make_task_mappings(
+        self,
+        tool_name: str,
+        hash: str,
+        root_mappings: Dict[CompositeTaskType, Dict[str, Dict[str, str]]],
+    ) -> Dict[CompositeTaskType, Dict[str, Dict[str, str]]]:
+        res: Dict[CompositeTaskType, Dict[str, Dict[str, str]]] = {}
+        for task_type, dir_mapping in root_mappings.items():
+            new_mapping = {}
+            for host_dir, container_dir_mapping in dir_mapping.items():
+                new_mapping[f"{host_dir}-{tool_name}-{hash}"] = container_dir_mapping
+            res[task_type] = new_mapping
+        return res
 
     def event_worker(self) -> None:
         global active_jobs_lock  # Capture the process lock

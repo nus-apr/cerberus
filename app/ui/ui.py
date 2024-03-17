@@ -319,6 +319,7 @@ class Cerberus(App[List[Result]]):
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(job_identifier)
             emitter.information(
                 "\t[framework] Starting image check for bug {} from subject {}".format(
                     bug_name, subject_name
@@ -444,6 +445,7 @@ class Cerberus(App[List[Result]]):
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(job_identifier)
             emitter.information(
                 "\t[framework] Starting image check for bug {} from subject {}".format(
                     bug_name, subject_name
@@ -735,6 +737,7 @@ class Cerberus(App[List[Result]]):
                     job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
+            values.session_identifier.set(message.identifier)
             values.current_task_profile_id.set(message.task_profile[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 message.container_profile[definitions.KEY_ID]
@@ -964,15 +967,17 @@ class Cerberus(App[List[Result]]):
 
     @on(Write)
     async def write_message(self, message: Write) -> None:
-        if message.identifier in log_map:
-            log_map[message.identifier].write(
+        if message.session_identifier in log_map:
+            log_map[message.session_identifier].write(
                 message.text,
                 # f"{time.strftime('%b %d %H:%M:%S')} {message.text}",
                 shrink=False,
                 width=values.ui_max_width,
-                scroll_end=(self.selected_subject == message.identifier),
+                scroll_end=(self.selected_subject == message.session_identifier),
                 expand=True,
             )
+        else:
+            self.debug_print("I cannot find {}".format(message.session_identifier))
         self.debug_print(message.text)
 
     def show(self, x: Widget) -> None:
@@ -1068,7 +1073,9 @@ app: Cerberus
 
 
 def post_write(text: str) -> None:
-    message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
+    message = Write(
+        text=text, session_identifier=values.session_identifier.get("(Root)")
+    )
     app.post_message(message)
 
 

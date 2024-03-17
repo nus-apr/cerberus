@@ -68,9 +68,13 @@ def store_logs() -> None:
 
 def track_job(txt: Any) -> str:
     job = values.job_identifier.get("NAN")
+    session = values.session_identifier.get("NAN")
+    res = str(txt)
     if job != "NAN":
-        return job + "    " + str(txt)
-    return str(txt)
+        res += job + "    " + str(txt)
+    if session != "NAN":
+        res += session + "    " + str(txt)
+    return res
 
 
 def build(message: Any) -> None:

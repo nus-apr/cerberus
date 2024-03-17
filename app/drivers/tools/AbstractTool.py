@@ -95,6 +95,7 @@ class AbstractTool(AbstractDriver):
     key_exploit_list = definitions.KEY_EXPLOIT_LIST
     key_config_timeout_test = definitions.KEY_CONFIG_TIMEOUT_TESTCASE
     key_dependencies = definitions.KEY_DEPENDENCIES
+    key_java_version = definitions.KEY_JAVA_VERSION
     # endregion
 
     stats: ToolStats
@@ -159,7 +160,6 @@ class AbstractTool(AbstractDriver):
                 self.name, bug_info[self.key_subject], bug_info[self.key_bug_id]
             )
         )
-        self.emit_normal("Checking space usage")
         utilities.check_space()
         self.emit_normal("Preprocessing")
         self.pre_process(bug_info)

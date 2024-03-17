@@ -142,6 +142,11 @@ def run(
 
     if not values.only_setup:
         task_type = values.task_type.get()
+        emitter.debug("\t\t[framework] Running task type: {}".format(task_type))
+        emitter.debug(
+            "\t\t[framework] Timeout override: {}".format(task_timeout_override)
+        )
+        emitter.debug("\t\t[framework] Task config info: {}".format(task_config_info))
         if task_type in task_timeout_override:
             task_config_info[definitions.KEY_CONFIG_TIMEOUT] = task_config_info.get(
                 task_timeout_override[task_type],
@@ -359,11 +364,6 @@ def execute(
     if not values.ui_active:
         parallel.initialize()
 
-    if definitions.KEY_CONFIG_REPAIR_TIMEOUT in task_config_info:
-        task_config_info[definitions.KEY_CONFIG_TIMEOUT] = task_config_info[
-            definitions.KEY_CONFIG_REPAIR_TIMEOUT
-        ]
-
     time_duration = float(task_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
     test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
     total_timeout = time.time() + 60 * 60 * time_duration
@@ -414,6 +414,7 @@ def execute(
             v_task_config_info: Dict[str, Any],
             task_profile_id: str,
             job_identifier: str,
+            session_identifier: str,
             task_type: TaskType,
         ) -> None:
             """
@@ -422,6 +423,7 @@ def execute(
             values.task_type.set(task_type)
             values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(session_identifier)
             parallel.consume_patches(v_path_info, v_dir_info, v_task_config_info)
 
         consume_thread = threading.Thread(
@@ -432,6 +434,7 @@ def execute(
                 v_task_config_info,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
+                values.session_identifier.get("NA"),
                 values.task_type.get("NA"),
             ),
         )
@@ -463,6 +466,7 @@ def execute(
             run_index: str,
             task_profile_id: str,
             job_identifier: str,
+            session_identifier: str,
             task_type: TaskType,
             final_status: List[TaskStatus],
             hash: Any,
@@ -473,6 +477,7 @@ def execute(
             values.task_type.set(task_type)
             values.current_task_profile_id.set(task_profile_id)
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(session_identifier)
             execute_setup(
                 dir_info,
                 experiment_info,
@@ -499,6 +504,7 @@ def execute(
                 run_index,
                 values.current_task_profile_id.get("NA"),
                 values.job_identifier.get("NA"),
+                values.session_identifier.get("NA"),
                 values.task_type.get(None),
                 final_status,
                 hash,

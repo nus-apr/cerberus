@@ -69,6 +69,7 @@ class AbstractCompositeTool(AbstractTool):
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
-        self.error_exit(
-            "This method should not be called. Composite workflows should be started throught the invoke_advanced method."
-        )
+        return
+        # self.warning(
+        #    "This method should not be called. Composite workflows should be started throught the invoke_advanced method."
+        # )
