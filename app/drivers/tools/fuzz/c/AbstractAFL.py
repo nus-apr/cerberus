@@ -167,5 +167,6 @@ class AbstractAFL(AbstractFuzzTool):
         )
 
         # Ensure at least one test-case
-        if len(self.list_dir(corpus_path)) == 0:
+        corpus = self.list_dir(corpus_path)
+        if len(corpus) == 0 or corpus == [corpus_path]:
             self.write_file(["hi"], join(corpus_path, "hi.txt"))
