@@ -250,7 +250,7 @@ class GZoltar(AbstractLocalizeTool):
                 self.key_analysis_output: [
                     {
                         "generator": "gzoltar",
-                        "confidence": "1",
+                        "confidence": 1,
                         "localization": localization[:10],
                     }
                 ],
