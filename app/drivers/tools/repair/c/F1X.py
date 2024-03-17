@@ -40,7 +40,10 @@ class F1X(AbstractRepairTool):
         self.emit_normal(f"preparing test driver for {self.name}")
         test_driver_path = self.dir_expr + "/f1x-test"
         self.write_file(
-            ["#!/bin/bash\n", "bash {0} $@".format(test_script)],
+            [
+                "#!/bin/bash\n",
+                "bash {1} {0} $@".format(test_script, "-x" if self.is_debug else ""),
+            ],
             test_driver_path,
         )
         permission_command = "chmod +x {}".format(test_driver_path)
