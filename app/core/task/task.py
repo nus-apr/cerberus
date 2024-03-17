@@ -175,6 +175,13 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
+        if values.experiment_status.get(TaskStatus.NONE) != TaskStatus.SUCCESS:
+            emitter.error(
+                "\t\t\t[framework] Experiment failed with status {}".format(
+                    values.experiment_status.get(TaskStatus.NONE)
+                )
+            )
+
     return (tool.stats.error_stats.is_error, dir_info)
 
 
@@ -486,6 +493,7 @@ def execute(
                 experiment_info,
                 tool,
                 task_config_info,
+                container_config_info,
                 container_id,
                 benchmark,
                 run_index,

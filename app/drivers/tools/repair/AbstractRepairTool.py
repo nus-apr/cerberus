@@ -32,6 +32,7 @@ class AbstractRepairTool(AbstractTool):
     def __init__(self, tool_name: str) -> None:
         self.stats = RepairToolStats()
         self.tool_type = "repair-tool"
+        self.dir_patch = ""
         super().__init__(tool_name)
 
     def analyse_output(

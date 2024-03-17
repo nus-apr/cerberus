@@ -169,13 +169,6 @@ class AbstractTool(AbstractDriver):
 
         bug_id = str(bug_info[definitions.KEY_BUG_ID])
 
-        self.dir_patch = join(
-            self.dir_output,
-            "patch-valid" if self.use_valkyrie else "patches",
-        )
-        self.dir_selection = join(self.dir_output, "selection")
-        self.dir_localization = join(self.dir_output, "localization")
-
         log_file_name = "{}-{}-{}-output.log".format(
             task_config_info[definitions.KEY_ID], self.name.lower(), bug_id
         )
@@ -353,6 +346,13 @@ class AbstractTool(AbstractDriver):
             self.dir_setup = dir_info["local"]["setup"]
             self.dir_output = dir_info["local"]["artifacts"]
             self.dir_base_expr = values.dir_experiments
+
+        self.dir_patch = join(
+            self.dir_output,
+            "patch-valid" if self.use_valkyrie else "patches",
+        )
+        self.dir_selection = join(self.dir_output, "selection")
+        self.dir_localization = join(self.dir_output, "localization")
 
     def timestamp_log(self) -> None:
         time_now = time.strftime("%a %d %b %Y %H:%M:%S %p")

@@ -23,6 +23,8 @@ class AbstractValidateTool(AbstractTool):
     def __init__(self, tool_name: str) -> None:
         self.stats = ValidateToolStats()
         self.tool_type = "validate-tool"
+        self.dir_patch = ""
+        self.dir_validation = ""
         super().__init__(tool_name)
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
