@@ -380,11 +380,11 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
-        tb = traceback.format_exc()
         self.emit_error(e)
-        self.emit_error(tb)
+        tb = traceback.format_tb(e.__traceback__)
+        for l in tb:
+            self.emit_error(l)
         self.stats.error_stats.is_error = True
-        traceback.print_exc(file=sys.stderr)
 
     def watcher(self) -> None:
         event_handler = FileCreationHandler(self.message_queue)
@@ -493,6 +493,12 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_fuzzing_finished(self, base_dir: str) -> None:
         try:
+            resulting_artefacts = self.list_dir(base_dir)
+            if len(resulting_artefacts) == 0 or resulting_artefacts == [base_dir]:
+                self.emit_warning("No results found! Surely an error")
+                self.stats.error_stats.is_error = True
+                return
+
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 
@@ -628,6 +634,12 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_crash_analysis_finished(self, base_dir: str) -> None:
         try:
+            resulting_artefacts = self.list_dir(base_dir)
+            if len(resulting_artefacts) == 0 or resulting_artefacts == [base_dir]:
+                self.emit_warning("No results found! Surely an error")
+                self.stats.error_stats.is_error = True
+                return
+
             base_dir = base_dir
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
