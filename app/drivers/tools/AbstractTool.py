@@ -723,3 +723,11 @@ class AbstractTool(AbstractDriver):
         )
 
     # endregion
+
+    def clean_subject(self, bug_info: Dict[str, Any]) -> None:
+        self.emit_normal(f"cleaning subject")
+        if bug_info.get(self.key_clean_script, None):
+            clean_script = f"{self.dir_setup}/{bug_info[self.key_clean_script]}"
+            clean_command = "bash {}".format(clean_script)
+            log_clean_path = join(self.dir_logs, f"{self.name}-clean.log")
+            self.run_command(clean_command, log_file_path=log_clean_path)

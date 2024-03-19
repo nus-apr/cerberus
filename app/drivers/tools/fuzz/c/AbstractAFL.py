@@ -73,7 +73,7 @@ class AbstractAFL(AbstractFuzzTool):
             self.emit_error(
                 "AFL++ needs to rebuild the project with coverage instrumntation"
             )
-
+        self.clean_subject(bug_info)
         self.prepare_for_fuzz(bug_info)
 
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
