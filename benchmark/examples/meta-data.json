@@ -24,6 +24,7 @@
     "count_pos": 0,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
     "test_script": "test.sh",
     "binary_path": "test",
     "binary_args": "1",
@@ -46,7 +47,7 @@
       {
         "source_file": "test.c",
         "line_numbers": [
-          19
+          7
         ]
       }
     ],
@@ -63,10 +64,12 @@
     "count_pos": 0,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "build_command": "make",
     "test_script": "test.sh",
     "output_dir_abspath": "/output",
     "binary_path": "test",
-    "crash_input": "$POC",
+    "binary_args": "$POC",
     "test_timeout": 10,
     "language": "c"
   },
@@ -95,6 +98,7 @@
     "count_pos": 4,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
     "test_script": "test.sh",
     "binary_path": "test",
     "binary_args": "1",
@@ -126,6 +130,7 @@
     "count_pos": 4,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
     "test_script": "test.sh",
     "binary_path": "test",
     "binary_args": "1",
@@ -157,6 +162,7 @@
     "count_pos": 10,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
     "test_script": "test.sh",
     "binary_path": "gcd",
     "binary_args": "55",
