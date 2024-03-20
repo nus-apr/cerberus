@@ -8,11 +8,9 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 CUR_DIR = os.path.abspath(__file__)[: os.path.abspath(__file__).rindex("/") + 1]
 
-
-<<<<<<< HEAD
-<<<<<<< HEAD:app/drivers/tools/repair/c/AIxCCRepairPrompt.py
-=======
->>>>>>> 3434d3b8c990e07e7c738bd1e5769366f8a018f7
+"""
+Prompt GPT-4 to fix vulnerability
+"""
 class AIxCCRepairPrompt(AbstractRepairTool):
     def __init__(self):
         self.name = os.path.basename(__file__)[:-3].lower()
@@ -23,21 +21,6 @@ class AIxCCRepairPrompt(AbstractRepairTool):
 
     def run_repair(self, bug_info, repair_config_info):
         super(AIxCCRepairPrompt, self).run_repair(bug_info, repair_config_info)
-<<<<<<< HEAD
-=======
-class AIxCCRepairSFT(AbstractRepairTool):
-    def __init__(self):
-        self.name = os.path.basename(__file__)[:-3].lower()
-        super().__init__(self.name)
-        self.image_name = "jiang719/aixcc-repair-sft:latest"
-        self.bug_name = ""
-        self.hash_digest = ""
-
-    def run_repair(self, bug_info, repair_config_info):
-        super(AIxCCRepairSFT, self).run_repair(bug_info, repair_config_info)
->>>>>>> 3434d3b8c990e07e7c738bd1e5769366f8a018f7:app/drivers/tools/repair/c/AIxCCRepairSFT.py
-=======
->>>>>>> 3434d3b8c990e07e7c738bd1e5769366f8a018f7
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -55,17 +38,9 @@ class AIxCCRepairSFT(AbstractRepairTool):
         }
         bug_info_encoded = base64.b64encode(json.dumps(bug_info).encode()).decode()
         tool_info_encoded = base64.b64encode(json.dumps(tool_info).encode()).decode()
-        
+
         timeout_h = str(repair_config_info[self.key_timeout])
-<<<<<<< HEAD
-<<<<<<< HEAD:app/drivers/tools/repair/c/AIxCCRepairPrompt.py
         repair_command = f"bash -c 'cd /home/aixcc-repair/api && python prompt_repair.py {bug_info_encoded} {tool_info_encoded}'"
-=======
-        repair_command = f"bash -c 'cd /home/aixcc-repair/api && python sft_repair.py {bug_info_encoded} {tool_info_encoded}'"
->>>>>>> 3434d3b8c990e07e7c738bd1e5769366f8a018f7:app/drivers/tools/repair/c/AIxCCRepairSFT.py
-=======
-        repair_command = f"bash -c 'cd /home/aixcc-repair/api && python prompt_repair.py {bug_info_encoded} {tool_info_encoded}'"
->>>>>>> 3434d3b8c990e07e7c738bd1e5769366f8a018f7
         repair_command = f"timeout -k 5m {timeout_h}h {repair_command} "
         self.timestamp_log_start()
         status = self.run_command(
