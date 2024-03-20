@@ -1,12 +1,14 @@
 import json
 import os
 import random
+import traceback
 from typing import Any
 from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
 from typing import Sequence
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -45,7 +47,7 @@ def get_client() -> docker.DockerClient:
                 "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
             )
         for image in image_cache:
-            tag_list = image.tags
+            tag_list = image.tags  # type: ignore
             if not tag_list:
                 continue
             for image_tag in tag_list:
@@ -293,7 +295,7 @@ def build_container(
             # Check that the docker version has DeviceRequests
             if docker.__version__ and semver.compare(docker.__version__, "4.3.0") >= 0:
                 container_run_args["device_requests"] = [
-                    docker.types.DeviceRequest(
+                    docker.types.DeviceRequest(  # type: ignore
                         device_ids=gpu,
                         capabilities=[["gpu"]],
                     )
@@ -325,7 +327,9 @@ def build_container(
         )
         container = client.containers.run(image_name, **container_run_args)
         container_id = container.id  # type: ignore
-        return container_id[:12]  # type: ignore
+        shortened_id: str = container_id[:12]  # type: ignore
+        container_list.add(shortened_id)
+        return shortened_id
     except docker.errors.ContainerError as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
@@ -431,6 +435,24 @@ def remove_container(container_id: str) -> None:
         emitter.warning("[warning] unable to remove container: unhandled exception")
 
 
+container_list: Set[str] = set()
+
+
+def clean_containers() -> None:
+    pass
+    # emitter.debug("Removing containers")
+    # emitter.debug(container_list)
+    # client = get_client()
+    # for container_id in list(container_list):
+    #     try:
+    #         container = client.containers.get(container_id)
+    #         container.stop(timeout=5)  # type: ignore
+    #     except Exception as e:  # type: ignore
+    #         emitter.debug(e)
+    #         emitter.debug(traceback.format_tb(e.__traceback__))
+    #         pass
+
+
 def start_container(container_id: str) -> None:
     client = get_client()
     emitter.normal(
@@ -439,6 +461,7 @@ def start_container(container_id: str) -> None:
     try:
         container = client.containers.get(container_id)
         container.start()  # type: ignore
+        container_list.add(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -454,13 +477,13 @@ def start_container(container_id: str) -> None:
 def stop_container(container_id: str, timeout: int = 120) -> None:
     client = get_client()
     emitter.normal(
-        "\t\t\t[framework] stopping docker container {}".format(
-            " " if values.debug else container_id
-        )
+        "\t\t\t[framework] stopping docker container {}".format(container_id)
     )
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=timeout)  # type: ignore
+        if container_id in container_list:
+            container_list.remove(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -480,10 +503,12 @@ def stop_container(container_id: str, timeout: int = 120) -> None:
 
 def kill_container(container_id: str, ignore_errors: bool = False) -> None:
     client = get_client()
-    emitter.normal("\t\t\t[framework] killing docker container")
+    emitter.normal("\t\t\t[framework] killing docker container {}".format(container_id))
     try:
         container = client.containers.get(container_id)
         container.kill()  # type: ignore
+        if container_id in container_list:
+            container_list.remove(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         if not ignore_errors:
             emitter.warning(exp)

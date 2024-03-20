@@ -177,8 +177,22 @@ def prepare_experiment_image(
     else:
         bug_name = str(bug_info[definitions.KEY_BUG_ID])
         subject_name = str(bug_info[definitions.KEY_SUBJECT])
+        # Allow for a special base setup folder if needed
+        dir_setup_extended = (
+            join(
+                values.dir_benchmark,
+                benchmark.name,
+                subject_name,
+                f"{bug_name}-{tag}",
+                "",
+            )
+            if tag
+            else None
+        )
         benchmark.update_dir_info(
-            generate_dir_info(benchmark.name, subject_name, bug_name, tag)
+            generate_dir_info(
+                benchmark.name, subject_name, bug_name, dir_setup_extended
+            )
         )
         experiment_image_id = (
             benchmark.get_exp_image(

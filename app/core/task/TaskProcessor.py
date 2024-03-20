@@ -174,11 +174,23 @@ class TaskProcessor:
                                 subject_name = str(
                                     experiment_item[definitions.KEY_SUBJECT]
                                 )
+                                # Allow for a special base setup folder if needed
+                                dir_setup_extended = (
+                                    os.path.join(
+                                        values.dir_benchmark,
+                                        benchmark_name,
+                                        subject_name,
+                                        f"{bug_name}-{tool_config.tag}",
+                                        "",
+                                    )
+                                    if tool_config.tag
+                                    else None
+                                )
                                 dir_info = generate_dir_info(
                                     benchmark_name,
                                     subject_name,
                                     bug_name,
-                                    tool_config.tag,
+                                    dir_setup_extended,
                                 )
                                 values.use_container = (
                                     tasks_chunk_config.task_config.use_container

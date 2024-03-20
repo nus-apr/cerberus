@@ -1,5 +1,6 @@
 import getpass
 import multiprocessing
+import os
 import signal
 import sys
 import time
@@ -15,6 +16,7 @@ from typing import Optional
 import rich.traceback
 from rich import get_console
 
+from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
@@ -159,6 +161,7 @@ def main() -> None:
         emitter.error(str(e))
         logger.error(traceback.format_exc())
     finally:
+        container.clean_containers()
         get_console().show_cursor(True)
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
@@ -230,11 +233,23 @@ def process_tasks(tasks: TaskList) -> bool:
         tool.tool_tag = tool_tag
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
+        # Allow for a special base setup folder if needed
+        dir_setup_extended = (
+            os.path.join(
+                values.dir_benchmark,
+                benchmark.name,
+                subject_name,
+                f"{bug_name}-{tool_tag}",
+                "",
+            )
+            if tool_tag
+            else None
+        )
         dir_info = generate_dir_info(
             benchmark.name,
             subject_name,
             bug_name,
-            tool_tag,
+            dir_setup_extended,
         )
 
         experiment_image_id = prepare_experiment_image(
@@ -293,6 +308,7 @@ def process_tasks(tasks: TaskList) -> bool:
                 gpus,
                 str(run_index),
                 image_name,
+                dir_setup_extended=dir_setup_extended,
             )
             if err:
                 has_error = True

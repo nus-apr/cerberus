@@ -144,14 +144,23 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_debug(composite_sequence)
 
         root_dir = join(
-            values.dir_main,
-            "composite_workspace",
+            values.dir_composite_workspace,
             "run-{}".format(hash.hexdigest()[:8]),
         )
-        os.makedirs(root_dir, exist_ok=True)
         self.root_dir = root_dir
+        self.root_artifact_dir = join(root_dir, "artifacts")
+        self.root_setups_dir = join(root_dir, "setups")
+        self.root_logs_dir = join(root_dir, "logs")
 
-        self.root_task_mappings = self.make_root_task_mappings(root_dir)
+        for x in [
+            self.root_dir,
+            self.root_artifact_dir,
+            self.root_setups_dir,
+            self.root_logs_dir,
+        ]:
+            os.makedirs(x, exist_ok=True)
+
+        self.root_task_mappings = self.make_root_task_mappings(self.root_artifact_dir)
         self.bug_info = bug_info
 
         self.tool_map: Dict[
@@ -277,8 +286,9 @@ class BasicWorkflow(AbstractCompositeTool):
         self.emit_debug(f"Bindings are {tool.bindings}")
         tool.bindings = tool.bindings or {}
         new_mappings = self.make_task_mappings(
-            tool.name, hash.hexdigest()[:8], self.root_task_mappings
-        )[task_type]
+            tool.name, hash.hexdigest()[:8], self.root_task_mappings, tool.tool_tag
+        )[task_config_info.get(self.key_real_type, task_type)]
+        self.emit_debug(f"New mappings are {new_mappings}")
         for host_dir, _ in new_mappings.items():
             os.makedirs(host_dir, exist_ok=True, mode=0o777)
         tool.bindings.update(new_mappings)
@@ -318,13 +328,19 @@ class BasicWorkflow(AbstractCompositeTool):
             # TODO track multiple cpus
             cpu = self.cpu_queue.get()
 
+            dir_setup_extended = (
+                join(
+                    self.root_setups_dir,
+                    f"{bug_info[self.key_bug_id]}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
+
             with open(
                 join(
-                    list(
-                        self.root_task_mappings[
-                            task_config_info[self.key_real_type]
-                        ].keys()
-                    )[0],
+                    list(new_mappings.keys())[0],
                     "cerberus_internal.json",
                 ),
                 "w",
@@ -339,7 +355,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 bug_info[self.key_bug_id],
                                 hash,
                                 key,
-                                tool_tag,
+                                dir_setup_extended,
                             ),
                             "bug_info": bug_info,
                         }
@@ -358,7 +374,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 run_index,
                 image_name,
                 hash,
-                tool_tag,
+                dir_setup_extended,
             )
             if err:
                 self.stats.error_stats.is_error = True
@@ -388,9 +404,9 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def watcher(self) -> None:
         event_handler = FileCreationHandler(self.message_queue)
-        self.emit_highlight("Observing {}".format(self.root_dir))
+        self.emit_highlight("Observing {}".format(self.root_artifact_dir))
         self.observer.schedule(
-            event_handler, self.root_dir, recursive=True
+            event_handler, self.root_artifact_dir, recursive=True
         )  # type:ignore
         self.observer.start()  # type:ignore
 
@@ -433,6 +449,7 @@ class BasicWorkflow(AbstractCompositeTool):
             ".affinity_lock",
             "plot_data",
             ".synced",
+            ".state",
             "cmdline",
             "trace.sh",
             ".fuzzer_stats_tmp",
@@ -481,7 +498,7 @@ class BasicWorkflow(AbstractCompositeTool):
             ):
                 pass
             else:
-                self.emit_warning("Ignoring file {}".format(event.src_path))
+                self.emit_debug("Ignoring file {}".format(event.src_path))
             # elif (
             #     os.path.commonprefix(
             #         [event.src_path, self.crash_analyze_root]
@@ -493,8 +510,8 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_fuzzing_finished(self, base_dir: str) -> None:
         try:
-            resulting_artefacts = self.list_dir(base_dir)
-            if len(resulting_artefacts) == 0 or resulting_artefacts == [base_dir]:
+            resulting_artefacts = os.listdir(base_dir)
+            if len(resulting_artefacts) == 0:
                 self.emit_warning("No results found! Surely an error")
                 self.stats.error_stats.is_error = True
                 return
@@ -506,8 +523,9 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
+            self.emit_debug(f"Base dir is {base_dir}")
             (base_setup, enhanced_setup) = self.get_setup_directories(
-                self.fuzz_root, subtask_tag
+                base_dir, subtask_tag
             )
 
             self.emit_debug(f"Setup dir is {base_setup}")
@@ -567,6 +585,7 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_crash_found(self, event: FileSystemEvent) -> None:
         try:
+            # self.emit_debug("Crash found! {}".format(event))
             crash_dir = dirname(event.src_path)
             benign_dir = join(dirname(crash_dir), "queue")
             current_time = int(time.time())
@@ -581,10 +600,11 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
+            # Assumption - the fuzzer is at the start of the chain, therefore I can take this directly from the proto args
             base_setup = self.proto_args[0]["local"]["setup"]
             self.emit_debug(f"Base setup dir is {base_setup}")
             enhanced_setup = join(
-                dirname(os.path.normpath(base_setup)),
+                self.root_setups_dir,
                 f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
             )
             self.emit_debug(f"New setup dir is {enhanced_setup}")
@@ -634,7 +654,8 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_crash_analysis_finished(self, base_dir: str) -> None:
         try:
-            resulting_artefacts = self.list_dir(base_dir)
+            self.emit_error("Base dir is {}".format(base_dir))
+            resulting_artefacts = os.listdir(base_dir)
             if len(resulting_artefacts) == 0 or resulting_artefacts == [base_dir]:
                 self.emit_warning("No results found! Surely an error")
                 self.stats.error_stats.is_error = True
@@ -649,7 +670,7 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_tag = subtask_hash.hexdigest()[:8]
 
             (base_setup, enhanced_setup) = self.get_setup_directories(
-                self.crash_analyze_root, subtask_tag
+                base_dir, subtask_tag
             )
 
             self.emit_debug(f"Setup dir is {base_setup}")
@@ -725,6 +746,7 @@ class BasicWorkflow(AbstractCompositeTool):
     def on_selection_finished(self, event: FileSystemEvent) -> None:
         self.emit_highlight("Selection finished")
         self.emit_normal("The workflow has finished for this path.")
+        #  self.on_task_finished(event, [])
         pass
 
     def validate_metadata(self, metadata: List[Dict[str, Any]]) -> None:
@@ -752,8 +774,16 @@ class BasicWorkflow(AbstractCompositeTool):
             subtask_hash.update(str(time.time()).encode("utf-8"))
             subtask_tag = subtask_hash.hexdigest()[:8]
 
+            root_folder = os.path.dirname(event.src_path)
+            # If a meta-data.json is created at composite-workspace/run-x/artifacts/tool/../meta-data.json
+            # I want to access composite-workspace/run-x/artifacts/tool/cerberus-internal
+            while (
+                os.path.dirname(os.path.dirname(root_folder)) != self.root_artifact_dir
+            ):
+                root_folder = os.path.dirname(root_folder)
+
             (base_setup, enhanced_setup) = self.get_setup_directories(
-                self.localize_root, subtask_tag
+                root_folder, subtask_tag
             )
 
             self.emit_debug(f"Setup dir is {base_setup}")
@@ -954,7 +984,9 @@ class BasicWorkflow(AbstractCompositeTool):
         """
         Extracts the setup directories from the internal representation or the proto arguments.
         """
+        self.emit_debug("Root directory is {}".format(root))
         if os.path.isfile(join(root, "cerberus_internal.json")):
+            self.emit_debug("Found internal representation at {}".format(root))
             with open(join(root, "cerberus_internal.json"), "r") as f:
                 data = json.loads(f.read())
                 dir_info = data["dir_info"]
@@ -964,19 +996,19 @@ class BasicWorkflow(AbstractCompositeTool):
                 if len(previous_setup.split("-")[-1]) == 8:
                     # The last argument is either the run index or the tool tag and for the run index to be reaching 8 digits, that is suspicious
                     enhanced_setup = join(
-                        dirname(os.path.normpath(base_setup)),
+                        self.root_setups_dir,
                         f"{previous_setup[:-9]}-{subtask_tag}",
                     )
                 else:
                     enhanced_setup = join(
-                        dirname(os.path.normpath(base_setup)),
+                        self.root_setups_dir,
                         f"{previous_setup}-{subtask_tag}",
                     )
         else:
             dir_info = self.proto_args[0]
             base_setup = dir_info["local"]["setup"]
             enhanced_setup = join(
-                dirname(os.path.normpath(base_setup)),
+                self.root_setups_dir,
                 f"{basename(os.path.normpath(base_setup))}-{subtask_tag}",
             )
         return (base_setup, enhanced_setup)
@@ -1020,12 +1052,18 @@ class BasicWorkflow(AbstractCompositeTool):
         tool_name: str,
         hash: str,
         root_mappings: Dict[CompositeTaskType, Dict[str, Dict[str, str]]],
+        tool_tag: Optional[str] = None,
     ) -> Dict[CompositeTaskType, Dict[str, Dict[str, str]]]:
         res: Dict[CompositeTaskType, Dict[str, Dict[str, str]]] = {}
         for task_type, dir_mapping in root_mappings.items():
             new_mapping = {}
             for host_dir, container_dir_mapping in dir_mapping.items():
-                new_mapping[f"{host_dir}-{tool_name}-{hash}"] = container_dir_mapping
+                new_mapping[
+                    join(
+                        host_dir,
+                        (f"{tool_name}{ ('-' + tool_tag if tool_tag else '') }-{hash}"),
+                    )
+                ] = container_dir_mapping
             res[task_type] = new_mapping
         return res
 

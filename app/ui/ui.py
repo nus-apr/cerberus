@@ -325,7 +325,22 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
-            dir_info = generate_dir_info(benchmark.name, subject_name, bug_name, tag)
+            # Allow for a special base setup folder if needed
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    benchmark.name,
+                    subject_name,
+                    f"{bug_name}-{tag}",
+                    "",
+                )
+                if tag
+                else None
+            )
+
+            dir_info = generate_dir_info(
+                benchmark.name, subject_name, bug_name, dir_setup_extended
+            )
             benchmark.update_dir_info(dir_info)
             try:
                 emitter.information(
@@ -451,11 +466,24 @@ class Cerberus(App[List[Result]]):
                     bug_name, subject_name
                 )
             )
+            # Allow for a special base setup folder if needed
+            tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    benchmark.name,
+                    subject_name,
+                    f"{bug_name}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
             dir_info = generate_dir_info(
                 benchmark.name,
                 subject_name,
                 bug_name,
-                task_profile.get(definitions.KEY_TOOL_TAG, ""),
+                dir_setup_extended,
             )
             benchmark.update_dir_info(dir_info)
             try:
@@ -804,6 +832,18 @@ class Cerberus(App[List[Result]]):
 
             status = TaskStatus.SUCCESS
             dir_info: DirectoryInfo = {}
+            tool_tag = cast(str, message.task_profile.get(definitions.KEY_TOOL_TAG, ""))
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    message.benchmark.name,
+                    message.experiment_item[definitions.KEY_SUBJECT],
+                    f"{message.experiment_item[definitions.KEY_BUG_ID]}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
             try:
                 err, dir_info = task.run(
                     message.benchmark,
@@ -816,6 +856,7 @@ class Cerberus(App[List[Result]]):
                     gpus,
                     str(message.run),
                     message.experiment_image_id,
+                    dir_setup_extended=dir_setup_extended,
                 )
                 if err:
                     status = TaskStatus.FAIL
