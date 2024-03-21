@@ -2,12 +2,14 @@ import os
 import re
 import subprocess
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class FAVOR(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.dir_root = "/FAVOR/"
@@ -17,8 +19,13 @@ class FAVOR(AbstractRepairTool):
         )
 
     def prepare_for_repair(
-        self, buggy_filepath, buggy_loc, test_case_path, binary_path, crash_command
-    ):
+        self,
+        buggy_filepath: str,
+        buggy_loc: int,
+        test_case_path: str,
+        binary_path: str,
+        crash_command: str,
+    ) -> None:
         # removing comments from source file and extracting the buggy function execute path
         # buggy_loc_strs = " ".join(map(str, buggy_loc))
         buggy_loc_command = f"--bug_loc 0"
@@ -44,7 +51,9 @@ class FAVOR(AbstractRepairTool):
         )
         self.process_status(status)
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
         self.dir_logs - directory to store logs
         self.dir_setup - directory to access setup scripts
@@ -52,18 +61,30 @@ class FAVOR(AbstractRepairTool):
         self.dir_output - directory to store artifacts/output
         """
 
-        super(FAVOR, self).run_repair(bug_info, repair_config_info)
-        buggy_loc = bug_info.get("line_numbers")
-        test_case = bug_info.get("exploit_file_list")
-        benchmark = bug_info.get("benchmark")
-        subject = bug_info.get("subject")
-        bug_id = bug_info.get("bug_id")
+        buggy_loc = bug_info.get("line_numbers", None)
+        test_case = bug_info.get("exploit_file_list", [])
+        if not test_case:
+            self.emit_error("No test cases provided for the bug")
+        source_file = bug_info.get("source_file", None)
+        if not source_file:
+            self.emit_error("No source file provided for the bug")
+        binary_path = bug_info.get("binary_path", None)
+        if not binary_path:
+            self.emit_error("No binary path provided for the bug")
+        config_script = bug_info.get("config_script", None)
+        if not config_script:
+            self.emit_error("No config script provided for the bug")
+        build_script = bug_info.get("build_script", None)
+        if not build_script:
+            self.emit_error("No build script provided for the bug")
+        crash_command = bug_info.get("crash_cmd", None)
+        if not crash_command:
+            self.emit_error("No crash command provided for the bug")
+
         test_case_path = os.path.join(self.dir_setup, test_case[0])
-        buggy_file_path = os.path.join(
-            self.dir_expr, f"src", bug_info.get("source_file")
-        )
-        binary_path = os.path.join(self.dir_expr, f"src", bug_info.get("binary_path"))
-        crash_command = bug_info.get("crash_input").replace("$POC", test_case_path)
+        buggy_file_path = os.path.join(self.dir_expr, f"src", source_file)
+        binary_path = os.path.join(self.dir_expr, f"src", binary_path)
+        crash_command = crash_command.replace("$POC", test_case_path)
 
         if not self.is_file(buggy_file_path):
             self.error_exit("buggy source file not found")
@@ -73,8 +94,8 @@ class FAVOR(AbstractRepairTool):
             buggy_loc = 0
 
         clean_script = os.path.join(self.dir_setup, f"clean_subject")
-        config_script = os.path.join(self.dir_setup, bug_info.get("config_script"))
-        build_script = os.path.join(self.dir_setup, bug_info.get("build_script"))
+        config_script = os.path.join(self.dir_setup, config_script)
+        build_script = os.path.join(self.dir_setup, build_script)
 
         self.run_command(
             clean_script, log_file_path=self.log_output_path, dir_path=self.dir_root
@@ -91,7 +112,7 @@ class FAVOR(AbstractRepairTool):
         )
         self.timestamp_log_start()
         self.emit_normal("running repair phase")
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         favor_command = (
             "bash -c 'source /root/anaconda3/etc/profile.d/conda.sh && cd {} && conda activate favor "
             "&& timeout -k 5m {}h sh ./favor.sh >> {}'".format(
@@ -120,7 +141,7 @@ class FAVOR(AbstractRepairTool):
         self.process_status(status)
         self.timestamp_log_end()
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -143,7 +164,7 @@ class FAVOR(AbstractRepairTool):
         # self.process_status(status)
         super(FAVOR, self).save_artifacts(dir_info)
 
-    # def analyse_output(self, dir_info, bug_id, fail_list):
+    # def analyse_output(self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]):
     #     """
     #     analyse tool output and collect information
     #     output of the tool is logged at self.log_output_path

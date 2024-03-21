@@ -35,6 +35,12 @@ task_profile_schema = {
     "properties": {
         ConfigFieldsEnum.PROFILE_ID.value: {"type": "string"},
         ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.FUZZ_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.REPAIR_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.LOCALIZE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.VALIDATE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.SELECT_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.COMPOSITE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FAULT_LOCATION.value: {"type": "string"},
         ConfigFieldsEnum.PASSING_TEST_RATIO.value: {
             "type": "number",
@@ -250,7 +256,7 @@ tool_config_schema = {
         ConfigFieldsEnum.HASH_DIGEST.value: {"type": "string"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 composite_sequence_schema = {
@@ -258,23 +264,18 @@ composite_sequence_schema = {
     "title": "Composite Sequence",
     "type": "object",
     "properties": {
-        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.SLICE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.ORCHESTRATOR.value: {"type": "string"},
+        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.CRASH_ANALYZE.value: {
+            "type": "array",
+            "items": tool_config_schema,
+        },
+        ConfigFieldsEnum.SLICE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.VALIDATE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": tool_config_schema},
     },
-    "anyOf": [
-        ConfigFieldsEnum.FUZZ.value,
-        ConfigFieldsEnum.ANALYZE.value,
-        ConfigFieldsEnum.LOCALIZE.value,
-        ConfigFieldsEnum.SLICE.value,
-        ConfigFieldsEnum.REPAIR.value,
-        ConfigFieldsEnum.SELECT.value,
-    ],
-    "required": [ConfigFieldsEnum.ORCHESTRATOR.value],
     "additionalProperties": False,
 }
 

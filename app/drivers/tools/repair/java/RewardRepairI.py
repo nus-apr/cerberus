@@ -2,9 +2,14 @@ import csv
 import os
 import time
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
 from app.core import definitions
 from app.core import values
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -15,36 +20,43 @@ class RewardRepairI(AbstractRepairTool):
 
     SECS_PER_HOUR = 3600
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "thanhlecong/rewardrepair:cerberus"
         self.bug_name = ""
         self.dir_fl = join(values.dir_main, "localization", "ochiai")
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(RewardRepairI, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
         top_n = 200
 
         tool_dir = "/repair/RewardRepair"
 
-        if repair_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
-            if len(bug_info[self.key_fix_lines]) == 0:
+        if task_config_info[definitions.KEY_CONFIG_FIX_LOC] == "line":
+            if (
+                self.key_localization in bug_info
+                or len(bug_info[self.key_localization]) == 0
+            ):
                 self.error_exit("no line number to fix")
 
-            locations = [
-                (
-                    bug_info[self.key_fix_file].replace(".", "/"),
-                    bug_info[self.key_fix_lines][0],
+            locations = list(
+                map(
+                    lambda x: (
+                        x[self.key_fix_file].replace(".", "/"),
+                        x[self.key_fix_lines][0],
+                    ),
+                    bug_info[self.key_localization],
                 )
-            ]
+            )
         else:
             fl_file = join(self.dir_fl, f"{bug_info[self.key_bug_id]}.csv")
             if not os.path.isfile(fl_file):
@@ -60,7 +72,7 @@ class RewardRepairI(AbstractRepairTool):
         self.timestamp_log_start()
         time_start = time.time()
 
-        timeout_h = float(repair_config_info[self.key_timeout])
+        timeout_h = float(task_config_info[self.key_timeout])
 
         for fix_file, fix_line in locations:
             out_dir = join(self.dir_output, f"{fix_file.replace('/', '.')}-{fix_line}")
@@ -106,7 +118,7 @@ class RewardRepairI(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -115,7 +127,9 @@ class RewardRepairI(AbstractRepairTool):
         """
         super().save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

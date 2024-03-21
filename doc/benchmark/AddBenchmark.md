@@ -14,17 +14,22 @@ Create a new file in `app/drivers/benchmarks/<language of benchmark>` with the B
 import shutil
 import os
 from os.path import join
+from typing import Dict
+from typing import Optional
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.core.utilities import execute_command
 from app import definitions, values, emitter
 
 
 class NewBenchmark(AbstractBenchmark):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewBenchmark, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         is_error = super(Defects4J, self).setup_experiment(
             bug_index, container_id, test_all
         )
@@ -39,31 +44,31 @@ class NewBenchmark(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def deploy(self, bug_id, container_id):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tdownloading experiment subject")
         return True
 
-    def config(self, bug_id, container_id):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tconfiguring experiment subject")
         return True
 
-    def build(self, bug_id, container_id):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tbuilding experiment subject")
         return True
 
-    def test(self, bug_id, container_id):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\ttesting experiment subject")
         return True
 
-    def verify(self, bug_id, container_id):
+    def verify(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\tverify dev patch and test-oracle")
         return True
 
-    def transform(self, bug_id, container_id):
+    def transform(self, bug_index: int, container_id: Optional[str]) -> bool:
         emitter.normal("\t\t\ttransform fix-file")
         return True
 
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
         emitter.normal("\t\t\tremoving experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
@@ -128,18 +133,18 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
   information
 * Common but not mandatory:
   * `source_file` - The specific file containing the bug
-  * `failing_test` - A string or a list containing test identifiers for tests which fail
-  * `passing_test` -  A string or a list containing test identifiers for tests which pass
-  * `count_pos` - The amount of tests in `failing_test`
-  * `count_neg` - The amount of tests in `passing_test`
+  * `failing_test_identifiers` - A string or a list containing test identifiers for tests which fail
+  * `passing_test_identifiers` -  A string or a list containing test identifiers for tests which pass
+  * `count_pos` - The amount of tests in `failing_test_identifiers`
+  * `count_neg` - The amount of tests in `passing_test_identifiers`
   * `config_script` - A path to the name of the configuration script. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `build_script` - A path to the configuration script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `clean_script`  - A path to the clean-up script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `build_script`  - A path to the build script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`
   * `test_script` - A path to the test script for the bug. The path is relative to the directory of the bug, e.g. `subject-a/1`. The script should be able to accept the keyword `all` to allow for execution of all tests or the identifier for test. This can be benchmark specific but a preferable standard can be either a file path to indicate input files or name of a test method `file::method`.
   * `language` - The language of the subject. `multi` if there is more than one
-  * `crash_input` - command to execute the binary. `$POC` represents where the input should be passed
-  * `exploit_file_list` - a list of crashing inputs. Similar to `failing_test`
+  * `binary_args` - command to execute the binary. `$POC` represents where the input should be passed
+  * `exploit_file_list` - a list of crashing inputs. Similar to `failing_test_identifiers`
 * Java:
   * `dependencies` - specific dependencies of the project.
   * `source_directory` - the location of the .java files for the project. Path is relative to the root of the project.
@@ -162,10 +167,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,
@@ -183,10 +188,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,
@@ -204,10 +209,10 @@ The metadata file has a couple of mandatory fields, which Cerberus directly util
         "line_numbers": [],
         "language": "",
         "bug_type": "Test Failure",
-        "failing_test": [
+        "failing_test_identifiers": [
             "Test Identifier",
         ],
-        "passing_test": [
+        "passing_test_identifiers": [
             "Test Identifier"
         ],
         "count_neg": 1,

@@ -8,19 +8,19 @@
   "TP2": {
     "id": "TP2",
     "timeout": 1,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 1
   },
   "TP3": {
     "id": "TP3",
     "timeout": 1,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 0
   },
   "TP4": {
     "id": "TP4",
     "timeout": 1,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 0.5
   },
   "TP5": {
@@ -32,19 +32,19 @@
   "TP6": {
     "id": "TP6",
     "timeout": 2,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 1
   },
   "TP7": {
     "id": "TP7",
     "timeout": 2,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 0
   },
   "TP8": {
     "id": "TP8",
     "timeout": 2,
-    "fault_location": "dev",
+    "fault_location": "tool",
     "passing_test_ratio": 0.5
   }
 }

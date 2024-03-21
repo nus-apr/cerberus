@@ -1,7 +1,10 @@
 import argparse
 import multiprocessing
+from argparse import Action
 from argparse import HelpFormatter
+from argparse import Namespace
 from operator import attrgetter
+from typing import Iterable
 
 from app.core import definitions
 from app.core import utilities
@@ -9,12 +12,12 @@ from app.core import values
 
 
 class SortingHelpFormatter(HelpFormatter):
-    def add_arguments(self, actions):
+    def add_arguments(self, actions: Iterable[Action]) -> None:
         actions = sorted(actions, key=attrgetter("option_strings"))
         super(SortingHelpFormatter, self).add_arguments(actions)
 
 
-def parse_args():
+def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
         prog=values.tool_name,
         usage="%(prog)s [options]",
@@ -280,7 +283,6 @@ def parse_args():
     optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")
     optional.add_argument(
         definitions.ARG_BUG_ID_LIST,
-        type=list,  # type: ignore
         help="list of identifiers for the bugs",
         nargs="+",
         default=[],

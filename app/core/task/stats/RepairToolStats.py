@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Any
+from typing import Callable
 from typing import Dict
 
 from app.core import emitter
@@ -14,13 +15,13 @@ class RepairToolStats(ToolStats):
     bug_info: Dict[str, Any]
     config_info: Dict[str, Any]
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.patch_stats = PatchStats()
         self.bug_info = {}
         self.config_info = {}
         super(RepairToolStats, self).__init__()
 
-    def get_dict(self):
+    def get_dict(self) -> Dict[str, Any]:
         res = super(RepairToolStats, self).get_dict()
         res["details"]["space"] = self.patch_stats.get_dict()
         if "info" not in res:
@@ -29,7 +30,7 @@ class RepairToolStats(ToolStats):
         res["info"]["config-info"] = self.config_info
         return res
 
-    def write(self, printer, prefix=""):
+    def write(self, printer: Callable[[str], Any], prefix: str = "") -> None:
         printer("{1} search space size: {0}\n".format(self.patch_stats.size, prefix))
         printer(
             "{1} count enumerations: {0}\n".format(

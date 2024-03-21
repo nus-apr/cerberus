@@ -2,7 +2,12 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
@@ -14,13 +19,13 @@ class Infer(AbstractAnalyzeTool):
         "Double Free": "DOUBLE_FREE",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # the version in ubuntu-18 as better compatibility with the VulnLoc benchmark
         self.image_name = "yuntongzhang/infer:facebook-ubuntu-18"
 
-    def prepare(self, bug_info):
+    def pre_process(self, bug_info: Dict[str, Any]) -> None:
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
@@ -33,8 +38,10 @@ class Infer(AbstractAnalyzeTool):
                 bug_info.get("java_version", 8)
             )
             if int(bug_info.get("java_version", 8)) == 8:
-                self.run_command(f"update-java-alternatives -s java-1.8.0-openjdk-amd64")
-        
+                self.run_command(
+                    f"update-java-alternatives -s java-1.8.0-openjdk-amd64"
+                )
+
         clean_command = bug_info.get(self.key_clean_command, "make clean")
         self.run_command(clean_command, dir_path=dir_src)
 
@@ -67,11 +74,11 @@ class Infer(AbstractAnalyzeTool):
             )
         )
 
-    def run_analysis(self, bug_info, repair_config_info):
-        self.prepare(bug_info)
-        super(Infer, self).run_analysis(bug_info, repair_config_info)
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
 
         self.timestamp_log_start()
         dir_src = join(self.dir_expr, "src")
@@ -89,7 +96,7 @@ class Infer(AbstractAnalyzeTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         infer_output = join(self.dir_expr, "src", "infer-out")
         infer_report_json = join(infer_output, "report.json")
         infer_report_txt = join(infer_output, "report.txt")
@@ -100,7 +107,9 @@ class Infer(AbstractAnalyzeTool):
         super(Infer, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> AnalysisToolStats:
         self.emit_normal("reading output logs")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

@@ -1,18 +1,25 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.SliceToolStats import SliceToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.slice.AbstractSliceTool import AbstractSliceTool
 
 
 class AutoBug(AbstractSliceTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/autobug"
         self.id = ""
 
-    def instrument_program(self, config_script, build_script, binary_path):
+    def instrument_program(
+        self, config_script: str, build_script: str, binary_path: str
+    ) -> None:
         self.emit_normal("re-running configuration")
         instrument_script_path = self.dir_expr + "/autobug-instrumentation"
         dir_src = join(self.dir_expr, "src")
@@ -32,7 +39,9 @@ class AutoBug(AbstractSliceTool):
         log_instrument_path = join(self.dir_logs, f"{self.name}-instrument.log")
         self.run_command(instrument_command, log_file_path=log_instrument_path)
 
-    def run_slicing(self, bug_info, validate_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
         binary_path = bug_info.get(self.key_bin_path, None)
@@ -52,7 +61,6 @@ class AutoBug(AbstractSliceTool):
         abs_binary_path = join(self.dir_expr, "src", binary_path)
 
         self.instrument_program(config_script_path, build_script_path, abs_binary_path)
-        super(AutoBug, self).run_slicing(bug_info, validate_config_info)
 
         if "$POC" in crash_command:
             exploit_list = bug_info.get(self.key_exploit_list, None)
@@ -65,14 +73,14 @@ class AutoBug(AbstractSliceTool):
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         self.id = bug_id
-        timeout = str(validate_config_info[self.key_timeout])
+        timeout = str(task_config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
         timeout_m = str(float(timeout) * 60)
-        additional_tool_param = validate_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.timestamp_log_start()
         slice_command = (
             "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {0}h {1} {2} ".format(
@@ -90,7 +98,9 @@ class AutoBug(AbstractSliceTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> SliceToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

@@ -7,7 +7,9 @@ from argparse import Namespace
 from copy import deepcopy
 from os.path import join
 from typing import Any
+from typing import cast
 from typing import Dict
+from typing import Iterable
 from typing import List
 
 from app.core import definitions
@@ -35,7 +37,7 @@ def load_profiles(profile_file_path: str) -> Dict[str, Dict[str, Any]]:
     return json_data
 
 
-def load_class(class_name: str):
+def load_class(class_name: str) -> Any:
     components = class_name.split(".")
     mod = __import__(components[0])
     for comp in components[1:]:
@@ -65,7 +67,7 @@ def load_tool(tool_name: str, tool_type: str) -> AbstractTool:
         )
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
-        return initializer()
+        return cast(AbstractTool, initializer())
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
@@ -97,7 +99,7 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
         )
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
-        return initializer()
+        return cast(AbstractBenchmark, initializer())
 
 
 class Configurations:
@@ -143,7 +145,7 @@ class Configurations:
     }
     __runtime_config_values = __default_config_values
 
-    def convert_range(self, x):
+    def convert_range(self, x: str) -> Iterable[int]:
         parts = x.split("-")
         if len(parts) == 1:
             return [int(parts[0])]
@@ -153,9 +155,9 @@ class Configurations:
         end = 9999 if parts[1] == "" else int(parts[1])
         return range(start, end + 1)
 
-    def read_arg_list(self, arg_list: Namespace):
+    def read_arg_list(self, arg_list: Namespace) -> None:
         emitter.normal("\t[framework] reading configuration values from arguments")
-        flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
+
         self.__runtime_config_values["task-type"] = arg_list.task_type
 
         if arg_list.docker_host:
@@ -228,7 +230,7 @@ class Configurations:
 
         if arg_list.bug_index_list:
             self.__runtime_config_values["bug-index-list"] = list(
-                flat_map(
+                utilities.flat_map(
                     self.convert_range,
                     str(arg_list.bug_index_list).split(","),
                 )
@@ -272,16 +274,16 @@ class Configurations:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
         if arg_list.task_profile_id_list:
-            self.__runtime_config_values[
-                "task-profile-id-list"
-            ] = arg_list.task_profile_id_list
+            self.__runtime_config_values["task-profile-id-list"] = (
+                arg_list.task_profile_id_list
+            )
 
         if arg_list.container_profile_id_list:
-            self.__runtime_config_values[
-                "container-profile-id-list"
-            ] = arg_list.container_profile_id_list
+            self.__runtime_config_values["container-profile-id-list"] = (
+                arg_list.container_profile_id_list
+            )
 
-    def read_slack_config_file(self):
+    def read_slack_config_file(self) -> None:
         slack_config_info = {}
         if self.__slack_config_file:
             slack_config_info = json.load(self.__slack_config_file)
@@ -304,7 +306,7 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for slack.")
 
-    def read_email_config_file(self):
+    def read_email_config_file(self) -> None:
         email_config_info = {}
         if self.__email_config_file:
             email_config_info = json.load(self.__email_config_file)
@@ -324,7 +326,7 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for email.")
 
-    def read_discord_config_file(self):
+    def read_discord_config_file(self) -> None:
         discord_config_info = {}
         if self.__discord_config_file:
             discord_config_info = json.load(self.__discord_config_file)
@@ -343,12 +345,14 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for discord.")
 
-    def print_configuration(self):
+    def print_configuration(self) -> None:
         for config_key, config_value in self.__runtime_config_values.items():
             if config_value is not None:
                 emitter.configuration(config_key, config_value)
 
-    def filter_experiment_list(self, benchmark: AbstractBenchmark):
+    def filter_experiment_list(
+        self, benchmark: AbstractBenchmark
+    ) -> List[Dict[str, Any]]:
         filtered_list = []
         experiment_list = benchmark.get_list()
         for bug_index in range(1, benchmark.size + 1):
@@ -454,7 +458,7 @@ class Configurations:
         for tool_name in self.tool_list:
             tool = load_tool(tool_name, self.task_type)
             if not values.only_analyse:
-                tool.check_tool_exists()
+                tool.ensure_tool_exists()
             tool_list.append(tool)
         emitter.highlight(
             f"\t[framework] {self.task_type}-tool(s): "
@@ -467,7 +471,7 @@ class Configurations:
         emitter.highlight(f"\t[framework] {self.task_type}-benchmark: {benchmark.name}")
         return benchmark
 
-    def update_configuration(self):
+    def update_configuration(self) -> None:
         emitter.normal("\t[framework] updating configuration values")
         self.task_type = self.__runtime_config_values["task-type"]
         values.task_type.set(self.__runtime_config_values["task-type"])

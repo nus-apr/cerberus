@@ -1,11 +1,16 @@
 import os
 from pathlib import Path
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class ET(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         # self.image_name = "et-dev"
@@ -14,15 +19,17 @@ class ET(AbstractRepairTool):
             "sha256:76644b641521cd0d3917c2bb1e5e99d7d5b9c54fef3f070c85455c5f7f0acd61"
         )
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(ET, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         self.timestamp_log_start()
 
         # print('!!! begin')
         # return #####
 
         assert bug_info["language"] == "java"
-        assert len(bug_info["failing_test"]) > 0
+        assert len(bug_info[self.key_failing_test_identifiers]) > 0
 
         """
             self.dir_logs - directory to store logs
@@ -33,13 +40,13 @@ class ET(AbstractRepairTool):
 
         repo_path = (Path(self.dir_expr) / "src").resolve()
         setup_path = Path(self.dir_setup).resolve()
-        # print(bug_info, repair_config_info, self.container_id)
+        # print(bug_info, task_config_info, self.container_id)
 
         # test list maybe `com.clz::mtd` or `com.clz`, let's make them into `com.clz`
 
         test_failed = []
         test_failed_set = set()
-        for t in bug_info["failing_test"]:
+        for t in bug_info[self.key_failing_test_identifiers]:
             t = t.partition("::")[0]
             if t not in test_failed_set:
                 test_failed_set.add(t)
@@ -47,7 +54,7 @@ class ET(AbstractRepairTool):
 
         test_passed = []
         test_passed_set = set()
-        for t in bug_info["passing_test"]:
+        for t in bug_info[self.key_passing_test_identifiers]:
             t = t.partition("::")[0]
             if t not in test_failed_set and t not in test_passed_set:
                 test_passed_set.add(t)
@@ -80,14 +87,14 @@ class ET(AbstractRepairTool):
                 "test_failed": test_failed,
                 "test_timeout": bug_info["test_timeout"],
                 "test_sh_fn": bug_info["test_script"],
-                "total_timeout_s": int(float(repair_config_info["timeout"]) * 3600),
-                "cpus": repair_config_info["cpus"],
-                "gpus": repair_config_info["gpus"],
+                "total_timeout_s": int(float(task_config_info["timeout"]) * 3600),
+                "cpus": task_config_info["cpus"],
+                "gpus": task_config_info["gpus"],
             },
             "/root/workflow/info.json",
         )
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         command = 'bash -c "python3 /root/workflow/main.py"'
         repair_command = f"timeout -k 5m {timeout_h}h {command} "
 
@@ -103,7 +110,7 @@ class ET(AbstractRepairTool):
 
         # print('!!! end')
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -121,7 +128,9 @@ class ET(AbstractRepairTool):
         super().save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -149,7 +158,7 @@ class ET(AbstractRepairTool):
 
         if not stats:
             self.stats.error_stats.is_error = True
-            return
+            return self.stats
 
         self.stats.patch_stats.size = stats["n_generated"]
         self.stats.patch_stats.enumerations = stats["n_validated"]

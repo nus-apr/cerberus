@@ -1,17 +1,22 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Fix2Fit(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "yuntongzhang/fix2fit"
 
-    def generate_test_driver(self, test_script):
+    def generate_test_driver(self, test_script: str) -> str:
         self.emit_normal(f"preparing test driver for {self.name}")
         test_driver_path = self.dir_expr + f"/{self.name}-test"
         self.write_file(
@@ -22,7 +27,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return test_driver_path
 
-    def generate_build_driver(self, build_script):
+    def generate_build_driver(self, build_script: str) -> str:
         self.emit_normal(f"preparing build driver for {self.name}")
         build_driver_path = self.dir_expr + f"/{self.name}-build"
         self.write_file(
@@ -36,7 +41,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return build_driver_path
 
-    def generate_config_driver(self, config_script):
+    def generate_config_driver(self, config_script: str) -> str:
         self.emit_normal(f"preparing config driver for {self.name}")
         config_driver_path = self.dir_expr + f"/{self.name}-config"
         dir_src = join(self.dir_expr, "src")
@@ -51,7 +56,7 @@ class Fix2Fit(AbstractRepairTool):
         self.run_command(permission_command)
         return config_driver_path
 
-    def clean_subject(self):
+    def clean_subject(self) -> None:
         self.emit_normal(f"cleaning previous artifacts")
         clean_script = self.dir_expr + f"{self.name}-clean"
         dir_src = join(self.dir_expr, "src")
@@ -68,7 +73,9 @@ class Fix2Fit(AbstractRepairTool):
         log_clean_path = join(self.dir_logs, f"{self.name}-clean.log")
         self.run_command(clean_command, log_file_path=log_clean_path)
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
         test_script = bug_info.get(self.key_test_script, None)
@@ -88,32 +95,34 @@ class Fix2Fit(AbstractRepairTool):
         build_driver = self.generate_build_driver(build_script_path)
         test_driver = self.generate_test_driver(test_script_path)
         self.clean_subject()
-        super(Fix2Fit, self).run_repair(bug_info, repair_config_info)
+
         if self.is_instrument_only:
             return
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
-        fix_location = bug_info[self.key_fix_file]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_file]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         abs_path_binary = join(self.dir_expr, "src", bug_info[self.key_bin_path])
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += test_id + " "
-        if passing_test_list:
-            for test_id in passing_test_list:
+        if passing_test_identifiers_list:
+            for test_id in passing_test_identifiers_list:
                 test_id_list += test_id + " "
 
         abs_path_buggy_file = join(
             self.dir_expr,
             "src",
-            fix_location
-            if fix_location
-            else self.read_file(self.dir_expr + "/manifest.txt")[0],
+            (
+                fix_location
+                if fix_location
+                else self.read_file(self.dir_expr + "/manifest.txt")[0]
+            ),
         )
 
         self.timestamp_log_start()
@@ -128,15 +137,13 @@ class Fix2Fit(AbstractRepairTool):
             "BUILD": build_driver,
             "DRIVER": test_driver,
             "BINARY": abs_path_binary,
-            "T_TIMEOUT": "{}000".format(
-                repair_config_info[self.key_config_timeout_test]
-            ),
-            "TIMEOUT": "{}h; ".format(repair_config_info[self.key_timeout]),
+            "T_TIMEOUT": "{}000".format(task_config_info[self.key_config_timeout_test]),
+            "TIMEOUT": "{}h; ".format(task_config_info[self.key_timeout]),
             "BINARY_INPUT": bug_info[self.key_crash_cmd],
         }
 
         repair_command = "timeout -k 5m {}h bash /src/scripts/run.sh ".format(
-            str(repair_config_info[self.key_timeout])
+            str(task_config_info[self.key_timeout])
         )
         repair_command += " >> {0} 2>&1 ".format(self.log_output_path)
         status = self.run_command(
@@ -147,14 +154,16 @@ class Fix2Fit(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         dir_patch = join(self.dir_expr, "patches")
-        self.run_command("mkdir /output")
+        self.run_command("mkdir {}".format(self.dir_output))
         self.run_command("cp -rf {} {}/patches".format(dir_patch, self.dir_output))
         super(Fix2Fit, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))
@@ -178,7 +187,7 @@ class Fix2Fit(AbstractRepairTool):
         self.emit_highlight(" Log File: " + self.log_output_path)
 
         is_timeout = True
-        reported_failing_test = []
+        reported_failing_test_identifiers = []
         if self.is_file(dir_results + "/original.txt"):
             log_lines = self.read_file(dir_results + "/original.txt")
             self.stats.time_stats.timestamp_start = log_lines[0].replace("\n", "")
@@ -187,7 +196,7 @@ class Fix2Fit(AbstractRepairTool):
                 if "no patch found" in line:
                     self.emit_warning("[warning] no patch found by F1X")
                 elif "negative tests: [" in line:
-                    reported_failing_test = (
+                    reported_failing_test_identifiers = (
                         str(line)
                         .split("negative tests: [")[-1]
                         .split("]")[0]
@@ -252,14 +261,16 @@ class Fix2Fit(AbstractRepairTool):
         if is_timeout:
             self.emit_warning("[warning] timeout detected")
         if (
-            reported_failing_test != fail_list
-            and reported_failing_test
+            reported_failing_test_identifiers != fail_list
+            and reported_failing_test_identifiers
             and not is_timeout
         ):
             self.emit_warning("[warning] unexpected failing test-cases reported")
             self.emit_warning("expected fail list: {0}".format(",".join(fail_list)))
             self.emit_warning(
-                "reported fail list: {0}".format(",".join(reported_failing_test))
+                "reported fail list: {0}".format(
+                    ",".join(reported_failing_test_identifiers)
+                )
             )
 
         dir_patch = self.dir_expr + "/patches"

@@ -1,16 +1,23 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.FuzzToolStats import FuzzToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
 
 
 class StudentFuzzer(AbstractFuzzTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "student-fuzzer"
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> FuzzToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -25,6 +32,8 @@ class StudentFuzzer(AbstractFuzzTool):
             exit_code, output = self.exec_command(
                 command_str, dir_path="/home/student/"
             )
+            if not output:
+                self.error_exit("failed to get time of crash")
             stdout, stderr = output
             if stdout:
                 self.stats.fuzzing_stats.time_to_bug = int(stdout) - self.stime
@@ -33,12 +42,14 @@ class StudentFuzzer(AbstractFuzzTool):
 
         return self.stats
 
-    def run_fuzz(self, bug_info, fuzz_config_info):
-        super(StudentFuzzer, self).run_fuzz(bug_info, fuzz_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         self.emit_normal("executing fuzz command")
         self.nonce = "12345"
 
-        timeout_mins = int(float(fuzz_config_info[self.key_timeout]) * 60)
+        timeout_mins = int(float(task_config_info[self.key_timeout]) * 60)
 
         self.run_command(
             "bash -c 'cp -Rf {} /home/student/'".format(join(self.dir_expr, "."))
@@ -46,6 +57,8 @@ class StudentFuzzer(AbstractFuzzTool):
 
         command_str = f"date +%s"
         exit_code, output = self.exec_command(command_str, dir_path="/home/student")
+        if not output:
+            self.error_exit("failed to get start time")
         stdout, stderr = output
         if stdout:
             self.stime = int(stdout)

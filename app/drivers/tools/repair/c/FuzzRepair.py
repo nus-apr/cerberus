@@ -1,19 +1,25 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
+from typing import Optional
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class FuzzRepair(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/fuzzrepair:tool"
         self.bug_id = ""
 
-    def transform_source(self, source_file_list):
+    def transform_source(self, source_file_list: Optional[List[str]]) -> None:
         self.emit_normal("applying transformations for source files")
         script_path = self.dir_expr + f"/{self.name}-transform"
         if not source_file_list:
@@ -41,7 +47,9 @@ class FuzzRepair(AbstractRepairTool):
         if status != 0:
             self.error_exit("transforming subject failed")
 
-    def rerun_configuration(self, config_script, build_script, cc, cxx):
+    def rerun_configuration(
+        self, config_script: str, build_script: str, cc: str, cxx: str
+    ) -> None:
         self.emit_normal("re-building subject with fuzzrepair compilers")
         script_path = self.dir_expr + f"/{self.name}-rebuild"
         dir_src = join(self.dir_expr, "src")
@@ -69,7 +77,7 @@ class FuzzRepair(AbstractRepairTool):
         if status != 0:
             self.error_exit("rebuilding subject failed")
 
-    def generate_conf_file(self, bug_info):
+    def generate_conf_file(self, bug_info: Dict[str, Any]) -> str:
         repair_conf_path = join(self.dir_setup, "fuzzrepair.conf")
         conf_content = []
         # check there is a file-input defined, if not use default exploit command
@@ -91,7 +99,9 @@ class FuzzRepair(AbstractRepairTool):
 
         conf_content.append("exploit_command:{}\n".format(crash_cmd))
         conf_content.append(
-            "fix_file:{}\n".format(bug_info[self.key_fix_file]).replace("//", "/")
+            "fix_file:{}\n".format(
+                bug_info[self.key_localization][0][self.key_fix_file]
+            ).replace("//", "/")
         )
         conf_content.append("poc:{}\n".format(poc_abs_list[0]))
 
@@ -102,7 +112,9 @@ class FuzzRepair(AbstractRepairTool):
         self.write_file(conf_content, repair_conf_path)
         return repair_conf_path
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
 
@@ -113,14 +125,16 @@ class FuzzRepair(AbstractRepairTool):
 
         config_script_path = join(self.dir_setup, config_script)
         build_script_path = join(self.dir_setup, build_script)
-        fix_file = bug_info[self.key_fix_file]
+        fix_file = bug_info[self.key_localization][0][self.key_fix_file]
         dir_src = join(self.dir_expr, "src")
+        transform_file_list = []
         if isinstance(fix_file, list):
             transform_file_list = [f"{dir_src}/{f}" for f in fix_file]
         elif isinstance(fix_file, str):
             transform_file_list = [f"{dir_src}/{fix_file}"]
+        else:
+            self.error_exit("fix file is not a list or string")
 
-        super(FuzzRepair, self).run_repair(bug_info, repair_config_info)
         if not bug_info[self.key_benchmark] == "vulnloc":
             self.rerun_configuration(
                 config_script_path, build_script_path, "clang", "clang++"
@@ -130,9 +144,9 @@ class FuzzRepair(AbstractRepairTool):
                 config_script_path, build_script_path, "fuzzrepair-cc", "fuzzrepair-cxx"
             )
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = str(int(float(timeout_h) * 60))
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         repair_conf_path = self.generate_conf_file(bug_info)
         self.emit_normal(f"running {self.name}")
         self.timestamp_log_start()
@@ -152,7 +166,7 @@ class FuzzRepair(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         tool_log_dir = "/FuzzRepair/logs/"
         copy_command = "cp -rf {} {}".format(tool_log_dir, self.dir_output)
         self.run_command(copy_command)
@@ -162,7 +176,9 @@ class FuzzRepair(AbstractRepairTool):
         super(FuzzRepair, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         json_report = join(self.dir_output, self.bug_id, "final-result")
         dir_patch = join(self.dir_output, self.bug_id, "plausible-patches")
         list_patches = self.list_dir(dir_patch, regex="*.patch")
@@ -185,15 +201,16 @@ class FuzzRepair(AbstractRepairTool):
         if self.is_file(json_report):
             self.emit_normal("reading result.json")
             result_info = self.read_json(json_report, encoding="iso-8859-1")
-            count_enumerations = int(
-                result_info["agg-stats"]["patch-fuzzing-num-new-unique-patches"]
-            )
-            count_invalid = int(
-                result_info["agg-stats"]["prune-stage-num-invalid-patches"]
-            )
-            count_over_fitting = int(
-                result_info["agg-stats"]["prune-stage-num-pruned-total"]
-            )
+            if result_info:
+                count_enumerations = int(
+                    result_info["agg-stats"]["patch-fuzzing-num-new-unique-patches"]
+                )
+                count_invalid = int(
+                    result_info["agg-stats"]["prune-stage-num-invalid-patches"]
+                )
+                count_over_fitting = int(
+                    result_info["agg-stats"]["prune-stage-num-pruned-total"]
+                )
 
         else:
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")

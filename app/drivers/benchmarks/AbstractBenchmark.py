@@ -15,6 +15,8 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.metadata.MetadataLoader import MetadataLoader
+from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task.stats.BenchmarkStats import BenchmarkStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
@@ -26,33 +28,41 @@ class AbstractBenchmark(AbstractDriver):
     experiment_subjects: List[Any] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
+
     name: str = ""
     image_name: str = ""
+
     __dir_info: DirectoryInfo = dict()
+
     dir_logs = ""
     dir_expr = ""
     dir_base_expr = ""
     dir_inst = ""
     dir_setup = ""
+
     log_dir_path = "None"
     log_deps_path = "None"
     log_deploy_path = "None"
     log_config_path = "None"
     log_build_path = "None"
     log_test_path = "None"
+
     size = 0
     list_artifact_dirs: List[str] = []
     list_artifact_files: List[str] = []
     base_dir_experiment = values.container_base_experiment
+
     key_bug_id = definitions.KEY_BUG_ID
     key_fix_file = definitions.KEY_FIX_FILE
-    key_failing_tests = definitions.KEY_FAILING_TEST
-    key_passing_tests = definitions.KEY_PASSING_TEST
+    key_localization = definitions.KEY_LOCALIZATION
+    key_failing_test_identifiers = definitions.KEY_FAILING_TEST
+    key_passing_test_identifiers = definitions.KEY_PASSING_TEST
     key_java_version = definitions.KEY_JAVA_VERSION
     key_compile_cmd = definitions.KEY_COMPILE_CMD
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_fail_mod_dir = definitions.KEY_FAILING_MODULE_DIRECTORY
     key_test_all_cmd = definitions.KEY_TEST_ALL_CMD
+    key_test_script = definitions.KEY_TEST_SCRIPT
     key_dir_class = definitions.KEY_CLASS_DIRECTORY
     key_dir_source = definitions.KEY_SOURCE_DIRECTORY
     key_dir_tests = definitions.KEY_TEST_DIRECTORY
@@ -65,7 +75,7 @@ class AbstractBenchmark(AbstractDriver):
     key_language = definitions.KEY_LANGUAGE
     has_standard_name: bool = False
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.dir_benchmark: str = values.dir_benchmark
         self.bench_dir_path = os.path.abspath(values.dir_benchmark)
         self.stats = BenchmarkStats()
@@ -85,25 +95,28 @@ class AbstractBenchmark(AbstractDriver):
         self.load_meta_file()
         self.use_valkyrie = values.use_valkyrie
 
-    def read_file(self, container_id: Optional[str], file_path: str, encoding="utf-8"):
+    def read_file(
+        self, container_id: Optional[str], file_path: str, encoding: str = "utf-8"
+    ) -> List[str]:
         return abstractions.read_file(container_id, file_path, encoding)
 
     def append_file(
         self, container_id: Optional[str], content: List[str], file_path: str
-    ):
+    ) -> None:
         return abstractions.append_file(container_id, content, file_path)
 
-    def _update_container_stats(self, container_id):
+    def _update_container_stats(self, container_id: str) -> None:
         container_stats = container.get_container_stats(container_id)
-        self.stats.container_stats.load_container_stats(container_stats)
+        if container_stats:
+            self.stats.container_stats.load_container_stats(container_stats)
 
-    def print_stats(self):
+    def print_stats(self) -> None:
         emitter.highlight("\t\t\t deployed: {0}\n".format(self.stats.deployed))
         emitter.highlight("\t\t\t configured: {0}\n".format(self.stats.configured))
         emitter.highlight("\t\t\t built: {0}\n".format(self.stats.built))
         emitter.highlight("\t\t\t tested: {0}\n".format(self.stats.tested))
 
-    def update_dir_info(self, dir_info: DirectoryInfo):
+    def update_dir_info(self, dir_info: DirectoryInfo) -> None:
         self.__dir_info = dir_info
         if not values.use_container:
             self.dir_expr = dir_info["local"]["experiment"]
@@ -120,32 +133,43 @@ class AbstractBenchmark(AbstractDriver):
         return self.experiment_subjects
 
     @staticmethod
-    def load_meta_file_static(path, name) -> List[Any]:
+    def load_meta_file_static(path: str, name: str) -> List[Any]:
         meta_file_path = join(path, name, "meta-data.json")
         AbstractBenchmark.check_benchmark_folder(name)
-        with open(meta_file_path, "r") as in_file:
-            json_data = json.load(in_file)
-            if json_data:
-                return AbstractBenchmark.process_metadata(json_data)
-            else:
-                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
-                utilities.error_exit(
-                    "Could not load meta-data from {}".format(meta_file_path)
+        try:
+            loader = MetadataLoader(meta_file_path, general_section_schema)
+            loader.load()
+            loader.validate()
+            return AbstractBenchmark.process_metadata(loader.get_meta_data())
+        except Exception as e:
+            values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+            utilities.error_exit(
+                "Could not load meta-data from {}. Reason is {}".format(
+                    meta_file_path, e
                 )
+            )
 
     @staticmethod
-    def process_metadata(data):
+    def process_metadata(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         for experiment_item in data:
-            passing_list = experiment_item.get(AbstractBenchmark.key_passing_tests, [])
-            failing_list = experiment_item.get(AbstractBenchmark.key_failing_tests, [])
+            passing_list = experiment_item.get(
+                AbstractBenchmark.key_passing_test_identifiers, []
+            )
+            failing_list = experiment_item.get(
+                AbstractBenchmark.key_failing_test_identifiers, []
+            )
             passing_list_str = [f"{x}" for x in passing_list]
             failing_list_str = [f"{x}" for x in failing_list]
-            experiment_item[AbstractBenchmark.key_passing_tests] = passing_list_str
-            experiment_item[AbstractBenchmark.key_failing_tests] = failing_list_str
+            experiment_item[AbstractBenchmark.key_passing_test_identifiers] = (
+                passing_list_str
+            )
+            experiment_item[AbstractBenchmark.key_failing_test_identifiers] = (
+                failing_list_str
+            )
         return data
 
     @staticmethod
-    def check_benchmark_folder(name):
+    def check_benchmark_folder(name: str) -> None:
         if len(os.listdir(join(values.dir_benchmark, name))) == 0:
             emitter.information(
                 "(information) Benchmark folder is empty. Probably submodule was not pulled. Pulling now.."
@@ -161,11 +185,11 @@ class AbstractBenchmark(AbstractDriver):
                     "Could not get the submodule. Maybe the system asked for an SSH key and it could not be provided."
                 )
 
-    def load_meta_file(self):
+    def load_meta_file(self) -> None:
         emitter.normal("\t[framework] loading experiment meta-data")
         if not self.meta_file:
             utilities.error_exit("Meta file path not set")
-        if not os.path.isfile(cast(str, self.meta_file)):
+        if not os.path.isfile(self.meta_file):
             utilities.error_exit("Meta file does not exist")
 
         meta_file_loc = self.meta_file
@@ -175,23 +199,30 @@ class AbstractBenchmark(AbstractDriver):
             if not os.path.exists(meta_file_loc):
                 utilities.error_exit("Special meta file path is incorrect")
 
-        with open(meta_file_loc, "r") as in_file:
-            json_data = json.load(in_file)
-            if json_data:
-                self.experiment_subjects = AbstractBenchmark.process_metadata(json_data)
-                self.size = len(json_data)
-            else:
-                values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
-                utilities.error_exit("Could not load meta-data from ", self.meta_file)
+        try:
+            loader = MetadataLoader(meta_file_loc, general_section_schema)
+            loader.load()
+            loader.validate()
+            self.experiment_subjects = AbstractBenchmark.process_metadata(
+                loader.get_meta_data()
+            )
+            self.size = len(self.experiment_subjects)
+        except Exception as e:
+            values.experiment_status.set(TaskStatus.FAIL_IN_SETUP)
+            utilities.error_exit(
+                "Could not load meta-data from {}. Reason is {}".format(
+                    meta_file_loc, e
+                )
+            )
 
     def run_command(
         self,
         container_id: Optional[str],
         command_str: str,
-        log_file_path="/dev/null",
-        dir_path="/experiment",
-        env=dict(),
-    ):
+        log_file_path: str = "/dev/null",
+        dir_path: str = values.container_base_experiment,
+        env: Dict[str, str] = dict(),
+    ) -> int:
         if container_id:
             exit_code, output = container.exec_command(
                 container_id, command_str, dir_path, env
@@ -214,7 +245,7 @@ class AbstractBenchmark(AbstractDriver):
             exit_code = utilities.execute_command(command_str, directory=dir_path)
         return exit_code
 
-    def build_benchmark_image(self):
+    def build_benchmark_image(self) -> None:
         if not container.image_exists(self.image_name) or (
             values.rebuild_all and self.name not in AbstractBenchmark.rebuilt_benchmarks
         ):
@@ -242,7 +273,7 @@ class AbstractBenchmark(AbstractDriver):
         exp_image_name: str,
         cpu: List[str],
         gpu: List[str],
-    ):
+    ) -> None:
         """
         Builds an image for an experiment
         """
@@ -261,7 +292,7 @@ class AbstractBenchmark(AbstractDriver):
 
     def setup_container(
         self, bug_index: int, image_name: str, cpu: List[str], gpu: List[str]
-    ):
+    ) -> Optional[str]:
         """
         Setup the container for the experiment by constructing volumes,
         which point to certain folders in the project
@@ -305,7 +336,7 @@ class AbstractBenchmark(AbstractDriver):
 
     def _handle_setup_exp_error(
         self, task_status: TaskStatus, error_msg: str, container_id: Optional[str]
-    ):
+    ) -> bool:
         values.experiment_status.set(task_status)
         self.emit_error(error_msg)
         if container_id:
@@ -315,7 +346,7 @@ class AbstractBenchmark(AbstractDriver):
 
     def setup_experiment(
         self, bug_index: int, container_id: Optional[str], test_all: bool
-    ):
+    ) -> bool:
         self.emit_normal("preparing experiment subject")
         if not container_id:
             self.base_dir_experiment = os.path.abspath(values.dir_experiments)
@@ -361,7 +392,9 @@ class AbstractBenchmark(AbstractDriver):
             return self._handle_setup_exp_error(
                 TaskStatus.FAIL_IN_BUILD, "build failed", container_id
             )
+
         test_choice = self.test_all if test_all else self.test
+
         self.stats.tested = test_choice(bug_index, container_id)
         if not self.stats.tested:
             return self._handle_setup_exp_error(
@@ -378,7 +411,7 @@ class AbstractBenchmark(AbstractDriver):
         cpu: List[str],
         gpu: List[str],
         ignore_rebuild: bool = False,
-    ):
+    ) -> str:
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
@@ -403,7 +436,7 @@ class AbstractBenchmark(AbstractDriver):
         return exp_image_name
 
     @abc.abstractmethod
-    def deploy(self, bug_index, container_id: Optional[str]):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         """Prepares the experiment, e.g. download or copy and synthesize an image for the bug from the benchmark"""
         return False
 
@@ -413,27 +446,29 @@ class AbstractBenchmark(AbstractDriver):
     #     return
 
     @abc.abstractmethod
-    def config(self, bug_index, container_id: Optional[str]):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         """Configure the bug from the benchmark, e.g. running the ./configure script for a C/C++ project"""
         return False
 
     @abc.abstractmethod
-    def build(self, bug_index, container_id: Optional[str]):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         """Builds the bug from the benchmark, e.g. invoking the make command for a C/C++ project or ant/mvn package/gradle build for a Java project"""
         return False
 
     @abc.abstractmethod
-    def test(self, bug_index, container_id: Optional[str]):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         """Runs a single test for a bug from the benchmark"""
         return False
 
     @abc.abstractmethod
-    def test_all(self, bug_index, container_id: Optional[str]):
+    def test_all(self, bug_index: int, container_id: Optional[str]) -> bool:
         """Runs all tests for a bug in the benchmark"""
         return False
 
     @abc.abstractmethod
-    def save_artifacts(self, dir_info, container_id: Optional[str]):
+    def save_artifacts(
+        self, dir_info: DirectoryInfo, container_id: Optional[str]
+    ) -> None:
         """Save all artifacts produced by the tool"""
         self.emit_normal("saving experiment artifacts")
         if container_id:
@@ -457,30 +492,30 @@ class AbstractBenchmark(AbstractDriver):
         return
 
     @abc.abstractmethod
-    def clean(self, exp_dir_path: str, container_id: Optional[str]):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
         """Clean up any residual files. This method is used for the case where Cerberus has been ran locally."""
         return
 
-    def emit_normal(self, message):
-        super().emit_normal("benchmark", self.name, message)
+    def emit_normal(self, message: Any) -> None:
+        self._emit_normal_raw("benchmark", self.name, message)
 
-    def emit_warning(self, message):
-        super().emit_warning("benchmark", self.name, message)
+    def emit_warning(self, message: Any) -> None:
+        self._emit_warning_raw("benchmark", self.name, message)
 
-    def emit_error(self, message):
-        super().emit_error("benchmark", self.name, message)
+    def emit_error(self, message: Any) -> None:
+        self._emit_error_raw("benchmark", self.name, message)
 
-    def emit_highlight(self, message):
-        super().emit_highlight("benchmark", self.name, message)
+    def emit_highlight(self, message: Any) -> None:
+        self._emit_highlight_raw("benchmark", self.name, message)
 
-    def emit_success(self, message):
-        super().emit_success("benchmark", self.name, message)
+    def emit_success(self, message: Any) -> None:
+        self._emit_success_raw("benchmark", self.name, message)
 
-    def emit_debug(self, message):
-        super().emit_debug("benchmark", self.name, message)
+    def emit_debug(self, message: Any) -> None:
+        self._emit_debug_raw("benchmark", self.name, message)
 
-    def is_dir(self, dir_path, container_id):
+    def is_dir(self, dir_path: str, container_id: Optional[str]) -> bool:
         return abstractions.is_dir(container_id, dir_path)
 
-    def is_file(self, file_path, container_id):
+    def is_file(self, file_path: str, container_id: Optional[str]) -> bool:
         return abstractions.is_file(container_id, file_path)

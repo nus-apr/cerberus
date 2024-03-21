@@ -1,35 +1,42 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class GenProg(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/genprog"
         self.fix_file = ""
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(GenProg, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        task_conf_id = task_config_info[self.key_id]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         bug_id = str(bug_info[self.key_bug_id])
-        self.fix_file = bug_info[self.key_fix_file]
+        self.fix_file = bug_info[self.key_localization][0][self.key_fix_file]
 
-        fix_location = bug_info[self.key_fix_lines][0]
-        timeout = str(repair_config_info[self.key_timeout])
+        fix_location = bug_info[self.key_localization][0][self.key_fix_lines][0]
+        timeout = str(task_config_info[self.key_timeout])
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-        count_pass = len(passing_test_list)
-        count_neg = len(failing_test_list)
+        count_pass = len(passing_test_identifiers_list)
+        count_neg = len(failing_test_identifiers_list)
         repair_config_str = (
             "--program {program}\n"
             "--pos-tests {p_size}\n"
@@ -73,7 +80,7 @@ class GenProg(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         dir_results = dir_info["result"]
         dir_patch = join(self.dir_expr, "src", "..")
         copy_command = "cp -rf {} {}".format(dir_patch, self.dir_output)
@@ -120,7 +127,9 @@ class GenProg(AbstractRepairTool):
             self.run_command(save_command)
         super(GenProg, self).save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

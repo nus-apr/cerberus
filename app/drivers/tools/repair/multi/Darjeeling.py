@@ -2,7 +2,13 @@ import multiprocessing as mp
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core import values
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -102,22 +108,22 @@ resource-limits:
   candidates: 10000
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/darjeeling"
 
     def generate_repair_config(
         self,
-        c_script,
-        b_script,
-        t_script,
-        p_lang,
-        fix_files,
-        tag_id,
-        test_driver,
-        test_list,
-    ):
+        c_script: str,
+        b_script: str,
+        t_script: str,
+        p_lang: str,
+        fix_files: List[str],
+        tag_id: str,
+        test_driver: str,
+        test_list: List[str],
+    ) -> str:
         self.emit_normal(f"generating config file for {self.name}")
         config_file_path = join(self.dir_setup, "darjeeling.yml")
         file_list_str = ""
@@ -158,10 +164,10 @@ resource-limits:
             )
         else:
             self.error_exit(f"unsupported programming language {p_lang}")
-        self.write_file(config_content, config_file_path)
+        self.write_file([config_content], config_file_path)
         return config_file_path
 
-    def generate_runtime_dockerfile(self, docker_image_tag):
+    def generate_runtime_dockerfile(self, docker_image_tag: str) -> str:
         # the dockerfile is created at the setup dir and docker build will be run at the setup dir
         self.emit_normal(f"generating runtime Dockerfile for {self.name}")
         dockerfile_path = self.dir_setup + "/Dockerfile"
@@ -172,7 +178,7 @@ resource-limits:
                 "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
                 "RUN pip3 install coverage pytest pytest-cov gcovr\n",
                 f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
-                "WORKDIR /experiment\n",
+                f"WORKDIR {values.container_base_experiment}\n",
                 'ENTRYPOINT ["/bin/sh", "-c"]\n',
                 'CMD ["bash"]',
             ],
@@ -180,7 +186,7 @@ resource-limits:
         )
         return dockerfile_path
 
-    def build_runtime_docker_image(self, docker_tag):
+    def build_runtime_docker_image(self, docker_tag: str) -> None:
         dockerfile_path = self.generate_runtime_dockerfile(docker_tag)
         self.emit_normal(f"building runtime Dockerfile for {self.name}")
         build_command = (
@@ -191,7 +197,9 @@ resource-limits:
             build_command, dir_path=self.dir_setup, log_file_path=log_docker_build_path
         )
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
         test_script = bug_info.get(self.key_test_script, None)
@@ -208,20 +216,24 @@ resource-limits:
         if not test_script:
             self.error_exit(f"{self.name} requires a test script as input")
 
-        benchmark_name = bug_info.get(self.key_benchmark)
-        subject_name = bug_info.get(self.key_subject)
+        benchmark_name = bug_info.get(self.key_benchmark, "BENCHMARK")
+        subject_name = bug_info.get(self.key_subject, "SUBJECT")
         bug_id = str(bug_info[self.key_bug_id])
-        docker_tag_id = (f"{benchmark_name}" f"-{subject_name}" f"-{bug_id}").lower()
-        test_list = bug_info.get(self.key_passing_tests) + bug_info.get(
-            self.key_failing_tests
+        docker_tag_id = (
+            f"{self.name}-"
+            f"{benchmark_name.replace('-', '_')}"
+            f"-{subject_name.replace('-', '_')}"
+            f"-{bug_id.replace('-', '_')}"
+        ).lower()
+        test_list = bug_info.get(self.key_passing_test_identifiers, []) + bug_info.get(
+            self.key_failing_test_identifiers, []
         )
         self.build_runtime_docker_image(docker_tag_id)
         fix_files = []
-        if self.key_fix_file_list in bug_info:
-            fix_files = bug_info[self.key_fix_file_list]
-        elif self.key_fix_file in bug_info:
-            fix_files = [bug_info[self.key_fix_file]]
-
+        if self.key_localization in bug_info:
+            fix_files = list(
+                map(lambda x: x[self.key_fix_file], bug_info[self.key_localization])
+            )
         self.generate_repair_config(
             c_script=config_script,
             b_script=build_script,
@@ -232,12 +244,12 @@ resource-limits:
             test_driver=test_script,
             test_list=test_list,
         )
-        super(Darjeeling, self).run_repair(bug_info, repair_config_info)
+
         if self.is_instrument_only:
             return
 
-        timeout = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(
@@ -268,7 +280,9 @@ resource-limits:
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

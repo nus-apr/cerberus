@@ -1,16 +1,21 @@
 import os
 from datetime import datetime
 from os.path import join
+from typing import Dict
+from typing import Optional
 
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class Bears(AbstractBenchmark):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Bears, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         if not container_id:
             self.error_exit(
                 "unimplemented functionality: this benchmark only runs on docker"
@@ -39,7 +44,7 @@ class Bears(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def install_deps(self, bug_index, container_id):
+    def install_deps(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("installing experiment dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -58,7 +63,7 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def deploy(self, bug_index, container_id):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -75,7 +80,7 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def config(self, bug_index, container_id):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("configuring experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -92,7 +97,7 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def build(self, bug_index, container_id):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -110,7 +115,9 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def compress_dependencies(self, container_id, bug_index):
+    def compress_dependencies(
+        self, container_id: Optional[str], bug_index: int
+    ) -> bool:
         self.emit_normal("compressing experiment dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -130,7 +137,7 @@ class Bears(AbstractBenchmark):
 
         return status == 0
 
-    def test(self, bug_index, container_id):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -138,8 +145,10 @@ class Bears(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
-        command_str = f"bash test_subject {failing_test_list[0]}"
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
+        command_str = f"bash test_subject {failing_test_identifiers_list[0]}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -147,10 +156,12 @@ class Bears(AbstractBenchmark):
             os.path.join(self.dir_setup),
         )
 
-        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_test_identifiers_list = experiment_item[
+            self.key_passing_test_identifiers
+        ]
         passing_status = 0
-        if len(passing_test_list) != 0:
-            command_str = f"bash test_subject {passing_test_list[0]}"
+        if len(passing_test_identifiers_list) != 0:
+            command_str = f"bash test_subject {passing_test_identifiers_list[0]}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
@@ -163,7 +174,7 @@ class Bears(AbstractBenchmark):
         )
         return failing_status != 0 and passing_status == 0
 
-    def verify(self, bug_index, container_id):
+    def verify(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("verify dev patch and test-oracle")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -181,7 +192,7 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def transform(self, bug_index, container_id):
+    def transform(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("transforming source code")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -200,13 +211,15 @@ class Bears(AbstractBenchmark):
         )
         return status == 0
 
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
         self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
-    def save_artifacts(self, dir_info, container_id):
+    def save_artifacts(
+        self, dir_info: DirectoryInfo, container_id: Optional[str]
+    ) -> None:
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(Bears, self).save_artifacts(dir_info, container_id)

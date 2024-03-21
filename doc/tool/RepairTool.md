@@ -4,7 +4,7 @@ The following document describes the interface of the AbstactRepairTool class - 
 ```py
 
 class NewTool(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(NewTool, self).__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
@@ -13,8 +13,7 @@ class NewTool(AbstractRepairTool):
 The constructor should follow the following format, the line `self.image_name=...` should be an identifier for a valid docker image, preferably with a label. The line `self.hash_digest=...` should be a prefix of the hash of the image and is mandatory when Cerberus is ran with the `secure_hash` flag enabled (used for APR-COMP).
 
 ```py
-     def run_repair(self, bug_info, repair_config_info):
-        super(NewTool, self).repair(bug_info, repair_config_info)
+     def invoke(self, bug_info, task_config_info):
         '''
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -37,7 +36,7 @@ Start the repair tool. Preferably `self.timestamp_log()` is called before and af
 Save useful artifacts from the repair execution, the main folders one should transfer the results is to the output folder (`self.dir_output`) and the logs folder (`self.dir_logs`). The parent method should be invoked at the end to archive the results.
 
 ```py
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]):
         emitter.normal("\t\t\t analysing output of " + self.name)
         return self.stats
 ```
