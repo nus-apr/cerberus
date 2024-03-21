@@ -131,6 +131,36 @@ class Valkyrie(AbstractValidateTool):
                 elif "statistics" in line:
                     is_timeout = False
 
+        input_patches_dir = f"{self.dir_setup}/patches"
+        patch_list = [
+            x for x in self.list_dir(input_patches_dir) if ".patch" in x or ".diff" in x
+        ]
+        self.stats.patch_stats.size = len(patch_list)
+
+        result_json_file = f"{self.dir_output}/result.json"
+        result_json = self.read_json(result_json_file)
+        if not isinstance(result_json, List):
+            result_json = []
+        self.stats.patch_stats.enumerations = len(result_json)
+        invalid_count = 0
+        incorrect_count = 0
+        plausible_count = 0
+        correct_count = 0
+        for result in iter(result_json):
+            p_file, p_class = result
+            if "pass public" in p_class:
+                plausible_count += 1
+            elif "invalid patch" in p_class or "cannot build" in p_class:
+                invalid_count += 1
+            elif "incorrect patch" in p_class or "fixed failing" in p_class:
+                incorrect_count += 1
+            elif "pass private" in p_class:
+                correct_count += 1
+
+        self.stats.patch_stats.plausible = plausible_count
+        self.stats.patch_stats.correct = correct_count
+        self.stats.patch_stats.non_compilable = invalid_count
+
         if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
         if is_timeout:
