@@ -121,7 +121,7 @@ class F1X(AbstractRepairTool):
 
         abs_path_buggy_file = None
         if fix_file_list:
-            abs_path_buggy_file = ",".join(
+            abs_path_buggy_file = ", ".join(
                 join(self.dir_expr, "src", f) for f in fix_file_list
             )
 
