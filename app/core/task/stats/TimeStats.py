@@ -50,8 +50,8 @@ class TimeStats:
 
     def get_duration(self) -> float:
         if self.__duration_total < 0:
-            self.__duration_total = self.compute_duration(
-                self.timestamp_start, self.timestamp_end
+            self.__duration_total = min(
+                0.0, self.compute_duration(self.timestamp_start, self.timestamp_end)
             )
         return self.__duration_total
 
