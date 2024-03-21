@@ -26,6 +26,7 @@ KEY_CONFIG_VALIDATE_TIMEOUT = "validate-timeout"
 KEY_CONFIG_SELECT_TIMEOUT = "select-timeout"
 
 KEY_TOOL_PARAMS = "params"
+KEY_TOOL_NAME = "tool-name"
 KEY_TOOL_TAG = "tag"
 KEY_SCORE = "score"
 KEY_CONFIG_TIMEOUT_TESTCASE = "test_timeout"

@@ -737,13 +737,14 @@ class BasicWorkflow(AbstractCompositeTool):
         def copy_patches(
             base_setup: str, enhanced_setup: str, new_bug_info: Dict[str, Any]
         ) -> None:
-            os.makedirs(join(enhanced_setup, "patches"), exist_ok=True)
+            tool_name = new_bug_info[self.key_tool_name]
+            os.makedirs(join(enhanced_setup, "patches", tool_name), exist_ok=True)
             self.emit_debug(
                 f"Copying patches from {dirname(event.src_path)} to {enhanced_setup}"
             )
             shutil.copytree(
                 join(dirname(event.src_path), "patches"),
-                join(enhanced_setup, "patches"),
+                join(enhanced_setup, "patches", tool_name),
                 dirs_exist_ok=True,
             )
             # shutil.copy(event.src_path, join(enhanced_setup, "patches"))
@@ -980,6 +981,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 task_config_info_new[real_task_type + "-" + self.key_timeout] = (
                     new_timeout
                 )
+        bug_info[self.key_tool_name] = tool.name
 
         return (
             dir_info,

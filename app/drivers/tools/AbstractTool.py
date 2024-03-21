@@ -59,6 +59,7 @@ class AbstractTool(AbstractDriver):
     key_bug_id = definitions.KEY_BUG_ID
     key_bug_type = definitions.KEY_BUG_TYPE
     key_tool_params = definitions.KEY_TOOL_PARAMS
+    key_tool_name = definitions.KEY_TOOL_NAME
     key_timeout = definitions.KEY_CONFIG_TIMEOUT
     key_source = definitions.KEY_SOURCE
     key_fix_file = definitions.KEY_FIX_FILE
@@ -174,7 +175,7 @@ class AbstractTool(AbstractDriver):
             task_config_info[definitions.KEY_ID], self.name.lower(), bug_id
         )
         self.extract_fields_to_stats(bug_info, task_config_info)
-
+        bug_info["tool-name"] = self.name
         task_config_info["container-id"] = self.container_id
 
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
