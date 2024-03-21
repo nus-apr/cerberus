@@ -8,7 +8,7 @@ cd $dir_name
 TEST_ID=$1
 BINARY_PATH=$dir_name/src/test
 POC=$script_dir/tests/$TEST_ID
-timeout 10 $BINARY_PATH -f $POC
+timeout 10 $BINARY_PATH $POC
 ret=$?
 if [[ ret -eq 1 ]]
 then
