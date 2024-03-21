@@ -123,11 +123,6 @@ class LLMR(AbstractRepairTool):
 
         self.timestamp_log_end()
 
-        self.write_json(
-            [{"patches_dir": join(self.dir_output, "patches")}],
-            join(self.dir_output, "meta-data.json"),
-        )
-
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:

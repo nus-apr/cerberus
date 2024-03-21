@@ -13,6 +13,7 @@ from app.core import utilities
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import error_exit
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 
 
@@ -50,6 +51,30 @@ class AbstractRepairTool(AbstractTool):
             self.stats.patch_stats.generated = len(self.list_dir(self.dir_patch))
 
         return self.stats
+
+    def invoke_advanced(
+        self,
+        dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
+        bug_info: Dict[str, Any],
+        task_config_info: Dict[str, Any],
+        container_config_info: Dict[str, Any],
+        run_index: str,
+        hash: str,
+    ) -> None:
+        super().invoke_advanced(
+            dir_info,
+            benchmark,
+            bug_info,
+            task_config_info,
+            container_config_info,
+            run_index,
+            hash,
+        )
+        self.write_json(
+            [{"patches_dir": join(self.dir_output, "patches")}],
+            join(self.dir_output, "meta-data.json"),
+        )
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
