@@ -132,7 +132,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
             self.emit_warning("no output log file found")
             return self.stats
 
-        output_file = join(self.dir_output, "ochiai.csv")
+        output_file = join(self.dir_output, "ochiai.json")
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_timeout = True
         if self.is_file(self.log_output_path):
@@ -143,8 +143,16 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 elif "statistics" in line:
                     is_timeout = False
         if self.is_file(output_file):
-            output_lines = self.read_file(output_file, encoding="iso-8859-1")
-            self.stats.fix_loc_stats.fix_locs = len(output_lines)
+            output_lines = self.read_json(output_file, encoding="iso-8859-1")
+            if output_lines:
+                fix_files = set()
+                fix_lines = list()
+                for _l in output_lines:
+                    fix_files.add(_l.get(self.key_fix_file))
+                    fix_lines += _l.get(self.key_fix_lines, [])
+                self.stats.fix_loc_stats.fix_locs = len(output_lines)
+                self.stats.fix_loc_stats.source_files = len(fix_files)
+
         else:
             self.emit_error("no output file found")
             self.stats.error_stats.is_error = True
