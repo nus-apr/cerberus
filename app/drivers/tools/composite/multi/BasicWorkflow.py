@@ -369,6 +369,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 key,
                                 dir_setup_extended,
                             ),
+                            "task_config_info": task_config_info,
                             "bug_info": bug_info,
                         }
                     )
@@ -1122,7 +1123,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             key, info[key], candidate[key]
                         )
                     )
-                    info[key] = candidate[key]
+                    new_info[key] = candidate[key]
                 else:
                     if type(info[key]) != list and type(info[key]) != dict:
                         self.emit_warning(
