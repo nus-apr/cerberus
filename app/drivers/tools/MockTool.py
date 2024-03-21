@@ -12,8 +12,9 @@ class MockTool(AbstractTool):
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         self.stats = ToolStats()
-        super().__init__(self.name)
+        self.tool_type = "mock-tool"
         self.image_name = "busybox:latest"
+        super().__init__(self.name)
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
