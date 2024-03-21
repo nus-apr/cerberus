@@ -51,14 +51,39 @@
         ]
       }
     ],
+    "stack_trace": [
+        {
+            "depth": 0,
+            "function": "div",
+            "source_file": "test.c",
+            "line": 4
+        }
+    ],
     "failing_test_identifiers": [
-      "1"
+      "crash_1"
     ],
     "passing_test_identifiers": [
-      "2"
+      "pass_1"
     ],
-    "failing_test": "1",
-    "passing_test": "2",
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [
+                    {
+                        "format": "raw",
+                        "dir": "crashing_tests"
+                    }
+                ],
+                "benign_inputs": [
+                    {
+                        "format": "raw",
+                        "dir": "benign_tests"
+                    }
+                ],
+                "exploit_file_list": [],
+                "test_dir_abspath": "/setup/example/crashes/file-input/tests"
+            }
+    ],
     "exploit_file_list": [
       "crashing_tests/crash_1"
     ],

@@ -6,33 +6,13 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 cd $dir_name
 TEST_ID=$1
-POS_N=1
-NEG_N=1
-
-
-if [ -z "$TEST_ID" ]
+BINARY_PATH=$dir_name/src/test
+POC=$script_dir/tests/$TEST_ID
+timeout 10 $BINARY_PATH -f $POC
+ret=$?
+if [[ ret -eq 1 ]]
 then
-   # Run passing test cases
-  for i in `seq -s " " -f "p%g"  1 $POS_N`
-  do
-  bash oracle-1 $i
-  done
-
-  # Run failing test cases
-  for i in `seq -s " " -f "n%g"  1 $NEG_N`
-  do
-  bash $script_dir/oracle-1 $i
-  done
+   exit 0;
 else
-  pattern=`expr substr "$TEST_ID" 1 1`
-  num=`expr substr "$TEST_ID" 2 ${#TEST_ID}`
-  cd $dir_name
-  if [[ $pattern == 'n' ]] || [[ $pattern == 'p' ]]; then
-      cd $dir_name
-      timeout 25 bash $script_dir/oracle-2 $TEST_ID
-  else
-      cd $dir_name
-      timeout 25 bash $script_dir/oracle-1 $TEST_ID
-  fi
-
-fi
+   exit $ret
+fi;
