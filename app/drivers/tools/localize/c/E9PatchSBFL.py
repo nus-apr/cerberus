@@ -150,7 +150,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 for _l in output_lines:
                     fix_files.add(_l.get(self.key_fix_file))
                     fix_lines += _l.get(self.key_fix_lines, [])
-                self.stats.fix_loc_stats.fix_locs = len(output_lines)
+                self.stats.fix_loc_stats.fix_locs = len(fix_lines)
                 self.stats.fix_loc_stats.source_files = len(fix_files)
 
         else:
