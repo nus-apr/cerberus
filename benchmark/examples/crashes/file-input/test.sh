@@ -6,7 +6,7 @@ bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 cd $dir_name
 TEST_ID=$1
-POS_N=0
+POS_N=1
 NEG_N=1
 
 
@@ -15,27 +15,24 @@ then
    # Run passing test cases
   for i in `seq -s " " -f "p%g"  1 $POS_N`
   do
-  bash test.sh $i /data
+  bash oracle-1 $i
   done
 
   # Run failing test cases
   for i in `seq -s " " -f "n%g"  1 $NEG_N`
   do
-  bash test.sh $i /data
+  bash $script_dir/oracle-1 $i
   done
 else
   pattern=`expr substr "$TEST_ID" 1 1`
   num=`expr substr "$TEST_ID" 2 ${#TEST_ID}`
   cd $dir_name
-  if [[ $pattern == 'n' ]]; then
+  if [[ $pattern == 'n' ]] || [[ $pattern == 'p' ]]; then
       cd $dir_name
-      timeout 25 bash oracle-2 $TEST_ID
-  elif [[ $pattern == 'p' ]]; then
-      cd $dir_name
-      timeout 25 bash oracle-2 $TEST_ID
+      timeout 25 bash $script_dir/oracle-2 $TEST_ID
   else
       cd $dir_name
-      timeout 25 bash oracle-1 $TEST_ID
+      timeout 25 bash $script_dir/oracle-1 $TEST_ID
   fi
 
 fi

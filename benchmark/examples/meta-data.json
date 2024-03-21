@@ -47,21 +47,23 @@
       {
         "source_file": "test.c",
         "line_numbers": [
-          7
+          19
         ]
       }
     ],
     "failing_test_identifiers": [
       "1"
     ],
-    "passing_test_identifiers": [],
+    "passing_test_identifiers": [
+      "2"
+    ],
     "failing_test": "1",
-    "passing_test": "",
+    "passing_test": "2",
     "exploit_file_list": [
-      "tests/exploit"
+      "crashing_tests/crash_1"
     ],
     "count_neg": 1,
-    "count_pos": 0,
+    "count_pos": 1,
     "config_script": "config.sh",
     "build_script": "build.sh",
     "clean_script": "clean.sh",
