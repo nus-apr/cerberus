@@ -75,7 +75,8 @@ class CrashRepair(AbstractLocalizeTool):
         )
 
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
-
+        if status >= 0:
+            status = 0
         self.process_status(status)
 
         self.timestamp_log_end()
