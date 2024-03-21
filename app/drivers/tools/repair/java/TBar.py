@@ -91,7 +91,7 @@ class TBar(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def create_parameters(
-        self, experiment_info: Dict[str, Any], run_fl: bool, env: Dict[str, str]
+        self, bug_info: Dict[str, Any], run_fl: bool, env: Dict[str, str]
     ) -> str:
         """
         Formats of execution cmds:
@@ -105,8 +105,8 @@ class TBar(AbstractRepairTool):
 
         defects4j_home = "/defects4j/"
         bug_id_str = "{0}_{1}".format(
-            experiment_info[self.key_subject],
-            experiment_info[self.key_bug_id],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
 
         """
@@ -126,7 +126,7 @@ class TBar(AbstractRepairTool):
         self.run_command(f"mkdir -p {failed_tests_dir}")
         failed_tests_file = join(
             failed_tests_dir,
-            f"{experiment_info[self.key_bug_id].replace('-', '_')}.txt",
+            f"{bug_info[self.key_bug_id].replace('-', '_')}.txt",
         )
 
         self.emit_debug("I am looking for {}".format(failed_tests_file))
@@ -141,9 +141,10 @@ class TBar(AbstractRepairTool):
         )
 
         if not run_fl:
-            self.write_fl_data(experiment_info, failed_tests_file, fl_data)
+            self.emit_debug("Creating FL data file from provided info")
+            self.write_fl_data(bug_info, failed_tests_file, fl_data)
         else:
-            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,experiment_info[self.key_build_script])}"
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,bug_info[self.key_build_script])}"
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
@@ -172,14 +173,13 @@ class TBar(AbstractRepairTool):
             ]
         )
 
-    # TODO Rename this here and in `create_parameters`
     def write_fl_data(
-        self, experiment_info: Dict[str, Any], failed_tests_file: str, fl_data: str
+        self, bug_info: Dict[str, Any], failed_tests_file: str, fl_data: str
     ) -> None:
         self.run_command(f"rm -f {failed_tests_file}")
         self.run_command(f"rm -f {fl_data}")
 
-        failing_tests = experiment_info[self.key_failing_test_identifiers]
+        failing_tests = bug_info[self.key_failing_test_identifiers]
         lines = [f"Failing tests: {len(failing_tests)}:\n"]
         lines.extend(f"  - {name.replace('#', '::')}\n" for name in failing_tests)
         self.write_file(lines, failed_tests_file)
@@ -187,7 +187,7 @@ class TBar(AbstractRepairTool):
         test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
 
         lines = []
-        for x in experiment_info[self.key_localization]:
+        for x in bug_info[self.key_localization]:
             classname = x["location"].split("#")[0].replace("$", ".", 1)
             classname = re.sub(r"\$\d+$", "", classname)
             lines.extend(f"{classname}@{lineno}\n" for lineno in x["line_numbers"])
