@@ -253,7 +253,19 @@ class BasicWorkflow(AbstractCompositeTool):
         self.timestamp_log_start()
 
         if not self.do_step(
-            bug_info, None, None, ["analyze", "fuzz", "crash-analyze", "repair"]
+            bug_info,
+            None,
+            None,
+            [
+                "analyze",
+                "fuzz",
+                "crash-analyze",
+                "localize",
+                "slice",
+                "repair",
+                "validate",
+                "select",
+            ],
         ):
             self.observer.stop()  # type:ignore
             for _ in range(self.event_processor_count):
