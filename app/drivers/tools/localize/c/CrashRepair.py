@@ -61,7 +61,7 @@ class CrashRepair(AbstractLocalizeTool):
     ) -> None:
         conf_path = self.generate_conf_file(bug_info)
         timeout_h = str(task_config_info[self.key_timeout])
-        timeout_m = 60 * int(timeout_h)
+        timeout_m = 60 * float(timeout_h)
         timeout_validation = int(timeout_m * 0.75)
         timeout_test = 30
         additional_tool_param = task_config_info[self.key_tool_params]
@@ -78,8 +78,37 @@ class CrashRepair(AbstractLocalizeTool):
         if status >= 0:
             status = 0
         self.process_status(status)
-
         self.timestamp_log_end()
+        result_file = f"/CrashRepair/output/{bug_info[self.key_bug_id]}/analysis.json"
+        if self.is_file(result_file):
+            analysis_info = self.read_json(result_file)
+            if not isinstance(analysis_info, Dict):
+                self.error_exit("expected analysis info to be a dictionary")
+            localization_list = analysis_info["analysis_output"][0]["localization"]
+            processed_loc_info = list()
+            loc_list = list()
+            for _l in localization_list:
+                abs_file_path = _l[self.key_fix_file]
+                line_num = _l[self.key_fix_lines]
+                src_loc = f"{abs_file_path}:{line_num}"
+                if src_loc in loc_list:
+                    continue
+                loc_list.append(src_loc)
+                rel_file_path = abs_file_path.replace(self.dir_expr + "src/", "")
+                _l[self.key_fix_file] = rel_file_path
+
+                processed_loc_info.append(_l)
+            new_metadata = {
+                "generator": self.name,
+                "confidence": "1",
+                "localization": processed_loc_info,
+            }
+
+            self.write_json(
+                [{self.key_analysis_output: [new_metadata]}],
+                join(self.dir_output, "meta-data.json"),
+            )
+
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
