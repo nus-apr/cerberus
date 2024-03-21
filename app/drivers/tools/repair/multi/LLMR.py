@@ -37,10 +37,8 @@ class LLMR(AbstractRepairTool):
 
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
-        if self.key_localization not in bug_info:
-            fl = "-do-fl"
-        elif task_config_info["fault_location"] == "line" or (
-            task_config_info["fault_location"] == "dev"
+        if (
+            task_config_info["fault_location"] == "auto"
             and self.key_localization in bug_info
         ):
             fl_info = []
@@ -56,12 +54,8 @@ class LLMR(AbstractRepairTool):
             fl_path = join(self.dir_output, "fl_data.txt")
             self.write_file(fl_info, fl_path)
             fl = f"-fl-data {fl_path}"
-        elif task_config_info["fault_location"] == "file":
-            file = bug_info[self.key_localization][0][self.key_fix_file]
-            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
-                file = f"src/main/java/{file.replace('.', '/')}.java"
-            self.emit_debug("LLMR will work on file {}".format(file))
-            fl = "-file {}".format(file) if file else ""
+        else:
+            fl = "-do-fl"
 
         language = (
             "-lang {}".format(bug_info[self.key_language])
