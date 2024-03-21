@@ -287,14 +287,15 @@ class AbstractTool(AbstractDriver):
                     if tests["format"] == "raw":
                         # TODO make recursive
                         # Remove the .state file just in case
-                        if self.is_file(join(self.dir_setup, tests["dir"], ".state")):
-                            self.run_command(
-                                "rm .state", dir_path=join(self.dir_setup, tests["dir"])
-                            )
                         test_dir_path = join(dir_info["local"]["setup"], tests["dir"])
                         test_identifiers = []
                         if os.path.exists(test_dir_path):
-                            test_identifiers = os.listdir(test_dir_path)
+                            test_identifiers = list(
+                                filter(
+                                    lambda x: not x.startswith("."),
+                                    os.listdir(test_dir_path),
+                                )
+                            )
                         bug_info[identifier_key] = (
                             bug_info.get(identifier_key, []) + test_identifiers
                         )
@@ -304,6 +305,9 @@ class AbstractTool(AbstractDriver):
                                 join(self.dir_setup, tests["dir"]),
                                 join(self.dir_setup, "tests"),
                             )
+                        )
+                        self.run_command(
+                            "bash -c 'rm .??*'", dir_path=join(self.dir_setup, "tests")
                         )
                         pass
                     if tests["format"] == "ktest":
