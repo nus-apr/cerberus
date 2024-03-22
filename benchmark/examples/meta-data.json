@@ -54,9 +54,15 @@
     "stack_trace": [
         {
             "depth": 0,
-            "function": "div",
+            "function": "division",
             "source_file": "test.c",
             "line": 4
+        },
+        {
+            "depth": 1,
+            "function": "main",
+            "source_file": "test.c",
+            "line": 20
         }
     ],
     "failing_test_identifiers": [],

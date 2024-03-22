@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int div (int a){
+int division (int a){
   return 1000 /(a-5);
 }
 
@@ -17,6 +17,6 @@ int main(int argc, char *argv[]) {
   int x = buffer[0] - 65;
   printf("%d\n", x);
   y = x - 1;
-  res = div(y);
+  res = division(y);
   return 0;
 }
