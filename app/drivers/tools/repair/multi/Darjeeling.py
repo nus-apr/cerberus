@@ -135,9 +135,9 @@ resource-limits:
                 file_list_str += f"  - {f}\n"
         instrument_list_str = ""
         if entry_file_list:
-            instrument_list_str = "  files-to-instrument:\n"
+            instrument_list_str = "    files-to-instrument:\n"
             for f in entry_file_list:
-                instrument_list_str += f"  - {f}\n"
+                instrument_list_str += f"      - {f}\n"
 
         config_content = ""
         if p_lang.lower() in ["c", "c++"]:
