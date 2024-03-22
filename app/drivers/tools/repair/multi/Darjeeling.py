@@ -23,7 +23,7 @@ coverage:
 localization:
   type: spectrum-based
   metric: tarantula
-{fix_file_list}
+{fix_list_str}
 optimizations:
   ignore-dead-code: true
   ignore-equivalent-insertions: true
@@ -121,6 +121,7 @@ resource-limits:
         t_script: str,
         p_lang: str,
         fix_files: List[str],
+        fix_lines: List[str],
         tag_id: str,
         test_driver: str,
         test_list: List[str],
@@ -128,11 +129,15 @@ resource-limits:
     ) -> str:
         self.emit_normal(f"generating config file for {self.name}")
         config_file_path = join(self.dir_setup, "darjeeling.yml")
-        file_list_str = ""
+        fix_list_str = ""
         if fix_files:
-            file_list_str = "  restrict-to-files:\n"
+            fix_list_str = "  restrict-to-files:\n"
             for f in fix_files:
-                file_list_str += f"  - {f}\n"
+                fix_list_str += f"  - {f}\n"
+        if fix_lines:
+            fix_list_str = "  restrict-to-lines:\n"
+            for locs in fix_lines:
+                fix_list_str += f"   {locs}\n"
         instrument_list_str = ""
         if entry_file_list:
             instrument_list_str = "    files-to-instrument:\n"
@@ -149,7 +154,7 @@ resource-limits:
                 build_script=b_script,
                 test_script=t_script,
                 prog_language=p_lang,
-                fix_file_list=file_list_str,
+                fix_list_str=fix_list_str,
                 tag_id=tag_id,
                 dir_src=join(self.dir_expr, "src"),
                 dir_setup=self.dir_setup,
@@ -165,7 +170,7 @@ resource-limits:
             config_content = self.CONFIG_PYTHON_TEMPLATE.format(
                 test_script=t_script,
                 prog_language=p_lang,
-                fix_file_list=file_list_str,
+                fix_file_list=fix_list_str,
                 tag_id=tag_id,
                 dir_src=join(self.dir_expr, "src"),
                 test_cases=test_cases_str,
@@ -237,11 +242,19 @@ resource-limits:
             self.key_failing_test_identifiers, []
         )
         self.build_runtime_docker_image(docker_tag_id)
-        fix_files = []
+        fix_locs: Dict[str, List[str]] = dict()
         if self.key_localization in bug_info:
-            fix_files = list(
-                map(lambda x: x[self.key_fix_file], bug_info[self.key_localization])
-            )
+            for x in bug_info[self.key_localization]:
+                fix_file = x[self.key_fix_file]
+                lines = x[self.key_fix_lines]
+                if fix_file not in fix_locs:
+                    fix_locs[fix_file] = list()
+                fix_locs[fix_file] += [str(x) for x in lines]
+        fix_files: List[str] = []
+        fix_line_str_list = []
+        for x in fix_locs:
+            line_list_str = ",".join(fix_locs[x])
+            fix_line_str_list.append(f"{x}: [{line_list_str}]")
         entry_file_list = []
         if self.key_stack_trace in bug_info:
             last_stack_entry = bug_info[self.key_stack_trace][-1]
@@ -253,6 +266,7 @@ resource-limits:
             t_script=test_script,
             p_lang=str(prog_lang).lower(),
             fix_files=fix_files,
+            fix_lines=fix_line_str_list,
             tag_id=docker_tag_id,
             test_driver=test_script,
             test_list=test_list,
