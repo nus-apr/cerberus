@@ -942,7 +942,7 @@ class Cerberus(App[List[Result]]):
                 str(message.status),
                 update_width=True,
             )
-            table.sort(Cerberus.COLUMNS["ID"][id])
+            table.sort(Cerberus.COLUMNS["ID"][id], key=lambda x: int(x))
             # TODO temporary
             if message.task_type == "repair":
                 table.update_cell(
