@@ -19,6 +19,7 @@ algorithm:
 coverage:
   method:
     type: gcov
+{instrument_file_list}
 localization:
   type: spectrum-based
   metric: tarantula
@@ -123,6 +124,7 @@ resource-limits:
         tag_id: str,
         test_driver: str,
         test_list: List[str],
+        entry_file_list: List[str],
     ) -> str:
         self.emit_normal(f"generating config file for {self.name}")
         config_file_path = join(self.dir_setup, "darjeeling.yml")
@@ -131,6 +133,11 @@ resource-limits:
             file_list_str = "  restrict-to-files:\n"
             for f in fix_files:
                 file_list_str += f"  - {f}\n"
+        instrument_list_str = ""
+        if entry_file_list:
+            instrument_list_str = "  files-to-instrument:\n"
+            for f in entry_file_list:
+                instrument_list_str += f"  - {f}\n"
 
         config_content = ""
         if p_lang.lower() in ["c", "c++"]:
@@ -147,6 +154,7 @@ resource-limits:
                 dir_src=join(self.dir_expr, "src"),
                 dir_setup=self.dir_setup,
                 test_cases=test_cases_str,
+                instrument_file_list=instrument_list_str,
             )
         elif p_lang.lower() == "python":
             test_cases_str = ""
@@ -234,6 +242,11 @@ resource-limits:
             fix_files = list(
                 map(lambda x: x[self.key_fix_file], bug_info[self.key_localization])
             )
+        entry_file_list = []
+        if self.key_stack_trace in bug_info:
+            last_stack_entry = bug_info[self.key_stack_trace][-1]
+            if last_stack_entry["function"] == "main":
+                entry_file_list.append(last_stack_entry["source_file"])
         self.generate_repair_config(
             c_script=config_script,
             b_script=build_script,
@@ -243,6 +256,7 @@ resource-limits:
             tag_id=docker_tag_id,
             test_driver=test_script,
             test_list=test_list,
+            entry_file_list=entry_file_list,
         )
 
         if self.is_instrument_only:
