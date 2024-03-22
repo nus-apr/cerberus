@@ -84,6 +84,10 @@ def construct_experiment_tool_image(
             if tool.sudo_password:
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
+        # do not assume current user is root
+        # TODO: might have to switch back to original user (i.e. Darjeeling user is darjeeling)
+        dock_file.write(f"USER root \n")
+
         # Create a special group to ensure that files are accessible
         dock_file.write(
             f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
