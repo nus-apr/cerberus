@@ -19,6 +19,7 @@ class TaskStatus(Enum):
     FAIL_IN_TOOL = 13
     CANCELLED = 14
     VALIDATING = 15
+    TIMEOUT = 16
 
     def __str__(self) -> str:
         response_map = {
@@ -38,6 +39,7 @@ class TaskStatus(Enum):
             TaskStatus.FAIL_IN_TOOL: "Tool returned non-zero status",
             TaskStatus.CANCELLED: "Job Cancelled",
             TaskStatus.VALIDATING: "Tool validating patches",
+            TaskStatus.TIMEOUT: "Job Timeout",
             TaskStatus.NONE: "NONEEEEEE",
         }
         if self in response_map:

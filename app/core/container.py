@@ -321,7 +321,7 @@ def build_container(
             container_run_args["mem_limit"] = default_mem_limit
 
         emitter.debug(
-            "\t\t\t[framework] container {} is build with the following args {}".format(
+            "\t\t\t[framework] container {} is built with the following args {}".format(
                 container_name, container_run_args
             )
         )

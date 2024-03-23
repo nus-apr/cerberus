@@ -180,10 +180,11 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
-        if values.experiment_status.get(TaskStatus.NONE) != TaskStatus.SUCCESS:
+        final_status = values.experiment_status.get(TaskStatus.NONE)
+        if final_status != TaskStatus.SUCCESS and final_status != TaskStatus.TIMEOUT:
             emitter.error(
                 "\t\t\t[framework] Experiment failed with status {}".format(
-                    values.experiment_status.get(TaskStatus.NONE)
+                    final_status
                 )
             )
 
