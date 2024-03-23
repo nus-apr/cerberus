@@ -164,7 +164,8 @@ class BasicWorkflow(AbstractCompositeTool):
         self.bug_info = bug_info
 
         self.tool_map: Dict[
-            CompositeTaskType, List[Tuple[AbstractTool, str, str, str]]
+            CompositeTaskType,
+            List[Tuple[Callable[[], AbstractTool], str, str, str]],
         ] = {}
 
         self.session_key = values.session_identifier.get("NAN")
@@ -193,9 +194,20 @@ class BasicWorkflow(AbstractCompositeTool):
                     "type", task_type
                 )  # override the type when in "special" (crash-analyze) types
                 if tool_name == "mock":
-                    tool = cast(AbstractTool, MockTool())
+                    tool_constructor: Callable[[], AbstractTool] = lambda: cast(
+                        AbstractTool, MockTool()
+                    )
+                    tool = tool_constructor()
                 else:
-                    tool = configuration.load_tool(tool_name, real_type)
+
+                    def make_tool() -> AbstractTool:
+                        t = configuration.load_tool(tool_name, real_type)
+                        t.tool_tag = tool_tag
+                        t.bindings = t.bindings or {}
+                        return t
+
+                    tool_constructor = make_tool
+                    tool = tool_constructor()
                     tool.tool_tag = tool_tag
 
                 tool.bindings = tool.bindings or {}
@@ -224,7 +236,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     tool_tag,
                 )
                 self.tool_map[task_type].append(
-                    (tool, tool_params, tool_tag, real_type)
+                    (tool_constructor, tool_params, tool_tag, real_type)
                 )
 
         self.emit_highlight("Done with setup!")
@@ -886,7 +898,8 @@ class BasicWorkflow(AbstractCompositeTool):
         }
         for next_task in next_task_options:
             if next_task in self.tool_map:
-                for tool, params, tag, type in self.tool_map[next_task]:
+                for tool_constuctor, params, tag, type in self.tool_map[next_task]:
+                    tool = tool_constuctor()
                     self.pool.apply_async(
                         self.run_subtask,
                         [
