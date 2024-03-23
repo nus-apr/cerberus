@@ -113,6 +113,9 @@ resource-limits:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/darjeeling"
+        self.runs_as_root = False
+        self.image_user = "darjeeling"
+        self.sudo_password = ""
 
     def generate_repair_config(
         self,
