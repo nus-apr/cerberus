@@ -1,3 +1,4 @@
+import copy
 import hashlib
 import json
 import os
@@ -200,13 +201,22 @@ class BasicWorkflow(AbstractCompositeTool):
                     tool = tool_constructor()
                 else:
 
-                    def make_tool() -> AbstractTool:
-                        t = configuration.load_tool(tool_name, real_type)
-                        t.tool_tag = tool_tag
-                        t.bindings = t.bindings or {}
-                        return t
+                    def make_tool_constructor(
+                        tool_name: str, real_type: str, tool_tag: str
+                    ) -> Callable[[], AbstractTool]:
+                        def tool_constructor() -> AbstractTool:
+                            t = configuration.load_tool(tool_name, real_type)
+                            t.tool_tag = tool_tag
+                            t.bindings = t.bindings or {}
+                            return t
 
-                    tool_constructor = make_tool
+                        return tool_constructor
+
+                    tool_constructor = make_tool_constructor(
+                        copy.deepcopy(tool_name),
+                        copy.deepcopy(real_type),
+                        copy.deepcopy(tool_tag),
+                    )
                     tool = tool_constructor()
                     tool.tool_tag = tool_tag
 
