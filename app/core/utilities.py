@@ -91,6 +91,10 @@ def execute_command(
         [command], stdout=subprocess.PIPE, shell=True, env=new_env, cwd=directory
     )
     (output, error) = process.communicate()
+    if output:
+        emitter.debug(output.decode("utf-8"))
+    if error:
+        emitter.error(error.decode("utf-8"))
     # out is the output of the command, and err is the exit value
     return int(process.returncode)
 
@@ -123,6 +127,10 @@ def run_command(
         [command], stdout=subprocess.PIPE, shell=True, env=new_env, cwd=directory
     )
     (output, error) = process.communicate()
+    if output:
+        emitter.debug(output.decode("utf-8"))
+    if error:
+        emitter.error(error.decode("utf-8"))
     # out is the output of the command, and err is the exit value
     return int(process.returncode), (output, error)
 
