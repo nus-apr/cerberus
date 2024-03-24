@@ -8,3 +8,4 @@ cython
 jsonschema
 semver
 watchdog
+javalang
