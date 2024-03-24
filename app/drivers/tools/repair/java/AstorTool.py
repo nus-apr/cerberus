@@ -68,8 +68,15 @@ class AstorTool(AbstractRepairTool):
             f"-maxtime {int(math.ceil(float(timeout_m)))} "
             f"-stopfirst false "
         )
+        env = {}
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
 
-        status = self.run_command(repair_command, self.log_output_path, self.astor_home)
+        status = self.run_command(
+            repair_command, self.log_output_path, self.astor_home, env=env
+        )
 
         self.process_status(status)
 

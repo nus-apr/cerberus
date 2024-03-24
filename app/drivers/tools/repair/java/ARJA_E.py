@@ -32,7 +32,7 @@ class ARJA_E(AbstractRepairTool):
 
         timeout_h = str(task_config_info[self.key_timeout])
 
-        classpath = f"{join(self.arja_e_home, 'lib/*')}:{join(self.arja_e_home, 'bin')}"
+        classpath = f"{join(self.arja_e_home, 'lib/*')}:{join(self.arja_e_home, 'bin')}:/root/.m2/repository/*"
 
         dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
