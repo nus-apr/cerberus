@@ -4,15 +4,25 @@ benchmark_name=$(echo $script_dir | rev | cut -d "/" -f 3 | rev)
 project_name=$(echo $script_dir | rev | cut -d "/" -f 2 | rev)
 bug_id=$(echo $script_dir | rev | cut -d "/" -f 1 | rev)
 dir_name=/experiment/$benchmark_name/$project_name/$bug_id
-cd $dir_name
-TEST_ID=$1
-BINARY_PATH=$dir_name/src/test
-POC=$script_dir/tests/$TEST_ID
-timeout 10 $BINARY_PATH $POC
-ret=$?
-if [[ ret -eq 1 ]]
+TEST_CLASS=$1
+EXIT_CODE=1
+cd $dir_name/src
+
+if [ -z "$TEST_CLASS" ];
 then
-   exit 0;
+  echo "requires a test class"
+  exit 255
+fi
+
+
+timeout 20 mvn test -Drat.skip=true -Dtest=$TEST_CLASS > /dev/null 2>&1
+EXIT_CODE=$?
+
+if [[ EXIT_CODE -eq 0 ]]
+then
+  echo "PASS"
 else
-   exit $ret
+  echo "FAIL"
 fi;
+
+exit $EXIT_CODE
