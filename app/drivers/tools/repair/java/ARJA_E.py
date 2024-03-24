@@ -97,6 +97,18 @@ class ARJA_E(AbstractRepairTool):
             f"-DgzoltarDataDir {dir_localization} "
         )
 
+        env = self.d4j_env.copy()
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
+        )
+
         if not passing_test_identifiers_list:
             test_list_str = ",".join(failing_test_identifiers_list)
             arja_e_command += f" -Dtests {test_list_str}"
@@ -105,7 +117,7 @@ class ARJA_E(AbstractRepairTool):
             arja_e_command,
             self.log_output_path,
             dir_path=join(self.dir_expr, "src"),
-            env=self.d4j_env,
+            env=env,
         )
 
         self.process_status(status)

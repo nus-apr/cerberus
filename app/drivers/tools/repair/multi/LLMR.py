@@ -74,6 +74,20 @@ class LLMR(AbstractRepairTool):
             else ""
         )
 
+        env = {}
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        if self.key_build_script in bug_info:
+            # Build it once to have things prepared
+            self.run_command(
+                "bash {}".format(bug_info.get(self.key_build_script)),
+                dir_path=self.dir_setup,
+                env=env,
+            )
+
         # start running
         self.timestamp_log_start()
         llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} {params}".format(
@@ -116,7 +130,7 @@ class LLMR(AbstractRepairTool):
             params=params,
         )
         status = self.run_command(
-            llmr_command, self.log_output_path, join(self.dir_expr, "src")
+            llmr_command, self.log_output_path, join(self.dir_expr, "src"), env=env
         )
 
         self.process_status(status)
