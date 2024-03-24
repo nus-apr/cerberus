@@ -128,11 +128,13 @@ class TBar(AbstractRepairTool):
             failed_tests_dir,
             f"{bug_info[self.key_bug_id].replace('-', '_')}.txt",
         )
+        self.run_command("mkdir -p {}".format(os.path.dirname(failed_tests_file)))
 
         self.emit_debug("I am looking for {}".format(failed_tests_file))
         fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
         self.run_command(f"mkdir -p {fl_out_dir}")
         fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
+        self.run_command("mkdir -p {}".format(os.path.dirname(fl_data)))
 
         failed_tests_file_copy = join(
             self.tbar_root_dir,
@@ -184,17 +186,20 @@ class TBar(AbstractRepairTool):
         lines.extend(f"  - {name.replace('#', '::')}\n" for name in failing_tests)
         self.write_file(lines, failed_tests_file)
 
-        test_failed_tests_file = self.run_command(f"test -f {failed_tests_file}")
+        test_failed_tests_file = self.is_file(failed_tests_file)
 
+        self.emit_debug("Bug info is {}".format(bug_info))
+        self.emit_debug("Localization is {}".format(bug_info[self.key_localization]))
         lines = []
         for x in bug_info[self.key_localization]:
             classname = x["location"].split("#")[0].replace("$", ".", 1)
             classname = re.sub(r"\$\d+$", "", classname)
             lines.extend(f"{classname}@{lineno}\n" for lineno in x["line_numbers"])
+        self.emit_debug("Writing [{}] to {}".format(lines, fl_data))
         self.write_file(lines, fl_data)
 
-        test_fl_data = self.run_command(f"test -f {fl_data}")
-        if self.run_command(f"test -f {fl_data}") != 0:
+        test_fl_data = self.is_file(fl_data)
+        if not test_fl_data:
             self.error_exit("Suspiciousness file was not written. Unsupported state")
         self.emit_debug(f"{test_failed_tests_file} {test_fl_data}")
 
