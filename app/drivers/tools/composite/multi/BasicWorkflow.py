@@ -318,7 +318,8 @@ class BasicWorkflow(AbstractCompositeTool):
         """
         if task_type.lower() == "repair":
             for _a in bug_info[self.key_analysis_output]:
-                del _a[self.key_benign_inputs]
+                if self.key_benign_inputs in _a:
+                    del _a[self.key_benign_inputs]
 
         self.emit_debug(f"Bindings are {tool.bindings}")
         tool.bindings = tool.bindings or {}
@@ -981,6 +982,8 @@ class BasicWorkflow(AbstractCompositeTool):
         if new_bug_info:
             bug_info = new_bug_info
 
+        bug_info = copy.deepcopy(bug_info) # Ensure bug info is unique
+        
         if new_hash:
             hash = new_hash
 
