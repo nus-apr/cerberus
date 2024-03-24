@@ -982,8 +982,8 @@ class BasicWorkflow(AbstractCompositeTool):
         if new_bug_info:
             bug_info = new_bug_info
 
-        bug_info = copy.deepcopy(bug_info) # Ensure bug info is unique
-        
+        bug_info = copy.deepcopy(bug_info)  # Ensure bug info is unique
+
         if new_hash:
             hash = new_hash
 
@@ -1011,7 +1011,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 task_config_info_new[real_task_type + "-" + self.key_timeout] = (
                     new_timeout
                 )
-        bug_info[self.key_tool_name] = tool.name
+        bug_info[self.key_tool_name] = tool.name + "-" + tool.tool_tag
 
         return (
             dir_info,
