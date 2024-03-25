@@ -74,21 +74,22 @@ class FlaCoCo(AbstractLocalizeTool):
                 pass
 
         self.timestamp_log_start()
+        localization_file_path = join(self.dir_output, "localilzation.csv")
         localize_command = "timeout -k 5m {}h java -jar /flacoco/target/flacoco-1.0.7-SNAPSHOT-jar-with-dependencies.jar -f {} --projectpath {} {} -o {} {}".format(
             timeout,
             formula,
             join(self.dir_expr, "src"),
             additional_tool_param,
-            join(self.dir_output, "localilzation.csv"),
+            localization_file_path,
             "-v" if values.debug else "",
         )
 
         status = self.run_command(localize_command, self.log_output_path, env=env)
         self.process_status(status)
 
-        if self.is_file(join(self.dir_output, "localilzation.csv")):
+        if self.is_file(localization_file_path):
             localization = []
-            lines = self.read_file(join(self.dir_output, "localization.csv"))
+            lines = self.read_file(localization_file_path)
             for entry in lines:
                 path, line, score = entry.split(",")
                 localization.append(
