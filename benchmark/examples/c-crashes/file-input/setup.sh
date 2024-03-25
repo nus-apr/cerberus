@@ -8,5 +8,5 @@ dir_name=/experiment/$benchmark_name/$project_name/$bug_id
 current_dir=$PWD
 mkdir -p $dir_name
 cp -rf $current_dir/src $dir_name
-cp $current_dir/oracle* $dir_name
-cp -rf $current_dir/tests $dir_name
+cp -rf $current_dir/benign_tests $dir_name
+cp -rf $current_dir/crashing_tests $dir_name
