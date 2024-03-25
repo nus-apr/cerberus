@@ -223,6 +223,7 @@
     "localization": [
       {
         "source_file": "src/main/java/sg/edu/nus/comp/cerberus/LeapYear.java",
+        "location": "sg.edu.nus.comp.cerberus$LeapYear#LeapChecking(int)",
         "score": 1.0,
         "line_numbers": [
           7
