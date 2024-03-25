@@ -677,6 +677,18 @@ def write_file(container_id: str, file_path: str, content: Sequence[str]) -> Non
     os.remove(tmp_file_path)
 
 
+def get_file_object(container_id: str, file_path: str, encoding: str = "utf-8") -> Any:
+    tmp_file_path = os.path.join(
+        "/tmp", "container-file-{}".format(random.randint(0, 1000000))
+    )
+    copy_command = "docker -H {} cp {}:{} {}".format(
+        values.docker_host, container_id, file_path, tmp_file_path
+    )
+    utilities.execute_command(copy_command)
+    f_obj = open(tmp_file_path, "r", encoding=encoding)
+    return f_obj
+
+
 def read_file(container_id: str, file_path: str, encoding: str = "utf-8") -> List[str]:
     tmp_file_path = os.path.join(
         "/tmp", "container-file-{}".format(random.randint(0, 1000000))

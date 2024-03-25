@@ -651,6 +651,11 @@ class AbstractTool(AbstractDriver):
     def is_file(self, file_path: str) -> bool:
         return abstractions.is_file(self.container_id, file_path)
 
+    def load_ast(
+        self, file_path: str, encoding: str = "utf-8", language: str = "java"
+    ) -> Any:
+        return abstractions.load_ast(self.container_id, file_path, encoding, language)
+
     # endregion
 
     def get_output_log_path(self) -> str:

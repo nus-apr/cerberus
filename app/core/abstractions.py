@@ -6,6 +6,8 @@ from typing import List
 from typing import Optional
 from typing import Sequence
 
+import javalang  # type: ignore
+
 from app.core import container
 
 
@@ -89,3 +91,28 @@ def is_file(container_id: Optional[str], file_path: str) -> bool:
         return container.is_file(container_id, file_path)
     else:
         return os.path.isfile(file_path)
+
+
+def load_ast_java(
+    container_id: Optional[str], file_path: str, encoding: str = "utf-8"
+) -> Any:
+    if container_id:
+        file_object = container.get_file_object(container_id, file_path, encoding)
+        tree = javalang.parse.parse(file_object.read())
+    else:
+        with open(file_path, "r", encoding=encoding) as f:
+            tree = javalang.parse.parse(f.read())
+    return tree
+
+
+def load_ast(
+    container_id: Optional[str],
+    file_path: str,
+    encoding: str = "utf-8",
+    language: str = "java",
+) -> Any:
+    if language == "java":
+        return load_ast_java(container_id, file_path, encoding)
+    else:
+        Exception(f"Unsupported Language {language} for AST generation")
+    return
