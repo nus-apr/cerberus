@@ -1,4 +1,4 @@
-package sg.edu.nus.comp.evorepair;
+package sg.edu.nus.comp.cerberus;
 
 import org.junit.Test;
 import static org.junit.Assert.assertEquals;

@@ -47,7 +47,7 @@
       {
         "source_file": "test.c",
         "line_numbers": [
-          19
+          24
         ]
       }
     ],
@@ -222,7 +222,7 @@
     },
     "localization": [
       {
-        "source_file": "main/java/sg/edu/nus/comp/cerberus/LeapYear.java",
+        "source_file": "src/main/java/sg/edu/nus/comp/cerberus/LeapYear.java",
         "line_numbers": [
           7
         ]
