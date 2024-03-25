@@ -60,7 +60,7 @@ localization_schema = {
         MetadataFieldsEnum.SOURCE_FILE.value,
         MetadataFieldsEnum.LINE_NUMBERS.value,
     ],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 """
