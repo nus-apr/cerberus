@@ -74,7 +74,7 @@ class FlaCoCo(AbstractLocalizeTool):
                 pass
 
         self.timestamp_log_start()
-        localization_file_path = join(self.dir_output, "localilzation.csv")
+        localization_file_path = join(self.dir_output, "localization.csv")
         localize_command = "timeout -k 5m {}h java -jar /flacoco/target/flacoco-1.0.7-SNAPSHOT-jar-with-dependencies.jar -f {} --projectpath {} {} -o {} {}".format(
             timeout,
             formula,
