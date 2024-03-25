@@ -133,7 +133,12 @@ class FlaCoCo(AbstractLocalizeTool):
                     is_timeout = False
         if self.is_file(output_file):
             output_lines = self.read_file(output_file, encoding="iso-8859-1")
-            self.stats.fix_loc_stats.fix_locs = len(output_lines) - 1
+            unique_class_list = set()
+            for result in output_lines:
+                class_name, line_number, score = result.split(",")
+                unique_class_list.add(class_name)
+            self.stats.fix_loc_stats.source_files = len(unique_class_list)
+            self.stats.fix_loc_stats.fix_locs = len(output_lines)
         else:
             self.emit_error("no localization file found")
             self.stats.error_stats.is_error = True
