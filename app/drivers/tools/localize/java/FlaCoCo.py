@@ -121,7 +121,7 @@ class FlaCoCo(AbstractLocalizeTool):
             self.emit_warning("no output log file found")
             return self.stats
 
-        output_file = join(self.dir_output, "localilzation.csv")
+        output_file = join(self.dir_output, "localization.csv")
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_timeout = True
         if self.is_file(self.log_output_path):
