@@ -16,6 +16,30 @@ class FauxPy(AbstractLocalizeTool):
         super().__init__(self.name)
         self.image_name = "mirchevmp/fauxpy:latest"
 
+    def generate_meta_data(self, localization_file_path: str) -> None:
+        localization = []
+        lines = self.read_file(localization_file_path)[1:]
+        for entry in lines:
+            src_loc, score = entry.split(",")
+            source_file, line_number = src_loc.split("::")
+            localization.append(
+                {
+                    "source_file": source_file,
+                    "line_numbers": [line_number],
+                    "score": score,
+                }
+            )
+        new_metadata = {
+            self.key_analysis_output: [
+                {
+                    "generator": self.name,
+                    "confidence": "1",
+                    "localization": localization,
+                }
+            ]
+        }
+        self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -41,6 +65,7 @@ class FauxPy(AbstractLocalizeTool):
             localize_command, self.log_output_path, dir_path=join(self.dir_expr, "src")
         )
 
+        localization_file_path = join(self.dir_output, "localization.csv")
         if status == 1:
             # The test suite has failing tests but this is generally what we want to so we change the code to success if the report is generated
             report_list = self.list_dir(join(self.dir_expr), regex="FauxPyReport*")
@@ -53,14 +78,14 @@ class FauxPy(AbstractLocalizeTool):
                     "bash -c 'cp {}/Scores_{}.csv {}'  ".format(
                         report_list[0],
                         formula,
-                        join(self.dir_output, "localization.csv"),
+                        localization_file_path,
                     ),
                     dir_path=self.dir_expr,
                 )
                 status = 0
-
+        if self.is_file(localization_file_path):
+            self.generate_meta_data(localization_file_path)
         self.process_status(status)
-
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
