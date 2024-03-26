@@ -1,5 +1,6 @@
 import difflib
 import os
+from os.path import join
 from pathlib import Path
 from typing import Any
 from typing import Dict
@@ -7,6 +8,8 @@ from typing import List
 from typing import Tuple
 
 from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractLLMTool import AbstractLLMTool
 
 
@@ -55,3 +58,27 @@ class AbstractLLMRepairTool(AbstractLLMTool):
             )
             prompt_list.append(prompt)
         return prompt_list
+
+    def invoke_advanced(
+        self,
+        dir_info: DirectoryInfo,
+        benchmark: AbstractBenchmark,
+        bug_info: Dict[str, Any],
+        task_config_info: Dict[str, Any],
+        container_config_info: Dict[str, Any],
+        run_index: str,
+        hash: str,
+    ) -> None:
+        super().invoke_advanced(
+            dir_info,
+            benchmark,
+            bug_info,
+            task_config_info,
+            container_config_info,
+            run_index,
+            hash,
+        )
+        self.write_json(
+            [{"patches_dir": join(self.dir_output, "patches")}],
+            join(self.dir_output, "meta-data.json"),
+        )
