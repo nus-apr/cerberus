@@ -34,12 +34,12 @@
         "composite-sequence": {
           "localize": [
             {
-              "name": "flacoco"
+              "name": "fauxpy"
             }
           ],
           "repair": [
             {
-              "name": "arja",
+              "name": "darjeeling",
               "ignore": false
             }
           ],
@@ -53,7 +53,7 @@
           {
             "name": "examples",
             "bug-id-list": [
-              "5"
+              "6"
             ]
           }
         ],
