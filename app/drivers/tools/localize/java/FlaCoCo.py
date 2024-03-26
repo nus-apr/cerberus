@@ -17,6 +17,29 @@ class FlaCoCo(AbstractLocalizeTool):
         super().__init__(self.name)
         self.image_name = "mirchevmp/flacoco:latest"
 
+    def generate_meta_data(self, localization_file_path: str) -> None:
+        localization = []
+        lines = self.read_file(localization_file_path)
+        for entry in lines:
+            path, line, score = entry.split(",")
+            localization.append(
+                {
+                    "source_file": path,
+                    "line_numbers": [line],
+                    "score": score,
+                }
+            )
+        new_metadata = {
+            self.key_analysis_output: [
+                {
+                    "generator": self.name,
+                    "confidence": "1",
+                    "localization": localization,
+                }
+            ]
+        }
+        self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -88,27 +111,7 @@ class FlaCoCo(AbstractLocalizeTool):
         self.process_status(status)
 
         if self.is_file(localization_file_path):
-            localization = []
-            lines = self.read_file(localization_file_path)
-            for entry in lines:
-                path, line, score = entry.split(",")
-                localization.append(
-                    {
-                        "source_file": path,
-                        "line_numbers": [line],
-                        "score": score,
-                    }
-                )
-            new_metadata = {
-                self.key_analysis_output: [
-                    {
-                        "generator": "flacoco",
-                        "confidence": "1",
-                        "localization": localization,
-                    }
-                ]
-            }
-            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
+            self.generate_meta_data(localization_file_path)
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
