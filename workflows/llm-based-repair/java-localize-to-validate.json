@@ -35,7 +35,7 @@
         "composite-sequence": {
           "localize": [
             {
-              "name": "e9patchsbfl"
+              "name": "flacoco"
             }
           ],
           "repair": [
@@ -54,7 +54,7 @@
           {
             "name": "examples",
             "bug-id-list": [
-              "2"
+              "5"
             ]
           }
         ],
