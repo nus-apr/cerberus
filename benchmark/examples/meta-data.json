@@ -224,7 +224,7 @@
     },
     "localization": [
       {
-        "source_file": "cerberus/Calculator.java",
+        "source_file": "src/main/java/cerberus/Calculator.java",
         "location": "cerberus$Calculator#wrongAdd(int, int)",
         "score": 1.0,
         "line_numbers": [
