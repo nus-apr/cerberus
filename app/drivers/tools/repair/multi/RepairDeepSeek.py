@@ -44,12 +44,23 @@ class RepairDeepSeek(AbstractLLMRepairTool):
         localization_list = bug_info[self.key_localization]
         diff_list = []
         status = 0
+        prog_lang = bug_info.get(self.key_language)
         # TODO: this is a hack to temporarily disable internal validation
         hack_command = 'sed -i "126d" /home/aixcc-repair/api/sft_repair.py'
         self.run_command(hack_command)
         for localization in localization_list:
-            rel_src_path = localization[self.key_fix_file]
-            fix_lines = localization[self.key_fix_lines]
+            fix_file = localization[self.key_fix_file]
+            dir_src = join(self.dir_expr, "src")
+            if prog_lang == "c":
+                rel_src_path = fix_file.replace(dir_src + "/", "")
+            elif prog_lang == "java":
+                java_src_path = bug_info.get(self.key_dir_source)
+                fix_class_name = fix_file
+                class_path = fix_class_name.replace(".", "/")
+                rel_src_path = f"{java_src_path}/{class_path}.java"
+            else:
+                rel_src_path = fix_file
+            fix_lines = [int(x) for x in localization[self.key_fix_lines]]
             for line_num in fix_lines:
                 bug_info[self.key_fix_file] = rel_src_path
                 bug_info[self.key_fix_lines] = [line_num]
