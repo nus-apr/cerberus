@@ -135,7 +135,7 @@
     "language": "c"
   },
   {
-    "id": 6,
+    "id": 4,
     "subject": "java-test-suite",
     "bug_id": "leap-year",
     "bug_type": "Incorrect Output",
@@ -200,8 +200,8 @@
     "test_timeout": 10,
     "language": "java"
   },
-    {
-    "id": 7,
+  {
+    "id": 5,
     "subject": "java-test-suite",
     "bug_id": "calculator",
     "bug_type": "Incorrect Output",
@@ -263,5 +263,54 @@
     "count_pos": 1,
     "test_timeout": 10,
     "language": "java"
+  },
+  {
+    "id": 6,
+    "subject": "python-test-suite",
+    "bug_id": "calculator",
+    "bug_type": "Incorrect Output",
+    "output_dir_abspath": "/output",
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "src": {
+      "root_abspath": "/experiment/examples/python-test-suite/calculator/src",
+      "entrypoint": {}
+    },
+    "localization": [
+      {
+        "source_file": "calculator.py",
+        "score": 1.0,
+        "line_numbers": [
+          4
+        ]
+      }
+    ],
+
+    "failing_test_identifiers": [
+      "test_0",
+      "test_1"
+    ],
+    "passing_test_identifiers": [
+      "test_2",
+      "test_3",
+      "test_4",
+      "test_5"
+    ],
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [],
+                "benign_inputs": [],
+                "exploit_file_list": [],
+                "test_dir_abspath": ""
+            }
+    ],
+    "exploit_file_list": [],
+    "count_neg": 2,
+    "count_pos": 4,
+    "test_timeout": 10,
+    "language": "python"
   }
 ]
