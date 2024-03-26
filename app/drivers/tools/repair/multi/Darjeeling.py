@@ -255,8 +255,11 @@ resource-limits:
                 fix_locs[fix_file] += [str(x) for x in lines]
         fix_files: List[str] = []
         fix_line_str_list = []
+        dir_src = os.path.join(self.dir_expr, "src")
         for x in fix_locs:
             line_list_str = ",".join(fix_locs[x])
+            if dir_src in x:
+                x = x.replace(dir_src + "/", "")
             fix_line_str_list.append(f"{x}: [{line_list_str}]")
         entry_file_list = []
         if self.key_stack_trace in bug_info:
