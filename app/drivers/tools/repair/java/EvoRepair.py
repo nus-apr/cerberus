@@ -19,6 +19,9 @@ class EvoRepair(AbstractRepairTool):
         super().__init__(self.name)
         self.image_name = "rshariffdeen/evorepair"
         self.bug_id = ""
+        self.hash_digest = (
+            "sha256:12bd73e4382acb361ccda3bb333c37e4c44d200ad40ec7fad860d35072f7e952"
+        )
 
     def generate_config_file(self, bug_info: Dict[str, Any]) -> str:
         repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
@@ -49,14 +52,20 @@ class EvoRepair(AbstractRepairTool):
         build_config["directory"] = os.path.join(self.dir_expr, "src")
         build_config["commands"] = dict()
         build_config["commands"]["pre-build"] = "exit 0"
-        build_config["commands"]["clean"] = "rm -rf build build-tests"
-        build_config["commands"]["build"] = "defects4j compile"
+        build_config["commands"]["clean"] = bug_info[self.key_clean_command]
+        build_config["commands"]["build"] = bug_info[self.key_build_command]
         config_object["build"] = build_config
 
         localize_config = dict()
-        localize_config["fix-locations"] = list(
-            map(lambda x: x[self.key_fix_loc], bug_info[self.key_localization])
-        )
+        fix_locations = []
+        localization_list = bug_info[self.key_localization]
+        for result in localization_list:
+            source_file = result[self.key_fix_file]
+            line_numbers = result[self.key_fix_lines]
+            for _l in line_numbers:
+                fix_loc = f"{source_file}:{_l}"
+                fix_locations.append(fix_loc)
+        localize_config["fix-locations"] = fix_locations
         config_object["localization"] = localize_config
 
         self.write_file([json.dumps(config_object)], repair_config_path)
