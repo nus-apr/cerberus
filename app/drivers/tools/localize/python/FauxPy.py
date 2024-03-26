@@ -81,8 +81,14 @@ class FauxPy(AbstractLocalizeTool):
                 if "statistics" in line:
                     is_timeout = False
         if self.is_file(output_file):
-            output_lines = self.read_file(output_file, encoding="iso-8859-1")
-            self.stats.fix_loc_stats.fix_locs = len(output_lines) - 1
+            output_lines = self.read_file(output_file, encoding="iso-8859-1")[1:]
+            unique_src_list = set()
+            for result in output_lines:
+                src_loc, score = result.split(",")
+                source_file, line_number = src_loc.split("::")
+                unique_src_list.add(source_file)
+            self.stats.fix_loc_stats.source_files = len(unique_src_list)
+            self.stats.fix_loc_stats.fix_locs = len(output_lines)
         else:
             self.emit_error("no output file found")
             self.stats.error_stats.is_error = True
