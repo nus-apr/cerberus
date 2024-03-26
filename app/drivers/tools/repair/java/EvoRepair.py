@@ -5,6 +5,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import definitions
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -77,6 +78,7 @@ class EvoRepair(AbstractRepairTool):
         test_timeout = 30000
         test_partitions = 1
         # generate patches
+
         self.timestamp_log_start()
         repair_command = (
             f"timeout -k 5m {timeout_h}h evorepair "
@@ -84,6 +86,10 @@ class EvoRepair(AbstractRepairTool):
             f"--passing-tests-partitions {test_partitions} "
             f"--config {repair_config_path}"
         )
+
+        run_fl = task_config_info[definitions.KEY_CONFIG_FIX_LOC] == "tool"
+        if not run_fl:
+            repair_command += " --use-given-locations"
 
         status = self.run_command(
             repair_command, self.log_output_path, self.evorepair_home
