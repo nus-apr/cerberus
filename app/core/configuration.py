@@ -16,6 +16,7 @@ from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
@@ -100,6 +101,19 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
         return cast(AbstractBenchmark, initializer())
+
+
+def process_overrides(parsed_args: Namespace, config: Config) -> None:
+    if parsed_args.debug:
+        config.general.debug_mode = True
+    if parsed_args.secure_hash:
+        config.general.secure_hash = True
+    if parsed_args.parallel:
+        config.general.parallel_mode = True
+    if parsed_args.cpus:
+        config.general.cpus = parsed_args.cpus
+    if parsed_args.gpus:
+        config.general.gpus = parsed_args.gpus
 
 
 class Configurations:

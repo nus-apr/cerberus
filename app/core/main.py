@@ -16,6 +16,7 @@ from typing import Optional
 import rich.traceback
 from rich import get_console
 
+from app.core import configuration
 from app.core import container
 from app.core import definitions
 from app.core import emitter
@@ -119,7 +120,6 @@ def main() -> None:
             f"User {getpass.getuser()} is not part of {definitions.GROUP_NAME} group or group does not exist. Please this is setup correctly"
         )
 
-    # TODO Do overwrite magic
     config_obj = bootstrap(parsed_args)
     try:
         emitter.title(
@@ -180,6 +180,9 @@ def process_config_file(parsed_args: Namespace) -> Config:
     config_loader.load()
     config_loader.validate()
     config = ConfigDataFactory.create(config_data_dict=config_loader.get_config_data())
+    configuration.process_overrides(
+        parsed_args, config
+    )  # Allow for overriding of the config by the command line
     values.debug = config.general.debug_mode
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
