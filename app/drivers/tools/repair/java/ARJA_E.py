@@ -109,6 +109,13 @@ class ARJA_E(AbstractRepairTool):
             env=env,
         )
 
+        if bug_info[self.key_build_system] == "maven":
+            self.run_command(
+                f"mvn dependency:copy-dependencies",
+                dir_path=join(self.dir_expr, "src"),
+                env=env,
+            )
+
         if not passing_test_identifiers_list:
             test_list_str = ",".join(failing_test_identifiers_list)
             arja_e_command += f" -Dtests {test_list_str}"
@@ -206,7 +213,7 @@ class ARJA_E(AbstractRepairTool):
         lines = ["name;suspiciousness_value\n"]
         for x in data:
             suspiciousness = x["score"]
-            method = x["location"]
+            method = x["function"]
             classname = method.split("#")[0].replace("$", ".", 1)
             classname = re.sub(r"\$\d+$", "", classname)
             for lineno in x["line_numbers"]:

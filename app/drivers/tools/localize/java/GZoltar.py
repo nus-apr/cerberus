@@ -229,7 +229,7 @@ class GZoltar(AbstractLocalizeTool):
                 localization.append(
                     {
                         "source_file": path,
-                        "location": reference,
+                        "function": reference,
                         "line_numbers": [line],
                         "score": score,
                     }

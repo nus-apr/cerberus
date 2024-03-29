@@ -99,6 +99,7 @@ class AbstractTool(AbstractDriver):
     key_java_version = definitions.KEY_JAVA_VERSION
     key_generator = definitions.KEY_GENERATOR
     key_stack_trace = definitions.KEY_STACK_TRACE
+    key_build_system = definitions.KEY_BUILD_SYSTEM
     # endregion
 
     stats: ToolStats

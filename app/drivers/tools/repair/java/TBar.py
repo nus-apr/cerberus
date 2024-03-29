@@ -192,7 +192,7 @@ class TBar(AbstractRepairTool):
         self.emit_debug("Localization is {}".format(bug_info[self.key_localization]))
         lines = []
         for x in bug_info[self.key_localization]:
-            classname = x["location"].split("#")[0].replace("$", ".", 1)
+            classname = x["function"].split("#")[0].replace("$", ".", 1)
             classname = re.sub(r"\$\d+$", "", classname)
             lines.extend(f"{classname}@{lineno}\n" for lineno in x["line_numbers"])
         self.emit_debug("Writing [{}] to {}".format(lines, fl_data))
