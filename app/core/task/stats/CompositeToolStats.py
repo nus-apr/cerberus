@@ -1,13 +1,29 @@
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import Tuple
 
 from app.core.task.stats.ToolStats import ToolStats
+from app.core.task.TaskStatus import TaskStatus
 
 
 class CompositeStats:
+    job_statuses: Dict[str, Tuple[int, TaskStatus]]
+    test_distribution: Dict[str, Tuple[int, int]]
+
+    def __init__(self) -> None:
+        self.job_statuses = {}
+        self.test_distribution = {}
+
     def get_dict(self) -> Dict[str, Any]:
         summary: Dict[str, Any] = {}
+        for key, (value, status) in self.job_statuses.items():
+            summary[key] = {
+                "value": value,
+                "status": str(status),
+                "benign_tests": self.test_distribution.get(key, (-1, -1))[0],
+                "exploit_inputs": self.test_distribution.get(key, (-1, -1))[1],
+            }
         return summary
 
 

@@ -43,6 +43,7 @@ from app.core.task.dir_info import generate_tool_dir_info
 from app.core.task.image import prepare_experiment_image
 from app.core.task.image import prepare_experiment_tool_image
 from app.core.task.stats.CompositeToolStats import CompositeToolStats
+from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.CompositeSequence import CompositeSequence
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.task.typing.TaskType import CompositeTaskType
@@ -401,6 +402,37 @@ class BasicWorkflow(AbstractCompositeTool):
                     )
                 )
 
+            exploit_input_count = 0
+            beningn_input_count = 0
+            for analysis_output in bug_info[self.key_analysis_output]:
+                if self.key_exploit_inputs in analysis_output:
+                    p = join(
+                        dir_setup_extended or dir_info["local"]["setup"],
+                        str(analysis_output[self.key_exploit_inputs]["dir"]),
+                    )
+                    if os.path.exists(p):
+                        exploit_input_count += len(os.listdir(p))
+                    else:
+                        self.emit_warning(
+                            f"Path for exploit test list {p} does not exist"
+                        )
+                if self.key_benign_inputs in analysis_output:
+                    p = join(
+                        dir_setup_extended or dir_info["local"]["setup"],
+                        str(analysis_output[self.key_benign_inputs]["dir"]),
+                    )
+                    if os.path.exists(p):
+                        beningn_input_count += len(os.listdir(p))
+                    else:
+                        self.emit_warning(
+                            f"Path for benign test list {p} does not exist"
+                        )
+
+            self.stats.composite_stats.test_distribution[key] = (
+                beningn_input_count,
+                exploit_input_count,
+            )
+
             err, _ = task.run(
                 benchmark,
                 tool,
@@ -423,6 +455,16 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_error(tb)
             traceback.print_exc(file=sys.stderr)
         finally:
+            status = values.experiment_status.get(TaskStatus.NONE)
+            self.stats.composite_stats.job_statuses[key] = (
+                (
+                    1
+                    if status == TaskStatus.SUCCESS
+                    else (-1 if status == TaskStatus.NONE else -1)
+                ),
+                status,
+            )
+
             if cpu is not None:
                 self.cpu_queue.put(cpu)
 
