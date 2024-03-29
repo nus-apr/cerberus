@@ -110,10 +110,16 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
         config.general.secure_hash = True
     if parsed_args.parallel:
         config.general.parallel_mode = True
-    if parsed_args.cpus:
-        config.general.cpus = parsed_args.cpus
-    if parsed_args.gpus:
-        config.general.gpus = parsed_args.gpus
+    if parsed_args.cpu_count:
+        config.general.cpus = parsed_args.cpu_count
+    if parsed_args.gpu_count:
+        config.general.gpus = parsed_args.gpu_count
+    if parsed_args.rebuild_all:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_all = True
+    if parsed_args.rebuild_base:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_base = True
 
 
 class Configurations:
