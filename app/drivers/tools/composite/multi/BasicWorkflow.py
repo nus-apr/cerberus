@@ -402,36 +402,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     )
                 )
 
-            exploit_input_count = 0
-            beningn_input_count = 0
-            for analysis_output in bug_info[self.key_analysis_output]:
-                if self.key_exploit_inputs in analysis_output:
-                    p = join(
-                        dir_setup_extended or dir_info["local"]["setup"],
-                        str(analysis_output[self.key_exploit_inputs]["dir"]),
-                    )
-                    if os.path.exists(p):
-                        exploit_input_count += len(os.listdir(p))
-                    else:
-                        self.emit_warning(
-                            f"Path for exploit test list {p} does not exist"
-                        )
-                if self.key_benign_inputs in analysis_output:
-                    p = join(
-                        dir_setup_extended or dir_info["local"]["setup"],
-                        str(analysis_output[self.key_benign_inputs]["dir"]),
-                    )
-                    if os.path.exists(p):
-                        beningn_input_count += len(os.listdir(p))
-                    else:
-                        self.emit_warning(
-                            f"Path for benign test list {p} does not exist"
-                        )
-
-            self.stats.composite_stats.test_distribution[key] = (
-                beningn_input_count,
-                exploit_input_count,
-            )
+            self.track_test_count(dir_info, bug_info, key, dir_setup_extended)
 
             err, _ = task.run(
                 benchmark,
@@ -474,6 +445,40 @@ class BasicWorkflow(AbstractCompositeTool):
             if self.active_jobs == 0:
                 self.message_queue.put(self.exit_message_delayed)
         return list(new_mappings.keys())[0]
+
+    def track_test_count(self, dir_info: DirectoryInfo, bug_info: Dict[str,Any], key: str, dir_setup: Optional[str]) -> None:
+        exploit_input_count = 0
+        beningn_input_count = 0
+        for analysis_output in bug_info[self.key_analysis_output]:
+            if self.key_exploit_inputs in analysis_output:
+                for exploit_input_info in analysis_output[self.key_exploit_inputs]:
+                    p = join(
+                            dir_setup or dir_info["local"]["setup"],
+                            str(exploit_input_info["dir"]),
+                        )
+                    if os.path.exists(p):
+                        exploit_input_count += len(os.listdir(p))
+                    else:
+                        self.emit_warning(
+                                f"Path for exploit test list {p} does not exist"
+                            )
+            if self.key_benign_inputs in analysis_output:
+                for benign_input_info in analysis_output[self.key_benign_inputs]:
+                    p = join(
+                            dir_setup or dir_info["local"]["setup"],
+                            str(benign_input_info["dir"]),
+                        )
+                    if os.path.exists(p):
+                        beningn_input_count += len(os.listdir(p))
+                    else:
+                        self.emit_warning(
+                                f"Path for benign test list {p} does not exist"
+                            )
+
+        self.stats.composite_stats.test_distribution[key] = (
+                beningn_input_count,
+                exploit_input_count,
+            )
 
     def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
@@ -811,11 +816,12 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(
                 f"Copying patches from {dirname(event.src_path)} to {enhanced_setup}"
             )
-            shutil.copytree(
-                join(dirname(event.src_path), "patches"),
-                join(enhanced_setup, "patches", tool_name),
-                dirs_exist_ok=True,
-            )
+            if (os.path.exists(join(dirname(event.src_path), "patches"))):
+                shutil.copytree(
+                    join(dirname(event.src_path), "patches"),
+                    join(enhanced_setup, "patches", tool_name),
+                    dirs_exist_ok=True,
+                )
             # shutil.copy(event.src_path, join(enhanced_setup, "patches"))
 
         self.on_task_finished(event, ["validate"], copy_patches)
