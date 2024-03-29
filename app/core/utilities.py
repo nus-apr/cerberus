@@ -92,9 +92,9 @@ def execute_command(
     )
     (output, error) = process.communicate()
     if output:
-        emitter.debug(output.decode("utf-8"))
+        emitter.debug(f"[execute-command][stdout] {output.decode('utf-8')}")
     if error:
-        emitter.error(error.decode("utf-8"))
+        emitter.error(f"[execute-command][stderr] {error.decode('utf-8')}")
     # out is the output of the command, and err is the exit value
     return int(process.returncode)
 
