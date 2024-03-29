@@ -55,6 +55,11 @@ localization_schema = {
             "items": {"type": "number", "minimum": 1},
         },
         MetadataFieldsEnum.FUNCTION.value: {"type": "string"},
+        MetadataFieldsEnum.SCORE.value: {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+        },
     },
     "required": [
         MetadataFieldsEnum.SOURCE_FILE.value,
