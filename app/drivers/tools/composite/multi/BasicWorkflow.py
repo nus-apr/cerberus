@@ -172,7 +172,6 @@ class BasicWorkflow(AbstractCompositeTool):
 
         self.session_key = values.session_identifier.get("NAN")
 
-        # TODO move tool to be generated dynamically
         for task_type, tools in composite_sequence.items():
             self.tool_map[task_type] = []
             for tool_info in tools:
@@ -446,39 +445,45 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.message_queue.put(self.exit_message_delayed)
         return list(new_mappings.keys())[0]
 
-    def track_test_count(self, dir_info: DirectoryInfo, bug_info: Dict[str,Any], key: str, dir_setup: Optional[str]) -> None:
+    def track_test_count(
+        self,
+        dir_info: DirectoryInfo,
+        bug_info: Dict[str, Any],
+        key: str,
+        dir_setup: Optional[str],
+    ) -> None:
         exploit_input_count = 0
         beningn_input_count = 0
         for analysis_output in bug_info[self.key_analysis_output]:
             if self.key_exploit_inputs in analysis_output:
                 for exploit_input_info in analysis_output[self.key_exploit_inputs]:
                     p = join(
-                            dir_setup or dir_info["local"]["setup"],
-                            str(exploit_input_info["dir"]),
-                        )
+                        dir_setup or dir_info["local"]["setup"],
+                        str(exploit_input_info["dir"]),
+                    )
                     if os.path.exists(p):
                         exploit_input_count += len(os.listdir(p))
                     else:
                         self.emit_warning(
-                                f"Path for exploit test list {p} does not exist"
-                            )
+                            f"Path for exploit test list {p} does not exist"
+                        )
             if self.key_benign_inputs in analysis_output:
                 for benign_input_info in analysis_output[self.key_benign_inputs]:
                     p = join(
-                            dir_setup or dir_info["local"]["setup"],
-                            str(benign_input_info["dir"]),
-                        )
+                        dir_setup or dir_info["local"]["setup"],
+                        str(benign_input_info["dir"]),
+                    )
                     if os.path.exists(p):
                         beningn_input_count += len(os.listdir(p))
                     else:
                         self.emit_warning(
-                                f"Path for benign test list {p} does not exist"
-                            )
+                            f"Path for benign test list {p} does not exist"
+                        )
 
         self.stats.composite_stats.test_distribution[key] = (
-                beningn_input_count,
-                exploit_input_count,
-            )
+            beningn_input_count,
+            exploit_input_count,
+        )
 
     def error_callback_handler(self, e: BaseException) -> None:
         self.emit_error("I got an exception!")
@@ -816,7 +821,7 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(
                 f"Copying patches from {dirname(event.src_path)} to {enhanced_setup}"
             )
-            if (os.path.exists(join(dirname(event.src_path), "patches"))):
+            if os.path.exists(join(dirname(event.src_path), "patches")):
                 shutil.copytree(
                     join(dirname(event.src_path), "patches"),
                     join(enhanced_setup, "patches", tool_name),
@@ -939,6 +944,11 @@ class BasicWorkflow(AbstractCompositeTool):
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
     ) -> CompositeToolStats:
         self.emit_normal("reading output")
+
+        for _, status in self.stats.composite_stats.job_statuses.values():
+            if status != TaskStatus.SUCCESS:
+                self.stats.error_stats.is_error = True
+                break
 
         return self.stats
 
