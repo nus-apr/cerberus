@@ -465,7 +465,7 @@ class AbstractTool(AbstractDriver):
             )
 
     def pre_process(self, bug_info: Dict[str, Any]) -> None:
-        """Any pre-processing required for the repair"""
+        """Any pre-processing required for the tool"""
         # self.check_tool_exists()
         return
 
@@ -588,7 +588,7 @@ class AbstractTool(AbstractDriver):
         ui.update_current_job(status)
 
     def post_process(self) -> None:
-        """Any post-processing required for the repair"""
+        """Any post-processing required for the tool"""
         if self.container_id:
             container.stop_container(self.container_id)
         if values.use_purge:

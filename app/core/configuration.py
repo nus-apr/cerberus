@@ -132,6 +132,12 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
                     ):
                         for tool_info in tools:
                             tool_info["ignore"] = True
+    if parsed_args.rebuild_all:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_all = True
+    if parsed_args.rebuild_base:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_base = True
 
 
 class Configurations:
