@@ -19,6 +19,8 @@ from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.typing.TaskList import TaskList
+from app.core.task.typing.TaskType import compare_types
+from app.core.task.typing.TaskType import CompositeTaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.MockTool import MockTool
@@ -110,10 +112,26 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
         config.general.secure_hash = True
     if parsed_args.parallel:
         config.general.parallel_mode = True
-    if parsed_args.cpus:
-        config.general.cpus = parsed_args.cpus
-    if parsed_args.gpus:
-        config.general.gpus = parsed_args.gpus
+    if parsed_args.cpu_count:
+        config.general.cpus = parsed_args.cpu_count
+    if parsed_args.gpu_count:
+        config.general.gpus = parsed_args.gpu_count
+    if parsed_args.subsequnce:
+        start, end = parsed_args.subsequence.split("-")
+        start = start.replace("_", "-")
+        end = end.replace("_", "-")
+        for chunk in config.tasks_configs_list:
+            if chunk.task_config.task_type == "composite":
+                for task_type, tools in cast(
+                    Dict[CompositeTaskType, List[Dict[str, Any]]],
+                    getattr(chunk.task_config, "composite_subsequence"),
+                ).items():
+                    if not (
+                        compare_types(task_type, start) >= 0
+                        and compare_types(task_type, end) <= 0
+                    ):
+                        for tool_info in tools:
+                            tool_info["ignore"] = True
 
 
 class Configurations:

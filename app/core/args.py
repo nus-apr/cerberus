@@ -60,6 +60,11 @@ def parse_args() -> Namespace:
     )
 
     optional.add_argument(
+        definitions.ARG_SUBSEQUENCE,
+        help="Use a subsequence of the composite workflow",
+    )
+
+    optional.add_argument(
         definitions.ARG_BENCHMARK,
         "-b",
         help="program repair/analysis benchmark {"

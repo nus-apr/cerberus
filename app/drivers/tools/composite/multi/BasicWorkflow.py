@@ -18,6 +18,7 @@ from typing import Any
 from typing import Callable
 from typing import cast
 from typing import Dict
+from typing import get_args
 from typing import List
 from typing import Optional
 from typing import Set
@@ -279,16 +280,7 @@ class BasicWorkflow(AbstractCompositeTool):
             bug_info,
             None,
             None,
-            [
-                "analyze",
-                "fuzz",
-                "crash-analyze",
-                "localize",
-                "slice",
-                "repair",
-                "validate",
-                "select",
-            ],
+            list(get_args(CompositeTaskType)),
         ):
             self.observer.stop()  # type:ignore
             for _ in range(self.event_processor_count):
