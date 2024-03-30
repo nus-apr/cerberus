@@ -61,7 +61,7 @@ def parse_args() -> Namespace:
 
     optional.add_argument(
         definitions.ARG_SUBSEQUENCE,
-        help="Use a subsequence of the composite workflow",
+        help="Use a subsequence of the composite workflow. Format is startInclusive-endInclusive",
     )
 
     optional.add_argument(
