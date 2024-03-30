@@ -116,7 +116,7 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
         config.general.cpus = parsed_args.cpu_count
     if parsed_args.gpu_count:
         config.general.gpus = parsed_args.gpu_count
-    if parsed_args.subsequnce:
+    if parsed_args.subsequence:
         start, end = parsed_args.subsequence.split("-")
         start = start.replace("_", "-")
         end = end.replace("_", "-")
@@ -124,7 +124,7 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
             if chunk.task_config.task_type == "composite":
                 for task_type, tools in cast(
                     Dict[CompositeTaskType, List[Dict[str, Any]]],
-                    getattr(chunk.task_config, "composite_subsequence"),
+                    getattr(chunk.task_config, "composite_sequence"),
                 ).items():
                     if not (
                         compare_types(task_type, start) >= 0

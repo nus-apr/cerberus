@@ -26,8 +26,6 @@ from typing import Tuple
 from typing import Union
 
 from jsonschema import Draft7Validator
-from watchdog.events import DirCreatedEvent
-from watchdog.events import FileCreatedEvent
 from watchdog.events import FileSystemEvent
 from watchdog.observers import Observer
 
@@ -279,7 +277,16 @@ class BasicWorkflow(AbstractCompositeTool):
             bug_info,
             None,
             None,
-            list(get_args(CompositeTaskType)),
+            [
+                "analyze",
+                "fuzz",
+                "crash-analyze",
+                "localize",
+                "slice",
+                "repair",
+                "validate",
+                "select",
+            ],
         ):
             self.observer.stop()  # type:ignore
             for _ in range(self.event_processor_count):
