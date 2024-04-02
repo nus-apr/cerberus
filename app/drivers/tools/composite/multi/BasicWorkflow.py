@@ -433,6 +433,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 ),
                 status,
             )
+            self.stats.composite_stats.tool_stats[key] = tool.stats
 
             if cpu is not None:
                 self.cpu_queue.put(cpu)

@@ -10,10 +10,12 @@ from app.core.task.TaskStatus import TaskStatus
 class CompositeStats:
     job_statuses: Dict[str, Tuple[int, TaskStatus]]
     test_distribution: Dict[str, Tuple[int, int]]
+    tool_stats: Dict[str, ToolStats]
 
     def __init__(self) -> None:
         self.job_statuses = {}
         self.test_distribution = {}
+        self.tool_stats = {}
 
     def get_dict(self) -> Dict[str, Any]:
         summary: Dict[str, Any] = {}
@@ -21,6 +23,9 @@ class CompositeStats:
             summary[key] = {
                 "value": value,
                 "status": str(status),
+                "summary": (
+                    self.tool_stats[key].get_dict() if key in self.tool_stats else {}
+                ),
                 "benign_tests": self.test_distribution.get(key, (-1, -1))[0],
                 "exploit_inputs": self.test_distribution.get(key, (-1, -1))[1],
             }
