@@ -454,7 +454,13 @@ class BasicWorkflow(AbstractCompositeTool):
     ) -> None:
         exploit_input_count = 0
         beningn_input_count = 0
-        for analysis_output in bug_info[self.key_analysis_output]:
+        if (
+            self.key_analysis_output not in bug_info
+            or bug_info[self.key_analysis_output] == []
+        ):
+            self.emit_warning("No analysis output. I hope you know what you are doing.")
+
+        for analysis_output in bug_info.get(self.key_analysis_output, []):
             if self.key_exploit_inputs in analysis_output:
                 for exploit_input_info in analysis_output[self.key_exploit_inputs]:
                     p = join(
