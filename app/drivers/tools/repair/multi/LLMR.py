@@ -194,5 +194,9 @@ class LLMR(AbstractRepairTool):
             for line in log_lines:
                 if re.match("Patch .* is Plausible", line):
                     self.stats.patch_stats.plausible += 1
+                if re.match("response", line):
+                    self.stats.patch_stats.generated += 1
+                if re.match("does not compile", line):
+                    self.stats.patch_stats.non_compilable += 1
 
         return self.stats
