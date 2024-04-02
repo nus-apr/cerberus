@@ -66,6 +66,12 @@ class AbstractCompositeTool(AbstractTool):
 
         return self.stats
 
+    def save_trace(self) -> None:
+        """
+        Currently the composite tools do not track their histories.
+        """
+        pass
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
