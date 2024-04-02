@@ -345,7 +345,7 @@ def setup_for_valkyrie(
     if not os.path.isdir(patch_dir):
         os.makedirs(patch_dir)
     dir_process = dir_output_local + "/patches-processing"
-    utilities.execute_command("mkdir {}".format(dir_process))
+    os.makedirs(dir_process, exist_ok=True)
     return patch_dir, dir_process, valkyrie_binary_path, valkyrie_oracle_path
 
 
