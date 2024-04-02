@@ -1,5 +1,5 @@
 import os
-import re
+from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -17,6 +17,60 @@ class CrashRepair(AbstractLocalizeTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/crashrepair:tool"
+
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
+        """instrumentation for the experiment as needed by the tool"""
+        self.emit_normal("Running instrumentation")
+        bug_id = bug_info[self.key_bug_id]
+        dir_src = join(self.dir_expr, "src")
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
+        self.log_instrument_path = join(
+            self.dir_logs,
+            "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),
+        )
+        inst_script_path = self.dir_expr + f"/{self.name}-instrument"
+        self.write_file(
+            [
+                'grep -nrl -e "fabs" | grep "\.c" | xargs -I @ sed -i \'s/ fabs/ fabs_crepair/g\' @\n',
+                'grep -nrl -e "longjmp" | grep "\.c" | xargs -I @ sed -i \'s/ longjmp/ longjmp_crepair/g\' @\n',
+                'grep -nrl -e "rint" | grep "\.c" | xargs -I @ sed -i \'s/ rint/ rint_crepair/g\' @\n',
+                'grep -nrl -e "fabs_crepair" | grep "\.c" | xargs git add \n',
+                'grep -nrl -e "longjmp_crepair" | grep "\.c" | xargs git add \n',
+                'grep -nrl -e "rint_crepair" | grep "\.c" | xargs git add \n',
+                'git config --global user.email "you@example.com"\n',
+                'git config --global user.name "Your Name"\n',
+                "git commit -m 'replace with proxy functions'",
+            ],
+            inst_script_path,
+        )
+        reconfig_command = "bash {}".format(inst_script_path)
+        self.run_command(
+            reconfig_command, log_file_path=self.log_instrument_path, dir_path=dir_src
+        )
+        time = datetime.now()
+        self.emit_debug(
+            "\t\t\t instrumentation took {} second(s)".format(
+                (datetime.now() - time).total_seconds()
+            )
+        )
+        return
+
+    def rerun_configuration(self, config_script: str) -> None:
+        self.emit_normal("re-running configuration")
+        _config_path = self.dir_expr + f"/{self.name}-config"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make distclean; rm -f CMakeCache.txt\n",
+                f"CC=crepair-cc CXX=crepair-cxx {config_script} {self.dir_expr}\n",
+            ],
+            _config_path,
+        )
+        reconfig_command = "bash {}".format(_config_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-config.log")
+        self.run_command(reconfig_command, log_file_path=log_reconfig_path)
 
     def generate_conf_file(self, bug_info: Dict[str, Any]) -> str:
         config_script = bug_info.get(self.key_config_script, None)
@@ -60,6 +114,13 @@ class CrashRepair(AbstractLocalizeTool):
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
         conf_path = self.generate_conf_file(bug_info)
+        config_script = bug_info.get(self.key_config_script, None)
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+
+        self.instrument(bug_info)
+        config_script = join(self.dir_setup, config_script)
+        self.rerun_configuration(config_script)
         timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = 60 * float(timeout_h)
         timeout_validation = int(timeout_m * 0.75)
