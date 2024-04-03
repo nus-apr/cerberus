@@ -112,7 +112,10 @@ class Jazzer(AbstractFuzzTool):
             "test_dir_abspath": self.dir_setup,
         }
 
-        self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
+        self.write_json(
+            {self.key_analysis_output: [new_bug_info]},
+            join(self.dir_output, "meta-data.json"),
+        )
 
         self.timestamp_log_end()
 
