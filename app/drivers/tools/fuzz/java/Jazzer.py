@@ -113,7 +113,7 @@ class Jazzer(AbstractFuzzTool):
         }
 
         self.write_json(
-            {self.key_analysis_output: [new_bug_info]},
+            [{self.key_analysis_output: [new_bug_info]}],
             join(self.dir_output, "meta-data.json"),
         )
 

@@ -57,6 +57,7 @@ def run(
     task_image: Optional[str] = None,
     hash: Any = None,
     dir_setup_extended: Optional[str] = None,
+    dir_logs_override: Optional[str] = None,
 ) -> Tuple[bool, DirectoryInfo]:
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
@@ -81,6 +82,7 @@ def run(
         hash,
         task_identifier,
         dir_setup_extended,
+        dir_logs_override,
     )
     benchmark.update_dir_info(dir_info)
     print_task_info(
