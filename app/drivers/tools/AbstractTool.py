@@ -302,7 +302,6 @@ class AbstractTool(AbstractDriver):
                                 ),
                                 dir_path=join(self.dir_setup, tests["dir"]),
                             )
-                            input()
                         else:
                             self.run_command(
                                 "bash -c 'cp -r {}/. {}'".format(
