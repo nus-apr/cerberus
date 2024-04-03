@@ -40,14 +40,48 @@ class AstorTool(AbstractRepairTool):
         dir_java_bin = bug_info[self.key_dir_source]
         dir_test_bin = bug_info[self.key_dir_test_class]
 
-        # there is a bug in running Lang subjects with asm.jar
+        env = {}
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
+        )
+
         list_deps = [
-            f"{self.dir_expr}/{x}"
-            for x in bug_info["dependencies"]
-            if not (bug_info[self.key_subject].lower() == "lang" and "asm.jar" in x)
+            join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
         ]
-        list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
-        list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
+        list_deps += [
+            join(self.astor_home, "external", "lib", "hamcrest-core-1.3.jar"),
+            join(self.astor_home, "external", "lib", "junit-4.12.jar"),
+        ]
+        # Ensure the dependencies exist
+        if bug_info[self.key_build_system] == "maven":
+            self.run_command(
+                f"mvn dependency:copy-dependencies",
+                dir_path=join(self.dir_expr, "src"),
+                env=env,
+            )
+            # Add common folders for deependencies
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "test", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+
         list_deps_str = ":".join(list_deps)
 
         # generate patches
@@ -68,16 +102,10 @@ class AstorTool(AbstractRepairTool):
             f"-maxtime {int(math.ceil(float(timeout_m)))} "
             f"-stopfirst false "
         )
-        env = {}
-        java_version = bug_info.get(self.key_java_version, 8)
-        if int(java_version) <= 7:
-            java_version = 8
-        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
 
         status = self.run_command(
             repair_command, self.log_output_path, self.astor_home, env=env
         )
-
         self.process_status(status)
 
         self.timestamp_log_end()

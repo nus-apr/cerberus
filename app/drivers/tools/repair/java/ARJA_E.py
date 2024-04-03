@@ -41,13 +41,48 @@ class ARJA_E(AbstractRepairTool):
         passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
         failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
 
+        env = self.d4j_env.copy()
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
+        )
+
         list_deps = [
             join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
         ]
-        list_deps.append(
-            join(self.arja_e_home, "external", "lib", "hamcrest-core-1.3.jar")
-        )
-        list_deps.append(join(self.arja_e_home, "external", "lib", "junit-4.12.jar"))
+        list_deps += [
+            join(self.arja_e_home, "external", "lib", "hamcrest-core-1.3.jar"),
+            join(self.arja_e_home, "external", "lib", "junit-4.12.jar"),
+        ]
+        # Ensure the dependencies exist
+        if bug_info[self.key_build_system] == "maven":
+            self.run_command(
+                f"mvn dependency:copy-dependencies",
+                dir_path=join(self.dir_expr, "src"),
+                env=env,
+            )
+            # Add common folders for deependencies
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "test", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+
         list_deps_str = ":".join(list_deps)
 
         localization_lines = self.transform_localization(
