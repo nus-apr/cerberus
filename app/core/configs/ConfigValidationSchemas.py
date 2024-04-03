@@ -47,6 +47,14 @@ task_profile_schema = {
             "minimum": 0,
             "maximum": 1,
         },
+        ConfigFieldsEnum.PASSING_TEST_LIMIT.value: {
+            "type": "number",
+            "minimum": 0,
+        },
+        ConfigFieldsEnum.FAILING_TEST_LIMIT.value: {
+            "type": "number",
+            "minimum": 0,
+        },
         ConfigFieldsEnum.PATCH_DIRECTORY.value: {"type": "string"},
     },
     "required": [

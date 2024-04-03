@@ -20,8 +20,8 @@ from app.core import emitter
 from app.core import parallel
 from app.core import utilities
 from app.core import values
+from app.core.task.dir_info import add_instrumentation_dir_info
 from app.core.task.dir_info import generate_tool_dir_info
-from app.core.task.dir_info import update_dir_info
 from app.core.task.image import construct_container_volumes
 from app.core.task.results import collect_tool_result
 from app.core.task.results import retrieve_results
@@ -87,7 +87,7 @@ def run(
         task_config_info, container_config_info, bug_name, subject_name, dir_info
     )
 
-    dir_info = update_dir_info(dir_info, tool.name)
+    dir_info = add_instrumentation_dir_info(dir_info, tool.name)
 
     dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
@@ -251,7 +251,7 @@ def execute_setup(
     setup_tests(experiment_info, config_info)
 
     tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
-    tool.process_tests(dir_info, experiment_info)
+    tool.process_tests(dir_info, config_info, experiment_info)
     try:
         tool.invoke_advanced(
             dir_info,

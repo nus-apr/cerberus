@@ -8,7 +8,9 @@ from app.core import values
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 
 
-def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
+def add_instrumentation_dir_info(
+    dir_info: DirectoryInfo, tool_name: str
+) -> DirectoryInfo:
     dir_info["local"]["instrumentation"] = join(
         dir_info["local"]["setup"], tool_name.lower()
     )
