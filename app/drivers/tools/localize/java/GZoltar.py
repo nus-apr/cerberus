@@ -238,7 +238,7 @@ class GZoltar(AbstractLocalizeTool):
             failing_identifiers = []
             for test_line in self.read_file(
                 join(self.dir_output, "sfl", "txt", "tests.csv")
-            ):
+            )[1:]:
                 test_line = test_line.strip()
                 identifier, outcome, runtime, stack_trace, *rest = test_line.split(",")
                 if outcome == "PASS":
