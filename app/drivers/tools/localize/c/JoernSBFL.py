@@ -36,6 +36,10 @@ class JoernSBFL(AbstractLocalizeTool):
             self.emit_error("No binary path found")
 
         self.run_command(
+            f"""bash -c '{os.path.join(self.dir_setup, bug_info[self.key_clean_script])}'""",
+        )
+
+        self.run_command(
             f"""bash -c '{os.path.join(self.dir_setup, bug_info[self.key_config_script])}'""",
         )
         self.run_command(
@@ -69,13 +73,11 @@ class JoernSBFL(AbstractLocalizeTool):
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
     ) -> LocalizeToolStats:
         self.emit_normal("reading output")
+        output_files = self.list_dir(self.dir_output, "meta-data.json")
         output_json = None
-        regex = re.compile("(.*meta-data.json$)")
-        for _, _, files in os.walk(self.dir_output):
-            for file in files:
-                if regex.match(file) and self.name in file:
-                    output_json = self.dir_output + "/" + file
-                    break
+        if output_files:
+            output_json = output_files[0]
+
         if not output_json:
             self.emit_warning("no output json file found")
             return self.stats
