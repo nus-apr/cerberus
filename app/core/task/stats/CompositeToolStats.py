@@ -1,6 +1,7 @@
 from typing import Any
 from typing import Callable
 from typing import Dict
+from typing import List
 from typing import Tuple
 
 from app.core.task.stats.ToolStats import ToolStats
@@ -11,11 +12,15 @@ class CompositeStats:
     job_statuses: Dict[str, Tuple[int, TaskStatus]]
     test_distribution: Dict[str, Tuple[int, int]]
     tool_stats: Dict[str, ToolStats]
+    paths: List[List[str]]
+    aggregations: Dict[str, List[ToolStats]]
 
     def __init__(self) -> None:
         self.job_statuses = {}
         self.test_distribution = {}
         self.tool_stats = {}
+        self.paths = []
+        self.aggregations = {}
 
     def get_dict(self) -> Dict[str, Any]:
         summary: Dict[str, Any] = {}

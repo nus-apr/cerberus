@@ -146,3 +146,4 @@ UI_PLAUSIBLE_PATCHES = "Plausible Patches"
 UI_DURATION = "Duration"
 
 GROUP_NAME = "cerberus"
+INTERNAL_METADATA_JSON = "cerberus_internal.json"

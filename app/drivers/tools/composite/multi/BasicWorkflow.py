@@ -287,6 +287,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 "validate",
                 "select",
             ],
+            [],
         ):
             self.observer.stop()  # type:ignore
             for _ in range(self.event_processor_count):
@@ -310,6 +311,9 @@ class BasicWorkflow(AbstractCompositeTool):
         run_index: str,  # Specific iteration of the workflow run
         hash: Any,  # Hash, to be used for unique locations
         tool: AbstractTool,
+        path: List[
+            str
+        ],  # List of previously executed tools that were used to reach this point
     ) -> str:
         """
         Common entry point for a subtask, we take the original task tag to not create new images.
@@ -384,7 +388,7 @@ class BasicWorkflow(AbstractCompositeTool):
             with open(
                 join(
                     list(new_mappings.keys())[0],
-                    "cerberus_internal.json",
+                    definitions.INTERNAL_METADATA_JSON,
                 ),
                 "w",
             ) as f:
@@ -403,6 +407,7 @@ class BasicWorkflow(AbstractCompositeTool):
                             ),
                             "task_config_info": task_config_info,
                             "bug_info": bug_info,
+                            "path": path + [tool_tag],
                         }
                     )
                 )
@@ -442,6 +447,10 @@ class BasicWorkflow(AbstractCompositeTool):
                 status,
             )
             self.stats.composite_stats.tool_stats[key] = tool.stats
+            self.stats.composite_stats.aggregations[tool.name] = (
+                self.stats.composite_stats.aggregations.get(tool.name, [])
+                + [tool.stats]
+            )
 
             if cpu is not None:
                 self.cpu_queue.put(cpu)
@@ -558,7 +567,7 @@ class BasicWorkflow(AbstractCompositeTool):
             "cmdline",
             "trace.sh",
             ".fuzzer_stats_tmp",
-            "cerberus_internal.json",
+            definitions.INTERNAL_METADATA_JSON,
         ] or os.path.basename(os.path.normpath(dirname(event.src_path))) in [
             "benign_tests"
         ]:
@@ -644,8 +653,12 @@ class BasicWorkflow(AbstractCompositeTool):
 
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
-            self.emit_debug(f"Looking for! {join(base_dir,'cerberus_internal.json')}")
-            internal_data = reader.read_json(join(base_dir, "cerberus_internal.json"))
+            self.emit_debug(
+                f"Looking for! {join(base_dir,definitions.INTERNAL_METADATA_JSON)}"
+            )
+            internal_data = reader.read_json(
+                join(base_dir, definitions.INTERNAL_METADATA_JSON)
+            )
             if not internal_data:
                 self.error_exit(
                     "How did it finish but the internal file was not generated??"
@@ -690,6 +703,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     subtask_hash,
                     subtask_tag,
                     ["crash-analyze", "localize", "repair"],
+                    internal_data["path"],
                 )
 
         except Exception as e:
@@ -760,6 +774,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 subtask_hash,
                 subtask_tag,
                 ["crash-analyze", "localize", "repair"],
+                [],
             )
         except Exception as e:
             self.emit_warning(e)
@@ -796,8 +811,12 @@ class BasicWorkflow(AbstractCompositeTool):
             self.copy_tests(crash_dir, enhanced_setup, "crashing_tests")
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
-            self.emit_debug(f"Looking for! {join(base_dir,'cerberus_internal.json')}")
-            internal_data = reader.read_json(join(base_dir, "cerberus_internal.json"))
+            self.emit_debug(
+                f"Looking for! {join(base_dir, definitions.INTERNAL_METADATA_JSON)}"
+            )
+            internal_data = reader.read_json(
+                join(base_dir, definitions.INTERNAL_METADATA_JSON)
+            )
             if not internal_data:
                 self.error_exit(
                     "How did it finish but the internal file was not generated??"
@@ -830,7 +849,11 @@ class BasicWorkflow(AbstractCompositeTool):
             )
 
             self.do_step(
-                new_bug_info, subtask_hash, subtask_tag, ["localize", "repair"]
+                new_bug_info,
+                subtask_hash,
+                subtask_tag,
+                ["localize", "repair"],
+                internal_data["path"],
             )
         except Exception as e:
             self.emit_warning(e)
@@ -920,10 +943,10 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.emit_error("Could not find meta-data.json")
 
             self.emit_debug(
-                f"Looking for! {join(root_folder,'cerberus_internal.json')}"
+                f"Looking for! {join(root_folder,definitions.INTERNAL_METADATA_JSON)}"
             )
             internal_data = reader.read_json(
-                join(root_folder, "cerberus_internal.json")
+                join(root_folder, definitions.INTERNAL_METADATA_JSON)
             )
             if not internal_data:
                 self.error_exit(
@@ -949,7 +972,13 @@ class BasicWorkflow(AbstractCompositeTool):
 
             # self.validate_metadata([new_bug_info])
 
-            self.do_step(new_bug_info, subtask_hash, subtask_tag, next_task_options)
+            self.do_step(
+                new_bug_info,
+                subtask_hash,
+                subtask_tag,
+                next_task_options,
+                internal_data["path"],
+            )
 
         except Exception as e:
             self.stats.error_stats.is_error = True
@@ -1002,6 +1031,7 @@ class BasicWorkflow(AbstractCompositeTool):
         subtask_hash: Optional[Any],
         subtask_tag: Optional[str],
         next_task_options: List[CompositeTaskType],
+        path: Optional[List[str]] = None,
     ) -> bool:
         """
         Start subsequent tasks in the workflow.
@@ -1033,14 +1063,17 @@ class BasicWorkflow(AbstractCompositeTool):
                                 real_task_type=next_task,
                                 task_type=type,
                             ),
+                            path or list(),
                         ],
                         callback=callbacks.get(next_task, None),
                         error_callback=self.error_callback_handler,
                     )
                 return True
         else:
+            if path:
+                self.stats.composite_stats.paths.append(path)
             self.emit_warning(
-                "Did not find a successor task from the options {}. Terminating this path.".format(
+                "Did not find a successor task from the options {}. Terminating and saving this path.".format(
                     ",".join(next_task_options)
                 )
             )
@@ -1131,9 +1164,9 @@ class BasicWorkflow(AbstractCompositeTool):
         Extracts the setup directories from the internal representation or the proto arguments.
         """
         self.emit_debug("Root directory is {}".format(root))
-        if os.path.isfile(join(root, "cerberus_internal.json")):
+        if os.path.isfile(join(root, definitions.INTERNAL_METADATA_JSON)):
             self.emit_debug("Found internal representation at {}".format(root))
-            with open(join(root, "cerberus_internal.json"), "r") as f:
+            with open(join(root, definitions.INTERNAL_METADATA_JSON), "r") as f:
                 data = json.loads(f.read())
                 dir_info = data["dir_info"]
                 # bug_info = data["bug_info"]
