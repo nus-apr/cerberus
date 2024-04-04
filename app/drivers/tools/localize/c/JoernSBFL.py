@@ -85,7 +85,6 @@ class JoernSBFL(AbstractLocalizeTool):
             self.emit_error("expected analysis to provide a json object")
             return self.stats
         analysis_info = output_info[self.key_analysis_output]
-
         localization_list = analysis_info[0][self.key_localization]
         if localization_list:
             fix_files = set()
