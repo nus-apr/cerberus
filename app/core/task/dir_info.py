@@ -45,7 +45,7 @@ def generate_local_dir_info(
     dir_validation_local = join(dir_setup_local, "validation")
     dir_selection_local = join(dir_setup_local, "selection")
 
-    emitter.warning(
+    emitter.debug(
         f"dir_setup_local={dir_setup_local} bugs={dir_bugs_local} localization={dir_localization_local} patches={dir_patches_local} validation={dir_validation_local} selection={dir_selection_local}"
     )
 
