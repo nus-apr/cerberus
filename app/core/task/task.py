@@ -20,8 +20,8 @@ from app.core import emitter
 from app.core import parallel
 from app.core import utilities
 from app.core import values
+from app.core.task.dir_info import add_instrumentation_dir_info
 from app.core.task.dir_info import generate_tool_dir_info
-from app.core.task.dir_info import update_dir_info
 from app.core.task.image import construct_container_volumes
 from app.core.task.results import collect_tool_result
 from app.core.task.results import retrieve_results
@@ -57,6 +57,7 @@ def run(
     task_image: Optional[str] = None,
     hash: Any = None,
     dir_setup_extended: Optional[str] = None,
+    dir_logs_override: Optional[str] = None,
 ) -> Tuple[bool, DirectoryInfo]:
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
@@ -81,13 +82,14 @@ def run(
         hash,
         task_identifier,
         dir_setup_extended,
+        dir_logs_override,
     )
     benchmark.update_dir_info(dir_info)
     print_task_info(
         task_config_info, container_config_info, bug_name, subject_name, dir_info
     )
 
-    dir_info = update_dir_info(dir_info, tool.name)
+    dir_info = add_instrumentation_dir_info(dir_info, tool.name)
 
     dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
@@ -251,7 +253,7 @@ def execute_setup(
     setup_tests(experiment_info, config_info)
 
     tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
-    tool.process_tests(dir_info, experiment_info)
+    tool.process_tests(dir_info, config_info, experiment_info)
     try:
         tool.invoke_advanced(
             dir_info,
@@ -345,7 +347,7 @@ def setup_for_valkyrie(
     if not os.path.isdir(patch_dir):
         os.makedirs(patch_dir)
     dir_process = dir_output_local + "/patches-processing"
-    utilities.execute_command("mkdir {}".format(dir_process))
+    os.makedirs(dir_process, exist_ok=True)
     return patch_dir, dir_process, valkyrie_binary_path, valkyrie_oracle_path
 
 

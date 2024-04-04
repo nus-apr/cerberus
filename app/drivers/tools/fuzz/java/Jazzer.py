@@ -103,8 +103,8 @@ class Jazzer(AbstractFuzzTool):
         if status != 0:
             self.error_exit("failed to rewrite benign tests")
 
-        self.run_command("cp -r {} {}".format(harness_source_dir, reproducer_path))
-        self.run_command("cp -r {} {}".format(harness_source_dir, benign_path))
+        self.run_command("cp -r {}/. {}".format(harness_source_dir, reproducer_path))
+        self.run_command("cp -r {}/. {}".format(harness_source_dir, benign_path))
 
         new_bug_info: Dict[str, Any] = {
             self.key_exploit_inputs: [{"format": "junit", "dir": "crashing_tests"}],
@@ -112,7 +112,10 @@ class Jazzer(AbstractFuzzTool):
             "test_dir_abspath": self.dir_setup,
         }
 
-        self.write_json([new_bug_info], join(self.dir_output, "meta-data.json"))
+        self.write_json(
+            [{self.key_analysis_output: [new_bug_info]}],
+            join(self.dir_output, "meta-data.json"),
+        )
 
         self.timestamp_log_end()
 

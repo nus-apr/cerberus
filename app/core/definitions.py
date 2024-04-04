@@ -24,6 +24,8 @@ KEY_CONFIG_ANALYZE_TIMEOUT = "analyze-timeout"
 KEY_CONFIG_COMPOSITE_TIMEOUT = "composite-timeout"
 KEY_CONFIG_VALIDATE_TIMEOUT = "validate-timeout"
 KEY_CONFIG_SELECT_TIMEOUT = "select-timeout"
+KEY_CONFIG_PASSING_TEST_COUNT = "passing-test-limit"
+KEY_CONFIG_FAILING_TEST_COUNT = "failing-test-limit"
 
 KEY_TOOL_PARAMS = "params"
 KEY_TOOL_NAME = "tool-name"

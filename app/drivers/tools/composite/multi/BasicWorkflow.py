@@ -374,6 +374,12 @@ class BasicWorkflow(AbstractCompositeTool):
                 if tool_tag
                 else None
             )
+            dir_logs_extended = join(
+                self.root_logs_dir,
+                f"{bug_info[self.key_bug_id]}-{tool_tag if tool_tag else tool.name }",
+                "",
+            )
+            os.makedirs(dir_logs_extended, exist_ok=True)
 
             with open(
                 join(
@@ -393,6 +399,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 hash,
                                 key,
                                 dir_setup_extended,
+                                dir_logs_extended,
                             ),
                             "task_config_info": task_config_info,
                             "bug_info": bug_info,
@@ -415,6 +422,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 image_name,
                 hash,
                 dir_setup_extended,
+                dir_logs_extended,
             )
             if err:
                 self.stats.error_stats.is_error = True
@@ -454,7 +462,13 @@ class BasicWorkflow(AbstractCompositeTool):
     ) -> None:
         exploit_input_count = 0
         beningn_input_count = 0
-        for analysis_output in bug_info[self.key_analysis_output]:
+        if (
+            self.key_analysis_output not in bug_info
+            or bug_info[self.key_analysis_output] == []
+        ):
+            self.emit_warning("No analysis output. I hope you know what you are doing.")
+
+        for analysis_output in bug_info.get(self.key_analysis_output, []):
             if self.key_exploit_inputs in analysis_output:
                 for exploit_input_info in analysis_output[self.key_exploit_inputs]:
                     p = join(
@@ -630,12 +644,21 @@ class BasicWorkflow(AbstractCompositeTool):
 
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
+            self.emit_debug(f"Looking for! {join(base_dir,'cerberus_internal.json')}")
+            internal_data = reader.read_json(join(base_dir, "cerberus_internal.json"))
+            if not internal_data:
+                self.error_exit(
+                    "How did it finish but the internal file was not generated??"
+                )
+
+            old_bug_info = internal_data["bug_info"]
+
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
             if bug_info_extension is None:
                 self.emit_error("Could not find meta-data.json")
 
             new_bug_info = self.merge_dict(
-                self.bug_info,
+                old_bug_info,
                 cast(
                     Dict[Any, Any],
                     (
@@ -752,7 +775,6 @@ class BasicWorkflow(AbstractCompositeTool):
                 self.stats.error_stats.is_error = True
                 return
 
-            base_dir = base_dir
             benign_dir = join(base_dir, "benign_tests")
             crash_dir = join(base_dir, "crashing_tests")
 
@@ -774,12 +796,21 @@ class BasicWorkflow(AbstractCompositeTool):
             self.copy_tests(crash_dir, enhanced_setup, "crashing_tests")
             self.copy_tests(benign_dir, enhanced_setup, "benign_tests")
 
+            self.emit_debug(f"Looking for! {join(base_dir,'cerberus_internal.json')}")
+            internal_data = reader.read_json(join(base_dir, "cerberus_internal.json"))
+            if not internal_data:
+                self.error_exit(
+                    "How did it finish but the internal file was not generated??"
+                )
+
+            old_bug_info = internal_data["bug_info"]
+
             bug_info_extension = reader.read_json(join(base_dir, "meta-data.json"))
             if bug_info_extension is None:
                 self.emit_error("Could not find meta-data.json")
 
             new_bug_info = self.merge_dict(
-                self.bug_info,
+                old_bug_info,
                 cast(
                     Dict[Any, Any],
                     (
@@ -888,8 +919,21 @@ class BasicWorkflow(AbstractCompositeTool):
             if bug_info_extension is None:
                 self.emit_error("Could not find meta-data.json")
 
+            self.emit_debug(
+                f"Looking for! {join(root_folder,'cerberus_internal.json')}"
+            )
+            internal_data = reader.read_json(
+                join(root_folder, "cerberus_internal.json")
+            )
+            if not internal_data:
+                self.error_exit(
+                    "How did it finish but the internal file was not generated??"
+                )
+
+            old_bug_info = internal_data["bug_info"]
+
             new_bug_info = self.merge_dict(
-                self.bug_info,
+                old_bug_info,
                 cast(
                     Dict[Any, Any],
                     (

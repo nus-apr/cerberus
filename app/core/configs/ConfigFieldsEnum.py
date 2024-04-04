@@ -17,6 +17,8 @@ class ConfigFieldsEnum(Enum):
     FAULT_LOCATION = "fault-location"
     PASSING_TEST_RATIO = "passing-test-ratio"
     PATCH_DIRECTORY = "patch-directory"
+    PASSING_TEST_LIMIT = "passing-test-limit"
+    FAILING_TEST_LIMIT = "failing-test-limit"
 
     CPU_COUNT = "cpu-count"
     GPU_COUNT = "gpu-count"

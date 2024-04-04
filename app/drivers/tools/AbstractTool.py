@@ -252,41 +252,67 @@ class AbstractTool(AbstractDriver):
                 rm_command = "rm -rf {}".format(self.dir_expr)
                 execute_command(rm_command)
 
-    def process_tests(self, dir_info: DirectoryInfo, bug_info: Dict[str, Any]) -> None:
-        for test_group, identifier_key, len_key in [
+    def process_tests(
+        self,
+        dir_info: DirectoryInfo,
+        config_info: Dict[str, Any],
+        bug_info: Dict[str, Any],
+    ) -> None:
+        for test_group, identifier_key, len_key, config_count in [
             (
                 self.key_benign_inputs,
                 self.key_passing_test_identifiers,
                 definitions.KEY_COUNT_POS,
+                definitions.KEY_CONFIG_PASSING_TEST_COUNT,
             ),
             (
                 self.key_exploit_inputs,
                 self.key_failing_test_identifiers,
                 definitions.KEY_COUNT_NEG,
+                definitions.KEY_CONFIG_FAILING_TEST_COUNT,
             ),
         ]:
+            patched_jazzer = False
             for analysis_result in bug_info.get(self.key_analysis_output, []):
                 for tests in analysis_result.get(test_group, []):
                     """
                     Documents how to process tests to ensure their usability
                     """
                     if tests["format"] == "junit":
-                        jazzer_dep = """<dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>"""
+                        if not patched_jazzer:
+                            patched_jazzer = True
+                            jazzer_dep = """<dependency><groupId>com.code-intelligence</groupId><artifactId>jazzer</artifactId><version>0.22.1</version></dependency>"""
 
-                        self.run_command(
-                            "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} ;".format(
-                                join(self.dir_expr, "src"), jazzer_dep
+                            self.run_command(
+                                "find {} -name pom.xml -exec sed -i 's|</dependencies>|{}</dependencies>|g' {{}} ;".format(
+                                    join(self.dir_expr, "src"), jazzer_dep
+                                )
                             )
-                        )
 
-                        self.run_command(
-                            "bash -c 'cp -r {}/. {}'".format(
-                                join(self.dir_setup, tests["dir"]),
-                                join(
-                                    self.dir_expr, "src", bug_info[self.key_dir_tests]
+                        test_limit = config_info.get(config_count, -1)
+                        if test_limit != -1:
+                            self.run_command(
+                                "bash -c \"find ./ -type f | head -n {0} | xargs -I[] bash -c 'mkdir -p {1}/$(dirname []); cp [] {1}/[]' \"".format(
+                                    test_limit,
+                                    join(
+                                        self.dir_expr,
+                                        "src",
+                                        bug_info[self.key_dir_tests],
+                                    ),
                                 ),
+                                dir_path=join(self.dir_setup, tests["dir"]),
                             )
-                        )
+                        else:
+                            self.run_command(
+                                "bash -c 'cp -r {}/. {}'".format(
+                                    join(self.dir_setup, tests["dir"]),
+                                    join(
+                                        self.dir_expr,
+                                        "src",
+                                        bug_info[self.key_dir_tests],
+                                    ),
+                                )
+                            )
                     if tests["format"] == "raw":
                         # TODO make recursive
                         # Remove the .state file just in case
@@ -314,6 +340,7 @@ class AbstractTool(AbstractDriver):
                         )
                         pass
                     if tests["format"] == "ktest":
+                        self.emit_warning("Not supporting ktest files yet!")
                         pass
         self.write_json([bug_info], join(self.dir_base_expr, "meta-data.json"))
         pass
