@@ -36,14 +36,10 @@ class AbstractAFL(AbstractFuzzTool):
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
 
-        self.emit_normal("executing fuzz command")
-
         timeout = int(float(task_config_info[self.key_timeout]) * 60)
 
         if self.key_bin_path not in bug_info:
             self.error_exit("no binary path provided")
-
-        self.timestamp_log_start()
 
         initial_corpus = join(self.dir_expr, "initial-corpus")
 
@@ -75,7 +71,7 @@ class AbstractAFL(AbstractFuzzTool):
             )
         self.clean_subject(bug_info)
         self.prepare_for_fuzz(bug_info)
-
+        self.timestamp_log_start()
         fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none {dict} {additional_params} -- {binary} {binary_input}'".format(
             timeout=timeout,
             additional_params=additional_params,
@@ -85,7 +81,7 @@ class AbstractAFL(AbstractFuzzTool):
             binary=join(self.dir_expr, "src", bug_info[self.key_bin_path]),
             binary_input=bug_info[self.key_crash_cmd].replace("$POC", "@@"),
         )
-
+        self.emit_normal(f"executing fuzz command with {self.name}")
         status = self.run_command(
             fuzz_command,
             self.log_output_path,
