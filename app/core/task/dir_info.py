@@ -96,12 +96,16 @@ def generate_local_tool_dir_info(
     )
 
     dir_result_local = join(values.dir_results, dir_name)
-    dir_log_local = join(values.dir_logs, dir_name)
+    dir_logs_local = join(values.dir_logs, dir_name)
+
+    if logs_dir_override and os.path.exists(logs_dir_override):
+        dir_logs_local = logs_dir_override
+
     dir_artifact_local = join(values.dir_artifacts, dir_name)
-    for directory in [dir_log_local, dir_result_local, dir_artifact_local]:
+    for directory in [dir_logs_local, dir_result_local, dir_artifact_local]:
         os.makedirs(directory, exist_ok=True)
 
-    base_info["logs"] = dir_log_local
+    base_info["logs"] = dir_logs_local
     base_info["artifacts"] = dir_artifact_local
     base_info["results"] = dir_result_local
 
