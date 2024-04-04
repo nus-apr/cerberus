@@ -36,10 +36,10 @@ class JoernSBFL(AbstractLocalizeTool):
             self.emit_error("No binary path found")
 
         self.run_command(
-            f"""bash -c '{os.path.join(self.dir_setup, bug_info["config_script"])}'""",
+            f"""bash -c '{os.path.join(self.dir_setup, bug_info[self.key_config_script])}'""",
         )
         self.run_command(
-            f"""bash -c '{os.path.join(self.dir_setup, bug_info["build_script"])}'""",
+            f"""bash -c '{os.path.join(self.dir_setup, bug_info[self.key_build_script])}'""",
         )
         # For using with network disabled, <<does not work>> but will work if this
         #   command is run manually in the container
@@ -49,7 +49,7 @@ class JoernSBFL(AbstractLocalizeTool):
 
         self.timestamp_log_start()
 
-        self.emit_normal("Running tool...")
+        self.emit_normal(f"Running {self.name}")
 
         metadata_loc = os.path.join(self.dir_expr, "meta-data.json")
         bug_info["src"] = {"root_abspath": os.path.join(self.dir_expr, "src")}
@@ -69,4 +69,31 @@ class JoernSBFL(AbstractLocalizeTool):
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
     ) -> LocalizeToolStats:
         self.emit_normal("reading output")
+        output_json = None
+        regex = re.compile("(.*meta-data.json$)")
+        for _, _, files in os.walk(self.dir_output):
+            for file in files:
+                if regex.match(file) and self.name in file:
+                    output_json = self.dir_output + "/" + file
+                    break
+        if not output_json:
+            self.emit_warning("no output json file found")
+            return self.stats
+
+        output_info = self.read_json(output_json)
+        if not isinstance(output_info, Dict):
+            self.emit_error("expected analysis to provide a json object")
+            return self.stats
+        analysis_info = output_info[self.key_analysis_output]
+
+        localization_list = analysis_info[0][self.key_localization]
+        if localization_list:
+            fix_files = set()
+            fix_lines = list()
+            for _l in localization_list:
+                fix_files.add(_l.get(self.key_fix_file))
+                fix_lines += _l.get(self.key_fix_lines, [])
+            self.stats.fix_loc_stats.fix_locs = len(fix_lines)
+            self.stats.fix_loc_stats.source_files = len(fix_files)
+
         return self.stats
