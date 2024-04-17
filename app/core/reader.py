@@ -5,6 +5,8 @@ import pickle
 from typing import Any
 from typing import Optional
 
+import yaml
+
 
 def read_json(file_path: str) -> Optional[Any]:
     json_data = None
@@ -25,6 +27,14 @@ def read_pickle(file_path: str) -> Optional[Any]:
         with open(file_path, "rb") as pickle_file:
             pickle_object = pickle.load(pickle_file)
     return pickle_object
+
+
+def read_yaml(file_path: str) -> Optional[Any]:
+    yaml_data = None
+    if os.path.isfile(file_path):
+        with open(file_path, "r") as yaml_file:
+            yaml_data = yaml.safe_load(yaml_file)
+    return yaml_data
 
 
 def read_csv(file_path: str) -> Optional[Any]:

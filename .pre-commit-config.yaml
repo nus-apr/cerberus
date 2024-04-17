@@ -21,4 +21,4 @@ repos:
     hooks:
     -   id: mypy
         args: [--strict ,--python-version, "3.9",  --disable-error-code,  unused-ignore]
-        additional_dependencies: [docker, "textual[syntax]==0.52.1", slack_sdk, discord, cython, types-jsonschema, jsonschema, semver, watchdog, javalang]
+        additional_dependencies: [docker, "textual[syntax]==0.52.1", slack_sdk, discord, cython, types-jsonschema, jsonschema, semver, watchdog, javalang, types-PyYAML]
