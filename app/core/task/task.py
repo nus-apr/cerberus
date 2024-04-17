@@ -210,6 +210,9 @@ def setup_localization(
     if config_info[definitions.KEY_CONFIG_FIX_LOC] == "tool":
         if definitions.KEY_LOCALIZATION in experiment_info:
             del experiment_info[definitions.KEY_LOCALIZATION]
+    elif config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
+        if definitions.KEY_LOCALIZATION in experiment_info:
+            del experiment_info[definitions.KEY_LOCALIZATION][definitions.KEY_FIX_LINES]
 
 
 def setup_tests(
