@@ -325,8 +325,8 @@ class AbstractTool(AbstractDriver):
                                     os.listdir(test_dir_path),
                                 )
                             )
-                        bug_info[identifier_key] = (
-                            bug_info.get(identifier_key, []) + test_identifiers
+                        bug_info[identifier_key] = list(
+                            set(bug_info.get(identifier_key, []) + test_identifiers)
                         )
                         bug_info[len_key] = len(bug_info[identifier_key])
                         self.run_command(
