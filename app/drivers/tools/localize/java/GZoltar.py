@@ -20,6 +20,7 @@ class GZoltar(AbstractLocalizeTool):
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
+        self.output_file = ""
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         timeout = str(task_config_info[self.key_timeout])
@@ -200,11 +201,11 @@ class GZoltar(AbstractLocalizeTool):
         )
         self.process_status(status)
 
-        if self.is_file(join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")):
+        self.output_file = join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")
+
+        if self.is_file(self.output_file):
             localization = []
-            lines = self.read_file(
-                join(self.dir_output, "sfl", "txt", "ochiai.ranking.csv")
-            )[1:]
+            lines = self.read_file(self.output_file)[1:]
             for entry in lines:
                 entry = entry.strip()
                 path_line, score = entry.split(";")
@@ -272,7 +273,6 @@ class GZoltar(AbstractLocalizeTool):
             self.emit_warning("no output log file found")
             return self.stats
 
-        output_file = join(self.dir_output, "localilzation.csv")
         self.emit_highlight(" Log File: " + self.log_output_path)
         is_timeout = True
         if self.is_file(self.log_output_path):
@@ -282,8 +282,8 @@ class GZoltar(AbstractLocalizeTool):
                     self.stats.error_stats.is_error = True
                 elif "statistics" in line:
                     is_timeout = False
-        if self.is_file(output_file):
-            output_lines = self.read_file(output_file, encoding="iso-8859-1")
+        if self.output_file and self.is_file(self.output_file):
+            output_lines = self.read_file(self.output_file, encoding="iso-8859-1")
             self.stats.fix_loc_stats.fix_locs = len(output_lines) - 1
         else:
             self.emit_error("no output file found")
