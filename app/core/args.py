@@ -48,6 +48,14 @@ def parse_args() -> Namespace:
     )
 
     optional.add_argument(
+        definitions.ARG_SUBJECT_BASED,
+        "-sb",
+        help="experiment image based on subject image\n\n",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
         definitions.ARG_CONFIG_FILE, "-c", type=str, help="Path to the JSON config file"
     )
 

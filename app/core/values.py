@@ -77,6 +77,7 @@ task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None
 ui_max_width = 1000
 runs = 1
 use_latest_image = False
+use_subject_as_base = False
 secure_hash = False
 special_meta = ""
 

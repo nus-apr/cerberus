@@ -125,7 +125,8 @@ class AbstractTool(AbstractDriver):
                     )
                 )
         self.command_history = []
-
+        self.portable_dirs: List[str] = []
+        self.path_to_binaries: List[str] = []
         self.is_ui_active = values.ui_active
         self.is_only_instrument = values.only_instrument
         self.is_debug = values.debug

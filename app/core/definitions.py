@@ -136,6 +136,7 @@ ARG_TASK_TYPE = "--task-type"
 ARG_SECURE_HASH = "--secure-hash"
 ARG_SPECIAL_META = "--special-meta"
 ARG_SUBSEQUENCE = "--subsequence"
+ARG_SUBJECT_BASED = "--subject-based"
 
 UI_TASK_PROFILE = "Task Profile"
 UI_CONTAINER_PROFILE = "Container Profile"

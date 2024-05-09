@@ -15,6 +15,8 @@ class Valkyrie(AbstractValidateTool):
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/valkyrie"
+        self.path_to_binaries = ["/opt/valkyrie/bin/valkyrie"]
+        self.portable_dirs = ["/opt/valkyrie"]
 
     def populate_config_file(self, bug_info: Dict[str, Any]) -> str:
         self.emit_normal("generating config file")

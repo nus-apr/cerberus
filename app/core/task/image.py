@@ -43,14 +43,14 @@ def construct_container_volumes(
     return volume_list
 
 
-def construct_experiment_tool_image(
+def _tool_based_image(
     bug_image_id: str,
     tool: AbstractTool,
     dir_info: DirectoryInfo,
-    image_name: str,
     bug_info: Dict[str, Any],
     tag: Optional[str],
 ) -> str:
+
     dockerfile_name = "Dockerfile-{}-{}".format(tool.name, bug_image_id)
     if tag and tag != "":
         dockerfile_name += "-{}".format(tag)
@@ -153,6 +153,86 @@ def construct_experiment_tool_image(
         # We assume that the container will always have the sh command available
         # This line is included against some issues with the container lifetime
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
+    return tmp_dockerfile
+
+
+def _subject_based_image(
+    bug_image_id: str,
+    tool: AbstractTool,
+    dir_info: DirectoryInfo,
+    bug_info: Dict[str, Any],
+    tag: Optional[str],
+) -> str:
+    dockerfile_name = "Dockerfile-{}-{}".format(bug_image_id, tool.name)
+    if tag and tag != "":
+        dockerfile_name += "-{}".format(tag)
+
+    tmp_dockerfile = join(
+        dir_info["local"]["setup"],
+        dockerfile_name,
+    )
+    os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
+    with open(tmp_dockerfile, "w") as dock_file:
+        dock_file.write("FROM {}\n".format(bug_image_id))
+        dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
+
+        res, (output, error) = utilities.run_command(
+            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+        )
+        if not output or output.decode() == "":
+            utilities.error_exit(
+                f"Cannot the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+            )
+
+        group_id = output.decode().strip()
+
+        emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
+        prefix = ""
+        if not tool.runs_as_root:
+            prefix = "sudo"
+            if tool.sudo_password:
+                prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
+
+        # Create a special group to ensure that files are accessible
+        dock_file.write(
+            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
+        )
+
+        # Make all user's primary group to be our special group
+        dock_file.write(
+            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
+        )
+
+        ownership = ""
+        if tool.image_user != "root":
+            ownership = f"--chown={tool.image_user}:{definitions.GROUP_NAME}"
+
+        for _dir in tool.portable_dirs:
+            dock_file.write(
+                "COPY --from={0} {2} {1} {1}\n".format(tool.image_name, _dir, ownership)
+            )
+        for _path in tool.path_to_binaries:
+            dock_file.write('ENV PATH="$PATH:{0}"\n'.format(_path))
+        # We assume that the container will always have the sh command available
+        # This line is included against some issues with the container lifetime
+        dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
+    return tmp_dockerfile
+
+
+def construct_experiment_tool_image(
+    bug_image_id: str,
+    tool: AbstractTool,
+    dir_info: DirectoryInfo,
+    image_name: str,
+    bug_info: Dict[str, Any],
+    tag: Optional[str],
+) -> str:
+    if values.use_subject_as_base:
+        tmp_dockerfile = _subject_based_image(
+            bug_image_id, tool, dir_info, bug_info, tag
+        )
+    else:
+        tmp_dockerfile = _tool_based_image(bug_image_id, tool, dir_info, bug_info, tag)
     id = container.build_image(tmp_dockerfile, image_name)
     os.remove(tmp_dockerfile)
     return id

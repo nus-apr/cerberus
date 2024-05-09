@@ -180,6 +180,7 @@ class Configurations:
         "task-profile-id-list": ["TP1"],
         "container-profile-id-list": ["CP1"],
         "use-latest-image": False,
+        "use-subject-as-base": False,
     }
     __runtime_config_values = __default_config_values
 
@@ -259,6 +260,9 @@ class Configurations:
 
         if arg_list.use_latest_image:
             self.__runtime_config_values["use-latest-image"] = True
+
+        if arg_list.subject_based:
+            self.__runtime_config_values["use-subject-as-base"] = True
 
         if arg_list.parallel:
             self.__runtime_config_values["parallel"] = True
@@ -527,6 +531,7 @@ class Configurations:
 
         values.use_parallel = self.__runtime_config_values["parallel"]
         values.use_latest_image = self.__runtime_config_values["use-latest-image"]
+        values.use_subject_as_base = self.__runtime_config_values["use-subject-as-base"]
 
         self.benchmark_name = self.__runtime_config_values["benchmark-name"]
         self.subject_name = self.__runtime_config_values["subject-name"]
