@@ -87,8 +87,6 @@ class BasicWorkflow(AbstractCompositeTool):
         )
         self.last_crash = 0
         self.active_jobs = 0
-        if not values.use_container:
-            self.error_exit("This tool cannot be run outside of containers for now")
 
     def invoke_advanced(
         self,
@@ -182,6 +180,10 @@ class BasicWorkflow(AbstractCompositeTool):
                 if tool_info.get("ignore", False):
                     self.emit_debug(f"Skip {tool_name}")
                     continue
+
+                tool_local = bool(tool_info.get("local", False))
+                self.emit_debug(f"Local: {tool_local}")
+
                 tool_params = tool_info.get("params", "")
 
                 extra_tool_tag = tool_info.get("tag", "")
@@ -201,12 +203,13 @@ class BasicWorkflow(AbstractCompositeTool):
                 else:
 
                     def make_tool_constructor(
-                        tool_name: str, real_type: str, tool_tag: str
+                        tool_name: str, real_type: str, tool_tag: str, tool_local: bool
                     ) -> Callable[[], AbstractTool]:
                         def tool_constructor() -> AbstractTool:
                             t = configuration.load_tool(tool_name, real_type)
                             t.tool_tag = tool_tag
                             t.bindings = t.bindings or {}
+                            t.locally_running = tool_local
                             return t
 
                         return tool_constructor
@@ -215,6 +218,7 @@ class BasicWorkflow(AbstractCompositeTool):
                         copy.deepcopy(tool_name),
                         copy.deepcopy(real_type),
                         copy.deepcopy(tool_tag),
+                        copy.deepcopy(tool_local),
                     )
                     tool = tool_constructor()
                     tool.tool_tag = tool_tag
@@ -234,6 +238,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     task_config_info[self.key_cpus],
                     [],
                     tool_tag,
+                    locally_running=tool.locally_running,
                 )
                 prepare_experiment_tool(
                     experiment_image_id,

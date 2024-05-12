@@ -245,6 +245,7 @@ def prepare_experiment_image(
     gpu: List[str],
     tag: str,
     ignore_rebuild: bool = False,
+    locally_running: bool = False,
 ) -> Optional[str]:
     utilities.check_space()
     bug_index = bug_info[definitions.KEY_ID]
@@ -272,7 +273,8 @@ def prepare_experiment_image(
         benchmark.update_dir_info(
             generate_dir_info(
                 benchmark.name, subject_name, bug_name, dir_setup_extended
-            )
+            ),
+            locally_running,
         )
         experiment_image_id = (
             benchmark.get_exp_image(
@@ -297,7 +299,7 @@ def prepare_experiment_tool(
     bug_info: Dict[str, Any],
     tag: Optional[str] = None,
 ) -> Optional[str]:
-    if values.use_container and tool.locally_running:
+    if values.use_container and not tool.locally_running:
         if not bug_image_id:
             utilities.error_exit("Bug image id not provided")
         emitter.information("\t\t[framework] preparing image {}".format(image_name))

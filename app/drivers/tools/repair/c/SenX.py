@@ -46,7 +46,7 @@ class SenX(AbstractRepairTool):
 
         test_dir = self.dir_setup + "/tests"
         test_file_list = []
-        if self.use_container:
+        if self.use_container and not self.locally_running:
             self.error_exit(
                 "unimplemented functionality: SenX docker support not implemented"
             )

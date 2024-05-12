@@ -341,7 +341,7 @@ class Cerberus(App[List[Result]]):
             dir_info = generate_dir_info(
                 benchmark.name, subject_name, bug_name, dir_setup_extended
             )
-            benchmark.update_dir_info(dir_info)
+            benchmark.update_dir_info(dir_info, False)
             try:
                 emitter.information(
                     "\t[framework] Image check for bug {} from subject {}".format(
@@ -485,7 +485,7 @@ class Cerberus(App[List[Result]]):
                 bug_name,
                 dir_setup_extended,
             )
-            benchmark.update_dir_info(dir_info)
+            benchmark.update_dir_info(dir_info, tool.locally_running)
             try:
                 emitter.information(
                     "\t[framework] Image check for bug {} from subject {}".format(
@@ -501,6 +501,7 @@ class Cerberus(App[List[Result]]):
                     [],
                     task_profile.get(definitions.KEY_TOOL_TAG, ""),
                     ignore_rebuild=True,
+                    locally_running=tool.locally_running,
                 )
 
                 emitter.information(

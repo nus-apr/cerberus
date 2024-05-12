@@ -199,7 +199,7 @@ class TaskProcessor:
                                 benchmark = copy.deepcopy(benchmark_template)
                                 tool = copy.deepcopy(tool_template)
                                 tool.locally_running = tool_config.local
-                                benchmark.update_dir_info(dir_info)
+                                benchmark.update_dir_info(dir_info, tool_config.local)
 
                                 yield (
                                     tasks_chunk_config.task_config,

@@ -116,18 +116,18 @@ class AbstractBenchmark(AbstractDriver):
         emitter.highlight("\t\t\t built: {0}\n".format(self.stats.built))
         emitter.highlight("\t\t\t tested: {0}\n".format(self.stats.tested))
 
-    def update_dir_info(self, dir_info: DirectoryInfo) -> None:
+    def update_dir_info(self, dir_info: DirectoryInfo, locally_running: bool) -> None:
         self.__dir_info = dir_info
-        if not values.use_container:
-            self.dir_expr = dir_info["local"]["experiment"]
-            self.dir_logs = dir_info["local"]["logs"]
-            self.dir_setup = dir_info["local"]["setup"]
-            self.dir_base_expr = values.dir_experiments
-        else:
+        if values.use_container and not locally_running:
             self.dir_expr = dir_info["container"]["experiment"]
             self.dir_logs = dir_info["container"]["logs"]
             self.dir_setup = dir_info["container"]["setup"]
             self.dir_base_expr = values.container_base_experiment
+        else:
+            self.dir_expr = dir_info["local"]["experiment"]
+            self.dir_logs = dir_info["local"]["logs"]
+            self.dir_setup = dir_info["local"]["setup"]
+            self.dir_base_expr = values.dir_experiments
 
     def get_list(self) -> List[Any]:
         return self.experiment_subjects

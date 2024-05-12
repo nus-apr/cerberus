@@ -507,7 +507,7 @@ class AbstractTool(AbstractDriver):
                 next(iter(image.attrs.get("RepoDigests", [])), "@").split("@")[1:]
             )
 
-        if values.use_container:
+        if values.use_container and not self.locally_running:
             if values.secure_hash:
                 emitter.debug(
                     "\t[framework] will check whether the final image that is locally available aligns has a hash digest,starting with {}".format(
@@ -608,10 +608,13 @@ class AbstractTool(AbstractDriver):
                         )
 
         else:
-            local_path = shutil.which(self.name.lower())
-            if not local_path:
-                error_exit("{} not Found".format(self.name))
+            self.locate()
         return
+
+    def locate(self) -> None:
+        local_path = shutil.which(self.name.lower())
+        if not local_path:
+            error_exit("{} not Found".format(self.name))
 
     def update_experiment_status(self, status: str) -> None:
         """Update the status of the experiment if any visualization is available"""

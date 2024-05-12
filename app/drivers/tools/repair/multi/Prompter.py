@@ -19,6 +19,9 @@ class Prompter(AbstractRepairTool):
         self.image_name = "prompter"
         self.sudo_password = "ubuntu"
 
+    def locate(self) -> None:
+        pass
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -39,21 +42,28 @@ class Prompter(AbstractRepairTool):
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
 
-        self.run_command("bash -c \"echo 'ubuntu\\n' | sudo -S mkdir -p -m 777 {}\"".format(self.dir_output))
-        
-        self.append_file([
-            "[anthropic]\n",
-            "anthropic_token = \"INSERT ANTHROPIC KEY HERE\"\n",
-            "[openai]\n"
-            "openai_token = \"INSERT OPENAI DRIVER HERE\"\n" 
-            "\n"
-            ], "/home/ubuntu/prompter/config.toml")
-        
-        
-        file_path = join(self.dir_expr,"src",bug_info[self.key_localization][0][self.key_fix_file])
-        
+        self.run_command(
+            "bash -c \"echo 'ubuntu\\n' | sudo -S mkdir -p -m 777 {}\"".format(
+                self.dir_output
+            )
+        )
+
+        self.append_file(
+            [
+                "[anthropic]\n",
+                'anthropic_token = "INSERT ANTHROPIC KEY HERE"\n',
+                "[openai]\n" 'openai_token = "INSERT OPENAI DRIVER HERE"\n',
+                "\n",
+            ],
+            "/home/ubuntu/prompter/config.toml",
+        )
+
+        file_path = join(
+            self.dir_expr, "src", bug_info[self.key_localization][0][self.key_fix_file]
+        )
+
         self.emit_debug(bug_info)
-        
+
         repair_command = f"timeout -k 5m {timeout}h python3 main.py {file_path} {bug_info['cwe_id']} {self.dir_output} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
         self.emit_debug(repair_command)
         status = self.run_command(
@@ -63,7 +73,6 @@ class Prompter(AbstractRepairTool):
         self.process_status(status)
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
-
 
     def analyse_output(
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]

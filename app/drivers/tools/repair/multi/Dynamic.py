@@ -22,6 +22,9 @@ class Dynamic(AbstractRepairTool):
         # preferably change to a container with the dependencies to reduce setup time
         self.image_name = "ubuntu:22.04"
 
+    def locate(self) -> None:
+        pass
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:

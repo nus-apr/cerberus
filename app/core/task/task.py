@@ -84,9 +84,14 @@ def run(
         dir_setup_extended,
         dir_logs_override,
     )
-    benchmark.update_dir_info(dir_info)
+    benchmark.update_dir_info(dir_info, tool.locally_running)
     print_task_info(
-        task_config_info, container_config_info, bug_name, subject_name, dir_info
+        task_config_info,
+        container_config_info,
+        bug_name,
+        subject_name,
+        dir_info,
+        tool.locally_running,
     )
 
     dir_info = add_instrumentation_dir_info(dir_info, tool.name)
@@ -114,9 +119,9 @@ def run(
     else:
         utilities.clean_artifacts(dir_info["local"]["artifacts"])
         utilities.clean_artifacts(dir_info["local"]["logs"])
-        benchmark.update_dir_info(dir_info)
+        benchmark.update_dir_info(dir_info, tool.locally_running)
 
-        if values.use_container:
+        if values.use_container and not tool.locally_running:
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a docker image name assigned: {}".format(
@@ -168,7 +173,7 @@ def run(
         )
 
         # update container stats
-        if values.use_container:
+        if values.use_container and not tool.locally_running:
             if not container_id:
                 utilities.error_exit("Use container but ID is none?")
             tool.update_container_stats(container_id)
@@ -575,6 +580,7 @@ def print_task_info(
     bug_name: str,
     subject_name: str,
     dir_info: DirectoryInfo,
+    locally_running: bool,
 ) -> None:
     emitter.highlight(
         "\t\t[task profile] Identifier: {}".format(task_config_info[definitions.KEY_ID])
@@ -600,7 +606,7 @@ def print_task_info(
         )
     )
 
-    if values.use_container:
+    if values.use_container and not locally_running:
         emitter.highlight(
             "\t\t[container profile] Identifier: {}".format(
                 container_config_info[definitions.KEY_ID]

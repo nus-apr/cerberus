@@ -253,7 +253,12 @@ def process_tasks(tasks: TaskList) -> bool:
         )
 
         experiment_image_id = prepare_experiment_image(
-            benchmark, experiment_item, cpus, [], tool_tag
+            benchmark,
+            experiment_item,
+            cpus,
+            [],
+            tool_tag,
+            locally_running=tool.locally_running,
         )
 
         if task_config.task_type == "prepare":
