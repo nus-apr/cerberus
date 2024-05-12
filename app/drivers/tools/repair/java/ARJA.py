@@ -40,6 +40,12 @@ class ARJA(AbstractRepairTool):
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
         dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
         dir_test_bin = join(self.dir_expr, "src", bug_info[self.key_dir_test_class])
+        env = self.d4j_env.copy()
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
         list_deps = [
             join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
         ]
@@ -47,6 +53,35 @@ class ARJA(AbstractRepairTool):
             join(self.arja_home, "external", "lib", "hamcrest-core-1.3.jar")
         )
         list_deps.append(join(self.arja_home, "external", "lib", "junit-4.11.jar"))
+        if bug_info[self.key_build_system] == "maven":
+            self.run_command(
+                f"mvn dependency:copy-dependencies",
+                dir_path=join(self.dir_expr, "src"),
+                env=env,
+            )
+            failing_mod = bug_info.get("failing_module", "")
+            # Add common folders for deependencies
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", failing_mod, "target", "dependency")
+                )
+                if x.endswith(".jar") and not "junit" in x
+            ]
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(
+                        self.dir_expr,
+                        "src",
+                        failing_mod,
+                        "test",
+                        "target",
+                        "dependency",
+                    )
+                )
+                if x.endswith(".jar") and not "junit" in x
+            ]
         list_deps_str = ":".join(list_deps)
 
         arja_default_population_size = 40
@@ -70,6 +105,11 @@ class ARJA(AbstractRepairTool):
             f"-Ddependences {list_deps_str} "
             f"-DpopulationSize {arja_default_population_size} "
             f"-DgzoltarDataDir {dir_localization} "
+        )
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
         )
 
         if not passing_test_identifiers_list:

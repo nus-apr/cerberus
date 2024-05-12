@@ -6,6 +6,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import definitions
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -62,48 +63,56 @@ class ARJA_E(AbstractRepairTool):
         ]
         # Ensure the dependencies exist
         if bug_info[self.key_build_system] == "maven":
+            failing_mod = bug_info.get("failing_module", "")
             self.run_command(
                 f"mvn dependency:copy-dependencies",
-                dir_path=join(self.dir_expr, "src"),
+                dir_path=join(self.dir_expr, "src", failing_mod),
                 env=env,
             )
             # Add common folders for deependencies
             list_deps += [
                 x
                 for x in self.list_dir(
-                    join(self.dir_expr, "src", "target", "dependency")
+                    join(self.dir_expr, "src", failing_mod, "target", "dependency")
                 )
-                if x.endswith(".jar")
+                if x.endswith(".jar") and not "junit" in x
             ]
             list_deps += [
                 x
                 for x in self.list_dir(
-                    join(self.dir_expr, "src", "test", "target", "dependency")
+                    join(
+                        self.dir_expr,
+                        "src",
+                        failing_mod,
+                        "test",
+                        "target",
+                        "dependency",
+                    )
                 )
-                if x.endswith(".jar")
+                if x.endswith(".jar") and not "junit" in x
             ]
 
         list_deps_str = ":".join(list_deps)
-
-        localization_lines = self.transform_localization(
-            bug_info[self.key_localization]
-        )
         dir_localization = f"{self.dir_output}/localization"
-        self.run_command(f"mkdir {dir_localization}")
-        self.write_file(localization_lines, join(dir_localization, "spectra"))
+        if task_config_info[definitions.KEY_CONFIG_FIX_LOC] != "tool":
+            self.run_command(f"mkdir {dir_localization}")
+            localization_lines = self.transform_localization(
+                bug_info[self.key_localization]
+            )
+            self.write_file(localization_lines, join(dir_localization, "spectra"))
 
-        test_name_lines = (
-            ["name,outcome,runtime,stacktrace\n"]
-            + [
-                f"{name},FAIL,0,\n"
-                for name in bug_info[self.key_failing_test_identifiers]
-            ]
-            + [
-                f"{name},PASS,0,\n"
-                for name in bug_info[self.key_passing_test_identifiers]
-            ]
-        )
-        self.write_file(test_name_lines, join(dir_localization, "tests"))
+            test_name_lines = (
+                ["name,outcome,runtime,stacktrace\n"]
+                + [
+                    f"{name},FAIL,0,\n"
+                    for name in bug_info[self.key_failing_test_identifiers]
+                ]
+                + [
+                    f"{name},PASS,0,\n"
+                    for name in bug_info[self.key_passing_test_identifiers]
+                ]
+            )
+            self.write_file(test_name_lines, join(dir_localization, "tests"))
 
         arja_default_population_size = 40
         # use a large one to keep ARJA running forever

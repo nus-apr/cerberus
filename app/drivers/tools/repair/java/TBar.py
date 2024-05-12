@@ -55,6 +55,9 @@ class TBar(AbstractRepairTool):
             dir_path=join(self.dir_expr, "src"),
         )
 
+        if bug_info.get(self.key_java_version) == 7:
+            bug_info[self.key_java_version] = 8
+
         env = dict(
             FAILING_TESTS=(" ".join(bug_info[self.key_failing_test_identifiers])),
             PASSING_TESTS=(" ".join(bug_info[self.key_passing_test_identifiers])),
@@ -134,19 +137,35 @@ class TBar(AbstractRepairTool):
         fl_out_dir = join(self.tbar_root_dir, "SuspiciousCodePositions/")
         self.run_command(f"mkdir -p {fl_out_dir}")
         fl_data = join(fl_out_dir, bug_id_str, "Ochiai.txt")
+        # Temporary solution: copying to new path
+        fl_folder = f"{bug_info[self.key_bug_id].replace('-', '_')}"
+        orig_path = join(
+            fl_out_dir, fl_folder, "Ochiai.txt"
+        )  # /TBar/SuspiciousCodePositions/{subject}_id
+        new_path = join(
+            fl_out_dir, bug_id_str
+        )  # /TBar/SuspiciousCodePositions/{subject}_{bug_id_str}
         self.run_command("mkdir -p {}".format(os.path.dirname(fl_data)))
+        self.run_command(f"cp {orig_path} {new_path}")
 
         failed_tests_file_copy = join(
             self.tbar_root_dir,
             "FailedTestCases/",
             f"{bug_id_str}.txt",
         )
+        # Temporary: copying modified FL.sh
+        self.run_command(f"cp {self.dir_setup}FL.sh {self.tbar_root_dir}")
+        # Specifying failing module
+        failing_module = bug_info.get("failing_module", "")
 
         if not run_fl:
             self.emit_debug("Creating FL data file from provided info")
+            self.run_command(
+                f"bash {join(self.dir_setup,bug_info[self.key_build_script])}"
+            )
             self.write_fl_data(bug_info, failed_tests_file, fl_data)
         else:
-            cmd = f"bash ./FL.sh {join(self.dir_expr,'src')} {bug_id_str} {join(self.dir_setup,bug_info[self.key_build_script])}"
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src', failing_module)} {bug_id_str} {join(self.dir_setup,bug_info[self.key_build_script])}"
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
