@@ -434,7 +434,7 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command += " | tee {0} 2>&1".format(log_file_path)
+            command += " | tee -a {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command, env=env, directory=dir_path)
 
         self.command_history.append((dir_path, command, env))
