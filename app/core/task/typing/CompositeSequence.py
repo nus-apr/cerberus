@@ -6,5 +6,5 @@ from app.core.task.typing.TaskType import CompositeTaskType
 
 CompositeSequence = Dict[
     CompositeTaskType,
-    List[Dict[Literal["name", "type", "params", "tag", "ignore"], str]],
+    List[Dict[Literal["name", "type", "params", "local", "tag", "ignore"], str]],
 ]

@@ -40,7 +40,7 @@ from app.core.metadata.MetadataValidationSchemas import general_section_schema
 from app.core.task import task
 from app.core.task.dir_info import generate_tool_dir_info
 from app.core.task.image import prepare_experiment_image
-from app.core.task.image import prepare_experiment_tool_image
+from app.core.task.image import prepare_experiment_tool
 from app.core.task.stats.CompositeToolStats import CompositeToolStats
 from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.CompositeSequence import CompositeSequence
@@ -235,7 +235,7 @@ class BasicWorkflow(AbstractCompositeTool):
                     [],
                     tool_tag,
                 )
-                prepare_experiment_tool_image(
+                prepare_experiment_tool(
                     experiment_image_id,
                     tool,
                     task_config_info,

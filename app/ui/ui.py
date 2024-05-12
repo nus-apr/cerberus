@@ -45,7 +45,7 @@ from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
 from app.core.task.dir_info import generate_dir_info
 from app.core.task.image import prepare_experiment_image
-from app.core.task.image import prepare_experiment_tool_image
+from app.core.task.image import prepare_experiment_tool
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.stats.ToolStats import ToolStats
 from app.core.task.TaskStatus import TaskStatus
@@ -509,7 +509,7 @@ class Cerberus(App[List[Result]]):
                     )
                 )
 
-                tool_experiment_image_id = prepare_experiment_tool_image(
+                tool_experiment_image_id = prepare_experiment_tool(
                     experiment_image_id,
                     tool,
                     task_profile,

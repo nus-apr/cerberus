@@ -197,6 +197,10 @@ class ConfigDataFactory:
                         hash_digest=tool_config_dict.get(
                             ConfigFieldsEnum.HASH_DIGEST.value, ""
                         ),
+                        ignore=tool_config_dict.get(
+                            ConfigFieldsEnum.IGNORE.value, False
+                        ),
+                        local=tool_config_dict.get(ConfigFieldsEnum.LOCAL.value, False),
                     )
                 )
 

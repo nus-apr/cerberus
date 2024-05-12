@@ -86,6 +86,7 @@ class ConfigFieldsEnum(Enum):
     IMAGE = "image"
     HASH_DIGEST = "hash_digest"
     IGNORE = "ignore"
+    LOCAL = "local"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"

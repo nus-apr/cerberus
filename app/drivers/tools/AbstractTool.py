@@ -105,6 +105,8 @@ class AbstractTool(AbstractDriver):
     stats: ToolStats
     tool_type: str
 
+    locally_running: bool = False
+
     bindings: Optional[Dict[str, Any]] = None
     runs_as_root: bool = True
     sudo_password: str = ""

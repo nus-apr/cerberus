@@ -263,6 +263,7 @@ tool_config_schema = {
         ConfigFieldsEnum.IMAGE.value: {"type": "string"},
         ConfigFieldsEnum.IGNORE.value: {"type": "boolean"},
         ConfigFieldsEnum.HASH_DIGEST.value: {"type": "string"},
+        ConfigFieldsEnum.LOCAL.value: {"type": "boolean"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
     "additionalProperties": True,

@@ -198,6 +198,7 @@ class TaskProcessor:
 
                                 benchmark = copy.deepcopy(benchmark_template)
                                 tool = copy.deepcopy(tool_template)
+                                tool.locally_running = tool_config.local
                                 benchmark.update_dir_info(dir_info)
 
                                 yield (

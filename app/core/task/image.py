@@ -288,16 +288,16 @@ def prepare_experiment_image(
     return experiment_image_id
 
 
-def prepare_experiment_tool_image(
+def prepare_experiment_tool(
     bug_image_id: Optional[str],
-    repair_tool: AbstractTool,
+    tool: AbstractTool,
     task_profile: Dict[str, Any],
     dir_info: DirectoryInfo,
     image_name: str,
     bug_info: Dict[str, Any],
     tag: Optional[str] = None,
 ) -> Optional[str]:
-    if values.use_container:
+    if values.use_container and tool.locally_running:
         if not bug_image_id:
             utilities.error_exit("Bug image id not provided")
         emitter.information("\t\t[framework] preparing image {}".format(image_name))
@@ -307,7 +307,7 @@ def prepare_experiment_tool_image(
             or values.rebuild_all
         ):
             return construct_experiment_tool_image(
-                bug_image_id, repair_tool, dir_info, image_name, bug_info, tag
+                bug_image_id, tool, dir_info, image_name, bug_info, tag
             )
         else:
             img = container.get_image(image_name)

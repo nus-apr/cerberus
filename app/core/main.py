@@ -36,7 +36,7 @@ from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
 from app.core.task.dir_info import generate_dir_info
 from app.core.task.image import prepare_experiment_image
-from app.core.task.image import prepare_experiment_tool_image
+from app.core.task.image import prepare_experiment_tool
 from app.core.task.TaskProcessor import TaskProcessor
 from app.core.task.typing.TaskList import TaskList
 from app.core.task.typing.TaskType import TaskType
@@ -88,10 +88,7 @@ def process_configs(
     values.current_container_profile_id.set(container_profile[definitions.KEY_ID])
     values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
 
-    if values.use_container:
-        values.job_identifier.set(
-            create_bug_image_identifier(benchmark, experiment_item)
-        )
+    values.job_identifier.set(create_bug_image_identifier(benchmark, experiment_item))
 
 
 def main() -> None:
@@ -272,7 +269,7 @@ def process_tasks(tasks: TaskList) -> bool:
             experiment_item,
             tool_tag,
         )
-        prepare_experiment_tool_image(
+        prepare_experiment_tool(
             experiment_image_id,
             tool,
             task_profile,
