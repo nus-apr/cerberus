@@ -28,7 +28,7 @@ class FootPatch(AbstractRepairTool):
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         if not self.container_id:
-            clean_command = "rm -f /tmp/td_candidates/*; make clean;"
+            clean_command = "rm -f /tmp/td_candidates/*; make clean "
         self.run_command(clean_command, dir_path=dir_src)
 
         new_env = os.environ.copy()

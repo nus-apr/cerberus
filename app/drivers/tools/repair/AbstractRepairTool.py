@@ -94,7 +94,7 @@ class AbstractRepairTool(AbstractTool):
                 )
             else:
                 if self.dir_patch != "":
-                    save_command = "cp -rf {} {};".format(self.dir_patch, dir_patches)
+                    save_command = "cp -rf {} {}".format(self.dir_patch, dir_patches)
                     utilities.execute_command(save_command)
 
         super().save_artifacts(dir_info)

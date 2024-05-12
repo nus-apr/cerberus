@@ -302,7 +302,7 @@ def setup_for_valkyrie(
             values.docker_host, container_id, binary_path, valkyrie_binary_path
         )
     else:
-        copy_command = "cp {} {} ;".format(binary_path, valkyrie_binary_path)
+        copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
 
     utilities.execute_command(copy_command)
     values.list_processed = []

@@ -70,8 +70,8 @@ def retrieve_results(archive_name: str, tool: AbstractTool) -> bool:
     emitter.normal("\t\tretrieving results")
     archive_path = join(values.dir_main, "results", tool.name.lower(), archive_name)
     if os.path.isfile(archive_path):
-        extract_command = "cp {} {};".format(archive_path, values.dir_results)
-        extract_command += "cd {};".format(values.dir_results)
+        extract_command = "cp {} {} ; ".format(archive_path, values.dir_results)
+        extract_command += "cd {} ; ".format(values.dir_results)
         extract_command += "tar -xf {}" + archive_name
         utilities.execute_command(extract_command)
         return True
@@ -91,6 +91,6 @@ def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool) -> None:
     os.makedirs(dir_results, exist_ok=True)
     tool.save_artifacts(local_info)
     tool.post_process()
-    save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
+    save_command = "cp -f {} {} ; ".format(values.file_main_log, dir_results)
     save_command += "cp -f {}/* {}".format(values.file_error_log, dir_results)
     utilities.execute_command(save_command)

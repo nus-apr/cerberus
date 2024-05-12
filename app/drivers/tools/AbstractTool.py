@@ -434,7 +434,7 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command += " >> {0} 2>&1".format(log_file_path)
+            command += " | tee {0} 2>&1".format(log_file_path)
             exit_code = execute_command(command, env=env, directory=dir_path)
 
         self.command_history.append((dir_path, command, env))
@@ -649,13 +649,15 @@ class AbstractTool(AbstractDriver):
                 self.container_id, self.dir_output, dir_artifacts
             )
         else:
-            save_command = "cp -rf {}/* {};".format(self.dir_output, dir_results)
+            save_command = "cp -rf {}/* {}".format(self.dir_output, dir_results)
             if self.dir_logs != "":
-                save_command += "cp -rf {}/* {};".format(self.dir_logs, dir_results)
+                save_command += "; cp -rf {}/* {}".format(self.dir_logs, dir_results)
             if dir_artifacts != "":
-                save_command += "cp -rf {}/* {};".format(self.dir_output, dir_artifacts)
+                save_command += "; cp -rf {}/* {}".format(
+                    self.dir_output, dir_artifacts
+                )
             if dir_logs != "":
-                save_command += "cp -rf {}/* {}".format(self.dir_logs, dir_logs)
+                save_command += "; cp -rf {}/* {}".format(self.dir_logs, dir_logs)
 
             execute_command(save_command)
 

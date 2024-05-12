@@ -1,4 +1,5 @@
 import os
+from os.path import join
 from typing import Any
 from typing import Dict
 from typing import List
@@ -38,11 +39,13 @@ class Dynamic(AbstractRepairTool):
         timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = str(float(timeout_h) * 60)
 
+        tool_folder = values.dir_dynamic if values.dir_dynamic else "/tool"
+
         # generate patches
         self.timestamp_log_start()
         repair_command = "echo 0"
 
-        self.run_command("bash /tool/setup.sh", self.log_output_path)
+        self.run_command(f"bash {join(tool_folder,'setup.sh')}", self.log_output_path)
 
         status = self.run_command(repair_command, self.log_output_path)
 

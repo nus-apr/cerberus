@@ -40,7 +40,7 @@ class AbstractSelectTool(AbstractTool):
                     self.container_id, self.dir_output, f"{dir_selection}"
                 )
             else:
-                save_command = "cp -rf {} {};".format(
+                save_command = "cp -rf {} {}".format(
                     self.dir_output, f"{dir_selection}"
                 )
                 utilities.execute_command(save_command)

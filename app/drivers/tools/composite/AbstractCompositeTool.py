@@ -46,7 +46,7 @@ class AbstractCompositeTool(AbstractTool):
                     self.container_id, self.dir_output, f"{dir_patches}"
                 )
             else:
-                save_command = "cp -rf {} {};".format(self.dir_output, f"{dir_patches}")
+                save_command = "cp -rf {} {}".format(self.dir_output, f"{dir_patches}")
                 utilities.execute_command(save_command)
 
         super().save_artifacts(dir_info)

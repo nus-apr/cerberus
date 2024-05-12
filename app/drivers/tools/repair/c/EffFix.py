@@ -183,7 +183,7 @@ class EffFix(AbstractRepairTool):
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         # rm the infer directory, since it's too big
-        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single ;"
+        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single"
         self.run_command(rm_cmd)
         super(EffFix, self).save_artifacts(dir_info)
         return
