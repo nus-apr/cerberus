@@ -189,7 +189,12 @@ class AbstractTool(AbstractDriver):
 
         self.log_output_path = os.path.join(self.dir_logs, log_file_name)
 
-        self.run_command("mkdir {}".format(self.dir_output), "dev/null", "/")
+        self.run_command(
+            "mkdir {}".format(self.dir_output),
+            "dev/null",
+            "/",
+            run_as_sudo=not self.runs_as_root,
+        )
 
         self.invoke(bug_info, task_config_info)
 
