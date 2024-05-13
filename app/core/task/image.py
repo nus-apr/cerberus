@@ -250,7 +250,7 @@ def prepare_experiment_image(
     utilities.check_space()
     bug_index = bug_info[definitions.KEY_ID]
     experiment_image_id = None
-    if not values.use_container:
+    if not values.use_container or locally_running:
         if not values.use_valkyrie:
             is_error = benchmark.setup_experiment(bug_index, None, values.only_test)
             if is_error:
@@ -280,7 +280,7 @@ def prepare_experiment_image(
             benchmark.get_exp_image(
                 bug_index, values.only_test, cpu, gpu, ignore_rebuild
             )
-            if values.use_container
+            if values.use_container and not locally_running
             else None
         )
 

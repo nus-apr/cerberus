@@ -226,29 +226,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool.bindings = tool.bindings or {}
 
                 tool.ensure_tool_exists()
-                image_name = create_task_image_identifier(
-                    benchmark,
-                    tool,
-                    bug_info,
-                    tool_tag,
-                )
-                experiment_image_id = prepare_experiment_image(
-                    benchmark,
-                    bug_info,
-                    task_config_info[self.key_cpus],
-                    [],
-                    tool_tag,
-                    locally_running=tool.locally_running,
-                )
-                prepare_experiment_tool(
-                    experiment_image_id,
-                    tool,
-                    task_config_info,
-                    dir_info,
-                    image_name,
-                    bug_info,
-                    tool_tag,
-                )
+
                 self.tool_map[task_type].append(
                     (tool_constructor, tool_params, tool_tag, real_type)
                 )
@@ -359,6 +337,27 @@ class BasicWorkflow(AbstractCompositeTool):
                 image_tag,
             )
 
+            self.emit_debug(f"Dir info is {dir_info}")
+            benchmark.update_dir_info(dir_info, tool.locally_running)
+
+            experiment_image_id = prepare_experiment_image(
+                benchmark,
+                bug_info,
+                task_config_info[self.key_cpus],
+                [],
+                tool_tag,
+                locally_running=tool.locally_running,
+            )
+            prepare_experiment_tool(
+                experiment_image_id,
+                tool,
+                task_config_info,
+                dir_info,
+                image_name,
+                bug_info,
+                tool_tag,
+            )
+
             key = create_task_identifier(
                 benchmark,
                 task_config_info,
@@ -409,6 +408,7 @@ class BasicWorkflow(AbstractCompositeTool):
                                 key,
                                 dir_setup_extended,
                                 dir_logs_extended,
+                                tool.locally_running,
                             ),
                             "task_config_info": task_config_info,
                             "bug_info": bug_info,

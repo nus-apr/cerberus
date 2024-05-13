@@ -3,6 +3,7 @@ from os.path import join
 from typing import Any
 from typing import Dict
 from typing import Optional
+from typing import Tuple
 
 from app.core import emitter
 from app.core import values
@@ -27,9 +28,15 @@ def generate_local_dir_info(
     bug_name: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    copy_experiment: Tuple[bool, str] = (False, ""),
 ) -> Dict[str, str]:
     dir_path = join(benchmark_name, subject_name, bug_name, "")
-    dir_exp_local = join(values.dir_experiments, dir_path)
+
+    if copy_experiment[0]:
+        dir_exp_local = join(values.dir_experiments, copy_experiment[1], dir_path)
+    else:
+        dir_exp_local = join(values.dir_experiments, dir_path)
+
     dir_setup_local = join(values.dir_benchmark, dir_path)
     dir_logs_local = join(values.dir_logs, dir_path)
 
@@ -44,10 +51,6 @@ def generate_local_dir_info(
     dir_patches_local = join(dir_setup_local, "patches")
     dir_validation_local = join(dir_setup_local, "validation")
     dir_selection_local = join(dir_setup_local, "selection")
-
-    emitter.debug(
-        f"dir_setup_local={dir_setup_local} bugs={dir_bugs_local} localization={dir_localization_local} patches={dir_patches_local} validation={dir_validation_local} selection={dir_selection_local}"
-    )
 
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
@@ -89,10 +92,16 @@ def generate_local_tool_dir_info(
     task_identifier: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    copy_experiment: bool = False,
 ) -> Dict[str, str]:
     dir_name = f"{task_identifier}-{hash.hexdigest()[:8]}"
     base_info = generate_local_dir_info(
-        benchmark_name, subject_name, bug_name, setup_dir_override, logs_dir_override
+        benchmark_name,
+        subject_name,
+        bug_name,
+        setup_dir_override,
+        logs_dir_override,
+        (copy_experiment, dir_name),
     )
 
     dir_result_local = join(values.dir_results, dir_name)
@@ -142,6 +151,7 @@ def generate_tool_dir_info(
     task_identifier: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    copy_experiment: bool = False,
 ) -> DirectoryInfo:
     dir_info: DirectoryInfo = {
         "local": generate_local_tool_dir_info(
@@ -152,6 +162,7 @@ def generate_tool_dir_info(
             task_identifier,
             setup_dir_override,
             logs_dir_override,
+            copy_experiment,
         ),
         "container": generate_container_dir_info(
             benchmark_name, subject_name, bug_name

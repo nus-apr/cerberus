@@ -83,6 +83,7 @@ def run(
         task_identifier,
         dir_setup_extended,
         dir_logs_override,
+        tool.locally_running,
     )
     benchmark.update_dir_info(dir_info, tool.locally_running)
     print_task_info(

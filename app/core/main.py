@@ -253,14 +253,17 @@ def process_tasks(tasks: TaskList) -> bool:
             dir_setup_extended,
         )
 
-        experiment_image_id = prepare_experiment_image(
-            benchmark,
-            experiment_item,
-            cpus,
-            [],
-            tool_tag,
-            locally_running=tool.locally_running,
-        )
+        if task_config.task_type != "composite":
+            experiment_image_id = prepare_experiment_image(
+                benchmark,
+                experiment_item,
+                cpus,
+                [],
+                tool_tag,
+                locally_running=tool.locally_running,
+            )
+        else:
+            experiment_image_id = None
 
         if task_config.task_type == "prepare":
             iteration = iteration + 1
@@ -275,15 +278,16 @@ def process_tasks(tasks: TaskList) -> bool:
             experiment_item,
             tool_tag,
         )
-        prepare_experiment_tool(
-            experiment_image_id,
-            tool,
-            task_profile,
-            dir_info,
-            image_name,
-            experiment_item,
-            tool_tag,
-        )
+        if task_config.task_type != "composite":
+            prepare_experiment_tool(
+                experiment_image_id,
+                tool,
+                task_profile,
+                dir_info,
+                image_name,
+                experiment_item,
+                tool_tag,
+            )
 
         for run_index in range(task_config.runs):
             iteration = iteration + 1

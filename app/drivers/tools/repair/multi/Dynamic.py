@@ -45,6 +45,8 @@ class Dynamic(AbstractRepairTool):
         self.timestamp_log_start()
         repair_command = "echo 0"
 
+        self.emit_debug(f"expr dir is {self.dir_expr}")
+
         self.run_command(f"bash {join(tool_folder,'setup.sh')}", self.log_output_path)
 
         status = self.run_command(repair_command, self.log_output_path)

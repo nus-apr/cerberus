@@ -424,11 +424,19 @@ class AbstractTool(AbstractDriver):
         env: Dict[str, str] = dict(),
     ) -> int:
         """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
+        temp_env = {
+            **env,
+            "EXPERIMENT_DIR": (
+                values.container_base_experiment
+                if not self.locally_running
+                else values.dir_experiments
+            ),
+        }
         if self.container_id:
             if not dir_path:
                 dir_path = values.container_base_experiment
             exit_code, output = container.exec_command(
-                self.container_id, command, dir_path, env
+                self.container_id, command, dir_path, temp_env
             )
             if output:
                 stdout, stderr = output
@@ -441,9 +449,9 @@ class AbstractTool(AbstractDriver):
             if not dir_path:
                 dir_path = self.dir_expr
             command += " | tee -a {0} 2>&1".format(log_file_path)
-            exit_code = execute_command(command, env=env, directory=dir_path)
+            exit_code = execute_command(command, env=temp_env, directory=dir_path)
 
-        self.command_history.append((dir_path, command, env))
+        self.command_history.append((dir_path, command, temp_env))
         return exit_code
 
     def exec_command(

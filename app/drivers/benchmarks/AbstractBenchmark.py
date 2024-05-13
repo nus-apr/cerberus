@@ -127,7 +127,12 @@ class AbstractBenchmark(AbstractDriver):
             self.dir_expr = dir_info["local"]["experiment"]
             self.dir_logs = dir_info["local"]["logs"]
             self.dir_setup = dir_info["local"]["setup"]
-            self.dir_base_expr = values.dir_experiments
+            # Standard depth procedure is experiment_dir/(tag)/benchmark/subject/bug_id
+            self.dir_base_expr = os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(os.path.normpath(dir_info["local"]["experiment"]))
+                )
+            )
 
     def get_list(self) -> List[Any]:
         return self.experiment_subjects
@@ -225,7 +230,10 @@ class AbstractBenchmark(AbstractDriver):
     ) -> int:
         if container_id:
             exit_code, output = container.exec_command(
-                container_id, command_str, dir_path, env
+                container_id,
+                command_str,
+                dir_path,
+                {**env, "EXPERIMENT_DIR": values.container_base_experiment},
             )
             if output:
                 stdout, stderr = output
@@ -242,7 +250,11 @@ class AbstractBenchmark(AbstractDriver):
                         )
         else:
             command_str += " | tee -a {0} 2>&1".format(log_file_path)
-            exit_code = utilities.execute_command(command_str, directory=dir_path)
+            exit_code = utilities.execute_command(
+                command_str,
+                directory=dir_path,
+                env={"EXPERIMENT_DIR": self.dir_base_expr},
+            )
         return exit_code
 
     def build_benchmark_image(self) -> None:
