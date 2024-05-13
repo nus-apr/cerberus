@@ -104,53 +104,19 @@ class Vul4J(AbstractBenchmark):
         self.emit_normal("compress experiment subject's dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         build_system = experiment_item[self.key_build_system]
-        set_java_home_cmd = "JAVA_HOME=$JAVA{0}_HOME".format(
-            experiment_item[self.key_java_version]
-        )
-
+        dir_classes = join(self.dir_expr, "src", experiment_item[self.key_dir_class])
+        dir_target = "/".join(dir_classes.split("/")[:-1])
         if build_system != "maven":
             return True
-
-        command_str = "bash -c '{0} mvn dependency:copy-dependencies'".format(
-            set_java_home_cmd
+        
+        self.log_compress_path = (
+            self.dir_logs + "/" + self.name + "-" + str(bug_index) + "-compress.log"
         )
+
+        command_str = f"bash compress_deps {dir_target}"
         status = self.run_command(
-            container_id,
-            command_str,
-            self.log_build_path,
-            join(
-                self.dir_expr,
-                "src",
-                experiment_item[self.key_fail_mod_dir],
-            ),
+            container_id, command_str, self.log_compress_path, self.dir_setup
         )
-
-        if status != 0:
-            command_str = "bash -c 'mvn dependency:copy-dependencies'"
-            status = self.run_command(
-                container_id,
-                command_str,
-                self.log_build_path,
-                join(
-                    self.dir_expr,
-                    "src",
-                    experiment_item[self.key_fail_mod_dir],
-                ),
-            )
-
-            if status != 0:
-                return False
-
-        command_str = "bash -c '{0} {1}'".format(
-            join(self.dir_expr, "base", "init_dependencies.sh"),
-            join(
-                self.dir_expr,
-                "src",
-                experiment_item[self.key_fail_mod_dir],
-                "target",
-            ),
-        )
-        status = self.run_command(container_id, command_str, self.log_build_path)
 
         return status == 0
 
