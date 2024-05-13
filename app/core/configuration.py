@@ -143,8 +143,7 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
 class Configurations:
     __email_config_file = open(join(values.dir_config, "email.json"))
     __slack_config_file = open(join(values.dir_config, "slack.json"))
-    __openai_config_file = open(join(values.dir_config, "openai.json"))
-    __anthropic_config_file = open(join(values.dir_config, "anthropic.json"))
+    __api_config_file = open(join(values.dir_config, "api.json"))
     __discord_config_file = open(join(values.dir_config, "discord.json"))
     __default_config_values: Dict[str, Any] = {
         "use-cache": False,
@@ -350,29 +349,15 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for slack.")
 
-    def read_openai_config_file(self) -> None:
-        openai_config_info = {}
-        if self.__openai_config_file:
-            openai_config_info = json.load(self.__openai_config_file)
-        for key, value in openai_config_info.items():
-            if key in values.openai_configuration and type(value) == type(
-                values.openai_configuration[key]
+    def read_api_config_file(self) -> None:
+        api_config_info = {}
+        if self.__api_config_file:
+            api_config_info = json.load(self.__api_config_file)
+        for key, value in api_config_info.items():
+            if key in values.api_configuration and type(value) == type(
+                values.api_configuration[key]
             ):
-                values.openai_configuration[key] = value
-            else:
-                utilities.error_exit(
-                    "[error] Unknown key {} or invalid type of value".format(key)
-                )
-
-    def read_anthropic_config_file(self) -> None:
-        anthropic_config_info = {}
-        if self.__anthropic_config_file:
-            anthropic_config_info = json.load(self.__anthropic_config_file)
-        for key, value in anthropic_config_info.items():
-            if key in values.anthropic_configuration and type(value) == type(
-                values.anthropic_configuration[key]
-            ):
-                values.anthropic_configuration[key] = value
+                values.api_configuration[key] = value
             else:
                 utilities.error_exit(
                     "[error] Unknown key {} or invalid type of value".format(key)

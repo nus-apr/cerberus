@@ -104,9 +104,11 @@ experiment_status: ContextVar[TaskStatus] = ContextVar(
 job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
 session_identifier: ContextVar[str] = ContextVar("session_id", default="root")
 
-openai_configuration = {"provider": "openai", "oauth_token": ""}
-
-anthropic_configuration = {"provider": "anthropic", "oauth_token": ""}
+api_configuration = {
+    "openai_token": None,
+    "anthropic_token": None,
+    "huggingface_token": None,
+}
 
 slack_configuration = {
     "enabled": False,

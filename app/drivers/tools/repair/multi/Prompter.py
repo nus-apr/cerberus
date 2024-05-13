@@ -48,8 +48,8 @@ class Prompter(AbstractRepairTool):
             )
         )
 
-        openai_token = self.api_keys.get(self.key_openai, None)
-        anthropic_token = self.api_keys.get(self.key_anthropic, None)
+        openai_token = self.api_keys.get(self.key_openai_token, None)
+        anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
         if not openai_token and not anthropic_token:
             self.error_exit(
                 f"{self.name} requires at least one API key for OpenAI or Anthropic"
