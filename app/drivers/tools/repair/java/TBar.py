@@ -119,6 +119,12 @@ class TBar(AbstractRepairTool):
         """
         bug_data_path_real = join(self.dir_expr, "src", "")
         bug_data_path_symlink = join(self.dir_expr, bug_id_str)
+        dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
+        dir_test_bin = join(self.dir_expr, "src", bug_info[self.key_dir_test_class])
+        list_deps = [
+            join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
+        ]
+        list_deps_str = ":".join(list_deps)
         symlink_command = "ln -s {0} {1}".format(
             bug_data_path_real, bug_data_path_symlink
         )
@@ -157,15 +163,17 @@ class TBar(AbstractRepairTool):
         self.run_command(f"cp {self.dir_setup}FL.sh {self.tbar_root_dir}")
         # Specifying failing module
         failing_module = bug_info.get("failing_module", "")
-
-        if not run_fl:
-            self.emit_debug("Creating FL data file from provided info")
-            self.run_command(
+        
+        # Run build script
+        self.run_command(
                 f"bash {join(self.dir_setup,bug_info[self.key_build_script])}"
             )
+        
+        if not run_fl:
+            self.emit_debug("Creating FL data file from provided info")
             self.write_fl_data(bug_info, failed_tests_file, fl_data)
         else:
-            cmd = f"bash ./FL.sh {join(self.dir_expr,'src', failing_module)} {bug_id_str} {join(self.dir_setup,bug_info[self.key_build_script])}"
+            cmd = f"bash ./FL.sh {join(self.dir_expr,'src', failing_module)} {bug_id_str} {dir_java_bin} {dir_test_bin} {list_deps_str}"
             self.run_command(
                 cmd,
                 dir_path=self.tbar_root_dir,
@@ -328,3 +336,4 @@ class TBar(AbstractRepairTool):
         self.stats.error_stats.is_error = is_error
 
         return self.stats
+    
