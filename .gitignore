@@ -20,6 +20,7 @@ benchmark/**/seed-dir
 benchmark/**/fix2fit/*-driver
 benchmark/**/compile_commands.json
 benchmark/**/f1x-*
+experiments/**/
 summaries/**
 composite_workspace
 tags

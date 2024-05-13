@@ -3,6 +3,7 @@ echo "Removing output, logs, and results"
 rm -rf output
 rm -rf logs
 rm -rf results
+rm -rf experiments
 
 # if composite_workspace exists, remove it
 if [ -d "composite_workspace" ]; then
