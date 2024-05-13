@@ -41,13 +41,16 @@ class Prompter(AbstractRepairTool):
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-
-        self.run_command(
-            "bash -c \"echo 'ubuntu\\n' | sudo -S mkdir -p -m 777 {}\"".format(
-                self.dir_output
-            )
+        self.output_path = join(
+            "/home",
+            "ubuntu",
+            "prompter",
+            "output",
+            bug_info[self.key_benchmark],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
         )
-
+        self.run_command(f"mkdir -p {self.output_path}")
         openai_token = self.api_keys.get(self.key_openai_token, None)
         anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
         if not openai_token and not anthropic_token:
@@ -70,7 +73,7 @@ class Prompter(AbstractRepairTool):
 
         self.emit_debug(bug_info)
 
-        repair_command = f"timeout -k 5m {timeout}h python3 main.py {file_path} {bug_info['cwe_id']} {self.dir_output} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
+        repair_command = f"timeout -k 5m {timeout}h python3 main.py {file_path} {bug_info['cwe_id']} {self.output_path} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
         self.emit_debug(repair_command)
         status = self.run_command(
             repair_command, self.log_output_path, "/home/ubuntu/prompter"
@@ -79,6 +82,12 @@ class Prompter(AbstractRepairTool):
         self.process_status(status)
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
+
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
+        copy_cmd = f"cp {self.output_path}/* {self.dir_output}"
+        self.run_command(copy_cmd, run_as_sudo=True)
+        super(Prompter, self).save_artifacts(dir_info)
+        return
 
     def analyse_output(
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
