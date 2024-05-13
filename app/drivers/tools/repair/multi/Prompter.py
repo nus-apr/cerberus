@@ -48,11 +48,17 @@ class Prompter(AbstractRepairTool):
             )
         )
 
+        openai_token = self.api_keys.get(self.key_openai, None)
+        anthropic_token = self.api_keys.get(self.key_anthropic, None)
+        if not openai_token and not anthropic_token:
+            self.error_exit(
+                f"{self.name} requires at least one API key for OpenAI or Anthropic"
+            )
         self.append_file(
             [
                 "[anthropic]\n",
-                'anthropic_token = "INSERT ANTHROPIC KEY HERE"\n',
-                "[openai]\n" 'openai_token = "INSERT OPENAI DRIVER HERE"\n',
+                f'anthropic_token = "{anthropic_token}"\n',
+                "[openai]\n" f'openai_token = "{openai_token}"\n',
                 "\n",
             ],
             "/home/ubuntu/prompter/config.toml",

@@ -63,6 +63,8 @@ def bootstrap(arg_list: Namespace) -> Configurations:
     config.read_email_config_file()
     config.read_slack_config_file()
     config.read_discord_config_file()
+    config.read_openai_config_file()
+    config.read_anthropic_config_file()
     config.read_arg_list(arg_list)
     values.arg_pass = True
     config.update_configuration()

@@ -100,6 +100,8 @@ class AbstractTool(AbstractDriver):
     key_generator = definitions.KEY_GENERATOR
     key_stack_trace = definitions.KEY_STACK_TRACE
     key_build_system = definitions.KEY_BUILD_SYSTEM
+    key_openai = definitions.KEY_OPENAI
+    key_anthropic = definitions.KEY_ANTHROPIC
     # endregion
 
     stats: ToolStats
@@ -108,6 +110,7 @@ class AbstractTool(AbstractDriver):
     locally_running: bool = False
 
     bindings: Optional[Dict[str, Any]] = None
+    api_keys: Dict[str, Any] = dict()
     runs_as_root: bool = True
     sudo_password: str = ""
     image_user: str = "root"
@@ -359,7 +362,18 @@ class AbstractTool(AbstractDriver):
         self.is_instrument_only = instrument_only
         self.update_dir_info(dir_info)
         self.update_experiment_info(experiment_info)
-
+        _key_token = definitions.KEY_OAUTH_TOKEN
+        _key_source = definitions.KEY_SERVICE_PROVIDER
+        for _api_source in [
+            values.anthropic_configuration,
+            values.openai_configuration,
+        ]:
+            _provider = str(_api_source[_key_source])
+            self.api_keys[_provider] = None
+            if _key_token in _api_source:
+                _token = str(_api_source[_key_token])
+                if _token and len(_token) > 0:
+                    self.api_keys[_provider] = _token
         experiment_info[definitions.KEY_OUTPUT_DIR_ABSPATH] = self.dir_output
 
     def update_experiment_info(self, experiment_info: Dict[str, Any]) -> None:
