@@ -105,9 +105,9 @@ job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
 session_identifier: ContextVar[str] = ContextVar("session_id", default="root")
 
 api_configuration = {
-    "openai_token": None,
-    "anthropic_token": None,
-    "huggingface_token": None,
+    "openai_token": "",
+    "anthropic_token": "",
+    "huggingface_token": "",
 }
 
 slack_configuration = {
