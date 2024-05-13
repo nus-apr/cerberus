@@ -89,11 +89,12 @@ class LLMR(AbstractRepairTool):
             )
 
         openai_token = self.api_keys.get(self.key_openai_token, None)
+        context_window = 10
         if not openai_token:
             self.error_exit(f"{self.name} requires at least one API key for OpenAI")
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} -key {openai_token} {params}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} -key {openai_token} -context {context_window} {params}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -132,6 +133,7 @@ class LLMR(AbstractRepairTool):
             fl=fl,
             params=params,
             openai_token=openai_token,
+            context_window=context_window,
         )
         status = self.run_command(
             llmr_command, self.log_output_path, join(self.dir_expr, "src"), env=env
