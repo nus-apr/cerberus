@@ -159,8 +159,6 @@ class TBar(AbstractRepairTool):
             "FailedTestCases/",
             f"{bug_id_str}.txt",
         )
-        # Temporary: copying modified FL.sh
-        self.run_command(f"cp {self.dir_setup}FL.sh {self.tbar_root_dir}")
         # Specifying failing module
         failing_module = bug_info.get("failing_module", "")
         

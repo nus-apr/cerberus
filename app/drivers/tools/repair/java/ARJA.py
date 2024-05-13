@@ -17,7 +17,7 @@ class ARJA(AbstractRepairTool):
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/arja"
+        self.image_name = "hzhenxin/arja"
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
@@ -53,35 +53,6 @@ class ARJA(AbstractRepairTool):
             join(self.arja_home, "external", "lib", "hamcrest-core-1.3.jar")
         )
         list_deps.append(join(self.arja_home, "external", "lib", "junit-4.11.jar"))
-        if bug_info[self.key_build_system] == "maven":
-            self.run_command(
-                f"mvn dependency:copy-dependencies",
-                dir_path=join(self.dir_expr, "src"),
-                env=env,
-            )
-            failing_mod = bug_info.get("failing_module", "")
-            # Add common folders for deependencies
-            list_deps += [
-                x
-                for x in self.list_dir(
-                    join(self.dir_expr, "src", failing_mod, "target", "dependency")
-                )
-                if x.endswith(".jar") and not "junit" in x
-            ]
-            list_deps += [
-                x
-                for x in self.list_dir(
-                    join(
-                        self.dir_expr,
-                        "src",
-                        failing_mod,
-                        "test",
-                        "target",
-                        "dependency",
-                    )
-                )
-                if x.endswith(".jar") and not "junit" in x
-            ]
         list_deps_str = ":".join(list_deps)
 
         arja_default_population_size = 40

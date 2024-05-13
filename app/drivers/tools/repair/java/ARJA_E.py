@@ -19,7 +19,7 @@ class ARJA_E(AbstractRepairTool):
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/arjae"
+        self.image_name = "hzhenxin/arjae"
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
@@ -61,36 +61,6 @@ class ARJA_E(AbstractRepairTool):
             join(self.arja_e_home, "external", "lib", "hamcrest-core-1.3.jar"),
             join(self.arja_e_home, "external", "lib", "junit-4.12.jar"),
         ]
-        # Ensure the dependencies exist
-        if bug_info[self.key_build_system] == "maven":
-            failing_mod = bug_info.get("failing_module", "")
-            self.run_command(
-                f"mvn dependency:copy-dependencies",
-                dir_path=join(self.dir_expr, "src", failing_mod),
-                env=env,
-            )
-            # Add common folders for deependencies
-            list_deps += [
-                x
-                for x in self.list_dir(
-                    join(self.dir_expr, "src", failing_mod, "target", "dependency")
-                )
-                if x.endswith(".jar") and not "junit" in x
-            ]
-            list_deps += [
-                x
-                for x in self.list_dir(
-                    join(
-                        self.dir_expr,
-                        "src",
-                        failing_mod,
-                        "test",
-                        "target",
-                        "dependency",
-                    )
-                )
-                if x.endswith(".jar") and not "junit" in x
-            ]
 
         list_deps_str = ":".join(list_deps)
         dir_localization = f"{self.dir_output}/localization"
