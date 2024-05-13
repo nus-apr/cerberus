@@ -422,6 +422,7 @@ class AbstractTool(AbstractDriver):
         log_file_path: str = "/dev/null",
         dir_path: Optional[str] = None,
         env: Dict[str, str] = dict(),
+        run_as_sudo: bool = False,
     ) -> int:
         """executes the specified command at the given dir_path and save the output to log_file without returning the result"""
         temp_env = {
@@ -432,6 +433,15 @@ class AbstractTool(AbstractDriver):
                 else values.dir_experiments
             ),
         }
+        if run_as_sudo:
+            if not self.sudo_password:
+                self.error_exit(
+                    f"{self.name} requires sudo command but sudo password is empty"
+                )
+            sudo_command = "bash -c 'echo \"{}\n\" | sudo -S {}'".format(
+                self.sudo_password, command
+            )
+            command = sudo_command
         if self.container_id:
             if not dir_path:
                 dir_path = values.container_base_experiment
