@@ -81,5 +81,5 @@
 	url = https://github.com/nus-apr/vulnloc-benchmark
         branch = instrumented
 [submodule "benchmark/bugsinpy"]
-	path = benchmark/bugsinpy
-	url = git@github.com:nus-apr/bugs-in-py-benchmark.git
+        path = benchmark/bugsinpy
+        url = https://github.com/nus-apr/bugs-in-py-benchmark.git
