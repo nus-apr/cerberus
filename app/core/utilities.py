@@ -169,6 +169,7 @@ def flat_map(f: Callable[[Any], Any], xs: List[Any]) -> Generator[Any, None, Non
 
 
 def clean_artifacts(output_dir: str) -> None:
+    emitter.debug(f"[framework] cleaning artifacts at {output_dir}")
     if os.path.isdir(output_dir):
         execute_command("rm -rf {}".format(output_dir))
     execute_command("mkdir {}".format(output_dir))

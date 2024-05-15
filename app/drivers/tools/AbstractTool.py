@@ -257,6 +257,7 @@ class AbstractTool(AbstractDriver):
         return self.stats
 
     def clean_up(self) -> None:
+        self.emit_debug("cleaning up")
         if self.container_id:
             container.remove_container(self.container_id)
         else:

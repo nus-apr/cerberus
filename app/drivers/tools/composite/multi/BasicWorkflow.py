@@ -316,7 +316,7 @@ class BasicWorkflow(AbstractCompositeTool):
         for host_dir, _ in new_mappings.items():
             os.makedirs(host_dir, exist_ok=True, mode=0o777)
         tool.bindings.update(new_mappings)
-        self.emit_debug(tool.bindings)
+        self.emit_debug(f"bindings are {tool.bindings}")
 
         global active_jobs_lock
         with active_jobs_lock:
@@ -374,6 +374,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 key,
                 dir_setup_extended,
                 dir_logs_extended,
+                list(new_mappings.keys())[0] if tool.locally_running else None,
                 tool.locally_running,
             )
 
@@ -400,27 +401,21 @@ class BasicWorkflow(AbstractCompositeTool):
 
             os.makedirs(dir_logs_extended, exist_ok=True)
 
+            internal_representation_path = join(
+                list(new_mappings.keys())[0],
+                definitions.INTERNAL_METADATA_JSON,
+            )
             with open(
-                join(
-                    list(new_mappings.keys())[0],
-                    definitions.INTERNAL_METADATA_JSON,
-                ),
+                internal_representation_path,
                 "w",
             ) as f:
-                self.emit_debug("Creating internal representation")
+                self.emit_debug(
+                    f"Creating internal representation at {internal_representation_path}"
+                )
                 f.write(
                     json.dumps(
                         {
-                            "dir_info": generate_tool_dir_info(
-                                benchmark.name,
-                                bug_info[self.key_subject],
-                                bug_info[self.key_bug_id],
-                                hash,
-                                key,
-                                dir_setup_extended,
-                                dir_logs_extended,
-                                tool.locally_running,
-                            ),
+                            "dir_info": dir_info,
                             "task_config_info": task_config_info,
                             "bug_info": bug_info,
                             "path": path + [tool_tag],
@@ -444,6 +439,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 hash,
                 dir_setup_extended,
                 dir_logs_extended,
+                list(new_mappings.keys())[0] if tool.locally_running else None,
             )
             if err:
                 self.stats.error_stats.is_error = True

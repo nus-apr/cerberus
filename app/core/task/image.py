@@ -324,5 +324,6 @@ def prepare_experiment_tool(
             os.makedirs(dir_local_patch)
     else:
         if isdir(dir_local_patch):
+            emitter.debug(f"[framework] clearing patch dir {dir_local_patch}")
             shutil.rmtree(dir_local_patch)
     return None

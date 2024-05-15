@@ -58,6 +58,7 @@ def run(
     hash: Any = None,
     dir_setup_extended: Optional[str] = None,
     dir_logs_override: Optional[str] = None,
+    dir_results_override: Optional[str] = None,
 ) -> Tuple[bool, DirectoryInfo]:
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
@@ -83,6 +84,7 @@ def run(
         task_identifier,
         dir_setup_extended,
         dir_logs_override,
+        dir_results_override,
         tool.locally_running,
     )
     benchmark.update_dir_info(dir_info, tool.locally_running)
@@ -97,15 +99,9 @@ def run(
 
     dir_info = add_instrumentation_dir_info(dir_info, tool.name)
 
-    dir_instr_local = dir_info["local"]["instrumentation"]
     dir_result_local = dir_info["local"]["results"]
 
     container_id = None
-    # emitter.information("directory is {}".format(dir_instr_local))
-    if os.path.isdir(dir_instr_local):
-        emitter.information(
-            "\t\t[framework] there is custom instrumentation for {}".format(tool.name)
-        )
 
     if values.only_analyse:
         can_analyse_results = True
@@ -118,8 +114,11 @@ def run(
         if can_analyse_results:
             collect_tool_result(dir_info, bug_info, tool)
     else:
-        utilities.clean_artifacts(dir_info["local"]["artifacts"])
-        utilities.clean_artifacts(dir_info["local"]["logs"])
+        if not dir_results_override:
+            utilities.clean_artifacts(dir_info["local"]["artifacts"])
+        if not dir_logs_override:
+            utilities.clean_artifacts(dir_info["local"]["logs"])
+
         benchmark.update_dir_info(dir_info, tool.locally_running)
 
         if values.use_container and not tool.locally_running:

@@ -28,9 +28,11 @@ def generate_local_dir_info(
     bug_name: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    artifacts_dir_override: Optional[str] = None,
     copy_experiment: Tuple[bool, str] = (False, ""),
 ) -> Dict[str, str]:
     dir_path = join(benchmark_name, subject_name, bug_name, "")
+    dir_artifact_local = join(values.dir_artifacts, dir_path)
 
     if copy_experiment[0]:
         dir_exp_local = join(values.dir_experiments, copy_experiment[1], dir_path)
@@ -46,6 +48,9 @@ def generate_local_dir_info(
     if logs_dir_override and os.path.exists(logs_dir_override):
         dir_logs_local = logs_dir_override
 
+    if artifacts_dir_override and os.path.exists(artifacts_dir_override):
+        dir_artifact_local = artifacts_dir_override
+
     dir_bugs_local = join(dir_setup_local, "bugs")
     dir_localization_local = join(dir_setup_local, "localization")
     dir_patches_local = join(dir_setup_local, "patches")
@@ -54,7 +59,6 @@ def generate_local_dir_info(
 
     dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
     dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
-    dir_artifact_local = join(values.dir_artifacts, dir_path)
     for directory in [
         dir_exp_local,
         dir_setup_local,
@@ -92,6 +96,7 @@ def generate_local_tool_dir_info(
     task_identifier: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    artifacts_dir_override: Optional[str] = None,
     copy_experiment: bool = False,
 ) -> Dict[str, str]:
     dir_name = f"{task_identifier}-{hash.hexdigest()[:8]}"
@@ -101,16 +106,20 @@ def generate_local_tool_dir_info(
         bug_name,
         setup_dir_override,
         logs_dir_override,
+        artifacts_dir_override,
         (copy_experiment, dir_name),
     )
 
     dir_result_local = join(values.dir_results, dir_name)
     dir_logs_local = join(values.dir_logs, dir_name)
+    dir_artifact_local = join(values.dir_artifacts, dir_name)
 
     if logs_dir_override and os.path.exists(logs_dir_override):
         dir_logs_local = logs_dir_override
 
-    dir_artifact_local = join(values.dir_artifacts, dir_name)
+    if artifacts_dir_override and os.path.exists(artifacts_dir_override):
+        dir_artifact_local = artifacts_dir_override
+
     for directory in [dir_logs_local, dir_result_local, dir_artifact_local]:
         os.makedirs(directory, exist_ok=True)
 
@@ -151,6 +160,7 @@ def generate_tool_dir_info(
     task_identifier: str,
     setup_dir_override: Optional[str],
     logs_dir_override: Optional[str] = None,
+    artifacts_dir_override: Optional[str] = None,
     copy_experiment: bool = False,
 ) -> DirectoryInfo:
     dir_info: DirectoryInfo = {
@@ -162,6 +172,7 @@ def generate_tool_dir_info(
             task_identifier,
             setup_dir_override,
             logs_dir_override,
+            artifacts_dir_override,
             copy_experiment,
         ),
         "container": generate_container_dir_info(
