@@ -395,8 +395,12 @@ class AbstractTool(AbstractDriver):
             self.dir_inst = dir_info["local"]["instrumentation"]
             self.dir_setup = dir_info["local"]["setup"]
             self.dir_output = dir_info["local"]["artifacts"]
-            self.dir_base_expr = values.dir_experiments
-
+            # Standard depth procedure is experiment_dir/(tag)/benchmark/subject/bug_id
+            self.dir_base_expr = os.path.dirname(
+                os.path.dirname(
+                    os.path.dirname(os.path.normpath(dir_info["local"]["experiment"]))
+                )
+            )
         self.dir_patch = join(
             self.dir_output,
             "patch-valid" if self.use_valkyrie else "patches",
@@ -435,7 +439,7 @@ class AbstractTool(AbstractDriver):
             "EXPERIMENT_DIR": (
                 values.container_base_experiment
                 if not self.locally_running
-                else values.dir_experiments
+                else self.dir_base_expr
             ),
         }
         if run_as_sudo:
