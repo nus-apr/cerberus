@@ -1,5 +1,5 @@
 #!/bin/bash
-echo "Removing output, logs, and results"
+echo "Removing output, logs, results and experiments"
 rm -rf output
 rm -rf logs
 rm -rf results
