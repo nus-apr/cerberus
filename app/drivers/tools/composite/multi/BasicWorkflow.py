@@ -337,6 +337,46 @@ class BasicWorkflow(AbstractCompositeTool):
                 image_tag,
             )
 
+            # TODO track multiple cpus
+            cpu = self.cpu_queue.get()
+
+            dir_setup_extended = (
+                join(
+                    self.root_setups_dir,
+                    f"{bug_info[self.key_bug_id]}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
+            dir_logs_extended = join(
+                self.root_logs_dir,
+                f"{bug_info[self.key_bug_id]}-{tool_tag if tool_tag else tool.name }",
+                "",
+            )
+            key = create_task_identifier(
+                benchmark,
+                task_config_info,
+                container_config_info,
+                bug_info,
+                tool,
+                str(run_index),
+                tool_tag,
+            )
+            values.job_identifier.set(key)
+            values.session_identifier.set(self.session_key)
+
+            dir_info = generate_tool_dir_info(
+                benchmark.name,
+                bug_info[self.key_subject],
+                bug_info[self.key_bug_id],
+                hash,
+                key,
+                dir_setup_extended,
+                dir_logs_extended,
+                tool.locally_running,
+            )
+
             self.emit_debug(f"Dir info is {dir_info}")
             benchmark.update_dir_info(dir_info, tool.locally_running)
 
@@ -358,35 +398,6 @@ class BasicWorkflow(AbstractCompositeTool):
                 tool_tag,
             )
 
-            key = create_task_identifier(
-                benchmark,
-                task_config_info,
-                container_config_info,
-                bug_info,
-                tool,
-                str(run_index),
-                tool_tag,
-            )
-            values.job_identifier.set(key)
-            values.session_identifier.set(self.session_key)
-
-            # TODO track multiple cpus
-            cpu = self.cpu_queue.get()
-
-            dir_setup_extended = (
-                join(
-                    self.root_setups_dir,
-                    f"{bug_info[self.key_bug_id]}-{tool_tag}",
-                    "",
-                )
-                if tool_tag
-                else None
-            )
-            dir_logs_extended = join(
-                self.root_logs_dir,
-                f"{bug_info[self.key_bug_id]}-{tool_tag if tool_tag else tool.name }",
-                "",
-            )
             os.makedirs(dir_logs_extended, exist_ok=True)
 
             with open(
