@@ -39,13 +39,11 @@ class Dynamic(AbstractRepairTool):
         timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = str(float(timeout_h) * 60)
 
-        tool_folder = values.dir_dynamic if values.dir_dynamic else "/tool"
+        tool_folder = values.dir_dynamic if self.locally_running else "/tool"
 
         # generate patches
         self.timestamp_log_start()
         repair_command = "echo 0"
-
-        self.emit_debug(f"expr dir is {self.dir_expr}")
 
         self.run_command(f"bash {join(tool_folder,'setup.sh')}", self.log_output_path)
 

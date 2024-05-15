@@ -68,6 +68,7 @@ class AbstractTool(AbstractDriver):
     key_localization = definitions.KEY_LOCALIZATION
     key_sink = definitions.KEY_SINK
     key_compile_programs = definitions.KEY_COMPILE_PROGRAMS
+    key_commit_checkout = definitions.KEY_COMMIT_CHECKOUT
     key_build_command_project = definitions.KEY_BUILD_COMMAND_PROJECT
     key_build_command_repair = definitions.KEY_BUILD_COMMAND_REPAIR
     key_build_command = definitions.KEY_BUILD_COMMAND
