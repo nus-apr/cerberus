@@ -27,6 +27,7 @@ class TaskConfig(TaskDefaultConfig):
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
+        use_subject_as_base: bool,
         runs: int = 1,
         **kwargs: Dict[str, Any]
     ):
@@ -44,6 +45,7 @@ class TaskConfig(TaskDefaultConfig):
             use_container,
             use_gpu,
             use_purge,
+            use_subject_as_base,
             runs,
         )
 

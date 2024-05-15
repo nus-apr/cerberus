@@ -51,6 +51,9 @@ class TaskProcessor:
                             benchmark_config
                         ) in tasks_chunk_config.benchmarks_config_list:
                             benchmark_name = benchmark_config.name
+                            values.use_subject_as_base = (
+                                tasks_chunk_config.task_config.use_subject_as_base
+                            )
                             benchmark_template = configuration.load_benchmark(
                                 benchmark_name
                             )

@@ -162,6 +162,10 @@ class ConfigDataFactory:
                 use_purge=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.USE_PURGE.value, values.use_purge
                 ),
+                use_subject_as_base=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_SUBJECT_AS_BASE.value,
+                    values.use_subject_as_base,
+                ),
                 runs=tasks_chunk_config_dict.get(ConfigFieldsEnum.RUNS.value, 1),
             )
 

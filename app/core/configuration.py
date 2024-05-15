@@ -259,6 +259,9 @@ class Configurations:
         if arg_list.only_instrument:
             self.__runtime_config_values["only-instrument"] = True
 
+        if arg_list.use_subject_as_base:
+            self.__runtime_config_values["use-subject-as-base"] = True
+
         if arg_list.use_latest_image:
             self.__runtime_config_values["use-latest-image"] = True
 
@@ -467,6 +470,7 @@ class Configurations:
                     values.use_container,
                     values.use_gpu,
                     values.use_purge,
+                    values.use_subject_as_base,
                     values.runs,
                 )
 

@@ -90,7 +90,7 @@ class AbstractBenchmark(AbstractDriver):
         if self.image_name == "":
             self.has_standard_name = True
             self.image_name = "{}-benchmark".format(self.name)
-        if values.use_container:
+        if values.use_container and not values.use_subject_as_base:
             self.build_benchmark_image()
         self.load_meta_file()
         self.use_valkyrie = values.use_valkyrie

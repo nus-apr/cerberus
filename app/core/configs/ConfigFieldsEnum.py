@@ -97,6 +97,7 @@ class ConfigFieldsEnum(Enum):
     ONLY_SETUP = "only-setup"
     ONLY_INSTRUMENT = "only-instrument"
     ONLY_TEST = "only-test"
+    USE_SUBJECT_AS_BASE = "use-subject-as-base"
     REBUILD_ALL = "rebuild-all"
     REBUILD_BASE = "rebuild-base"
     USE_CACHE = "use-cache"

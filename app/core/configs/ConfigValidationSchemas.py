@@ -200,6 +200,7 @@ task_default_schema = {
         ConfigFieldsEnum.USE_CONTAINER.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_GPU.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_PURGE.value: {"type": "boolean"},
+        ConfigFieldsEnum.USE_SUBJECT_AS_BASE.value: {"type": "boolean"},
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value: {
             "type": "array",
             "minItems": 1,

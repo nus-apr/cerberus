@@ -207,6 +207,13 @@ def parse_args() -> Namespace:
     )
 
     optional.add_argument(
+        definitions.ARG_USE_SUBJECT_AS_BASE,
+        help="use the subject image as the base image",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
         definitions.ARG_USE_CONTAINER,
         help="use containers for experiments",
         dest="use_container",
