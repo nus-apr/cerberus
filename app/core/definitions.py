@@ -87,6 +87,8 @@ KEY_OPENAI_TOKEN = "openai_token"
 KEY_ANTHROPIC_TOKEN = "anthropic_token"
 KEY_HUGGINGFACE_TOKEN = "huggingface_token"
 KEY_BUG_REPORTS = "bug_reports"
+KEY_GEMINI_TOKEN = "gemini_token"
+
 
 KEY_JAVA_VERSION = "java_version"
 KEY_BUILD_SYSTEM = "build_system"

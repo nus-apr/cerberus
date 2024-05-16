@@ -105,6 +105,7 @@ class AbstractTool(AbstractDriver):
     key_anthropic_token = definitions.KEY_ANTHROPIC_TOKEN
     key_huggingface_token = definitions.KEY_HUGGINGFACE_TOKEN
     key_bug_reports = definitions.KEY_BUG_REPORTS
+    key_gemini_token = definitions.KEY_GEMINI_TOKEN
     # endregion
 
     stats: ToolStats

@@ -16,7 +16,7 @@ class Prompter(AbstractRepairTool):
         super(Prompter, self).__init__(self.name)
         self.image_user = "ubuntu"
         self.runs_as_root = False
-        self.image_name = "prompter"
+        self.image_name = "rshariffdeen/prompter"
         self.sudo_password = "ubuntu"
 
     def locate(self) -> None:
@@ -35,6 +35,7 @@ class Prompter(AbstractRepairTool):
         self.timestamp_log_start()
         timeout = str(task_config_info[self.key_timeout])
         additional_tool_param = task_config_info[self.key_tool_params]
+        config_file_path = "/home/ubuntu/prompter/config.toml"
         task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         self.log_output_path = join(
@@ -53,18 +54,31 @@ class Prompter(AbstractRepairTool):
         self.run_command(f"mkdir -p {self.output_path}")
         openai_token = self.api_keys.get(self.key_openai_token, None)
         anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
+        gemini_token = self.api_keys.get(self.key_anthropic_token, "TOKEN")
+        huggingface_token = self.api_keys.get(self.key_huggingface_token, "TOKEN")
+
         if not openai_token and not anthropic_token:
             self.error_exit(
                 f"{self.name} requires at least one API key for OpenAI or Anthropic"
             )
-        self.append_file(
+
+        self.write_file(
             [
+                "[google]\n",
+                f'gemini_token = "{gemini_token}"\n',
+                "[huggingface]\n",
+                f'hf_token = "{huggingface_token}"\n',
                 "[anthropic]\n",
                 f'anthropic_token = "{anthropic_token}"\n',
-                "[openai]\n" f'openai_token = "{openai_token}"\n',
+                "[openai]\n",
+                f'openai_token = "{openai_token}"\n',
+                "[data]\n",
+                'data_path = "./megavul_simple.json"\n',
+                'chroma_path = "./data_store"\n',
+                'collection_name = "megavul"\n',
                 "\n",
             ],
-            "/home/ubuntu/prompter/config.toml",
+            config_file_path,
         )
 
         file_path = join(
@@ -73,7 +87,7 @@ class Prompter(AbstractRepairTool):
 
         self.emit_debug(bug_info)
 
-        repair_command = f"timeout -k 5m {timeout}h python3 main.py {file_path} {bug_info['cwe_id']} {self.output_path} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
+        repair_command = f"timeout -k 5m {timeout}h python3 cli.py {file_path} {bug_info['cwe_id']} {self.output_path} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
         self.emit_debug(repair_command)
         status = self.run_command(
             repair_command, self.log_output_path, "/home/ubuntu/prompter"
