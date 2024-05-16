@@ -86,8 +86,9 @@ class Prompter(AbstractRepairTool):
         )
 
         self.emit_debug(bug_info)
-
-        repair_command = f"timeout -k 5m {timeout}h python3 cli.py {file_path} {bug_info['cwe_id']} {self.output_path} {bug_info[self.key_localization][0][self.key_fix_lines][0]}"
+        fix_line = bug_info[self.key_localization][0][self.key_fix_lines][0]
+        cwe_id = bug_info["cwe_id"]
+        repair_command = f"timeout -k 5m {timeout}h python3 cli.py {file_path} {cwe_id}  {fix_line} {self.output_path}"
         self.emit_debug(repair_command)
         status = self.run_command(
             repair_command, self.log_output_path, "/home/ubuntu/prompter"
