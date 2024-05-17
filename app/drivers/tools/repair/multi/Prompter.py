@@ -1,4 +1,5 @@
 import os
+import re
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -99,7 +100,7 @@ class Prompter(AbstractRepairTool):
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
-        copy_cmd = f"cp {self.output_path}/* {self.dir_output}"
+        copy_cmd = f"cp -rf {self.output_path}/* {self.dir_output}"
         self.run_command(copy_cmd, run_as_sudo=True)
         super(Prompter, self).save_artifacts(dir_info)
         return
@@ -108,21 +109,39 @@ class Prompter(AbstractRepairTool):
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
     ) -> RepairToolStats:
         self.emit_normal("reading output")
-        # dir_results = join(self.dir_expr, "result")
-        # task_conf_id = str(self.current_task_profile_id.get("NA"))
-        # self.log_stats_path = join(
-        #     self.dir_logs,
-        #     "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
-        # )
+        task_conf_id = str(self.current_task_profile_id.get("NA"))
+        self.log_stats_path = join(
+            self.dir_logs,
+            "{}-{}-{}-stats.log".format(task_conf_id, self.name.lower(), bug_id),
+        )
 
-        # if not self.log_output_path or not self.is_file(self.log_output_path):
-        #     self.emit_warning("[warning] no log file found")
-        #     return self.stats
+        if not self.log_output_path or not self.is_file(self.log_output_path):
+            self.emit_warning("no output log file found")
+            return self.stats
 
-        # self.emit_highlight(f"output log file: {self.log_output_path}")
+        self.emit_highlight("log File: " + self.log_output_path)
 
-        # self.stats.patch_stats.generated = len(
-        #     self.list_dir(join(self.dir_output, "patches"))
-        # )
+        if self.stats.error_stats.is_error:
+            self.emit_error("error detected in logs")
+
+        self.stats.patch_stats.plausible = 0
+        self.stats.patch_stats.non_compilable = 0
+        self.stats.patch_stats.size = 0
+        self.stats.patch_stats.enumerations = 0
+
+        if self.is_file(self.log_output_path):
+            log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
+
+            for line in log_lines:
+                if "Received response" in line:
+                    self.stats.patch_stats.enumerations += 1
+
+        self.stats.patch_stats.size = self.stats.patch_stats.enumerations
+        # count number of patch files
+        self.dir_patch = join(self.output_path, "patches")
+        list_output_dir = self.list_dir(self.dir_patch)
+        self.stats.patch_stats.generated = len(
+            [name for name in list_output_dir if ".diff" in name]
+        )
 
         return self.stats
