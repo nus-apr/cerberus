@@ -201,7 +201,7 @@ class TaskProcessor:
 
                                 benchmark = copy.deepcopy(benchmark_template)
                                 tool = copy.deepcopy(tool_template)
-                                tool.locally_running = tool_config.local
+                                tool.locally_running = tool_config.local if tasks_chunk_config.task_config.task_type != "composite" else True
                                 benchmark.update_dir_info(dir_info, tool_config.local)
 
                                 yield (

@@ -27,3 +27,6 @@ tags
 tags.lock
 .venv
 
+0.6.2/**
+dynamic/codeql_queries/**
+temp-run/**

@@ -27,6 +27,7 @@ class AbstractCompositeTool(AbstractTool):
         self.stats = CompositeToolStats()
         self.tool_type = "composite-tool"
         super().__init__(tool_name)
+        self.locally_running = True
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
