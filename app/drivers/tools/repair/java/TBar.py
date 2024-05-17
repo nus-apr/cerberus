@@ -161,12 +161,10 @@ class TBar(AbstractRepairTool):
         )
         # Specifying failing module
         failing_module = bug_info.get("failing_module", "")
-        
+
         # Run build script
-        self.run_command(
-                f"bash {join(self.dir_setup,bug_info[self.key_build_script])}"
-            )
-        
+        self.run_command(f"bash {join(self.dir_setup,bug_info[self.key_build_script])}")
+
         if not run_fl:
             self.emit_debug("Creating FL data file from provided info")
             self.write_fl_data(bug_info, failed_tests_file, fl_data)
@@ -334,4 +332,3 @@ class TBar(AbstractRepairTool):
         self.stats.error_stats.is_error = is_error
 
         return self.stats
-    

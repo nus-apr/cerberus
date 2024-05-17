@@ -108,7 +108,7 @@ class Vul4J(AbstractBenchmark):
         dir_target = "/".join(dir_classes.split("/")[:-1])
         if build_system != "maven":
             return True
-        
+
         self.log_compress_path = (
             self.dir_logs + "/" + self.name + "-" + str(bug_index) + "-compress.log"
         )
