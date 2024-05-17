@@ -1055,7 +1055,7 @@ class BasicWorkflow(AbstractCompositeTool):
             "crash-analyze": self.on_crash_analysis_finished,
         }
         for next_task in next_task_options:
-            if next_task in self.tool_map:
+            if next_task in self.tool_map and self.tool_map[next_task]:
                 for tool_constuctor, params, tag, type in self.tool_map[next_task]:
                     tool = tool_constuctor()
                     self.pool.apply_async(
