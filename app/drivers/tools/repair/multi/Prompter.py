@@ -54,7 +54,7 @@ class Prompter(AbstractRepairTool):
                 "[openai]\n",
                 f'openai_token = "{openai_token}"\n',
                 "[google]\n",
-                f'gemini_token = ""google-key.json""\n',
+                f'gemini_token = "google-key.json"\n',
                 "[data]\n",
                 'data_path = "./megavul_simple.json"\n',
                 'chroma_path = "./data_store"\n',
