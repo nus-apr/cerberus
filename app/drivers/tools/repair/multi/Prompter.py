@@ -23,6 +23,47 @@ class Prompter(AbstractRepairTool):
     def locate(self) -> None:
         pass
 
+    def create_config(self) -> None:
+        config_file_path = "/home/ubuntu/prompter/config.toml"
+        google_auth_json_path = "/home/ubuntu/prompter/google-key.json"
+        google_auth_data = {
+            "type": "service_account",
+            "universe_domain": "googleapis.com",
+            "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+            "token_uri": "https://oauth2.googleapis.com/token",
+            "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        }
+        google_auth_secret_data = self.api_keys.get(self.key_gemini_token, dict())
+        for key, value in google_auth_secret_data.items():
+            google_auth_data[key] = value
+        openai_token = self.api_keys.get(self.key_openai_token, None)
+        anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
+        huggingface_token = self.api_keys.get(self.key_huggingface_token, "TOKEN")
+
+        if not openai_token and not anthropic_token:
+            self.error_exit(
+                f"{self.name} requires at least one API key for OpenAI or Anthropic"
+            )
+        self.write_json(google_auth_data, google_auth_json_path)
+        self.write_file(
+            [
+                "[huggingface]\n",
+                f'hf_token = "{huggingface_token}"\n',
+                "[anthropic]\n",
+                f'anthropic_token = "{anthropic_token}"\n',
+                "[openai]\n",
+                f'openai_token = "{openai_token}"\n',
+                "[google]\n",
+                f'gemini_token = "google-key.json"\n',
+                "[data]\n",
+                'data_path = "./megavul_simple.json"\n',
+                'chroma_path = "./data_store"\n',
+                'collection_name = "megavul"\n',
+                "\n",
+            ],
+            config_file_path,
+        )
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -35,8 +76,7 @@ class Prompter(AbstractRepairTool):
 
         self.timestamp_log_start()
         timeout = str(task_config_info[self.key_timeout])
-        additional_tool_param = task_config_info[self.key_tool_params]
-        config_file_path = "/home/ubuntu/prompter/config.toml"
+
         task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
         self.log_output_path = join(
@@ -53,35 +93,7 @@ class Prompter(AbstractRepairTool):
             bug_info[self.key_bug_id],
         )
         self.run_command(f"mkdir -p {self.output_path}")
-        openai_token = self.api_keys.get(self.key_openai_token, None)
-        anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
-        gemini_token = self.api_keys.get(self.key_anthropic_token, "TOKEN")
-        huggingface_token = self.api_keys.get(self.key_huggingface_token, "TOKEN")
-
-        if not openai_token and not anthropic_token:
-            self.error_exit(
-                f"{self.name} requires at least one API key for OpenAI or Anthropic"
-            )
-
-        self.write_file(
-            [
-                "[google]\n",
-                f'gemini_token = "{gemini_token}"\n',
-                "[huggingface]\n",
-                f'hf_token = "{huggingface_token}"\n',
-                "[anthropic]\n",
-                f'anthropic_token = "{anthropic_token}"\n',
-                "[openai]\n",
-                f'openai_token = "{openai_token}"\n',
-                "[data]\n",
-                'data_path = "./megavul_simple.json"\n',
-                'chroma_path = "./data_store"\n',
-                'collection_name = "megavul"\n',
-                "\n",
-            ],
-            config_file_path,
-        )
-
+        self.create_config()
         file_path = join(
             self.dir_expr, "src", bug_info[self.key_localization][0][self.key_fix_file]
         )

@@ -108,6 +108,7 @@ api_configuration = {
     "openai_token": "",
     "anthropic_token": "",
     "huggingface_token": "",
+    "gemini_token": {},
 }
 
 slack_configuration = {
