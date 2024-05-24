@@ -1158,7 +1158,9 @@ class BasicWorkflow(AbstractCompositeTool):
                 task_config_info_new[real_task_type + "-" + self.key_timeout] = (
                     new_timeout
                 )
-        bug_info[self.key_tool_name] = tool.name + "-" + tool.tool_tag
+        bug_info[self.key_tool_name] = tool.name + (
+            ("-" + tool.tool_tag) if tool.tool_tag else ""
+        )
 
         return (
             dir_info,
