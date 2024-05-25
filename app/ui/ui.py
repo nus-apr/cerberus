@@ -7,6 +7,7 @@ from asyncio import AbstractEventLoop
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from os.path import join
+from random import randint
 from typing import Any
 from typing import cast
 from typing import Dict
@@ -57,7 +58,7 @@ error_subjects_id = "error_subjects"
 running_subjects_id = "running_subjects"
 
 log_map: Dict[str, RichLog] = {}
-job_time_map: Dict[str, Tuple[int, int, AbstractTool]] = {}
+job_time_map: Dict[str, Tuple[int, int, int, AbstractTool]] = {}
 job_time_map_mutex = threading.Lock()
 
 job_condition = threading.Condition()
@@ -89,10 +90,10 @@ class Cerberus(App[List[Result]]):
 
     BINDINGS = [
         ("d", "toggle_dark", "Toggle dark mode"),
-        ("a", "show_all_subjects", "Show All Subjects"),
-        ("r", "show_running_subjects", "Show Running Subjects"),
-        ("f", "show_finished_subjects", "Show Finished Subjects"),
-        ("e", "show_error_subjects", "Show Erred Subjects"),
+        # ("a", "show_all_subjects", "Show All Subjects"),
+        # ("r", "show_running_subjects", "Show Running Subjects"),
+        # ("f", "show_finished_subjects", "Show Finished Subjects"),
+        # ("e", "show_error_subjects", "Show Erred Subjects"),
     ]
 
     tasks: Optional[TaskList]
@@ -100,6 +101,7 @@ class Cerberus(App[List[Result]]):
     async def _on_exit_app(self) -> None:
         values.ui_active = False
         self.jobs_cancelled = True
+        self.completed_all = True
 
         # Allow all processes to wake up and process that they are cancelled
         self.free_cpus = 10000
@@ -118,7 +120,8 @@ class Cerberus(App[List[Result]]):
         self._return_value = self.finished_subjects
         return await super()._on_exit_app()
 
-    def on_mount(self):
+    def on_mount(self) -> None:
+        self.completed_all = False
         self.selected_subject = None
         self.finished_subjects: List[Result] = []
 
@@ -135,12 +138,51 @@ class Cerberus(App[List[Result]]):
         self.setup_column_keys()
 
         loop = asyncio.get_running_loop()
-        loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus + 1))
+        loop.set_default_executor(ThreadPoolExecutor(max_workers=values.cpus + 2))
+
+        asyncio.get_running_loop().run_in_executor(
+            None,
+            self.watchdog,
+        )
+
         asyncio.get_running_loop().run_in_executor(
             None,
             self.prepare_tasks_run,
             loop,
         )
+
+    def watchdog(self) -> None:
+        while not self.completed_all:
+            now = int(time.time())
+            to_del = []
+
+            if job_time_map_mutex.acquire(timeout=4):
+                for job_id, info in job_time_map.items():
+                    (nonce, start, limit, tool) = info
+                    if now - start > limit:
+                        if not self.jobs[job_id][0].done():
+                            self.debug_print("TIME TO KILL {}".format(info))
+                            log_map[job_id].write("KILLED BY WATCHDOG")
+                            self.update_status(job_id, "KILLED BY WATCHDOG")
+                            if tool.container_id:
+                                log_map["root"].write(
+                                    "Killing {}".format(tool.container_id)
+                                )
+                                # Currently this kills the container and the tool gets a 137 status for the run command
+                                # Possibly we can also track a "critical" section of the tool run
+                                # as killing it outside of that specific moment does not seem sensible
+                                container.kill_container(tool.container_id)
+                            else:
+                                emitter.information(
+                                    "Cannot kill a local process as I do not know the exact process id"
+                                )
+                            log_map[job_id].write("Cancelled")
+                        to_del.append(job_id)
+
+                for job_id in to_del:
+                    del job_time_map[job_id]
+                job_time_map_mutex.release()
+            time.sleep(30)
 
     def setup_resource_allocation(self) -> None:
         self.free_cpus = values.cpus
@@ -171,35 +213,6 @@ class Cerberus(App[List[Result]]):
             self.debug_print(e)
             pass
         # self.debug_print("Idle")
-        now = int(time.time())
-        to_del = []
-
-        if job_time_map_mutex.acquire(timeout=0.1):
-            for job_id, info in job_time_map.items():
-                (start, limit, tool) = info
-                if now - start > limit:
-                    if not self.jobs[job_id][0].done():
-                        self.debug_print("TIME TO KILL {}".format(info))
-                        log_map[job_id].write("KILLED BY WATCHDOG")
-                        self.update_status(job_id, "KILLED BY WATCHDOG")
-                        if tool.container_id:
-                            log_map["root"].write(
-                                "Killing {}".format(tool.container_id)
-                            )
-                            # Currently this kills the container and the tool gets a 137 status for the run command
-                            # Possibly we can also track a "critical" section of the tool run
-                            # as killing it outside of that specific moment does not seem sensible
-                            container.kill_container(tool.container_id)
-                        else:
-                            emitter.information(
-                                "Cannot kill a local process as I do not know the exact process id"
-                            )
-                        log_map[job_id].write("Cancelled")
-                    to_del.append(job_id)
-
-            for job_id in to_del:
-                del job_time_map[job_id]
-            job_time_map_mutex.release()
 
     def prepare_tasks_run(self, loop: AbstractEventLoop):
         try:
@@ -732,12 +745,13 @@ class Cerberus(App[List[Result]]):
                 * float(message.task_profile.get(definitions.KEY_CONFIG_TIMEOUT, 1.0))
             )
             # give it more time so things can finish
-            timeout = int(timeout + 60 * 10)
+            timeout = int(timeout + 60 * 1)
             finish_date = time.asctime(time.localtime(float(start_time + timeout)))
             emitter.debug("Setting a timeout of {} seconds".format(timeout))
 
             job_time_map_mutex.acquire(blocking=True)
             job_time_map[message.identifier] = (
+                randint(0, 100000),
                 start_time,
                 timeout,
                 message.tool,
@@ -853,12 +867,15 @@ class Cerberus(App[List[Result]]):
             )
         except:
             pass
-        self.query_one("#" + all_subjects_id, DataTable).update_cell(
-            key,
-            Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
-            status,
-            update_width=True,
-        )
+        try:
+            self.query_one("#" + all_subjects_id, DataTable).update_cell(
+                key,
+                Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
+                status,
+                update_width=True,
+            )
+        except:
+            pass
 
     @on(JobMount)
     async def on_mount_job(self, message: JobMount):
@@ -895,27 +912,27 @@ class Cerberus(App[List[Result]]):
 
         # self.update_status(message.key, str(message.status))
         try:
-            finished_subjects_table = self.query_one(
-                "#" + finished_subjects_id, DataTable
-            )
+            # finished_subjects_table = self.query_one(
+            #     "#" + finished_subjects_id, DataTable
+            # )
             all_subjects_table = self.query_one("#" + all_subjects_id, DataTable)
-            row_key = finished_subjects_table.add_row(
-                *message.row_data,
-                key=message.key,
-            )
-            update_table(row_key, finished_subjects_id, finished_subjects_table)
+            # row_key = finished_subjects_table.add_row(
+            #     *message.row_data,
+            #     key=message.key,
+            # )
+            # update_table(row_key, finished_subjects_id, finished_subjects_table)
 
-            update_table(row_key, all_subjects_id, all_subjects_table)
+            update_table(message.key, all_subjects_id, all_subjects_table)
 
-            if message.status is not TaskStatus.SUCCESS:
-                error_subjects_table = self.query_one(
-                    "#" + error_subjects_id, DataTable
-                )
-                row_key = error_subjects_table.add_row(
-                    *message.row_data,
-                    key=message.key,
-                )
-                update_table(row_key, error_subjects_id, error_subjects_table)
+            # if message.status is not TaskStatus.SUCCESS:
+            #     error_subjects_table = self.query_one(
+            #         "#" + error_subjects_id, DataTable
+            #     )
+            #     row_key = error_subjects_table.add_row(
+            #         *message.row_data,
+            #         key=message.key,
+            #     )
+            #     update_table(row_key, error_subjects_id, error_subjects_table)
 
         except Exception as e:
             self.debug_print(str(e))
@@ -934,6 +951,7 @@ class Cerberus(App[List[Result]]):
         job_time_map_mutex.release()
 
         if self.jobs_remaining == 0:
+            self.completed_all = True
             self.debug_print("DONE!")
             if not values.debug:
                 # Ensure that the job is not counted for twice
@@ -943,6 +961,7 @@ class Cerberus(App[List[Result]]):
 
     @on(Write)
     async def write_message(self, message: Write):
+        return
         if message.identifier in log_map:
             log_map[message.identifier].write(
                 message.text,
@@ -970,21 +989,25 @@ class Cerberus(App[List[Result]]):
     ) -> None:
         # self.debug_print("I am highlighting {}".format(message.row_key.value))
         # self.selected: Optional[str]
-        if self.selected_subject is not None:
-            self.hide(log_map[self.selected_subject])
-
-        if (
-            message
-            and message.row_key
-            and message.row_key.value
-            and message.row_key.value in log_map
-        ):
-            self.selected_subject = message.row_key.value
-            self.show(log_map[self.selected_subject])
-            self.set_focus(log_map[self.selected_subject], scroll_visible=True)
-            log_map[self.selected_subject].scroll_end(animate=False)
-        else:
-            self.debug_print("Info was not okay? {}".format(message.__dict__))
+        return
+        try:
+            # if self.selected_subject is not None:
+            #     self.hide(log_map[self.selected_subject])
+            pass
+            # if (
+            #     message
+            #     and message.row_key
+            #     and message.row_key.value
+            #     and message.row_key.value in log_map
+            # ):
+            #     self.selected_subject = message.row_key.value
+            #     self.show(log_map[self.selected_subject])
+            #     self.set_focus(log_map[self.selected_subject], scroll_visible=True)
+            #     log_map[self.selected_subject].scroll_end(animate=False)
+            # else:
+            #     self.debug_print("Info was not okay? {}".format(message.__dict__))
+        except:
+            pass
 
     def compose(self) -> ComposeResult:
         def create_table(id: str):
@@ -1047,11 +1070,13 @@ app: Cerberus
 
 
 def post_write(text: str):
+    return
     message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
     app.post_message(message)
 
 
 def update_current_job(status: str):
+    return
     if not values.ui_active:
         return
     current_job = values.job_identifier.get("NA")

@@ -80,13 +80,13 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
         if prefix:
             print_message = prefix + str(print_message)
 
-        ui.post_write(
-            "[bold {}]{} {}".format(
-                TEXTUALIZE_COLOR_MAP[print_color],
-                values.job_identifier.get("Root"),
-                str(print_message).replace("[", "\\[").replace("\t", " "),
-            )
-        )
+        # ui.post_write(
+        #     "[bold {}]{} {}".format(
+        #         TEXTUALIZE_COLOR_MAP[print_color],
+        #         values.job_identifier.get("Root"),
+        #         str(print_message).replace("[", "\\[").replace("\t", " "),
+        #     )
+        # )
 
 
 def title(title):

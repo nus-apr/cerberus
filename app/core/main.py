@@ -73,7 +73,7 @@ def create_task_image_identifier(
         image_args.append(tag)
 
     image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
-    return image_name.lower()
+    return image_name.lower().replace(".", "_")
 
 
 def create_bug_image_identifier(
@@ -81,9 +81,13 @@ def create_bug_image_identifier(
 ):
     bug_name = str(experiment_item[definitions.KEY_BUG_ID])
     subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    return "-".join(
-        map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
-    ).lower()
+    return (
+        "-".join(
+            map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
+        )
+        .lower()
+        .replace(".", "_")
+    )
 
 
 def create_task_identifier(
@@ -105,7 +109,7 @@ def create_task_identifier(
             container_profile[definitions.KEY_ID],
             run_index,
         ]
-    )
+    ).replace(".", "_")
 
 
 iteration = 0

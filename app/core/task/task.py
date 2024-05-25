@@ -662,6 +662,9 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
+        if values.use_container and tool.container_id:
+            container.stop_container(tool.container_id)
+
     return dir_info
 
 

@@ -46,14 +46,17 @@ class StudentFuzzer(AbstractFuzzTool):
 
         command_str = f"date +%s"
         exit_code, output = self.exec_command(command_str, dir_path="/home/student")
-        stdout, stderr = output
-        if stdout:
-            self.stime = int(stdout)
+        if output:
+            stdout, stderr = output
+            if stdout:
+                self.stime = int(stdout)
 
         self.timestamp_log_start()
 
-        fuzz_command = "bash -c 'NONCE={} python3 student_fuzzer.py'".format(
-            self.nonce,
+        fuzz_command = (
+            "bash -c 'NONCE={} timeout -k 40s {}m python3 student_fuzzer.py'".format(
+                self.nonce, timeout_mins
+            )
         )
 
         status = self.run_command(fuzz_command, self.log_output_path, "/home/student/")

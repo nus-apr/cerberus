@@ -440,7 +440,7 @@ def start_container(container_id: str):
         )
 
 
-def stop_container(container_id: str, timeout=120):
+def stop_container(container_id: str, timeout=10):
     client = get_client()
     emitter.normal("\t\t\t[framework] stopping docker container")
     try:
