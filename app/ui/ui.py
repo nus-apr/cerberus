@@ -572,6 +572,7 @@ class Cerberus(App[List[Result]]):
                 )
 
     def change_table(self, new_id: str):
+        return
         if self.is_preparing:
             return
         self.debug_print("Changing table!")
@@ -621,23 +622,23 @@ class Cerberus(App[List[Result]]):
             tool_tag,
         )
 
-        _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
-            iteration,
-            benchmark.name,
-            tool.name,
-            experiment_item[definitions.KEY_SUBJECT],
-            experiment_item[definitions.KEY_BUG_ID],
-            run,
-            "N/A" if tool_tag == "" else tool_tag,
-            task_profile[definitions.KEY_ID],
-            container_profile[definitions.KEY_ID],
-            "N/A",
-            "N/A",
-            "Allocated",
-            "N/A",
-            "N/A",
-            key=key,
-        )
+        # _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
+        #     iteration,
+        #     benchmark.name,
+        #     tool.name,
+        #     experiment_item[definitions.KEY_SUBJECT],
+        #     experiment_item[definitions.KEY_BUG_ID],
+        #     run,
+        #     "N/A" if tool_tag == "" else tool_tag,
+        #     task_profile[definitions.KEY_ID],
+        #     container_profile[definitions.KEY_ID],
+        #     "N/A",
+        #     "N/A",
+        #     "Allocated",
+        #     "N/A",
+        #     "N/A",
+        #     key=key,
+        # )
 
         log_map[key] = RichLog(highlight=True, markup=True, wrap=True, id=key + "_log")
         self.hide(log_map[key])
@@ -667,6 +668,7 @@ class Cerberus(App[List[Result]]):
     @on(Key)
     async def handle_key_press(self, message: Key):
         if message.key == "escape":
+            return
             if self.selected_subject:
                 self.hide(log_map[self.selected_subject])
             self.selected_subject = None
@@ -776,25 +778,25 @@ class Cerberus(App[List[Result]]):
                 "N/A",
             )
 
-            running_row_key = self.query_one(
-                "#" + running_subjects_id, DataTable
-            ).add_row(
-                *row_data,
-                key=message.identifier,
-            )
+            # running_row_key = self.query_one(
+            #     "#" + running_subjects_id, DataTable
+            # ).add_row(
+            #     *row_data,
+            #     key=message.identifier,
+            # )
 
-            self.query_one("#" + all_subjects_id, DataTable).update_cell(
-                message.identifier,
-                Cerberus.COLUMNS[definitions.UI_STARTED_AT][all_subjects_id],
-                start_date,
-                update_width=True,
-            )
-            self.query_one("#" + all_subjects_id, DataTable).update_cell(
-                message.identifier,
-                Cerberus.COLUMNS[definitions.UI_SHOULD_FINISH][all_subjects_id],
-                finish_date,
-                update_width=True,
-            )
+            # self.query_one("#" + all_subjects_id, DataTable).update_cell(
+            #     message.identifier,
+            #     Cerberus.COLUMNS[definitions.UI_STARTED_AT][all_subjects_id],
+            #     start_date,
+            #     update_width=True,
+            # )
+            # self.query_one("#" + all_subjects_id, DataTable).update_cell(
+            #     message.identifier,
+            #     Cerberus.COLUMNS[definitions.UI_SHOULD_FINISH][all_subjects_id],
+            #     finish_date,
+            #     update_width=True,
+            # )
 
             status = TaskStatus.SUCCESS
             dir_info = {}
@@ -860,21 +862,23 @@ class Cerberus(App[List[Result]]):
 
     def update_status(self, key: str, status: str):
         try:  # generally a running task will be updating its status
-            self.query_one("#" + running_subjects_id, DataTable).update_cell(
-                key,
-                Cerberus.COLUMNS[definitions.UI_STATUS][running_subjects_id],
-                status,
-                update_width=True,
-            )
+            # self.query_one("#" + running_subjects_id, DataTable).update_cell(
+            #     key,
+            #     Cerberus.COLUMNS[definitions.UI_STATUS][running_subjects_id],
+            #     status,
+            #     update_width=True,
+            # )
+            pass
         except:
             pass
         try:
-            self.query_one("#" + all_subjects_id, DataTable).update_cell(
-                key,
-                Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
-                status,
-                update_width=True,
-            )
+            # self.query_one("#" + all_subjects_id, DataTable).update_cell(
+            #     key,
+            #     Cerberus.COLUMNS[definitions.UI_STATUS][all_subjects_id],
+            #     status,
+            #     update_width=True,
+            # )
+            pass
         except:
             pass
 
@@ -916,14 +920,14 @@ class Cerberus(App[List[Result]]):
             # finished_subjects_table = self.query_one(
             #     "#" + finished_subjects_id, DataTable
             # )
-            all_subjects_table = self.query_one("#" + all_subjects_id, DataTable)
+            # all_subjects_table = self.query_one("#" + all_subjects_id, DataTable)
             # row_key = finished_subjects_table.add_row(
             #     *message.row_data,
             #     key=message.key,
             # )
             # update_table(row_key, finished_subjects_id, finished_subjects_table)
-
-            update_table(message.key, all_subjects_id, all_subjects_table)
+            pass
+            # update_table(message.key, all_subjects_id, all_subjects_table)
 
             # if message.status is not TaskStatus.SUCCESS:
             #     error_subjects_table = self.query_one(
