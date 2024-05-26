@@ -20,6 +20,8 @@ def setup_logger(name, log_file, level=logging.INFO, formatter=None):
     """To setup as many loggers as you want"""
     if formatter is None:
         formatter = logging.Formatter("%(asctime)s %(levelname)s %(message)s")
+    level=logging.ERROR
+
     handler = logging.FileHandler(log_file)
     handler.setFormatter(formatter)
     logger = logging.getLogger(name)

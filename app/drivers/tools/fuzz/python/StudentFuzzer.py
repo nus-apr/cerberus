@@ -53,10 +53,8 @@ class StudentFuzzer(AbstractFuzzTool):
 
         self.timestamp_log_start()
 
-        fuzz_command = (
-            "bash -c 'NONCE={} timeout -k 40s {}m python3 student_fuzzer.py'".format(
-                self.nonce, timeout_mins
-            )
+        fuzz_command = "bash -c 'NONCE={} timeout -k 40s 5m python3 fuzzer.py'".format(
+            self.nonce,
         )
 
         status = self.run_command(fuzz_command, self.log_output_path, "/home/student/")
