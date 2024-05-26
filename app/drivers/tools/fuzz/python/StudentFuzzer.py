@@ -17,13 +17,13 @@ class StudentFuzzer(AbstractFuzzTool):
         information required to be extracted are:
         """
 
-        r = self.list_dir("/home/student", regex="*")
+        r = self.list_dir("/home/participant", regex="*")
         self.emit_normal(f"saw files {r}")
 
-        if f"/home/student/{self.nonce}.crash" in r:
+        if f"/home/participant/{self.nonce}.crash" in r:
             command_str = f"date -r {self.nonce}.crash +%s"
             exit_code, output = self.exec_command(
-                command_str, dir_path="/home/student/"
+                command_str, dir_path="/home/participant/"
             )
             stdout, stderr = output
             if stdout:
@@ -41,11 +41,11 @@ class StudentFuzzer(AbstractFuzzTool):
         timeout_mins = int(float(fuzz_config_info[self.key_timeout]) * 60)
 
         self.run_command(
-            "bash -c 'cp -Rf {} /home/student/'".format(join(self.dir_expr, "."))
+            "bash -c 'cp -Rf {} /home/participant/'".format(join(self.dir_expr, "."))
         )
 
         command_str = f"date +%s"
-        exit_code, output = self.exec_command(command_str, dir_path="/home/student")
+        exit_code, output = self.exec_command(command_str, dir_path="/home/participant")
         if output:
             stdout, stderr = output
             if stdout:
@@ -57,7 +57,7 @@ class StudentFuzzer(AbstractFuzzTool):
             self.nonce,
         )
 
-        status = self.run_command(fuzz_command, self.log_output_path, "/home/student/")
+        status = self.run_command(fuzz_command, self.log_output_path, "/home/participant/")
 
         self.process_status(status)
 
