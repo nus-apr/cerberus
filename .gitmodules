@@ -82,4 +82,7 @@
         branch = instrumented
 [submodule "benchmark/bugsinpy"]
         path = benchmark/bugsinpy
-        url = https://github.com/nus-apr/bugs-in-py-benchmark.git
+	url = https://github.com/nus-apr/bugs-in-py-benchmark.git
+[submodule "benchmark/bugjs"]
+	path = benchmark/bugjs
+	url = https://github.com/nus-apr/bugjs-dataset.git
