@@ -1000,6 +1000,8 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def copy_tests(self, source_dir: str, destination_dir: str, subtype: str) -> None:
         os.makedirs(join(destination_dir, subtype, ""), exist_ok=True)
+        if not os.path.exists(source_dir):
+            return
         for test_case in os.listdir(source_dir):
             if test_case == "README.txt":
                 continue
