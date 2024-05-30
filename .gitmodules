@@ -86,3 +86,6 @@
 [submodule "benchmark/bugsphp"]
         path = benchmark/bugsphp
         url = https://github.com/nus-apr/bugsPHP.git
+[submodule "benchmark/bugjs"]
+	path = benchmark/bugjs
+	url = https://github.com/nus-apr/bugjs-dataset.git
