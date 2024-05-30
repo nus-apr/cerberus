@@ -34,14 +34,26 @@ class ValidateToolStats(ToolStats):
             )
         )
         printer(
-            "{1} count invalid patches: {0}\n".format(
+            "{1} count malformed patches: {0}\n".format(
+                self.patch_stats.malformed, prefix
+            )
+        )
+
+        printer(
+            "{1} count build failures: {0}\n".format(
                 self.patch_stats.non_compilable, prefix
             )
         )
 
         printer(
+            "{1} count fix failed patches: {0}\n".format(
+                self.patch_stats.fix_fail, prefix
+            )
+        )
+
+        printer(
             "{1} count incorrect patches: {0}\n".format(
-                self.patch_stats.get_implausible(), prefix
+                self.patch_stats.incorrect, prefix
             )
         )
 
