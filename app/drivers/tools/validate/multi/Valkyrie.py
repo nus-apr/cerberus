@@ -171,6 +171,8 @@ class Valkyrie(AbstractValidateTool):
         self.stats.patch_stats.correct = correct_count
         self.stats.patch_stats.non_compilable = build_fail_count
         self.stats.patch_stats.malformed = malformed_count
+        self.stats.patch_stats.fix_fail = fix_fail_count
+        self.stats.patch_stats.incorrect = incorrect_count
 
         if self.stats.error_stats.is_error:
             self.emit_error("[error] error detected in logs")
