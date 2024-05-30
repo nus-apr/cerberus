@@ -108,13 +108,14 @@ class Prompter(AbstractRepairTool):
             repair_command, self.log_output_path, "/home/ubuntu/prompter"
         )
 
+        copy_cmd = f"cp -rf {self.output_path}/* {self.dir_output}"
+        self.run_command(copy_cmd, run_as_sudo=True)
+
         self.process_status(status)
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
     def save_artifacts(self, dir_info: Dict[str, str]) -> None:
-        copy_cmd = f"cp -rf {self.output_path}/* {self.dir_output}"
-        self.run_command(copy_cmd, run_as_sudo=True)
         super(Prompter, self).save_artifacts(dir_info)
         return
 
