@@ -10,14 +10,14 @@ from app.core.task.TaskStatus import TaskStatus
 class TimeStats:
     timestamp_start = "Wed 20 Jul 2022 10:31:47 AM +08"
     timestamp_end = "Wed 20 Jul 2022 10:31:47 AM +08"
-    timestamp_compilation = 0
-    timestamp_validation = 0
-    timestamp_plausible = 0
-    total_validation: float = 0.0
-    total_build: float = 0.0
-    __latency_compilation = -1.0
-    __latency_validation = -1.0
-    __latency_plausible = -1.0
+    # timestamp_compilation = 0
+    # timestamp_validation = 0
+    # timestamp_plausible = 0
+    # total_validation: float = 0.0
+    # total_build: float = 0.0
+    # __latency_compilation = -1.0
+    # __latency_validation = -1.0
+    # __latency_plausible = -1.0
     __default_time_fmt = "%a %d %b %Y %H:%M:%S %p"
     __log_time_fmt = None
     __duration_total = -1.0
@@ -55,31 +55,31 @@ class TimeStats:
             )
         return self.__duration_total
 
-    def get_latency_compilation(self) -> float:
-        if self.__latency_compilation < 0 and self.timestamp_compilation:
-            self.__latency_compilation = self.compute_latency(
-                str(self.timestamp_compilation)
-            )
-        return self.__latency_compilation
+    # def get_latency_compilation(self) -> float:
+    #     if self.__latency_compilation < 0 and self.timestamp_compilation:
+    #         self.__latency_compilation = self.compute_latency(
+    #             str(self.timestamp_compilation)
+    #         )
+    #     return self.__latency_compilation
+    #
+    # def get_latency_validation(self) -> float:
+    #     if self.__latency_validation < 0 and self.timestamp_validation:
+    #         self.__latency_validation = self.compute_latency(
+    #             str(self.timestamp_validation)
+    #         )
+    #     return self.__latency_validation
 
-    def get_latency_validation(self) -> float:
-        if self.__latency_validation < 0 and self.timestamp_validation:
-            self.__latency_validation = self.compute_latency(
-                str(self.timestamp_validation)
-            )
-        return self.__latency_validation
-
-    def get_latency_plausible(self) -> float:
-        if self.__latency_plausible < 0 and self.timestamp_plausible:
-            self.__latency_plausible = self.compute_latency(
-                str(self.timestamp_plausible)
-            )
-        return self.__latency_plausible
+    # def get_latency_plausible(self) -> float:
+    #     if self.__latency_plausible < 0 and self.timestamp_plausible:
+    #         self.__latency_plausible = self.compute_latency(
+    #             str(self.timestamp_plausible)
+    #         )
+    #     return self.__latency_plausible
 
     def get_dict(self) -> Dict[str, float]:
         summary = {
             "total duration": self.get_duration(),
-            "build time": self.total_build,
-            "validation time": self.total_validation,
+            # "build time": self.total_build,
+            # "validation time": self.total_validation,
         }
         return summary

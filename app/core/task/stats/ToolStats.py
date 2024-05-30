@@ -38,33 +38,33 @@ class ToolStats:
         }
 
     def write(self, printer: Callable[[str], Any], prefix: str = "") -> None:
-        printer(
-            "{1} time build: {0} seconds\n".format(self.time_stats.total_build, prefix)
-        )
-        printer(
-            "{1} time validation: {0} seconds\n".format(
-                self.time_stats.total_validation, prefix
-            )
-        )
+        # printer(
+        #     "{1} time build: {0} seconds\n".format(self.time_stats.total_build, prefix)
+        # )
+        # printer(
+        #     "{1} time validation: {0} seconds\n".format(
+        #         self.time_stats.total_validation, prefix
+        #     )
+        # )
         printer(
             "{1} time duration: {0} seconds\n".format(
                 self.time_stats.get_duration(), prefix
             )
         )
 
-        if values.use_valkyrie:
-            printer(
-                "{1} latency compilation: {0} seconds\n".format(
-                    self.time_stats.get_latency_compilation(), prefix
-                )
-            )
-            printer(
-                "{1} latency validation: {0} seconds\n".format(
-                    self.time_stats.get_latency_validation(), prefix
-                )
-            )
-            printer(
-                "{1} latency plausible: {0} seconds\n".format(
-                    self.time_stats.get_latency_plausible(), prefix
-                )
-            )
+        # if values.use_valkyrie:
+        #     printer(
+        #         "{1} latency compilation: {0} seconds\n".format(
+        #             self.time_stats.get_latency_compilation(), prefix
+        #         )
+        #     )
+        #     printer(
+        #         "{1} latency validation: {0} seconds\n".format(
+        #             self.time_stats.get_latency_validation(), prefix
+        #         )
+        #     )
+        #     printer(
+        #         "{1} latency plausible: {0} seconds\n".format(
+        #             self.time_stats.get_latency_plausible(), prefix
+        #         )
+        #     )
