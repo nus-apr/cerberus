@@ -11,8 +11,8 @@ benchmarks including but not limited to ManyBugs, VulnLoc and Defects4J. This pl
 run experiments more efficiently and effectively, with more user-friendly features such as push notifications, and summary extraction.
 
 ## Highlights
-* Empowered the First [International Program Repair Competition](https://apr-comp.github.io/) to evaluate the competing tools in Java, C and Python 
-* Benchmarking platform used to run the Fuzzing Hackathon at the [Fuzzing and Software Security Summer School](https://fuzzing.comp.nus.edu.sg/Home.html).
+* Empowered the First [International Program Repair Competition](https://apr-comp.github.io/) to evaluate 10 repair tools in 6 tracks covering mulitple programming languages (Java, C and Python), totalling upto 475 repair tasks. 
+* Benchmarking platform used to run the Fuzzing Hackathon at the [Fuzzing and Software Security Summer School](https://fuzzing.comp.nus.edu.sg/Home.html), continuous evaluation for 3 days evaluating upto 138 different fuzzing tools. 
 * Automated student assignment grading for Masters Course [CS5219](https://nusmods.com/courses/CS5219/automated-software-validation) taught at NUS. 
 
 ## Features
