@@ -19,7 +19,7 @@ class BugsInPy(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         status = self.run_command(
             container_id,
-            f"./setup_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[-1]}",
+            f"./setup_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[1]}",
             dir_path=self.dir_setup,
         )
         return status == 0
