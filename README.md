@@ -3,12 +3,17 @@
 ![Main View](doc/images/CerberusView.png)
 
 
-Cerberus is a program repair framework that provides the interface to multiple
-state-of-the art program analysis tools such as Infer and Pulse, as well as program repair tools such as Prophet, Darjeeling, Angelix, F1X etc.
+Cerberus is a research acceleration framework that provides the interface to multiple
+state-of-the art program analysis tools such as Infer and Pulse, fuzzing tools such as AFL++, Jazzer as well as program repair tools such as F1X, SelfAPR etc.
 Encapsulating the difficulties to setup the infrastructure for program analysis/repair technology, this platform provides
 the necessary framework to configure a program for analysis/repair. We have integrated multiple defects
 benchmarks including but not limited to ManyBugs, VulnLoc and Defects4J. This platform also provides the necessary means for researchers to
 run experiments more efficiently and effectively, with more user-friendly features such as push notifications, and summary extraction.
+
+## Highlights
+* Empowered the First [International Program Repair Competition](https://apr-comp.github.io/) to evaluate the competing tools in Java, C and Python 
+* Benchmarking platform used to run the Fuzzing Hackathon at the [Fuzzing and Software Security Summer School](https://fuzzing.comp.nus.edu.sg/Home.html).
+* Automated student assignment grading for Masters Course [CS5219](https://nusmods.com/courses/CS5219/automated-software-validation) taught at NUS. 
 
 ## Features
 
