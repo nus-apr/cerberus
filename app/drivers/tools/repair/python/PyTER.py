@@ -29,13 +29,10 @@ class PyTER(AbstractRepairTool):
         benchmark = bug_info.get(self.key_benchmark, "")
         if benchmark == "bugsinpy":
             # Run pyter dynamics for bugsinpy
-            status = self.run_command(
+            self.run_command(
                 f"bash /pyter/pyter_tool/dynamic_bugsinpy.sh {src_dir} {bug_id}",
                 dir_path=src_dir,
             )
-        else:
-            # TODO TypeBugs && PyTER own benchmark
-            pass
 
         status = self.run_command(
             'timeout -k 5m {}h python -u pyter_tool/my_tool/main.py -p {} -d {} -b {} -i {} -c ""'.format(
