@@ -19,17 +19,16 @@ class BugsInPy(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         status = self.run_command(
             container_id,
-            f"./setup_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[1]}",
+            f"bash setup_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[-1]}",
             dir_path=self.dir_setup,
         )
         return status == 0
 
     def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("configuring experiment subject")
-        experiment_item = self.experiment_subjects[bug_index - 1]
         status = self.run_command(
             container_id,
-            f"./config_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[1]}",
+            f"bash config_subject",
             dir_path=self.dir_setup,
         )
         return status == 0
@@ -39,7 +38,7 @@ class BugsInPy(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         status = self.run_command(
             container_id,
-            f"./build_subject {experiment_item[self.key_subject]} {experiment_item[self.key_bug_id].split('-')[1]}",
+            f"bash build_subject",
             dir_path=self.dir_setup,
         )
         return status == 0
@@ -49,7 +48,7 @@ class BugsInPy(AbstractBenchmark):
         experiment_item = self.experiment_subjects[bug_index - 1]
         status = self.run_command(
             container_id,
-            f"./test_subject",
+            f"bash test_subject",
             dir_path=self.dir_setup,
         )
         return status != 0
