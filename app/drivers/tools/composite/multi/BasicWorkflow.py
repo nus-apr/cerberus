@@ -309,10 +309,10 @@ class BasicWorkflow(AbstractCompositeTool):
         Common entry point for a subtask, we take the original task tag to not create new images.
         This flow assumes that the run_composite function has prepared all the tags beforehand in order to quickly start new jobs.
         """
-        if task_type.lower() == "repair":
-            for _a in bug_info[self.key_analysis_output]:
-                if self.key_benign_inputs in _a:
-                    del _a[self.key_benign_inputs]
+        # if task_type.lower() == "repair":
+        #     for _a in bug_info[self.key_analysis_output]:
+        #         if self.key_benign_inputs in _a:
+        #             del _a[self.key_benign_inputs]
 
         self.emit_debug(f"Bindings are {tool.bindings}")
         tool.bindings = tool.bindings or {}
