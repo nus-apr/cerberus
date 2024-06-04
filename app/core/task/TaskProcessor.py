@@ -207,6 +207,7 @@ class TaskProcessor:
                                     != "composite"
                                     else True
                                 )
+                                tool.rebuild_image = tool_config.rebuild
                                 benchmark.update_dir_info(dir_info, tool_config.local)
 
                                 yield (

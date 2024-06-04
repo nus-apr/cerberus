@@ -204,6 +204,9 @@ class ConfigDataFactory:
                         ignore=tool_config_dict.get(
                             ConfigFieldsEnum.IGNORE.value, False
                         ),
+                        rebuild=tool_config_dict.get(
+                            ConfigFieldsEnum.REBUILD.value, False
+                        ),
                         local=tool_config_dict.get(ConfigFieldsEnum.LOCAL.value, False),
                     )
                 )

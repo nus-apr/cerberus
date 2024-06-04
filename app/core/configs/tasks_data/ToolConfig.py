@@ -8,6 +8,7 @@ class ToolConfig:
         hash_digest: str = "",
         ignore: bool = False,
         local: bool = False,
+        rebuild: bool = False,
     ):
         self.tag = tag
         self.name = name
@@ -16,3 +17,4 @@ class ToolConfig:
         self.hash_digest = hash_digest
         self.ignore = ignore
         self.local = local
+        self.rebuild = rebuild

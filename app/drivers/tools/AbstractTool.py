@@ -112,6 +112,7 @@ class AbstractTool(AbstractDriver):
     tool_type: str
 
     locally_running: bool = False
+    rebuild_image: bool = False
 
     bindings: Optional[Dict[str, Any]] = None
     api_keys: Dict[str, Any] = dict()

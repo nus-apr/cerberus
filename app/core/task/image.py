@@ -306,6 +306,7 @@ def prepare_experiment_tool(
         if (
             not container.image_exists(image_name)
             or values.rebuild_base
+            or tool.rebuild_image
             or values.rebuild_all
         ):
             return construct_experiment_tool_image(

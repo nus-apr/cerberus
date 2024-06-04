@@ -87,6 +87,7 @@ class ConfigFieldsEnum(Enum):
     HASH_DIGEST = "hash_digest"
     IGNORE = "ignore"
     LOCAL = "local"
+    REBUILD = "rebuild"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"
