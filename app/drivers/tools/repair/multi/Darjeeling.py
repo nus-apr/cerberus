@@ -2,11 +2,13 @@ import multiprocessing as mp
 import os
 import re
 from os.path import join
+from datetime import datetime
 from typing import Any
 from typing import Dict
 from typing import List
 
 from app.core import values
+from app.core import definitions
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
@@ -112,10 +114,10 @@ resource-limits:
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/darjeeling"
+        self.image_name = "hzhenxin/darjeeling"
         self.runs_as_root = False
         self.image_user = "darjeeling"
-        self.sudo_password = ""
+        self.sudo_password = "hzx5959hzx"
 
     def generate_repair_config(
         self,
@@ -183,34 +185,74 @@ resource-limits:
         self.write_file([config_content], config_file_path)
         return config_file_path
 
-    def generate_runtime_dockerfile(self, docker_image_tag: str) -> str:
+    def generate_runtime_dockerfile(self, docker_image_tag: str, bug_info) -> str:
         # the dockerfile is created at the setup dir and docker build will be run at the setup dir
         self.emit_normal(f"generating runtime Dockerfile for {self.name}")
         dockerfile_path = self.dir_setup + "/Dockerfile"
-        self.write_file(
-            [
-                f"FROM {docker_image_tag}\n",
-                "USER root\n",
-                "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
-                "RUN pip3 install coverage pytest pytest-cov gcovr\n",
-                f"RUN cd {self.dir_setup}; make clean;make distclean;rm CMakeCache.txt; exit 0\n",
-                f"WORKDIR {values.container_base_experiment}\n",
-                'ENTRYPOINT ["/bin/sh", "-c"]\n',
-                'CMD ["bash"]',
-            ],
-            dockerfile_path,
-        )
+        # Copy pythonpath to darjeeling runtime docker
+        if "pythonpath" in bug_info:
+            # Set up python path if any
+            pythonpath = bug_info.get("pythonpath", "")
+            src_dir = join(self.dir_expr, "src")
+            experiment_src_path = src_dir.lstrip("/")
+            pythonpath = (
+                join(self.dir_expr, "src", "/".join(pythonpath.split("/")[2:]))
+                if pythonpath
+                else ""
+            )
+            set_pypath_cmd = (
+                f"ENV PYTHONPATH=$PYTHONPATH:{pythonpath}" if pythonpath else ""
+            )
+            run_bugsinpy_compile = (
+                f"RUN /bugsinpy/framework/bin/bugsinpy-compile"
+                if bug_info.get("benchmark", "") == "bugsinpy"
+                else ""
+            )
+            self.write_file(
+                [
+                    f"FROM {docker_image_tag}\n",
+                    "USER root\n",
+                    "RUN apt update; apt install -y make libxml2-dev libxslt1-dev \n",
+                    "RUN pip3 install coverage pytest pytest-cov gcovr\n",
+                    "WORKDIR /\n",
+                    # Copy pyenv env to the runtime docker
+                    "COPY opt/pyenv /opt/pyenv\n",
+                    # Copy any pre-built lib in experiment_dir
+                    f"COPY {experiment_src_path} {src_dir}\n" f"{set_pypath_cmd}\n",
+                    f'WORKDIR {os.path.join(self.dir_expr, "src")}\n',
+                    f"{run_bugsinpy_compile}\n",
+                    # Remove pytest & coverage setting in project
+                    f"RUN rm -f pytest.ini .coveragerc\n"
+                    f'ENTRYPOINT ["/bin/sh", "-c"]\n',
+                    'CMD ["bash"]',
+                ],
+                dockerfile_path,
+            )
+        else:
+            self.write_file(
+                [
+                    f"FROM {docker_image_tag}\n",
+                    "USER root\n",
+                    "RUN apt update; apt install -y make g++ python3 python3-pip libxml2-dev libxslt1-dev \n",
+                    "RUN pip3 install coverage pytest pytest-cov gcovr\n",
+                    f"RUN cd {self.dir_setup}; make clean;make distclean;rm -f CMakeCache.txt; exit 0\n",
+                    f"WORKDIR {values.container_base_experiment}\n",
+                    'ENTRYPOINT ["/bin/sh", "-c"]\n',
+                    'CMD ["bash"]',
+                ],
+                dockerfile_path,
+            )
         return dockerfile_path
 
-    def build_runtime_docker_image(self, docker_tag: str) -> None:
-        dockerfile_path = self.generate_runtime_dockerfile(docker_tag)
+    def build_runtime_docker_image(self, docker_tag: str, bug_info) -> None:
+        dockerfile_path = self.generate_runtime_dockerfile(docker_tag, bug_info)
         self.emit_normal(f"building runtime Dockerfile for {self.name}")
         build_command = (
             f"sudo docker build -t {docker_tag}-runtime -f {dockerfile_path} ."
         )
         log_docker_build_path = join(self.dir_logs, "darjeeling-docker.log")
         self.run_command(
-            build_command, dir_path=self.dir_setup, log_file_path=log_docker_build_path
+            build_command, dir_path="/", log_file_path=log_docker_build_path
         )
 
     def invoke(
@@ -241,10 +283,13 @@ resource-limits:
             f"-{subject_name.replace('-', '_')}"
             f"-{bug_id.replace('-', '_')}"
         ).lower()
+        # import app.core.identifiers
+        # docker_tag_id = app.core.identifiers.create_task_image_identifier_v1(benchmark_name.replace('-', "_"),self,bug_info,self.tool_tag)
+
         test_list = bug_info.get(self.key_passing_test_identifiers, []) + bug_info.get(
             self.key_failing_test_identifiers, []
         )
-        self.build_runtime_docker_image(docker_tag_id)
+        self.build_runtime_docker_image(docker_tag_id, bug_info)
         fix_locs: Dict[str, List[str]] = dict()
         if self.key_localization in bug_info:
             for x in bug_info[self.key_localization]:
@@ -298,8 +343,13 @@ resource-limits:
         repair_command = "timeout -k 5m {}h  ".format(str(timeout))
         if self.container_id:
             repair_command += "sudo "
-        repair_command += "darjeeling repair --continue --patch-dir {} ".format(
-            dir_patch
+        # Will genereate huge cache for big benchmark
+
+        # --no-log-to-file
+        repair_command += (
+            "darjeeling repair --continue --patch-dir {} ".format(
+                dir_patch
+            )
         )
         repair_command += additional_tool_param + " "
         if self.is_dump_patches:
@@ -319,6 +369,10 @@ resource-limits:
     ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
+        dir_patch = self.dir_output + "/patches"
+        check_patch_command = f"sudo ls {dir_patch}"
+        self.run_command(check_patch_command, self.log_output_path, self.dir_expr)
+
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         self.log_stats_path = join(
             self.dir_logs,
@@ -391,3 +445,13 @@ resource-limits:
         )
 
         return self.stats
+    
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
+        """
+        Save useful artifacts from the repair execution
+        output folder -> self.dir_output
+        logs folder -> self.dir_logs
+        The parent method should be invoked at last to archive the results
+        """
+        dir_info["patches"] = self.dir_output + "/patches"
+        super(Darjeeling, self).save_artifacts(dir_info)
