@@ -68,7 +68,7 @@ class Valkyrie(AbstractValidateTool):
             conf_content.append(f"adv_test_script:{adv_script}\n")
         conf_content.append(f"output_dir:{self.dir_output}\n")
         conf_content.append("patch_mode:compile\n")
-        conf_content.append("patch_per_dir_limit:50\n")
+        conf_content.append("patch_per_dir_limit:100\n")
         conf_content.append("reset_command:git reset --hard HEAD\n")
         self.write_file(conf_content, config_path)
         return config_path
