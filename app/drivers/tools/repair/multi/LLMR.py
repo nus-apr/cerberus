@@ -15,7 +15,7 @@ class LLMR(AbstractRepairTool):
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "mirchevmp/llmr"
+        self.image_name = "hzhenxin/llmr"
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
@@ -80,7 +80,7 @@ class LLMR(AbstractRepairTool):
             java_version = 8
         env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
 
-        if self.key_build_script in bug_info:
+        if bug_info.get(self.key_build_script, ""):
             # Build it once to have things prepared
             self.run_command(
                 "bash {}".format(bug_info.get(self.key_build_script)),
@@ -88,13 +88,13 @@ class LLMR(AbstractRepairTool):
                 env=env,
             )
 
-        openai_token = self.api_keys.get(self.key_openai_token, None)
+        key = self.get_api_key(model)
         context_window = 10
-        if not openai_token:
+        if not key:
             self.error_exit(f"{self.name} requires at least one API key for OpenAI")
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} -key {openai_token} -context {context_window} {params}".format(
+        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} -key {key} -context {context_window} {params}".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -121,10 +121,12 @@ class LLMR(AbstractRepairTool):
                 if failing_test_identifiers != ""
                 else " "
             ),
+            # TODO:
+            # LLMR: error: argument -binary-loc: expected one argument e.g. ITSP: 1
             binary_path=(
                 "-binary-loc {}".format(bug_info[self.key_bin_path])
-                if self.key_bin_path in bug_info
-                else " "
+                if bug_info.get(self.key_bin_path, "")
+                else "-binary-loc {}".format(join(self.dir_expr, "src", bug_info[self.key_fix_file]))
             ),
             debug="-d" if self.is_debug else "",
             reference_file=reference_file,
@@ -132,7 +134,7 @@ class LLMR(AbstractRepairTool):
             language=language,
             fl=fl,
             params=params,
-            openai_token=openai_token,
+            key=key,
             context_window=context_window,
         )
         status = self.run_command(
@@ -206,3 +208,14 @@ class LLMR(AbstractRepairTool):
                     self.stats.patch_stats.non_compilable += 1
 
         return self.stats
+    
+    def get_api_key(self, model):
+        if "gpt" in model:
+            return self.api_keys.get(self.key_openai_token, "")
+        elif "claude" in model:
+            return self.api_keys.get(self.key_anthropic_token, "")
+        elif "huggingface" in model:
+            return self.api_keys.get(self.key_huggingface_token, "")
+        elif "gemini" in model:
+            return self.api_keys.get(self.key_gemini_token, "")
+
