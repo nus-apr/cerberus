@@ -17,10 +17,11 @@ class Valkyrie(AbstractValidateTool):
         self.image_name = "rshariffdeen/valkyrie"
         self.path_to_binaries = ["/opt/valkyrie/bin/"]
         self.portable_dirs = ["/opt/valkyrie"]
+        self.config_path = ""
 
-    def populate_config_file(self, bug_info: Dict[str, Any]) -> str:
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
         self.emit_normal("generating config file")
-        config_path = join(self.dir_expr, f"{self.name}.config")
+        self.config_path = join(self.dir_expr, f"{self.name}.config")
         conf_content = list()
         dir_src = f"{self.dir_expr}/src"
         conf_content.append(f"source_dir:{dir_src}\n")
@@ -70,13 +71,12 @@ class Valkyrie(AbstractValidateTool):
         conf_content.append("patch_mode:compile\n")
         conf_content.append("patch_per_dir_limit:100\n")
         conf_content.append("reset_command:git reset --hard HEAD\n")
-        self.write_file(conf_content, config_path)
-        return config_path
+        self.write_file(conf_content, self.config_path)
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
-        conf_path = self.populate_config_file(bug_info)
+        conf_path = self.config_path
 
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
