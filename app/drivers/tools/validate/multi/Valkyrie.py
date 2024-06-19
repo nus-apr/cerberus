@@ -30,14 +30,14 @@ class Valkyrie(AbstractValidateTool):
             abs_path_c_script = f"{self.dir_setup}/{config_script}"
             conf_content.append(f"config_script:{abs_path_c_script}\n")
 
-        if bug_info.get(self.key_localization, None):
-            localization = bug_info[self.key_localization]
-            if len(localization) > 1:
-                self.emit_warning("Multiple localization not supported")
-            else:
-                conf_content.append(
-                    f"source_file:{localization[0][self.key_fix_file]}\n"
-                )
+        # if bug_info.get(self.key_localization, None):
+        #     localization = bug_info[self.key_localization]
+        #     if len(localization) > 1:
+        #         self.emit_warning("Multiple localization not supported")
+        #     else:
+        #         conf_content.append(
+        #             f"source_file:{localization[0][self.key_fix_file]}\n"
+        #         )
         conf_content.append(f"patch_dir:{self.dir_setup}/patches\n")
         conf_content.append(
             f"test_oracle:{self.dir_setup}/{bug_info[self.key_test_script]}\n"
