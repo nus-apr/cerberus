@@ -823,7 +823,9 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(f"Setup dir is {base_setup}")
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
-            shutil.copytree(base_setup, enhanced_setup)
+            shutil.copytree(
+                base_setup, enhanced_setup, ignore=shutil.ignore_patterns("core")
+            )
             os.makedirs(join(enhanced_setup, "benign_tests"), exist_ok=True)
             os.makedirs(join(enhanced_setup, "crashing_tests"), exist_ok=True)
 
