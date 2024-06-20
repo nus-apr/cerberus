@@ -6,6 +6,7 @@ from typing import Dict
 from typing import List
 
 from app.core import definitions
+from app.core import values
 from app.core.task.stats.LocalizeToolStats import LocalizeToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
@@ -13,9 +14,101 @@ from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
 
 class E9PatchSBFL(AbstractLocalizeTool):
     def __init__(self) -> None:
+        self.bindings = {
+            join(values.dir_main, "sbfl_local"): {"bind": "/sbfl_local", "mode": "rw"}
+        }
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "mirchevmp/sbfl-e9patch:latest"
+        self.image_name = "rshariffdeen/e9sbfl"
+
+    def locate(self) -> None:
+        pass
+
+    def rerun_configuration(self, config_script: str, build_script: str) -> None:
+        self.emit_normal("re-running configuration and build")
+        _config_path = self.dir_expr + f"/{self.name}-config-build"
+        dir_src = join(self.dir_expr, "src")
+        self.write_file(
+            [
+                "#!/bin/bash\n",
+                f"cd {dir_src}\n",
+                "make distclean; rm -f CMakeCache.txt\n",
+                f"{config_script} {self.dir_expr}\n",
+                f"{build_script} {self.dir_expr}\n",
+            ],
+            _config_path,
+        )
+        reconfig_command = "bash {}".format(_config_path)
+        log_reconfig_path = join(self.dir_logs, f"{self.name}-re-config-build.log")
+        self.run_command(reconfig_command, log_file_path=log_reconfig_path)
+
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
+        self.tool_folder = (
+            "/sbfl" if not self.locally_running else join(values.dir_main, "sbfl_local")
+        )
+
+        benchmark_name = bug_info[self.key_benchmark]
+        config_script = bug_info.get(self.key_config_script, None)
+        if not config_script:
+            self.error_exit(f"{self.name} requires a configuration script as input")
+        build_script = bug_info.get(self.key_build_script, None)
+        if not build_script:
+            self.error_exit(f"{self.name} requires a build script as input")
+
+        config_script = join(self.dir_setup, config_script)
+        build_script = join(self.dir_setup, build_script)
+        if str(benchmark_name).lower() == "vulnloc":
+            # rerun configration
+            self.clean_subject(bug_info)
+            self.rerun_configuration(config_script, build_script)
+
+        if os.path.exists(join(self.dir_expr, "src", "instrument.sh")):
+            self.run_command("bash instrument.sh", dir_path=join(self.dir_expr, "src"))
+        else:
+            self.run_command("bash build.sh", dir_path=join(self.dir_expr, "src"))
+            instrument_comand = f"python3 {join(self.tool_folder,'instrument.py')} {join(self.dir_expr,'src',bug_info[self.key_bin_path])}"
+            self.run_command(
+                instrument_comand,
+                self.log_output_path,
+                dir_path=join(self.tool_folder, "e9patch"),
+            )
+            binary_name = bug_info[self.key_bin_path].split("/")[-1]
+            self.run_command(
+                f"bash -c 'mv {join(self.tool_folder,'e9patch',binary_name)}*.tracer {join(self.dir_expr,'src',bug_info[self.key_bin_path])}'"
+            )
+
+        dir_failing_traces = join(self.dir_output, self.key_failing_test_identifiers)
+        dir_passing_traces = join(self.dir_output, self.key_passing_test_identifiers)
+        self.run_command("mkdir -p {}".format(dir_failing_traces))
+        self.run_command("mkdir -p {}".format(dir_passing_traces))
+
+        if (
+            not bug_info[self.key_failing_test_identifiers]
+            or not bug_info[self.key_passing_test_identifiers]
+        ):
+            self.error_exit("This tool requires positive and negative test cases")
+
+        has_trace = self.is_file(join(self.dir_expr, "src", "trace.sh"))
+
+        for failing_test_identifier in bug_info[self.key_failing_test_identifiers]:
+            if has_trace:
+                self.run_trace(
+                    bug_info,
+                    dir_failing_traces,
+                    join(self.dir_expr, "src", "tests", failing_test_identifier),
+                )
+            else:
+                self.run_test(bug_info, dir_failing_traces, failing_test_identifier)
+
+        for passing_test_identifier in bug_info[self.key_passing_test_identifiers]:
+            if has_trace:
+                self.run_trace(
+                    bug_info,
+                    dir_passing_traces,
+                    join(self.dir_expr, "src", "tests", passing_test_identifier),
+                )
+            else:
+                self.run_test(bug_info, dir_passing_traces, passing_test_identifier)
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
@@ -37,75 +130,39 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
         self.timestamp_log_start()
 
-        self.emit_normal("Instrumenting binary")
-
-        if self.key_fix_file in bug_info:
-            self.run_command(
-                f"bash -c 'python3 /sbfl/dump_lines.py {join(self.dir_expr,'src',bug_info[self.key_fix_file])} $(cat  {join(self.dir_expr,'src',bug_info[self.key_fix_file])} | wc -l ) >> /sbfl/lines.txt'",
-                log_file_path=self.log_output_path,
-                dir_path="/sbfl",
-            )
-        else:
-            self.run_command(
-                f"bash -c 'for x in $(find {join(self.dir_expr,'src')} | grep -E \".*\\.(c|cpp|hpp|h)$\"); do python3 /sbfl/dump_lines.py $x $(cat $x | wc -l ) >> /sbfl/lines.txt ; done'",
-                dir_path="/sbfl",
-            )
-
-        localize_command = f"python3 ./instrument.py {join(self.dir_expr,'src',bug_info[self.key_bin_path])} /sbfl/lines.txt"
-
-        self.run_command(localize_command, self.log_output_path, dir_path="/sbfl")
-
+        self.tool_folder = (
+            "/sbfl" if not self.locally_running else join(values.dir_main, "sbfl_local")
+        )
         dir_failing_traces = join(self.dir_output, self.key_failing_test_identifiers)
         dir_passing_traces = join(self.dir_output, self.key_passing_test_identifiers)
-        self.run_command("mkdir -p {}".format(dir_failing_traces))
-        self.run_command("mkdir -p {}".format(dir_passing_traces))
 
-        self.run_command(
-            f"bash -c 'mv /sbfl/*.tracer {join(self.dir_expr,'src',bug_info[self.key_bin_path])}'"
+        command = f"""python3 {join(self.tool_folder,'sbfl.py')}
+        {dir_failing_traces}
+        {dir_passing_traces}
+        -b {join(self.dir_expr,'src',bug_info[self.key_bin_path])}
+        -a {task_config_info.get(self.key_fl_formula,'ochiai').lower()}
+        -e {join(self.dir_expr, 'src')}
+        {task_config_info.get(self.key_tool_params, '')}
+        """.replace(
+            "\n", " "
         )
 
         if (
-            not bug_info[self.key_failing_test_identifiers]
-            or not bug_info[self.key_passing_test_identifiers]
+            self.key_tiebreak_functions in bug_info
+            and bug_info[self.key_tiebreak_functions]
         ):
-            self.error_exit("This tool requires positive and negative test cases")
+            tiebreaker_info = join(self.dir_output, "tiebreaker_function_list.json")
+            self.write_json(bug_info[self.key_tiebreak_functions], tiebreaker_info)
+            command += f" --tiebreak-functions-path {tiebreaker_info}"
 
-        for failing_test_identifiers in bug_info[self.key_failing_test_identifiers]:
-            self.run_command(
-                "bash {} {}".format(
-                    bug_info[self.key_test_script], failing_test_identifiers
-                ),
-                dir_path=self.dir_setup,
-                env={
-                    "TRACE_FILE": join(
-                        dir_failing_traces, failing_test_identifiers + ".trace"
-                    )
-                },
-            )
+        if self.key_tiebreak_files in bug_info and bug_info[self.key_tiebreak_files]:
+            tiebreaker_info = join(self.dir_output, "tiebreaker_file_list.json")
+            self.write_json(bug_info[self.key_tiebreak_files], tiebreaker_info)
+            command += f" --tiebreak-files-path {tiebreaker_info}"
 
-        for passing_test_identifiers in bug_info[self.key_passing_test_identifiers]:
-            self.run_command(
-                "bash {} {}".format(
-                    bug_info[self.key_test_script], passing_test_identifiers
-                ),
-                dir_path=self.dir_setup,
-                env={
-                    "TRACE_FILE": join(
-                        dir_passing_traces, passing_test_identifiers + ".trace"
-                    )
-                },
-            )
-
-        status = self.run_command(
-            f"python3 /sbfl/sbfl.py {dir_failing_traces} {dir_passing_traces} -a {task_config_info.get(self.key_fl_formula,'ochiai').lower()} {task_config_info.get(self.key_tool_params, '')}",
-            log_file_path=self.log_output_path,
-        )
-
-        self.run_command("rm -rf {}".format(dir_failing_traces))
-        self.run_command("rm -rf {}".format(dir_passing_traces))
+        status = self.run_command(command, log_file_path=self.log_output_path)
 
         self.process_status(status)
-
         self.timestamp_log_end()
 
         if self.is_file(join(self.dir_output, "ochiai.json")):
@@ -123,6 +180,29 @@ class E9PatchSBFL(AbstractLocalizeTool):
             )
 
         self.emit_highlight("log file: {0}".format(self.log_output_path))
+
+    def run_test(
+        self, bug_info: Dict[str, Any], target_dir: str, test_identifier: str
+    ) -> None:
+        self.run_command(
+            "bash {} {}".format(bug_info[self.key_test_script], test_identifier),
+            dir_path=join(self.dir_setup),
+            env={
+                "TRACE_FILE": join(
+                    target_dir, os.path.basename(test_identifier) + ".trace"
+                )
+            },
+        )
+
+    def run_trace(
+        self, bug_info: Dict[str, Any], target_dir: str, test_identifier: str
+    ) -> None:
+        self.run_command(
+            "bash {} {} {}".format(
+                join(self.dir_expr, "src", "trace.sh"), test_identifier, target_dir
+            ),
+            dir_path=join(self.dir_expr, "src"),
+        )
 
     def analyse_output(
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]

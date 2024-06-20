@@ -17,6 +17,9 @@ KEY_CONFIG_TIMEOUT = "timeout"
 KEY_FL_FORMULA = "fl_formula"
 KEY_STACK_TRACE = "stack_trace"
 
+KEY_TIEBREAKER_FUNCTIONS = "tiebreaker_functions"
+KEY_TIEBREAKER_FILES = "tiebreaker_files"
+
 KEY_CONFIG_REPAIR_TIMEOUT = "repair-timeout"
 KEY_CONFIG_FUZZ_TIMEOUT = "fuzz-timeout"
 KEY_CONFIG_LOCALIZE_TIMEOUT = "localize-timeout"

@@ -100,6 +100,8 @@ class AbstractTool(AbstractDriver):
     key_java_version = definitions.KEY_JAVA_VERSION
     key_generator = definitions.KEY_GENERATOR
     key_stack_trace = definitions.KEY_STACK_TRACE
+    key_tiebreak_functions = definitions.KEY_TIEBREAKER_FUNCTIONS
+    key_tiebreak_files = definitions.KEY_TIEBREAKER_FILES
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_openai_token = definitions.KEY_OPENAI_TOKEN
     key_anthropic_token = definitions.KEY_ANTHROPIC_TOKEN
