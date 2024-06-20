@@ -146,11 +146,14 @@ class E9PatchSBFL(AbstractLocalizeTool):
             output_lines = self.read_json(output_file, encoding="iso-8859-1")
             if output_lines:
                 fix_files = set()
-                fix_lines = list()
+                fix_locs = set()
                 for _l in output_lines:
-                    fix_files.add(_l.get(self.key_fix_file))
-                    fix_lines += _l.get(self.key_fix_lines, [])
-                self.stats.fix_loc_stats.fix_locs = len(fix_lines)
+                    src_file = _l.get(self.key_fix_file)
+                    fix_files.add(src_file)
+                    for x in _l.get(self.key_fix_lines, []):
+                        loc = f"{src_file}:{x}"
+                        fix_locs.add(loc)
+                self.stats.fix_loc_stats.fix_locs = len(fix_locs)
                 self.stats.fix_loc_stats.source_files = len(fix_files)
 
         else:
