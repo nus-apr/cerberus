@@ -126,7 +126,9 @@ class LLMR(AbstractRepairTool):
             binary_path=(
                 "-binary-loc {}".format(bug_info[self.key_bin_path])
                 if bug_info.get(self.key_bin_path, "")
-                else "-binary-loc {}".format(join(self.dir_expr, "src", bug_info[self.key_fix_file]))
+                else "-binary-loc {}".format(
+                    join(self.dir_expr, "src", bug_info[self.key_fix_file])
+                )
             ),
             debug="-d" if self.is_debug else "",
             reference_file=reference_file,
@@ -186,7 +188,7 @@ class LLMR(AbstractRepairTool):
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_patch)
         self.stats.patch_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
+            [name for name in list_output_dir if ".diff" in name]
         )
 
         # extract information from output log
@@ -200,16 +202,16 @@ class LLMR(AbstractRepairTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
 
             for line in log_lines:
-                if re.match("Patch .* is Plausible", line):
+                if "is Plausible" in line:
                     self.stats.patch_stats.plausible += 1
-                if re.match("response", line):
-                    self.stats.patch_stats.generated += 1
-                if re.match("does not compile", line):
+                if "response" in line:
+                    self.stats.patch_stats.enumerations += 1
+                if "does not compile" in line:
                     self.stats.patch_stats.non_compilable += 1
 
         return self.stats
-    
-    def get_api_key(self, model):
+
+    def get_api_key(self, model: str) -> Any:
         if "gpt" in model:
             return self.api_keys.get(self.key_openai_token, "")
         elif "claude" in model:
@@ -218,4 +220,3 @@ class LLMR(AbstractRepairTool):
             return self.api_keys.get(self.key_huggingface_token, "")
         elif "gemini" in model:
             return self.api_keys.get(self.key_gemini_token, "")
-
