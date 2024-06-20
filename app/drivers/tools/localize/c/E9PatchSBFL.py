@@ -72,10 +72,8 @@ class E9PatchSBFL(AbstractLocalizeTool):
                 self.log_output_path,
                 dir_path=join(self.tool_folder, "e9patch"),
             )
-            binary_name = bug_info[self.key_bin_path].split("/")[-1]
-            self.run_command(
-                f"bash -c 'mv {join(self.tool_folder,'e9patch',binary_name)}*.tracer {join(self.dir_expr,'src',bug_info[self.key_bin_path])}'"
-            )
+            binary_path = join(self.dir_expr, "src", bug_info[self.key_bin_path])
+            self.run_command(f"bash -c 'mv {binary_path}*.tracer {binary_path}'")
 
         dir_failing_traces = join(self.dir_output, self.key_failing_test_identifiers)
         dir_passing_traces = join(self.dir_output, self.key_passing_test_identifiers)
