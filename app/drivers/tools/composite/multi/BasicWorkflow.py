@@ -957,7 +957,11 @@ class BasicWorkflow(AbstractCompositeTool):
             self.emit_debug(f"Setup dir is {base_setup}")
             self.emit_debug(f"New setup dir is {enhanced_setup}")
 
-            shutil.copytree(base_setup, enhanced_setup)
+            try:
+                shutil.copytree(base_setup, enhanced_setup)
+            except Exception as e:
+                self.emit_error(f"copying error:{e}")
+                pass
 
             bug_info_extension = reader.read_json(event.src_path)
             if bug_info_extension is None:
