@@ -1,5 +1,5 @@
+import json
 import os
-import re
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -19,11 +19,13 @@ class Prompter(AbstractRepairTool):
         self.runs_as_root = False
         self.image_name = "rshariffdeen/prompter"
         self.sudo_password = "ubuntu"
+        self.config_file: str = ""
+        self.output_path: str = ""
 
     def locate(self) -> None:
         pass
 
-    def create_config(self) -> None:
+    def create_api_auth(self) -> None:
         config_file_path = "/home/ubuntu/prompter/config.toml"
         google_auth_json_path = "/home/ubuntu/prompter/google-key.json"
         google_auth_data = {
@@ -67,6 +69,40 @@ class Prompter(AbstractRepairTool):
             config_file_path,
         )
 
+    def generate_config_file(self, bug_info: Dict[str, Any]) -> str:
+        repair_config_path = os.path.join(self.dir_expr, "src", "repair.json")
+        self.output_path = join(
+            "/home",
+            "ubuntu",
+            "prompter",
+            "output",
+            bug_info[self.key_benchmark],
+            bug_info[self.key_subject],
+            bug_info[self.key_bug_id],
+        )
+        self.run_command(f"mkdir -p {self.output_path}")
+        config_object: Dict[str, Any] = dict()
+        config_object["language"] = bug_info[self.key_language].lower()
+        config_object["output_dir"] = self.output_path
+        config_object["cwe_id"] = bug_info["cwe_id"]
+
+        fix_locations = []
+        localization_list = bug_info[self.key_localization]
+        for result in localization_list:
+            source_file = result[self.key_fix_file]
+            if self.dir_expr not in source_file:
+                source_file = join(self.dir_expr, "src", source_file)
+            line_numbers = result[self.key_fix_lines]
+            for _l in line_numbers:
+                fix_locations.append({"source_path": source_file, "line_number": _l})
+        config_object["localization"] = fix_locations[:5]
+        self.write_file([json.dumps(config_object)], repair_config_path)
+        return repair_config_path
+
+    def instrument(self, bug_info: Dict[str, Any]) -> None:
+        self.create_api_auth()
+        self.config_file = self.generate_config_file(bug_info)
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -86,26 +122,10 @@ class Prompter(AbstractRepairTool):
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
-        self.output_path = join(
-            "/home",
-            "ubuntu",
-            "prompter",
-            "output",
-            bug_info[self.key_benchmark],
-            bug_info[self.key_subject],
-            bug_info[self.key_bug_id],
-        )
-        self.run_command(f"mkdir -p {self.output_path}")
-        self.create_config()
-        file_path = join(
-            self.dir_expr, "src", bug_info[self.key_localization][0][self.key_fix_file]
-        )
 
-        self.emit_debug(bug_info)
-        fix_line = bug_info[self.key_localization][0][self.key_fix_lines][0]
-        cwe_id = bug_info["cwe_id"]
-        prog_lang = bug_info[self.key_language].lower()
-        repair_command = f"timeout -k 5m {timeout}h python3 cli.py {file_path} {prog_lang} {cwe_id}  {fix_line} {self.output_path}"
+        repair_command = (
+            f"timeout -k 5m {timeout}h python multi_location.py {self.config_file}"
+        )
         self.emit_debug(repair_command)
         status = self.run_command(
             repair_command, self.log_output_path, "/home/ubuntu/prompter"
