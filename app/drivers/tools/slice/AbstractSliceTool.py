@@ -74,8 +74,4 @@ class AbstractSliceTool(AbstractTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
-
-        if self.is_dir(self.dir_patch):
-            self.stats.patch_stats.size = len(self.list_dir(self.dir_patch))
-
         return self.stats
