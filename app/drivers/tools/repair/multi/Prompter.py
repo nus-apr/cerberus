@@ -95,7 +95,7 @@ class Prompter(AbstractRepairTool):
             line_numbers = result[self.key_fix_lines]
             for _l in line_numbers:
                 fix_locations.append({"source_path": source_file, "line_number": _l})
-        config_object["localization"] = fix_locations[:5]
+        config_object["localization"] = fix_locations
         self.write_file([json.dumps(config_object)], repair_config_path)
         return repair_config_path
 
