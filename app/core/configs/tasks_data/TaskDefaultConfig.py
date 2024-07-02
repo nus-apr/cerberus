@@ -14,6 +14,7 @@ class TaskDefaultConfig:
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
+        use_subject_as_base: bool,
         runs: int = 1,
     ):
 
@@ -30,4 +31,5 @@ class TaskDefaultConfig:
         self.use_container = use_container
         self.use_gpu = use_gpu
         self.use_purge = use_purge
+        self.use_subject_as_base = use_subject_as_base
         self.runs = runs

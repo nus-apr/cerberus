@@ -1,216 +1,316 @@
 [
   {
-        "id": 1,
-        "subject": "binutils",
-        "bug_id": "CVE-2017-14745",
-        "localization": [
-            {
-                "source_file": "bfd/elf64-x86-64.c",
-                "line_numbers": [
-                    6720
-                ]
-            }
-        ],
-        "failing_test_identifiers": [
-            "1.bin"
-        ],
-        "passing_test_identifiers": [],
-        "count_neg": 1,
-        "count_pos": 0,
-        "binary_path": "binutils/objdump",
-        "binary_args": "-D $POC",
-        "exploit_file_list": [
-            "tests/1.bin"
-        ],
-        "crash_stack_trace": [
-            [
-                "compare_relocs",
-                "bfd/elf64-x86-64.c",
-                6632
-            ],
-            [
-                "elf_x86_64_get_synthetic_symtab",
-                "bfd/elf64-x86-64.c",
-                6722
-            ],
-            [
-                "dump_bfd",
-                "objdump.c",
-                3525
-            ],
-            [
-                "display_object_bfd",
-                "objdump.c",
-                3603
-            ],
-            [
-                "display_any_bfd",
-                "objdump.c",
-                3692
-            ],
-            [
-                "display_file",
-                "objdump.c",
-                3713
-            ],
-            [
-                "main",
-                "objdump.c",
-                4015
-            ]
-        ],
-        "test_timeout": 5,
-        "language": "c",
-        "config_script": "config.sh",
-        "build_script": "build.sh",
-        "test_script": "test.sh",
-        "build_command": "make -j20 CFLAGS='-Wno-error' CXXFLAGS='-Wno-error' LDFLAGS='-ldl -lutil'",
-        "bug_type": "Integer Overflow",
-        "src": {
-            "root_abspath": "/experiment/vulnloc/binutils/CVE-2017-14745/src",
-            "entrypoint": {
-                "file": "binutils/objdump.c",
-                "function": "main"
-            }
-        },
-        "output_dir_abspath": "/output",
-        "stack_trace": [
-            {
-                "depth": 0,
-                "function": "compare_relocs",
-                "source_file": "bfd/elf64-x86-64.c",
-                "line": 6632
-            },
-            {
-                "depth": 1,
-                "function": "elf_x86_64_get_synthetic_symtab",
-                "source_file": "bfd/elf64-x86-64.c",
-                "line": 6722
-            },
-            {
-                "depth": 2,
-                "function": "dump_bfd",
-                "source_file": "objdump.c",
-                "line": 3525
-            },
-            {
-                "depth": 3,
-                "function": "display_object_bfd",
-                "source_file": "objdump.c",
-                "line": 3603
-            },
-            {
-                "depth": 4,
-                "function": "display_any_bfd",
-                "source_file": "objdump.c",
-                "line": 3692
-            },
-            {
-                "depth": 5,
-                "function": "display_file",
-                "source_file": "objdump.c",
-                "line": 3713
-            },
-            {
-                "depth": 6,
-                "function": "main",
-                "source_file": "objdump.c",
-                "line": 4015
-            }
-        ]
+    "id": 1,
+    "subject": "c-crashes",
+    "bug_id": "user-input",
+    "src": {
+      "root_abspath": "/experiment/examples/c-crashes/user-input/src",
+      "entrypoint": {
+        "file": "test.c",
+        "function": "main"
+      }
     },
- {
-   "id": 1,
-   "subject": "crashes",
-   "bug_id": "user-input",
-   "source_file": "test.c",
-   "line_numbers": [6],
-   "failing_test": "1",
-   "passing_test": "",
-   "count_neg": 1,
-   "count_pos": 0,
-   "binary_path": "test",
-   "crash_input": "1",
-   "test_timeout": 10
- },
-  {
-    "id": 2,
-    "subject": "crashes",
-    "bug_id": "file-input",
     "localization": [
       {
         "source_file": "test.c",
         "line_numbers": [
-          19
+          6
         ]
       }
     ],
-    "failing_test_identifiers": [
-      "1"
-    ],
+    "failing_test_identifiers": ["1"],
     "passing_test_identifiers": [],
-    "failing_test": "1",
-    "passing_test": "",
-    "exploit_file_list": [
-      "tests/exploit"
-    ],
     "count_neg": 1,
     "count_pos": 0,
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "binary_path": "test",
+    "binary_args": "1",
+    "test_timeout": 10,
+    "language": "c"
+  },
+  {
+    "id": 2,
+    "subject": "c-crashes",
+    "bug_id": "file-input",
     "bug_type": "Divide by Zero",
     "src": {
-      "root_abspath": "/experiment/examples/crashes/file-input/src",
+      "root_abspath": "/experiment/examples/c-crashes/file-input/src",
       "entrypoint": {
         "file": "test",
         "function": "main"
       }
     },
+    "localization": [
+      {
+        "source_file": "test.c",
+        "line_numbers": [
+          24
+        ]
+      }
+    ],
+    "stack_trace": [
+        {
+            "depth": 0,
+            "function": "division",
+            "source_file": "test.c",
+            "line": 4
+        },
+        {
+            "depth": 1,
+            "function": "main",
+            "source_file": "test.c",
+            "line": 20
+        }
+    ],
+    "failing_test_identifiers": [],
+    "passing_test_identifiers": [],
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [
+                    {
+                        "format": "raw",
+                        "dir": "crashing_tests"
+                    }
+                ],
+                "benign_inputs": [
+                    {
+                        "format": "raw",
+                        "dir": "benign_tests"
+                    }
+                ],
+                "exploit_file_list": [],
+                "test_dir_abspath": "/setup/example/c-crashes/file-input/tests"
+            }
+    ],
+    "exploit_file_list": [
+      "crashing_tests/crash_1"
+    ],
+    "count_neg": 1,
+    "count_pos": 1,
     "config_script": "config.sh",
     "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "build_command": "make",
+    "test_script": "test.sh",
     "output_dir_abspath": "/output",
     "binary_path": "test",
-    "crash_input": "$POC",
-    "test_timeout": 10
+    "binary_args": "$POC",
+    "test_timeout": 10,
+    "language": "c"
   },
   {
-   "id": 3,
-   "subject": "test-suite",
-   "bug_id": "insert-if",
-   "source_file": "test.c",
-   "line_numbers": [6],
-   "failing_test": "3",
-   "passing_test": "1,2,4,5",
-   "count_neg": 1,
-   "count_pos": 4,
-   "binary_path": "test",
-   "crash_input": "1",
-   "test_timeout": 10
- },
+    "id": 3,
+    "subject": "c-test-suite",
+    "bug_id": "gcd",
+    "src": {
+      "root_abspath": "/experiment/examples/c-test-suite/gcd/src",
+      "entrypoint": {
+        "file": "gcd.c",
+        "function": "main"
+      }
+    },
+    "localization": [
+      {
+        "source_file": "gcd.c",
+        "line_numbers": [
+          6
+        ]
+      }
+    ],
+    "failing_test_identifiers": ["11"],
+    "passing_test_identifiers": ["1","2","3","4","5","6","7","8","9","10"],
+    "count_neg": 1,
+    "count_pos": 10,
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "binary_path": "gcd",
+    "binary_args": "55",
+    "test_timeout": 10,
+    "language": "c"
+  },
   {
-   "id": 4,
-   "subject": "test-suite",
-   "bug_id": "update-if",
-   "source_file": "test.c",
-   "line_numbers": [7],
-   "failing_test": "3",
-   "passing_test": "1,2,4,5",
-   "count_neg": 1,
-   "count_pos": 4,
-   "binary_path": "test",
-   "crash_input": "1",
-   "test_timeout": 10
- },
+    "id": 4,
+    "subject": "java-test-suite",
+    "bug_id": "leap-year",
+    "bug_type": "Incorrect Output",
+    "source_directory": "src/main/java",
+    "class_directory": "target/classes",
+    "test_directory": "src/test/java",
+    "test_class_directory": "target/test-classes",
+    "output_dir_abspath": "/output",
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "clean_command": "mvn clean",
+    "build_command": "mvn -DskipTests -Drat.skip=true clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "test_all_cmd": "mvn test",
+    "src": {
+      "root_abspath": "/experiment/examples/java-test-suite/leap-year/src",
+      "entrypoint": {}
+    },
+    "localization": [
+      {
+        "source_file": "src/main/java/sg/edu/nus/comp/cerberus/LeapYear.java",
+        "location": "sg.edu.nus.comp.cerberus$LeapYear#LeapChecking(int)",
+        "score": 1.0,
+        "line_numbers": [
+          7
+        ]
+      }
+    ],
+
+    "failing_test_identifiers": [
+      "sg.nus.comp.cerberus.Test1",
+      "sg.nus.comp.cerberus.Test2",
+      "sg.nus.comp.cerberus.Test6"
+    ],
+    "passing_test_identifiers": [
+      "sg.nus.comp.cerberus.Test0",
+      "sg.nus.comp.cerberus.Test3",
+      "sg.nus.comp.cerberus.Test4",
+      "sg.nus.comp.cerberus.Test5",
+      "sg.nus.comp.cerberus.Test7",
+      "sg.nus.comp.cerberus.Test8"
+    ],
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [],
+                "benign_inputs": [],
+                "exploit_file_list": [],
+                "test_dir_abspath": ""
+            }
+    ],
+    "exploit_file_list": [],
+    "dependencies": [
+            "src/target/all-dependencies.jar"
+    ],
+    "java_version": 8,
+    "build_system": "maven",
+    "count_neg": 3,
+    "count_pos": 6,
+    "test_timeout": 10,
+    "language": "java"
+  },
   {
-   "id": 5,
-   "subject": "test-suite",
-   "bug_id": "gcd",
-   "source_file": "gcd.c",
-   "line_numbers": [10],
-   "failing_test": "11",
-   "passing_test": "1,2,3,4,5,6,7,8,9,10",
-   "count_neg": 1,
-   "count_pos": 10,
-   "binary_path": "gcd",
-   "crash_input": "55",
-   "test_timeout": 10
- }
+    "id": 5,
+    "subject": "java-test-suite",
+    "bug_id": "calculator",
+    "bug_type": "Incorrect Output",
+    "source_directory": "src/main/java",
+    "class_directory": "target/classes",
+    "test_directory": "src/test/java",
+    "test_class_directory": "target/test-classes",
+    "output_dir_abspath": "/output",
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "clean_command": "mvn clean",
+    "build_command": "mvn -DskipTests -Drat.skip=true clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "compile_cmd": "mvn -DskipTests clean install -Dhttps.protocols=TLSv1.2 -Denforcer.skip=true -Dcheckstyle.skip=true -Dcobertura.skip=true -DskipITs=true -Drat.skip=true -Dlicense.skip=true -Dpmd.skip=true -Dfindbugs.skip=true -Dgpg.skip=true -Dskip.npm=true -Dskip.gulp=true -Dskip.bower=true -Danimal.sniffer.skip=true -V -B",
+    "test_all_cmd": "mvn test",
+    "src": {
+      "root_abspath": "/experiment/examples/java-test-suite/leap-year/src",
+      "entrypoint": {}
+    },
+    "localization": [
+      {
+        "source_file": "src/main/java/cerberus/Calculator.java",
+        "location": "cerberus$Calculator#wrongAdd(int, int)",
+        "score": 1.0,
+        "line_numbers": [
+          5
+        ]
+      }
+    ],
+
+    "failing_test_identifiers": [
+      "cerberus.CalculatorTest",
+      "cerberus.Test0",
+      "cerberus.Test1"
+    ],
+    "passing_test_identifiers": [
+      "cerberus.Test2",
+      "cerberus.Test3",
+      "cerberus.Test4",
+      "cerberus.Test5"
+    ],
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [],
+                "benign_inputs": [],
+                "exploit_file_list": [],
+                "test_dir_abspath": ""
+            }
+    ],
+    "exploit_file_list": [],
+    "dependencies": [
+            "src/target/all-dependencies.jar"
+    ],
+    "java_version": 8,
+    "build_system": "maven",
+    "count_neg": 1,
+    "count_pos": 1,
+    "test_timeout": 10,
+    "language": "java"
+  },
+  {
+    "id": 6,
+    "subject": "python-test-suite",
+    "bug_id": "calculator",
+    "bug_type": "Incorrect Output",
+    "output_dir_abspath": "/output",
+    "config_script": "config.sh",
+    "build_script": "build.sh",
+    "clean_script": "clean.sh",
+    "test_script": "test.sh",
+    "src": {
+      "root_abspath": "/experiment/examples/python-test-suite/calculator/src",
+      "entrypoint": {}
+    },
+    "localization": [
+      {
+        "source_file": "calculator.py",
+        "score": 1.0,
+        "line_numbers": [
+          4
+        ]
+      }
+    ],
+
+    "failing_test_identifiers": [
+      "test_0",
+      "test_1"
+    ],
+    "passing_test_identifiers": [
+      "test_2",
+      "test_3",
+      "test_4",
+      "test_5"
+    ],
+    "analysis_output": [
+            {
+                "generator": "benchmark provided",
+                "exploit_inputs": [],
+                "benign_inputs": [],
+                "exploit_file_list": [],
+                "test_dir_abspath": ""
+            }
+    ],
+    "exploit_file_list": [],
+    "count_neg": 2,
+    "count_pos": 4,
+    "test_timeout": 10,
+    "language": "python"
+  }
 ]

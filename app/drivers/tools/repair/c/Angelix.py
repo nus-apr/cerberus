@@ -1,35 +1,37 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Set
 
 from app.core import container
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Angelix(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mechtaev/angelix:1.1"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(Angelix, self).run_repair(
-            bug_info,
-            repair_config_info,
-        )
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        source_file = str(bug_info[self.key_fix_file])
-        fix_line_number_list = bug_info[self.key_fix_lines]
-        fix_location = bug_info[self.key_fix_loc]
-        timeout = str(repair_config_info[self.key_timeout])
-        failing_test_list = bug_info[self.key_failing_tests]
-        passing_test_list = bug_info[self.key_passing_tests]
+        source_file = str(bug_info[self.key_localization][0][self.key_fix_file])
+        fix_line_number_list = bug_info[self.key_localization][0][self.key_fix_lines]
+        fix_location = bug_info[self.key_localization][0][self.key_fix_loc]
+        timeout = str(task_config_info[self.key_timeout])
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
         subject_name = bug_info[self.key_subject]
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
@@ -43,10 +45,12 @@ class Angelix(AbstractRepairTool):
         timeout_s = int(timeout) * 3600
         syn_timeout = int(0.25 * timeout_s * 1000)
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += test_id + " "
-        if passing_test_list:
-            filtered_list = self.filter_tests(passing_test_list, subject_name, bug_id)
+        if passing_test_identifiers_list:
+            filtered_list = self.filter_tests(
+                passing_test_identifiers_list, subject_name, bug_id
+            )
             for test_id in filtered_list:
                 test_id_list += test_id + " "
 
@@ -95,8 +99,7 @@ class Angelix(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
-
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         # dir_artifact = dir_info["artifact"]
         # execute_command("rm /tmp/find_dir")
         # dir_patch = join(self.dir_expr, "patches")
@@ -107,7 +110,7 @@ class Angelix(AbstractRepairTool):
         #
         # dir_patch_local = dir_output + "/patches"
         if self.container_id:
-            container.fix_permissions(self.container_id, "/output")
+            container.fix_permissions(self.container_id, self.dir_output)
         # if os.path.isdir(dir_patch_local):
         #     output_patch_list = [f for f in listdir(dir_patch_local) if isfile(join(dir_patch_local, f)) and ".patch" in f]
         #     for f in output_patch_list:
@@ -126,34 +129,9 @@ class Angelix(AbstractRepairTool):
 
         super(Angelix, self).save_artifacts(dir_info)
 
-    def instrument(self, bug_info):
-        """instrumentation for the experiment as needed by the tool"""
-        self.emit_normal(" instrumenting for " + self.name)
-        bug_id = bug_info[self.key_bug_id]
-        task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info[self.key_fix_file]
-        self.log_instrument_path = (
-            self.dir_logs
-            + "/"
-            + task_conf_id
-            + "-"
-            + self.name
-            + "-"
-            + bug_id
-            + "-instrument.log"
-        )
-        command_str = "bash instrument.sh {} {}".format(self.dir_expr, buggy_file)
-        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        if status not in [0, 126]:
-            self.error_exit(
-                "error with instrumentation of "
-                + self.name
-                + "; exit code "
-                + str(status)
-            )
-        return
-
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -272,7 +250,9 @@ class Angelix(AbstractRepairTool):
         self.stats.error_stats.is_error = is_error
         return self.stats
 
-    def filter_tests(self, test_id_list: List[str], subject, bug_id):
+    def filter_tests(
+        self, test_id_list: List[str], subject: str, bug_id: str
+    ) -> List[str]:
         filtered_list: List[str] = []
         filter_list: List[int] = []
         if str(subject).lower() == "gzip":
@@ -284,4 +264,4 @@ class Angelix(AbstractRepairTool):
             if int(t_id) not in filter_list:
                 filtered_list.append(t_id)
 
-        return filtered_list
+        return list(map(str, filtered_list))

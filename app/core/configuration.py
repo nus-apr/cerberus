@@ -7,15 +7,20 @@ from argparse import Namespace
 from copy import deepcopy
 from os.path import join
 from typing import Any
+from typing import cast
 from typing import Dict
+from typing import Iterable
 from typing import List
 
 from app.core import definitions
 from app.core import emitter
 from app.core import utilities
 from app.core import values
+from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.typing.TaskList import TaskList
+from app.core.task.typing.TaskType import compare_types
+from app.core.task.typing.TaskType import CompositeTaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.MockTool import MockTool
@@ -35,7 +40,7 @@ def load_profiles(profile_file_path: str) -> Dict[str, Dict[str, Any]]:
     return json_data
 
 
-def load_class(class_name: str):
+def load_class(class_name: str) -> Any:
     components = class_name.split(".")
     mod = __import__(components[0])
     for comp in components[1:]:
@@ -65,7 +70,7 @@ def load_tool(tool_name: str, tool_type: str) -> AbstractTool:
         )
         tool_class = getattr(mod, tool_class_name)
         initializer = getattr(tool_class, tool_class_name)
-        return initializer()
+        return cast(AbstractTool, initializer())
 
 
 def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
@@ -97,12 +102,48 @@ def load_benchmark(benchmark_name: str) -> AbstractBenchmark:
         )
         benchmark_class = getattr(mod, str(benchmark_class_name))
         initializer = getattr(benchmark_class, str(benchmark_class_name))
-        return initializer()
+        return cast(AbstractBenchmark, initializer())
+
+
+def process_overrides(parsed_args: Namespace, config: Config) -> None:
+    if parsed_args.debug:
+        config.general.debug_mode = True
+    if parsed_args.secure_hash:
+        config.general.secure_hash = True
+    if parsed_args.parallel:
+        config.general.parallel_mode = True
+    if parsed_args.cpu_count:
+        config.general.cpus = parsed_args.cpu_count
+    if parsed_args.gpu_count:
+        config.general.gpus = parsed_args.gpu_count
+    if parsed_args.subsequence:
+        start, end = parsed_args.subsequence.split("-")
+        start = start.replace("_", "-")
+        end = end.replace("_", "-")
+        for chunk in config.tasks_configs_list:
+            if chunk.task_config.task_type == "composite":
+                for task_type, tools in cast(
+                    Dict[CompositeTaskType, List[Dict[str, Any]]],
+                    getattr(chunk.task_config, "composite_sequence"),
+                ).items():
+                    if not (
+                        compare_types(task_type, start) >= 0
+                        and compare_types(task_type, end) <= 0
+                    ):
+                        for tool_info in tools:
+                            tool_info["ignore"] = True
+    if parsed_args.rebuild_all:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_all = True
+    if parsed_args.rebuild_base:
+        for x in config.tasks_configs_list:
+            x.task_config.rebuild_base = True
 
 
 class Configurations:
     __email_config_file = open(join(values.dir_config, "email.json"))
     __slack_config_file = open(join(values.dir_config, "slack.json"))
+    __api_config_file = open(join(values.dir_config, "api.json"))
     __discord_config_file = open(join(values.dir_config, "discord.json"))
     __default_config_values: Dict[str, Any] = {
         "use-cache": False,
@@ -140,10 +181,11 @@ class Configurations:
         "task-profile-id-list": ["TP1"],
         "container-profile-id-list": ["CP1"],
         "use-latest-image": False,
+        "use-subject-as-base": False,
     }
     __runtime_config_values = __default_config_values
 
-    def convert_range(self, x):
+    def convert_range(self, x: str) -> Iterable[int]:
         parts = x.split("-")
         if len(parts) == 1:
             return [int(parts[0])]
@@ -153,9 +195,9 @@ class Configurations:
         end = 9999 if parts[1] == "" else int(parts[1])
         return range(start, end + 1)
 
-    def read_arg_list(self, arg_list: Namespace):
+    def read_arg_list(self, arg_list: Namespace) -> None:
         emitter.normal("\t[framework] reading configuration values from arguments")
-        flat_map = lambda f, xs: (y for ys in xs for y in f(ys))
+
         self.__runtime_config_values["task-type"] = arg_list.task_type
 
         if arg_list.docker_host:
@@ -217,8 +259,14 @@ class Configurations:
         if arg_list.only_instrument:
             self.__runtime_config_values["only-instrument"] = True
 
+        if arg_list.use_subject_as_base:
+            self.__runtime_config_values["use-subject-as-base"] = True
+
         if arg_list.use_latest_image:
             self.__runtime_config_values["use-latest-image"] = True
+
+        if arg_list.subject_based:
+            self.__runtime_config_values["use-subject-as-base"] = True
 
         if arg_list.parallel:
             self.__runtime_config_values["parallel"] = True
@@ -228,7 +276,7 @@ class Configurations:
 
         if arg_list.bug_index_list:
             self.__runtime_config_values["bug-index-list"] = list(
-                flat_map(
+                utilities.flat_map(
                     self.convert_range,
                     str(arg_list.bug_index_list).split(","),
                 )
@@ -272,16 +320,16 @@ class Configurations:
             self.__runtime_config_values["use-gpu"] = arg_list.use_gpu
 
         if arg_list.task_profile_id_list:
-            self.__runtime_config_values[
-                "task-profile-id-list"
-            ] = arg_list.task_profile_id_list
+            self.__runtime_config_values["task-profile-id-list"] = (
+                arg_list.task_profile_id_list
+            )
 
         if arg_list.container_profile_id_list:
-            self.__runtime_config_values[
-                "container-profile-id-list"
-            ] = arg_list.container_profile_id_list
+            self.__runtime_config_values["container-profile-id-list"] = (
+                arg_list.container_profile_id_list
+            )
 
-    def read_slack_config_file(self):
+    def read_slack_config_file(self) -> None:
         slack_config_info = {}
         if self.__slack_config_file:
             slack_config_info = json.load(self.__slack_config_file)
@@ -304,7 +352,21 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for slack.")
 
-    def read_email_config_file(self):
+    def read_api_config_file(self) -> None:
+        api_config_info = {}
+        if self.__api_config_file:
+            api_config_info = json.load(self.__api_config_file)
+        for key, value in api_config_info.items():
+            if key in values.api_configuration and type(value) == type(
+                values.api_configuration[key]
+            ):
+                values.api_configuration[key] = value
+            else:
+                utilities.error_exit(
+                    "[error] Unknown key {} or invalid type of value".format(key)
+                )
+
+    def read_email_config_file(self) -> None:
         email_config_info = {}
         if self.__email_config_file:
             email_config_info = json.load(self.__email_config_file)
@@ -324,7 +386,7 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for email.")
 
-    def read_discord_config_file(self):
+    def read_discord_config_file(self) -> None:
         discord_config_info = {}
         if self.__discord_config_file:
             discord_config_info = json.load(self.__discord_config_file)
@@ -343,12 +405,14 @@ class Configurations:
         ):
             utilities.error_exit("[error] invalid configuration for discord.")
 
-    def print_configuration(self):
+    def print_configuration(self) -> None:
         for config_key, config_value in self.__runtime_config_values.items():
             if config_value is not None:
                 emitter.configuration(config_key, config_value)
 
-    def filter_experiment_list(self, benchmark: AbstractBenchmark):
+    def filter_experiment_list(
+        self, benchmark: AbstractBenchmark
+    ) -> List[Dict[str, Any]]:
         filtered_list = []
         experiment_list = benchmark.get_list()
         for bug_index in range(1, benchmark.size + 1):
@@ -406,6 +470,7 @@ class Configurations:
                     values.use_container,
                     values.use_gpu,
                     values.use_purge,
+                    values.use_subject_as_base,
                     values.runs,
                 )
 
@@ -454,7 +519,7 @@ class Configurations:
         for tool_name in self.tool_list:
             tool = load_tool(tool_name, self.task_type)
             if not values.only_analyse:
-                tool.check_tool_exists()
+                tool.ensure_tool_exists()
             tool_list.append(tool)
         emitter.highlight(
             f"\t[framework] {self.task_type}-tool(s): "
@@ -467,7 +532,7 @@ class Configurations:
         emitter.highlight(f"\t[framework] {self.task_type}-benchmark: {benchmark.name}")
         return benchmark
 
-    def update_configuration(self):
+    def update_configuration(self) -> None:
         emitter.normal("\t[framework] updating configuration values")
         self.task_type = self.__runtime_config_values["task-type"]
         values.task_type.set(self.__runtime_config_values["task-type"])
@@ -485,6 +550,7 @@ class Configurations:
 
         values.use_parallel = self.__runtime_config_values["parallel"]
         values.use_latest_image = self.__runtime_config_values["use-latest-image"]
+        values.use_subject_as_base = self.__runtime_config_values["use-subject-as-base"]
 
         self.benchmark_name = self.__runtime_config_values["benchmark-name"]
         self.subject_name = self.__runtime_config_values["subject-name"]

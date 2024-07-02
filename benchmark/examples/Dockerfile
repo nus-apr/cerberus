@@ -5,62 +5,40 @@ RUN apt-get update && apt-get upgrade -y && apt-get autoremove -y
 
 # install experiment dependencies
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends  \
+    ant \
     automake \
     autopoint \
     bison \
     flex \
+    g++-multilib \
+    gcc-multilib \
     gettext \
     git \
     gperf \
-    libass-dev \
     libfreetype6 \
     libfreetype6-dev \
-    libjpeg-dev \
-    liblzma-dev \
-    libnuma-dev \
-    libpciaccess-dev \
+    libgdbm-dev \
+    libglib2.0-dev \
+    libguice-java \
     libpython-dev \
     libpython3-dev \
-    libsdl1.2-dev  \
-    libsqlite3-dev \
     libtool \
     libvdpau-dev \
-    libx11-dev \
-    libxcb-xfixes0-dev \
-    libxcb1-dev \
-    libxcb-shm0-dev \
-    libxml2-dev \
-    nasm \
+    m4 \
+    maven \
+    mercurial \
     nano \
+    nasm \
+    openjdk-11-jdk \
+    openjdk-11-jdk-headless \
     pkg-config \
     psmisc \
     python3 \
-    texinfo \
-    xutils-dev \
-    yasm \
-    m4 \
-    libglib2.0-dev \
-    libldap-dev \
-    libbz2-dev \
-    libssl-dev \
-    libsqlite3-dev \
-    libxml2-dev \
-    libgdbm-dev \
     subversion \
-    libc6-dev-i386 \
-    mercurial \
-    libncurses-dev \
-    libsqlite-dev \
-    libgdbm-dev \
-    libssl-dev \
-    libreadline-gplv2-dev \
-    libbz2-dev \
-    psmisc \
-    libsqlite3-dev \
-    gcc-multilib \
-    g++-multilib \
-    tk-dev \
-    mercurial \
     tcl-dev \
+    texinfo \
     tix-dev \
-    unzip
+    tk-dev \
+    unzip \
+    xutils-dev \
+    yasm

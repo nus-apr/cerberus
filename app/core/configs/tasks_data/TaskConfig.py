@@ -1,5 +1,4 @@
 from typing import Any
-from typing import cast
 from typing import Dict
 from typing import Optional
 
@@ -28,9 +27,10 @@ class TaskConfig(TaskDefaultConfig):
         use_container: bool,
         use_gpu: bool,
         use_purge: bool,
+        use_subject_as_base: bool,
         runs: int = 1,
+        **kwargs: Dict[str, Any]
     ):
-
         super().__init__(
             compact_results,
             dump_patches,
@@ -45,10 +45,15 @@ class TaskConfig(TaskDefaultConfig):
             use_container,
             use_gpu,
             use_purge,
+            use_subject_as_base,
             runs,
         )
 
-        self.task_type = cast(TaskType, task_type)
+        if any(kwargs):
+            print("Dictionary is not empty, please check whether this is okay behavior")
+            print(kwargs)
+
+        self.task_type = task_type
         self.task_profile: Optional[TaskProfile] = None
         self.container_profile: Optional[ContainerProfile] = None
         self.bug_id: Optional[str] = None

@@ -4,14 +4,17 @@ import sys
 import time
 from os.path import join
 from typing import Any
+from typing import Dict
 from typing import List
+from typing import Tuple
 
+from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.plugins import valkyrie
 
 
-def mute():
+def mute() -> None:
     sys.stdout = open(os.devnull, "w")
     sys.stderr = open(os.devnull, "w")
 
@@ -26,7 +29,7 @@ len_processed = 0
 total_timeout = 0
 
 
-def initialize():
+def initialize() -> None:
     global validator_pool, exit_consume, consume_count, len_gen, len_processed, total_timeout, result_list
     if values.use_vthreads:
         validator_pool = mp.Pool(max_process_count, initializer=mute)
@@ -39,17 +42,21 @@ def initialize():
     values.list_consumed = []
 
 
-def collect_result(result):
+def collect_result(result: str) -> Any:
     global result_list
     result_list.append(result)
 
 
-def consume_patches(path_info, dir_info, repair_config_info):
+def consume_patches(
+    path_info: Tuple[str, str, str],
+    dir_info: Tuple[str, str],
+    task_config_info: Dict[str, Any],
+) -> None:
     global exit_consume, consume_count, validator_pool, len_gen, len_processed, total_timeout
 
     binary_path, oracle_path, source_file = path_info
     dir_patch, dir_process = dir_info
-    _, _, total_timeout, _ = repair_config_info
+    total_timeout = task_config_info[definitions.KEY_CONFIG_TIMEOUT]
 
     list_dir = os.listdir(dir_patch)
     len_gen = len(list_dir)
@@ -108,12 +115,12 @@ def consume_patches(path_info, dir_info, repair_config_info):
             if values.use_vthreads and validator_pool:
                 validator_pool.apply_async(
                     valkyrie.validate_patch,
-                    args=(dir_info, file_info, repair_config_info),
+                    args=(dir_info, file_info, task_config_info),
                     callback=collect_result,
                 )
             else:
                 result_list.append(
-                    valkyrie.validate_patch(dir_info, file_info, repair_config_info)
+                    valkyrie.validate_patch(dir_info, file_info, task_config_info)
                 )
 
             consume_count += 1
@@ -121,7 +128,7 @@ def consume_patches(path_info, dir_info, repair_config_info):
         len_consumed = len(values.list_consumed)
 
 
-def wait_validation():
+def wait_validation() -> None:
     global exit_consume, validator_pool, len_gen, consume_count, len_processed, total_timeout
     # Notify threads it's time to exit
     time.sleep(5)

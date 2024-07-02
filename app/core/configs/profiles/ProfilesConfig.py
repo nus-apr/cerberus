@@ -16,7 +16,9 @@ class ProfilesConfig:
         self.task_profiles_list = task_profiles_list
 
     @staticmethod
-    def get_profile_by_id(profile_id: str, profiles_list: Sequence[AbstractProfile]):
+    def get_profile_by_id(
+        profile_id: str, profiles_list: Sequence[AbstractProfile]
+    ) -> AbstractProfile:
         try:
             found_element = next(
                 profile for profile in profiles_list if profile.id == profile_id

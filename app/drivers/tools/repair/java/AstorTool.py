@@ -1,8 +1,13 @@
 import math
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 from typing import Optional
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -12,20 +17,21 @@ class AstorTool(AbstractRepairTool):
     astor_version = "2.0.0"
     mode: Optional[str] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(self.name)
         self.image_name = "rshariffdeen/astor"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(AstorTool, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = str(float(timeout_h) * 60)
         max_gen = 1000000
 
@@ -34,14 +40,48 @@ class AstorTool(AbstractRepairTool):
         dir_java_bin = bug_info[self.key_dir_source]
         dir_test_bin = bug_info[self.key_dir_test_class]
 
-        # there is a bug in running Lang subjects with asm.jar
+        env = {}
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
+        )
+
         list_deps = [
-            f"{self.dir_expr}/{x}"
-            for x in bug_info["dependencies"]
-            if not (bug_info[self.key_subject].lower() == "lang" and "asm.jar" in x)
+            join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
         ]
-        list_deps.append(f"{self.astor_home}/external/lib/hamcrest-core-1.3.jar")
-        list_deps.append(f"{self.astor_home}/external/lib/junit-4.11.jar")
+        list_deps += [
+            join(self.astor_home, "external", "lib", "hamcrest-core-1.3.jar"),
+            join(self.astor_home, "external", "lib", "junit-4.12.jar"),
+        ]
+        # Ensure the dependencies exist
+        if bug_info[self.key_build_system] == "maven":
+            self.run_command(
+                f"mvn dependency:copy-dependencies",
+                dir_path=join(self.dir_expr, "src"),
+                env=env,
+            )
+            # Add common folders for deependencies
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+            list_deps += [
+                x
+                for x in self.list_dir(
+                    join(self.dir_expr, "src", "test", "target", "dependency")
+                )
+                if x.endswith(".jar")
+            ]
+
         list_deps_str = ":".join(list_deps)
 
         # generate patches
@@ -63,14 +103,15 @@ class AstorTool(AbstractRepairTool):
             f"-stopfirst false "
         )
 
-        status = self.run_command(repair_command, self.log_output_path, self.astor_home)
-
+        status = self.run_command(
+            repair_command, self.log_output_path, self.astor_home, env=env
+        )
         self.process_status(status)
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -85,7 +126,9 @@ class AstorTool(AbstractRepairTool):
             self.run_command(copy_command)
         super(AstorTool, self).save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

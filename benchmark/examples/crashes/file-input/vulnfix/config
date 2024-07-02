@@ -1,5 +1,0 @@
-fix-location=test.c:19
-crash-location=test.c:4
-fix-file-path=test.c
-fix-line=19
-build-cmd=make clean && make CFLAGS="-fsanitize=address -fsanitize=undefined -g" CXXFLAGS="-fsanitize=address -fsanitize=undefined -g" -j10

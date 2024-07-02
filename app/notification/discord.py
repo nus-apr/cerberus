@@ -10,7 +10,7 @@ max_length = (
 )
 
 
-def send_message(message):
+def send_message(message: str) -> None:
     webhook = SyncWebhook.from_url(cast(str, values.discord_configuration["hook_url"]))
 
     chunks = len(message) / max_length

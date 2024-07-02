@@ -1,11 +1,13 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
 
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class RepairLlama(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(RepairLlama, self).__init__(self.name)
         self.image_name = "andre15silva/repairllama:latest"
@@ -13,13 +15,14 @@ class RepairLlama(AbstractRepairTool):
             "sha256:84e6a0edc81b9edd08158c41a0ada00aa96ee9dbda699435c61f7f07669af513"
         )
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(RepairLlama, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
         dir_java_src = join(self.dir_expr, "src", bug_info["source_directory"])
         dir_test_src = join(self.dir_expr, "src", bug_info["test_directory"])
@@ -37,7 +40,7 @@ class RepairLlama(AbstractRepairTool):
             f"--patch_directory {patch_directory}"
         )
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         repair_command = f"timeout -k 5m {timeout_h}h {command} "
         self.timestamp_log_start()
         status = self.run_command(repair_command, log_file_path=self.log_output_path)
