@@ -103,6 +103,22 @@ class Prompter(AbstractRepairTool):
         self.create_api_auth()
         self.config_file = self.generate_config_file(bug_info)
 
+    def create_meta_data(self) -> None:
+        patch_info_json = join(self.dir_output, "generated_patches.json")
+        if self.is_file(patch_info_json):
+            patch_info = self.read_json(patch_info_json)
+            patch_list = []
+            if isinstance(patch_info, Dict):
+                patch_list = patch_info["patches"]
+            metadata = {
+                "patches_dir": join(self.dir_output, "patches"),
+                "patches": patch_list,
+            }
+            self.write_json(
+                metadata,
+                join(self.dir_output, "meta-data.json"),
+            )
+
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
@@ -133,23 +149,8 @@ class Prompter(AbstractRepairTool):
 
         copy_cmd = f"cp -rf {self.output_path}/* {self.dir_output}"
         self.run_command(copy_cmd, run_as_sudo=True)
-
         self.process_status(status)
-        patch_info_json = join(self.dir_output, "generated_patches.json")
-        if self.is_file(patch_info_json):
-            patch_info = self.read_json(patch_info_json)
-            patch_list = []
-            if isinstance(patch_info, Dict):
-                patch_list = patch_info["patch_info"]
-            metadata = {
-                "patches_dir": join(self.dir_output, "patches"),
-                "patches": patch_list,
-            }
-            self.write_json(
-                metadata,
-                join(self.dir_output, "meta-data.json"),
-            )
-
+        self.create_meta_data()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
