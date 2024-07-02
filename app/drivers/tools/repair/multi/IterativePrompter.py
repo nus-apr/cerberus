@@ -42,6 +42,16 @@ class IterativePrompter(Prompter):
         config_object["base_dir"] = src_dir
 
         fix_locations = []
+        stack_trace = bug_info[self.key_stack_trace]
+        for result in stack_trace:
+            source_file = result[self.key_fix_file]
+            if src_dir in source_file:
+                source_file = source_file.replace(src_dir + "/", "")
+            line_number = result["line"]
+            fix_locations.append(
+                {"source_path": source_file, "line_number": line_number}
+            )
+
         localization_list = bug_info[self.key_localization]
         for result in localization_list:
             source_file = result[self.key_fix_file]
