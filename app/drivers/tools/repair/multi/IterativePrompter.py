@@ -43,7 +43,8 @@ class IterativePrompter(Prompter):
 
         fix_locations = []
         stack_trace = bug_info[self.key_stack_trace]
-        for result in stack_trace:
+        stack_limit = 5
+        for result in stack_trace[:stack_limit]:
             source_file = result[self.key_fix_file]
             if src_dir in source_file:
                 source_file = source_file.replace(src_dir + "/", "")
