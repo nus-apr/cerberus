@@ -74,20 +74,20 @@ class IterativePrompter(Prompter):
         return repair_config_path
 
     def create_meta_data(self) -> None:
+        patch_list = []
         patch_info_json = join(self.dir_output, "generated_feedback_patches.json")
         if self.is_file(patch_info_json):
             patch_info = self.read_json(patch_info_json)
-            patch_list = []
             if isinstance(patch_info, Dict):
                 patch_list = patch_info["patches"]
-            metadata = {
-                "patches_dir": join(self.dir_output, "patches"),
-                "patches": patch_list,
-            }
-            self.write_json(
-                metadata,
-                join(self.dir_output, "meta-data.json"),
-            )
+        metadata = {
+            "patches_dir": join(self.dir_output, "patches"),
+            "patches": patch_list,
+        }
+        self.write_json(
+            metadata,
+            join(self.dir_output, "meta-data.json"),
+        )
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
