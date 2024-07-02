@@ -85,13 +85,15 @@ class Prompter(AbstractRepairTool):
         config_object["language"] = bug_info[self.key_language].lower()
         config_object["output_dir"] = self.output_path
         config_object["cwe_id"] = bug_info["cwe_id"]
+        src_dir = join(self.dir_expr, "src")
+        config_object["base_dir"] = src_dir
 
         fix_locations = []
         localization_list = bug_info[self.key_localization]
         for result in localization_list:
             source_file = result[self.key_fix_file]
-            if self.dir_expr not in source_file:
-                source_file = join(self.dir_expr, "src", source_file)
+            if src_dir in source_file:
+                source_file = source_file.replace(src_dir + "/", "")
             line_numbers = result[self.key_fix_lines]
             for _l in line_numbers:
                 fix_locations.append({"source_path": source_file, "line_number": _l})
