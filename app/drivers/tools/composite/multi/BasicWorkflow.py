@@ -87,6 +87,8 @@ class BasicWorkflow(AbstractCompositeTool):
         )
         self.last_crash = 0
         self.active_jobs = 0
+        self.repair_retry_map: Dict[str, int] = {}
+        self.max_retry_count = 1
 
     def invoke_advanced(
         self,
@@ -276,6 +278,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 "repair",
                 "validate",
                 "select",
+                "iterative-repair",
             ],
             [],
         ):
@@ -608,6 +611,11 @@ class BasicWorkflow(AbstractCompositeTool):
                 ("Analyze", self.analyze_root, self.on_analysis_finished),
                 ("Localize", self.localize_root, self.on_localization_finished),
                 ("Validate", self.validate_root, self.on_validation_finished),
+                (
+                    "IterativeRepair",
+                    self.iterative_repair_root,
+                    self.on_repair_finished,
+                ),
                 ("Select", self.select_root, self.on_selection_finished),
             ]:
                 if os.path.commonprefix([event.src_path, sub_root]) == sub_root:
@@ -908,8 +916,40 @@ class BasicWorkflow(AbstractCompositeTool):
 
     def on_validation_finished(self, event: FileSystemEvent) -> None:
         self.emit_highlight("Validation finished")
-        self.on_task_finished(event, ["select"])
-        pass
+        internal_data = self.read_json(
+            join(dirname(event.src_path), definitions.INTERNAL_METADATA_JSON)
+        )
+        if not isinstance(internal_data, Dict):
+            return
+        validation_output = self.read_json(event.src_path)
+        validation_result = []
+        if isinstance(validation_output, List):
+            validation_result = validation_output[0]["validation_output"]
+        patch_info: list[list[str]] = validation_result[0]["validation_result"]
+        dir_info = internal_data["dir_info"]
+        bug_info = internal_data["bug_info"]
+        patch_dir = dir_info["local"]["patches"]
+        plausible_patches = []
+        for patch_name, patch_class in patch_info:
+            if patch_class.startswith("pass"):
+                plausible_patches.append(join(patch_dir, *patch_name.split(":")))
+
+        if len(plausible_patches) < 1:
+            self.emit_warning(f"No plausible patch found!")
+            bug_id = bug_info.get(self.key_bug_id, "")
+            if bug_id not in self.repair_retry_map:
+                self.repair_retry_map[bug_id] = 0
+            retry_count = self.repair_retry_map[bug_id] + 1
+            if retry_count <= self.max_retry_count:
+                self.repair_retry_map[bug_id] = retry_count
+                self.emit_warning(
+                    f"setting up iterative repair, retry count {retry_count}"
+                )
+                self.on_task_finished(event, ["iterative-repair"])
+                return
+        else:
+            self.on_task_finished(event, ["select"])
+            pass
 
     def on_selection_finished(self, event: FileSystemEvent) -> None:
         self.emit_highlight("Selection finished")
@@ -1238,6 +1278,9 @@ class BasicWorkflow(AbstractCompositeTool):
             "crash-analyze": {
                 join(root_dir, "crash-analyze"): {"bind": "/output", "mode": "rw"}
             },
+            "iterative-repair": {
+                join(root_dir, "iterative-repair"): {"bind": "/output", "mode": "rw"}
+            },
         }
 
         self.repair_root = list(task_mappings["repair"].keys())[0]
@@ -1247,6 +1290,7 @@ class BasicWorkflow(AbstractCompositeTool):
         self.validate_root = list(task_mappings["validate"].keys())[0]
         self.localize_root = list(task_mappings["localize"].keys())[0]
         self.crash_analyze_root = list(task_mappings["crash-analyze"].keys())[0]
+        self.iterative_repair_root = list(task_mappings["iterative-repair"].keys())[0]
 
         self.emit_debug(task_mappings)
         for task in task_mappings.values():

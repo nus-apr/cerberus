@@ -71,6 +71,8 @@ class AbstractRepairTool(AbstractTool):
             run_index,
             hash,
         )
+
+    def create_meta_data(self) -> None:
         self.write_json(
             [{"patches_dir": join(self.dir_output, "patches")}],
             join(self.dir_output, "meta-data.json"),

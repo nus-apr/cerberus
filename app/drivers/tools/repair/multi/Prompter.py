@@ -135,6 +135,21 @@ class Prompter(AbstractRepairTool):
         self.run_command(copy_cmd, run_as_sudo=True)
 
         self.process_status(status)
+        patch_info_json = join(self.dir_output, "generated_patches.json")
+        if self.is_file(patch_info_json):
+            patch_info = self.read_json(patch_info_json)
+            patch_list = []
+            if isinstance(patch_info, Dict):
+                patch_list = patch_info["patch_info"]
+            metadata = {
+                "patches_dir": join(self.dir_output, "patches"),
+                "patches": patch_list,
+            }
+            self.write_json(
+                metadata,
+                join(self.dir_output, "meta-data.json"),
+            )
+
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 

@@ -14,7 +14,9 @@ TaskType = Literal[
     "validate",
 ]
 
-CompositeTaskType = Union[TaskType, Literal["crash-analyze"]]
+CompositeTaskType = Union[
+    TaskType, Literal["crash-analyze"], Literal["iterative-repair"]
+]
 
 
 def compare_types(a: CompositeTaskType, b: CompositeTaskType) -> int:

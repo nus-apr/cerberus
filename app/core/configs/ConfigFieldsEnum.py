@@ -67,6 +67,7 @@ class ConfigFieldsEnum(Enum):
     VALIDATE = "validate"
     ANALYZE = "analyze"
     CRASH_ANALYZE = "crash-analyze"
+    ITERATIVE_REPAIR = "iterative-repair"
     LOCALIZE = "localize"
     SLICE = "slice"
     REPAIR = "repair"

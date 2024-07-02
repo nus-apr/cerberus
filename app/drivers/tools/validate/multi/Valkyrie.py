@@ -102,6 +102,16 @@ class Valkyrie(AbstractValidateTool):
         status = self.run_command(validate_command, self.log_output_path)
         self.process_status(status)
 
+        result_json_file = f"{self.dir_output}/result.json"
+        if self.is_file(result_json_file):
+            result_json = self.read_json(result_json_file)
+            new_metadata = {"generator": self.name, "validation_result": result_json}
+
+            self.write_json(
+                [{"validation_output": [new_metadata]}],
+                join(self.dir_output, "meta-data.json"),
+            )
+
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
@@ -145,6 +155,7 @@ class Valkyrie(AbstractValidateTool):
         result_json = self.read_json(result_json_file)
         if not isinstance(result_json, List):
             result_json = []
+
         self.stats.patch_stats.enumerations = len(result_json)
         malformed_count = 0
         build_fail_count = 0
