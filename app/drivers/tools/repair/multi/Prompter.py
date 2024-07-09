@@ -41,7 +41,8 @@ class Prompter(AbstractRepairTool):
         openai_token = self.api_keys.get(self.key_openai_token, None)
         anthropic_token = self.api_keys.get(self.key_anthropic_token, None)
         huggingface_token = self.api_keys.get(self.key_huggingface_token, "TOKEN")
-
+        azure_token = self.api_keys.get(self.key_azure_token, None)
+        azure_base = self.api_keys.get(self.key_azure_base, None)
         if not openai_token and not anthropic_token:
             self.error_exit(
                 f"{self.name} requires at least one API key for OpenAI or Anthropic"
@@ -61,6 +62,9 @@ class Prompter(AbstractRepairTool):
                 'data_path = "./megavul_simple.json"\n',
                 'chroma_path = "./data_store"\n',
                 'collection_name = "megavul"\n',
+                "[azure]\n",
+                f'azure_key = "{azure_token}"\n',
+                f'azure_endpoint = "{azure_base}"\n',
                 "[litellm]\n",
                 'litellm_key = "sk-1234"\n',
                 'litellm_hostname = "http://litellm"\n',
