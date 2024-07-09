@@ -378,7 +378,7 @@ class AbstractTool(AbstractDriver):
         self.update_dir_info(dir_info)
         self.update_experiment_info(experiment_info)
         for key, value in values.api_configuration.items():
-            if key in ["token", "base"]:
+            if any(x in key for x in ["token", "base"]):
                 self.api_keys[key] = value
         experiment_info[definitions.KEY_OUTPUT_DIR_ABSPATH] = self.dir_output
 
