@@ -108,6 +108,8 @@ api_configuration = {
     "openai_token": "",
     "anthropic_token": "",
     "huggingface_token": "",
+    "azure_token": "",
+    "azure_base": "",
     "gemini_token": {},
 }
 

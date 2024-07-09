@@ -104,6 +104,8 @@ class AbstractTool(AbstractDriver):
     key_tiebreak_files = definitions.KEY_TIEBREAKER_FILES
     key_build_system = definitions.KEY_BUILD_SYSTEM
     key_openai_token = definitions.KEY_OPENAI_TOKEN
+    key_azure_token = definitions.KEY_AZURE_TOKEN
+    key_azure_base = definitions.KEY_AZURE_BASE
     key_anthropic_token = definitions.KEY_ANTHROPIC_TOKEN
     key_huggingface_token = definitions.KEY_HUGGINGFACE_TOKEN
     key_bug_reports = definitions.KEY_BUG_REPORTS
@@ -376,7 +378,7 @@ class AbstractTool(AbstractDriver):
         self.update_dir_info(dir_info)
         self.update_experiment_info(experiment_info)
         for key, value in values.api_configuration.items():
-            if "token" in key:
+            if key in ["token", "base"]:
                 self.api_keys[key] = value
         experiment_info[definitions.KEY_OUTPUT_DIR_ABSPATH] = self.dir_output
 

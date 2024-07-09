@@ -2,6 +2,8 @@
   "openai_token": "",
   "anthropic_token": "",
   "huggingface_token": "",
+  "azure_token": "",
+  "azure_base": "",
   "gemini_token": {
     "project_id": "",
     "private_key_id": "",
