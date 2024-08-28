@@ -1,5 +1,6 @@
 import os
 import re
+from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
@@ -60,6 +61,13 @@ class CrashRepair(AbstractRepairTool):
         additional_tool_param = task_config_info[self.key_tool_params]
         patch_limit = 10
         bug_json_path = self.dir_expr + "/bug.json"
+
+        # modify rand_seed for fuzzer
+        bug_json_config = self.read_json(bug_json_path)
+        if isinstance(bug_json_config, Dict):
+            bug_json_config["fuzzer"]["seed"] = int(round(datetime.now().timestamp()))
+            self.write_json(bug_json_config, bug_json_path)
+
         self.timestamp_log_start()
         repair_command = (
             f"bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {str(timeout_h)}h "
