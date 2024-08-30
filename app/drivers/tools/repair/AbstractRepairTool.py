@@ -119,7 +119,7 @@ class AbstractRepairTool(AbstractTool):
             definitions.KEY_COUNT_POS,
         ]
         for k in interested_keys:
-            filtered_bug_info[k] = bug_info[k]
+            filtered_bug_info[k] = bug_info.get(k, None)
         repair_config_info["container-id"] = self.container_id
         self.stats.bug_info = filtered_bug_info
         self.stats.config_info = repair_config_info
