@@ -78,3 +78,6 @@
 	url = https://github.com/nus-apr/vulnloc-benchmark
         branch = instrumented
 
+[submodule "benchmark/efffix"]
+	path = benchmark/efffix
+	url = git@github.com:nus-apr/effFix-benchmark.git
