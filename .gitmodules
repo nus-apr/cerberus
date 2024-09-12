@@ -37,9 +37,6 @@
 [submodule "benchmark/saver"]
 	path = benchmark/saver
 	url = https://github.com/nus-apr/saver-benchmark
-[submodule "benchmark/efffix"]
-	path = benchmark/efffix
-	url = https://github.com/nus-apr/effFix-benchmark.git
 [submodule "benchmark/vul4j"]
 	path = benchmark/vul4j
 	url = https://github.com/nus-apr/vul4j.git
