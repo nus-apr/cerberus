@@ -1,6 +1,11 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -9,22 +14,23 @@ class Nopol(AbstractRepairTool):
     nopol_version = "0.0.3"
     dir_source = ""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "rshariffdeen/nopol"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(Nopol, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
-        failing_test_list = bug_info[self.key_failing_tests]
+        timeout_h = str(task_config_info[self.key_timeout])
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
         dir_java_src = self.dir_expr + "/src/" + bug_info["source_directory"]
         self.dir_source = dir_java_src
 
@@ -39,7 +45,7 @@ class Nopol(AbstractRepairTool):
 
         list_deps_str = ":".join(list_deps)
 
-        test_classes_str = " ".join(failing_test_list)
+        test_classes_str = " ".join(failing_test_identifiers_list)
         nopol_jar_path = (
             f"{self.nopol_home}/nopol/nopol-{self.nopol_version}"
             f"-SNAPSHOT-jar-with-dependencies.jar"
@@ -67,7 +73,7 @@ class Nopol(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -80,7 +86,9 @@ class Nopol(AbstractRepairTool):
         self.run_command(copy_command)
         super(Nopol, self).save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

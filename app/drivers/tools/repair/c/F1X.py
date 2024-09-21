@@ -1,12 +1,17 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class F1X(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "mechtaev/f1x:aprcomp24"
@@ -14,7 +19,7 @@ class F1X(AbstractRepairTool):
             "sha256:3f67b61292222c0b5a96ac01b887e9415f35283b5ca6e9b639be7d68f8bcb6c9"
         )
 
-    def rerun_configuration(self, config_script):
+    def rerun_configuration(self, config_script: str) -> None:
         self.emit_normal("re-running configuration")
         f1x_config_path = self.dir_expr + "/f1x-config"
         dir_src = join(self.dir_expr, "src")
@@ -31,17 +36,22 @@ class F1X(AbstractRepairTool):
         log_reconfig_path = join(self.dir_logs, "f1x-re-config.log")
         self.run_command(reconfig_command, log_file_path=log_reconfig_path)
 
-    def generate_test_driver(self, test_script):
+    def generate_test_driver(self, test_script: str) -> None:
         self.emit_normal(f"preparing test driver for {self.name}")
         test_driver_path = self.dir_expr + "/f1x-test"
         self.write_file(
-            ["#!/bin/bash\n", "bash {0} $@".format(test_script)],
+            [
+                "#!/bin/bash\n",
+                "bash {1} {0} $@".format(test_script, "-x" if self.is_debug else ""),
+            ],
             test_driver_path,
         )
         permission_command = "chmod +x {}".format(test_driver_path)
         self.run_command(permission_command)
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         config_script = bug_info.get(self.key_config_script, None)
         build_script = bug_info.get(self.key_build_script, None)
         test_script = bug_info.get(self.key_test_script, None)
@@ -62,41 +72,57 @@ class F1X(AbstractRepairTool):
         )
         self.rerun_configuration(config_script)
         self.generate_test_driver(test_script)
-        super(F1X, self).run_repair(bug_info, repair_config_info)
+
         if self.is_instrument_only:
             return
 
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        fix_file = bug_info.get(self.key_fix_file, None)
-        fix_location = bug_info.get(self.key_fix_loc, None)
-        fix_file_list = bug_info.get(self.key_fix_file_list, None)
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
-        timeout = str(repair_config_info[self.key_timeout])
-        subject_name = bug_info[self.key_subject]
-        benchmark_name = bug_info[self.key_benchmark]
-        additional_tool_param = repair_config_info[self.key_tool_params]
+
+        def process_info(x: Dict[str, Any]) -> str:
+            file: str = x.get(self.key_fix_file, "")
+            lines = list(map(int, x.get(self.key_fix_lines, [])))
+            if not lines:
+                return file
+            elif len(lines) == 1:
+                return file + ":" + str(lines[0])
+            else:
+                return file + ":" + str(min(lines)) + "-" + str(max(lines))
+
+        fix_file_list = list(
+            filter(
+                lambda x: x != "",
+                map(
+                    process_info,
+                    bug_info.get(self.key_localization, [{}]),
+                ),
+            )
+        )
+        self.emit_debug(fix_file_list)
+        passing_test_identifiers_list = bug_info.get(
+            self.key_passing_test_identifiers, []
+        )
+        failing_test_identifiers_list = bug_info.get(
+            self.key_failing_test_identifiers, []
+        )
+        timeout = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
         )
         test_driver_path = join(self.dir_expr, "f1x-test")
         test_id_list = ""
-        for test_id in failing_test_list:
+        for test_id in failing_test_identifiers_list:
             test_id_list += str(test_id) + " "
-        if passing_test_list:
-            for test_id in passing_test_list:
-                test_id_list += str(test_id) + " "
+
+        for test_id in passing_test_identifiers_list:
+            test_id_list += str(test_id) + " "
 
         abs_path_buggy_file = None
-        if fix_location or fix_file:
-            abs_path_buggy_file = join(
-                self.dir_expr, "src", fix_location if fix_location else fix_file
-            )
-        elif fix_file_list:
-            abs_path_buggy_file = ",".join(
-                f"{self.dir_expr}/src/{f}" for f in fix_file_list
+        if fix_file_list:
+            abs_path_buggy_file = ", ".join(
+                join(self.dir_expr, "src", f) for f in fix_file_list
             )
 
         dir_patch = f"{self.dir_output}/patches"
@@ -135,10 +161,11 @@ class F1X(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
         if self.is_dump_patches:
-            self.create_patches_from_space(fix_file)
+            for fix_file in fix_file_list:
+                self.create_patches_from_space(fix_file)
         self.timestamp_log_end()
 
-    def create_patches_from_space(self, source_file):
+    def create_patches_from_space(self, source_file: str) -> None:
         script_name = "{}/{}-dump-patches.py".format(self.dir_expr, self.name)
         abs_path_buggy_file = self.dir_expr + "/src/" + source_file
         dump_command = "timeout -k 5m 1h python3 {} {} {}".format(
@@ -146,7 +173,7 @@ class F1X(AbstractRepairTool):
         )
         self.run_command(dump_command, self.log_output_path, self.dir_expr)
 
-    def read_log_file(self):
+    def read_log_file(self) -> None:
         if self.is_file(self.log_output_path):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             self.stats.time_stats.timestamp_start = log_lines[0].rstrip()
@@ -189,7 +216,9 @@ class F1X(AbstractRepairTool):
                         # )
                         pass
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

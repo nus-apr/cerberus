@@ -1,18 +1,20 @@
 import os
 from os.path import join
 
+from typing import Any
+from typing import Dict
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Darjeeling(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(Darjeeling, self).__init__(self.name)
         self.image_name = "yeyehe/darjeeling:latest"
         self.hash_digest = "sha256:05ced78b95452bd0062ca2ea34624bdf50df9234bd79428bd398f911e4c6b031"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(Darjeeling, self).run_repair(bug_info, repair_config_info)
+    def invoke(self, bug_info: Dict[str,Any], task_config_info: Dict[str,Any]) -> None:
+
         """
             self.dir_logs - directory to store logs
             self.dir_setup - directory to access setup scripts
@@ -22,8 +24,8 @@ class Darjeeling(AbstractRepairTool):
         dir_c_src = join(self.dir_expr, "src", bug_info["source_directory"])
         fix_file = join(self.dir_expr, "src", bug_info["fix_file"])
         bug_id = join(self.dir_expr, "src", bug_info["bug_id"])
-        passing_test_list = join(self.dir_expr, "src", bug_info["passing_tests"])
-        failing_test_list = join(self.dir_expr, "src", bug_info["failing_tests"])
+        passing_test_identifiers_list = join(self.dir_expr, "src", bug_info[self.key_passing_test_identifiers])
+        failing_test_identifiers_list = join(self.dir_expr, "src", bug_info[self.key_failing_test_identifiers])
         patch_directory = join(self.dir_output, "patches")
 
         # execute repair tool
@@ -32,8 +34,8 @@ class Darjeeling(AbstractRepairTool):
             f"--dir_c_src {dir_c_src} "
             f"--fix_file {fix_file} "
             f"--bug_id {bug_id} "
-            f"--passing_test_list {passing_test_list} "
-            f"--failing_test_list {failing_test_list} "
+            f"--passing_test_identifiers_list {passing_test_identifiers_list} "
+            f"--failing_test_identifiers_list {failing_test_identifiers_list} "
             f"--patch_directory {patch_directory}"
         )
         self.timestamp_log_start()

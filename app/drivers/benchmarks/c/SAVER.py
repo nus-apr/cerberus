@@ -1,22 +1,27 @@
 import os
 import shutil
 from datetime import datetime
+from typing import Dict
+from typing import Optional
 
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class SAVER(AbstractBenchmark):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(SAVER, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         is_error = super(SAVER, self).setup_experiment(
             bug_index, container_id, test_all
         )
         return is_error
 
-    def deploy(self, bug_index, container_id):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -33,7 +38,7 @@ class SAVER(AbstractBenchmark):
         )
         return status == 0
 
-    def config(self, bug_index, container_id):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("configuring experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -50,7 +55,7 @@ class SAVER(AbstractBenchmark):
         )
         return status == 0
 
-    def build(self, bug_index, container_id):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -68,17 +73,19 @@ class SAVER(AbstractBenchmark):
         )
         return status == 0
 
-    def test(self, bug_index, container_id):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("testing experiment subject")
         return True
 
-    def clean(self, exp_dir_path, container_id):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
         self.emit_normal("removing experiment subject")
         command_str = "rm -rf " + exp_dir_path
         self.run_command(container_id, command_str)
         return
 
-    def save_artifacts(self, dir_info, container_id):
+    def save_artifacts(
+        self, dir_info: DirectoryInfo, container_id: Optional[str]
+    ) -> None:
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(SAVER, self).save_artifacts(dir_info, container_id)

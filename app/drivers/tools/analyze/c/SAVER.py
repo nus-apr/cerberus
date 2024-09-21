@@ -2,18 +2,23 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
 
 
 class SAVER(AbstractAnalyzeTool):
     relative_binary_path = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
 
-    def prepare(self, bug_info):
+    def pre_process(self, bug_info: Dict[str, Any]) -> None:
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
@@ -46,15 +51,15 @@ class SAVER(AbstractAnalyzeTool):
             )
         )
 
-    def run_analysis(self, bug_info, repair_config_info):
-        self.prepare(bug_info)
-        super(SAVER, self).run_analysis(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         if self.is_instrument_only:
             return
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
 
-        if self.use_container:
+        if self.use_container and not self.locally_running:
             self.error_exit(
                 "unimplemented functionality: SAVER docker support not implemented"
             )
@@ -74,7 +79,7 @@ class SAVER(AbstractAnalyzeTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         copy_command = "cp -rf {}/saver {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         infer_output = join(self.dir_expr, "src", "infer-out")
@@ -83,7 +88,9 @@ class SAVER(AbstractAnalyzeTool):
         super(SAVER, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> AnalysisToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

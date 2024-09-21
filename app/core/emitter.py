@@ -4,8 +4,13 @@ import random
 import sys
 import textwrap
 from enum import Enum
+from typing import Any
+from typing import List
+from typing import Optional
+from typing import Union
 
 import rich
+import time
 
 from app.core import definitions
 from app.core import logger
@@ -17,7 +22,7 @@ try:
     rows, columns = tuple(map(int, stty_info.read().split()))
     stty_info.close()
 except Exception as e:
-    rows, columns = 200, 100
+    rows, columns = 500, 800
     rich.print("Could not get terminal size: {}".format(e))
 
 
@@ -61,10 +66,21 @@ TEXTUALIZE_COLOR_MAP = {
 }
 
 
-def write(print_message, print_color, new_line=True, prefix=None, indent_level=0):
+def write(
+    print_message: Any,
+    print_color: COLOR,
+    new_line: bool = True,
+    prefix: Optional[str] = None,
+    indent_level: int = 0,
+) -> None:
+    timestamp_str = (
+        "" if not values.timestamp else f" {time.strftime('%b %d %H:%M:%S')}"
+    )
     if not values.ui_active:
-        message = "[bold {}]{}".format(
-            RICH_COLOR_MAP[print_color], str(print_message).replace("[", "\\[")
+        message = "[bold {}]{}{}".format(
+            RICH_COLOR_MAP[print_color],
+            str(print_message).replace("[", "\\["),
+            timestamp_str,
         )
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
@@ -81,58 +97,59 @@ def write(print_message, print_color, new_line=True, prefix=None, indent_level=0
             print_message = prefix + str(print_message)
 
         ui.post_write(
-            "[bold {}]{} {}".format(
+            "[bold {}]{} {}{}".format(
                 TEXTUALIZE_COLOR_MAP[print_color],
                 values.job_identifier.get("Root"),
                 str(print_message).replace("[", "\\[").replace("\t", " "),
+                timestamp_str,
             )
         )
 
 
-def title(title):
+def title(title: str) -> None:
     write("\n" + "=" * 100 + "\n\n\t" + title + "\n" + "=" * 100 + "\n", COLOR.CYAN)
     logger.information(title)
 
 
-def sub_title(text):
+def sub_title(text: str) -> None:
     write("\n\t" + text + "\n\t" + "_" * 90 + "\n", COLOR.CYAN)
     logger.information(text)
 
 
-def sub_sub_title(text):
+def sub_sub_title(text: str) -> None:
     write("\n\t\t" + text + "\n\t\t" + "_" * 90 + "\n", COLOR.CYAN)
     logger.information(text)
 
 
-def command(message):
+def command(message: Any) -> None:
     if values.debug:
         prefix = "\t\t[command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.command(message)
 
 
-def docker_command(message):
+def docker_command(message: Any) -> None:
     if values.debug:
         prefix = "\t\t[docker-command] "
         write(message, COLOR.ROSE, prefix=prefix, indent_level=2)
     logger.docker_command(message)
 
 
-def debug(message):
+def debug(message: Any) -> None:
     if values.debug:
         prefix = "\t\t[debug] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.debug(message)
 
 
-def build(message):
+def build(message: Any) -> None:
     if values.debug:
         prefix = "\t\t[build] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
     logger.build(message)
 
 
-def data(message, info=None):
+def data(message: Any, info: Any = None) -> None:
     if values.debug:
         prefix = "\t\t[data] "
         write(message, COLOR.GREY, prefix=prefix, indent_level=2)
@@ -141,12 +158,12 @@ def data(message, info=None):
     logger.data(message, info)
 
 
-def normal(message, jump_line=True):
-    write(message, COLOR.BLUE, jump_line)
+def normal(message: Any, jump_line: bool = True) -> None:
+    write(message, COLOR.BLUE, jump_line, prefix="\t\t[normal] ")
     logger.output(message)
 
 
-def highlight(message, jump_line=True):
+def highlight(message: Any, jump_line: bool = True) -> None:
     indent_length = message.count("\t")
     prefix = "\t" * indent_length
     message = message.replace("\t", "")
@@ -154,65 +171,67 @@ def highlight(message, jump_line=True):
     logger.note(message)
 
 
-def information(message, jump_line=True):
-    write(message, COLOR.GREY, jump_line)
+def information(message: Any, jump_line: bool = True) -> None:
+    write(message, COLOR.GREY, jump_line, prefix="[info]")
     logger.information(message)
 
 
-def statistics(message):
-    write(message, COLOR.WHITE)
+def statistics(message: Any) -> None:
+    write(message, COLOR.WHITE, prefix="[stat]")
     logger.output(message)
 
 
-def error(message):
-    write(message, COLOR.RED)
+def error(message: Any) -> None:
+    write(message, COLOR.RED, prefix="[error]")
     logger.error(message)
 
 
-def success(message):
-    write(message, COLOR.GREEN)
+def success(message: Any) -> None:
+    write(message, COLOR.GREEN, prefix="[info]")
     logger.output(message)
 
 
-def special(message):
-    write(message, COLOR.ROSE)
+def special(message: Any) -> None:
+    write(message, COLOR.ROSE, prefix="[special]")
     logger.note(message)
 
 
-def program_output(output_message):
+def program_output(output_message: Union[str, List[str]]) -> None:
     write("\t\tProgram Output:", COLOR.WHITE)
     if type(output_message) == list:
         for line in output_message:
             write("\t\t\t" + line.strip(), COLOR.PROG_OUTPUT_COLOR)
-    else:
+    elif type(output_message) == str:
         write("\t\t\t" + output_message, COLOR.PROG_OUTPUT_COLOR)
 
 
-def emit_patch(patch_lines, jump_line=True, message=""):
-    output = message
+def emit_patch(
+    patch_lines: List[str], jump_line: bool = True, message: str = ""
+) -> None:
     indent_length = 2
     prefix = "\t\t" * indent_length
+    write(message, COLOR.WHITE, jump_line, indent_level=indent_length, prefix=prefix)
     for line in patch_lines:
         write(line, COLOR.ROSE, jump_line, indent_level=indent_length, prefix=prefix)
 
 
-def warning(message):
-    write(message, COLOR.YELLOW)
+def warning(message: Any) -> None:
+    write(message, COLOR.YELLOW, prefix="[warning]")
     logger.warning(message)
 
 
-def note(message):
-    write(message, COLOR.WHITE)
+def note(message: Any) -> None:
+    write(message, COLOR.WHITE, prefix="[note]")
     logger.note(message)
 
 
-def configuration(setting, value):
+def configuration(setting: str, value: Any) -> None:
     message = "\t[config] " + setting + ": " + str(value)
     write(message, COLOR.WHITE, True)
     logger.configuration(setting + ":" + str(value))
 
 
-def end(time_total, experiments_executed, is_error=False):
+def end(time_total: str, experiments_executed: int, is_error: bool = False) -> None:
     if values.arg_pass:
         statistics("\nRun time statistics:\n-----------------------\n")
         statistics("Experiment Count: {}".format(experiments_executed))
@@ -224,7 +243,7 @@ def end(time_total, experiments_executed, is_error=False):
         error("Could not process configuration arguments\n")
 
 
-def emit_help():
+def emit_help() -> None:
     benchmarks = random.sample(
         list(filter(lambda x: x != "examples", values.get_list_benchmarks())), 3
     )

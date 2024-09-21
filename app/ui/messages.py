@@ -24,7 +24,7 @@ class JobAllocate(Message):
         index: int,
         benchmark: AbstractBenchmark,
         tool: AbstractTool,
-        experiment_item,
+        experiment_item: Dict[str, Any],
         task_config_info: Dict[str, Any],
         container_config_info: Dict[str, Any],
         experiment_image_id: Optional[str],
@@ -42,7 +42,7 @@ class JobAllocate(Message):
         self.container_profile = container_config_info
         self.experiment_image_id = experiment_image_id
         self.identifier = identifier
-        self.task_type = cast(TaskType, task_type)
+        self.task_type = task_type
         self.task_config = task_config
         self.run = run
         self.tag = tag
@@ -55,19 +55,19 @@ class JobFinish(Message):
 
     def __init__(
         self,
-        key,
+        key: str,
         status: TaskStatus,
-        row_data,
+        row_data: Any,
         directory_info: Dict[str, str],
         results: ToolStats,
         task_type: TaskType,
-    ):
+    ) -> None:
         self.key = key
         self.status = status
         self.row_data = row_data
         self.directory_info = directory_info
         self.results = results
-        self.task_type = cast(TaskType, task_type)
+        self.task_type = task_type
         super().__init__()
 
 
@@ -75,7 +75,7 @@ class JobMount(Message):
     bubble = False
     namespace = "cerberus"
 
-    def __init__(self, key):
+    def __init__(self, key: str) -> None:
         self.key = key
         super().__init__()
 
@@ -85,7 +85,7 @@ class Write(Message):
 
     namespace = "cerberus"
 
-    def __init__(self, text, identifier):
+    def __init__(self, text: str, session_identifier: str) -> None:
         self.text = text
-        self.identifier = identifier
+        self.session_identifier = session_identifier
         super().__init__()

@@ -2,7 +2,7 @@
 *.bc
 *.a
 .idea
-app/__pycache__/
+**/__pycache__/
 logs
 output
 venv
@@ -11,7 +11,7 @@ venv
 *.pyc
 archive
 results
-.scode
+.vscode
 benchmark/microfuzz
 benchmark/**/patches
 benchmark/**/location.txt
@@ -20,7 +20,13 @@ benchmark/**/seed-dir
 benchmark/**/fix2fit/*-driver
 benchmark/**/compile_commands.json
 benchmark/**/f1x-*
+experiments/**/
 summaries/**
+composite_workspace
 tags
 tags.lock
 .venv
+
+0.6.2/**
+dynamic/codeql_queries/**
+temp-run/**

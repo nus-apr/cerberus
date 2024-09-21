@@ -3,7 +3,10 @@ from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -15,15 +18,15 @@ class EffFix(AbstractRepairTool):
         "Null Pointer Dereference": "NULLPTR_DEREFERENCE",
         # In Pulse, these two bugs are both treated as UAF
         "Double Free": "USE_AFTER_FREE",
-        "Use After Free": "USE_AFTER_FREE"
+        "Use After Free": "USE_AFTER_FREE",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         self.image_name = "yuntongzhang/efffix:experiments"
         super().__init__(self.name)
 
-    # def re_build(self, config_script, build_script):
+    # def re_build(self, config_script: str, build_script: str) -> None:
     #     self.emit_normal("re-building subject")
     #     rebuild_script = self.dir_expr + f"/{self.name}-rebuild"
     #     dir_src = join(self.dir_expr, "src")
@@ -84,7 +87,7 @@ class EffFix(AbstractRepairTool):
     #         content += f"{key}:{config_info[key]}" + " \n"
     #     self.write_file(content, config_path)
 
-    # def prepare(self, bug_info):
+    # def pre_process(self, bug_info: Dict[str, Any]) -> None:
     #     dir_src = join(self.dir_expr, "src")
     #     tool_dir = join(self.dir_expr, self.name)
     #     self.emit_normal("preparing subject for repair with " + self.name)
@@ -114,22 +117,22 @@ class EffFix(AbstractRepairTool):
     #             dir_path=dir_src,
     #             log_file_path=log_analysis_path,
     #         )
-
     #         if int(status) != 0:
     #             self.emit_error("pre-analysis failed")
     #             return None
-
     #     self.emit_normal(
     #         "preparation took {} second(s)".format(
     #             (datetime.now() - time).total_seconds()
     #         )
     #     )
-    #     return config_path
+    #     self.config_path = config_path
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         bug_id = str(bug_info[self.key_bug_id])
         subject = bug_info[self.key_subject]
-        if bug_info[self.key_benchmark].lower() == 'efffix':
+        if bug_info[self.key_benchmark].lower() == "efffix":
             # A special case when running EffFix on the effFix benchmark
             # to save time, the tool image already contains pre-analysis results for all
             # experiment subjects (including source code and analysis artifacts).
@@ -144,14 +147,13 @@ class EffFix(AbstractRepairTool):
         # config_path = self.prepare(bug_info)
         # if config_path is None:
         #     return
-        super(EffFix, self).run_repair(bug_info, repair_config_info)
         # if self.is_instrument_only:
         #     return
 
-        task_conf_id = repair_config_info[self.key_id]
-        timeout_h = str(repair_config_info[self.key_timeout])
+        task_conf_id = task_config_info[self.key_id]
+        timeout_h = str(task_config_info[self.key_timeout])
         timeout_m = str(int(float(timeout_h) * 60))
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
@@ -179,14 +181,16 @@ class EffFix(AbstractRepairTool):
         clean_command = "rm /tmp/*footpatch*"
         self.run_command(clean_command, dir_path=dir_src)
 
-    def save_artifacts(self, dir_info):
-        # remove the infer directory, since it's too big
-        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single ;"
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
+        # rm the infer directory, since it's too big
+        rm_cmd = f"rm -rf {self.dir_output}/infer-out-single"
         self.run_command(rm_cmd)
         super(EffFix, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         json_report = join(self.dir_output, "result.json")
         dir_patch = join(self.dir_output, "final-patches")
         list_patches = self.list_dir(dir_patch, regex="*.patch")
@@ -208,11 +212,12 @@ class EffFix(AbstractRepairTool):
         if self.is_file(json_report):
             self.emit_normal("reading result.json")
             result_info = self.read_json(json_report, encoding="iso-8859-1")
-            space_size = result_info["stats"]["total_search_space"]
-            count_enumerations = result_info["stats"]["total_num_patches"]
-            count_plausible = result_info["stats"][
-                "total_num_locally_plausible_patches"
-            ]
+            if result_info:
+                space_size = result_info["stats"]["total_search_space"]
+                count_enumerations = result_info["stats"]["total_num_patches"]
+                count_plausible = result_info["stats"][
+                    "total_num_locally_plausible_patches"
+                ]
         else:
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
             for line in log_lines:

@@ -4,53 +4,33 @@ from datetime import datetime
 from os import listdir
 from os.path import isfile
 from os.path import join
+from typing import Any
 from typing import cast
+from typing import Dict
+from typing import List
 from typing import Optional
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class SenX(AbstractRepairTool):
     relative_binary_path: Optional[str] = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
 
-    def instrument(self, bug_info):
-        """instrumentation for the experiment as needed by the tool"""
-        self.emit_normal(" instrumenting for " + self.name)
-        bug_id = bug_info[self.key_bug_id]
-        task_conf_id = str(self.current_task_profile_id.get("NA"))
-        buggy_file = bug_info[self.key_fix_file]
-        self.log_instrument_path = join(
-            self.dir_logs,
-            "{}-{}-{}-instrument.log".format(task_conf_id, self.name, bug_id),
-        )
-        time = datetime.now()
-        command_str = "bash instrument.sh {}".format(self.dir_expr)
-        status = self.run_command(command_str, self.log_instrument_path, self.dir_inst)
-        self.emit_debug(
-            "instrumentation took {} second(s)".format(
-                (datetime.now() - time).total_seconds()
-            )
-        )
-        if status not in [0, 126]:
-            self.error_exit(
-                "error with instrumentation of {}; exit code {}".format(
-                    self.name, str(status)
-                )
-            )
-        return
-
-    def run_repair(self, bug_info, repair_config_info):
-        super(SenX, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
@@ -66,7 +46,7 @@ class SenX(AbstractRepairTool):
 
         test_dir = self.dir_setup + "/tests"
         test_file_list = []
-        if self.use_container:
+        if self.use_container and not self.locally_running:
             self.error_exit(
                 "unimplemented functionality: SenX docker support not implemented"
             )
@@ -105,23 +85,23 @@ class SenX(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         copy_command = "cp -rf {}/senx {}".format(self.dir_expr, self.dir_output)
         self.run_command(copy_command)
         if not self.dir_expr:
             self.error_exit("experiment directory not set")
         if not self.relative_binary_path:
             self.error_exit("relative binary path not set")
-        abs_binary_path = join(
-            self.dir_expr, "src", cast(str, self.relative_binary_path)
-        )
+        abs_binary_path = join(self.dir_expr, "src", self.relative_binary_path)
         patch_path = abs_binary_path + ".bc.patch"
         copy_command = "cp -rf {} {}/patches".format(patch_path, self.dir_output)
         self.run_command(copy_command)
         super(SenX, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         task_conf_id = str(self.current_task_profile_id.get("NA"))

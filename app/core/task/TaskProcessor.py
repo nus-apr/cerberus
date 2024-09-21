@@ -1,26 +1,29 @@
 import copy
 import os
+from typing import cast
 from typing import List
 
-from app.core import configuration
+from app.core import configuration, utilities
 from app.core import definitions
 from app.core import emitter
 from app.core import values
 from app.core.configs.Config import Config
-from app.core.task import task
+from app.core.configs.tasks_data.CompositeTaskConfig import CompositeTaskConfig
+from app.core.task.dir_info import generate_dir_info
 from app.core.task.typing.TaskList import TaskList
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
+from app.drivers.tools.AbstractTool import AbstractTool
 from app.drivers.tools.MockTool import MockTool
 
 
 class TaskProcessor:
     @staticmethod
-    def expand_interval(interval) -> List[int]:
+    def expand_interval(interval: str) -> List[int]:
         start_range, end_range = interval.split("-")
         return list(range(int(start_range), int(end_range) + 1))
 
     @staticmethod
-    def normalize_id_list(id_list_raw, size) -> List[int]:
+    def normalize_id_list(id_list_raw: List[str], size: int) -> List[int]:
         # TODO: Add support for "*"
         id_list: List[int] = []
         for element in id_list_raw:
@@ -48,6 +51,9 @@ class TaskProcessor:
                             benchmark_config
                         ) in tasks_chunk_config.benchmarks_config_list:
                             benchmark_name = benchmark_config.name
+                            values.use_subject_as_base = (
+                                tasks_chunk_config.task_config.use_subject_as_base
+                            )
                             benchmark_template = configuration.load_benchmark(
                                 benchmark_name
                             )
@@ -102,8 +108,17 @@ class TaskProcessor:
                                 tasks_chunk_config.task_config.only_instrument
                             )
                             values.only_test = tasks_chunk_config.task_config.only_test
-
-                            if tasks_chunk_config.task_config.task_type != "prepare":
+                            if tasks_chunk_config.task_config.task_type == "prepare":
+                                tool_template = cast(AbstractTool, MockTool())
+                            elif (
+                                tasks_chunk_config.task_config.task_type == "composite"
+                            ):
+                                utilities.check_groups()
+                                tool_template = configuration.load_tool(
+                                    tool_config.name,
+                                    tasks_chunk_config.task_config.task_type,
+                                )
+                            else:
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
                                     tasks_chunk_config.task_config.task_type,
@@ -135,9 +150,7 @@ class TaskProcessor:
                                         )
 
                                 if not tasks_chunk_config.task_config.only_analyse:
-                                    tool_template.check_tool_exists()
-                            else:
-                                tool_template = MockTool()
+                                    tool_template.ensure_tool_exists()
 
                             # filter skipped bug id
                             for bug_id in bug_id_list:
@@ -146,16 +159,42 @@ class TaskProcessor:
 
                                 experiment_item = benchmark_subjects[int(bug_id) - 1]
 
+                                if (
+                                    tasks_chunk_config.task_config.task_type
+                                    == "composite"
+                                ):
+                                    composite_task = cast(
+                                        CompositeTaskConfig,
+                                        tasks_chunk_config.task_config,
+                                    )
+                                    setattr(
+                                        task_profile,
+                                        definitions.KEY_COMPOSITE_SEQUENCE,
+                                        composite_task.composite_sequence,
+                                    )
+
                                 bug_index = experiment_item[definitions.KEY_ID]
                                 bug_name = str(experiment_item[definitions.KEY_BUG_ID])
                                 subject_name = str(
                                     experiment_item[definitions.KEY_SUBJECT]
                                 )
-                                dir_info = task.generate_dir_info(
+                                # Allow for a special base setup folder if needed
+                                dir_setup_extended = (
+                                    os.path.join(
+                                        values.dir_benchmark,
+                                        benchmark_name,
+                                        subject_name,
+                                        f"{bug_name}-{tool_config.tag}",
+                                        "",
+                                    )
+                                    if tool_config.tag
+                                    else None
+                                )
+                                dir_info = generate_dir_info(
                                     benchmark_name,
                                     subject_name,
                                     bug_name,
-                                    tool_config.tag,
+                                    dir_setup_extended,
                                 )
                                 values.use_container = (
                                     tasks_chunk_config.task_config.use_container
@@ -163,7 +202,14 @@ class TaskProcessor:
 
                                 benchmark = copy.deepcopy(benchmark_template)
                                 tool = copy.deepcopy(tool_template)
-                                benchmark.update_dir_info(dir_info)
+                                tool.locally_running = (
+                                    tool_config.local
+                                    if tasks_chunk_config.task_config.task_type
+                                    != "composite"
+                                    else True
+                                )
+                                tool.rebuild_image = tool_config.rebuild
+                                benchmark.update_dir_info(dir_info, tool_config.local)
 
                                 yield (
                                     tasks_chunk_config.task_config,

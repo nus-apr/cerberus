@@ -17,7 +17,7 @@ class GeneralConfig:
         self.cpus = cpus
         self.gpus = gpus
 
-    def __str__(self):
+    def __str__(self) -> str:
         return (
             f"[general config] parallel Mode: {self.parallel_mode}\n"
             f"[general config] UI Mode: {self.ui_mode}\n"

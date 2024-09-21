@@ -1,10 +1,14 @@
 import json
 import os
 import random
+import traceback
 from typing import Any
+from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Set
 from typing import Tuple
 from typing import Union
 
@@ -20,9 +24,10 @@ cached_client = None
 image_map = {}
 
 
-def get_client():
+def get_client() -> docker.DockerClient:
     """
-    Utility method to track all client usages. Pulls the images at the current state to allow for less network calls.
+    Utility method to track all client usages.
+    Pulls the images at the current state to allow for less network calls.
     """
     global cached_client
     global image_map
@@ -30,7 +35,7 @@ def get_client():
         cached_client = docker.DockerClient(
             base_url=values.docker_host,
             version="1.41",
-            timeout=900
+            timeout=900,
             # user_agent="Cerberus Agent",
             # use_ssh_client=True,
         )
@@ -42,7 +47,7 @@ def get_client():
                 "[error] docker connection was unsuccessful. Check if Docker is running or there is a connection to the specified host."
             )
         for image in image_cache:
-            tag_list = image.tags
+            tag_list = image.tags  # type: ignore
             if not tag_list:
                 continue
             for image_tag in tag_list:
@@ -51,22 +56,22 @@ def get_client():
     return cached_client
 
 
-def image_exists(image_name: str, tag_name="latest"):
-    client = get_client()
+def image_exists(image_name: str, tag_name: str = "latest") -> bool:
+    _ = get_client()
     emitter.debug("Checking for image {} with tag {}".format(image_name, tag_name))
     if f"{image_name}:{tag_name}" not in image_map:
         return False
     return True
 
 
-def get_image(image_name: str, tag_name="latest"):
-    client = get_client()
+def get_image(image_name: str, tag_name: str = "latest") -> Any:
+    _ = get_client()
     if f"{image_name}:{tag_name}" not in image_map:
         return None
     return image_map[f"{image_name}:{tag_name}"]
 
 
-def pull_image(image_name: str, tag_name: str):
+def pull_image(image_name: str, tag_name: str) -> Any:
     client = get_client()
     emitter.normal(
         "\t\t[framework] pulling docker image {}:{}".format(image_name, tag_name)
@@ -101,7 +106,10 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
     emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
-        dockerfilename = dockerfile_path.split("/")[-1]
+        dockerfilename = os.path.relpath(dockerfile_path, context_dir)
+        emitter.debug(
+            f"Context directory is {context_dir} with image file {dockerfilename}"
+        )
         try:
             logs = client.api.build(
                 path=context_dir,
@@ -110,7 +118,7 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                 decode=True,
                 rm=not values.debug,
             )
-            id = None
+            id: str = "NONE"
             for line in logs:
                 # emitter.debug(line)
                 if "stream" in line:
@@ -118,7 +126,7 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
                         emitter.build("\t\t[docker-api] {}".format(line_stream))
                     if "Successfully built" in line["stream"]:
                         id = line["stream"].split(" ")[-1]
-            if id is None:
+            if id == "NONE":
                 utilities.error_exit(
                     "[error] Image was not build successfully. Please check whether the file builds outside of Cerberus"
                 )
@@ -163,7 +171,7 @@ def build_tool_image(tool_name: str) -> Optional[str]:
     return tool_image_id
 
 
-def get_container(container_id: str):
+def get_container(container_id: str) -> Any:
     client = get_client()
     container = None
     try:
@@ -192,9 +200,9 @@ def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[st
     try:
         container_id = client.containers.get(container_name).id[:12]  # type: ignore
     except docker.errors.NotFound as ex:  # type: ignore
-        if values.debug:
-            emitter.error(f"\t\t[debug] {ex}")
         if not ignore_not_found:
+            if values.debug:
+                emitter.error(f"\t\t[debug] {ex}")
             emitter.warning("\t\t[warning] unable to find container")
     except docker.errors.APIError as exp:  # type: ignore
         emitter.error(exp)
@@ -212,11 +220,11 @@ def get_container_id(container_name: str, ignore_not_found: bool) -> Optional[st
 
 def get_container_stats(
     container_id: str,
-):
+) -> Optional[Dict[str, Any]]:
     container = get_container(container_id)
     try:
         container_stats = container.stats(stream=False)
-        return container_stats
+        return cast(Dict[str, Any], container_stats)
     except docker.errors.NotFound as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
@@ -249,7 +257,7 @@ def get_container_stats(
 
 def build_container(
     container_name: str,
-    volume_list,
+    volume_list: Dict[str, Dict[str, str]],
     image_name: str,
     cpu: List[str],
     gpu: List[str],
@@ -266,7 +274,7 @@ def build_container(
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
 
-        container_run_args = {
+        container_run_args: Dict[str, Any] = {
             "detach": True,
             "entrypoint": "/bin/bash",
             "name": container_name,
@@ -274,7 +282,12 @@ def build_container(
             "privileged": True,
             "cpuset_cpus": ",".join(cpu),
             "tty": True,
-            "environment": {"EXPERIMENT_DIR": values.container_base_experiment},
+            "environment": {
+                "EXPERIMENT_DIR": values.container_base_experiment,
+                "METADATA_FILE": os.path.join(
+                    values.container_base_experiment, "meta-data.json"
+                ),
+            },
         }
 
         if disable_network:
@@ -285,7 +298,7 @@ def build_container(
             # Check that the docker version has DeviceRequests
             if docker.__version__ and semver.compare(docker.__version__, "4.3.0") >= 0:
                 container_run_args["device_requests"] = [
-                    docker.types.DeviceRequest(
+                    docker.types.DeviceRequest(  # type: ignore
                         device_ids=gpu,
                         capabilities=[["gpu"]],
                     )
@@ -311,13 +324,15 @@ def build_container(
             container_run_args["mem_limit"] = default_mem_limit
 
         emitter.debug(
-            "\t\t\t[framework] container {} is build with the following args {}".format(
+            "\t\t\t[framework] container {} is built with the following args {}".format(
                 container_name, container_run_args
             )
         )
         container = client.containers.run(image_name, **container_run_args)
         container_id = container.id  # type: ignore
-        return container_id[:12]  # type: ignore
+        shortened_id: str = container_id[:12]  # type: ignore
+        container_list.add(shortened_id)
+        return shortened_id
     except docker.errors.ContainerError as ex:  # type: ignore
         emitter.error(ex)
         utilities.error_exit(
@@ -345,7 +360,10 @@ def build_container(
 
 
 def exec_command(
-    container_id: str, command: str, workdir="/experiment", env: Dict[str, str] = dict()
+    container_id: str,
+    command: str,
+    workdir: str = values.container_base_experiment,
+    env: Dict[str, str] = dict(),
 ) -> Tuple[int, Optional[Tuple[Optional[bytes], Optional[bytes]]]]:
     client = get_client()
     exit_code: int
@@ -401,7 +419,7 @@ def exec_command(
     return exit_code, output
 
 
-def remove_container(container_id: str):
+def remove_container(container_id: str) -> None:
     client = get_client()
     emitter.normal("\t\t\t[framework] removing docker container")
     try:
@@ -420,7 +438,25 @@ def remove_container(container_id: str):
         emitter.warning("[warning] unable to remove container: unhandled exception")
 
 
-def start_container(container_id: str):
+container_list: Set[str] = set()
+
+
+def clean_containers() -> None:
+    pass
+    # emitter.debug("Removing containers")
+    # emitter.debug(container_list)
+    # client = get_client()
+    # for container_id in list(container_list):
+    #     try:
+    #         container = client.containers.get(container_id)
+    #         container.stop(timeout=5)  # type: ignore
+    #     except Exception as e:  # type: ignore
+    #         emitter.debug(e)
+    #         emitter.debug(traceback.format_tb(e.__traceback__))
+    #         pass
+
+
+def start_container(container_id: str) -> None:
     client = get_client()
     emitter.normal(
         "\t\t\t[framework] starting docker container {}".format(container_id)
@@ -428,6 +464,7 @@ def start_container(container_id: str):
     try:
         container = client.containers.get(container_id)
         container.start()  # type: ignore
+        container_list.add(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -440,12 +477,16 @@ def start_container(container_id: str):
         )
 
 
-def stop_container(container_id: str, timeout=120):
+def stop_container(container_id: str, timeout: int = 120) -> None:
     client = get_client()
-    emitter.normal("\t\t\t[framework] stopping docker container")
+    emitter.normal(
+        "\t\t\t[framework] stopping docker container {}".format(container_id)
+    )
     try:
         container = client.containers.get(container_id)
         container.stop(timeout=timeout)  # type: ignore
+        if container_id in container_list:
+            container_list.remove(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         emitter.warning(exp)
         emitter.warning(
@@ -463,12 +504,14 @@ def stop_container(container_id: str, timeout=120):
         )
 
 
-def kill_container(container_id: str, ignore_errors=False):
+def kill_container(container_id: str, ignore_errors: bool = False) -> None:
     client = get_client()
-    emitter.normal("\t\t\t[framework] killing docker container")
+    emitter.normal("\t\t\t[framework] killing docker container {}".format(container_id))
     try:
         container = client.containers.get(container_id)
         container.kill()  # type: ignore
+        if container_id in container_list:
+            container_list.remove(container_id)
     except docker.errors.APIError as exp:  # type: ignore
         if not ignore_errors:
             emitter.warning(exp)
@@ -487,27 +530,114 @@ def kill_container(container_id: str, ignore_errors=False):
         )
 
 
-def is_file(container_id: str, file_path: str):
+def create_running_container(
+    volume_list: Dict[str, Dict[str, str]],
+    image_name: str,
+    container_name: str,
+    cpu: List[str],
+    gpu: List[str],
+    container_config_info: Dict[str, Any],
+    source_logs: str,
+    target_logs: str,
+) -> str:
+    image_name = image_name.lower()
+    emitter.information(
+        "\t\t[framework] Creating running container with image {}".format(image_name)
+    )
+    container_id = get_container_id(container_name, ignore_not_found=True)
+    if container_id:
+        kill_container(container_id, ignore_errors=True)
+        remove_container(container_id)
+
+    if not image_exists(image_name):
+        utilities.error_exit("Image should be constructed by now!")
+
+    extract_experiment_logs(
+        image_name,
+        container_name,
+        cpu,
+        gpu,
+        container_config_info,
+        source_logs,
+        target_logs,
+    )
+
+    emitter.information("\t\t[framework] building main container for experiment")
+    is_network_enabled = True
+    if container_config_info:
+        is_network_enabled = container_config_info.get(
+            definitions.KEY_CONTAINER_ENABLE_NETWORK, True
+        )
+
+    container_id = build_container(
+        container_name,
+        volume_list,
+        image_name,
+        cpu,
+        gpu,
+        container_config_info,
+        not is_network_enabled,
+    )
+    if not container_id:
+        utilities.error_exit("Container was not created successfully")
+    return container_id
+
+
+def extract_experiment_logs(
+    image_name: str,
+    container_name: str,
+    cpu: List[str],
+    gpu: List[str],
+    container_config_info: Dict[str, Any],
+    source_logs: str,
+    target_logs: str,
+) -> None:
+    # Need to copy the logs from benchmark setup before instantiating the running container
+    emitter.information(
+        "\t\t[framework] building temporary container for log extraction"
+    )
+
+    tmp_container_id = get_container_id(container_name, ignore_not_found=True)
+
+    if not tmp_container_id:
+        tmp_container_id = build_container(
+            container_name, dict(), image_name, cpu, gpu, container_config_info
+        )
+
+    if not tmp_container_id:
+        utilities.error_exit("Could not create temporary container")
+    else:
+        copy_file_from_container(tmp_container_id, source_logs, target_logs)
+        if values.runs:
+            stop_container(tmp_container_id, 5)
+            remove_container(tmp_container_id)
+
+
+def is_file(container_id: str, file_path: str) -> bool:
     exist_command = "test -f {}".format(file_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
-def is_dir(container_id: str, dir_path: str):
+def is_dir(container_id: str, dir_path: str) -> bool:
     exist_command = "test -d {}".format(dir_path)
     return exec_command(container_id, exist_command)[0] == 0
 
 
-def is_file_empty(container_id: str, file_path: str):
+def is_file_empty(container_id: str, file_path: str) -> bool:
     exist_command = "[ -s {} ]".format(file_path)
     return exec_command(container_id, exist_command)[0] != 0
 
 
-def fix_permissions(container_id: str, dir_path: str):
+def fix_permissions(
+    container_id: str, dir_path: str
+) -> Tuple[int, Optional[Tuple[Optional[bytes], Optional[bytes]]]]:
     permission_command = "chmod -R g+w  {}".format(dir_path)
     return exec_command(container_id, permission_command)
 
 
-def list_dir(container_id: str, dir_path: str, regex=None):
+def list_dir(
+    container_id: str, dir_path: str, regex: Optional[str] = None
+) -> List[str]:
     if not regex:
         regex = "*"
     exist_command = 'find {} -name "{}"'.format(dir_path, regex)
@@ -522,21 +652,21 @@ def list_dir(container_id: str, dir_path: str, regex=None):
     return file_list
 
 
-def copy_file_from_container(container_id: str, from_path: str, to_path: str):
+def copy_file_from_container(container_id: str, from_path: str, to_path: str) -> int:
     copy_command = "docker -H {} cp {}:{} {}".format(
         values.docker_host, container_id, from_path, to_path
     )
-    utilities.execute_command(copy_command)
+    return utilities.execute_command(copy_command)
 
 
-def copy_file_to_container(container_id: str, from_path: str, to_path: str):
+def copy_file_to_container(container_id: str, from_path: str, to_path: str) -> int:
     copy_command = "docker -H {} cp {} {}:{}".format(
         values.docker_host, from_path, container_id, to_path
     )
-    utilities.execute_command(copy_command)
+    return utilities.execute_command(copy_command)
 
 
-def write_file(container_id: str, file_path: str, content: List[str]):
+def write_file(container_id: str, file_path: str, content: Sequence[str]) -> None:
     tmp_file_path = os.path.join(
         "/tmp", "write-file-{}".format(random.randint(0, 1000000))
     )
@@ -550,7 +680,19 @@ def write_file(container_id: str, file_path: str, content: List[str]):
     os.remove(tmp_file_path)
 
 
-def read_file(container_id: str, file_path: str, encoding="utf-8"):
+def get_file_object(container_id: str, file_path: str, encoding: str = "utf-8") -> Any:
+    tmp_file_path = os.path.join(
+        "/tmp", "container-file-{}".format(random.randint(0, 1000000))
+    )
+    copy_command = "docker -H {} cp {}:{} {}".format(
+        values.docker_host, container_id, file_path, tmp_file_path
+    )
+    utilities.execute_command(copy_command)
+    f_obj = open(tmp_file_path, "r", encoding=encoding)
+    return f_obj
+
+
+def read_file(container_id: str, file_path: str, encoding: str = "utf-8") -> List[str]:
     tmp_file_path = os.path.join(
         "/tmp", "container-file-{}".format(random.randint(0, 1000000))
     )
@@ -564,7 +706,7 @@ def read_file(container_id: str, file_path: str, encoding="utf-8"):
     return file_content
 
 
-def append_file(container_id: str, file_path: str, content: List[str]):
+def append_file(container_id: str, file_path: str, content: Sequence[str]) -> None:
     tmp_file_path = os.path.join(
         "/tmp", "append-file-{}".format(random.randint(0, 1000000))
     )

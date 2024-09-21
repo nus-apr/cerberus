@@ -1,9 +1,11 @@
 docker
 more_itertools
 pre-commit
-textual[syntax]==0.45.1
+textual[syntax]==0.79.1
 slack_sdk
 discord
 cython
 jsonschema
 semver
+watchdog
+javalang

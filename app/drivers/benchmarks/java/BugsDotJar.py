@@ -1,16 +1,21 @@
 import os
 from datetime import datetime
 from os.path import join
+from typing import Dict
+from typing import Optional
 
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 
 
 class BugsDotJar(AbstractBenchmark):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super(BugsDotJar, self).__init__()
 
-    def setup_experiment(self, bug_index, container_id, test_all):
+    def setup_experiment(
+        self, bug_index: int, container_id: Optional[str], test_all: bool
+    ) -> bool:
         if not container_id:
             self.error_exit(
                 "unimplemented functionality: this benchmark only runs on docker"
@@ -28,7 +33,7 @@ class BugsDotJar(AbstractBenchmark):
                     self.emit_success("transformation successful")
                     if self.compress_dependencies(container_id, bug_index):
                         self.emit_success("dependencies compressed successfully")
-                        if self.clean(bug_index, container_id):
+                        if self.clean_subject(bug_index, container_id):
                             self.emit_success("clean up successful")
                         else:
                             self.emit_error("clean up failed")
@@ -44,7 +49,7 @@ class BugsDotJar(AbstractBenchmark):
                 is_error = True
         return is_error
 
-    def install_deps(self, bug_index, container_id):
+    def install_deps(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("installing experiment dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -63,7 +68,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def deploy(self, bug_index, container_id):
+    def deploy(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("downloading experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -80,7 +85,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def config(self, bug_index, container_id):
+    def config(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("configuring experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -97,7 +102,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def build(self, bug_index, container_id):
+    def build(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("building experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -115,7 +120,9 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def compress_dependencies(self, container_id, bug_index):
+    def compress_dependencies(
+        self, container_id: Optional[str], bug_index: int
+    ) -> bool:
         self.emit_normal("compressing experiment dependencies")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -137,7 +144,7 @@ class BugsDotJar(AbstractBenchmark):
 
         return status == 0
 
-    def test(self, bug_index, container_id):
+    def test(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("testing experiment subject")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -145,9 +152,11 @@ class BugsDotJar(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-test.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
         test_timeout = experiment_item[self.key_test_timeout]
-        command_str = f"bash run_test {failing_test_list[0]} {test_timeout}"
+        command_str = f"bash run_test {failing_test_identifiers_list[0]} {test_timeout}"
         failing_status = self.run_command(
             container_id,
             command_str,
@@ -155,11 +164,13 @@ class BugsDotJar(AbstractBenchmark):
             os.path.join(self.dir_setup),
         )
 
-        passing_test_list = experiment_item[self.key_passing_tests]
+        passing_test_identifiers_list = experiment_item[
+            self.key_passing_test_identifiers
+        ]
         passing_status = 0
-        if passing_test_list:
-            passing_test_str = ",".join(passing_test_list)
-            command_str = f"bash run_test {passing_test_str} {300}"
+        if passing_test_identifiers_list:
+            passing_test_identifiers_str = ",".join(passing_test_identifiers_list)
+            command_str = f"bash run_test {passing_test_identifiers_str} {300}"
             passing_status = self.run_command(
                 container_id,
                 command_str,
@@ -172,7 +183,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return failing_status != 0 and passing_status == 0
 
-    def verify(self, bug_index, container_id):
+    def verify(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("verify dev patch and test-oracle")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -180,9 +191,13 @@ class BugsDotJar(AbstractBenchmark):
             self.dir_logs + "/" + self.name + "-" + bug_id + "-verify.log"
         )
         time = datetime.now()
-        failing_test_list = experiment_item[self.key_failing_tests]
+        failing_test_identifiers_list = experiment_item[
+            self.key_failing_test_identifiers
+        ]
         test_timeout = experiment_item[self.key_test_timeout]
-        command_str = f"bash verify_dev {failing_test_list[0]} {test_timeout}"
+        command_str = (
+            f"bash verify_dev {failing_test_identifiers_list[0]} {test_timeout}"
+        )
         status = self.run_command(
             container_id, command_str, self.log_verify_path, self.dir_setup
         )
@@ -192,7 +207,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def transform(self, bug_index, container_id):
+    def transform(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("transforming source code")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -211,7 +226,7 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def clean(self, bug_index, container_id):
+    def clean_subject(self, bug_index: int, container_id: Optional[str]) -> bool:
         self.emit_normal("cleaning up source code")
         experiment_item = self.experiment_subjects[bug_index - 1]
         bug_id = str(experiment_item[self.key_bug_id])
@@ -228,7 +243,15 @@ class BugsDotJar(AbstractBenchmark):
         )
         return status == 0
 
-    def save_artifacts(self, dir_info, container_id):
+    def clean(self, exp_dir_path: str, container_id: Optional[str]) -> None:
+        self.emit_normal("\t\t\t[framework] removing experiment subject")
+        command_str = "rm -rf " + exp_dir_path
+        self.run_command(container_id, command_str, "/dev/null", "/")
+        return
+
+    def save_artifacts(
+        self, dir_info: DirectoryInfo, container_id: Optional[str]
+    ) -> None:
         self.list_artifact_dirs = []  # path should be relative to experiment directory
         self.list_artifact_files = []  # path should be relative to experiment directory
         super(BugsDotJar, self).save_artifacts(dir_info, container_id)

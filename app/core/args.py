@@ -1,7 +1,10 @@
 import argparse
 import multiprocessing
+from argparse import Action
 from argparse import HelpFormatter
+from argparse import Namespace
 from operator import attrgetter
+from typing import Iterable
 
 from app.core import definitions
 from app.core import utilities
@@ -9,12 +12,12 @@ from app.core import values
 
 
 class SortingHelpFormatter(HelpFormatter):
-    def add_arguments(self, actions):
+    def add_arguments(self, actions: Iterable[Action]) -> None:
         actions = sorted(actions, key=attrgetter("option_strings"))
         super(SortingHelpFormatter, self).add_arguments(actions)
 
 
-def parse_args():
+def parse_args() -> Namespace:
     parser = argparse.ArgumentParser(
         prog=values.tool_name,
         usage="%(prog)s [options]",
@@ -45,6 +48,14 @@ def parse_args():
     )
 
     optional.add_argument(
+        definitions.ARG_SUBJECT_BASED,
+        "-sb",
+        help="experiment image based on subject image\n\n",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
         definitions.ARG_CONFIG_FILE, "-c", type=str, help="Path to the JSON config file"
     )
 
@@ -54,6 +65,11 @@ def parse_args():
         help="Activate Textual UI",
         action="store_true",
         default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_SUBSEQUENCE,
+        help="Use a subsequence of the composite workflow. Format is startInclusive-endInclusive",
     )
 
     optional.add_argument(
@@ -98,6 +114,13 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_DOCKER_HOST,
         help="custom URL for the docker server which will host the containers",
+    )
+
+    optional.add_argument(
+        definitions.KEY_TIMESTAMP,
+        help="Add timestamp before every command",
+        acton="store_true",
+        default=False,
     )
 
     # TODO: Group list of tools based on type
@@ -186,6 +209,13 @@ def parse_args():
     optional.add_argument(
         definitions.ARG_RUN_TESTS_ONLY,
         help="only run the tests of the experiment",
+        action="store_true",
+        default=False,
+    )
+
+    optional.add_argument(
+        definitions.ARG_USE_SUBJECT_AS_BASE,
+        help="use the subject image as the base image",
         action="store_true",
         default=False,
     )
@@ -280,7 +310,6 @@ def parse_args():
     optional.add_argument(definitions.ARG_BUG_ID, help="identifier of the bug")
     optional.add_argument(
         definitions.ARG_BUG_ID_LIST,
-        type=list,  # type: ignore
         help="list of identifiers for the bugs",
         nargs="+",
         default=[],

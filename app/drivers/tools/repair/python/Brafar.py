@@ -1,12 +1,17 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
 from app.core import container
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class Brafar(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
         self.image_name = "linnaxie/brafar-python"
@@ -14,16 +19,18 @@ class Brafar(AbstractRepairTool):
             "sha256:0696fd92a2c918a59c2e51ee1e6f2e00ee260d50fa25b8db3ef41389f356afd2"
         )
 
-    def run_repair(self, bug_info, repair_config_info):
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         # print(self.dir_expr)
-        super(Brafar, self).run_repair(bug_info, repair_config_info)
+
         self.timestamp_log_start()
         status = self.run_command(
             "timeout -k 5m {}h python3 run.py -d {} -q src -s 100 -o {} {}".format(
-                repair_config_info[self.key_timeout],
+                task_config_info[self.key_timeout],
                 self.dir_expr,
                 "/output/patches",
-                repair_config_info[self.key_tool_params],
+                task_config_info[self.key_tool_params],
             ),
             self.log_output_path,
             dir_path="/home/linna/brafar-python",
@@ -32,7 +39,7 @@ class Brafar(AbstractRepairTool):
         self.emit_highlight("log file: {0}".format(self.log_output_path))
         self.timestamp_log_end()
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -45,7 +52,9 @@ class Brafar(AbstractRepairTool):
 
         super(Brafar, self).save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -80,8 +89,9 @@ class Brafar(AbstractRepairTool):
                     self.stats.error_stats.is_error = True
                 if line.startswith("The repair result is:"):
                     if "True" in line:
-                        self.stats.patch_stats.plausible = 1
+                        self.stats.patch_stats.plausible += 1
                     elif "False" in line:
-                        self.stats.patch_stats.implausible = 1
+                        self.stats.patch_stats.generated += 1
+                        self.stats.patch_stats.enumerations += 1
 
         return self.stats
