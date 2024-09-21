@@ -157,11 +157,48 @@ class BasicWorkflow(AbstractCompositeTool):
             )
         )
 
-        self.task_pool: ThreadPool = ThreadPool(
-            cpu_count,
-            initializer=init_pool_processes,
-            initargs=(global_job_lock,),
-        )
+        self.task_pools: Dict[CompositeTaskType, ThreadPool] = {
+            "repair": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "analyze": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "bisect": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "localize": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "crash-analyze": ThreadPool(
+                min(5, max(1, cpu_count // 8)),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "fuzz": ThreadPool(
+                max(active_fuzzers + 2, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "validate": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+            "iterative-repair": ThreadPool(
+                max(1, cpu_count // 8),
+                initializer=init_pool_processes,
+                initargs=(global_job_lock,),
+            ),
+        }
 
         self.patch_validation_map_lock = Lock()
         self.repair_retry_map_lock = Lock()
@@ -345,7 +382,8 @@ class BasicWorkflow(AbstractCompositeTool):
         watcher_handle.wait()
         self.file_pool.terminate()
         self.processed_file_pool.terminate()
-        self.task_pool.terminate()
+        for x in self.task_pools.values():
+            x.terminate()
         self.emit_highlight("Terminated")
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
@@ -714,7 +752,7 @@ class BasicWorkflow(AbstractCompositeTool):
                 # self.emit_debug(dirname(event.src_path))
                 if dirname(event.src_path).endswith("crashes"):
                     # self.emit_normal("Found a crash!")
-                    self.task_pool.apply_async(
+                    self.task_pools["fuzz"].apply_async(
                         self.on_crash_found,
                         [event],
                         error_callback=self.error_callback_handler,
@@ -1433,9 +1471,22 @@ class BasicWorkflow(AbstractCompositeTool):
                 for tool_constuctor, params, tag, type in self.tool_map[next_task]:
                     tool = tool_constuctor()
 
-                    self.emit_debug(f"Allocating tool {tool.name} on pool default")
+                    self.emit_debug(
+                        f"Allocating tool {tool.name} on pool {next_task if next_task in self.task_pools else 'default' }"
+                    )
 
-                    self.task_pool.apply_async(
+                    if time.time() - self.last_pool_print >= 30:
+                        queues = " ".join(
+                            map(
+                                lambda x: f"{x[0]} -> {x[1]._taskqueue.qsize()}",
+                                self.task_pools.items(),
+                            )
+                        )
+                        self.emit_debug("PRINTING QUEUE SIZE")
+                        self.emit_debug(queues)
+                        self.last_pool_print = time.time()
+
+                    self.task_pools[next_task].apply_async(
                         self.run_subtask,
                         [
                             type,

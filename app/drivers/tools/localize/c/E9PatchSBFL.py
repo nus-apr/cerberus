@@ -168,7 +168,7 @@ class E9PatchSBFL(AbstractLocalizeTool):
 
             new_metadata = {
                 "generator": "e9patchsbfl",
-                "confidence": "1",
+                "confidence": 1,
                 "localization": localization_info,
             }
 

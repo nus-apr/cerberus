@@ -26,7 +26,10 @@ def collect_benchmark_result(
     bug_id = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     benchmark_tag_name = "{}-{}-{}-{}".format(
-        benchmark.name, subject_name, bug_id, hash.hexdigest()[:8]
+        benchmark.name,
+        subject_name,
+        bug_id,
+        hash.hexdigest()[: values.hash_suffix_length],
     )
     benchmark.print_stats()
     logger.log_benchmark_stats(benchmark_tag_name, benchmark.stats)

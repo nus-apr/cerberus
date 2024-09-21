@@ -6,6 +6,7 @@ class ConfigFieldsEnum(Enum):
     GENERAL = "general"
     UI_MODE = "enable_ui"
     PARALLEL_MODE = "parallel"
+    TIMESTAMP = "TIMESTAMP"
 
     # profiles section
     PROFILES = "profiles"
@@ -73,6 +74,7 @@ class ConfigFieldsEnum(Enum):
     REPAIR = "repair"
     SELECT = "select"
     ORCHESTRATOR = "orchestrator"
+    BISECT = "bisect"
 
     # benchmarks
     BENCHMARKS = "benchmarks"

@@ -15,7 +15,7 @@ TaskType = Literal[
 ]
 
 CompositeTaskType = Union[
-    TaskType, Literal["crash-analyze"], Literal["iterative-repair"]
+    TaskType, Literal["crash-analyze", "bisect", "iterative-repair"]
 ]
 
 
@@ -24,12 +24,13 @@ def compare_types(a: CompositeTaskType, b: CompositeTaskType) -> int:
         "analyze": 0,
         "fuzz": 1,
         "crash-analyze": 2,
-        "slice": 3,
-        "localize": 4,
-        "repair": 5,
-        "validate": 6,
-        "select": 7,
-        "composite": 8,
-        "prepare": 9,
+        "bisect": 3,
+        "slice": 4,
+        "localize": 5,
+        "repair": 6,
+        "validate": 7,
+        "select": 8,
+        "composite": 9,
+        "prepare": 10,
     }
     return mapping[a] - mapping[b]

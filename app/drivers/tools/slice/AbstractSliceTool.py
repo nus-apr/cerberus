@@ -34,6 +34,23 @@ class AbstractSliceTool(AbstractTool):
         logs folder -> self.dir_logs
         The parent method should be invoked at last to archive the results
         """
+        base_dir_validate = dir_info["slicing"]
+        if os.path.isdir(base_dir_validate):
+            dir_validation = join(base_dir_validate, self.name)
+            self.dir_validation = dir_validation
+            if os.path.isdir(dir_validation):
+                shutil.rmtree(dir_validation)
+            os.makedirs(dir_validation)
+            if self.container_id:
+                container.copy_file_from_container(
+                    self.container_id, self.dir_output, f"{dir_validation}"
+                )
+            else:
+                save_command = "cp -rf {} {}".format(
+                    self.dir_output, f"{dir_validation}"
+                )
+                utilities.execute_command(save_command)
+        
         super().save_artifacts(dir_info)
         return
 
@@ -57,4 +74,8 @@ class AbstractSliceTool(AbstractTool):
             self.stats.time_stats.timestamp_validation
             self.stats.time_stats.timestamp_plausible
         """
+
+        if self.is_dir(self.dir_patch):
+            self.stats.patch_stats.size = len(self.list_dir(self.dir_patch))
+
         return self.stats

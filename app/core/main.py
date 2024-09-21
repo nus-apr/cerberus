@@ -110,14 +110,6 @@ def main() -> None:
     values.gpus = utilities.get_gpu_count()
     logger.create_log_files()
 
-    return_code, (output, _) = utilities.run_command(
-        f"groups {getpass.getuser()} | grep {definitions.GROUP_NAME}"
-    )
-    if return_code != 0 or not output or output.decode() == "":
-        utilities.error_exit(
-            f"User {getpass.getuser()} is not part of {definitions.GROUP_NAME} group or group does not exist. Please this is setup correctly"
-        )
-
     config_obj = bootstrap(parsed_args)
     try:
         emitter.title(
@@ -279,7 +271,7 @@ def process_tasks(tasks: TaskList) -> bool:
             tool_tag,
         )
         if task_config.task_type != "composite":
-            prepare_experiment_tool(
+            experiment_image_tool_id = prepare_experiment_tool(
                 experiment_image_id,
                 tool,
                 task_profile,
@@ -287,6 +279,9 @@ def process_tasks(tasks: TaskList) -> bool:
                 image_name,
                 experiment_item,
                 tool_tag,
+            )
+            experiment_item["image_id"] = (
+                experiment_image_tool_id or experiment_image_id.get("base_image", "")
             )
 
         for run_index in range(task_config.runs):

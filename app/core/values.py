@@ -12,7 +12,7 @@ from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.TaskType import TaskType
 
 tool_name = "Cerberus"
-docker_host = "unix:///var/run/docker.sock"
+docker_host = os.getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
 dir_main: str = dirname(dirname(dirname(os.path.realpath(__file__))))
 dir_infra = join(dir_main, "infra")
@@ -70,6 +70,10 @@ rebuild_base = False
 ui_active = False
 use_parallel = False
 compact_results = False
+timestamp = False
+
+hash_suffix_length = 10
+
 cpus = max(1, multiprocessing.cpu_count() - 2)
 gpus: int = 0
 # cpu_task = 1

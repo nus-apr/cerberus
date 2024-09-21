@@ -2,7 +2,7 @@
 *.bc
 *.a
 .idea
-app/__pycache__/
+**/__pycache__/
 logs
 output
 venv

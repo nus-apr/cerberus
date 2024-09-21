@@ -12,6 +12,7 @@ from app.drivers.tools.slice.AbstractSliceTool import AbstractSliceTool
 
 
 class AutoBug(AbstractSliceTool):
+    #TODO recheck
     def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)

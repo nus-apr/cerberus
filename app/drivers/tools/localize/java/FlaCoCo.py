@@ -33,7 +33,7 @@ class FlaCoCo(AbstractLocalizeTool):
             self.key_analysis_output: [
                 {
                     "generator": self.name,
-                    "confidence": "1",
+                    "confidence": 1,
                     "localization": localization,
                 }
             ]
@@ -112,6 +112,18 @@ class FlaCoCo(AbstractLocalizeTool):
 
         if self.is_file(localization_file_path):
             self.generate_meta_data(localization_file_path)
+        else:
+            localization = []
+            new_metadata = {
+                self.key_analysis_output: [
+                    {
+                        "generator": self.name,
+                        "confidence": 1,
+                        "localization": localization,
+                    }
+                ]
+            }
+            self.write_json([new_metadata], join(self.dir_output, "meta-data.json"))
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))

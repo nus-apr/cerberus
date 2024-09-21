@@ -3,7 +3,7 @@ import os
 from typing import cast
 from typing import List
 
-from app.core import configuration
+from app.core import configuration, utilities
 from app.core import definitions
 from app.core import emitter
 from app.core import values
@@ -113,6 +113,7 @@ class TaskProcessor:
                             elif (
                                 tasks_chunk_config.task_config.task_type == "composite"
                             ):
+                                utilities.check_groups()
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
                                     tasks_chunk_config.task_config.task_type,

@@ -106,7 +106,10 @@ def build_image(dockerfile_path: str, image_name: str) -> str:
     emitter.normal("\t\t[framework] building docker image {}".format(image_name))
     context_dir = os.path.abspath(os.path.dirname(dockerfile_path))
     if os.path.isfile(dockerfile_path):
-        dockerfilename = dockerfile_path.split("/")[-1]
+        dockerfilename = os.path.relpath(dockerfile_path, context_dir)
+        emitter.debug(
+            f"Context directory is {context_dir} with image file {dockerfilename}"
+        )
         try:
             logs = client.api.build(
                 path=context_dir,

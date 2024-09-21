@@ -25,7 +25,7 @@ from app.drivers.AbstractDriver import AbstractDriver
 
 class AbstractBenchmark(AbstractDriver):
     rebuilt_benchmarks: Dict[str, bool] = {}
-    experiment_subjects: List[Any] = []
+    experiment_subjects: List[Dict[str, Any]] = []
     meta_file: Optional[str] = None
     bench_dir_path = None
 
@@ -140,6 +140,9 @@ class AbstractBenchmark(AbstractDriver):
     @staticmethod
     def load_meta_file_static(path: str, name: str) -> List[Any]:
         meta_file_path = join(path, name, "meta-data.json")
+        if values.special_meta:
+            meta_file_path = values.special_meta
+
         AbstractBenchmark.check_benchmark_folder(name)
         try:
             loader = MetadataLoader(meta_file_path, general_section_schema)
@@ -192,17 +195,17 @@ class AbstractBenchmark(AbstractDriver):
 
     def load_meta_file(self) -> None:
         emitter.normal("\t[framework] loading experiment meta-data")
-        if not self.meta_file:
-            utilities.error_exit("Meta file path not set")
-        if not os.path.isfile(self.meta_file):
-            utilities.error_exit("Meta file does not exist")
-
         meta_file_loc = self.meta_file
 
         if values.special_meta:
             meta_file_loc = values.special_meta
             if not os.path.exists(meta_file_loc):
-                utilities.error_exit("Special meta file path is incorrect")
+                utilities.error_exit(f"Special meta file path {meta_file_loc} is incorrect")
+
+        if not meta_file_loc:
+            utilities.error_exit("Meta file path not set")
+        if not os.path.isfile(meta_file_loc):
+            utilities.error_exit("Meta file does not exist")
 
         try:
             loader = MetadataLoader(meta_file_loc, general_section_schema)
@@ -249,7 +252,7 @@ class AbstractBenchmark(AbstractDriver):
                             container_id, [stderr.decode("iso-8859-1")], log_file_path
                         )
         else:
-            command_str += " | tee -a {0} 2>&1".format(log_file_path)
+            command_str += "  2>&1 | tee -a {0}".format(log_file_path)
             exit_code = utilities.execute_command(
                 command_str,
                 directory=dir_path,
@@ -365,7 +368,9 @@ class AbstractBenchmark(AbstractDriver):
             if os.path.isdir(self.dir_expr):
                 utilities.execute_command("rm -rf {}".format(self.dir_expr))
             if not os.path.isdir(self.dir_logs):
-                utilities.execute_command("mkdir -p {}".format(self.dir_logs))
+                utilities.execute_command(
+                    "mkdir -p {}".format(self.dir_logs), show_output=False
+                )
         else:
             if not container.is_dir(container_id, self.dir_logs):
                 self.run_command(
@@ -428,6 +433,9 @@ class AbstractBenchmark(AbstractDriver):
         bug_id = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
         exp_image_name = "{}-{}-{}".format(self.name, subject_name, bug_id).lower()
+        if values.use_subject_as_base:
+            exp_image_name = experiment_item["base_image"]
+
         if not container.image_exists(exp_image_name) or (
             not ignore_rebuild and values.rebuild_all
         ):

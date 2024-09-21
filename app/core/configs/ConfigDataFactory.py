@@ -46,6 +46,7 @@ class ConfigDataFactory:
                     ),
                 ),
             ),
+            timestamp=general_config_dict.get(ConfigFieldsEnum.TIMESTAMP.value, False),
         )
 
     @staticmethod
@@ -198,9 +199,6 @@ class ConfigDataFactory:
                         params=tool_config_dict.get(ConfigFieldsEnum.PARAMS.value, ""),
                         tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
                         image=tool_config_dict.get(ConfigFieldsEnum.IMAGE.value, ""),
-                        hash_digest=tool_config_dict.get(
-                            ConfigFieldsEnum.HASH_DIGEST.value, ""
-                        ),
                         ignore=tool_config_dict.get(
                             ConfigFieldsEnum.IGNORE.value, False
                         ),
@@ -208,6 +206,9 @@ class ConfigDataFactory:
                             ConfigFieldsEnum.REBUILD.value, False
                         ),
                         local=tool_config_dict.get(ConfigFieldsEnum.LOCAL.value, False),
+                        hash_digest=tool_config_dict.get(
+                            ConfigFieldsEnum.HASH_DIGEST.value, ""
+                        ),
                     )
                 )
 

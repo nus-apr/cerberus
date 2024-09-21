@@ -5,6 +5,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import values
 from app.core.task.stats.ValidateToolStats import ValidateToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
@@ -19,7 +20,18 @@ class Valkyrie(AbstractValidateTool):
         self.portable_dirs = ["/opt/valkyrie"]
         self.config_path = ""
 
-    def instrument(self, bug_info: Dict[str, Any]) -> None:
+    def locate(self) -> None:
+        self.tool_folder = (
+            join(values.dir_main, "valkyrie")
+            if self.locally_running
+            else "/opt/valkyrie/"
+        )
+        if not self.is_dir(self.tool_folder):
+            self.error_exit(
+                f"Tool directory for {self.name} is not found at {self.tool_folder}"
+            )
+
+    def populate_config_file(self, bug_info: Dict[str, Any]) -> str:
         self.emit_normal("generating config file")
         self.config_path = join(self.dir_expr, f"{self.name}.config")
         conf_content = list()
@@ -52,7 +64,7 @@ class Valkyrie(AbstractValidateTool):
         else:
             conf_content.append(f'build_script:-c "exit 0"\n')
 
-        public_test_script = bug_info.get(self.key_pub_test_script, None)
+        public_test_script = bug_info.get(self.key_pub_test_script, "validate.sh")
         if public_test_script:
             conf_content.append(
                 f"pub_test_script:{self.dir_setup}/{public_test_script}\n"
@@ -72,12 +84,19 @@ class Valkyrie(AbstractValidateTool):
         conf_content.append("patch_per_dir_limit:100\n")
         conf_content.append("reset_command:git reset --hard HEAD\n")
         self.write_file(conf_content, self.config_path)
+        return self.config_path
 
     def invoke(
         self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
     ) -> None:
-        conf_path = self.config_path
-
+        conf_path = self.populate_config_file(bug_info)
+        self.tool_folder = (
+            join(values.dir_main, "valkyrie")
+            if self.locally_running
+            else "/opt/valkyrie/"
+        )
+        # delete previously validated patches
+        self.delete_validated_patches(bug_info)
         task_conf_id = str(self.current_task_profile_id.get("NA"))
         bug_id = str(bug_info[self.key_bug_id])
         timeout = str(task_config_info[self.key_timeout])
@@ -99,9 +118,28 @@ class Valkyrie(AbstractValidateTool):
             + "'"
         )
 
-        status = self.run_command(validate_command, self.log_output_path)
+        status = self.run_command(
+            validate_command, self.log_output_path, self.tool_folder
+        )
         self.process_status(status)
+        # transform the patch paths
+        self.transform_patches(bug_info)
+        self.create_meta_data()
+        self.timestamp_log_end()
+        self.emit_highlight("log file: {0}".format(self.log_output_path))
 
+    def delete_validated_patches(self, bug_info) -> None:
+        if not "validation_output" in bug_info:
+            return
+        validation_info = bug_info["validation_output"][0]["validation_result"]
+        input_patches_dir = f"{self.dir_setup}/patches"
+        for _id, _result in validation_info:
+            generator, patch_id = _id.split(":")
+            patch_file = join(input_patches_dir, generator, patch_id)
+            if os.path.isfile(patch_file):
+                self.run_command(f"rm -f {patch_file}")
+
+    def create_meta_data(self) -> None:
         result_json_file = f"{self.dir_output}/result.json"
         if self.is_file(result_json_file):
             result_json = self.read_json(result_json_file)
@@ -114,6 +152,23 @@ class Valkyrie(AbstractValidateTool):
 
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
+
+    def transform_patches(self, bug_info: Dict[str, Any]) -> None:
+        input_patches_dir = f"{self.dir_setup}/patches"
+        cp_source_list = [x["name"] for x in bug_info["cp_sources"]]
+        patch_list = [
+            x for x in self.list_dir(input_patches_dir) if ".patch" in x or ".diff" in x
+        ]
+        for _p in patch_list:
+            with open(_p, "r") as file:
+                filedata = file.read()
+                dir_src = f"{self.dir_expr}/src"
+                for _cp_src in cp_source_list:
+                    abs_path = f"{dir_src}/{_cp_src}".replace("//", "/")
+                    rel_path = f"/src/{_cp_src}".replace("//", "/")
+                    filedata = filedata.replace(abs_path, "").replace(rel_path, "")
+            with open(_p, "w") as file:
+                file.write(filedata)
 
     def analyse_output(
         self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]

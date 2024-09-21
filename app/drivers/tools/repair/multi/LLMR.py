@@ -80,7 +80,7 @@ class LLMR(AbstractRepairTool):
             java_version = 8
         env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
 
-        if bug_info.get(self.key_build_script, ""):
+        if self.key_build_script in bug_info:
             # Build it once to have things prepared
             self.run_command(
                 "bash {}".format(bug_info.get(self.key_build_script)),
@@ -91,10 +91,29 @@ class LLMR(AbstractRepairTool):
         key = self.get_api_key(model)
         context_window = 10
         if not key:
-            self.error_exit(f"{self.name} requires at least one API key for OpenAI")
+            self.error_exit(f"{self.name} requires at least one API key for {model}")
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_test_identifiers} {failing_test_identifiers} {debug} {language} -key {key} -context {context_window} {params}".format(
+        llmr_command = """timeout -k 5m 
+        {timeout_h}h 
+        python3 /tool/repair.py 
+        {fl} 
+        --project-path {project_path} 
+        -model {model} 
+        {reference_file} 
+        {bug_description} 
+        {build_script} 
+        -output {output_loc} 
+        -patches {patch_count} 
+        -test {test_script} 
+        {binary_path} 
+        {passing_test_identifiers} 
+        {failing_test_identifiers} 
+        {debug} 
+        {language} 
+        -key {key} 
+        -context {context_window} 
+        {params}""".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
@@ -138,6 +157,8 @@ class LLMR(AbstractRepairTool):
             params=params,
             key=key,
             context_window=context_window,
+        ).replace(
+            "\n", " "
         )
         status = self.run_command(
             llmr_command, self.log_output_path, join(self.dir_expr, "src"), env=env
@@ -202,11 +223,11 @@ class LLMR(AbstractRepairTool):
             log_lines = self.read_file(self.log_output_path, encoding="iso-8859-1")
 
             for line in log_lines:
-                if "is Plausible" in line:
+                if re.match("Patch .* is Plausible", line):
                     self.stats.patch_stats.plausible += 1
-                if "response" in line:
+                if re.match("response", line):
                     self.stats.patch_stats.enumerations += 1
-                if "does not compile" in line:
+                if re.match("does not compile", line):
                     self.stats.patch_stats.non_compilable += 1
 
         return self.stats

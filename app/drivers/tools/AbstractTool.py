@@ -124,6 +124,7 @@ class AbstractTool(AbstractDriver):
     sudo_password: str = ""
     image_user: str = "root"
     command_history: List[Tuple[str, str, Dict[str, str]]]
+    extends_subject: bool = False
 
     required_fields = ["stats", "tool_type"]
 
@@ -356,9 +357,11 @@ class AbstractTool(AbstractDriver):
                                 join(self.dir_setup, "tests"),
                             )
                         )
-                        self.run_command(
-                            "bash -c 'rm .??*'", dir_path=join(self.dir_setup, "tests")
-                        )
+                        if os.path.exists(join(self.dir_setup, "tests")):
+                            self.run_command(
+                                "bash -c 'rm .??*'",
+                                dir_path=join(self.dir_setup, "tests"),
+                            )
                         pass
                     if tests["format"] == "ktest":
                         self.emit_warning("Not supporting ktest files yet!")
@@ -451,7 +454,7 @@ class AbstractTool(AbstractDriver):
                 else self.dir_base_expr
             ),
         }
-        if run_as_sudo:
+        if run_as_sudo and not self.locally_running:
             if not self.sudo_password:
                 self.error_exit(
                     f"{self.name} requires sudo command but sudo password is empty"
@@ -476,7 +479,7 @@ class AbstractTool(AbstractDriver):
         else:
             if not dir_path:
                 dir_path = self.dir_expr
-            command += " | tee -a {0} 2>&1".format(log_file_path)
+            command += " 2>&1 | tee -a {0}".format(log_file_path)
             exit_code = execute_command(command, env=temp_env, directory=dir_path)
 
         self.command_history.append((dir_path, command, temp_env))

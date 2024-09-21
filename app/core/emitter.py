@@ -10,6 +10,7 @@ from typing import Optional
 from typing import Union
 
 import rich
+import time
 
 from app.core import definitions
 from app.core import logger
@@ -21,7 +22,7 @@ try:
     rows, columns = tuple(map(int, stty_info.read().split()))
     stty_info.close()
 except Exception as e:
-    rows, columns = 200, 100
+    rows, columns = 500, 800
     rich.print("Could not get terminal size: {}".format(e))
 
 
@@ -72,10 +73,14 @@ def write(
     prefix: Optional[str] = None,
     indent_level: int = 0,
 ) -> None:
+    timestamp_str = (
+        "" if not values.timestamp else f" {time.strftime('%b %d %H:%M:%S')}"
+    )
     if not values.ui_active:
-        message = "[bold {}]{}".format(
+        message = "[bold {}]{}{}".format(
             RICH_COLOR_MAP[print_color],
             str(print_message).replace("[", "\\["),
+            timestamp_str,
         )
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
@@ -92,10 +97,11 @@ def write(
             print_message = prefix + str(print_message)
 
         ui.post_write(
-            "[bold {}]{} {}".format(
+            "[bold {}]{} {}{}".format(
                 TEXTUALIZE_COLOR_MAP[print_color],
                 values.job_identifier.get("Root"),
                 str(print_message).replace("[", "\\[").replace("\t", " "),
+                timestamp_str,
             )
         )
 
@@ -153,7 +159,7 @@ def data(message: Any, info: Any = None) -> None:
 
 
 def normal(message: Any, jump_line: bool = True) -> None:
-    write(message, COLOR.BLUE, jump_line)
+    write(message, COLOR.BLUE, jump_line, prefix="\t\t[normal] ")
     logger.output(message)
 
 
@@ -166,27 +172,27 @@ def highlight(message: Any, jump_line: bool = True) -> None:
 
 
 def information(message: Any, jump_line: bool = True) -> None:
-    write(message, COLOR.GREY, jump_line)
+    write(message, COLOR.GREY, jump_line, prefix="[info]")
     logger.information(message)
 
 
 def statistics(message: Any) -> None:
-    write(message, COLOR.WHITE)
+    write(message, COLOR.WHITE, prefix="[stat]")
     logger.output(message)
 
 
 def error(message: Any) -> None:
-    write(message, COLOR.RED)
+    write(message, COLOR.RED, prefix="[error]")
     logger.error(message)
 
 
 def success(message: Any) -> None:
-    write(message, COLOR.GREEN)
+    write(message, COLOR.GREEN, prefix="[info]")
     logger.output(message)
 
 
 def special(message: Any) -> None:
-    write(message, COLOR.ROSE)
+    write(message, COLOR.ROSE, prefix="[special]")
     logger.note(message)
 
 
@@ -210,12 +216,12 @@ def emit_patch(
 
 
 def warning(message: Any) -> None:
-    write(message, COLOR.YELLOW)
+    write(message, COLOR.YELLOW, prefix="[warning]")
     logger.warning(message)
 
 
 def note(message: Any) -> None:
-    write(message, COLOR.WHITE)
+    write(message, COLOR.WHITE, prefix="[note]")
     logger.note(message)
 
 

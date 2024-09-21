@@ -99,7 +99,7 @@ def generate_local_tool_dir_info(
     artifacts_dir_override: Optional[str] = None,
     copy_experiment: bool = False,
 ) -> Dict[str, str]:
-    dir_name = f"{task_identifier}-{hash.hexdigest()[:8]}"
+    dir_name = f"{task_identifier}-{hash.hexdigest()[:values.hash_suffix_length]}"
     base_info = generate_local_dir_info(
         benchmark_name,
         subject_name,

@@ -116,6 +116,13 @@ def parse_args() -> Namespace:
         help="custom URL for the docker server which will host the containers",
     )
 
+    optional.add_argument(
+        definitions.KEY_TIMESTAMP,
+        help="Add timestamp before every command",
+        acton="store_true",
+        default=False,
+    )
+
     # TODO: Group list of tools based on type
     # group_tool = parser.add_argument_group(title='choice of tools')
     # repair_tools = parser.add_argument_group(title='repair tools')

@@ -21,6 +21,6 @@ class AnalysisToolStats(ToolStats):
 
     def write(self, printer: Callable[[str], Any], prefix: str = "") -> None:
         printer(
-            "{1} count generated: {0}\n".format(self.report_stats.generated, prefix)
+            "{1} report(s) generated: {0}\n".format(self.report_stats.generated, prefix)
         )
         super(AnalysisToolStats, self).write(printer, prefix)

@@ -73,7 +73,7 @@ def run(
         ]
 
     if hash is None:
-        hash = hashlib.sha1()
+        hash = hashlib.sha256()
         hash.update(str(time.time()).encode("utf-8"))
 
     dir_info = generate_tool_dir_info(
@@ -202,10 +202,11 @@ def setup_localization(
     experiment_info: Dict[str, Any],
     config_info: Dict[str, Any],
 ) -> None:
-    # TODO: make better
     if (
         definitions.KEY_ANALYSIS_OUTPUT in experiment_info
         and definitions.KEY_LOCALIZATION
+        and len(experiment_info[definitions.KEY_ANALYSIS_OUTPUT])
+        > 0
         in experiment_info[definitions.KEY_ANALYSIS_OUTPUT][-1]
     ):
         experiment_info[definitions.KEY_LOCALIZATION] = experiment_info[

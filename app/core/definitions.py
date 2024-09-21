@@ -16,6 +16,7 @@ KEY_FAILING_TEST = "failing_test_identifiers"
 KEY_CONFIG_TIMEOUT = "timeout"
 KEY_FL_FORMULA = "fl_formula"
 KEY_STACK_TRACE = "stack_trace"
+KEY_TIMESTAMP = "timestamp"
 
 KEY_TIEBREAKER_FUNCTIONS = "tiebreaker_functions"
 KEY_TIEBREAKER_FILES = "tiebreaker_files"

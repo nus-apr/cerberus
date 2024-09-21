@@ -19,7 +19,7 @@ from app.core import values
 from app.core.configs.Config import Config
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.task.typing.TaskList import TaskList
-from app.core.task.typing.TaskType import compare_types
+from app.core.task.typing.TaskType import TaskType, compare_types
 from app.core.task.typing.TaskType import CompositeTaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -138,9 +138,14 @@ def process_overrides(parsed_args: Namespace, config: Config) -> None:
     if parsed_args.rebuild_base:
         for x in config.tasks_configs_list:
             x.task_config.rebuild_base = True
+    if parsed_args.special_meta:
+        values.special_meta = parsed_args.special_meta
+    if parsed_args.timestamp:
+        values.timestamp = parsed_args.timestamp
 
 
 class Configurations:
+    task_type: TaskType
     __email_config_file = open(join(values.dir_config, "email.json"))
     __slack_config_file = open(join(values.dir_config, "slack.json"))
     __api_config_file = open(join(values.dir_config, "api.json"))
@@ -182,6 +187,7 @@ class Configurations:
         "container-profile-id-list": ["CP1"],
         "use-latest-image": False,
         "use-subject-as-base": False,
+        "timestamp": False,
     }
     __runtime_config_values = __default_config_values
 
@@ -240,6 +246,9 @@ class Configurations:
 
         if arg_list.purge:
             self.__runtime_config_values["use-purge"] = True
+
+        if arg_list.timestamp:
+            self.__runtime_config_values["timestamp"] = True
 
         if not arg_list.use_container or arg_list.use_local:
             self.__runtime_config_values["use-container"] = False
@@ -440,6 +449,9 @@ class Configurations:
         task_profiles: Dict[str, Dict[str, Any]] = self.get_task_profiles()
         container_profiles: Dict[str, Dict[str, Any]] = self.get_container_profiles()
         task_type = self.task_type
+        
+        if task_type == "composite":
+            utilities.check_groups()
 
         if not task_type:
             utilities.error_exit("No task type defined")
@@ -534,7 +546,7 @@ class Configurations:
 
     def update_configuration(self) -> None:
         emitter.normal("\t[framework] updating configuration values")
-        self.task_type = self.__runtime_config_values["task-type"]
+        self.task_type = cast(TaskType,self.__runtime_config_values["task-type"])
         values.task_type.set(self.__runtime_config_values["task-type"])
         values.only_setup = self.__runtime_config_values["only-setup"]
         if self.task_type == "prepare":
@@ -595,6 +607,7 @@ class Configurations:
         values.runs = max(1, self.__runtime_config_values["runs"])
         values.use_cache = self.__runtime_config_values["use-cache"]
         values.special_meta = self.__runtime_config_values["special-meta"]
+        values.timestamp = self.__runtime_config_values["timestamp"]
 
         values.cpus = max(
             1,
@@ -622,4 +635,7 @@ class Configurations:
 
         # This function is valid after Python 3.11
         if sys.version_info.major == 3 and sys.version_info.minor >= 11:
-            sys.set_int_max_str_digits(0)
+            try:
+                sys.set_int_max_str_digits(0)
+            except:
+                emitter.warning("Could not set max digits")

@@ -4,6 +4,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 
+from app.core import definitions
 from app.core import values
 from app.core.task.stats.AnalysisToolStats import AnalysisToolStats
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
@@ -122,8 +123,33 @@ class SanitizeParser(AbstractAnalyzeTool):
 
         self.process_status(status)
 
+        sanitizers = self.read_json(join(self.dir_output, "sanitizer.json"))
+
+        if len(sanitizers) == 0:
+            sanitizer = "NAN"
+        else:
+            sanitizer = sanitizers[0]
+
+        cwes = self.read_json(join(self.dir_output, "cwe_id.json"))
+        if len(cwes) == 0:
+            cwe = "NAN"
+        else:
+            cwe = cwes[0]
+
         self.write_json(
-            {"bug_reports": [join("reports", "report.txt")]},
+            [
+                {
+                    "bug_reports": [join("reports", "report.txt")],
+                    "triggered_sanitizer": sanitizer,
+                    "cwe_id": cwe,
+                    definitions.KEY_TIEBREAKER_FILES: self.read_json(
+                        join(self.dir_output, "tiebreaker_files.json")
+                    ),
+                    definitions.KEY_TIEBREAKER_FUNCTIONS: self.read_json(
+                        join(self.dir_output, "tiebreaker_functions.json")
+                    ),
+                }
+            ],
             join(self.dir_output, "meta-data.json"),
         )
 

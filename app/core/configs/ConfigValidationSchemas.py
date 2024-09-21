@@ -16,6 +16,7 @@ general_section_schema = {
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
         ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 2},
         ConfigFieldsEnum.GPUS.value: {"type": "integer", "minimum": 0},
+        ConfigFieldsEnum.TIMESTAMP.value: {"type": "boolean"},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
@@ -37,6 +38,7 @@ task_profile_schema = {
         ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FUZZ_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.REPAIR_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.ANALYZE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.LOCALIZE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.VALIDATE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.SELECT_TIMEOUT.value: {"type": "number", "minimum": 0},
@@ -285,6 +287,7 @@ composite_sequence_schema = {
             "type": "array",
             "items": tool_config_schema,
         },
+        ConfigFieldsEnum.BISECT.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.SLICE.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": tool_config_schema},
         ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": tool_config_schema},

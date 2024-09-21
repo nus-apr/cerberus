@@ -1,4 +1,5 @@
 import base64
+import getpass
 import hashlib
 import os
 import re
@@ -19,7 +20,7 @@ from typing import NoReturn
 from typing import Optional
 from typing import Tuple
 
-from app.core import emitter
+from app.core import definitions, emitter
 from app.core import logger
 from app.core import values
 from app.notification import notification
@@ -92,9 +93,12 @@ def execute_command(
     )
     (output, error) = process.communicate()
     if output:
-        emitter.debug(f"[execute-command][stdout] {output.decode('utf-8')}")
+        for line in output.decode("utf-8", "ignore").splitlines():
+            emitter.debug(
+                f"[execute-command][{values.job_identifier.get('NONE')}][stdout] {line}"
+            )
     if error:
-        emitter.error(f"[execute-command][stderr] {error.decode('utf-8')}")
+        emitter.error(f"[execute-command][stderr] {error.decode('utf-8','ignore')}")
     # out is the output of the command, and err is the exit value
     return int(process.returncode)
 
@@ -128,9 +132,9 @@ def run_command(
     )
     (output, error) = process.communicate()
     if output:
-        emitter.debug(output.decode("utf-8"))
+        emitter.debug(output.decode("utf-8", "ignore"))
     if error:
-        emitter.error(error.decode("utf-8"))
+        emitter.error(error.decode("utf-8", "ignore"))
     # out is the output of the command, and err is the exit value
     return int(process.returncode), (output, error)
 
@@ -156,7 +160,7 @@ def get_gpu_count() -> int:
     try:
         return len(
             subprocess.check_output(["nvidia-smi", "-L"])
-            .decode("utf-8")
+            .decode("utf-8", "ignore")
             .strip()
             .split("\n")
         )
@@ -183,8 +187,11 @@ def archive_results(dir_results: str, dir_archive: str) -> int:
     experiment_id = dir_results.split("/")[-1]
 
     archive_command = (
-        "cd {res} ; tar cvzf {id}.tar.gz {id} ; mv {id}.tar.gz {arc}".format(
-            res=dirname(abspath(dir_results)), id=experiment_id, arc=dir_archive
+        "cd {res} ; tar c{verbose}zf {id}.tar.gz {id} ; mv {id}.tar.gz {arc}".format(
+            verbose="v" if values.debug else "",
+            res=dirname(abspath(dir_results)),
+            id=experiment_id,
+            arc=dir_archive,
         )
     )
 
@@ -223,3 +230,13 @@ def check_space() -> None:
     free_size = free // (2**30)
     if int(free_size) < values.default_disk_space:
         error_exit("\t\t\tinsufficient disk space " + str(free_size))
+
+
+def check_groups() -> None:
+    return_code, (output, _) = run_command(
+        f"groups {getpass.getuser()} | grep {definitions.GROUP_NAME}"
+    )
+    if return_code != 0 or not output or output.decode() == "":
+        error_exit(
+            f"User {getpass.getuser()} is not part of {definitions.GROUP_NAME} group or group does not exist. Please this is setup correctly"
+        )

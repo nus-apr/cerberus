@@ -161,7 +161,7 @@ class CrashRepair(AbstractLocalizeTool):
                 processed_loc_info.append(_l)
             new_metadata = {
                 "generator": self.name,
-                "confidence": "1",
+                "confidence": 1,
                 "localization": processed_loc_info,
             }
 

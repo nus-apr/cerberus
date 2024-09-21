@@ -33,7 +33,7 @@ class FauxPy(AbstractLocalizeTool):
             self.key_analysis_output: [
                 {
                     "generator": self.name,
-                    "confidence": "1",
+                    "confidence": 1,
                     "localization": localization,
                 }
             ]

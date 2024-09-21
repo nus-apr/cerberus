@@ -51,7 +51,9 @@ def _tool_based_image(
     tag: Optional[str],
 ) -> str:
 
-    dockerfile_name = "Dockerfile-{}-{}".format(tool.name, bug_image_id)
+    dockerfile_name = "Dockerfile-{}-{}".format(tool.name, bug_image_id).replace(
+        "/", "__"
+    )
     if tag and tag != "":
         dockerfile_name += "-{}".format(tag)
 
@@ -163,7 +165,9 @@ def _subject_based_image(
     bug_info: Dict[str, Any],
     tag: Optional[str],
 ) -> str:
-    dockerfile_name = "Dockerfile-{}-{}".format(bug_image_id, tool.name)
+    dockerfile_name = "Dockerfile-{}-{}".format(bug_image_id, tool.name).replace(
+        "/", "__"
+    )
     if tag and tag != "":
         dockerfile_name += "-{}".format(tag)
 
@@ -175,6 +179,13 @@ def _subject_based_image(
     with open(tmp_dockerfile, "w") as dock_file:
         dock_file.write("FROM {}\n".format(bug_image_id))
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
+
+        tool_instructions = join(list(tool.bindings.keys())[0], "Dockerfile")
+
+        if os.path.exists(tool_instructions):
+            with open(tool_instructions, "r") as steps:
+                for line in steps:
+                    dock_file.write(f"{line}\n")
 
         res, (output, error) = utilities.run_command(
             f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
@@ -299,7 +310,9 @@ def prepare_experiment_tool(
     bug_info: Dict[str, Any],
     tag: Optional[str] = None,
 ) -> Optional[str]:
-    if values.use_container and not tool.locally_running:
+    if values.use_container and (not tool.locally_running or tool.extends_subject):
+        if values.use_subject_as_base:
+            bug_image_id = bug_info.get("base_image", "")
         if not bug_image_id:
             utilities.error_exit("Bug image id not provided")
         emitter.information("\t\t[framework] preparing image {}".format(image_name))
