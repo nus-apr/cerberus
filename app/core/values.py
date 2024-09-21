@@ -12,13 +12,14 @@ from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.TaskType import TaskType
 
 tool_name = "Cerberus"
-docker_host = "unix:///var/run/docker.sock"
+docker_host = os.getenv("DOCKER_HOST", "unix:///var/run/docker.sock")
 
 dir_main: str = dirname(dirname(dirname(os.path.realpath(__file__))))
 dir_infra = join(dir_main, "infra")
 dir_app = join(dir_main, "app", "")
 dir_tool_drivers = join(dir_app, "drivers", "tools", "")
 dir_benchmark_drivers = join(dir_app, "drivers", "benchmarks", "")
+dir_tool = join(dir_main, "tool", "")
 dir_benchmark: str = join(dir_main, "benchmark", "")
 dir_log_base = join(dir_main, "logs")
 dir_output_base = join(dir_main, "output")
@@ -32,7 +33,7 @@ dir_output = ""
 dir_summaries = join(dir_main, "summaries")
 dir_summaries_benchmarks = join(dir_main, "summaries", "benchmarks")
 dir_summaries_tools = join(dir_main, "summaries", "tools")
-
+dir_composite_workspace = join(dir_main, "composite_workspace")
 
 dir_backup = join(dir_main, "backup")
 dir_config = join(dir_main, "config")
@@ -69,6 +70,10 @@ rebuild_base = False
 ui_active = False
 use_parallel = False
 compact_results = False
+timestamp = False
+
+hash_suffix_length = 10
+
 cpus = max(1, multiprocessing.cpu_count() - 2)
 gpus: int = 0
 # cpu_task = 1
@@ -76,6 +81,7 @@ task_type: ContextVar[Optional[TaskType]] = ContextVar("task_type", default=None
 ui_max_width = 1000
 runs = 1
 use_latest_image = False
+use_subject_as_base = False
 secure_hash = False
 special_meta = ""
 
@@ -100,6 +106,16 @@ experiment_status: ContextVar[TaskStatus] = ContextVar(
     "experiment_status", default=TaskStatus.NONE
 )
 job_identifier: ContextVar[str] = ContextVar("job_id", default="root")
+session_identifier: ContextVar[str] = ContextVar("session_id", default="root")
+
+api_configuration = {
+    "openai_token": "",
+    "anthropic_token": "",
+    "huggingface_token": "",
+    "azure_token": "",
+    "azure_base": "",
+    "gemini_token": {},
+}
 
 slack_configuration = {
     "enabled": False,
@@ -151,7 +167,7 @@ apr_max_limit = {
 }
 
 
-def get_task_types():
+def get_task_types() -> List[str]:
     tool_dir = f"{dir_tool_drivers}"
     return sorted(
         ["prepare"]
@@ -167,7 +183,7 @@ def get_task_types():
     )
 
 
-def get_list_tools(tool_type=""):
+def get_list_tools(tool_type: str = "") -> List[str]:
     tool_dir = f"{dir_tool_drivers}/{tool_type}"
     return list(
         l[:-3].lower()
@@ -178,7 +194,7 @@ def get_list_tools(tool_type=""):
     )
 
 
-def get_list_benchmarks():
+def get_list_benchmarks() -> List[str]:
     return list(
         l[:-3].lower()
         for l in filter(

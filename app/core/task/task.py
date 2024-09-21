@@ -2,7 +2,9 @@ import copy
 import hashlib
 import os
 import shutil
+import threading
 import time
+import traceback
 from os.path import dirname
 from os.path import join
 from typing import Any
@@ -10,490 +12,36 @@ from typing import cast
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Tuple
 
 from app.core import container
 from app.core import definitions
 from app.core import emitter
-from app.core import logger
+from app.core import parallel
 from app.core import utilities
 from app.core import values
-from app.core import writer
-from app.core.task import analyze
-from app.core.task import fuzz
-from app.core.task import localize
-from app.core.task import repair
-from app.core.task import select
-from app.core.task import validate
+from app.core.task.dir_info import add_instrumentation_dir_info
+from app.core.task.dir_info import generate_tool_dir_info
+from app.core.task.image import construct_container_volumes
+from app.core.task.results import collect_tool_result
+from app.core.task.results import retrieve_results
+from app.core.task.results import save_artifacts
+from app.core.task.TaskStatus import TaskStatus
 from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
-from app.drivers.tools.analyze.AbstractAnalyzeTool import AbstractAnalyzeTool
-from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
-from app.drivers.tools.localize.AbstractLocalizeTool import AbstractLocalizeTool
-from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
-from app.drivers.tools.select.AbstractSelectTool import AbstractSelectTool
-from app.drivers.tools.validate.AbstractValidateTool import AbstractValidateTool
-from app.plugins import valkyrie
 
 
-def update_dir_info(dir_info: DirectoryInfo, tool_name: str) -> DirectoryInfo:
-    dir_info["local"]["instrumentation"] = join(
-        dir_info["local"]["setup"], tool_name.lower()
-    )
-    dir_info["container"]["instrumentation"] = join(
-        dir_info["container"]["setup"], tool_name.lower()
-    )
-    return dir_info
-
-
-def generate_local_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str, tag: str
-):
-    dir_path = join(benchmark_name, subject_name, bug_name, "")
-    dir_exp_local = join(values.dir_experiments, dir_path)
-    dir_setup_local = join(values.dir_benchmark, dir_path)
-
-    dir_bugs_local = join(dir_setup_local, "bugs")
-    dir_localization_local = join(dir_setup_local, "localization")
-    dir_patches_local = join(dir_setup_local, "patches")
-    dir_validation_local = join(dir_setup_local, "validation")
-    dir_selection_local = join(dir_setup_local, "selection")
-
-    dir_aux_local = join(values.dir_benchmark, benchmark_name, subject_name, ".aux")
-    dir_base_local = join(values.dir_benchmark, benchmark_name, subject_name, "base")
-    dir_logs_local = join(values.dir_logs, dir_path)
-    dir_artifact_local = join(values.dir_artifacts, dir_path)
-    for directory in [
-        dir_exp_local,
-        dir_setup_local,
-        dir_aux_local,
-        dir_base_local,
-        dir_bugs_local,
-        dir_patches_local,
-        dir_localization_local,
-        dir_validation_local,
-        dir_selection_local,
-    ]:
-        if not os.path.isdir(directory):
-            os.makedirs(directory, exist_ok=True)
-
-    if tag:  # Allow for the usage of custom setup folders
-        dir_path_extended = join(benchmark_name, subject_name, f"{bug_name}-{tag}", "")
-        dir_setup_extended = join(values.dir_benchmark, dir_path_extended)
-        if os.path.exists(dir_setup_extended):
-            dir_setup_local = dir_setup_extended
-
-    return {
-        "logs": dir_logs_local,
-        "artifacts": dir_artifact_local,
-        "experiment": dir_exp_local,
-        "setup": dir_setup_local,
-        "base": dir_base_local,
-        "aux": dir_aux_local,
-        "patches": dir_patches_local,
-        "localization": dir_localization_local,
-        "selection": dir_selection_local,
-        "validation": dir_validation_local,
-        "bugs": dir_bugs_local,
-    }
-
-
-def generate_local_tool_dir_info(
-    benchmark_name: str,
-    subject_name: str,
-    bug_name: str,
-    hash: Any,
-    task_identifier: str,
-    tag: str,
-):
-    dir_name = f"{task_identifier}-{hash.hexdigest()[:8]}"
-    base_info = generate_local_dir_info(benchmark_name, subject_name, bug_name, tag)
-
-    dir_result_local = join(values.dir_results, dir_name)
-    dir_log_local = join(values.dir_logs, dir_name)
-    dir_artifact_local = join(values.dir_artifacts, dir_name)
-    for directory in [dir_log_local, dir_result_local, dir_artifact_local]:
-        os.makedirs(directory, exist_ok=True)
-
-    base_info["logs"] = dir_log_local
-    base_info["artifacts"] = dir_artifact_local
-    base_info["results"] = dir_result_local
-
-    return base_info
-
-
-def generate_container_dir_info(benchmark_name: str, subject_name: str, bug_name: str):
-    dir_path = join(benchmark_name, subject_name, bug_name, "")
-
-    dir_setup_container = join("/setup", dir_path)
-    dir_exp_container = join("/experiment", dir_path)
-    dir_logs_container = "/logs"
-    dir_artifact_container = "/output"
-    dir_aux_container = join(dir_exp_container, ".aux")
-    dir_base_container = join(dir_exp_container, "base")
-
-    return {
-        "logs": dir_logs_container,
-        "artifacts": dir_artifact_container,
-        "experiment": dir_exp_container,
-        "setup": dir_setup_container,
-        "base": dir_base_container,
-        "aux": dir_aux_container,
-    }
-
-
-def generate_tool_dir_info(
-    benchmark_name: str,
-    subject_name: str,
-    bug_name: str,
-    hash,
-    task_identifier: str,
-    tag: str,
-) -> DirectoryInfo:
-    dir_info: DirectoryInfo = {
-        "local": generate_local_tool_dir_info(
-            benchmark_name, subject_name, bug_name, hash, task_identifier, tag
-        ),
-        "container": generate_container_dir_info(
-            benchmark_name, subject_name, bug_name
-        ),
-    }
-    return dir_info
-
-
-def generate_dir_info(
-    benchmark_name: str, subject_name: str, bug_name: str, tag: str
-) -> DirectoryInfo:
-    dir_info: DirectoryInfo = {
-        "local": generate_local_dir_info(benchmark_name, subject_name, bug_name, tag),
-        "container": generate_container_dir_info(
-            benchmark_name, subject_name, bug_name
-        ),
-    }
-    return dir_info
-
-
-def construct_job_summary(
-    job_identifier: str, dir: str, results_summary: Dict[str, Any]
-) -> str:
-    json_f_name = f"experiment-summary-{job_identifier}.json"
-    summary_f_path = join(dir, json_f_name)
-    writer.write_as_json(results_summary, summary_f_path)
-    return summary_f_path
-
-
-def collect_benchmark_result(
-    bug_info: Dict[str, Any], benchmark: AbstractBenchmark
-) -> None:
-    emitter.normal("\t\t[framework] collecting benchmark results")
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode("utf-8"))
-    bug_id = str(bug_info[definitions.KEY_BUG_ID])
-    subject_name = str(bug_info[definitions.KEY_SUBJECT])
-    benchmark_tag_name = "{}-{}-{}-{}".format(
-        benchmark.name, subject_name, bug_id, hash.hexdigest()[:8]
-    )
-    benchmark.print_stats()
-    logger.log_benchmark_stats(benchmark_tag_name, benchmark.stats)
-    construct_job_summary(
-        benchmark_tag_name, values.dir_summaries_benchmarks, benchmark.stats.get_dict()
-    )
-
-
-def collect_tool_result(dir_info: DirectoryInfo, experiment_info, tool: AbstractTool):
-    emitter.normal("\t\t[framework] collecting experiment results")
-    task_tag_name = dir_info["local"]["logs"].split("/")[-1]
-    bug_id = str(experiment_info[definitions.KEY_BUG_ID])
-    failing_test_list = experiment_info.get(definitions.KEY_FAILING_TEST, [])
-    tool.analyse_output(dir_info, bug_id, failing_test_list)
-    tool.print_stats()
-    tool.log_output_path = ""
-    logger.log_tool_stats(task_tag_name, tool.stats)
-    dir_info["local"]["summary"] = construct_job_summary(
-        task_tag_name, values.dir_summaries_tools, tool.stats.get_dict()
-    )
-    if values.use_valkyrie:
-        patch_dir = join(dir_info["local"]["artifacts"], "patches")
-        valkyrie.analyse_output(patch_dir, tool.stats)
-
-
-def retrieve_results(archive_name: str, tool: AbstractTool) -> bool:
-    emitter.normal("\t\tretrieving results")
-    archive_path = join(values.dir_main, "results", tool.name.lower(), archive_name)
-    if os.path.isfile(archive_path):
-        extract_command = "cp {} {};".format(archive_path, values.dir_results)
-        extract_command += "cd {};".format(values.dir_results)
-        extract_command += "tar -xf {}" + archive_name
-        utilities.execute_command(extract_command)
-        return True
-    else:
-        emitter.error("\t\t[error] Result archive not found at {}".format(archive_path))
-        return False
-
-
-def save_artifacts(dir_info: DirectoryInfo, tool: AbstractTool) -> None:
-    emitter.normal(
-        "\t\t[framework] Saving artifacts from tool {} and cleaning up".format(
-            tool.name
-        )
-    )
-    local_info = dir_info["local"]
-    dir_results = local_info["results"]
-    os.makedirs(dir_results, exist_ok=True)
-    tool.save_artifacts(local_info)
-    tool.post_process()
-    save_command = "cp -f {} {};".format(values.file_main_log, dir_results)
-    save_command += "cp -f {}/* {}".format(values.file_error_log, dir_results)
-    utilities.execute_command(save_command)
-
-
-def create_running_container(
-    dir_info: DirectoryInfo,
-    image_name: str,
-    container_name: str,
-    cpu: List[str],
-    gpu: List[str],
-    container_config_info: Dict[str, Any],
-    extra_volumes: Optional[Dict[str, Any]] = None,
-) -> str:
-    image_name = image_name.lower()
-    emitter.information(
-        "\t\t[framework] Creating running container with image {}".format(image_name)
-    )
-    container_id = container.get_container_id(container_name, ignore_not_found=True)
-    if container_id:
-        container.kill_container(container_id, ignore_errors=True)
-        container.remove_container(container_id)
-
-    if not container.image_exists(image_name):
-        utilities.error_exit("Image should be constructed by now!")
-
-    volume_list = construct_container_volumes(dir_info, extra_volumes)
-
-    extract_experiment_logs(
-        dir_info, image_name, container_name, cpu, gpu, container_config_info
-    )
-
-    emitter.information("\t\t[framework] building main container for experiment")
-    is_network_enabled = True
-    if container_config_info:
-        is_network_enabled = container_config_info.get(
-            definitions.KEY_CONTAINER_ENABLE_NETWORK, True
-        )
-    container_id = container.build_container(
-        container_name,
-        volume_list,
-        image_name,
-        cpu,
-        gpu,
-        container_config_info,
-        not is_network_enabled,
-    )
-    if not container_id:
-        utilities.error_exit("Container was not created successfully")
-    return container_id
-
-
-def extract_experiment_logs(
-    dir_info: DirectoryInfo,
-    image_name: str,
-    container_name: str,
-    cpu: List[str],
-    gpu: List[str],
-    container_config_info: Dict[str, Any],
-):
-    # Need to copy the logs from benchmark setup before instantiating the running container
-    emitter.information(
-        "\t\t[framework] building temporary container for log extraction"
-    )
-
-    tmp_container_id = container.get_container_id(container_name, ignore_not_found=True)
-
-    if not tmp_container_id:
-        tmp_container_id = container.build_container(
-            container_name, dict(), image_name, cpu, gpu, container_config_info
-        )
-
-    if not tmp_container_id:
-        utilities.error_exit("Could not create temporary container")
-    else:
-        container.copy_file_from_container(
-            tmp_container_id, dir_info["container"]["logs"], dir_info["local"]["logs"]
-        )
-        if values.runs:
-            container.stop_container(tmp_container_id, 5)
-            container.remove_container(tmp_container_id)
-
-
-def construct_container_volumes(
-    dir_info: DirectoryInfo, extra_volumes: Optional[Dict[str, Any]] = None
-):
-    volume_list = {
-        # dir_exp_local: {'bind': '/experiment', 'mode': 'rw'},
-        dir_info["local"]["logs"]: {"bind": "/logs", "mode": "rw"},
-        dir_info["local"]["setup"]: {
-            "bind": dir_info["container"]["setup"],
-            "mode": "rw",
-        },
-        dir_info["local"]["aux"]: {"bind": dir_info["container"]["aux"], "mode": "rw"},
-        dir_info["local"]["base"]: {
-            "bind": dir_info["container"]["base"],
-            "mode": "rw",
-        },
-        "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
-    }
-
-    if extra_volumes:
-        volume_list.update(extra_volumes)
-    return volume_list
-
-
-def prepare_tool_experiment_image(
-    bug_image_id: str,
-    repair_tool: AbstractTool,
-    dir_info: DirectoryInfo,
-    image_name: str,
-    bug_info: Dict[str, Any],
-    tag: Optional[str],
-):
-    dockerfile_name = "Dockerfile-{}-{}".format(repair_tool.name, bug_image_id)
-    if tag and tag != "":
-        dockerfile_name += "-{}".format(tag)
-
-    tmp_dockerfile = join(
-        dir_info["local"]["setup"],
-        dockerfile_name,
-    )
-    os.makedirs(dirname(tmp_dockerfile), exist_ok=True)
-    with open(tmp_dockerfile, "w") as dock_file:
-        dock_file.write("FROM {}\n".format(repair_tool.image_name))
-        dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/experiment"))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/logs"))
-        dock_file.write("COPY --from={0} {1} {1}\n".format(bug_image_id, "/root/"))
-
-        src_dir = bug_info.get(
-            definitions.KEY_SOURCE_DIRECTORY,
-            join(dir_info["container"]["experiment"], "src"),
-        )
-        if str(src_dir)[-1] == "/":
-            src_dir = src_dir[:-1]
-        pom_dir = os.path.dirname(os.path.dirname(os.path.dirname(src_dir))) or "."
-        pom_file = f"{dir_info['container']['experiment']}/src/{pom_dir}/pom.xml"
-        if repair_tool.name.lower() in ["et", "grt5"]:
-            dock_file.write(
-                "RUN mvnd -1 -B -Dmvnd.daemonStorage=/root/workflow/default "
-                "-ff -Djava.awt.headless=true -Dmaven.compiler.showWarnings=false "
-                "-Dmaven.compiler.useIncrementalCompilation=false "
-                "-Dmaven.compiler.failOnError=true -Dsurefire.skipAfterFailureCount=1 "
-                "compiler:compile surefire:test "
-                f"-Drat.skip=true -f {pom_file}; return 0\n"
-            )
-        elif repair_tool.name.lower() in [
-            "aprer",
-            "repaircat",
-            "repairllama",
-            "arja",
-            "arja_e",
-            "tbar",
-        ]:
-            dock_file.write(
-                "RUN mvn clean compile test "
-                f"-Drat.skip=true -f {pom_file}; return 0\n"
-            )
-
-        if os.path.exists(join(dir_info["local"]["setup"], "deps.sh")):
-            dock_file.write(
-                "RUN bash {0} || sudo bash {0} \n".format(
-                    join(dir_info["container"]["setup"], "deps.sh")
-                )
-            )
-        if os.path.exists(join(dir_info["local"]["setup"], "install_deps")):
-            dock_file.write(
-                "RUN bash {0} || sudo bash {0} \n".format(
-                    join(dir_info["container"]["setup"], "install_deps")
-                )
-            )
-        # We assume that the container will always have the sh command available
-        # This line is included against some issues with the container lifetime
-        dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
-    id = container.build_image(tmp_dockerfile, image_name)
-    os.remove(tmp_dockerfile)
-    return id
-
-
-def prepare_experiment(
-    benchmark: AbstractBenchmark,
-    bug_info: Dict[str, Any],
-    cpu: List[str],
-    gpu: List[str],
-    tag: str,
-    ignore_rebuild: bool = False,
-):
-    utilities.check_space()
-    bug_index = bug_info[definitions.KEY_ID]
-    experiment_image_id = None
-    if not values.use_container:
-        if not values.use_valkyrie:
-            is_error = benchmark.setup_experiment(bug_index, None, values.only_test)
-            if is_error:
-                return None
-    else:
-        bug_name = str(bug_info[definitions.KEY_BUG_ID])
-        subject_name = str(bug_info[definitions.KEY_SUBJECT])
-        benchmark.update_dir_info(
-            generate_dir_info(benchmark.name, subject_name, bug_name, tag)
-        )
-        experiment_image_id = (
-            benchmark.get_exp_image(
-                bug_index, values.only_test, cpu, gpu, ignore_rebuild
-            )
-            if values.use_container
-            else None
-        )
-
-    if not benchmark.pre_built:
-        collect_benchmark_result(bug_info, benchmark)
-
-    return experiment_image_id
-
-
-def prepare_experiment_tool(
-    bug_image_id: Optional[str],
-    repair_tool: AbstractTool,
-    task_profile: Dict[str, Any],
-    dir_info: DirectoryInfo,
-    image_name: str,
-    bug_info: Dict[str, Any],
-    tag: Optional[str] = None,
-):
-    if values.use_container:
-        if not bug_image_id:
-            utilities.error_exit("Bug image id not provided")
-        emitter.information("\t\t[framework] preparing image {}".format(image_name))
-        if (
-            not container.image_exists(image_name)
-            or values.rebuild_base
-            or values.rebuild_all
-        ):
-            return prepare_tool_experiment_image(
-                bug_image_id, repair_tool, dir_info, image_name, bug_info, tag
-            )
-        else:
-            img = container.get_image(image_name)
-            if not img:
-                utilities.error_exit("Image exists yet was not found??")
-            return cast(str, img.id)
-
-    dir_local_patch = dir_info["local"]["patches"]
-    config_patch_dir = task_profile.get(definitions.KEY_CONFIG_PATCH_DIR, None)
-    if config_patch_dir == "setup":
-        if not os.path.isdir(dir_local_patch):
-            os.makedirs(dir_local_patch)
-    else:
-        if os.path.isdir(dir_local_patch):
-            shutil.rmtree(dir_local_patch)
-    return None
+task_timeout_override: Dict[TaskType, str] = {
+    "repair": definitions.KEY_CONFIG_REPAIR_TIMEOUT,
+    "analyze": definitions.KEY_CONFIG_ANALYZE_TIMEOUT,
+    "fuzz": definitions.KEY_CONFIG_FUZZ_TIMEOUT,
+    "validate": definitions.KEY_CONFIG_VALIDATE_TIMEOUT,
+    "localize": definitions.KEY_CONFIG_LOCALIZE_TIMEOUT,
+    "select": definitions.KEY_CONFIG_SELECT_TIMEOUT,
+    "composite": definitions.KEY_CONFIG_COMPOSITE_TIMEOUT,
+}
 
 
 def run(
@@ -505,8 +53,13 @@ def run(
     task_identifier: str,
     cpu: List[str],
     gpu: List[str],
+    run_index: str,
     task_image: Optional[str] = None,
-):
+    hash: Any = None,
+    dir_setup_extended: Optional[str] = None,
+    dir_logs_override: Optional[str] = None,
+    dir_results_override: Optional[str] = None,
+) -> Tuple[bool, DirectoryInfo]:
     bug_name = str(bug_info[definitions.KEY_BUG_ID])
     subject_name = str(bug_info[definitions.KEY_SUBJECT])
     task_config_info = copy.deepcopy(task_config_info_template)
@@ -519,8 +72,9 @@ def run(
             definitions.KEY_CONFIG_TIMEOUT_TESTCASE
         ]
 
-    hash = hashlib.sha1()
-    hash.update(str(time.time()).encode("utf-8"))
+    if hash is None:
+        hash = hashlib.sha256()
+        hash.update(str(time.time()).encode("utf-8"))
 
     dir_info = generate_tool_dir_info(
         benchmark.name,
@@ -528,23 +82,26 @@ def run(
         bug_name,
         hash,
         task_identifier,
-        task_config_info.get(definitions.KEY_TOOL_TAG, ""),
+        dir_setup_extended,
+        dir_logs_override,
+        dir_results_override,
+        tool.locally_running,
     )
-    benchmark.update_dir_info(dir_info)
+    benchmark.update_dir_info(dir_info, tool.locally_running)
     print_task_info(
-        task_config_info, container_config_info, bug_name, subject_name, dir_info
+        task_config_info,
+        container_config_info,
+        bug_name,
+        subject_name,
+        dir_info,
+        tool.locally_running,
     )
 
-    dir_info = update_dir_info(dir_info, tool.name)
-    dir_instr_local = dir_info["local"]["instrumentation"]
+    dir_info = add_instrumentation_dir_info(dir_info, tool.name)
+
     dir_result_local = dir_info["local"]["results"]
 
     container_id = None
-    # emitter.information("directory is {}".format(dir_instr_local))
-    if os.path.isdir(dir_instr_local):
-        emitter.information(
-            "\t\t[framework] there is custom instrumentation for {}".format(tool.name)
-        )
 
     if values.only_analyse:
         can_analyse_results = True
@@ -557,11 +114,14 @@ def run(
         if can_analyse_results:
             collect_tool_result(dir_info, bug_info, tool)
     else:
-        utilities.clean_artifacts(dir_info["local"]["artifacts"])
-        utilities.clean_artifacts(dir_info["local"]["logs"])
-        benchmark.update_dir_info(dir_info)
+        if not dir_results_override:
+            utilities.clean_artifacts(dir_info["local"]["artifacts"])
+        if not dir_logs_override:
+            utilities.clean_artifacts(dir_info["local"]["logs"])
 
-        if values.use_container:
+        benchmark.update_dir_info(dir_info, tool.locally_running)
+
+        if values.use_container and not tool.locally_running:
             if tool.image_name is None:
                 utilities.error_exit(
                     "Repair tool does not have a docker image name assigned: {}".format(
@@ -574,81 +134,46 @@ def run(
                     "No task image provided, though container mode is selected"
                 )
 
-            container_id = create_running_container(
-                dir_info,
+            container_id = container.create_running_container(
+                construct_container_volumes(dir_info, tool.bindings),
                 task_image,
                 task_identifier,
                 cpu,
                 gpu,
                 container_config_info,
-                tool.bindings,
+                dir_info["container"]["logs"],
+                dir_info["local"]["logs"],
             )
             if not container_id:
                 utilities.error_exit("Could not get container id!")
 
     if not values.only_setup:
         task_type = values.task_type.get()
-        if task_type == "repair":
-            repair.repair_all(
-                dir_info,
-                bug_info,
-                cast(AbstractRepairTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
+        emitter.debug("\t\t[framework] Running task type: {}".format(task_type))
+        emitter.debug(
+            "\t\t[framework] Timeout override: {}".format(task_timeout_override)
+        )
+        emitter.debug("\t\t[framework] Task config info: {}".format(task_config_info))
+        if task_type in task_timeout_override:
+            task_config_info[definitions.KEY_CONFIG_TIMEOUT] = task_config_info.get(
+                task_timeout_override[task_type],
+                task_config_info[definitions.KEY_CONFIG_TIMEOUT],
             )
-        elif task_type == "analyze":
-            analyze.analyze_all(
-                dir_info,
-                bug_info,
-                cast(AbstractAnalyzeTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
-            )
-        elif task_type == "fuzz":
-            fuzz.fuzz_all(
-                dir_info,
-                bug_info,
-                cast(AbstractFuzzTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
-            )
-        elif task_type == "validate":
-            validate.validate_all(
-                dir_info,
-                bug_info,
-                cast(AbstractValidateTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
-            )
-        elif task_type == "localize":
-            localize.localize_all(
-                dir_info,
-                bug_info,
-                cast(AbstractLocalizeTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
-            )
-        elif task_type == "select":
-            select.select_all(
-                dir_info,
-                bug_info,
-                cast(AbstractSelectTool, tool),
-                task_config_info,
-                container_id,
-                benchmark.name,
-            )
-        elif task_type == "composite":
-            pass
-        else:
-            utilities.error_exit(f"Unknown task type: {task_type}")
+
+        execute(
+            dir_info,
+            bug_info,
+            tool,
+            task_config_info,
+            container_config_info,
+            container_id,
+            benchmark,
+            run_index,
+            hash,
+        )
 
         # update container stats
-        if values.use_container:
+        if values.use_container and not tool.locally_running:
             if not container_id:
                 utilities.error_exit("Use container but ID is none?")
             tool.update_container_stats(container_id)
@@ -662,7 +187,392 @@ def run(
             if values.compact_results:
                 utilities.clean_artifacts(dir_result)
 
-    return dir_info
+        final_status = values.experiment_status.get(TaskStatus.NONE)
+        if final_status != TaskStatus.SUCCESS and final_status != TaskStatus.TIMEOUT:
+            emitter.error(
+                "\t\t\t[framework] Experiment failed with status {}".format(
+                    final_status
+                )
+            )
+
+    return (tool.stats.error_stats.is_error, dir_info)
+
+
+def setup_localization(
+    experiment_info: Dict[str, Any],
+    config_info: Dict[str, Any],
+) -> None:
+    if (
+        definitions.KEY_ANALYSIS_OUTPUT in experiment_info
+        and definitions.KEY_LOCALIZATION
+        and len(experiment_info[definitions.KEY_ANALYSIS_OUTPUT])
+        > 0
+        in experiment_info[definitions.KEY_ANALYSIS_OUTPUT][-1]
+    ):
+        experiment_info[definitions.KEY_LOCALIZATION] = experiment_info[
+            definitions.KEY_ANALYSIS_OUTPUT
+        ][-1][definitions.KEY_LOCALIZATION]
+
+    if config_info[definitions.KEY_CONFIG_FIX_LOC] == "tool":
+        if definitions.KEY_LOCALIZATION in experiment_info:
+            del experiment_info[definitions.KEY_LOCALIZATION]
+    elif config_info[definitions.KEY_CONFIG_FIX_LOC] == "file":
+        if definitions.KEY_LOCALIZATION in experiment_info:
+            for localization in experiment_info[definitions.KEY_LOCALIZATION]:
+                del localization[definitions.KEY_FIX_LINES]
+
+
+def setup_tests(
+    experiment_info: Dict[str, Any],
+    config_info: Dict[str, Any],
+) -> None:
+    test_ratio = float(config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    test_timeout = int(config_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
+    passing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_PASSING_TEST, []
+    )
+    if isinstance(passing_test_identifiers_list, str):
+        passing_test_identifiers_list = passing_test_identifiers_list.split(",")
+    failing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_FAILING_TEST, []
+    )
+    if isinstance(failing_test_identifiers_list, str):
+        failing_test_identifiers_list = failing_test_identifiers_list.split(",")
+    pass_test_count = int(len(passing_test_identifiers_list) * test_ratio)
+    experiment_info[definitions.KEY_PASSING_TEST] = passing_test_identifiers_list[
+        :pass_test_count
+    ]
+    experiment_info[definitions.KEY_FAILING_TEST] = failing_test_identifiers_list
+    experiment_info[definitions.KEY_CONFIG_TIMEOUT_TESTCASE] = test_timeout
+
+
+def execute_setup(
+    dir_info: DirectoryInfo,
+    experiment_info: Dict[str, Any],
+    tool: AbstractTool,
+    config_info: Dict[str, Any],
+    container_config_info: Dict[str, Any],
+    container_id: Optional[str],
+    benchmark: AbstractBenchmark,
+    run_index: str,
+    hash: Any,
+) -> None:
+    experiment_info[definitions.KEY_BENCHMARK] = benchmark.name
+
+    setup_localization(experiment_info, config_info)
+    setup_tests(experiment_info, config_info)
+
+    tool.update_info(container_id, values.only_instrument, dir_info, experiment_info)
+    tool.process_tests(dir_info, config_info, experiment_info)
+    try:
+        tool.invoke_advanced(
+            dir_info,
+            benchmark,
+            experiment_info,
+            config_info,
+            container_config_info,
+            run_index,
+            hash,
+        )
+        if values.experiment_status.get(TaskStatus.NONE) == TaskStatus.NONE:
+            values.experiment_status.set(TaskStatus.SUCCESS)
+    except Exception as ex:
+        values.experiment_status.set(TaskStatus.FAIL_IN_TOOL)
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {ex}")
+        emitter.error(f"\t\t\t[ERROR][{tool.name}]: {traceback.format_exc()}")
+    pass
+
+
+def setup_for_valkyrie(
+    dir_info: DirectoryInfo,
+    container_id: Optional[str],
+    bug_info: Dict[str, Any],
+    benchmark_name: str,
+) -> Tuple[str, str, Optional[str], str]:
+    dir_output_local = dir_info["local"]["artifacts"]
+    if container_id:
+        dir_expr = dir_info["container"]["experiment"]
+    else:
+        dir_expr = dir_info["local"]["experiment"]
+    binary_path_rel = bug_info.get(definitions.KEY_BINARY_PATH, "")
+    valkyrie_binary_path: Optional[str]
+    valkyrie_binary_path = os.path.join(dir_output_local, "binary")
+    binary_path = os.path.join(dir_expr, "src", binary_path_rel)
+    if container_id:
+        copy_command = "docker -H {} cp {}:{} {}".format(
+            values.docker_host, container_id, binary_path, valkyrie_binary_path
+        )
+    else:
+        copy_command = "cp {} {}".format(binary_path, valkyrie_binary_path)
+
+    utilities.execute_command(copy_command)
+    values.list_processed = []
+    subject_name = bug_info[definitions.KEY_SUBJECT]
+    bug_id = str(bug_info[definitions.KEY_BUG_ID])
+
+    test_driver_path = values.dir_main + "/benchmark/{}/{}/{}/test.sh".format(
+        benchmark_name, subject_name, bug_id
+    )
+    test_dir_path = values.dir_main + "/benchmark/{}/{}/{}/tests".format(
+        benchmark_name, subject_name, bug_id
+    )
+    test_suite_path = values.dir_main + "/benchmark/{}/{}/{}/test-suite".format(
+        benchmark_name, subject_name, bug_id
+    )
+    oracle_path = values.dir_main + "/benchmark/{}/{}/{}/oracle*".format(
+        benchmark_name, subject_name, bug_id
+    )
+    valkyrie_oracle_path = dir_output_local + "/oracle"
+    if not os.path.isdir(test_suite_path):
+        if os.path.isfile(valkyrie_oracle_path):
+            os.remove(valkyrie_oracle_path)
+        with open(valkyrie_oracle_path, "w") as oracle_file:
+            oracle_file.writelines("#!/bin/bash\n")
+            oracle_file.writelines(
+                'script_dir="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"\n'
+            )
+            oracle_file.writelines("export LD_LIBRARY_PATH=$script_dir/../../../libs\n")
+            oracle_file.writelines("$script_dir/test.sh /dev/null $@\n")
+        os.system("chmod +x {}".format(valkyrie_oracle_path))
+        copy_command = "cp {} {} ; ".format(test_driver_path, dir_output_local)
+        copy_command += "cp -rf {} {} ; ".format(test_dir_path, dir_output_local)
+        copy_command += "cp -rf {} {}".format(oracle_path, dir_output_local)
+    else:
+        copy_command = "cp -rf {} {}".format(test_suite_path, dir_output_local)
+        file_list = list()
+        for dir_path, _, file_names in os.walk(test_suite_path):
+            file_list += [os.path.join(dir_path, file) for file in file_names]
+
+        for binary_file in file_list:
+            if ".orig" in binary_file:
+                os.system(
+                    "e9afl {} -o {} > /dev/null 2>&1".format(
+                        binary_file, binary_file.replace(".orig", ".inst_coverage")
+                    )
+                )
+        valkyrie_oracle_path = test_suite_path + "/valkyrie-tests.sh"
+        valkyrie_binary_path = None
+    utilities.execute_command(copy_command)
+    patch_dir = dir_output_local + "/patches"
+    if not os.path.isdir(patch_dir):
+        os.makedirs(patch_dir)
+    dir_process = dir_output_local + "/patches-processing"
+    os.makedirs(dir_process, exist_ok=True)
+    return patch_dir, dir_process, valkyrie_binary_path, valkyrie_oracle_path
+
+
+def execute(
+    dir_info: DirectoryInfo,
+    experiment_info: Dict[str, Any],
+    tool: AbstractTool,
+    task_config_info: Dict[str, Any],
+    container_config_info: Dict[str, Any],
+    container_id: Optional[str],
+    benchmark: AbstractBenchmark,
+    run_index: str,
+    hash: Any,
+) -> None:
+    consume_thread = None
+    tool_thread = None
+    if not values.ui_active:
+        parallel.initialize()
+
+    time_duration = float(task_config_info.get(definitions.KEY_CONFIG_TIMEOUT, 1))
+    test_timeout = int(experiment_info.get(definitions.KEY_CONFIG_TIMEOUT_TESTCASE, 10))
+    total_timeout = time.time() + 60 * 60 * time_duration
+
+    final_status = [TaskStatus.NONE]
+
+    passing_test_identifiers_list = experiment_info.get(
+        definitions.KEY_PASSING_TEST, []
+    )
+    if isinstance(passing_test_identifiers_list, str):
+        passing_test_identifiers_list = passing_test_identifiers_list.split(",")
+
+    test_ratio = float(task_config_info[definitions.KEY_CONFIG_TEST_RATIO])
+    failing_test_identifiers_list = str(
+        experiment_info.get(definitions.KEY_FAILING_TEST, "")
+    ).split(",")
+
+    is_rank = False
+    validation_test_list = (
+        failing_test_identifiers_list
+        + passing_test_identifiers_list[
+            : int(len(passing_test_identifiers_list) * test_ratio)
+        ]
+    )
+
+    if values.use_valkyrie:
+        fix_source_file = str(
+            experiment_info.get(definitions.KEY_LOCALIZATION, [{}])[0].get(
+                definitions.KEY_FIX_FILE, ""
+            )
+        )
+        valkyrie_setup_info = setup_for_valkyrie(
+            dir_info, container_id, experiment_info, benchmark.name
+        )
+        patch_dir, dir_process, binary_path, oracle_path = valkyrie_setup_info
+        v_path_info = (binary_path, oracle_path, fix_source_file)
+        v_dir_info = (patch_dir, dir_process)
+        v_task_config_info = (
+            validation_test_list,
+            is_rank,
+            total_timeout,
+            test_timeout,
+        )
+
+        def consume_patches_wrapped(
+            v_path_info: Tuple[str, str, str],
+            v_dir_info: Tuple[str, str],
+            v_task_config_info: Dict[str, Any],
+            task_profile_id: str,
+            job_identifier: str,
+            session_identifier: str,
+            task_type: TaskType,
+        ) -> None:
+            """
+            Pass over some fields as we are going into a new thread
+            """
+            values.task_type.set(task_type)
+            values.current_task_profile_id.set(task_profile_id)
+            values.job_identifier.set(job_identifier)
+            values.session_identifier.set(session_identifier)
+            parallel.consume_patches(v_path_info, v_dir_info, v_task_config_info)
+
+        consume_thread = threading.Thread(
+            target=consume_patches_wrapped,
+            args=(
+                v_path_info,
+                v_dir_info,
+                v_task_config_info,
+                values.current_task_profile_id.get("NA"),
+                values.job_identifier.get("NA"),
+                values.session_identifier.get("NA"),
+                values.task_type.get("NA"),
+            ),
+        )
+        consume_thread.start()
+        values.running_tool = True
+
+    if values.ui_active:
+        execute_setup(
+            dir_info,
+            experiment_info,
+            tool,
+            task_config_info,
+            container_config_info,
+            container_id,
+            benchmark,
+            run_index,
+            hash,
+        )
+    else:
+
+        def execute_wrapped(
+            dir_info: DirectoryInfo,
+            experiment_info: Dict[str, Any],
+            tool: AbstractTool,
+            task_config_info: Dict[str, Any],
+            container_config_info: Dict[str, Any],
+            container_id: Optional[str],
+            benchmark: AbstractBenchmark,
+            run_index: str,
+            task_profile_id: str,
+            job_identifier: str,
+            session_identifier: str,
+            task_type: TaskType,
+            final_status: List[TaskStatus],
+            hash: Any,
+        ) -> None:
+            """
+            Pass over contextvars fields as we are going into a new thread
+            """
+            values.task_type.set(task_type)
+            values.current_task_profile_id.set(task_profile_id)
+            values.job_identifier.set(job_identifier)
+            values.session_identifier.set(session_identifier)
+            execute_setup(
+                dir_info,
+                experiment_info,
+                tool,
+                task_config_info,
+                container_config_info,
+                container_id,
+                benchmark,
+                run_index,
+                hash,
+            )
+            final_status[0] = values.experiment_status.get(TaskStatus.SUCCESS)
+
+        tool_thread = threading.Thread(
+            target=execute_wrapped,
+            args=(
+                dir_info,
+                experiment_info,
+                tool,
+                task_config_info,
+                container_config_info,
+                container_id,
+                benchmark,
+                run_index,
+                values.current_task_profile_id.get("NA"),
+                values.job_identifier.get("NA"),
+                values.session_identifier.get("NA"),
+                values.task_type.get(None),
+                final_status,
+                hash,
+            ),
+            name="Wrapper thread for {} {} {} {} {}".format(
+                values.task_type.get("N/A"),
+                tool.name,
+                tool.tool_tag,
+                benchmark.name,
+                container_id,
+            ),
+        )
+        tool_thread.start()
+
+        if tool_thread is None:
+            utilities.error_exit("Thread was not created")
+        wait_time = 5.0
+        if time.time() <= total_timeout:
+            wait_time = total_timeout - time.time()
+        # give 5 min grace period for threads to finish
+        wait_time = wait_time + 60.0 * 5
+        tool_thread.join(wait_time)
+
+        if tool_thread.is_alive():
+            emitter.highlight(
+                "\t\t\t[framework] {}: thread is not done, setting event to kill thread.".format(
+                    tool.name
+                )
+            )
+            event = threading.Event()
+            event.set()
+            # The thread can still be running at this point. For example, if the
+            # thread's call to isSet() returns right before this call to set(), then
+            # the thread will still perform the full 1 second sleep and the rest of
+            # the loop before finally stopping.
+        else:
+            emitter.highlight(
+                "\t\t\t[framework] {}: thread has already finished.".format(tool.name)
+            )
+
+        # Thread can still be alive at this point. Do another join without a timeout
+        # to verify thread shutdown.
+        tool_thread.join()
+        values.experiment_status.set(final_status[0])
+        # if tool.log_output_path:
+        #     timestamp_command = "echo $(date -u '+%a %d %b %Y %H:%M:%S %p') >> " + tool.log_output_path
+        #     utilities.execute_command(timestamp_command)
+
+        values.running_tool = False
+        if values.use_valkyrie:
+            emitter.normal("\t\t\twaiting for validation pool")
+            parallel.wait_validation()
+            emitter.normal("\t\t\twaiting for consumer pool")
+            if consume_thread:
+                consume_thread.join()
 
 
 def print_task_info(
@@ -671,7 +581,8 @@ def print_task_info(
     bug_name: str,
     subject_name: str,
     dir_info: DirectoryInfo,
-):
+    locally_running: bool,
+) -> None:
     emitter.highlight(
         "\t\t[task profile] Identifier: {}".format(task_config_info[definitions.KEY_ID])
     )
@@ -696,7 +607,7 @@ def print_task_info(
         )
     )
 
-    if values.use_container:
+    if values.use_container and not locally_running:
         emitter.highlight(
             "\t\t[container profile] Identifier: {}".format(
                 container_config_info[definitions.KEY_ID]

@@ -1,6 +1,11 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
@@ -9,31 +14,38 @@ class ARJA(AbstractRepairTool):
 
     d4j_env = {"TZ": "America/Los_Angeles"}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "rshariffdeen/arja"
+        self.image_name = "hzhenxin/arja"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(ARJA, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
 
         classpath = f"{join(self.arja_home,'lib/*')}:{join(self.arja_home,'bin')}"
         dir_localization = f"{self.dir_output}/localization"
-        passing_test_list = bug_info[self.key_passing_tests]
-        failing_test_list = bug_info[self.key_failing_tests]
+        passing_test_identifiers_list = bug_info[self.key_passing_test_identifiers]
+        failing_test_identifiers_list = bug_info[self.key_failing_test_identifiers]
 
         dir_java_src = join(self.dir_expr, "src", bug_info[self.key_dir_source])
         dir_test_src = join(self.dir_expr, "src", bug_info[self.key_dir_tests])
         dir_java_bin = join(self.dir_expr, "src", bug_info[self.key_dir_class])
         dir_test_bin = join(self.dir_expr, "src", bug_info[self.key_dir_test_class])
+        env = self.d4j_env.copy()
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
         list_deps = [
             join(self.dir_expr, dep) for dep in bug_info[self.key_dependencies]
         ]
@@ -65,9 +77,14 @@ class ARJA(AbstractRepairTool):
             f"-DpopulationSize {arja_default_population_size} "
             f"-DgzoltarDataDir {dir_localization} "
         )
+        self.run_command(
+            "bash {}".format(bug_info.get(self.key_build_script)),
+            dir_path=self.dir_setup,
+            env=env,
+        )
 
-        if not passing_test_list:
-            test_list_str = ",".join(failing_test_list)
+        if not passing_test_identifiers_list:
+            test_list_str = ",".join(failing_test_identifiers_list)
             arja_command += f" -Dtests {test_list_str}"
 
         status = self.run_command(
@@ -82,7 +99,7 @@ class ARJA(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -91,7 +108,9 @@ class ARJA(AbstractRepairTool):
         """
         super(ARJA, self).save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path

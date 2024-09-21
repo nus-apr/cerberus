@@ -16,6 +16,7 @@ general_section_schema = {
         ConfigFieldsEnum.SECURE_HASH.value: {"type": "boolean"},
         ConfigFieldsEnum.CPUS.value: {"type": "integer", "minimum": 2},
         ConfigFieldsEnum.GPUS.value: {"type": "integer", "minimum": 0},
+        ConfigFieldsEnum.TIMESTAMP.value: {"type": "boolean"},
     },
     "required": [
         ConfigFieldsEnum.PARALLEL_MODE.value,
@@ -35,11 +36,26 @@ task_profile_schema = {
     "properties": {
         ConfigFieldsEnum.PROFILE_ID.value: {"type": "string"},
         ConfigFieldsEnum.TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.FUZZ_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.REPAIR_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.ANALYZE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.LOCALIZE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.VALIDATE_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.SELECT_TIMEOUT.value: {"type": "number", "minimum": 0},
+        ConfigFieldsEnum.COMPOSITE_TIMEOUT.value: {"type": "number", "minimum": 0},
         ConfigFieldsEnum.FAULT_LOCATION.value: {"type": "string"},
         ConfigFieldsEnum.PASSING_TEST_RATIO.value: {
             "type": "number",
             "minimum": 0,
             "maximum": 1,
+        },
+        ConfigFieldsEnum.PASSING_TEST_LIMIT.value: {
+            "type": "number",
+            "minimum": 0,
+        },
+        ConfigFieldsEnum.FAILING_TEST_LIMIT.value: {
+            "type": "number",
+            "minimum": 0,
         },
         ConfigFieldsEnum.PATCH_DIRECTORY.value: {"type": "string"},
     },
@@ -186,6 +202,7 @@ task_default_schema = {
         ConfigFieldsEnum.USE_CONTAINER.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_GPU.value: {"type": "boolean"},
         ConfigFieldsEnum.USE_PURGE.value: {"type": "boolean"},
+        ConfigFieldsEnum.USE_SUBJECT_AS_BASE.value: {"type": "boolean"},
         ConfigFieldsEnum.CONTAINER_PROFILE_ID_LIST.value: {
             "type": "array",
             "minItems": 1,
@@ -247,9 +264,12 @@ tool_config_schema = {
         ConfigFieldsEnum.PARAMS.value: {"type": "string"},
         ConfigFieldsEnum.TAG.value: {"type": "string"},
         ConfigFieldsEnum.IMAGE.value: {"type": "string"},
+        ConfigFieldsEnum.IGNORE.value: {"type": "boolean"},
+        ConfigFieldsEnum.HASH_DIGEST.value: {"type": "string"},
+        ConfigFieldsEnum.LOCAL.value: {"type": "boolean"},
     },
     "required": [ConfigFieldsEnum.NAME.value],
-    "additionalProperties": False,
+    "additionalProperties": True,
 }
 
 composite_sequence_schema = {
@@ -257,21 +277,23 @@ composite_sequence_schema = {
     "title": "Composite Sequence",
     "type": "object",
     "properties": {
-        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": {"type": "string"}},
-        ConfigFieldsEnum.ORCHESTRATOR.value: {"type": "string"},
+        ConfigFieldsEnum.FUZZ.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.ANALYZE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.CRASH_ANALYZE.value: {
+            "type": "array",
+            "items": tool_config_schema,
+        },
+        ConfigFieldsEnum.ITERATIVE_REPAIR.value: {
+            "type": "array",
+            "items": tool_config_schema,
+        },
+        ConfigFieldsEnum.BISECT.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.SLICE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.LOCALIZE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.REPAIR.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.VALIDATE.value: {"type": "array", "items": tool_config_schema},
+        ConfigFieldsEnum.SELECT.value: {"type": "array", "items": tool_config_schema},
     },
-    "anyOf": [
-        ConfigFieldsEnum.FUZZ.value,
-        ConfigFieldsEnum.ANALYZE.value,
-        ConfigFieldsEnum.LOCALIZE.value,
-        ConfigFieldsEnum.REPAIR.value,
-        ConfigFieldsEnum.SELECT.value,
-    ],
-    "required": [ConfigFieldsEnum.ORCHESTRATOR.value],
     "additionalProperties": False,
 }
 

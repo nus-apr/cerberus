@@ -1,113 +1,176 @@
 import os
 import re
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
 from app.core import definitions
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
 
 class LLMR(AbstractRepairTool):
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         super().__init__(self.name)
-        self.image_name = "mirchevmp/llmr"
+        self.image_name = "hzhenxin/llmr"
 
-    def run_repair(self, bug_info, repair_config_info):
-        super(LLMR, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         """
-            self.dir_logs - directory to store logs
-            self.dir_setup - directory to access setup scripts
-            self.dir_expr - directory for experiment
-            self.dir_output - directory to store artifacts/output
+        self.dir_logs - directory to store logs
+        self.dir_setup - directory to access setup scripts
+        self.dir_expr - directory for experiment
+        self.dir_output - directory to store artifacts/output
         """
 
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         # Any communication based model works
-        model = repair_config_info.get(self.key_tool_params, "gpt-4")
+        model = task_config_info.get("model", "gpt-4")
+        params = task_config_info.get(self.key_tool_params, "")
 
-        if model == "":
-            model = "gpt-4"
-
-        passing_tests = ",".join(bug_info[self.key_passing_tests])
-        failing_tests = ",".join(bug_info[self.key_failing_tests])
+        passing_test_identifiers = ",".join(bug_info[self.key_passing_test_identifiers])
+        failing_test_identifiers = ",".join(bug_info[self.key_failing_test_identifiers])
 
         self.run_command("mkdir -p {}".format(join(self.dir_output, "patches")))
 
-        file = ""
-        if self.key_fix_file in bug_info:
-            file = bug_info[self.key_fix_file]
-            if bug_info[self.key_language] == "java" and not file.endswith(".java"):
-                file = f"src/main/java/{file.replace('.', '/')}.java"
-            self.emit_debug("LLMR will work on file {}".format(file))
-        fl = ""
+        if (
+            task_config_info["fault_location"] == "auto"
+            and self.key_localization in bug_info
+        ):
+            fl_info = []
+            for location in bug_info[self.key_localization]:
+                file = location[self.key_fix_file]
+                if bug_info[self.key_language] == "java" and not file.endswith(".java"):
+                    file = f"src/main/java/{file.replace('.', '/')}.java"
+                locations = location[self.key_fix_lines]
+                for line in locations:
+                    fl_info.append(f"{file}::{line},1\n")
 
-        if repair_config_info["fault_location"] == "auto":
-            fl = "-do-fl"
-        elif repair_config_info["fault_location"] == "line":
-            fl_info = list(
-                map(
-                    lambda line: f"{bug_info[self.key_fix_file]}::{line},1\n",
-                    bug_info[self.key_fix_lines],
-                )
-            )
             self.emit_debug(f"File localization info: {fl_info}")
             fl_path = join(self.dir_output, "fl_data.txt")
             self.write_file(fl_info, fl_path)
             fl = f"-fl-data {fl_path}"
+        else:
+            fl = "-do-fl"
 
+        language = (
+            "-lang {}".format(bug_info[self.key_language])
+            if self.key_language in bug_info
+            else ""
+        )
+
+        bug_description = (
+            "-description {}".format(join(self.dir_setup, bug_info["bug_description"]))
+            if "bug_description" in bug_info
+            else ""
+        )
+        reference_file = (
+            "-reference {}".format(bug_info[definitions.KEY_REFERENCE_FILE])
+            if definitions.KEY_REFERENCE_FILE in bug_info
+            else ""
+        )
+
+        env = {}
+        java_version = bug_info.get(self.key_java_version, 8)
+        if int(java_version) <= 7:
+            java_version = 8
+        env["JAVA_HOME"] = f"/usr/lib/jvm/java-{java_version}-openjdk-amd64/"
+
+        if self.key_build_script in bug_info:
+            # Build it once to have things prepared
+            self.run_command(
+                "bash {}".format(bug_info.get(self.key_build_script)),
+                dir_path=self.dir_setup,
+                env=env,
+            )
+
+        key = self.get_api_key(model)
+        context_window = 10
+        if not key:
+            self.error_exit(f"{self.name} requires at least one API key for {model}")
         # start running
         self.timestamp_log_start()
-        llmr_command = "timeout -k 5m {timeout_h}h python3 /tool/repair.py {fl} --project-path {project_path} -model {model} {file} {reference_file} {bug_description} {build_script} -output {output_loc} -patches {patch_count} -test {test_script} {binary_path} {passing_tests} {failing_tests} {debug} {language}".format(
+        llmr_command = """timeout -k 5m 
+        {timeout_h}h 
+        python3 /tool/repair.py 
+        {fl} 
+        --project-path {project_path} 
+        -model {model} 
+        {reference_file} 
+        {bug_description} 
+        {build_script} 
+        -output {output_loc} 
+        -patches {patch_count} 
+        -test {test_script} 
+        {binary_path} 
+        {passing_test_identifiers} 
+        {failing_test_identifiers} 
+        {debug} 
+        {language} 
+        -key {key} 
+        -context {context_window} 
+        {params}""".format(
             timeout_h=timeout_h,
             patch_count=5,
             project_path=join(self.dir_expr, "src"),
-            build_script="-build {}".format(
-                join(self.dir_setup, bug_info[self.key_build_script])
-            )
-            if (
-                self.key_build_script in bug_info
-                and bug_info[self.key_build_script] != ""
-            )
-            else "",
+            build_script=(
+                "-build {}".format(
+                    join(self.dir_setup, bug_info[self.key_build_script])
+                )
+                if (
+                    self.key_build_script in bug_info
+                    and bug_info[self.key_build_script] != ""
+                )
+                else ""
+            ),
             output_loc=self.dir_output,
             test_script=join(self.dir_setup, bug_info[self.key_test_script]),
-            file="-file {}".format(file) if file else "",
             model=model,
-            passing_tests="-passing-tests {}".format(passing_tests)
-            if passing_tests != ""
-            else " ",
-            failing_tests="-failing-tests {}".format(failing_tests)
-            if failing_tests != ""
-            else " ",
-            binary_path="-binary-loc {}".format(bug_info[self.key_bin_path])
-            if self.key_bin_path in bug_info
-            else " ",
+            passing_test_identifiers=(
+                "-passing-tests {}".format(passing_test_identifiers)
+                if passing_test_identifiers != ""
+                else " "
+            ),
+            failing_test_identifiers=(
+                "-failing-tests {}".format(failing_test_identifiers)
+                if failing_test_identifiers != ""
+                else " "
+            ),
+            # TODO:
+            # LLMR: error: argument -binary-loc: expected one argument e.g. ITSP: 1
+            binary_path=(
+                "-binary-loc {}".format(bug_info[self.key_bin_path])
+                if bug_info.get(self.key_bin_path, "")
+                else "-binary-loc {}".format(
+                    join(self.dir_expr, "src", bug_info[self.key_fix_file])
+                )
+            ),
             debug="-d" if self.is_debug else "",
-            reference_file="-reference {}".format(
-                bug_info[definitions.KEY_REFERENCE_FILE]
-            )
-            if definitions.KEY_REFERENCE_FILE in bug_info
-            else "",
-            bug_description="-description {}".format(
-                join(self.dir_setup, bug_info["bug_description"])
-            )
-            if "bug_description" in bug_info
-            else "",
-            language="-lang {}".format(bug_info[self.key_language])
-            if self.key_language in bug_info
-            else "",
+            reference_file=reference_file,
+            bug_description=bug_description,
+            language=language,
             fl=fl,
+            params=params,
+            key=key,
+            context_window=context_window,
+        ).replace(
+            "\n", " "
         )
         status = self.run_command(
-            llmr_command, self.log_output_path, join(self.dir_expr, "src")
+            llmr_command, self.log_output_path, join(self.dir_expr, "src"), env=env
         )
 
         self.process_status(status)
 
         self.timestamp_log_end()
+
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         """
         Save useful artifacts from the repair execution
         output folder -> self.dir_output
@@ -121,7 +184,9 @@ class LLMR(AbstractRepairTool):
         self.exec_command(remove_command)
         super().save_artifacts(dir_info)
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         """
         analyse tool output and collect information
         output of the tool is logged at self.log_output_path
@@ -144,7 +209,7 @@ class LLMR(AbstractRepairTool):
         # count number of patch files
         list_output_dir = self.list_dir(self.dir_patch)
         self.stats.patch_stats.generated = len(
-            [name for name in list_output_dir if ".patch" in name]
+            [name for name in list_output_dir if ".diff" in name]
         )
 
         # extract information from output log
@@ -160,5 +225,19 @@ class LLMR(AbstractRepairTool):
             for line in log_lines:
                 if re.match("Patch .* is Plausible", line):
                     self.stats.patch_stats.plausible += 1
+                if re.match("response", line):
+                    self.stats.patch_stats.enumerations += 1
+                if re.match("does not compile", line):
+                    self.stats.patch_stats.non_compilable += 1
 
         return self.stats
+
+    def get_api_key(self, model: str) -> Any:
+        if "gpt" in model:
+            return self.api_keys.get(self.key_openai_token, "")
+        elif "claude" in model:
+            return self.api_keys.get(self.key_anthropic_token, "")
+        elif "huggingface" in model:
+            return self.api_keys.get(self.key_huggingface_token, "")
+        elif "gemini" in model:
+            return self.api_keys.get(self.key_gemini_token, "")

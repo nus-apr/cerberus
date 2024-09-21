@@ -4,6 +4,7 @@ import threading
 import time
 import traceback
 from asyncio import AbstractEventLoop
+from asyncio import Future
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from os.path import join
@@ -27,6 +28,7 @@ from textual.widgets import Header
 from textual.widgets import RichLog
 from textual.widgets import Static
 from textual.widgets._data_table import ColumnKey
+from textual.widgets.data_table import RowKey
 
 from app.core import container
 from app.core import definitions
@@ -37,11 +39,18 @@ from app.core import utilities
 from app.core import values
 from app.core import writer
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
+from app.core.identifiers import create_bug_image_identifier
+from app.core.identifiers import create_task_identifier
+from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
+from app.core.task.dir_info import generate_dir_info
+from app.core.task.image import prepare_experiment_image
+from app.core.task.image import prepare_experiment_tool
 from app.core.task.stats.RepairToolStats import RepairToolStats
 from app.core.task.stats.ToolStats import ToolStats
-from app.core.task.TaskProcessor import TaskList
 from app.core.task.TaskStatus import TaskStatus
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.core.task.typing.TaskList import TaskList
 from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
 from app.drivers.tools.AbstractTool import AbstractTool
@@ -67,6 +76,8 @@ Result = Tuple[str, TaskStatus, Dict[str, str], ToolStats]
 
 class Cerberus(App[List[Result]]):
     """The main window"""
+
+    selected_subject: Optional[str]
 
     COLUMNS: Dict[str, Dict[str, ColumnKey]] = {
         "ID": {},
@@ -118,13 +129,13 @@ class Cerberus(App[List[Result]]):
         self._return_value = self.finished_subjects
         return await super()._on_exit_app()
 
-    def on_mount(self):
+    def on_mount(self) -> None:
         self.selected_subject = None
         self.finished_subjects: List[Result] = []
 
         self.jobs_remaining_mutex = threading.Lock()
         self.jobs_remaining = 0
-        self.jobs: Dict[str, Tuple[asyncio.Future, AbstractTool]] = {}
+        self.jobs: Dict[str, Tuple[Future[None], AbstractTool]] = {}
 
         self.jobs_cancelled = False
 
@@ -201,7 +212,7 @@ class Cerberus(App[List[Result]]):
                 del job_time_map[job_id]
             job_time_map_mutex.release()
 
-    def prepare_tasks_run(self, loop: AbstractEventLoop):
+    def prepare_tasks_run(self, loop: AbstractEventLoop) -> None:
         try:
             self.hide(self.query_one("#" + all_subjects_id))
 
@@ -243,7 +254,7 @@ class Cerberus(App[List[Result]]):
                     bug_index,
                 ),
             ) in enumerate(tasks):
-                image_name = main.create_task_image_identifier(
+                image_name = create_task_image_identifier(
                     benchmark,
                     tool,
                     experiment_item,
@@ -293,34 +304,51 @@ class Cerberus(App[List[Result]]):
                 ],
             ]
         ],
-    ):
+    ) -> None:
         self.query_one(Static).update("Cerberus is preparing the subject images.")
         complete_images: queue.Queue[Tuple[str, str, bool]] = queue.Queue(0)
 
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_subjects_job(
-            benchmark: AbstractBenchmark, experiment_item, job_identifier: str, tag: str
-        ):
+            benchmark: AbstractBenchmark,
+            experiment_item: Dict[str, Any],
+            job_identifier: str,
+            tag: str,
+        ) -> None:
             cpu = self.cpu_queue.get(block=True, timeout=None)
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(job_identifier)
             emitter.information(
                 "\t[framework] Starting image check for bug {} from subject {}".format(
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(
-                benchmark.name, subject_name, bug_name, tag
+            # Allow for a special base setup folder if needed
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    benchmark.name,
+                    subject_name,
+                    f"{bug_name}-{tag}",
+                    "",
+                )
+                if tag
+                else None
             )
-            benchmark.update_dir_info(dir_info)
+
+            dir_info = generate_dir_info(
+                benchmark.name, subject_name, bug_name, dir_setup_extended
+            )
+            benchmark.update_dir_info(dir_info, False)
             try:
                 emitter.information(
                     "\t[framework] Image check for bug {} from subject {}".format(
                         bug_name, subject_name
                     )
                 )
-                task.prepare_experiment(
+                prepare_experiment_image(
                     benchmark, experiment_item, [str(cpu)], [], tag
                 )  # Assuming no GPU is used for preparation
                 complete_images.put(
@@ -363,9 +391,7 @@ class Cerberus(App[List[Result]]):
                 bug_index,
             ),
         ) in tasks:
-            job_identifier = main.create_bug_image_identifier(
-                benchmark, experiment_item
-            )
+            job_identifier = create_bug_image_identifier(benchmark, experiment_item)
             if job_identifier in image_list:
                 continue
 
@@ -414,38 +440,52 @@ class Cerberus(App[List[Result]]):
                 ],
             ]
         ],
-    ):
+    ) -> None:
         self.query_one(Static).update(
             "Cerberus is preparing the specialised subject images."
         )
-        complete_images: queue.Queue[
-            Tuple[str, str, Optional[str], bool]
-        ] = queue.Queue(0)
+        complete_images: queue.Queue[Tuple[str, str, Optional[str], bool]] = (
+            queue.Queue(0)
+        )
 
         # The Logic here is currently differernt as one generally just needs a single CPU to build a project
         def prepare_tool_subjects_job(
             benchmark: AbstractBenchmark,
             tool: AbstractTool,
-            experiment_item,
+            experiment_item: Dict[str, Any],
             task_profile: Dict[str, Any],
             job_identifier: str,
-        ):
+        ) -> None:
             cpu = self.cpu_queue.get(block=True, timeout=None)
             bug_name = str(experiment_item[definitions.KEY_BUG_ID])
             subject_name = str(experiment_item[definitions.KEY_SUBJECT])
             values.job_identifier.set(job_identifier)
+            values.session_identifier.set(job_identifier)
             emitter.information(
                 "\t[framework] Starting image check for bug {} from subject {}".format(
                     bug_name, subject_name
                 )
             )
-            dir_info = task.generate_dir_info(
+            # Allow for a special base setup folder if needed
+            tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    benchmark.name,
+                    subject_name,
+                    f"{bug_name}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
+            dir_info = generate_dir_info(
                 benchmark.name,
                 subject_name,
                 bug_name,
-                task_profile.get(definitions.KEY_TOOL_TAG, ""),
+                dir_setup_extended,
             )
-            benchmark.update_dir_info(dir_info)
+            benchmark.update_dir_info(dir_info, tool.locally_running)
             try:
                 emitter.information(
                     "\t[framework] Image check for bug {} from subject {}".format(
@@ -454,13 +494,14 @@ class Cerberus(App[List[Result]]):
                 )
                 # Ignore the rebuild as previously all bugs were prepared
                 # Assuming that no GPUs are needed for preparation
-                experiment_image_id = task.prepare_experiment(
+                experiment_image_id = prepare_experiment_image(
                     benchmark,
                     experiment_item,
                     [str(cpu)],
                     [],
                     task_profile.get(definitions.KEY_TOOL_TAG, ""),
                     ignore_rebuild=True,
+                    locally_running=tool.locally_running,
                 )
 
                 emitter.information(
@@ -469,7 +510,7 @@ class Cerberus(App[List[Result]]):
                     )
                 )
 
-                tool_experiment_image_id = task.prepare_experiment_tool(
+                tool_experiment_image_id = prepare_experiment_tool(
                     experiment_image_id,
                     tool,
                     task_profile,
@@ -520,7 +561,7 @@ class Cerberus(App[List[Result]]):
                 bug_index,
             ),
         ) in tasks:
-            image_name = main.create_task_image_identifier(
+            image_name = create_task_image_identifier(
                 benchmark,
                 tool,
                 experiment_item,
@@ -551,18 +592,25 @@ class Cerberus(App[List[Result]]):
             )
             pass
         while complete_images.qsize() != 0:
-            (id, job_identifier, image_name, success) = complete_images.get()
+            (id, job_identifier, image_name_t, success) = complete_images.get()
             if not success:
-                emitter.warning(
-                    "\t[warning] Failed building image {}".format(image_name)
-                )
+                if not image_name_t:
+                    emitter.warning(
+                        "\t[warning] Failed building image for id {} with job identifier {}".format(
+                            id, job_identifier
+                        )
+                    )
+                else:
+                    emitter.warning(
+                        "\t[warning] Failed building image {}".format(image_name_t)
+                    )
 
-    def change_table(self, new_id: str):
+    def change_table(self, new_id: str) -> None:
         if self.is_preparing:
             return
         self.debug_print("Changing table!")
         try:
-            self.selected_table: DataTable
+            self.selected_table: DataTable[str]
 
             self.hide(self.selected_table)
 
@@ -572,16 +620,16 @@ class Cerberus(App[List[Result]]):
         except Exception as e:
             self.debug_print(e)
 
-    def action_show_finished_subjects(self):
+    def action_show_finished_subjects(self) -> None:
         self.change_table("#" + finished_subjects_id)
 
-    def action_show_running_subjects(self):
+    def action_show_running_subjects(self) -> None:
         self.change_table("#" + running_subjects_id)
 
-    def action_show_all_subjects(self):
+    def action_show_all_subjects(self) -> None:
         self.change_table("#" + all_subjects_id)
 
-    def action_show_error_subjects(self):
+    def action_show_error_subjects(self) -> None:
         self.change_table("#" + error_subjects_id)
 
     def construct_job(
@@ -590,14 +638,15 @@ class Cerberus(App[List[Result]]):
         tool: AbstractTool,
         task_profile: Dict[str, Any],
         container_profile: Dict[str, Any],
-        experiment_item,
+        experiment_item: Dict[str, Any],
         image_name: Optional[str],
         iteration: int,
         run: str,
         task_config: TaskConfig,
-    ):
+    ) -> None:
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
-        key = main.create_task_identifier(
+        tool.tool_tag = tool_tag
+        key = create_task_identifier(
             benchmark,
             task_profile,
             container_profile,
@@ -608,15 +657,15 @@ class Cerberus(App[List[Result]]):
         )
 
         _ = self.query_one("#" + all_subjects_id, DataTable).add_row(
-            iteration,
+            str(iteration),
             benchmark.name,
             tool.name,
-            experiment_item[definitions.KEY_SUBJECT],
-            experiment_item[definitions.KEY_BUG_ID],
+            str(experiment_item[definitions.KEY_SUBJECT]),
+            str(experiment_item[definitions.KEY_BUG_ID]),
             run,
-            "N/A" if tool_tag == "" else tool_tag,
-            task_profile[definitions.KEY_ID],
-            container_profile[definitions.KEY_ID],
+            "N/A" if tool_tag == "" else str(tool_tag),
+            str(task_profile[definitions.KEY_ID]),
+            str(container_profile[definitions.KEY_ID]),
             "N/A",
             "N/A",
             "Allocated",
@@ -651,17 +700,17 @@ class Cerberus(App[List[Result]]):
         )
 
     @on(Key)
-    async def handle_key_press(self, message: Key):
+    async def handle_key_press(self, message: Key) -> None:
         if message.key == "escape":
             if self.selected_subject:
                 self.hide(log_map[self.selected_subject])
             self.selected_subject = None
 
     @on(JobAllocate)
-    async def on_job_allocate(self, message: JobAllocate):
+    async def on_job_allocate(self, message: JobAllocate) -> None:
         loop = asyncio.get_running_loop()
 
-        def job_allocated_job():
+        def job_allocated_job() -> None:
             values.task_type.set(cast(TaskType, message.task_type))
             cpus: List[str] = []
             gpus: List[str] = []
@@ -717,6 +766,7 @@ class Cerberus(App[List[Result]]):
                     job_condition.notify_all()
 
             values.job_identifier.set(message.identifier)
+            values.session_identifier.set(message.identifier)
             values.current_task_profile_id.set(message.task_profile[definitions.KEY_ID])
             values.current_container_profile_id.set(
                 message.container_profile[definitions.KEY_ID]
@@ -782,9 +832,21 @@ class Cerberus(App[List[Result]]):
             )
 
             status = TaskStatus.SUCCESS
-            dir_info = {}
+            dir_info: DirectoryInfo = {}
+            tool_tag = cast(str, message.task_profile.get(definitions.KEY_TOOL_TAG, ""))
+            dir_setup_extended = (
+                join(
+                    values.dir_benchmark,
+                    message.benchmark.name,
+                    message.experiment_item[definitions.KEY_SUBJECT],
+                    f"{message.experiment_item[definitions.KEY_BUG_ID]}-{tool_tag}",
+                    "",
+                )
+                if tool_tag
+                else None
+            )
             try:
-                dir_info = task.run(
+                err, dir_info = task.run(
                     message.benchmark,
                     message.tool,
                     message.experiment_item,
@@ -793,8 +855,12 @@ class Cerberus(App[List[Result]]):
                     message.identifier,
                     cpus,
                     gpus,
+                    str(message.run),
                     message.experiment_image_id,
+                    dir_setup_extended=dir_setup_extended,
                 )
+                if err:
+                    status = TaskStatus.FAIL
             except Exception as e:
                 try:
                     job_time_map_mutex.acquire(blocking=True)
@@ -840,10 +906,10 @@ class Cerberus(App[List[Result]]):
                 )
                 job_condition.notify_all()
 
-        task_future = loop.run_in_executor(None, job_allocated_job)
+        task_future: Future[None] = loop.run_in_executor(None, job_allocated_job)
         self.jobs[message.identifier] = (task_future, message.tool)
 
-    def update_status(self, key: str, status: str):
+    def update_status(self, key: str, status: str) -> None:
         try:  # generally a running task will be updating its status
             self.query_one("#" + running_subjects_id, DataTable).update_cell(
                 key,
@@ -861,7 +927,7 @@ class Cerberus(App[List[Result]]):
         )
 
     @on(JobMount)
-    async def on_mount_job(self, message: JobMount):
+    async def on_mount_job(self, message: JobMount) -> None:
         self.debug_print("Mounting {}".format(message.key))
         text_log = log_map[message.key]
         await self.mount(text_log, before=self.query_one("#" + all_subjects_id))
@@ -869,21 +935,21 @@ class Cerberus(App[List[Result]]):
         self.hide(text_log)
 
     @on(JobFinish)
-    async def on_job_finish(self, message: JobFinish):
-        def update_table(key, id: str, table: DataTable):
+    async def on_job_finish(self, message: JobFinish) -> None:
+        def update_table(key: RowKey, id: str, table: DataTable[str]) -> None:
             table.update_cell(
                 key,
                 Cerberus.COLUMNS[definitions.UI_STATUS][id],
                 str(message.status),
                 update_width=True,
             )
-            table.sort(Cerberus.COLUMNS["ID"][id])
+            table.sort(Cerberus.COLUMNS["ID"][id], key=lambda x: int(x))
             # TODO temporary
             if message.task_type == "repair":
                 table.update_cell(
                     key,
                     Cerberus.COLUMNS[definitions.UI_PLAUSIBLE_PATCHES][id],
-                    cast(RepairToolStats, message.results).patch_stats.plausible,
+                    str(cast(RepairToolStats, message.results).patch_stats.plausible),
                     update_width=True,
                 )
             table.update_cell(
@@ -942,16 +1008,18 @@ class Cerberus(App[List[Result]]):
                 self.exit(self.finished_subjects)
 
     @on(Write)
-    async def write_message(self, message: Write):
-        if message.identifier in log_map:
-            log_map[message.identifier].write(
+    async def write_message(self, message: Write) -> None:
+        if message.session_identifier in log_map:
+            log_map[message.session_identifier].write(
                 message.text,
                 # f"{time.strftime('%b %d %H:%M:%S')} {message.text}",
                 shrink=False,
                 width=values.ui_max_width,
-                scroll_end=(self.selected_subject == message.identifier),
+                scroll_end=(self.selected_subject == message.session_identifier),
                 expand=True,
             )
+        elif message.session_identifier != "(Root)":
+            self.debug_print("I cannot find {}".format(message.session_identifier))
         self.debug_print(message.text)
 
     def show(self, x: Widget) -> None:
@@ -976,7 +1044,7 @@ class Cerberus(App[List[Result]]):
         if (
             message
             and message.row_key
-            and message.row_key.value
+            and message.row_key.value is not None
             and message.row_key.value in log_map
         ):
             self.selected_subject = message.row_key.value
@@ -987,8 +1055,8 @@ class Cerberus(App[List[Result]]):
             self.debug_print("Info was not okay? {}".format(message.__dict__))
 
     def compose(self) -> ComposeResult:
-        def create_table(id: str):
-            table: DataTable = DataTable(id=id)
+        def create_table(id: str) -> DataTable[str]:
+            table: DataTable[str] = DataTable(id=id)
             table.cursor_type = "row"
             table.styles.border = ("heavy", "orange")
             return table
@@ -1032,7 +1100,7 @@ class Cerberus(App[List[Result]]):
         self.dark: Reactive[bool]
         self.dark = not self.dark  # type: ignore
 
-    def debug_print(self, text: Any):
+    def debug_print(self, text: Any) -> None:
         if values.debug or self.is_preparing:
             logger.debug(str(text))
             log_map["root"].write(
@@ -1046,12 +1114,14 @@ class Cerberus(App[List[Result]]):
 app: Cerberus
 
 
-def post_write(text: str):
-    message = Write(text=text, identifier=values.job_identifier.get("(Root)"))
+def post_write(text: str) -> None:
+    message = Write(
+        text=text, session_identifier=values.session_identifier.get("(Root)")
+    )
     app.post_message(message)
 
 
-def update_current_job(status: str):
+def update_current_job(status: str) -> None:
     if not values.ui_active:
         return
     current_job = values.job_identifier.get("NA")
@@ -1062,16 +1132,16 @@ def update_current_job(status: str):
             app.update_status(current_job, status)
 
 
-def setup_ui(tasks: Optional[TaskList] = None):
+def setup_ui(tasks: Optional[TaskList] = None) -> Tuple[int, bool]:
     global app
     app = Cerberus()
     app.tasks = tasks
     experiment_results = app.run()
     print_results(experiment_results)
-    return len(experiment_results) if experiment_results else 0
+    return (len(experiment_results), True) if experiment_results else (0, False)
 
 
-def print_results(experiment_results: Optional[List[Result]]):
+def print_results(experiment_results: Optional[List[Result]]) -> None:
     values.ui_active = False
     emitter.debug("The final results are {}".format(experiment_results))
     if experiment_results:

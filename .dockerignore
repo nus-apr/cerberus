@@ -1,2 +1,5 @@
 logs/*
 output/*
+benchmark
+experiments
+**/__pycache__

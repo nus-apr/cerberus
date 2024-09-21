@@ -2,11 +2,11 @@ from enum import Enum
 
 
 class ConfigFieldsEnum(Enum):
-
     # general section
     GENERAL = "general"
     UI_MODE = "enable_ui"
     PARALLEL_MODE = "parallel"
+    TIMESTAMP = "TIMESTAMP"
 
     # profiles section
     PROFILES = "profiles"
@@ -18,6 +18,8 @@ class ConfigFieldsEnum(Enum):
     FAULT_LOCATION = "fault-location"
     PASSING_TEST_RATIO = "passing-test-ratio"
     PATCH_DIRECTORY = "patch-directory"
+    PASSING_TEST_LIMIT = "passing-test-limit"
+    FAILING_TEST_LIMIT = "failing-test-limit"
 
     CPU_COUNT = "cpu-count"
     GPU_COUNT = "gpu-count"
@@ -52,14 +54,27 @@ class ConfigFieldsEnum(Enum):
     NAME = "name"
     TYPE = "type"
 
+    REPAIR_TIMEOUT = "repair-timeout"
+    FUZZ_TIMEOUT = "fuzz-timeout"
+    LOCALIZE_TIMEOUT = "localize-timeout"
+    ANALYZE_TIMEOUT = "analyze-timeout"
+    COMPOSITE_TIMEOUT = "composite-timeout"
+    VALIDATE_TIMEOUT = "validate-timeout"
+    SELECT_TIMEOUT = "select-timeout"
+
     # composite fields
     COMPOSITE_SEQUENCE = "composite-sequence"
     FUZZ = "fuzz"
+    VALIDATE = "validate"
     ANALYZE = "analyze"
+    CRASH_ANALYZE = "crash-analyze"
+    ITERATIVE_REPAIR = "iterative-repair"
     LOCALIZE = "localize"
+    SLICE = "slice"
     REPAIR = "repair"
     SELECT = "select"
     ORCHESTRATOR = "orchestrator"
+    BISECT = "bisect"
 
     # benchmarks
     BENCHMARKS = "benchmarks"
@@ -72,6 +87,10 @@ class ConfigFieldsEnum(Enum):
     PARAMS = "params"
     TAG = "tag"
     IMAGE = "image"
+    HASH_DIGEST = "hash_digest"
+    IGNORE = "ignore"
+    LOCAL = "local"
+    REBUILD = "rebuild"
 
     # Task Config Params
     COMPACT_RESULTS = "compact-results"
@@ -82,6 +101,7 @@ class ConfigFieldsEnum(Enum):
     ONLY_SETUP = "only-setup"
     ONLY_INSTRUMENT = "only-instrument"
     ONLY_TEST = "only-test"
+    USE_SUBJECT_AS_BASE = "use-subject-as-base"
     REBUILD_ALL = "rebuild-all"
     REBUILD_BASE = "rebuild-base"
     USE_CACHE = "use-cache"

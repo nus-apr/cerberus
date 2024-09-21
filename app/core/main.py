@@ -1,4 +1,6 @@
+import getpass
 import multiprocessing
+import os
 import signal
 import sys
 import time
@@ -8,104 +10,65 @@ from multiprocessing import set_start_method
 from typing import Any
 from typing import cast
 from typing import Dict
+from typing import NoReturn
 from typing import Optional
 
 import rich.traceback
 from rich import get_console
 
+from app.core import configuration
+from app.core import container
 from app.core import definitions
 from app.core import emitter
 from app.core import logger
 from app.core import utilities
 from app.core import values
 from app.core.args import parse_args
+from app.core.configs.Config import Config
 from app.core.configs.ConfigDataFactory import ConfigDataFactory
 from app.core.configs.ConfigDataLoader import ConfigDataLoader
 from app.core.configs.ConfigValidationSchemas import config_validation_schema
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configuration import Configurations
+from app.core.identifiers import create_bug_image_identifier
+from app.core.identifiers import create_task_identifier
+from app.core.identifiers import create_task_image_identifier
 from app.core.task import task
-from app.core.task.TaskProcessor import TaskList
+from app.core.task.dir_info import generate_dir_info
+from app.core.task.image import prepare_experiment_image
+from app.core.task.image import prepare_experiment_tool
 from app.core.task.TaskProcessor import TaskProcessor
+from app.core.task.typing.TaskList import TaskList
 from app.core.task.typing.TaskType import TaskType
 from app.drivers.benchmarks.AbstractBenchmark import AbstractBenchmark
-from app.drivers.tools.AbstractTool import AbstractTool
 from app.notification import notification
 from app.ui import ui
 
 
-def timeout_handler(signum, frame):
+def timeout_handler(signum: int, frame: Any) -> NoReturn:
     emitter.error("TIMEOUT Exception")
     raise Exception("end of time")
 
 
-def shutdown(signum, frame):
+def shutdown(signum: int, frame: Any) -> NoReturn:
     # global stop_event
     emitter.warning("Exiting due to Terminate Signal")
     # stop_event.set()
     raise SystemExit
 
 
-def bootstrap(arg_list: Namespace):
+def bootstrap(arg_list: Namespace) -> Configurations:
     emitter.sub_title("Bootstrapping framework")
     config = Configurations()
     config.read_email_config_file()
     config.read_slack_config_file()
     config.read_discord_config_file()
+    config.read_api_config_file()
     config.read_arg_list(arg_list)
     values.arg_pass = True
     config.update_configuration()
     config.print_configuration()
     return config
-
-
-def create_task_image_identifier(
-    benchmark: AbstractBenchmark,
-    tool: AbstractTool,
-    experiment_item: Dict[str, Any],
-    tag: Optional[str] = None,
-):
-    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    image_args = [tool.name, benchmark.name, subject_name, bug_name]
-
-    if tag and tag != "":
-        image_args.append(tag)
-
-    image_name = "-".join(map(lambda x: x.replace("-", "_"), image_args))
-    return image_name.lower()
-
-
-def create_bug_image_identifier(
-    benchmark: AbstractBenchmark, experiment_item: Dict[str, Any]
-):
-    bug_name = str(experiment_item[definitions.KEY_BUG_ID])
-    subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-    return "-".join(
-        map(lambda x: x.replace("-", "_"), [benchmark.name, subject_name, bug_name])
-    ).lower()
-
-
-def create_task_identifier(
-    benchmark: AbstractBenchmark,
-    task_profile,
-    container_profile,
-    experiment_item,
-    tool: AbstractTool,
-    run_index: str,
-    tool_tag: str,
-):
-    return "-".join(
-        [
-            benchmark.name,
-            tool.name if tool_tag == "" else f"{tool.name}-{tool_tag}",
-            experiment_item[definitions.KEY_SUBJECT],
-            experiment_item[definitions.KEY_BUG_ID],
-            task_profile[definitions.KEY_ID],
-            container_profile[definitions.KEY_ID],
-            run_index,
-        ]
-    )
 
 
 iteration = 0
@@ -114,10 +77,10 @@ iteration = 0
 def process_configs(
     task_config: TaskConfig,
     benchmark: AbstractBenchmark,
-    experiment_item,
+    experiment_item: Dict[str, Any],
     task_profile: Dict[str, Any],
     container_profile: Dict[str, Any],
-):
+) -> None:
     for k, v in task_config.__dict__.items():
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
@@ -126,13 +89,10 @@ def process_configs(
     values.current_container_profile_id.set(container_profile[definitions.KEY_ID])
     values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
 
-    if values.use_container:
-        values.job_identifier.set(
-            create_bug_image_identifier(benchmark, experiment_item)
-        )
+    values.job_identifier.set(create_bug_image_identifier(benchmark, experiment_item))
 
 
-def main():
+def main() -> None:
     global iteration
     if not sys.warnoptions:
         import warnings
@@ -141,15 +101,15 @@ def main():
 
     rich.traceback.install(show_locals=True)
     parsed_args = parse_args()
-    is_error = False
+    has_error = False
     signal.signal(signal.SIGALRM, timeout_handler)
     signal.signal(signal.SIGTERM, shutdown)
-    set_start_method("spawn")
+    set_start_method("fork")
     start_time = time.time()
     utilities.create_output_directories()
     values.gpus = utilities.get_gpu_count()
     logger.create_log_files()
-    # TODO Do overwrite magic
+
     config_obj = bootstrap(parsed_args)
     try:
         emitter.title(
@@ -177,30 +137,31 @@ def main():
                 utilities.error_exit(
                     "Parallel mode is currently supported only for versions 3.10+"
                 )
-            iteration = ui.setup_ui(tasks)
+            iteration, has_error = ui.setup_ui(tasks)
         else:
             emitter.information("\t\t[framework] starting processing of tasks")
-            process_tasks(tasks)
+            has_error = process_tasks(tasks)
 
     except (SystemExit, KeyboardInterrupt) as e:
         pass
     except Exception as e:
-        is_error = True
+        has_error = True
         values.ui_active = False
         emitter.error("Runtime Error")
         emitter.error(str(e))
         logger.error(traceback.format_exc())
     finally:
+        container.clean_containers()
         get_console().show_cursor(True)
         # Final running time and exit message
         # os.system("ps -aux | grep 'python' | awk '{print $2}' | xargs kill -9")
         total_duration = format((time.time() - start_time) / 60, ".3f")
         if not parsed_args.parallel:
-            notification.end(total_duration, is_error)
-        emitter.end(total_duration, iteration, is_error)
+            notification.end(total_duration, has_error)
+        emitter.end(total_duration, iteration, has_error)
 
 
-def process_config_file(parsed_args):
+def process_config_file(parsed_args: Namespace) -> Config:
     values.arg_pass = True
     config_loader = ConfigDataLoader(
         file_path=parsed_args.config_file,
@@ -209,6 +170,9 @@ def process_config_file(parsed_args):
     config_loader.load()
     config_loader.validate()
     config = ConfigDataFactory.create(config_data_dict=config_loader.get_config_data())
+    configuration.process_overrides(
+        parsed_args, config
+    )  # Allow for overriding of the config by the command line
     values.debug = config.general.debug_mode
     values.secure_hash = config.general.secure_hash
     values.use_parallel = config.general.parallel_mode
@@ -217,7 +181,8 @@ def process_config_file(parsed_args):
     return config
 
 
-def process_tasks(tasks: TaskList):
+def process_tasks(tasks: TaskList) -> bool:
+    has_error = False
     for iteration, (task_config, task_data) in enumerate(tasks):
         (
             benchmark,
@@ -258,27 +223,46 @@ def process_tasks(tasks: TaskList):
         )
 
         tool_tag = task_profile.get(definitions.KEY_TOOL_TAG, "")
-
+        tool.tool_tag = tool_tag
         bug_name = str(experiment_item[definitions.KEY_BUG_ID])
         subject_name = str(experiment_item[definitions.KEY_SUBJECT])
-        dir_info = task.generate_dir_info(
+        # Allow for a special base setup folder if needed
+        dir_setup_extended = (
+            os.path.join(
+                values.dir_benchmark,
+                benchmark.name,
+                subject_name,
+                f"{bug_name}-{tool_tag}",
+                "",
+            )
+            if tool_tag
+            else None
+        )
+        dir_info = generate_dir_info(
             benchmark.name,
             subject_name,
             bug_name,
-            tool_tag,
+            dir_setup_extended,
         )
+
+        if task_config.task_type != "composite":
+            experiment_image_id = prepare_experiment_image(
+                benchmark,
+                experiment_item,
+                cpus,
+                [],
+                tool_tag,
+                locally_running=tool.locally_running,
+            )
+        else:
+            experiment_image_id = None
 
         if task_config.task_type == "prepare":
             iteration = iteration + 1
             emitter.sub_sub_title(
                 "Experiment #{} - Bug #{} Run #{}".format(iteration, bug_index, 1)
             )
-            task.prepare_experiment(benchmark, experiment_item, cpus, [], tag=tool_tag)
             continue
-
-        experiment_image_id = task.prepare_experiment(
-            benchmark, experiment_item, cpus, [], tool_tag
-        )
 
         image_name = create_task_image_identifier(
             benchmark,
@@ -286,15 +270,20 @@ def process_tasks(tasks: TaskList):
             experiment_item,
             tool_tag,
         )
-        task.prepare_experiment_tool(
-            experiment_image_id,
-            tool,
-            task_profile,
-            dir_info,
-            image_name,
-            experiment_item,
-            tool_tag,
-        )
+        if task_config.task_type != "composite":
+            experiment_image_tool_id = prepare_experiment_tool(
+                experiment_image_id,
+                tool,
+                task_profile,
+                dir_info,
+                image_name,
+                experiment_item,
+                tool_tag,
+            )
+            experiment_item["image_id"] = (
+                experiment_image_tool_id or experiment_image_id.get("base_image", "")
+            )
+
         for run_index in range(task_config.runs):
             iteration = iteration + 1
             emitter.sub_sub_title(
@@ -313,7 +302,7 @@ def process_tasks(tasks: TaskList):
                 tool_tag,
             )
 
-            task.run(
+            (err, _) = task.run(
                 benchmark,
                 tool,
                 experiment_item,
@@ -322,5 +311,10 @@ def process_tasks(tasks: TaskList):
                 key,
                 cpus,
                 gpus,
+                str(run_index),
                 image_name,
+                dir_setup_extended=dir_setup_extended,
             )
+            if err:
+                has_error = True
+    return has_error

@@ -1,51 +1,42 @@
 import os
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
-from app.drivers.tools.fuzz.AbstractFuzzTool import AbstractFuzzTool
+from app.core.task.stats.FuzzToolStats import FuzzToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
+from app.drivers.tools.fuzz.c.AbstractAFL import AbstractAFL
 
 
-class AFLPlusPlus(AbstractFuzzTool):
-    def __init__(self):
+class AFLPlusPlus(AbstractAFL):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
-        super().__init__(self.name)
-        self.image_name = "aflplusplus/aflplusplus"
+        self.image_name = "mirchevmp/aflplusplus"
+        super().__init__()
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
-        """
-        analyse tool output and collect information
-        output of the tool is logged at self.log_output_path
-        information required to be extracted are:
-        """
+    def prepare_for_fuzz(self, bug_info: Dict[str, Any]) -> None:
+        self.run_command(
+            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
+                join(self.dir_setup, bug_info[self.key_config_script])
+            )
+        )
+        self.run_command(
+            "bash -c ' CC=afl-clang-fast CXX=afl-clang-fast++ {}'".format(
+                join(self.dir_setup, bug_info[self.key_build_script])
+            )
+        )
+
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> FuzzToolStats:
+        dir_test_benign = join(self.dir_output, "benign_tests")
+        dir_test_crash = join(self.dir_output, "crashing_tests")
+
+        crashing_test_list = self.list_dir(dir_test_crash)
+        non_crashing_test_lsit = self.list_dir(dir_test_benign)
+
+        self.stats.fuzzing_stats.count_benign_tests = len(non_crashing_test_lsit)
+        self.stats.fuzzing_stats.count_crash_tests = len(crashing_test_list)
 
         return self.stats
-
-    def run_fuzz(self, bug_info, fuzz_config_info):
-        super(AFLPlusPlus, self).run_fuzz(bug_info, fuzz_config_info)
-        self.emit_normal("executing fuzz command")
-
-        timeout = int(float(fuzz_config_info[self.key_timeout]) * 60)
-
-        if self.key_bin_path not in bug_info:
-            self.error_exit("no binary path provided")
-
-        self.timestamp_log_start()
-
-        initial_corpus = join(self.dir_setup, self.name, "initial-corpus")
-
-        fuzz_command = "bash -c 'stty cols 100 && stty rows 100 && timeout -k 5m {timeout}m afl-fuzz -i {input_folder} -o {output_folder} -d -m none -x {dict} {additional_params} -- {binary} {binary_input}'".format(
-            timeout=timeout,
-            additional_params=bug_info.get(self.key_tool_params, ""),
-            input_folder=initial_corpus,
-            output_folder=self.dir_output,
-            dict=join(self.dir_setup, self.name, "autodict.dict"),
-            binary=join(self.dir_expr, "src", bug_info[self.key_bin_path]),
-            binary_input=bug_info[self.key_crash_cmd].replace("$POC", "@@"),
-        )
-
-        status = self.run_command(
-            fuzz_command, self.log_output_path, join(self.dir_expr, "src")
-        )
-
-        self.process_status(status)
-
-        self.timestamp_log_end()

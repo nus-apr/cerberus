@@ -1,0 +1,89 @@
+{
+  "general": {
+    "parallel": false,
+    "enable_ui": false,
+    "secure-hash": false,
+    "debug-mode": false,
+    "cpus": 64,
+    "gpus": 1
+  },
+  "tasks": {
+    "default": {
+      "compact-results": true,
+      "dump-patches": false,
+      "docker-host": "unix:///var/run/docker.sock",
+      "only-analyse": false,
+      "only-setup": false,
+      "only-instrument": false,
+      "only-test": false,
+      "rebuild-all": false,
+      "rebuild-base": false,
+      "use-cache": false,
+      "use-container": true,
+      "use-gpu": true,
+      "use-purge": false,
+      "container-profiles-id-list": [
+        "CP1"
+      ],
+      "task-profiles-id-list": [
+        "TP1"
+      ]
+    },
+    "chunks": [
+      {
+        "type": "composite",
+        "composite-sequence": {
+          "localize": [
+            {
+              "name": "e9patchsbfl"
+            }
+          ],
+          "repair": [
+            {
+              "name": "repairdeepseek",
+              "ignore": false
+            }
+          ],
+          "validate": [
+            {
+              "name": "valkyrie"
+            }
+          ]
+        },
+        "benchmarks": [
+          {
+            "name": "examples",
+            "bug-id-list": [
+              "2"
+            ]
+          }
+        ],
+        "tools": [
+          {
+            "name": "basicworkflow",
+            "params": ""
+          }
+        ]
+      }
+    ]
+  },
+  "profiles": {
+    "container-profiles": [
+      {
+        "id": "CP1",
+        "cpu-count": 8,
+        "gpu-count": 1,
+        "mem-limit": "64g",
+        "enable-network": true
+      }
+    ],
+    "task-profiles": [
+      {
+        "id": "TP1",
+        "timeout": 0.25,
+        "fault-location": "auto",
+        "passing-test-ratio": 1
+      }
+    ]
+  }
+}

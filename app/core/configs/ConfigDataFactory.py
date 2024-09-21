@@ -1,5 +1,9 @@
 import multiprocessing
+from typing import Any
+from typing import cast
+from typing import Dict
 from typing import List
+from typing import Type
 
 from app.core import utilities
 from app.core import values
@@ -10,6 +14,7 @@ from app.core.configs.profiles.ContainerProfile import ContainerProfile
 from app.core.configs.profiles.ProfilesConfig import ProfilesConfig
 from app.core.configs.profiles.TaskProfile import TaskProfile
 from app.core.configs.tasks_data.BenchmarkConfig import BenchmarkConfig
+from app.core.configs.tasks_data.CompositeTaskConfig import CompositeTaskConfig
 from app.core.configs.tasks_data.TaskConfig import TaskConfig
 from app.core.configs.tasks_data.TasksChunksConfig import TasksChunksConfig
 from app.core.configs.tasks_data.ToolConfig import ToolConfig
@@ -17,7 +22,7 @@ from app.core.configs.tasks_data.ToolConfig import ToolConfig
 
 class ConfigDataFactory:
     @staticmethod
-    def _create_general_config(general_config_dict: dict) -> GeneralConfig:
+    def _create_general_config(general_config_dict: Dict[str, Any]) -> GeneralConfig:
         return GeneralConfig(
             parallel_mode=general_config_dict[ConfigFieldsEnum.PARALLEL_MODE.value],
             ui_mode=general_config_dict[ConfigFieldsEnum.UI_MODE.value],
@@ -41,10 +46,11 @@ class ConfigDataFactory:
                     ),
                 ),
             ),
+            timestamp=general_config_dict.get(ConfigFieldsEnum.TIMESTAMP.value, False),
         )
 
     @staticmethod
-    def _create_profiles_config(profiles_config_dict: dict) -> ProfilesConfig:
+    def _create_profiles_config(profiles_config_dict: Dict[str, Any]) -> ProfilesConfig:
         # load container profiles
         container_profiles_list = []
         for container_profile_dict in profiles_config_dict[
@@ -71,21 +77,22 @@ class ConfigDataFactory:
         for task_profile_dict in profiles_config_dict[
             ConfigFieldsEnum.TASK_PROFILES_LIST.value
         ]:
-            task_profiles_list.append(
-                TaskProfile(
-                    profile_id=task_profile_dict[ConfigFieldsEnum.PROFILE_ID.value],
-                    timeout=task_profile_dict[ConfigFieldsEnum.TIMEOUT.value],
-                    patch_directory=task_profile_dict.get(
-                        ConfigFieldsEnum.PATCH_DIRECTORY.value, None
-                    ),
-                    fault_location=task_profile_dict[
-                        ConfigFieldsEnum.FAULT_LOCATION.value
-                    ],
-                    passing_test_ratio=task_profile_dict[
-                        ConfigFieldsEnum.PASSING_TEST_RATIO.value
-                    ],
-                )
+            # TODO update the TaskProfile
+            profile = TaskProfile(
+                profile_id=task_profile_dict[ConfigFieldsEnum.PROFILE_ID.value],
+                timeout=task_profile_dict[ConfigFieldsEnum.TIMEOUT.value],
+                patch_directory=task_profile_dict.get(
+                    ConfigFieldsEnum.PATCH_DIRECTORY.value, None
+                ),
+                fault_location=task_profile_dict[ConfigFieldsEnum.FAULT_LOCATION.value],
+                passing_test_ratio=task_profile_dict[
+                    ConfigFieldsEnum.PASSING_TEST_RATIO.value
+                ],
             )
+            for k, v in task_profile_dict.items():
+                if not hasattr(profile, k):
+                    setattr(profile, k, v)
+            task_profiles_list.append(profile)
 
         return ProfilesConfig(
             task_profiles_list=task_profiles_list,
@@ -94,7 +101,7 @@ class ConfigDataFactory:
 
     @staticmethod
     def _create_tasks_chunks_config(
-        tasks_data_config_dict: dict,
+        tasks_data_config_dict: Dict[str, Any],
     ) -> List[TasksChunksConfig]:
         task_default_config = tasks_data_config_dict[
             ConfigFieldsEnum.DEFAULT_CONFIG.value
@@ -106,7 +113,16 @@ class ConfigDataFactory:
         ]:
             # overwrite task config if necessary
             tasks_chunk_config_dict = {**task_default_config, **tasks_chunk_config_dict}
-            task_config = TaskConfig(
+
+            task_constructor = TaskConfig
+
+            if tasks_chunk_config_dict[ConfigFieldsEnum.TYPE.value] == "composite":
+                task_constructor = cast(Type[TaskConfig], CompositeTaskConfig)
+
+            task_config = task_constructor(
+                composite_sequence=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.COMPOSITE_SEQUENCE.value, {}
+                ),
                 task_type=tasks_chunk_config_dict[ConfigFieldsEnum.TYPE.value],
                 compact_results=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.COMPACT_RESULTS.value, values.compact_results
@@ -147,6 +163,10 @@ class ConfigDataFactory:
                 use_purge=tasks_chunk_config_dict.get(
                     ConfigFieldsEnum.USE_PURGE.value, values.use_purge
                 ),
+                use_subject_as_base=tasks_chunk_config_dict.get(
+                    ConfigFieldsEnum.USE_SUBJECT_AS_BASE.value,
+                    values.use_subject_as_base,
+                ),
                 runs=tasks_chunk_config_dict.get(ConfigFieldsEnum.RUNS.value, 1),
             )
 
@@ -179,6 +199,16 @@ class ConfigDataFactory:
                         params=tool_config_dict.get(ConfigFieldsEnum.PARAMS.value, ""),
                         tag=tool_config_dict.get(ConfigFieldsEnum.TAG.value, ""),
                         image=tool_config_dict.get(ConfigFieldsEnum.IMAGE.value, ""),
+                        ignore=tool_config_dict.get(
+                            ConfigFieldsEnum.IGNORE.value, False
+                        ),
+                        rebuild=tool_config_dict.get(
+                            ConfigFieldsEnum.REBUILD.value, False
+                        ),
+                        local=tool_config_dict.get(ConfigFieldsEnum.LOCAL.value, False),
+                        hash_digest=tool_config_dict.get(
+                            ConfigFieldsEnum.HASH_DIGEST.value, ""
+                        ),
                     )
                 )
 
@@ -199,7 +229,7 @@ class ConfigDataFactory:
         return tasks_chunks_config_list
 
     @staticmethod
-    def create(config_data_dict: dict) -> Config:
+    def create(config_data_dict: Dict[str, Any]) -> Config:
         return Config(
             general=ConfigDataFactory._create_general_config(
                 config_data_dict[ConfigFieldsEnum.GENERAL.value]

@@ -4,7 +4,10 @@ from datetime import datetime
 from os.path import join
 from typing import Any
 from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -17,12 +20,12 @@ class SAVER(AbstractRepairTool):
         "Double Free": "DOUBLE_FREE",
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         self.image_name = "rshariffdeen/saver"
         super().__init__(self.name)
 
-    def populate_config_file(self, bug_info, config_path):
+    def populate_config_file(self, bug_info: Dict[str, Any], config_path: str) -> None:
         config_info: Dict[str, Any] = dict()
         bug_type = bug_info[self.key_bug_type]
         if bug_type not in self.bug_conversion_table:
@@ -57,7 +60,8 @@ class SAVER(AbstractRepairTool):
         config_info["err_type"] = bug_type_code
         self.write_json(config_info, config_path)
 
-    def prepare(self, bug_info):
+    def pre_process(self, bug_info: Dict[str, Any]) -> None:
+        self.config_path = None
         tool_dir = join(self.dir_expr, self.name)
         if not self.is_dir(tool_dir):
             self.run_command(f"mkdir -p {tool_dir}", dir_path=self.dir_expr)
@@ -69,16 +73,18 @@ class SAVER(AbstractRepairTool):
         self.populate_config_file(bug_info, config_path)
         time = datetime.now()
         bug_type = bug_info[self.key_bug_type]
-        compile_list = bug_info.get(self.key_compile_programs, [])
+        build_command_repair = bug_info.get(self.key_build_command_repair, "")
         if bug_type == "Memory Leak":
             compile_command = (
-                "infer -j 20 -g --headers --check-nullable-only -- make -j20 {}".format(
-                    " ".join(compile_list)
+                "infer -j 32 -g --headers --check-nullable-only -- {}".format(
+                    build_command_repair
                 )
             )
         else:
-            compile_command = "infer -j 20 run -g --headers --check-nullable-only -- make -j20 {}".format(
-                " ".join(compile_list)
+            compile_command = (
+                "infer -j 32 run -g --headers --check-nullable-only -- {}".format(
+                    build_command_repair
+                )
             )
         self.emit_normal(" compiling subject with " + self.name)
         log_compile_path = join(self.dir_logs, "saver-compile-output.log")
@@ -103,18 +109,19 @@ class SAVER(AbstractRepairTool):
             )
         )
 
-        return config_path
+        self.config_path = config_path
 
-    def run_repair(self, bug_info, repair_config_info):
-        config_path = self.prepare(bug_info)
-        super(SAVER, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
+        config_path = self.config_path
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        timeout_h = str(repair_config_info[self.key_timeout])
+        timeout_h = str(task_config_info[self.key_timeout])
         subject_name = bug_info[self.key_subject]
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-{}-output.log".format(
@@ -142,7 +149,7 @@ class SAVER(AbstractRepairTool):
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         # copy_command = "cp -rf {}/src/infer-out {}".format(
         #     self.dir_expr, self.dir_output
         # )
@@ -150,7 +157,9 @@ class SAVER(AbstractRepairTool):
         super(SAVER, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         regex = re.compile("(.*-output.log$)")

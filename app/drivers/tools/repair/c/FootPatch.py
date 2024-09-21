@@ -2,7 +2,12 @@ import os
 import re
 from datetime import datetime
 from os.path import join
+from typing import Any
+from typing import Dict
+from typing import List
 
+from app.core.task.stats.RepairToolStats import RepairToolStats
+from app.core.task.typing.DirectoryInfo import DirectoryInfo
 from app.core.utilities import escape_ansi
 from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 
@@ -10,12 +15,12 @@ from app.drivers.tools.repair.AbstractRepairTool import AbstractRepairTool
 class FootPatch(AbstractRepairTool):
     relative_binary_path = None
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.name = os.path.basename(__file__)[:-3].lower()
         self.image_name = "rshariffdeen/footpatch"
         super().__init__(self.name)
 
-    def prepare(self, bug_info):
+    def pre_process(self, bug_info: Dict[str, Any]) -> None:
         tool_dir = join(self.dir_expr, self.name)
         self.emit_normal(" preparing subject for repair with " + self.name)
         if not self.is_dir(tool_dir):
@@ -23,7 +28,7 @@ class FootPatch(AbstractRepairTool):
         dir_src = join(self.dir_expr, "src")
         clean_command = "make clean"
         if not self.container_id:
-            clean_command = "rm -f /tmp/td_candidates/*; make clean;"
+            clean_command = "rm -f /tmp/td_candidates/*; make clean "
         self.run_command(clean_command, dir_path=dir_src)
 
         new_env = os.environ.copy()
@@ -31,12 +36,9 @@ class FootPatch(AbstractRepairTool):
             del new_env["GLOBAL_REPAIR"]
         new_env["DUMP_CANDS"] = "1"
         time = datetime.now()
-        compile_list = bug_info.get(self.key_compile_programs, [])
-        analysis_command = (
-            "footpatch "
-            "-j 20 --headers --no-filtering -- make -j20 {}".format(
-                " ".join(compile_list)
-            )
+        build_command_repair = bug_info.get(self.key_build_command_repair, "")
+        analysis_command = "footpatch " "-j 32 --headers --no-filtering -- {}".format(
+            build_command_repair
         )
         log_analysis_path = join(self.dir_logs, "footpatch-capture-output.log")
         self.run_command(
@@ -51,15 +53,15 @@ class FootPatch(AbstractRepairTool):
             )
         )
 
-    def run_repair(self, bug_info, repair_config_info):
-        self.prepare(bug_info)
-        super(FootPatch, self).run_repair(bug_info, repair_config_info)
+    def invoke(
+        self, bug_info: Dict[str, Any], task_config_info: Dict[str, Any]
+    ) -> None:
         if self.is_instrument_only:
             return
-        task_conf_id = repair_config_info[self.key_id]
+        task_conf_id = task_config_info[self.key_id]
         bug_id = str(bug_info[self.key_bug_id])
-        timeout_h = str(repair_config_info[self.key_timeout])
-        additional_tool_param = repair_config_info[self.key_tool_params]
+        timeout_h = str(task_config_info[self.key_timeout])
+        additional_tool_param = task_config_info[self.key_tool_params]
         self.log_output_path = join(
             self.dir_logs,
             "{}-{}-{}-output.log".format(task_conf_id, self.name.lower(), bug_id),
@@ -75,13 +77,11 @@ class FootPatch(AbstractRepairTool):
         new_env["GLOBAL_REPAIR"] = "1"
 
         self.timestamp_log_start()
-        compile_list = bug_info.get(self.key_compile_programs, [])
+        build_command_repair = bug_info.get(self.key_build_command_repair, "")
         footpatch_command = (
             "timeout -k 5m {0}h footpatch "
-            "-j 20 --headers --no-filtering {1} "
-            "-- make -j20 {2} ".format(
-                timeout_h, additional_tool_param, " ".join(compile_list)
-            )
+            "-j 32 --headers --no-filtering {1} "
+            "-- {2} ".format(timeout_h, additional_tool_param, build_command_repair)
         )
 
         status = self.run_command(
@@ -97,7 +97,7 @@ class FootPatch(AbstractRepairTool):
         clean_command = "rm /tmp/*footpatch*"
         self.run_command(clean_command, dir_path=dir_src)
 
-    def save_artifacts(self, dir_info):
+    def save_artifacts(self, dir_info: Dict[str, str]) -> None:
         copy_command = "cp -rf {}/src/infer-out/footpatch {}".format(
             self.dir_expr, self.dir_output
         )
@@ -105,7 +105,9 @@ class FootPatch(AbstractRepairTool):
         super(FootPatch, self).save_artifacts(dir_info)
         return
 
-    def analyse_output(self, dir_info, bug_id, fail_list):
+    def analyse_output(
+        self, dir_info: DirectoryInfo, bug_id: str, fail_list: List[str]
+    ) -> RepairToolStats:
         self.emit_normal("reading output")
         dir_results = join(self.dir_expr, "result")
         regex = re.compile("(.*-output.log$)")

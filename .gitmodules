@@ -37,9 +37,6 @@
 [submodule "benchmark/saver"]
 	path = benchmark/saver
 	url = https://github.com/nus-apr/saver-benchmark
-[submodule "benchmark/efffix"]
-	path = benchmark/efffix
-	url = https://github.com/nus-apr/effFix-benchmark.git
 [submodule "benchmark/vul4j"]
 	path = benchmark/vul4j
 	url = https://github.com/nus-apr/vul4j.git
@@ -80,4 +77,15 @@
 	path = benchmark/vulnlocinstrumented
 	url = https://github.com/nus-apr/vulnloc-benchmark
         branch = instrumented
-
+[submodule "benchmark/bugsinpy"]
+  path = benchmark/bugsinpy
+  url = https://github.com/nus-apr/bugs-in-py-benchmark.git
+[submodule "benchmark/bugsphp"]
+  path = benchmark/bugsphp
+  url = https://github.com/nus-apr/bugsPHP.git
+[submodule "benchmark/bugjs"]
+	path = benchmark/bugjs
+	url = https://github.com/nus-apr/bugjs-dataset.git
+[submodule "benchmark/efffix"]
+	path = benchmark/efffix
+	url = git@github.com:nus-apr/effFix-benchmark.git
