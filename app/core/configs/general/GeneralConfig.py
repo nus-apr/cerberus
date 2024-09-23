@@ -7,6 +7,7 @@ class GeneralConfig:
         secure_hash: bool,
         cpus: int,
         gpus: int,
+        timestamp: bool,
     ):
 
         # validate config
@@ -16,6 +17,7 @@ class GeneralConfig:
         self.secure_hash = secure_hash
         self.cpus = cpus
         self.gpus = gpus
+        self.timestamp = timestamp
 
     def __str__(self) -> str:
         return (
