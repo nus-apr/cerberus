@@ -119,7 +119,7 @@ def parse_args() -> Namespace:
     optional.add_argument(
         definitions.KEY_TIMESTAMP,
         help="Add timestamp before every command",
-        acton="store_true",
+        action="store_true",
         default=False,
     )
 
