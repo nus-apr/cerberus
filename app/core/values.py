@@ -71,6 +71,7 @@ ui_active = False
 use_parallel = False
 compact_results = False
 timestamp = False
+needs_groups = False
 
 hash_suffix_length = 10
 

@@ -113,6 +113,7 @@ class TaskProcessor:
                             elif (
                                 tasks_chunk_config.task_config.task_type == "composite"
                             ):
+                                values.needs_groups = True
                                 utilities.check_groups()
                                 tool_template = configuration.load_tool(
                                     tool_config.name,
