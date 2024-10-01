@@ -451,6 +451,7 @@ class Configurations:
         task_type = self.task_type
         
         if task_type == "composite":
+            values.needs_groups = True
             utilities.check_groups()
 
         if not task_type:

@@ -66,15 +66,7 @@ def _tool_based_image(
         dock_file.write("FROM {}\n".format(tool.image_name))
         dock_file.write("ADD . {0}\n".format(dir_info["container"]["setup"]))
 
-        res, (output, error) = utilities.run_command(
-            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
-        )
-        if not output or output.decode() == "":
-            utilities.error_exit(
-                f"Cannot the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
-            )
-
-        group_id = output.decode().strip()
+        group_id = extract_group_id()
 
         emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
 
@@ -157,6 +149,19 @@ def _tool_based_image(
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
     return tmp_dockerfile
 
+def extract_group_id():
+    if values.needs_groups:
+        res, (output, error) = utilities.run_command(
+                f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+            )
+        if not output or output.decode() == "":
+                utilities.error_exit(
+                        f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+                    )
+        else:
+            return output.decode().strip()
+    else:
+        return "100"
 
 def _subject_based_image(
     bug_image_id: str,
@@ -187,15 +192,8 @@ def _subject_based_image(
                 for line in steps:
                     dock_file.write(f"{line}\n")
 
-        res, (output, error) = utilities.run_command(
-            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
-        )
-        if not output or output.decode() == "":
-            utilities.error_exit(
-                f"Cannot the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
-            )
 
-        group_id = output.decode().strip()
+        group_id = extract_group_id()
 
         emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
         prefix = ""
