@@ -149,19 +149,21 @@ def _tool_based_image(
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
     return tmp_dockerfile
 
-def extract_group_id():
+
+def extract_group_id() -> str:
     if values.needs_groups:
         res, (output, error) = utilities.run_command(
-                f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
-            )
+            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+        )
         if not output or output.decode() == "":
-                utilities.error_exit(
-                        f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
-                    )
+            utilities.error_exit(
+                f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+            )
         else:
             return output.decode().strip()
     else:
-        return "100"
+        return "2033"
+
 
 def _subject_based_image(
     bug_image_id: str,
@@ -191,7 +193,6 @@ def _subject_based_image(
             with open(tool_instructions, "r") as steps:
                 for line in steps:
                     dock_file.write(f"{line}\n")
-
 
         group_id = extract_group_id()
 

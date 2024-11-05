@@ -175,12 +175,6 @@ class Cerberus(App[List[Result]]):
                 Cerberus.COLUMNS[column_name][table.id] = column_key
 
     def _on_idle(self) -> None:
-        try:
-            super()._on_idle()
-        except Exception as e:
-            self.debug_print("The inner idle handler failed...")
-            self.debug_print(e)
-            pass
         # self.debug_print("Idle")
         now = int(time.time())
         to_del = []
@@ -692,7 +686,7 @@ class Cerberus(App[List[Result]]):
                 container_profile,
                 image_name,
                 key,
-                cast(TaskType, task_type),
+                task_type,
                 run,
                 "N/A" if tool_tag == "" else tool_tag,
                 task_config,
@@ -711,7 +705,7 @@ class Cerberus(App[List[Result]]):
         loop = asyncio.get_running_loop()
 
         def job_allocated_job() -> None:
-            values.task_type.set(cast(TaskType, message.task_type))
+            values.task_type.set(message.task_type)
             cpus: List[str] = []
             gpus: List[str] = []
 
@@ -889,7 +883,7 @@ class Cerberus(App[List[Result]]):
                         row_data,
                         dir_info["local"] if dir_info else {},
                         message.tool.stats,
-                        cast(TaskType, message.task_type),
+                        message.task_type,
                     )
                 )
             with job_condition:
