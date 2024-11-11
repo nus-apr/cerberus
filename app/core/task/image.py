@@ -79,14 +79,15 @@ def _tool_based_image(
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
         # Create a special group to ensure that files are accessible
-        dock_file.write(
-            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
-        )
+        if values.needs_groups:
+            dock_file.write(
+                f"RUN {prefix} bash -c 'if grep -q {definitions.GROUP_NAME} /etc/group; then echo exists; else  groupadd -g {group_id} {definitions.GROUP_NAME}; fi' \n"
+            )
 
-        # Make all user's primary group to be our special group
-        dock_file.write(
-            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
-        )
+            # Make all user's primary group to be our special group
+            dock_file.write(
+                f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
+            )
 
         ownership = ""
         if tool.image_user != "root":
@@ -203,15 +204,16 @@ def _subject_based_image(
             if tool.sudo_password:
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
-        # Create a special group to ensure that files are accessible
-        dock_file.write(
-            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
-        )
+        if values.needs_groups:
+            # Create a special group to ensure that files are accessible
+            dock_file.write(
+                f"RUN {prefix} bash -c 'if grep -q {definitions.GROUP_NAME} /etc/group; then echo exists; else groupadd -g {group_id} {definitions.GROUP_NAME}; fi' \n"
+            )
 
-        # Make all user's primary group to be our special group
-        dock_file.write(
-            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
-        )
+            # Make all user's primary group to be our special group
+            dock_file.write(
+                f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
+            )
 
         ownership = ""
         if tool.image_user != "root":
