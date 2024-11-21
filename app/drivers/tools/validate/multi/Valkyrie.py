@@ -64,7 +64,7 @@ class Valkyrie(AbstractValidateTool):
         else:
             conf_content.append(f'build_script:-c "exit 0"\n')
 
-        public_test_script = bug_info.get(self.key_pub_test_script, "validate.sh")
+        public_test_script = bug_info.get(self.key_pub_test_script)
         if public_test_script:
             conf_content.append(
                 f"pub_test_script:{self.dir_setup}/{public_test_script}\n"
