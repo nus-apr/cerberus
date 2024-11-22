@@ -150,6 +150,19 @@ def _tool_based_image(
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
     return tmp_dockerfile
 
+def extract_group_id():
+    if values.needs_groups:
+        res, (output, error) = utilities.run_command(
+                f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+            )
+        if not output or output.decode() == "":
+                utilities.error_exit(
+                        f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+                    )
+        else:
+            return output.decode().strip()
+    else:
+        return "100"
 
 def extract_group_id() -> str:
     if values.needs_groups:
