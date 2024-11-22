@@ -118,7 +118,7 @@ class AbstractTool(AbstractDriver):
     locally_running: bool = False
     rebuild_image: bool = False
 
-    bindings: Optional[Dict[str, Any]] = None
+    bindings: Dict[str, Any] = dict()
     api_keys: Dict[str, Any] = dict()
     runs_as_root: bool = True
     sudo_password: str = ""

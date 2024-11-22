@@ -79,14 +79,15 @@ def _tool_based_image(
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
         # Create a special group to ensure that files are accessible
-        dock_file.write(
-            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
-        )
+        if values.needs_groups:
+            dock_file.write(
+                f"RUN {prefix} bash -c 'if grep -q {definitions.GROUP_NAME} /etc/group; then echo exists; else  groupadd -g {group_id} {definitions.GROUP_NAME}; fi' \n"
+            )
 
-        # Make all user's primary group to be our special group
-        dock_file.write(
-            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
-        )
+            # Make all user's primary group to be our special group
+            dock_file.write(
+                f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
+            )
 
         ownership = ""
         if tool.image_user != "root":
@@ -163,6 +164,21 @@ def extract_group_id():
     else:
         return "100"
 
+def extract_group_id() -> str:
+    if values.needs_groups:
+        res, (output, error) = utilities.run_command(
+            f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
+        )
+        if not output or output.decode() == "":
+            utilities.error_exit(
+                f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
+            )
+        else:
+            return output.decode().strip()
+    else:
+        return "2033"
+
+
 def _subject_based_image(
     bug_image_id: str,
     tool: AbstractTool,
@@ -192,7 +208,6 @@ def _subject_based_image(
                 for line in steps:
                     dock_file.write(f"{line}\n")
 
-
         group_id = extract_group_id()
 
         emitter.debug(f"Group {definitions.GROUP_NAME} has id {group_id} ")
@@ -202,15 +217,16 @@ def _subject_based_image(
             if tool.sudo_password:
                 prefix = f'echo "{tool.sudo_password}\\n" | sudo -S'
 
-        # Create a special group to ensure that files are accessible
-        dock_file.write(
-            f"RUN {prefix} bash -c 'groupadd -g {group_id} {definitions.GROUP_NAME}' \n"
-        )
+        if values.needs_groups:
+            # Create a special group to ensure that files are accessible
+            dock_file.write(
+                f"RUN {prefix} bash -c 'if grep -q {definitions.GROUP_NAME} /etc/group; then echo exists; else groupadd -g {group_id} {definitions.GROUP_NAME}; fi' \n"
+            )
 
-        # Make all user's primary group to be our special group
-        dock_file.write(
-            f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
-        )
+            # Make all user's primary group to be our special group
+            dock_file.write(
+                f'RUN {prefix} bash -c "cut -d: -f1 /etc/passwd | xargs -i usermod -g {definitions.GROUP_NAME} {{}} "\n'
+            )
 
         ownership = ""
         if tool.image_user != "root":

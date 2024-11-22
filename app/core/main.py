@@ -85,7 +85,7 @@ def process_configs(
         if k != "task_type" and v is not None:
             emitter.configuration(k, v)
             setattr(values, k, v)
-    values.task_type.set(cast(TaskType, task_config.task_type))
+    values.task_type.set(task_config.task_type)
     values.current_container_profile_id.set(container_profile[definitions.KEY_ID])
     values.current_task_profile_id.set(task_profile[definitions.KEY_ID])
 
@@ -280,9 +280,7 @@ def process_tasks(tasks: TaskList) -> bool:
                 experiment_item,
                 tool_tag,
             )
-            experiment_item["image_id"] = (
-                experiment_image_tool_id or experiment_image_id.get("base_image", "")
-            )
+            experiment_item["image_id"] = experiment_image_tool_id
 
         for run_index in range(task_config.runs):
             iteration = iteration + 1

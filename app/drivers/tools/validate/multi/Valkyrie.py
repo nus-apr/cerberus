@@ -64,7 +64,7 @@ class Valkyrie(AbstractValidateTool):
         else:
             conf_content.append(f'build_script:-c "exit 0"\n')
 
-        public_test_script = bug_info.get(self.key_pub_test_script, "validate.sh")
+        public_test_script = bug_info.get(self.key_pub_test_script)
         if public_test_script:
             conf_content.append(
                 f"pub_test_script:{self.dir_setup}/{public_test_script}\n"
@@ -123,12 +123,12 @@ class Valkyrie(AbstractValidateTool):
         )
         self.process_status(status)
         # transform the patch paths
-        self.transform_patches(bug_info)
+        # self.transform_patches(bug_info)
         self.create_meta_data()
         self.timestamp_log_end()
         self.emit_highlight("log file: {0}".format(self.log_output_path))
 
-    def delete_validated_patches(self, bug_info) -> None:
+    def delete_validated_patches(self, bug_info: Dict[str, Any]) -> None:
         if not "validation_output" in bug_info:
             return
         validation_info = bug_info["validation_output"][0]["validation_result"]
