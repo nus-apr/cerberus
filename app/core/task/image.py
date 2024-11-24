@@ -137,13 +137,14 @@ def _tool_based_image(
                 f"-Drat.skip=true -f {pom_file}; return 0\n"
             )
 
-        for x in ["deps.sh", "install_deps"]:
-            if os.path.exists(join(dir_info["local"]["setup"], x)):
-                dock_file.write(
-                    "RUN {1} bash {0} \n".format(
-                        join(dir_info["container"]["setup"], x), prefix
+        if tool.name.lower() not in ["extractfix"]:
+            for x in ["deps.sh", "install_deps"]:
+                if os.path.exists(join(dir_info["local"]["setup"], x)):
+                    dock_file.write(
+                        "RUN {1} bash {0} \n".format(
+                            join(dir_info["container"]["setup"], x), prefix
+                        )
                     )
-                )
 
         # We assume that the container will always have the sh command available
         # This line is included against some issues with the container lifetime
@@ -239,11 +240,14 @@ def construct_experiment_tool_image(
     bug_info: Dict[str, Any],
     tag: Optional[str],
 ) -> str:
+    emitter.information("Constructing experiment tool image")
     if values.use_subject_as_base:
+        emitter.debug("Using subject as base")
         tmp_dockerfile = _subject_based_image(
             bug_image_id, tool, dir_info, bug_info, tag
         )
     else:
+        emitter.debug("Using tool as base")
         tmp_dockerfile = _tool_based_image(bug_image_id, tool, dir_info, bug_info, tag)
     id = container.build_image(tmp_dockerfile, image_name)
     os.remove(tmp_dockerfile)
