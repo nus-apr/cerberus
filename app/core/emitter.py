@@ -3,6 +3,7 @@ import os
 import random
 import sys
 import textwrap
+import time
 from enum import Enum
 from typing import Any
 from typing import List
@@ -10,7 +11,6 @@ from typing import Optional
 from typing import Union
 
 import rich
-import time
 
 from app.core import definitions
 from app.core import logger
@@ -77,10 +77,9 @@ def write(
         "" if not values.timestamp else f" {time.strftime('%b %d %H:%M:%S')}"
     )
     if not values.ui_active:
-        message = "[bold {}]{}{}".format(
+        message = "[bold {}]{}".format(
             RICH_COLOR_MAP[print_color],
             str(print_message).replace("[", "\\["),
-            timestamp_str,
         )
         if prefix:
             prefix = "[{}]{}".format(RICH_COLOR_MAP[print_color], prefix)
