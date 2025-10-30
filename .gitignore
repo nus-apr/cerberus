@@ -30,3 +30,7 @@ tags.lock
 0.6.2/**
 dynamic/codeql_queries/**
 temp-run/**
+Pipfile
+Pipfile.lock
+.env
+esbmc-ai.toml
