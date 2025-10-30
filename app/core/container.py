@@ -22,6 +22,40 @@ from app.core import values
 
 cached_client = None
 image_map = {}
+_cpuset_available_cache: Optional[bool] = None
+
+
+def _is_cpuset_available() -> bool:
+    """
+    Check if cpuset cgroup controller is available.
+    This is particularly relevant for rootless containers with cgroupv2.
+    """
+    global _cpuset_available_cache
+    if _cpuset_available_cache is not None:
+        return _cpuset_available_cache
+
+    try:
+        # Check if we're using cgroupv2 and if cpuset is available
+        # For user slices in systemd with cgroupv2, check the controllers file
+        import subprocess
+        result = subprocess.run(
+            ['cat', '/sys/fs/cgroup/user.slice/cgroup.controllers'],
+            capture_output=True,
+            text=True,
+            timeout=1
+        )
+        if result.returncode == 0:
+            controllers = result.stdout.strip().split()
+            _cpuset_available_cache = 'cpuset' in controllers
+            emitter.debug(f"\t\t[framework] Detected cgroup controllers: {controllers}")
+            emitter.debug(f"\t\t[framework] cpuset available: {_cpuset_available_cache}")
+            return _cpuset_available_cache
+    except Exception as e:
+        emitter.debug(f"\t\t[framework] Could not check cpuset availability: {e}")
+
+    # Default: assume not available for safety (works without CPU pinning)
+    _cpuset_available_cache = False
+    return _cpuset_available_cache
 
 
 def get_client() -> docker.DockerClient:
@@ -270,7 +304,8 @@ def build_container(
     emitter.normal("\t\t\t container name: {}".format(container_name))
     try:
         for local_dir_path in volume_list:
-            if local_dir_path == "/var/run/docker.sock":
+            # Skip socket files (ends with .sock) - don't try to create them as directories
+            if local_dir_path.endswith(".sock") or os.path.isfile(local_dir_path):
                 continue
             os.makedirs(local_dir_path, exist_ok=True)
 
@@ -280,7 +315,6 @@ def build_container(
             "name": container_name,
             "volumes": volume_list,
             "privileged": True,
-            "cpuset_cpus": ",".join(cpu),
             "tty": True,
             "environment": {
                 "EXPERIMENT_DIR": values.container_base_experiment,
@@ -289,6 +323,14 @@ def build_container(
                 ),
             },
         }
+
+        # Only set cpuset_cpus if CPU list is provided and cpuset controller is available
+        # For rootless containers with cgroupv2, cpuset may not be available
+        if cpu and len(cpu) > 0 and _is_cpuset_available():
+            container_run_args["cpuset_cpus"] = ",".join(cpu)
+            emitter.debug(f"\t\t\t[framework] Setting CPU affinity to: {','.join(cpu)}")
+        elif cpu and len(cpu) > 0:
+            emitter.debug("\t\t\t[framework] cpuset controller not available, skipping CPU pinning")
 
         if disable_network:
             container_run_args["network_mode"] = None

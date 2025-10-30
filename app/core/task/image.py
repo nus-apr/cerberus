@@ -35,8 +35,19 @@ def construct_container_volumes(
             "bind": dir_info["container"]["base"],
             "mode": "rw",
         },
-        "/var/run/docker.sock": {"bind": "/var/run/docker.sock", "mode": "rw"},
     }
+
+    # Extract socket path from docker_host and mount it if it exists
+    # For rootless Podman, this will be something like
+    # unix:///run/user/1000/podman/podman.sock
+    docker_socket = values.docker_host.replace("unix://", "")
+    if os.path.exists(docker_socket) and os.access(docker_socket, os.R_OK | os.W_OK):
+        volume_list[docker_socket] = {"bind": "/var/run/docker.sock", "mode": "rw"}
+        emitter.debug(f"\t[framework] Mounting docker socket: {docker_socket}")
+    else:
+        emitter.debug(
+            f"\t[framework] Skipping docker socket mount (not accessible): {docker_socket}"
+        )
 
     if extra_volumes:
         volume_list.update(extra_volumes)
@@ -150,19 +161,6 @@ def _tool_based_image(
         dock_file.write('ENTRYPOINT ["/bin/sh"]\n')
     return tmp_dockerfile
 
-def extract_group_id():
-    if values.needs_groups:
-        res, (output, error) = utilities.run_command(
-                f"getent group {definitions.GROUP_NAME} | cut -d: -f3"
-            )
-        if not output or output.decode() == "":
-                utilities.error_exit(
-                        f"Cannot get the id of the group {definitions.GROUP_NAME}. Ensure that it exists"
-                    )
-        else:
-            return output.decode().strip()
-    else:
-        return "100"
 
 def extract_group_id() -> str:
     if values.needs_groups:
